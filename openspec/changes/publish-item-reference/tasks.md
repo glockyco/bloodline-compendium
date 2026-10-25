@@ -2,8 +2,8 @@
 
 ## 1. Tooling foundation
 
-- [ ] 1.1 Add a Nix flake with one development shell for macOS and Linux (.NET SDK 10.0.403, Bun, Node 22), and verify `dotnet --version`, `bun --version` and `node --version` inside `nix develop` on macOS
-- [ ] 1.2 Add the .NET solution with `global.json`, central package management, locked restore, nullable analyzers with warnings as errors, CSharpier and an xUnit v3 test project, and verify that CUE4Parse restores under NuGet audit and that build, test and format checks pass
+- [x] 1.1 Add a Nix flake with one development shell for macOS and Linux (.NET SDK 10.0.403, Bun, Node 22), and verify `dotnet --version`, `bun --version` and `node --version` inside `nix develop` on macOS
+- [x] 1.2 Add the .NET solution with `global.json`, central package management, locked restore, nullable analyzers with warnings as errors, CSharpier and an xUnit v3 test project, and verify that CUE4Parse restores under NuGet audit and that build, test and format checks pass
 - [ ] 1.3 Add the SvelteKit site with the static adapter, TypeScript, ESLint, Prettier, svelte-check, Vitest and Playwright, and verify each check runs clean
 - [ ] 1.4 Add the check that fails when a game file or extracted output is tracked by Git, and verify it fails on a planted file and passes otherwise
 - [ ] 1.5 Add the GitHub Actions workflow that runs every check inside the Nix shell on invented fixtures, with SHA-pinned actions and no secrets, plus Renovate configuration with grouped updates and manual review for CUE4Parse, and verify the workflow passes on a pushed branch after approval to push

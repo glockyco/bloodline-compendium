@@ -1,0 +1,8 @@
+{
+  // Copy this file to bloodline.local.json, which Git ignores, and set the locations of this machine.
+  // The Steam library folder that contains steamapps, such as "C:/Program Files (x86)/Steam".
+  "steamLibrary": "/path/to/Steam",
+  // Where extraction writes records and site data, one directory per Steam build.
+  // Relative paths resolve against the configuration file.
+  "outputDirectory": "artifacts"
+}

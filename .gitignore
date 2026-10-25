@@ -8,3 +8,7 @@ obj/
 .env
 .env.*
 !.env.example
+# Extracted game data and machine-local configuration
+/artifacts/
+/bloodline.local.json
+TestResults/

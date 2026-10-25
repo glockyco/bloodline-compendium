@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>bloodline</AssemblyName>
+    <RootNamespace>Bloodline</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="CUE4Parse" />
+    <PackageReference Include="System.CommandLine" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Bloodline.Tests" />
+  </ItemGroup>
+</Project>
