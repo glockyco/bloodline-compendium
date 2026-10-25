@@ -9,6 +9,7 @@ See proposal.md for motivation. Measurements below come from spikes on Steam bui
 - Items are 2,161 Blueprint classes descending from `BP_BaseItemAsset_C`. Their class default objects store only overrides of their parents. 48 DataTables hold shops, armour, weapon components, skills, quests and loot presets.
 - The shipped container also contains demonstration content from marketplace asset packs, for example 569 packages under `BossAIToolkit/Demo`. Real cities and NPCs also live under asset-pack folders, so folder names do not separate the two.
 - Contributors may use macOS, Windows or Linux. CI never has game files.
+- The site may publish what it shows players. The game's terms do not clearly allow redistributing every extracted record and icon, including unpublished content, so data derived from game files stays private.
 
 ## Goals / Non-Goals
 
@@ -50,13 +51,26 @@ Fields that no Blueprint ancestor sets have native C++ defaults, which the files
 
 CUE4Parse catches object deserialization errors and, for Blueprint bytecode, keeps the successfully parsed prefix. The extractor enables fatal serialization errors and checks that every function it reads parses to its end-of-script token. A failure stops extraction and names the package, export or function.
 
-### Store each build's records in the repository
+### Keep game-derived data in a private data repository
 
-Records go to `data/builds/<build-id>/` as sorted, canonical JSON, one file per item class and per DataTable, with the build record and extractor version. One file per entity keeps Git diffs readable when an update touches a few items. Git deduplicates unchanged files across builds, so repository growth tracks what an update changes.
+Records go to a private repository, `bloodline-compendium-data`, under `builds/<build-id>/` as sorted, canonical JSON, one file per item class and per DataTable, with the build record and extractor version. The same repository holds icons, the accepted-build record, review lists and overrides, because all of them derive from game files. One file per entity keeps Git diffs readable when an update touches a few items. Git deduplicates unchanged files across builds, so repository growth tracks what an update changes.
 
-Alternative: a separate data repository, as ARK's Obelisk uses. One repository keeps an extractor change and the records it produces in the same commit. Revisit if the repository passes about 1 GB.
+The public repository holds code, specs and invented test data only. Each machine names its data checkout in its local configuration. The extractor refuses an output directory inside the code repository, and a check in the code repository fails when a game-derived file appears in it.
 
-Alternative: a content-addressed evidence store outside Git. It grew to 280 GB in an earlier project before garbage collection existed, and it does not give diffs for free.
+The code repository does not pin a data commit. Records carry a schema version, and the catalog refuses records whose schema version the code does not support. Each deployment records the code commit and data commit it used, which identifies any published site exactly without coordinating pins on every data update.
+
+Alternatives:
+
+- Records in the public repository. This distributes every record and icon, including content the site does not publish.
+- Encrypted records in the public repository. The ciphertext is still published, and one leaked key exposes the whole history permanently.
+- A private storage bucket. It gives no diffs, so history and patch comparisons would need their own tooling.
+- The whole project private. The code has no reason to be private.
+- Records kept only on each machine. History is lost once older game files are deleted, and contributors cannot share records.
+- A content-addressed evidence store. It grew to 280 GB in an earlier project before garbage collection existed, and it does not give diffs for free.
+
+### Check public code without game data, deploy where both repositories exist
+
+CI in the public repository runs every check on invented fixtures and holds no secrets. It never fetches the data repository. A public repository's Actions cache can be restored by pull requests from forks, so even caching private data there would leak it. Building the real site and deploying it runs on a machine with both checkouts, after approval. If deployments are automated later, they run from the private repository's CI, which can read the public code without any secret in the public repository.
 
 ### Pin builds as copies, cloned where the file system allows
 
@@ -80,16 +94,16 @@ This replaces folder-based exclusion, which would drop real content kept in asse
 
 SvelteKit prerenders every page with its static adapter. Pagefind indexes the output for search without a server. Every page shows the game version and Steam build ID. Wrangler deploys the output as Workers static assets, which Cloudflare recommends for new projects. The paid plan allows 100,000 files and 25 MiB per file, and the build fails before either is exceeded.
 
-### Icons stored in the repository by content hash
+### Icons stored in the data repository by content hash
 
-CI cannot decode textures without game files, so the extractor stores decoded icons as PNG under `data/icons/<sha256>.png`, referenced by hash from the records. Unchanged icons are stored once across builds. A spike decoded 30 of 30 sampled icons (DXT5 and DXT1) on macOS arm64. In that sample, WebP at quality 100 was larger than PNG, so the site converts PNG to its delivery format at build time.
+The extractor stores decoded icons as PNG under `icons/<sha256>.png` in the data repository, referenced by hash from the records, so a site build does not need game files. Unchanged icons are stored once across builds. A spike decoded 30 of 30 sampled icons (DXT5 and DXT1) on macOS arm64. In that sample, WebP at quality 100 was larger than PNG, so the site converts PNG to its delivery format at build time.
 
 ### Tooling
 
 - A Nix flake supplies one development shell for macOS and Linux, including a .NET SDK of at least 10.0.402, because earlier 10.0 SDKs are affected by the October 2026 SDK security advisory. Windows contributors install the SDK and Bun versions named in `global.json` and `package.json`.
 - C#: CSharpier, SDK analyzers with nullable references, xUnit v3 on Microsoft.Testing.Platform.
 - TypeScript and Svelte: ESLint with eslint-plugin-svelte, Prettier, svelte-check, Vitest, and Playwright for page behaviour. Faster tools such as Oxlint and Biome do not yet cover Svelte templates fully.
-- GitHub Actions runs the checks on the committed records, without game files. Renovate opens grouped dependency updates. CUE4Parse updates are reviewed by hand, because a parser change can change records.
+- GitHub Actions in the public repository runs the checks on invented fixtures. Renovate opens grouped dependency updates. CUE4Parse updates are reviewed by hand, because a parser change can change records.
 
 ### Minimal agent instructions
 
@@ -100,10 +114,12 @@ CI cannot decode textures without game files, so the extractor stores decoded ic
 - [CUE4Parse changes its output between versions] → Pin its version. Re-extract after an update and review the record diff before accepting it.
 - [Reachability misses items granted by Blueprint logic] → Unreached items appear on the review list with their references. Overrides publish them until the graph covers the case.
 - [Large levels exceed CUE4Parse's loader] → Placement extraction streams actor lists and skips render payloads. The 2.2 GB Moonhorn Cliffs level loaded this way in a spike after conversion with retoc.
-- [Repository growth from records and icons] → Records are per entity and deduplicated by Git. Check repository size per accepted build, and move records to a separate repository if it passes about 1 GB.
-- [Contributors on Windows see different line endings or path separators] → Records use LF and forward slashes regardless of platform, and a test compares committed records against a fresh extraction.
+- [Data repository growth from records and icons] → Records are per entity and deduplicated by Git. Check the data repository's size per accepted build and revisit storage if it passes about 1 GB.
+- [Game-derived data leaks into the public repository] → The extractor refuses output paths inside the code repository, and a check fails on game-derived files. Fixtures use invented names and values.
+- [Code and data drift apart without a pin] → Records carry a schema version that the catalog checks, and each deployment records both commits.
+- [Contributors on Windows see different line endings or path separators] → Records use LF and forward slashes regardless of platform, and a test compares the data repository's records against a fresh extraction.
 - [Early Access updates rename or remove item classes] → Item identity is the class path. A removed class disappears from the next accepted build's site, and its records stay in the history.
 
 ## Migration Plan
 
-New repository, nothing to migrate. The first deployment goes to a preview URL. The custom domain `bloodline.compendiums.org` is attached after review. Rollback redeploys the previous publication with Wrangler.
+Create the private repository `bloodline-compendium-data` alongside the public repository. The first deployment goes to a preview URL. The custom domain `bloodline.compendiums.org` is attached after review. Rollback redeploys the previous publication with Wrangler.

@@ -34,6 +34,13 @@ Every page SHALL state the game build its data comes from.
 - **WHEN** a reader opens any page
 - **THEN** the page names the game version and Steam build ID of its data
 
+### Requirement: Publication provenance
+Each built site SHALL include a build information file naming the code commit, the data repository commit and the Steam build ID it was built from. The file SHALL NOT contain record data.
+
+#### Scenario: Tracing a deployment
+- **WHEN** the deployed site's build information file is read
+- **THEN** it names the code commit, data commit and Steam build ID used for that deployment
+
 ### Requirement: Static delivery within limits
 The site SHALL be fully prerendered static files. The build SHALL fail when the file count or any file size exceeds the hosting limits.
 

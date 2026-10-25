@@ -62,11 +62,19 @@ Extraction SHALL produce byte-identical records for the same build and extractor
 
 #### Scenario: Checking committed records on another machine
 - **WHEN** a machine that pinned the same build extracts it with the recorded extractor version
-- **THEN** its output is identical to the records committed in the repository
+- **THEN** its output is identical to the records in the private data repository
 
-### Requirement: Build-scoped records in the repository
-Extracted records SHALL be stored in the repository per build, together with the build record and the extractor version that produced them.
+### Requirement: Build-scoped records in private storage
+Extracted records SHALL be stored per build in a private data repository, together with the build record and the extractor version that produced them. Extraction SHALL NOT write into the public code repository, and the public code repository SHALL NOT contain data derived from game files.
 
 #### Scenario: Records after the game files are gone
 - **WHEN** a build's game files have been deleted
-- **THEN** its extracted records can still be compared with a newer build's records
+- **THEN** its extracted records in the private data repository can still be compared with a newer build's records
+
+#### Scenario: Output directory inside the code repository
+- **WHEN** extraction is configured to write inside the public code repository
+- **THEN** extraction refuses to run and names the configured directory
+
+#### Scenario: Game-derived file committed to the code repository
+- **WHEN** a commit adds a record, icon, build record, review list or override to the public code repository
+- **THEN** the code repository's checks fail and name the file

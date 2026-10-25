@@ -6,8 +6,8 @@ Pinned builds give every extraction and runtime check a fixed, identified copy o
 
 ## ADDED Requirements
 
-### Requirement: Machine-local game locations
-The locations of the Steam library and of pinned copies SHALL come from configuration local to each machine. The repository SHALL NOT contain machine-specific paths.
+### Requirement: Machine-local locations
+The locations of the Steam library, of pinned copies and of the private data repository's checkout SHALL come from configuration local to each machine. Neither repository SHALL contain machine-specific paths.
 
 #### Scenario: Different library locations
 - **WHEN** two machines with different Steam library locations pin the same Steam build
@@ -37,11 +37,11 @@ The system SHALL record, for each pinned build, the Steam app ID, build ID, depo
 - **THEN** extraction from that copy fails and names the changed file
 
 ### Requirement: Accepted build
-The repository SHALL record which build is accepted. Published data SHALL come only from the accepted build's extracted records.
+The private data repository SHALL record which build is accepted. Published data SHALL come only from the accepted build's extracted records.
 
 #### Scenario: Accepting a candidate build
 - **WHEN** a candidate build's records are accepted
-- **THEN** the repository's accepted-build record names the candidate
+- **THEN** the data repository's accepted-build record names the candidate
 - **AND** the site's data comes from the candidate's records
 
 ### Requirement: Keep only current game files
@@ -53,4 +53,4 @@ Each machine SHALL keep the game files of at most the accepted build and one can
 
 #### Scenario: Build records outlive game files
 - **WHEN** a build's game files are deleted
-- **THEN** its build record and its extracted records remain in the repository
+- **THEN** its build record and its extracted records remain in the private data repository
