@@ -1,7 +1,11 @@
 using System.CommandLine;
 using Bloodline.Configuration;
+using Bloodline.SiteData;
 
-var root = new RootCommand("Builds The Bloodline Compendium's data from the installed game.");
+var root = new RootCommand("Builds The Bloodline Compendium's data from the installed game.")
+{
+    SiteDataSchema.CreateCommand(),
+};
 
 try
 {
