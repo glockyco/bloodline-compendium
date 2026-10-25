@@ -58,7 +58,7 @@ Extraction SHALL resolve Blueprint class defaults by merging each class's stored
 
 #### Scenario: Native default
 - **WHEN** no Blueprint ancestor and no struct default sets a field that a native class declares
-- **THEN** the record marks the field as unknown instead of guessing a value
+- **THEN** the record leaves the field out instead of guessing a value
 
 ### Requirement: Readable enum and text values
 Extraction SHALL resolve user-defined enum values to their display names and SHALL keep each localized text's namespace, key and source string.

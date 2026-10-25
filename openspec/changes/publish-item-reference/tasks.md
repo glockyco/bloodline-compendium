@@ -10,7 +10,7 @@
 
 ## 2. Extraction
 
-- [ ] 2.1 Add machine-local configuration (a Git-ignored file plus a committed example) for the Steam library and output locations, and verify a missing or invalid file produces an error naming the setting
+- [x] 2.1 Add machine-local configuration (a Git-ignored file plus a committed example) for the Steam library and output locations, and verify a missing or invalid file produces an error naming the setting
 - [ ] 2.2 Read build identity from Steam's app manifest and fail when the build changes during a run, and verify the output names build 24464547 and its depot manifest, contains no machine paths, and that a changed app manifest fails the run
 - [ ] 2.3 Load packages with fatal serialization errors and record unreadable objects and packages as gaps, and verify with a test that a failing object leaves no record and that the 2.2 GB Moonhorn Cliffs level appears as a gap
 - [ ] 2.4 Encode property values and merge inherited defaults, and verify with tests for inherited values, partial struct overrides, replaced arrays, explicit empty overrides, struct defaults and unknown native fields

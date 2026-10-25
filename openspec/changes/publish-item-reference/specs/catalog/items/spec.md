@@ -32,7 +32,7 @@ Each item SHALL carry its display name, description, category, value and type-sp
 - **THEN** its entry includes its damage and attack speed
 
 #### Scenario: Unknown fact
-- **WHEN** a fact depends on a field that the records mark unknown
+- **WHEN** a fact depends on a field that the records leave out
 - **THEN** the entry marks the fact unknown
 
 ### Requirement: Item sources
