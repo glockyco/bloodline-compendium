@@ -1,10 +1,10 @@
 schema: spec-driven
 context: |
-  Game files are proprietary and exist only on the maintainer's macOS machine, so CI cannot read them.
+  Game files are proprietary and never enter the repository. Each contributor supplies a copy of the game on their own machine, so CI cannot read game files.
+  Contributors may work on macOS, Windows or Linux.
   Publishing data extracted from the game is permitted.
   The site describes only the current game build. Game files of earlier builds are not kept.
-  The game is in Early Access with large updates every two to three months.
-  One maintainer works with coding agents. Prefer designs that a single person can maintain across updates.
+  The game is in Early Access with large updates every two to three months. Prefer designs that keep each update mostly automated.
 
 # Project context (optional)
 # Add only constraints that should guide OpenSpec artifacts and workflows.

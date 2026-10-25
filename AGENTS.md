@@ -1,6 +1,6 @@
 # Agent instructions
 
-- The game files are not in this repository. They exist only on the maintainer's machine, as pinned copies of Steam builds inside the CrossOver bottle `Steam`. Never modify the Steam installation. Work against a pinned copy.
-- Run the game only from a pinned copy, never from the Steam installation, and launch it with `-nosound`.
+- Game files never enter this repository. Read them only from a pinned copy of a Steam build, and never modify a Steam installation.
+- Run the game only from a pinned copy, and launch it with `-nosound` so that runs in the background stay silent.
 - Ask before deploying the site or pushing to a remote.
 - Requirements live in `openspec/specs/`, planned work in `openspec/changes/`. A change's `design.md` records why it chose its approach.
