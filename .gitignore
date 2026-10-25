@@ -1,0 +1,10 @@
+.DS_Store
+.direnv/
+result
+result-*
+node_modules/
+bin/
+obj/
+.env
+.env.*
+!.env.example
