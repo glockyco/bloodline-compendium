@@ -1,10 +1,11 @@
 schema: spec-driven
 context: |
   Game files are proprietary and never enter the repository. Each contributor supplies a copy of the game on their own machine, so CI cannot read game files.
-  Data derived from game files, such as records and icons, is stored only in private storage. The published site is the only public form of it, and CI in this public repository never reads it.
+  Data derived from game files, such as records and icons, is regenerated from the installed game and never stored in Git. The published site is the only public form of it.
   Contributors may work on macOS, Windows or Linux.
   Publishing data extracted from the game on the site is permitted.
-  The site describes only the current game build. Game files of earlier builds are not kept.
+  The site describes only the current game build. Steam keeps earlier builds, so neither their game files nor their extracted data are kept.
+  The site shows uncertain or missing information where readers meet it, instead of guessing or hiding content.
   The game is in Early Access with large updates every two to three months. Prefer designs that keep each update mostly automated.
 
 # Project context (optional)

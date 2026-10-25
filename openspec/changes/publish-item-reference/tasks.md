@@ -2,54 +2,50 @@
 
 ## 1. Tooling foundation
 
-- [ ] 1.1 Add a Nix flake with one development shell for macOS and Linux (.NET SDK at least 10.0.402, Bun, Node for Node-hosted tools) and verify `nix develop -c dotnet --version` and `nix develop -c bun --version` on macOS
-- [ ] 1.2 Add the .NET solution with `global.json`, locked NuGet restore, CSharpier and nullable analyzers, plus an xUnit v3 test project, and verify `dotnet test` passes on an empty test
-- [ ] 1.3 Add the Bun workspace with ESLint, Prettier, svelte-check and Vitest, and verify each check runs clean on the empty workspace
-- [ ] 1.4 Add a GitHub Actions workflow that runs every check inside the Nix shell on invented fixtures, with SHA-pinned actions and no secrets, and Renovate configuration with grouped updates and manual review for CUE4Parse, and verify the workflow passes on a pushed branch once a remote exists
-- [ ] 1.5 Add a check that fails when a record, icon, build record, review list or override appears in the code repository, and verify it fails on a planted record file and passes on fixtures
-- [ ] 1.6 Create the private repository `bloodline-compendium-data` with a README stating that its contents are private game-derived data, after approval to create it, and verify the code repository's CI configuration never references it
+- [ ] 1.1 Add a Nix flake with one development shell for macOS and Linux (.NET SDK 10.0.403, Bun, Node 22), and verify `dotnet --version`, `bun --version` and `node --version` inside `nix develop` on macOS
+- [ ] 1.2 Add the .NET solution with `global.json`, central package management, locked restore, nullable analyzers with warnings as errors, CSharpier and an xUnit v3 test project, and verify that CUE4Parse restores under NuGet audit and that build, test and format checks pass
+- [ ] 1.3 Add the SvelteKit site with the static adapter, TypeScript, ESLint, Prettier, svelte-check, Vitest and Playwright, and verify each check runs clean
+- [ ] 1.4 Add the check that fails when a game file or extracted output is tracked by Git, and verify it fails on a planted file and passes otherwise
+- [ ] 1.5 Add the GitHub Actions workflow that runs every check inside the Nix shell on invented fixtures, with SHA-pinned actions and no secrets, plus Renovate configuration with grouped updates and manual review for CUE4Parse, and verify the workflow passes on a pushed branch after approval to push
 
-## 2. Pinned builds
+## 2. Extraction
 
-- [ ] 2.1 Add machine-local configuration (Git-ignored file plus a committed example) for the Steam library, pinned-copy and data-checkout locations, and verify a missing or invalid file produces a clear error and an output directory inside the code repository is refused
-- [ ] 2.2 Implement pinning with copy-on-write cloning where available and a full copy otherwise, and verify on macOS that pinning build 24464547 leaves the Steam installation unchanged and that re-pinning reports the existing copy
-- [ ] 2.3 Write build records from the Steam app manifest and container hashes, and verify the record contains no machine paths and that a modified container fails verification
-- [ ] 2.4 Implement the accepted-build record in the data repository and the cleanup command with confirmation, and verify cleanup lists but keeps files until confirmed
-- [ ] 2.5 Document pinning and cleanup in README.md and verify the documented commands run as written
+- [ ] 2.1 Add machine-local configuration (a Git-ignored file plus a committed example) for the Steam library and output locations, and verify a missing or invalid file produces an error naming the setting
+- [ ] 2.2 Read build identity from Steam's app manifest and fail when the build changes during a run, and verify the output names build 24464547 and its depot manifest, contains no machine paths, and that a changed app manifest fails the run
+- [ ] 2.3 Load packages with fatal serialization errors and record unreadable objects and packages as gaps, and verify with a test that a failing object leaves no record and that the 2.2 GB Moonhorn Cliffs level appears as a gap
+- [ ] 2.4 Encode property values and merge inherited defaults, and verify with tests for inherited values, partial struct overrides, replaced arrays, explicit empty overrides, struct defaults and unknown native fields
+- [ ] 2.5 Resolve user-defined enum display names and keep each text's namespace, key and source string, and verify `E_ItemType::NewEnumerator3` resolves to its display name
+- [ ] 2.6 Write records for class defaults, DataTables, enums, placed actors per level and dialogues, and verify on build 24464547 that all 2,161 item classes and 48 DataTables appear and that placed vendors carry their stock
+- [ ] 2.7 Decode item icons to PNG named by pixel hash, and verify sampled DXT1, DXT5 and uncompressed icons by viewing them
+- [ ] 2.8 Verify that two extractions of build 24464547 produce identical output hashes
 
-## 3. Source records
+## 3. Item catalog
 
-- [ ] 3.1 Implement the package inventory with chunk hashes and parse status, and verify it lists all 42,277 packages of build 24464547
-- [ ] 3.2 Enable fatal serialization errors and the end-of-script check for read functions, and verify with a test that a truncated export and truncated bytecode both fail extraction with the package named
-- [ ] 3.3 Implement inherited-default merging with per-field ancestor provenance and unresolved native fields, and verify with tests for inherited values, partial struct overrides, replaced arrays and explicit empty overrides
-- [ ] 3.4 Resolve user-defined enum display names and keep text namespace, key and source string, and verify `E_ItemType::NewEnumerator3` resolves to its display name
-- [ ] 3.5 Write canonical records with a schema version, per item class and per DataTable, under `builds/<build-id>/` in the data checkout, and verify two runs produce identical hashes
-- [ ] 3.6 Export JSON Schema from the record types and generate TypeScript types from it, and verify a check fails when generated files are stale
-- [ ] 3.7 Add invented record fixtures covering inheritance, enums, texts and missing icons for the catalog and site tests, and verify they validate against the schema
-- [ ] 3.8 Commit the records and icons for build 24464547 to the data repository, and verify a fresh extraction on the same build reproduces them
+- [ ] 3.1 Select inventory items with identities and URLs, and verify that workbenches and containers are not items and that every URL is unique
+- [ ] 3.2 Resolve item facts, categories and stats, marking unknown facts, and verify a weapon, an armour piece and a food item against the records
+- [ ] 3.3 Add shop, currency shop, smithing, crafting and cooking sources, and verify sample items for each against the spike evidence
+- [ ] 3.4 Add container loot, random loot, enemy drop and pickup sources, and verify sample items for each against the spike evidence
+- [ ] 3.5 Add dialogue grant, fishing, gathering, farming, bounty note and settlement delivery sources, and verify sample items for each against the spike evidence
+- [ ] 3.6 Add reviewed exclusions for the test levels, and verify that DevTestMap placements are not sources and that a stale entry fails the catalog
+- [ ] 3.7 List coverage gaps, and verify that items without sources, missing icons, unknown facts and unread packages appear
+- [ ] 3.8 Write site data with exported JSON Schema and generated TypeScript types, add invented site-data fixtures, and verify the fixtures match the schema and a check fails when generated files are stale
 
-## 4. Item catalog
+## 4. Item reference site
 
-- [ ] 4.1 Load records into the catalog with schema validation and a schema-version check, and verify an invalid record or unsupported schema version fails the build with its file named
-- [ ] 4.2 Build the reachability graph from shops, loot tables, recipes, quest rewards and playable-level placements, and verify a shop item is published with its shop as source
-- [ ] 4.3 Write the review list of unreached items with their references, and verify demo-pack items appear on it and not in the catalog
-- [ ] 4.4 Add reviewed overrides with reasons, and verify an override publishes an unreached item and shows its reason on the review list
-- [ ] 4.5 Decode icons into content-addressed PNGs and list items without icons, and verify no empty image is substituted
+- [ ] 4.1 Add the layout with the Steam build label, and verify the label in prerendered HTML
+- [ ] 4.2 Add the item list with category filter and sorting, and verify filtering and sorting with Playwright
+- [ ] 4.3 Add item pages with facts, icons, sources and unknowns, and verify that a weapon page shows damage, speed and sources and that an item without sources links to the coverage page
+- [ ] 4.4 Add Pagefind search, and verify that the start of a word finds the item in a built site
+- [ ] 4.5 Add the coverage page, and verify it lists the fixture's gaps with links
+- [ ] 4.6 Convert icons to WebP thumbnails at build time, and verify the item list loads thumbnails instead of full-size icons
+- [ ] 4.7 Write the build information file and refuse production builds from a dirty tree, and verify the file's contents and the refusal
+- [ ] 4.8 Add the file-count and file-size gate, and verify it fails on a fixture that exceeds the configured limits
 
-## 5. Item reference site
+## 5. Deployment
 
-- [ ] 5.1 Create the SvelteKit site with the static adapter and a layout that shows the game version and build ID, and verify the label in prerendered HTML
-- [ ] 5.2 Add the item list with category filter and sorting, and verify filtering and sorting with Playwright
-- [ ] 5.3 Add item pages at stable URLs with facts, icons and sources, and verify a weapon page shows damage, speed and source links
-- [ ] 5.4 Add Pagefind search, and verify a partial name finds the item in a built site
-- [ ] 5.5 Add the file-count and file-size gate, and verify it fails on a fixture that exceeds the configured limits
-- [ ] 5.6 Write the build information file with code commit, data commit and Steam build ID, and verify it is present in the built site and contains no record data
+- [ ] 5.1 Add Wrangler configuration for an assets-only Worker with a prerendered 404 page, and verify `wrangler deploy --dry-run` accepts the build
+- [ ] 5.2 Add the preview, production and rollback commands and document the update workflow in README.md, and verify a preview deployment serves an item page, after approval to deploy
 
-## 6. Deployment
+## 6. End-to-end check
 
-- [ ] 6.1 Add Wrangler configuration for Workers static assets with prerendered 404 handling, and verify `wrangler deploy --dry-run` accepts the build
-- [ ] 6.2 Add the deploy and rollback commands, which build from the code and data checkouts, and document them in README.md, and verify a preview deployment serves an item page, after approval to deploy
-
-## 7. End-to-end check
-
-- [ ] 7.1 Run pin, extract, catalog, build and preview from a clean checkout on macOS, and verify the documented workflow produces the same records and a working preview
+- [ ] 6.1 Run extract, catalog, site build and preview from a clean checkout on macOS, and verify the documented workflow produces a working preview

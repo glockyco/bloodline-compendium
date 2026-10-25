@@ -6,7 +6,7 @@ The project is in planning. Nothing is built or published yet. The planned desig
 
 ## How it will work
 
-The game's content is read offline from its cooked Unreal Engine packages. A copy of each supported game build is kept locally, extracted into versioned data, and turned into a static site. Extracted data is kept in a private repository, and the site is its only public form. A modded copy of the same build runs only to capture map imagery and to check formulas against the game itself.
+The game's content is read offline from the installed game's cooked Unreal Engine packages. Each run regenerates the data from the game files, so extracted data never enters Git, and the published site is its only public form. Where the data leaves something uncertain or unknown, the site says so instead of guessing. A modded copy of the game runs only to capture map imagery and to check formulas against the game itself.
 
 ## License
 

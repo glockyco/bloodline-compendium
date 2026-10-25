@@ -2,124 +2,136 @@
 
 ## Context
 
-See proposal.md for motivation. Measurements below come from spikes on Steam build 24464547 (2026-10-25).
+See proposal.md for motivation. Measurements below come from spikes on Steam build 24464547.
 
 - The game is Unreal Engine 4.27 with one IoStore container of 42,277 packages, Zlib-compressed and unencrypted. Packages use tagged properties, so no AES key or `.usmap` mappings are needed.
-- Gameplay is Blueprint. The native game module holds seven utility classes, so rules live in Blueprint bytecode inside the packages.
-- Items are 2,161 Blueprint classes descending from `BP_BaseItemAsset_C`. Their class default objects store only overrides of their parents. 48 DataTables hold shops, armour, weapon components, skills, quests and loot presets.
-- The shipped container also contains demonstration content from marketplace asset packs, for example 569 packages under `BossAIToolkit/Demo`. Real cities and NPCs also live under asset-pack folders, so folder names do not separate the two.
+- Gameplay is Blueprint. Item classes descend from `BP_BaseItemAsset_C`. Of its 2,161 descendants, 69 are workbenches, containers, fishing spots and other placed interactables under `InteractableObject_C`. Class default objects store only overrides of their parents.
+- The game gives items through about 30 mechanisms. Most of them are data: DataTable rows, class defaults, placed actors and dialogue events. Data references reach 1,904 of the 2,092 classes outside `InteractableObject_C`. 33 more are referenced only from Blueprint bytecode, and 155 from nothing found so far, including plausible real items such as `HeadArmor_CelestialKnightHelm_C`.
+- The 109 levels include test maps. `DevTestMap` alone places 395 item classes.
+- Steam keeps every build. Its app manifest names the installed build and depot manifest, and DepotDownloader downloads any earlier manifest of an owned app.
 - Contributors may use macOS, Windows or Linux. CI never has game files.
-- The site may publish what it shows players. The game's terms do not clearly allow redistributing every extracted record and icon, including unpublished content, so data derived from game files stays private.
 
 ## Goals / Non-Goals
 
 **Goals:**
 
-- One path from a pinned build to a deployed page, shared by every later content kind.
-- Records that any machine with the same build reproduces byte for byte.
-- A site that states which build it describes and never shows partially parsed data.
+- One path from the installed game to a deployed page, rerun after each game update.
+- Every named inventory item on the site, with what the game data says about it and where it comes from.
+- Uncertain and missing information shown on the site, never guessed and never hidden by withholding the item.
 
 **Non-Goals:**
 
-- Running the game. Map capture and checking formulas against the running game come in later changes.
-- Content other than items, and change history pages. The records kept per build make history possible later.
+- Running the game. Map capture and checking formulas in the running game come in later changes.
+- Storing extracted data or the game files of earlier builds.
+- Deciding which levels players can reach, and sources that exist only in Blueprint bytecode. Both come in later changes.
+- Content other than items, and change history pages.
 - A shared code base with earlier compendium projects. Their lessons inform this design, their code does not carry over.
 
 ## Decisions
 
-### Read the packages offline instead of scanning the running game
+### Regenerate extracted data instead of storing it
 
-CUE4Parse reads every package except one on macOS arm64. The exception is a 2.2 GB level that overflows its loader and is not needed for items. With fatal object serialization enabled, no export failed silently. Two runs produced identical hashes.
-
-Alternatives: a runtime scanner inside the game, as the Unity projects needed, requires the game, Wine on macOS and level traversal for data that is already readable from files. FModel exports are interactive and swallow exceptions in bulk exports.
-
-### Extract targeted records, plus an inventory of every package
-
-The extractor writes an inventory of all packages (path, chunk hash, parse status) and targeted records for what the catalog needs. Items and all DataTables took 22 seconds, 1.4 GB of memory and 38 MB of JSON (1.7 MB gzipped).
-
-Alternative: a generic JSON dump of every package took 35 minutes, 10 to 18 GB of memory and 20 GB of output, and failed on 10 large levels in the serializer. It stays a private diagnostic, not a pipeline stage.
-
-The inventory's chunk hashes tell an update which packages changed, so later stages can re-check exactly what changed.
-
-### Merge inherited defaults explicitly and record each value's ancestor
-
-For each class, walk the parent chain from the asset registry and overlay class default objects from the oldest ancestor to the class itself. Nested structs merge field by field. Arrays, object references and texts replace as a whole. Explicit zero, false, null and empty arrays override. Each field records the ancestor that supplied it.
-
-Fields that no Blueprint ancestor sets have native C++ defaults, which the files do not contain. They are reported as unresolved instead of guessed. ARK's Purlovia and Soulmask's extractor hard-code such defaults, which breaks silently when the game changes.
-
-### Treat partial parses as failures
-
-CUE4Parse catches object deserialization errors and, for Blueprint bytecode, keeps the successfully parsed prefix. The extractor enables fatal serialization errors and checks that every function it reads parses to its end-of-script token. A failure stops extraction and names the package, export or function.
-
-### Keep game-derived data in a private data repository
-
-Records go to a private repository, `bloodline-compendium-data`, under `builds/<build-id>/` as sorted, canonical JSON, one file per item class and per DataTable, with the build record and extractor version. The same repository holds icons, the accepted-build record, review lists and overrides, because all of them derive from game files. One file per entity keeps Git diffs readable when an update touches a few items. Git deduplicates unchanged files across builds, so repository growth tracks what an update changes.
-
-The public repository holds code, specs and invented test data only. Each machine names its data checkout in its local configuration. The extractor refuses an output directory inside the code repository, and a check in the code repository fails when a game-derived file appears in it.
-
-The code repository does not pin a data commit. Records carry a schema version, and the catalog refuses records whose schema version the code does not support. Each deployment records the code commit and data commit it used, which identifies any published site exactly without coordinating pins on every data update.
+Extracted data depends only on the extractor's code and the game build. Git keeps the code and Steam keeps every build, so the data can be regenerated at any time and is not versioned. Extraction writes to a Git-ignored directory named by the Steam build ID. After a game update, the previous build's output is still on disk for comparison. The Afallon, Ardenfall and Ancient Kingdoms compendiums and the Erenshor data mining project also keep extracted data out of Git.
 
 Alternatives:
 
-- Records in the public repository. This distributes every record and icon, including content the site does not publish.
-- Encrypted records in the public repository. The ciphertext is still published, and one leaked key exposes the whole history permanently.
-- A private storage bucket. It gives no diffs, so history and patch comparisons would need their own tooling.
-- The whole project private. The code has no reason to be private.
-- Records kept only on each machine. History is lost once older game files are deleted, and contributors cannot share records.
-- A content-addressed evidence store. It grew to 280 GB in an earlier project before garbage collection existed, and it does not give diffs for free.
+- A private data repository. It versions a cache of reproducible data and adds a second repository to keep in step with the code. It would only pay off for history pages, which can download an earlier build when they are built.
+- A public data repository, as data mirrors such as Obelisk and mcmeta keep. Those projects publish data for other tools. This project publishes only its site.
 
-### Check public code without game data, deploy where both repositories exist
+### Read the installed build directly and read-only
 
-CI in the public repository runs every check on invented fixtures and holds no secrets. It never fetches the data repository. A public repository's Actions cache can be restored by pull requests from forks, so even caching private data there would leak it. Building the real site and deploying it runs on a machine with both checkouts, after approval. If deployments are automated later, they run from the private repository's CI, which can read the public code without any secret in the public repository.
+The extractor reads the Steam installation named in machine-local configuration. It takes the app ID, build ID and depot manifest IDs from Steam's app manifest, and it fails if the build changes while it runs. It never writes to the installation. A modded copy for running the game comes with the runtime work in a later change.
 
-### Pin builds as copies, cloned where the file system allows
+Alternative: a pinned copy of each build. It protected against updates during work and kept the previous build for comparison. The build check and the previous build's output cover both.
 
-Pinning copies the game directory to a machine-local location named by build ID. Where the file system supports cheap clones (APFS, Btrfs and XFS reflinks, ReFS block cloning), the copy costs almost no space until Steam overwrites the original. Otherwise it is a full copy of about 19 GB. The Steam library and pinned-copy locations come from a machine-local configuration file that Git ignores, with an example file in the repository.
+### Read the packages offline with CUE4Parse
 
-Build identity comes from Steam's app manifest (build ID, depot manifest ID) and hashes of the container files, so it does not depend on paths. The depot manifest ID lets a machine download an older build with a tool such as DepotDownloader if one is ever needed again.
+CUE4Parse reads every package except one on macOS arm64. The exception is a 2.2 GB level that overflows its loader. Items and all DataTables read in 22 seconds with 1.4 GB of memory.
 
-### C# extractor, TypeScript catalog and site, one schema source
+Alternatives: a runtime scanner needs the game running, under Wine on macOS, for data that is readable from files. A generic dump of every package took 35 minutes, 10 to 18 GB of memory and 20 GB of output.
 
-The extractor is C# because CUE4Parse is. Its export types are the single source of the record format. JSON Schema is generated from them with the serializer's own settings (`JsonSchemaExporter`). TypeScript types are generated from the schema, and the catalog validates records against it when loading. No hand-written duplicate schema exists.
+### One C# program from game files to site data
 
-Alternative: TypeScript-first schemas with generated C#. It puts the contract away from the code that produces the data, and C# generators lag the serializer's behaviour on nulls and enums.
+The extractor and the catalog are one C# program with two steps. `extract` reads packages into records: merged class defaults, DataTable rows, enums, placed actors per level, dialogues and icons. `catalog` reads the records and writes site data: items, sources, coverage gaps and the build label. Records are an internal cache in the output directory, so catalog work reruns in seconds without reading packages again.
 
-### Decide publication by reachability
+Site data is the only contract with the TypeScript site. JSON Schema is exported from the C# site-data types with `JsonSchemaExporter`, TypeScript types are generated from the schema with json-schema-to-typescript, and a check fails when the generated files are stale.
 
-The catalog builds a graph of what gives items to the player: shop stock, loot tables, recipes, quest rewards, and items placed or spawned in playable levels. Playable levels are those reachable from the overworld's travel actors and doors, not every level in the container. Items with no path in the graph go to a review list instead of the site. Reviewed overrides with reasons can publish or withhold an item.
+Alternative: a TypeScript catalog over the records. Without stored records, it only adds a second cross-language contract over loosely typed property values.
 
-This replaces folder-based exclusion, which would drop real content kept in asset-pack folders and keep demo content stored elsewhere. Items granted only by Blueprint logic, for example a scripted reward, can be missed. The review list makes such misses visible, and later changes add bytecode references to the graph.
+### Merge inherited defaults explicitly
+
+For each class, walk the parent chain and overlay class default objects from the oldest ancestor to the class itself. Nested structs merge field by field. Arrays, object references and texts replace as a whole. Explicit zero, false, null and empty arrays override. User-defined struct defaults fill the fields that no class sets. Fields that only a native C++ class declares have defaults that the files do not contain, so they stay unknown instead of being guessed.
+
+Placed actors store only overrides of their class defaults. The extractor merges each overridden struct field by field, so a placed value replaces the class value as a whole.
+
+### Leave out objects that do not parse completely
+
+The extractor enables CUE4Parse's fatal serialization errors. An object that fails to parse is left out entirely, and its package and error are recorded as a gap that the coverage page lists. A package that cannot be loaded at all, such as the 2.2 GB level, is a gap in the same way. This change reads no Blueprint bytecode, so script data reading stays off.
+
+### Publish every named inventory item and show what is uncertain
+
+An inventory item is a class under `BP_BaseItemAsset_C`, outside `InteractableObject_C`, with a display name. Every inventory item is published. A missing source is not a reason to withhold an item, because source capture is incomplete. Item pages state when no source, icon or value is known, and a coverage page lists every gap with links, as the Afallon Compendium does.
+
+Alternative: publish only the items that a graph of sources reaches. The graph needs about 30 mechanisms, Blueprint value flow for travel between levels and a review pass after every update. It still misses real items, and then it hides them.
+
+### Read item sources from data
+
+The catalog attaches sources from these mechanisms:
+
+| Mechanism | Data |
+|---|---|
+| Shops | `DT_AllShops` rows, vendor class stock and placed `Shop Contents`, dialogue shop events, settlement building stock |
+| Currency shops | `OpenCustomCurrencyShop` dialogue events with item prices in a currency item |
+| Smithing and crafting | `ItemRecipes` rows, joined to `WeaponComponentTable.Class` by row name |
+| Cooking | `AllFoodRecipes` rows |
+| Container loot | `LootableObject` pools in class defaults and placed overrides, `PresetLootTables_DT` rows |
+| Random loot | `AllLootSpawnRates` rows |
+| Enemy drops | `Loot Table` and `Rare Pickup Loot` in NPC class defaults and placed overrides |
+| Pickups | placed inventory item actors and the item class of pickup objects |
+| Dialogue grants | `AddItemDialogue` events |
+| Fishing | `Fishing_Minigame` pools and placed `FishingSpot` overrides |
+| Gathering | `HarvestableInteractionObject` resource pools and gather point tables |
+| Farming | `SeedDataTable` harvest pools |
+| Bounty notes | bounty note classes in `DT_UQC_Quests` |
+| Settlement deliveries | loot tables in `BuildingResourceAndIncomeValues` |
+
+Each source keeps consumed inputs apart from the item it gives, and it shows quantities, prices and raw weights as the data states them. Weights become percentages only where the selection rule is known. Some data looks like a source and is not one. `AllLootPresets` only describes how selected loot looks, the dialogue event `GiveItems` removes items, and a shop's currency, a recipe's ingredients and a planted seed are inputs. A null entry in a loot pool is a chance of no drop.
+
+### Reviewed exclusions for known non-content
+
+A short list in the repository names content that is not part of the game, each entry with its reason and evidence. Placements in an excluded level are not sources. The first entries are the test levels `DevTestMap`, `OverworldTest1` and `Overworld_working`. The catalog fails when an entry names a level or class that the build lacks, so stale entries do not linger. Class and level paths may appear in the repository. Records, icons and other extracted files may not.
+
+### Icons
+
+The extractor decodes the first mip of each item's icon texture (DXT1, DXT5 or uncompressed BGRA) in managed code and writes it as PNG named by a hash of its decoded pixels. Compressed PNG bytes can differ between platforms, and the pixel hash keeps records identical anyway. The site build converts icons to WebP thumbnails. A spike decoded 30 of 30 sampled icons. The extractor does not use CUE4Parse-Conversion, because its pinned dependencies carry security advisories that fail an audited restore.
 
 ### Static site on Cloudflare Workers static assets
 
-SvelteKit prerenders every page with its static adapter. Pagefind indexes the output for search without a server. Every page shows the game version and Steam build ID. Wrangler deploys the output as Workers static assets, which Cloudflare recommends for new projects. The paid plan allows 100,000 files and 25 MiB per file, and the build fails before either is exceeded.
-
-### Icons stored in the data repository by content hash
-
-The extractor stores decoded icons as PNG under `icons/<sha256>.png` in the data repository, referenced by hash from the records, so a site build does not need game files. Unchanged icons are stored once across builds. A spike decoded 30 of 30 sampled icons (DXT5 and DXT1) on macOS arm64. In that sample, WebP at quality 100 was larger than PNG, so the site converts PNG to its delivery format at build time.
+SvelteKit 3 prerenders every page with the static adapter, and server-only loads keep site data out of browser JavaScript. Pagefind indexes the output for search without a server. It matches the start of words, not arbitrary substrings. Wrangler deploys the output as an assets-only Worker with a prerendered 404 page. The paid plan allows 100,000 files and 25 MiB per file, and the build fails before either limit. A spike built and indexed 2,000 item pages in under ten seconds, producing about 6,000 files.
 
 ### Tooling
 
-- A Nix flake supplies one development shell for macOS and Linux, including a .NET SDK of at least 10.0.402, because earlier 10.0 SDKs are affected by the October 2026 SDK security advisory. Windows contributors install the SDK and Bun versions named in `global.json` and `package.json`.
-- C#: CSharpier, SDK analyzers with nullable references, xUnit v3 on Microsoft.Testing.Platform.
-- TypeScript and Svelte: ESLint with eslint-plugin-svelte, Prettier, svelte-check, Vitest, and Playwright for page behaviour. Faster tools such as Oxlint and Biome do not yet cover Svelte templates fully.
-- GitHub Actions in the public repository runs the checks on invented fixtures. Renovate opens grouped dependency updates. CUE4Parse updates are reviewed by hand, because a parser change can change records.
+- A Nix flake supplies one development shell for macOS and Linux. It overrides nixpkgs' .NET SDK 10.0.401 with 10.0.403 and runtime 10.0.14, because runtimes up to 10.0.12 are affected by CVE-2026-96231 and SDK 10.0.401 by CVE-2026-70165 on Windows. Windows contributors install the versions named in `global.json` and `package.json`.
+- C#: central package management with locked restore, nullable references, SDK analyzers with warnings as errors, CSharpier, and xUnit v3 on Microsoft.Testing.Platform.
+- Site: ESLint with eslint-plugin-svelte, Prettier, svelte-check, Vitest and Playwright.
+- GitHub Actions runs every check inside the Nix shell on invented fixtures, with SHA-pinned actions and no secrets. Renovate opens grouped updates. CUE4Parse updates are reviewed by hand, because a parser change can change site data.
+- A check fails when a game file or extracted output is tracked by Git.
 
 ### Minimal agent instructions
 
-`AGENTS.md` holds only boundaries an agent cannot infer from the code. Procedures become skills only once a workflow exists and has been repeated. Measured studies of repository instruction files show no reliable benefit from long, generated briefings and about 20% higher cost.
+`AGENTS.md` holds only boundaries that an agent cannot infer from the code. Procedures become skills only once a workflow exists and has been repeated. Measured studies of repository instruction files show no reliable benefit from long, generated briefings and about 20% higher cost.
 
 ## Risks / Trade-offs
 
-- [CUE4Parse changes its output between versions] → Pin its version. Re-extract after an update and review the record diff before accepting it.
-- [Reachability misses items granted by Blueprint logic] → Unreached items appear on the review list with their references. Overrides publish them until the graph covers the case.
-- [Large levels exceed CUE4Parse's loader] → Placement extraction streams actor lists and skips render payloads. The 2.2 GB Moonhorn Cliffs level loaded this way in a spike after conversion with retoc.
-- [Data repository growth from records and icons] → Records are per entity and deduplicated by Git. Check the data repository's size per accepted build and revisit storage if it passes about 1 GB.
-- [Game-derived data leaks into the public repository] → The extractor refuses output paths inside the code repository, and a check fails on game-derived files. Fixtures use invented names and values.
-- [Code and data drift apart without a pin] → Records carry a schema version that the catalog checks, and each deployment records both commits.
-- [Contributors on Windows see different line endings or path separators] → Records use LF and forward slashes regardless of platform, and a test compares the data repository's records against a fresh extraction.
-- [Early Access updates rename or remove item classes] → Item identity is the class path. A removed class disappears from the next accepted build's site, and its records stay in the history.
+- CUE4Parse can change its output between versions. Pin it, and compare site data before and after a parser update.
+- Items that only Blueprint logic grants show no source. The coverage page lists them until a later change reads bytecode.
+- Sources can name levels that players cannot reach. Known test levels are excluded, and a later change checks reachability through the game's travel data.
+- Steam may stop serving an old build, so an earlier publication could not be rebuilt exactly. The site describes only the current build.
+- Steam can update the game during extraction. The build check fails the run.
+- Extracted files could be committed by accident. The output directory is ignored, and a check fails on tracked game files and output.
+- Contributors on Windows see different line endings and path separators. Output uses LF and forward slashes on every platform.
+- Early Access updates rename or remove item classes. Item identity is the class path, so a removed class disappears from the next deployment.
 
 ## Migration Plan
 
-Create the private repository `bloodline-compendium-data` alongside the public repository. The first deployment goes to a preview URL. The custom domain `bloodline.compendiums.org` is attached after review. Rollback redeploys the previous publication with Wrangler.
+The first deployment goes to a preview URL. The custom domain `bloodline.compendiums.org` is attached after review. Rollback redeploys the previous version with Wrangler.
