@@ -62,13 +62,6 @@ Open work before building pages: establish the authored association between fini
 - [x] 7.4 Add the recheck to the update procedure and write `.agent/skills/game-issues/SKILL.md` with the ownership table and report drafting, and verify it names files that exist
 - [x] 7.5 Draft developer reports for the confirmed entries for posting on the game's Discord, and verify each follows the entry
 
-## 8. Item pages on the foundation
-
-- [ ] 8.1 Build the item tooltip component in the game's order and wording with the catalog's verified values, and verify a weapon, an armor piece, a food and a weapon part on real data
-- [ ] 8.2 Show entity tooltips on hover and keyboard focus for every item link, loading tooltip data per entity, and verify a recipe ingredient's tooltip with mouse, keyboard and with JavaScript off
-- [ ] 8.3 Rebuild the home, list, item, coverage, About and 404 pages from the primitives with rewritten copy, and verify the presentation and voice checks pass
-- [ ] 8.4 Review every page on real data at 1440 and 390 px, and record the review in the commit bodies
-
 ## 9. Integration
 
 - [ ] 9.1 Run every check (dotnet, types, guard, lint, stylelint, format, svelte-check, unit, fixtures build, e2e, voice, OpenSpec strict validation), and verify all pass
