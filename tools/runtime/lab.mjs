@@ -854,7 +854,7 @@ In the game (arguments are one JSON object):
   new-save <name>                 start a new game and create a character
   capture-screen <name> [noui]    keep an engine screenshot in the run (render mode)
   capture-model <json>            keep a model render in the run (render mode)
-  eval <file>                     run a Lua file with the command helpers
+  eval <file> [json]              run a Lua file with the command helpers and args
   ${"<command> [json]"}                run tools/runtime/commands/<command>.lua`;
 
 async function main([command, ...rest]) {
@@ -911,12 +911,13 @@ async function main([command, ...rest]) {
     case "capture-model":
       return captureModel(config, lab, JSON.parse(rest[0] ?? "{}"));
     case "eval": {
-      if (!rest[0]) throw new Error("Name the Lua file: lab.mjs eval <file>");
+      if (!rest[0])
+        throw new Error("Name the Lua file: lab.mjs eval <file> [json]");
       return game(
         config,
         lab,
         "eval",
-        {},
+        rest[1] ? JSON.parse(rest[1]) : {},
         await readFile(resolve(rest[0]), "utf8"),
       );
     }
