@@ -75,8 +75,7 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
             )
         )
         {
-            var nameNotes = new List<string>();
-            var name = LootRecords.Name(properties, "Enemy Name", path, nameNotes);
+            var name = LootRecords.Name(properties, "Enemy Name", path);
             // Spawners use class defaults, not overrides of another placed enemy.
             var sourcePlaces =
                 places.Count == 0 && spawnedPlaces.TryGetValue(path, out var spawned)
@@ -90,7 +89,7 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
                     SourceKind.EnemyDrop,
                     name,
                     sourcePlaces,
-                    RollNotes(field, nameNotes),
+                    RollNotes(field),
                     WorldSourceData.Reference(EntityKind.Creature, path, name),
                     OddsEvent.Kill,
                     picks,
@@ -125,8 +124,7 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
         {
             if (!context.Classes.TryGetValue(path, out var type) || !placedClasses.Contains(path))
                 continue;
-            var nameNotes = new List<string>();
-            var name = LootRecords.Name(type.Properties, "Enemy Name", path, nameNotes);
+            var name = LootRecords.Name(type.Properties, "Enemy Name", path);
             foreach (var (field, picks) in Pools(context, path))
             foreach (
                 var source in LootRecords.Pool(
@@ -135,7 +133,7 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
                     SourceKind.EnemyDrop,
                     name,
                     places,
-                    RollNotes(field, nameNotes),
+                    RollNotes(field),
                     WorldSourceData.Reference(EntityKind.Creature, path, name),
                     OddsEvent.Kill,
                     picks,
@@ -159,10 +157,8 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
         }
     }
 
-    private static IReadOnlyList<string> RollNotes(string field, IReadOnlyList<string> nameNotes) =>
-        field == "Loot Table"
-            ? nameNotes
-            : ["Rare loot, chosen apart from the normal drop.", .. nameNotes];
+    private static IReadOnlyList<string> RollNotes(string field) =>
+        field == "Loot Table" ? [] : ["A rare drop, chosen apart from the normal drop."];
 
     // Goblin_Base:Die picks once from the normal pool for every enemy. The rare pool drops only where a death
     // event spawns a Loot_Dropped with it, which then picks once, and these are the classes whose Drop Loot does

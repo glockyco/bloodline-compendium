@@ -366,7 +366,13 @@ internal sealed record Source(
 
     /// <summary>The source is a building in the player's own settlement.</summary>
     public bool Settlement { get; init; }
+
+    /// <summary>The lines of a conversation that give the item, in the game's own words.</summary>
+    public IReadOnlyList<Quote> Quotes { get; init; } = [];
 }
+
+/// <summary>A line of game dialogue. <see cref="Player"/> marks a line the player chooses.</summary>
+internal sealed record Quote(string Text, bool Player);
 
 internal enum OddsEvent
 {

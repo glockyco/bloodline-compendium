@@ -4,6 +4,7 @@
 	import { formatAmount, oddsLabel, payPrice } from './acquisition.js';
 	import EntityLink from './ui/EntityLink.svelte';
 	import Conditions from './Conditions.svelte';
+	import UnknownValue from './ui/UnknownValue.svelte';
 	let {
 		source,
 		showAmount = false,
@@ -20,8 +21,7 @@
 			{#if source.places.length}{#each source.places as place, index (index)}{#if index},
 					{/if}<EntityLink entity={place} />{/each}{:else}Location unknown{/if}
 		</p>
-		{#if source.odds?.unknown}<p class="source-places">{source.odds.unknown}</p>{/if}
-		{#if source.inputs.length || source.notes.length}
+		{#if source.inputs.length || source.notes.length || source.quotes?.length}
 			<details class="row-details">
 				<summary
 					>Details <span class="sr-only">for <span data-game>{source.name}</span></span></summary
@@ -37,7 +37,11 @@
 							</li>{/each}
 					</ul>
 				{/if}
-				{#if source.notes.length}<ul data-game>
+				{#each source.quotes ?? [] as quote, index (index)}<p class="quote">
+						{quote.player ? 'You say' : 'They say'}
+						"<span data-game>{quote.text}</span>"
+					</p>{/each}
+				{#if source.notes.length}<ul>
 						{#each source.notes as note, index (index)}<li>{note}</li>{/each}
 					</ul>{/if}
 			</details>
@@ -60,7 +64,10 @@
 				>
 			{:else if source.odds?.chance != null}
 				{formatChance(source.odds.chance)}<small>{oddsLabel(source.odds, source.kind)}</small>
-			{:else}<span class="muted">Unknown</span>{/if}
+			{:else if source.odds?.unknown}<UnknownValue
+					reason={source.odds.unknown}
+					id={id + '-odds'}
+				/>{:else}<span class="muted">Unknown</span>{/if}
 		</td>
 	{/if}
 </tr>

@@ -296,6 +296,7 @@ export interface Source {
   odds?: Odds | null;
   places: EntityReference[];
   price: Price | null;
+  quotes?: Quote[];
   recipe?: Recipe | null;
   relationId: string;
   settlement?: boolean;
@@ -341,6 +342,15 @@ export interface Price {
   currency: EntityReference | null;
   relationId?: string | null;
   rule?: PriceRule;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "Quote".
+ */
+export interface Quote {
+  player: boolean;
+  text: string;
   [k: string]: unknown;
 }
 /**

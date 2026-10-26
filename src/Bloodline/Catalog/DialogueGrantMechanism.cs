@@ -120,7 +120,8 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
                 {
                     continue;
                 }
-                var notes = GrantNotes(context, dialogue, grant).Distinct().ToList();
+                var notes = GrantNotes(dialogue).ToList();
+                var quotes = Quotes(dialogue, grant).Distinct().ToArray();
                 var matching = rewards
                     .Where(reward =>
                         reward.Amount == amount
@@ -146,12 +147,9 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
                             )
                         );
                     notes.Add(
-                        $"This conversation includes {matching.Length} separate grants of {amount} of this item. "
-                            + (
-                                together
-                                    ? "These grants share the same dialogue line."
-                                    : "Whether they occur together is unknown."
-                            )
+                        together
+                            ? $"The same line gives it {matching.Length} times."
+                            : $"{matching.Length} lines of the conversation give it. Whether one conversation reaches more than one is unknown."
                     );
                 }
                 foreach (var (name, place, generated, entity) in users)
@@ -169,12 +167,13 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
                                 ?
                                 [
                                     .. notes,
-                                    "This conversation is assigned to a generated character. The exact speaker and availability are unknown.",
+                                    "A character the game generates holds this conversation, so who and where is unknown.",
                                 ]
                                 : notes
                         )
                         {
                             Entity = entity,
+                            Quotes = quotes,
                             Conditions =
                             [
                                 .. WorldSourceData.DialogueConditions(context, dialogue, grant),
@@ -192,11 +191,7 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
         }
     }
 
-    private static IEnumerable<string> GrantNotes(
-        CatalogContext context,
-        AssetRecord dialogue,
-        InnerObjectRecord grant
-    )
+    private static IEnumerable<Quote> Quotes(AssetRecord dialogue, InnerObjectRecord grant)
     {
         var nodes = RecordValues
             .Elements(dialogue.Properties["Data"])
@@ -218,15 +213,19 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
             var text = RecordValues.Text(RecordValues.At(node, "Text"));
             if (!string.IsNullOrWhiteSpace(text))
             {
-                var player = RecordValues.Boolean(RecordValues.At(node, "isPlayer")) == true;
-                yield return player
-                    ? $"Dialogue choice: \"{text.Trim()}\""
-                    : $"During dialogue: \"{text.Trim()}\"";
+                yield return new Quote(
+                    text.Trim(),
+                    RecordValues.Boolean(RecordValues.At(node, "isPlayer")) == true
+                );
             }
         }
+    }
+
+    private static IEnumerable<string> GrantNotes(AssetRecord dialogue)
+    {
         if (dialogue.Path.Contains("/Dialogue_Unused/", StringComparison.OrdinalIgnoreCase))
         {
-            yield return "This conversation is marked unused in the game data. Availability is uncertain.";
+            yield return "The game files mark this conversation unused, so it may never take place.";
         }
         if (dialogue.Path.Contains("_SoulfaringNight.", StringComparison.OrdinalIgnoreCase))
         {

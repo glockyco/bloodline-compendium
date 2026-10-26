@@ -601,7 +601,7 @@ public sealed class TradeMechanismTests
             source =>
                 Assert.Contains(
                     source.Source.Notes,
-                    note => note.Contains("2") && note.Contains("3") && note.Contains("grants")
+                    note => note.Contains(linked ? "same line gives it 2 times" : "2 lines")
                 )
         );
         var found = sources[0];
@@ -620,11 +620,7 @@ public sealed class TradeMechanismTests
             found.Source.Conditions,
             condition => condition.Kind == ConditionKind.Unknown
         );
-        Assert.Equal(linked, found.Source.Notes.Any(note => note.Contains("Take this gift.")));
-        Assert.Equal(
-            linked && player,
-            found.Source.Notes.Any(note => note.Contains("Dialogue choice:"))
-        );
+        Assert.Equal(linked ? [new Quote("Take this gift.", player)] : [], found.Source.Quotes);
         Assert.Equal(
             linked,
             found.Source.Conditions.Any(condition =>

@@ -86,7 +86,12 @@
 			},
 			"conditions": [],
 			"relationId": "fixture:cinderpear:source:0",
-			"odds": null
+			"odds": {
+				"event": "pick",
+				"chance": null,
+				"expected": null,
+				"unknown": "How often the orchard yields it is unknown."
+			}
 		}
 	],
 	"key": "/Invented/Items/Cinderpear",

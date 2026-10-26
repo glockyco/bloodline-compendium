@@ -118,6 +118,11 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 	await page.goto('/items/mosswoven-coat/');
 	await expect(page.locator('.source-group')).toContainText('20%');
 	await expect(page.locator('.source-group')).toContainText('per kill');
+	await page.goto('/items/cinderpear/');
+	const unknown = page.locator('.source-group').getByRole('button', { name: 'Unknown' });
+	await expect(page.getByRole('tooltip')).toBeHidden();
+	await unknown.focus();
+	await expect(page.getByRole('tooltip')).toHaveText('How often the orchard yields it is unknown.');
 	await page.goto('/items/hollow-prism/');
 	await expect(
 		page.getByText('No way to get this item is known in this game version.')

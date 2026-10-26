@@ -34,23 +34,20 @@ internal sealed class FishingMechanism : ISourceMechanism
                 continue;
             }
             var notes = new List<string>();
-            if (RecordValues.Number(properties["Min Difficulty"]) is { } minimum)
+            var minimum = RecordValues.Number(properties["Min Difficulty"]);
+            var maximum = RecordValues.Number(properties["Max Difficulty"]);
+            if (minimum is { } low && maximum is { } high)
             {
-                notes.Add(FormattableString.Invariant($"Minimum fishing difficulty: {minimum}."));
-            }
-            if (RecordValues.Number(properties["Max Difficulty"]) is { } maximum)
-            {
-                notes.Add(FormattableString.Invariant($"Maximum fishing difficulty: {maximum}."));
+                notes.Add(
+                    low == high
+                        ? FormattableString.Invariant($"Fishing difficulty {low}.")
+                        : FormattableString.Invariant($"Fishing difficulty {low} to {high}.")
+                );
             }
             if (RecordValues.Number(properties["Remaining Fish"]) is { } remaining)
             {
-                notes.Add(
-                    FormattableString.Invariant($"Fish remaining at this spot: {remaining}.")
-                );
+                notes.Add(FormattableString.Invariant($"Holds {remaining} fish."));
             }
-            notes.Add(
-                "Each successful catch makes one loot roll. Fish size is determined separately."
-            );
             if (RecordValues.Boolean(properties["Use Specific Loot table?"]) == true)
             {
                 foreach (

@@ -28,12 +28,13 @@ internal sealed class RandomLootMechanism : ISourceMechanism
                     null,
                     LootRecords.Quantity(context, item),
                     [],
-                    [
-                        "Some containers can contain this item. Not every container can drop it.",
-                        "The chance depends on the container, player level, item level and item type, so a fixed chance is unknown.",
-                    ]
+                    []
                 )
                 {
+                    Odds = LootOdds.Unknown(
+                        OddsEvent.Container,
+                        "The chance depends on the container, your level, and the item's level and type."
+                    ),
                     Entity = WorldSourceData.Reference(
                         EntityKind.Activity,
                         table.Path,

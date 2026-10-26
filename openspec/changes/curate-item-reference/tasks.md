@@ -36,7 +36,7 @@
 
 ## 6. Reader text and support pages
 
-- [ ] 6.1 Add the pipeline words and identifier patterns to `scripts/voice-rules.json`, rewrite labels and copy across the site, and verify the voice check passes on real data
+- [x] 6.1 Add the pipeline words and identifier patterns to `scripts/voice-rules.json`, rewrite labels and copy across the site, and verify the voice check passes on real data
 - [x] 6.2 Move coverage to `report.json`, remove the Coverage route and its links, and add the reference's limits to About, and verify no page links /coverage/
 - [x] 6.3 Rebuild Known Issues with an issue list, player facts first and a collapsed developer section, fix the release name, and verify it at 390 px
 - [x] 6.4 Align home page counts and links with the list, route missing URLs to the missing-page view, and verify an unknown URL in the preview build

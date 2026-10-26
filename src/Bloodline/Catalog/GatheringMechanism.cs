@@ -159,15 +159,10 @@ internal sealed class GatheringMechanism : ISourceMechanism
                 continue;
             }
             var notes = HarvestNotes(properties).ToList();
-            if (RecordValues.String(properties["Custom Preset Name"]) is { Length: > 0 } resource)
+            if (!placed)
             {
-                notes.Add($"Resource type: {resource}.");
+                notes.Add("No gathering spot in the world is known to give it.");
             }
-            notes.Add(
-                placed
-                    ? "This gathering point can provide these resources. Its contents may change when it is created or updated. Harvest attempts and bonuses depend on gathering state."
-                    : "These resources can be gathered, but no active gathering point has been confirmed."
-            );
             foreach (var (item, weight) in WorldSourceData.Pool(properties[pool]))
             {
                 var perPick = WeightTotals.Chance(weight);
@@ -224,10 +219,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
                         null,
                         null,
                         [],
-                        [
-                            "Each listed outcome is equally likely, including repeated items and empty outcomes. Whether this gathering method is active is unknown.",
-                            .. HarvestNotes(properties),
-                        ]
+                        [.. HarvestNotes(properties)]
                     )
                     {
                         Entity = WorldSourceData.Reference(
@@ -294,7 +286,9 @@ internal sealed class GatheringMechanism : ISourceMechanism
             { } limit
         )
         {
-            yield return FormattableString.Invariant($"Maximum harvest amount: {limit}.");
+            yield return FormattableString.Invariant(
+                $"Gives up to {limit} items before it regrows."
+            );
         }
     }
 

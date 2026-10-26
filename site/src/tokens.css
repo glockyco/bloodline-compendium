@@ -116,10 +116,13 @@
 	--size-hero-min: 16rem;
 	--size-hero-max: 46rem;
 	--size-hero-phone: 17rem;
+	--size-tooltip: min(18rem, 70vw);
+	--position-below: 100%;
 
 	--duration-hover: 0.15s;
 
 	--layer-table-heading: 1;
+	--layer-tooltip: 2;
 	--layer-skip: 10;
 	--layer-search: 100;
 }

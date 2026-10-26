@@ -962,6 +962,22 @@
       "title": "QualityGrade",
       "type": "object"
     },
+    "Quote": {
+      "properties": {
+        "player": {
+          "type": "boolean"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "player"
+      ],
+      "title": "Quote",
+      "type": "object"
+    },
     "Recipe": {
       "properties": {
         "discipline": {
@@ -1250,6 +1266,12 @@
               "type": "null"
             }
           ]
+        },
+        "quotes": {
+          "items": {
+            "$ref": "#/$defs/Quote"
+          },
+          "type": "array"
         },
         "recipe": {
           "anyOf": [

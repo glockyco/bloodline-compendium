@@ -387,7 +387,7 @@ public sealed class WorldMechanismTests
         var result = Assert.Single(sources, source => source.Source.Places.Count > 0);
         Assert.Equal("/Invented/Fish.Fish_C", result.ItemClass);
         Assert.Equal(new Odds(OddsEvent.Catch, 0.8, 0.8, null), result.Source.Odds);
-        Assert.Equal(new[] { 1d, 1d, 5d }, NoteNumbers(result.Source));
+        Assert.Equal(new[] { 1d, 5d }, NoteNumbers(result.Source));
         Assert.DoesNotContain(
             sources,
             source => source.ItemClass.Contains("Dud", StringComparison.Ordinal)

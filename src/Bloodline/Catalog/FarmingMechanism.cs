@@ -24,13 +24,13 @@ internal sealed class FarmingMechanism : ISourceMechanism
             {
                 notes.Add(
                     FormattableString.Invariant(
-                        $"Base harvest attempts before farming bonuses: {attempts}."
+                        $"Gives {attempts} items per harvest before farming bonuses."
                     )
                 );
             }
             if (RecordValues.Number(values["GrowDurationDays"]) is { } days)
             {
-                notes.Add(FormattableString.Invariant($"Growing time in days: {days}."));
+                notes.Add(FormattableString.Invariant($"Grows in {days} days."));
             }
             foreach (var (item, weight) in WorldSourceData.Pool(values["HarvestItems"]))
             {

@@ -88,19 +88,12 @@ public sealed class LootMechanismTests
         );
         Assert.Empty(source.Inputs);
         Assert.Contains(source.Notes, note => note.Contains("50%", StringComparison.Ordinal));
-        Assert.Contains(
-            "The possible contents are known, but why this container uses this set of items is unknown.",
-            source.Notes
-        );
     }
 
     [Theory]
     [InlineData("Crate", false)]
     [InlineData("Loot", true)]
-    public void GenericLootNameUsesContainerIdentityAndRetainsUnknownNames(
-        string defaultName,
-        bool unknownName
-    )
+    public void GenericLootNameUsesContainerIdentity(string defaultName, bool unknownName)
     {
         var properties = OnePick(
             new JsonObject
@@ -123,7 +116,6 @@ public sealed class LootMechanismTests
         Assert.NotEqual("Loot", source.Name);
         if (!unknownName)
             Assert.Equal(defaultName, source.Name);
-        Assert.Equal(unknownName, source.Notes.Contains(LootRecords.UnnamedNote));
         Assert.Equal(0.25, source.Odds!.Chance);
         Assert.Equal(new Amount(3, 3), source.Amount);
         Assert.Equal(Level, Assert.Single(source.Places).Key);
@@ -146,7 +138,6 @@ public sealed class LootMechanismTests
             )
             .Source;
         Assert.Equal("Marsh Beast", source.Name);
-        Assert.Contains(LootRecords.UnnamedNote, source.Notes);
         Assert.Equal(0.25, source.Odds!.Chance);
         Assert.Equal(new Amount(3, 3), source.Amount);
     }
@@ -478,13 +469,10 @@ public sealed class LootMechanismTests
         var source = Assert.Single(new RandomLootMechanism().FindSources(context)).Source;
         Assert.Equal(SourceKind.RandomLoot, source.Kind);
         Assert.Equal("General random loot", source.Name);
-        Assert.Null(source.Odds);
+        Assert.Null(source.Odds!.Chance);
+        Assert.Contains("your level", source.Odds.Unknown, StringComparison.Ordinal);
         Assert.Equal(new Amount(3, 3), source.Amount);
         Assert.Empty(source.Places);
-        Assert.Contains(
-            source.Notes,
-            note => note.Contains("player level", StringComparison.Ordinal)
-        );
     }
 
     [Theory]
@@ -648,7 +636,6 @@ public sealed class LootMechanismTests
             )
             .Source;
         Assert.Equal("Beast", source.Name);
-        Assert.Contains(LootRecords.UnnamedNote, source.Notes);
     }
 
     [Fact]

@@ -47,7 +47,8 @@ export default {
 		'declaration-property-value-disallowed-list': { 'text-transform': ['uppercase'] },
 		'declaration-property-value-allowed-list': {
 			'/^(margin|padding|gap|row-gap|column-gap|inset|top|right|bottom|left|scroll-margin)/': [
-				spacing
+				spacing,
+				token('position')
 			],
 			'font-size': [token('type'), 'inherit'],
 			'line-height': [token('leading'), 'inherit'],
