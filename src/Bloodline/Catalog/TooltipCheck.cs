@@ -219,6 +219,57 @@ internal static partial class TooltipCheck
         );
     }
 
+    private static readonly Dictionary<string, Stat> FactFields = new(StringComparer.Ordinal)
+    {
+        ["Armor rating"] = Stat.ArmorRating,
+        ["Armor type"] = Stat.ArmorType,
+        ["Restoration amount"] = Stat.RestorationAmount,
+    };
+
+    /// <summary>
+    /// The items with each fact that a known game defect makes the tooltip misstate carrying the value the
+    /// tooltip shows, so a page can show both.
+    /// </summary>
+    public static IReadOnlyList<ItemPage> WithGameShows(
+        IReadOnlyList<ItemPage> items,
+        TooltipReport? report
+    )
+    {
+        var defects = Reasons.Where(reason => reason.Issue).Select(reason => reason.Id).ToHashSet();
+        var shown = (report?.Differences ?? [])
+            .Where(difference =>
+                difference.Reason is { } reason
+                && defects.Contains(reason)
+                && FactFields.ContainsKey(difference.Field)
+                && !string.IsNullOrWhiteSpace(difference.Tooltip)
+            )
+            .ToDictionary(
+                difference => (difference.Item, FactFields[difference.Field]),
+                difference =>
+                    difference.Field == "Armor type"
+                    && difference.Tooltip!.StartsWith("Type: ", StringComparison.Ordinal)
+                        ? difference.Tooltip["Type: ".Length..].Trim()
+                        : difference.Tooltip!.Trim()
+            );
+        return items
+            .Select(item =>
+                item with
+                {
+                    Facts = item
+                        .Facts.Select(fact =>
+                            shown.TryGetValue((item.Key, fact.Stat), out var value)
+                                ? fact with
+                                {
+                                    GameShows = value,
+                                }
+                                : fact
+                        )
+                        .ToArray(),
+                }
+            )
+            .ToArray();
+    }
+
     /// <summary>
     /// A coverage entry's wording for a difference without a known cause. Names and descriptions are game prose,
     /// which the site's own sentences do not quote, so only the kind of difference is named. The report keeps them.

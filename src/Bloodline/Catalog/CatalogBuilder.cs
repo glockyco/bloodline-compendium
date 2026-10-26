@@ -75,6 +75,7 @@ internal static class CatalogBuilder
             texture => texture.Path,
             StringComparer.OrdinalIgnoreCase
         );
+        var statuses = new ItemStatuses(records, context.ExcludedLevels);
         var gapEntries = Enum.GetValues<GapKind>()
             .ToDictionary(kind => kind, _ => new List<GapEntry>());
         var items = new List<ItemPage>();
@@ -98,7 +99,12 @@ internal static class CatalogBuilder
                 icon = texture.Hash;
             }
             var sources = CatalogContext.MergeSources(candidates[item.Key], context.ExcludedLevels);
-            item = item with { Icon = icon, Sources = sources };
+            item = item with
+            {
+                Icon = icon,
+                Sources = sources,
+                Status = statuses.Of(item.Key, sources.Count),
+            };
             items.Add(item);
             void Gap(GapKind kind, string label, string? detail = null) =>
                 gapEntries[kind].Add(new GapEntry(label, CatalogGraph.Reference(item), detail));
@@ -223,7 +229,7 @@ internal static class CatalogBuilder
             }
         }
         var (noted, issues) = KnownIssues.Attach(
-            graphResult.Items,
+            TooltipCheck.WithGameShows(graphResult.Items, tooltips),
             records.Issues,
             tooltips,
             resolver.IgnoredFoodEffects
@@ -245,6 +251,7 @@ internal static class CatalogBuilder
                 Key = item.Key,
                 Type = item.Type,
                 Qualifier = item.Qualifier,
+                Status = item.Status,
             })
             .ToArray();
         var categories = ordered

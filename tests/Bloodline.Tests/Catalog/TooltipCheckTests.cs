@@ -161,6 +161,38 @@ public sealed class TooltipCheckTests
     }
 
     [Fact]
+    public void FactsAKnownDefectMisstatesCarryWhatTheTooltipShows()
+    {
+        var pants = Armor("Leather Pants");
+        var pie = Food("Apple Pie");
+        var sword = Sword;
+        var report = TooltipCheck.Check(
+            1,
+            [pants, pie, sword],
+            [
+                Tooltip(pants, "ARMOR: 4", ""),
+                Tooltip(pie, "Heals: 15hp"),
+                Tooltip(sword, "Damage: 40", "Slow"),
+            ],
+            []
+        );
+        var shown = TooltipCheck
+            .WithGameShows([pants, pie, sword], report)
+            .ToDictionary(item => item.Name);
+        Fact Fact(string item, Stat stat) => shown[item].Facts.Single(fact => fact.Stat == stat);
+        Assert.Equal(
+            (0d, "4"),
+            (
+                Fact("Leather Pants", Stat.ArmorRating).Number!.Value,
+                Fact("Leather Pants", Stat.ArmorRating).GameShows
+            )
+        );
+        Assert.Equal("15", Fact("Apple Pie", Stat.RestorationAmount).GameShows);
+        // A difference without a known cause is a catalog question, not a value the page shows.
+        Assert.Null(Fact("Sword", Stat.Damage).GameShows);
+    }
+
+    [Fact]
     public void ItemsWithoutAReadableTooltipAreUnreadRatherThanCompared()
     {
         var report = TooltipCheck.Check(
