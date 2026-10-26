@@ -7,8 +7,8 @@
 	"uses": [],
 	"description": "A slender blade etched with a path of tiny stars.",
 	"category": {
-		"slug": "weapons",
-		"name": "Weapons"
+		"slug": "weapon",
+		"name": "Weapon"
 	},
 	"icon": "lanternedge",
 	"facts": [

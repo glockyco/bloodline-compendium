@@ -4,6 +4,7 @@ export interface ItemFilters {
 	name: string;
 	categories: string[];
 	types: string[];
+	sources: string[];
 	showUnknown: boolean;
 	sort: string;
 }
@@ -23,6 +24,7 @@ export function readFilters(
 		name: params.get('name') ?? '',
 		categories: params.getAll('category'),
 		types: params.getAll('type'),
+		sources: params.getAll('source'),
 		showUnknown: params.get('unknown') === '1',
 		sort: itemSorts.includes(params.get('sort') ?? '') ? params.get('sort')! : 'name-asc'
 	};
@@ -36,7 +38,8 @@ export function matchesItem(item: ItemSummary, filters: ItemFilters): boolean {
 				.toLocaleLowerCase('en')
 				.includes(filters.name.trim().toLocaleLowerCase('en'))) &&
 		(!filters.categories.length || filters.categories.includes(item.category)) &&
-		(!filters.types.length || filters.types.includes(item.type))
+		(!filters.types.length || filters.types.includes(item.type)) &&
+		(!filters.sources.length || item.sourceKinds.some((kind) => filters.sources.includes(kind)))
 	);
 }
 

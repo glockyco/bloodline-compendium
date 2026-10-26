@@ -204,7 +204,12 @@ internal static class CatalogBuilder
         var categories = ordered
             .GroupBy(item => item.Category)
             .OrderBy(group => group.Key.Name, StringComparer.Ordinal)
-            .Select(group => new CategorySummary(group.Key.Slug, group.Key.Name, group.Count()))
+            .Select(group => new CategorySummary(
+                group.Key.Slug,
+                group.Key.Name,
+                ItemCategories.Plural(group.Key.Name),
+                group.Count()
+            ))
             .ToArray();
         var coverage = new CoverageReport(
             gapEntries

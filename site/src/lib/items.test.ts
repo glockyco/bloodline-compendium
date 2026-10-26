@@ -16,7 +16,7 @@ it('hides items without a known source by default without removing their records
 });
 
 it('matches several values in a facet and combines different facets', () => {
-	const filters = { ...defaults, categories: ['weapons', 'food'], types: ['Sword'] };
+	const filters = { ...defaults, categories: ['weapon', 'food'], types: ['Sword'] };
 	expect(filterItems(index.items, filters).map((item) => item.name)).toEqual(['Lanternedge']);
 	expect(filterItems(index.items, { ...filters, types: [] })).toHaveLength(2);
 	expect(
@@ -30,13 +30,14 @@ it('restores all supported filters and sort from a shared URL', () => {
 	expect(
 		readFilters(
 			new URLSearchParams(
-				'name=lantern&category=weapons&category=food&type=Sword&unknown=1&sort=value-desc'
+				'name=lantern&category=weapon&category=food&type=Sword&unknown=1&sort=value-desc'
 			)
 		)
 	).toEqual({
 		name: 'lantern',
-		categories: ['weapons', 'food'],
+		categories: ['weapon', 'food'],
 		types: ['Sword'],
+		sources: [],
 		showUnknown: true,
 		sort: 'value-desc'
 	});
@@ -63,4 +64,16 @@ it('sorts types and filters names without case sensitivity', () => {
 	expect(
 		filterItems(index.items, { ...defaults, name: 'LANTERN' }).map((item) => item.slug)
 	).toEqual(['lanternedge']);
+});
+
+it('narrows items to any selected way of getting them', () => {
+	const shops = { ...defaults, sources: ['shop'] };
+	expect(filterItems(index.items, shops).map((item) => item.name)).toEqual(['Lanternedge']);
+	expect(
+		filterItems(index.items, { ...shops, sources: ['shop', 'gathering'] }).map((item) => item.name)
+	).toEqual(['Cinderpear', 'Lanternedge']);
+	expect(readFilters(new URLSearchParams('source=shop&source=gathering')).sources).toEqual([
+		'shop',
+		'gathering'
+	]);
 });

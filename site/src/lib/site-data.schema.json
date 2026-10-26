@@ -40,6 +40,9 @@
         "name": {
           "type": "string"
         },
+        "plural": {
+          "type": "string"
+        },
         "slug": {
           "type": "string"
         }
@@ -47,6 +50,7 @@
       "required": [
         "slug",
         "name",
+        "plural",
         "count"
       ],
       "title": "CategorySummary",

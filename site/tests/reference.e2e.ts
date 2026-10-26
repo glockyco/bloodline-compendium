@@ -8,7 +8,7 @@ test('filters items with counted facets, preserves URL state and sorts numeric v
 	const weapons = categories.getByRole('checkbox', { name: /^Weapons\s/ });
 	await weapons.check();
 	await expect(page.locator('.item-name')).toHaveText(['Lanternedge']);
-	await expect(page).toHaveURL(/category=weapons/);
+	await expect(page).toHaveURL(/category=weapon/);
 	await page.reload();
 	await expect(weapons).toBeChecked();
 	await expect(page.locator('.item-name')).toHaveText(['Lanternedge']);
@@ -53,7 +53,7 @@ test('name filtering combines with facets and empty results can be cleared', asy
 test('combines Category and Type selections and restores them from a shared URL', async ({
 	page
 }) => {
-	await page.goto('/items/?category=weapons&category=food&type=Sword');
+	await page.goto('/items/?category=weapon&category=food&type=Sword');
 	const facets = page.getByRole('complementary', { name: 'Item filters' });
 	await expect(facets.getByRole('checkbox', { name: /^Weapons\s/ })).toBeChecked();
 	await expect(facets.getByRole('checkbox', { name: /^Food\s/ })).toBeChecked();
@@ -82,7 +82,7 @@ test('phone filters open as a keyboard-accessible sheet and apply without naviga
 	await dialog.getByRole('button', { name: 'Show 1 item', exact: true }).click();
 	await expect(dialog).not.toBeVisible();
 	await expect(page.locator('.item-name')).toHaveText(['Lanternedge']);
-	await expect(page).toHaveURL(/category=weapons/);
+	await expect(page).toHaveURL(/category=weapon/);
 });
 test('answers acquisition first and exposes facts, quantities and uncertainty', async ({
 	page

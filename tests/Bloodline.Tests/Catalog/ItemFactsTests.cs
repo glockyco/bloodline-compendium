@@ -407,19 +407,38 @@ public sealed class ItemFactsTests
         var unrelated = new TableRecord("/Game/Invented/OtherTable.OtherTable", null, [row]);
         var page = new ItemFacts([], [unrelated]).Resolve(item, "invented");
 
-        Assert.Equal("Etc.", page.Type);
+        Assert.Equal("Material", page.Type);
         Assert.DoesNotContain(page.Facts, fact => fact.Label == "Damage contribution");
     }
 
     [Theory]
     [InlineData("Iuba_Coin")]
     [InlineData("Tithes")]
-    public void CurrencyConsumersDetermineTypeWithoutChangingTheRecordedCategory(string className)
+    public void CurrenciesFormTheirOwnCategory(string className)
     {
         var page = new ItemFacts([]).Resolve(Item(className: className), "invented");
 
         Assert.Equal("Currency", page.Type);
-        Assert.Equal("Etc.", page.Category.Name);
+        Assert.Equal("Currency", page.Category.Name);
+    }
+
+    [Fact]
+    public void WeaponComponentsFormTheWeaponPartCategory()
+    {
+        var item = Item();
+        var row = ComponentRow(
+            item,
+            """{"Part":{"$enum":"InventedParts::Edge","display":"Blade"},"Damage":12,"Speed":0.5}"""
+        );
+        var table = new TableRecord(
+            "/Game/BloodlinesAlpha/WeaponComponentTable.WeaponComponentTable",
+            null,
+            [row]
+        );
+        var page = new ItemFacts([], [table]).Resolve(item, "invented");
+
+        Assert.Equal("Weapon Part", page.Category.Name);
+        Assert.Equal("weapon-part", page.Category.Slug);
     }
 
     [Theory]
@@ -438,12 +457,17 @@ public sealed class ItemFactsTests
     }
 
     [Theory]
-    [InlineData("Food")]
-    [InlineData("Potion")]
-    [InlineData("Etc.")]
-    public void OtherItemsUseTheirRecordedCategoryAsType(string category)
+    [InlineData("Food", "Food")]
+    [InlineData("Potion", "Potion")]
+    [InlineData("Quest", "Quest Item")]
+    [InlineData("Etc.", "Material")]
+    [InlineData("Invented Kind", "Invented Kind")]
+    public void OtherItemsUseTheirCategoryAsType(string gameType, string category)
     {
-        Assert.Equal(category, new ItemFacts([]).Resolve(Item(category), "invented").Type);
+        var page = new ItemFacts([]).Resolve(Item(gameType), "invented");
+
+        Assert.Equal(category, page.Type);
+        Assert.Equal(category, page.Category.Name);
     }
 
     [Theory]

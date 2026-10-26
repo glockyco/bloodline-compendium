@@ -31,7 +31,8 @@ internal sealed record ItemIndex(
     IReadOnlyList<ItemSummary> Items
 );
 
-internal sealed record CategorySummary(string Slug, string Name, int Count);
+/// <summary>A category with its plural name for headings, such as Weapon and Weapons.</summary>
+internal sealed record CategorySummary(string Slug, string Name, string Plural, int Count);
 
 /// <summary>What the item list shows of an item. <see cref="Icon"/> is the hash of an icon in <c>icons/</c>.</summary>
 internal sealed record ItemSummary(

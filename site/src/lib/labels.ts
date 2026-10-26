@@ -24,6 +24,24 @@ export const sourceHeadings: Record<SourceKind, string> = {
 	bountyNote: 'Obtained from bounty notes',
 	settlementDelivery: 'Delivered by settlements'
 };
+/** Short names for each way of getting an item, for filters and overviews. */
+export const sourceNames: Record<SourceKind, string> = {
+	shop: 'Merchants',
+	currencyShop: 'Special traders',
+	smithing: 'Smithing',
+	crafting: 'Crafting',
+	cooking: 'Cooking',
+	containerLoot: 'Containers',
+	randomLoot: 'Random loot',
+	enemyDrop: 'Creatures',
+	pickup: 'Lying around',
+	dialogue: 'Conversations',
+	fishing: 'Fishing',
+	gathering: 'Gathering',
+	farming: 'Farming',
+	bountyNote: 'Bounty notes',
+	settlementDelivery: 'Settlements'
+};
 export const gaps: Record<GapKind, { title: string; explanation: string }> = {
 	itemWithoutSource: {
 		title: 'Items without a known source',

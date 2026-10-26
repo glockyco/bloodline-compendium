@@ -1,23 +1,27 @@
 {
 	"categories": [
 		{
-			"slug": "weapons",
-			"name": "Weapons",
+			"slug": "weapon",
+			"name": "Weapon",
+			"plural": "Weapons",
 			"count": 1
 		},
 		{
 			"slug": "armour",
 			"name": "Armour",
+			"plural": "Armour",
 			"count": 1
 		},
 		{
 			"slug": "food",
 			"name": "Food",
+			"plural": "Food",
 			"count": 1
 		},
 		{
-			"slug": "curios",
-			"name": "Curios",
+			"slug": "curio",
+			"name": "Curio",
+			"plural": "Curios",
 			"count": 1
 		}
 	],
@@ -37,7 +41,7 @@
 			"name": "Hollow Prism",
 			"type": "Curio",
 			"qualifier": null,
-			"category": "curios",
+			"category": "curio",
 			"value": null,
 			"icon": null,
 			"sourceKinds": []
@@ -47,7 +51,7 @@
 			"name": "Lanternedge",
 			"type": "Sword",
 			"qualifier": null,
-			"category": "weapons",
+			"category": "weapon",
 			"value": 45,
 			"icon": "lanternedge",
 			"sourceKinds": ["shop", "crafting", "currencyShop", "containerLoot"]

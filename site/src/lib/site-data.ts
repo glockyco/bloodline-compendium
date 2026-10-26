@@ -234,6 +234,7 @@ export interface ItemIndex {
 export interface CategorySummary {
   count: number;
   name: string;
+  plural: string;
   slug: string;
   [k: string]: unknown;
 }

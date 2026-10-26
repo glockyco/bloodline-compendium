@@ -5,13 +5,15 @@
 	import { page } from '$app/state';
 	import { SvelteURL } from 'svelte/reactivity';
 	import { filterItems, matchesItem, readFilters } from '#lib/items.js';
-	import { titleCase } from '#lib/labels.js';
+	import { sourceNames, titleCase } from '#lib/labels.js';
+	import type { SourceKind } from '#lib/site-data.js';
 	import { formatNumber } from '#lib/format.js';
 	import SeoHead from '#lib/SeoHead.svelte';
 	let { data } = $props();
 	let dialog: HTMLDialogElement;
 	let categorySearch = $state('');
 	let typeSearch = $state('');
+	let sourceSearch = $state('');
 	const currentUrl = $derived(page.shallow?.url ?? page.url);
 	const filters = $derived(readFilters(browser ? currentUrl.searchParams : undefined));
 	const items = $derived(filterItems(data.index.items, filters));
@@ -19,13 +21,14 @@
 	const activeCount = $derived(
 		filters.categories.length +
 			filters.types.length +
+			filters.sources.length +
 			Number(Boolean(filters.name)) +
 			Number(filters.showUnknown)
 	);
 	const categories = $derived(
 		data.index.categories.map((category) => ({
 			value: category.slug,
-			label: titleCase(category.name),
+			label: category.plural,
 			count: data.index.items.filter(
 				(item) =>
 					item.category === category.slug && matchesItem(item, { ...filters, categories: [] })
@@ -43,13 +46,26 @@
 				).length
 			}))
 	);
+	const sources = $derived(
+		(Object.keys(sourceNames) as SourceKind[])
+			.map((kind) => ({
+				value: kind,
+				label: sourceNames[kind],
+				count: data.index.items.filter(
+					(item) =>
+						item.sourceKinds.includes(kind) && matchesItem(item, { ...filters, sources: [] })
+				).length
+			}))
+			.filter((entry) => entry.count > 0 || filters.sources.includes(entry.value))
+			.sort((a, b) => a.label.localeCompare(b.label, 'en'))
+	);
 	function update(key: string, values: string[]) {
 		const url = new SvelteURL(currentUrl.href);
 		url.searchParams.delete(key);
 		for (const value of values) if (value) url.searchParams.append(key, value);
 		goto(resolve(`items/${url.search}${url.hash}`), { shallow: true });
 	}
-	function toggle(key: 'category' | 'type', value: string, checked: boolean) {
+	function toggle(key: 'category' | 'type' | 'source', value: string, checked: boolean) {
 		const values = currentUrl.searchParams.getAll(key).filter((entry) => entry !== value);
 		update(key, checked ? [...values, value] : values);
 	}
@@ -131,6 +147,13 @@
 						<span aria-hidden="true">×</span><span class="sr-only">Remove category filter</span
 						></button
 					>{/each}
+				{#each filters.sources as value (value)}<button
+						type="button"
+						onclick={() => toggle('source', value, false)}
+						>{sourceNames[value as SourceKind] ?? titleCase(value)}
+						<span aria-hidden="true">×</span><span class="sr-only">Remove source filter</span
+						></button
+					>{/each}
 				{#each filters.types as value (value)}<button
 						type="button"
 						onclick={() => toggle('type', value, false)}
@@ -201,7 +224,7 @@
 
 {#snippet facets()}
 	<h2 class="desktop-filter-title">Filters</h2>
-	{#each [{ key: 'category' as const, title: 'Category', entries: categories, selected: filters.categories, query: categorySearch }, { key: 'type' as const, title: 'Type', entries: types, selected: filters.types, query: typeSearch }] as facet (facet.key)}
+	{#each [{ key: 'category' as const, title: 'Category', entries: categories, selected: filters.categories, query: categorySearch }, { key: 'source' as const, title: 'How to Get', entries: sources, selected: filters.sources, query: sourceSearch }, { key: 'type' as const, title: 'Type', entries: types, selected: filters.types, query: typeSearch }] as facet (facet.key)}
 		<details class="facet" open>
 			<summary>{facet.title}{facet.selected.length ? ` (${facet.selected.length})` : ''}</summary>
 			{#if facet.entries.length > 10}<label
@@ -210,6 +233,7 @@
 						value={facet.query}
 						oninput={(event) => {
 							if (facet.key === 'category') categorySearch = event.currentTarget.value;
+							else if (facet.key === 'source') sourceSearch = event.currentTarget.value;
 							else typeSearch = event.currentTarget.value;
 						}}
 					/></label

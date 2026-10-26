@@ -47,18 +47,18 @@ internal sealed class ItemFacts(
         var category = Display(RecordValues.At(properties, "ItemInfo.ItemType"));
         var component = components.GetValueOrDefault(item.Path);
         var componentPart = component is null ? null : ComponentValue(component, "Part");
-        var type = ItemIdentity.ClassName(item.Path) switch
-        {
-            // CustomCurrencyShop's default shop functions select these inventory classes as currency.
-            "Iuba_Coin" or "Tithes" => "Currency",
-            _ when component is not null => componentPart,
-            _ => category switch
+        // CustomCurrencyShop's default shop functions select these inventory classes as currency.
+        var currency = ItemIdentity.ClassName(item.Path) is "Iuba_Coin" or "Tithes";
+        var readerCategory = ItemCategories.For(category, component is not null, currency);
+        var type =
+            currency ? "Currency"
+            : component is not null ? componentPart
+            : category switch
             {
                 "Weapon" => Display(RecordValues.At(properties, "ItemInfo.SpecificItemType")),
                 "Armor" => Display(RecordValues.At(properties, "ItemInfo.ItemSlot")),
-                _ => category,
-            },
-        };
+                _ => readerCategory?.Name,
+            };
         var facts = new List<Fact>();
         void Add(string label, string path) =>
             facts.Add(new Fact(label, Display(RecordValues.At(properties, path))));
@@ -135,7 +135,10 @@ internal sealed class ItemFacts(
             slug,
             RecordValues.Text(RecordValues.At(properties, "ItemInfo.ItemName"))!,
             RecordValues.Text(RecordValues.At(properties, "ItemInfo.Description")),
-            new CategoryLink(ItemIdentity.Slug(category ?? "Unknown"), category ?? "Unknown"),
+            new CategoryLink(
+                ItemIdentity.Slug(readerCategory?.Name ?? "Unknown"),
+                readerCategory?.Name ?? "Unknown"
+            ),
             null,
             facts,
             []

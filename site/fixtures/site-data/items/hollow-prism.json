@@ -7,8 +7,8 @@
 	"uses": [],
 	"description": null,
 	"category": {
-		"slug": "curios",
-		"name": "Curios"
+		"slug": "curio",
+		"name": "Curio"
 	},
 	"icon": null,
 	"facts": [
