@@ -30,7 +30,7 @@ It also found about 100 items whose sources come from mechanisms the catalog doe
 
 ### Contract changes
 
-The site-data contract in `SiteDataModel.cs` changes as follows. The slices below implement them, and the integration step regenerates the types once.
+The site-data contract in `SiteDataModel.cs` changes as follows. Task 1.1 added them with defaults, and each later task fills the fields it owns.
 
 - `ItemPage.Status`: `Obtainable`, `NoKnownSource` or `NotInNormalPlay`.
 - `Fact.GameShows`: the displayed value where a known tooltip cause differs from the applied value.
@@ -54,7 +54,7 @@ A chance is published only where the selection code is read and a lab run confir
 
 ### Reader-text rules are enforced twice
 
-`scripts/voice-rules.json` gains the pipeline words and identifier patterns so the build fails on them. The rules that a pattern cannot catch, such as text about the reference or repeated caveats, are review criteria in the `site/reader-text` spec, checked on real data at 1440 and 390 px before each slice merges.
+`scripts/voice-rules.json` gains the pipeline words and identifier patterns so the build fails on them. The rules that a pattern cannot catch, such as text about the reference or repeated caveats, are review criteria in the `site/reader-text` spec, checked on real data at 1440 and 390 px before each commit.
 
 ### Item list driven by facet and column definitions
 
@@ -68,30 +68,16 @@ Title and identity, then the tooltip with any displayed-value notes and issue no
 
 Coverage mixes player limits with extraction diagnostics, and the review found most of it unusable for players. Its player-relevant content becomes item statuses on pages and one About section. The rest goes to `report.json`, which the update procedure reviews.
 
-### Work slices and ownership
+### Order of work
 
-The work splits into slices that touch mostly separate files, each on its own branch and worktree, merged by one integration owner:
-
-| Slice | Owns | Depends on |
-|---|---|---|
-| Catalog economy | prices, odds, ingredient treatments, status, displayed values | lab results |
-| Catalog sources | recovered sources, recipe context, conditions, settlement and place names | none |
-| Catalog crafting | `crafting.json`, weapon assembly, armorsmithing, runes and enchanting | lab results |
-| Lab | every lab confirmation, run records, findings in this design | none |
-| Site text and support pages | voice rules, labels, About, Known Issues, report cutover, home, missing pages | none |
-| Site browsing | list facets, columns, stat filters, search lists | contract |
-| Site item page | page order, recipe line, uses, grouped sources, previews, notes | contract |
-| Site tools | weapon builder, price at respect, armor arithmetic, seasonal state | `crafting.json`, rules |
-
-Only the lab slice runs the game, because the lab has one copy and one session. The catalog slices that need confirmations write their code against the bytecode and adjust when the lab reports.
+Values come before presentation, because pages built on wrong numbers would be rebuilt twice: catalog economy first, then reader text and support pages, the item page, browsing, recovered sources, crafting and tools. Lab checks run as each value needs them, one session at a time, because the lab has one game copy.
 
 ## Risks / Trade-offs
 
-- Contract changes in several slices at once can conflict in `SiteDataModel.cs` and the generated types. The fields above are fixed before the slices start, and types are regenerated after each merge.
-- Lab checks may contradict the bytecode reading. The slice that owns the value changes its rule, and the finding goes into this design.
+- Lab checks may contradict the bytecode reading. The rule that produces the value changes, and the finding goes into this design.
 - Removing the Coverage page removes a public page. The review found no player question it answers that item statuses and About do not.
 - Prices depend on respect that the site cannot read. Pages state the assumed respect and let the reader change it.
 
 ## Lab findings
 
-Lab confirmations are recorded here as the lab slice completes them.
+Lab confirmations are recorded here as they complete.
