@@ -1,5 +1,16 @@
-import type { Amount, Source, SourceKind } from './site-data.js';
+import type { Amount, Price, Source, SourceKind } from './site-data.js';
 import { formatChance, formatNumber } from './format.js';
+import { buyPrice, neutralMultiplier } from './rules/price.js';
+
+/**
+ * What the player pays. A trading price is the base value times the multiplier for the player's respect in the
+ * merchant's city, which defaults to neutral respect.
+ */
+export function payPrice(price: Price, multiplier: number = neutralMultiplier): number {
+	if (price.rule !== 'trading') return price.amount;
+	const result = buyPrice.evaluate({ value: price.amount, multiplier });
+	return result.known ? result.value : price.amount;
+}
 
 export function formatAmount(amount: Amount): string {
 	return amount.min === amount.max
@@ -13,7 +24,7 @@ export function chanceLabel(source: Source): string {
 
 export function sourceContext(source: Source): string | null {
 	if (source.price) {
-		return `${formatNumber(source.price.amount)} ${source.price.currency?.name ?? 'gold'}`;
+		return `${formatNumber(payPrice(source.price))} ${source.price.currency?.name ?? 'gold'}`;
 	}
 	if (source.chance !== null && source.chanceBasis) {
 		return `${formatChance(source.chance)} ${source.chanceBasis.toLowerCase()}`;
@@ -39,7 +50,7 @@ export function sortSources(sources: Source[]): Source[] {
 		);
 	return [...sources].sort((a, b) => {
 		if (comparablePrices && a.price && b.price) {
-			const difference = a.price.amount - b.price.amount;
+			const difference = payPrice(a.price) - payPrice(b.price);
 			if (difference) return difference;
 		}
 		return a.name.localeCompare(b.name, 'en');

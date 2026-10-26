@@ -126,6 +126,16 @@ internal sealed class ShopMechanism : ISourceMechanism
         }
     }
 
+    // Window_Trading_Shop:Get Current City names a city only in these persistent levels, and Get City Respect
+    // reads saved respect only for them. Every other level, settlements included, trades at neutral respect.
+    private static readonly HashSet<string> RespectLevels = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Elderglen_Improved",
+        "Italian_City_2019-07-31-18-08-03_2019-10-14-17-40-40_Auto2",
+        "Khenmoore",
+        "Woodhurst",
+    };
+
     private static ItemSource Sale(
         CatalogContext context,
         string item,
@@ -137,13 +147,20 @@ internal sealed class ShopMechanism : ISourceMechanism
         var value = context.Classes.TryGetValue(item, out var type)
             ? RecordValues.Integer(RecordValues.At(type.Properties, "ItemInfo.ItemValue"))
             : null;
+        // Every merchant's dialogue opens Window_Trading_Shop through OPENdialogueSHOP, and that window prices by
+        // respect. The settlement Blacksmith's Discount Multiplier is read only by the unused Shop_Window_Base.
+        var city = places.FirstOrDefault(place =>
+            place.Key is { } key && RespectLevels.Contains(key.Split('/')[^1].Split('.')[0])
+        );
         return new ItemSource(
             item,
             new Source(
                 SourceKind.Shop,
                 entity.Name,
                 places,
-                value is { } price ? new Price(checked((int)price), null) : null,
+                value is { } price
+                    ? new Price(checked((int)price), null) { Rule = PriceRule.Trading, City = city }
+                    : null,
                 new Amount(1, 1),
                 null,
                 null,

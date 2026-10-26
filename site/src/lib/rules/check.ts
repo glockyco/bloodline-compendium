@@ -1,8 +1,9 @@
 import type { Rule } from './rule.js';
 import { experienceRequirement } from './experience.js';
+import { buyPrice, respectDiscount, sellPrice } from './price.js';
 
 /** Every rule that has game results to compare against. */
-export const rules = [experienceRequirement];
+export const rules = [experienceRequirement, respectDiscount, buyPrice, sellPrice];
 
 /** One row of a lab `call` result: the inputs set on the object and the outputs read back. */
 export interface CallRow {
@@ -34,7 +35,8 @@ export function ruleMismatches(
 			const game = row.outputs[rule.check.output];
 			const result = rule.evaluate(inputs);
 			const ours = result.known ? result.value : 'unknown';
-			if (ours !== game)
+			// The lab bridge prints floats with 14 significant digits, so values compare at 32-bit precision.
+			if (typeof ours !== 'number' || Math.fround(ours) !== Math.fround(game))
 				problems.push(`${rule.id} for ${JSON.stringify(inputs)}: rule ${ours}, game ${game}`);
 		}
 	}

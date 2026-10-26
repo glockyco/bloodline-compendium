@@ -65,7 +65,8 @@
 			],
 			"price": {
 				"amount": 45,
-				"currency": null
+				"currency": null,
+				"rule": "trading"
 			},
 			"amount": {
 				"min": 1,
@@ -100,7 +101,8 @@
 			"places": [],
 			"price": {
 				"amount": 46,
-				"currency": null
+				"currency": null,
+				"rule": "trading"
 			},
 			"amount": {
 				"min": 1,
@@ -128,7 +130,8 @@
 			"places": [],
 			"price": {
 				"amount": 47,
-				"currency": null
+				"currency": null,
+				"rule": "trading"
 			},
 			"amount": {
 				"min": 1,
@@ -156,7 +159,8 @@
 			"places": [],
 			"price": {
 				"amount": 48,
-				"currency": null
+				"currency": null,
+				"rule": "trading"
 			},
 			"amount": {
 				"min": 1,
@@ -184,7 +188,8 @@
 			"places": [],
 			"price": {
 				"amount": 49,
-				"currency": null
+				"currency": null,
+				"rule": "trading"
 			},
 			"amount": {
 				"min": 1,
@@ -212,7 +217,8 @@
 			"places": [],
 			"price": {
 				"amount": 50,
-				"currency": null
+				"currency": null,
+				"rule": "trading"
 			},
 			"amount": {
 				"min": 1,
@@ -240,7 +246,8 @@
 			"places": [],
 			"price": {
 				"amount": 51,
-				"currency": null
+				"currency": null,
+				"rule": "trading"
 			},
 			"amount": {
 				"min": 1,
@@ -268,7 +275,8 @@
 			"places": [],
 			"price": {
 				"amount": 52,
-				"currency": null
+				"currency": null,
+				"rule": "trading"
 			},
 			"amount": {
 				"min": 1,
@@ -296,7 +304,8 @@
 			"places": [],
 			"price": {
 				"amount": 53,
-				"currency": null
+				"currency": null,
+				"rule": "trading"
 			},
 			"amount": {
 				"min": 1,
@@ -324,7 +333,8 @@
 			"places": [],
 			"price": {
 				"amount": 54,
-				"currency": null
+				"currency": null,
+				"rule": "trading"
 			},
 			"amount": {
 				"min": 1,
@@ -352,7 +362,8 @@
 			"places": [],
 			"price": {
 				"amount": 55,
-				"currency": null
+				"currency": null,
+				"rule": "trading"
 			},
 			"amount": {
 				"min": 1,
@@ -380,7 +391,8 @@
 			"places": [],
 			"price": {
 				"amount": 56,
-				"currency": null
+				"currency": null,
+				"rule": "trading"
 			},
 			"amount": {
 				"min": 1,
@@ -408,7 +420,8 @@
 			"places": [],
 			"price": {
 				"amount": 57,
-				"currency": null
+				"currency": null,
+				"rule": "trading"
 			},
 			"amount": {
 				"min": 1,

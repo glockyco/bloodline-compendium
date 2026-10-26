@@ -998,12 +998,6 @@
             }
           ]
         },
-        "multiplier": {
-          "type": [
-            "number",
-            "null"
-          ]
-        },
         "rule": {
           "$ref": "#/$defs/PriceRule"
         }
@@ -1018,8 +1012,7 @@
     "PriceRule": {
       "enum": [
         "fixed",
-        "city",
-        "settlement"
+        "trading"
       ],
       "title": "PriceRule"
     },

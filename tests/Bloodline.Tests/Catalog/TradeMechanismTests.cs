@@ -433,6 +433,38 @@ public sealed class TradeMechanismTests
     }
 
     [Theory]
+    [InlineData("/Game/AdvancedLocomotionV3/Elderglen_Improved", true)]
+    [InlineData("/Game/Cities/Woodhurst/WoodhurstUnderground", false)]
+    [InlineData("/Game/Overworld/OpenWorldAreas/Cortona", false)]
+    public void MerchantPricesTradeByTheRespectOfTheirCity(string level, bool respect)
+    {
+        var item = Item("Goods");
+        var vendor = new ClassRecord(
+            "/Game/Invented/Keeper.Keeper_C",
+            [],
+            Properties(
+                $$$"""{"Full Name":{"$text":"Keeper"},"Shop Contents":[{"ItemClass":{"$ref":"{{{item.Path}}}"}}]}"""
+            )
+        );
+        var context = Context(
+            [item, vendor],
+            levels:
+            [
+                new LevelRecord(
+                    level,
+                    [],
+                    [new ActorRecord("Keeper", vendor.Path, new JsonObject())]
+                ),
+            ]
+        );
+
+        var price = Assert.Single(new ShopMechanism().FindSources(context)).Source.Price!;
+
+        Assert.Equal((17, PriceRule.Trading), (price.Amount, price.Rule));
+        Assert.Equal(respect ? level : null, price.City?.Key);
+    }
+
+    [Theory]
     [InlineData("WizardTower_Finished", "Wizard Tower (settlement)")]
     [InlineData("Fletcher_Finished", "Fletcher (settlement)")]
     [InlineData("Residence_02", "Residence (settlement)")]
@@ -451,7 +483,10 @@ public sealed class TradeMechanismTests
         Assert.Equal(item.Path, found.ItemClass);
         Assert.Equal(name, found.Source.Name);
         Assert.Equal(new Amount(1, 1), found.Source.Amount);
-        Assert.Equal(17, found.Source.Price!.Amount);
+        Assert.Equal(
+            (17, PriceRule.Trading, null),
+            (found.Source.Price!.Amount, found.Source.Price.Rule, found.Source.Price.City)
+        );
         Assert.Empty(found.Source.Places);
         var condition = Assert.Single(found.Source.Conditions);
         Assert.Equal(ConditionKind.Building, condition.Kind);

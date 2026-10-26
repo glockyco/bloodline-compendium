@@ -415,11 +415,11 @@ internal enum PriceRule
     /// <summary>The amount is what the player pays.</summary>
     Fixed,
 
-    /// <summary>The amount is the base value, and the player's respect in <see cref="Price.City"/> sets the price.</summary>
-    City,
-
-    /// <summary>The amount is the base value, and <see cref="Price.Multiplier"/> sets the price.</summary>
-    Settlement,
+    /// <summary>
+    /// The amount is the base value, and the trading window multiplies it by the player's respect in
+    /// <see cref="Price.City"/>, or by the neutral multiplier where the merchant stands in no city with respect.
+    /// </summary>
+    Trading,
 }
 
 internal enum SourceKind
@@ -450,8 +450,9 @@ internal enum SourceKind
 internal sealed record Price(int Amount, EntityReference? Currency)
 {
     public PriceRule Rule { get; init; } = PriceRule.Fixed;
+
+    /// <summary>The city whose respect sets a trading price, null where respect does not apply.</summary>
     public EntityReference? City { get; init; }
-    public double? Multiplier { get; init; }
 }
 
 /// <summary>How many of the item a source gives at once.</summary>

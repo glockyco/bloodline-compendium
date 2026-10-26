@@ -81,3 +81,6 @@ Values come before presentation, because pages built on wrong numbers would be r
 ## Lab findings
 
 Lab confirmations are recorded here as they complete.
+
+- Prices, run prices-1. Every merchant's dialogue fires `OPENdialogueSHOP` or `OPENdialogueSHOP_New`, both open `Window_Trading_Shop`, and the plain `ShopKeeper_Base` that settlement buildings spawn uses the `Shopkeeper_Base` dialogue with the same event. `Shop_Window_Base`, which would apply a building's `Discount Multiplier`, is only hidden by that event and never opened, so the settlement Blacksmith's 0.5 has no effect. `Get Current City` names a city only in the Elderglen, Arema, Khenmoore and Woodhurst levels, and `Get City Respect` reads saved respect only for those, so every other merchant trades at the neutral multiplier 1.4. The game's own `GetBuyValueWithMultiplier`, `GetSellValueWithMultiplier` and `Calculate Discount Based On Respect`, called on the trading window's class default for 84 value and multiplier pairs and 14 respect values, agree with `site/src/lib/rules/price.ts` in all 188 results.
+- Container picks, run prices-1. `Generate New Loot` on a live container made 5 entries for bounds 4 and 4, 2 for 1 and 1, and 1 for 0 and 0, in 400 calls each. Bounds 3 and 11 gave 4 to 12 entries, most often 6 or 7, because the loop redraws its bound on each pass.

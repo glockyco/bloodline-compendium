@@ -89,7 +89,7 @@ export type OddsEvent = "container" | "kill" | "delivery" | "use";
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "PriceRule".
  */
-export type PriceRule = "fixed" | "city" | "settlement";
+export type PriceRule = "fixed" | "trading";
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "ReportStatus".
@@ -407,7 +407,6 @@ export interface Price {
   amount: number;
   city?: EntityReference | null;
   currency: EntityReference | null;
-  multiplier?: number | null;
   rule?: PriceRule;
   [k: string]: unknown;
 }

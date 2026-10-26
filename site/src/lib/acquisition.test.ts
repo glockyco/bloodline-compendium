@@ -26,5 +26,6 @@ it('does not turn a weight or a chance without a basis into drop odds', () => {
 it('orders comparable shop prices before selecting the answer summary', () => {
 	const sources = sortSources(item.sources.filter((source) => source.kind === 'shop'));
 	expect(sources[0].price?.amount).toBe(45);
-	expect(sourceContext(sources[0])).toBe('45 gold');
+	// The base value 45 at neutral respect's multiplier of 1.4 costs 63.
+	expect(sourceContext(sources[0])).toBe('63 gold');
 });

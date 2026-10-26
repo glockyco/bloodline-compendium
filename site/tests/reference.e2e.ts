@@ -102,7 +102,7 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 		await summary.click();
 	for (const text of [
 		'Glass Reach',
-		'45',
+		'63',
 		'Cinderpear',
 		'1 to 2',
 		'25%',

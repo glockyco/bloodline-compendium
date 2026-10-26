@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Source } from './site-data.js';
 	import { formatNumber, formatChance } from './format.js';
-	import { chanceLabel, formatAmount } from './acquisition.js';
+	import { chanceLabel, formatAmount, payPrice } from './acquisition.js';
 	import EntityLink from './ui/EntityLink.svelte';
 	import Conditions from './Conditions.svelte';
 	let {
@@ -52,7 +52,7 @@
 	{#if showContext}
 		<td class="numeric context-value">
 			{#if source.price}
-				{formatNumber(source.price.amount)}<small
+				{formatNumber(payPrice(source.price))}<small
 					>{#if source.price.currency}<EntityLink
 							entity={source.price.currency}
 						/>{:else}gold{/if}</small
