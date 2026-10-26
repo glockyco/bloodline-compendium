@@ -222,7 +222,12 @@ internal sealed class ExtractionRunner
                     ancestors.AddRange(parentRecord.Ancestors);
                 }
             }
-            var declarations = generated.ChildProperties?.OfType<FProperty>().ToArray() ?? [];
+            var declarations =
+                generated
+                    .ChildProperties?.OfType<FProperty>()
+                    .Where(property => !PropertyEncoder.IsEventBinding(property))
+                    .ToArray()
+                ?? [];
             var fieldNames = FieldNames.Resolve(
                 declarations.Select(property => property.Name.Text)
             );

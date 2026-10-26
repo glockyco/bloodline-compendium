@@ -23,6 +23,19 @@ internal sealed class PropertyEncoder(
     private static readonly ConcurrentDictionary<Type, FieldInfo[]> NativeFields = new();
     private readonly HashSet<UStruct> activeDefaults = [];
 
+    public static bool IsEventBinding(FProperty property) =>
+        property
+            is FDelegateProperty
+                or FMulticastDelegateProperty
+                or FMulticastInlineDelegateProperty;
+
+    private static bool IsEventBinding(string type) =>
+        type
+            is "DelegateProperty"
+                or "MulticastDelegateProperty"
+                or "MulticastInlineDelegateProperty"
+                or "MulticastSparseDelegateProperty";
+
     public JsonObject Properties(IEnumerable<FPropertyTag> properties) =>
         EncodeProperties(properties, null, null);
 
@@ -192,7 +205,12 @@ internal sealed class PropertyEncoder(
         UStruct? declaration
     )
     {
-        var stored = properties as IReadOnlyCollection<FPropertyTag> ?? properties.ToArray();
+        var stored = properties
+            .Where(property =>
+                !IsEventBinding(property.PropertyType.Text)
+                && !IsEventBinding(property.Tag?.GetType().Name ?? "")
+            )
+            .ToArray();
         var fields = declaration is null ? null : DeclaredFields(declaration);
         var names = FieldNames.Resolve(
             stored
@@ -535,30 +553,7 @@ internal sealed class PropertyEncoder(
             ? null
             : new JsonObject { [RecordFormat.SoftReference] = path };
 
-    private JsonNode Text(FText value) =>
-        value.TextHistory switch
-        {
-            FTextHistory.Base text => new JsonObject
-            {
-                [RecordFormat.Text] = text.SourceString,
-                [RecordFormat.TextNamespace] = text.Namespace,
-                [RecordFormat.TextKey] = text.Key,
-            },
-            FTextHistory.None text => new JsonObject
-            {
-                [RecordFormat.Text] = text.CultureInvariantString ?? "",
-            },
-            FTextHistory.StringTableEntry text => new JsonObject
-            {
-                [RecordFormat.Text] = text.SourceString,
-                [RecordFormat.TextTable] = text.TableId.Text,
-                [RecordFormat.TextKey] = text.Key,
-            },
-            _ => Unsupported(
-                $"TextHistory.{value.HistoryType}",
-                "This text has no directly stored source string."
-            ),
-        };
+    private static JsonNode Text(FText value) => TextEncoder.Encode(value);
 
     private JsonObject Enum(string name, UEnum? declaration)
     {
@@ -599,9 +594,7 @@ internal sealed class PropertyEncoder(
                 && value?.GenericValue is FText text
             )
             {
-                return text.TextHistory is FTextHistory.Base source
-                    ? source.SourceString
-                    : text.Text;
+                return RecordValues.Text(TextEncoder.Encode(text));
             }
         }
         return null;
@@ -652,7 +645,7 @@ internal sealed class PropertyEncoder(
         {
             foreach (var field in current.ChildProperties ?? [])
             {
-                if (field is FProperty property)
+                if (field is FProperty property && !IsEventBinding(property))
                 {
                     result.TryAdd(property.Name.Text, property);
                 }

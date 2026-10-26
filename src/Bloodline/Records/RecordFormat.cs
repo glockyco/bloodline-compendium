@@ -13,12 +13,20 @@ namespace Bloodline.Records;
 /// user-defined enums carry a display name.</item>
 /// <item><c>{"$text": "Iron Sword", "namespace": "", "key": "4A1F..."}</c> is localized text with its source
 /// string. String table entries carry <c>table</c> and <c>key</c> instead of a namespace.</item>
+/// <item>Formatted text adds <c>format</c> with the source pattern and <c>arguments</c> with encoded argument
+/// values keyed by name, or by zero-based numeric strings for ordered arguments. Its <c>$text</c> is the
+/// readable result using source text and invariant numbers. Unresolved arguments keep their placeholders.
+/// Number, percent, currency, date, time and case-transform histories use a normalized <c>{value}</c>
+/// pattern, with a percent suffix or ISO currency prefix where appropriate, and retain their
+/// <c>history</c> and authored options. Dates and times display their stored ticks in invariant ISO form,
+/// with time zone and style metadata retained instead of applying machine-local settings.</item>
 /// <item><c>{"$map": [[key, value], ...]}</c> is a map, with entries in stored order.</item>
 /// <item><c>{"$unsupported": "PropertyType"}</c> is a property type that the encoder does not handle.</item>
 /// </list>
 /// Struct field names drop the <c>_N_GUID</c> suffix that user-defined structs add, unless two fields of one
 /// struct would then share a name. A field that is missing from a record has no value in the files, for
 /// example a default that only native code sets, so readers treat it as unknown.
+/// Event delegate bindings are not data properties and are omitted without gaps.
 /// </summary>
 internal static class RecordFormat
 {
@@ -30,6 +38,8 @@ internal static class RecordFormat
     public const string TextNamespace = "namespace";
     public const string TextKey = "key";
     public const string TextTable = "table";
+    public const string TextFormat = "format";
+    public const string TextArguments = "arguments";
     public const string Map = "$map";
     public const string Unsupported = "$unsupported";
 
