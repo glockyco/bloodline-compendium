@@ -60,7 +60,8 @@ internal sealed class ItemFacts(IReadOnlyList<EnumRecord> enums)
         }
         if (category == "Armor")
         {
-            Add("Type", "ItemInfo.SpecificItemType");
+            // SpecificItemType retains the weapon default on most armour. ItemSlot governs equipment placement.
+            Add("Slot", "ItemInfo.ItemSlot");
             Add("Armor type", "ItemInfo.ArmorType");
             // FirstPersonCharacter2's equipment function assigns Head Armor at L3650 and Torso Armor
             // at L6506 from ArmorInfo.DamageRating. TakeDamage uses Total Armor, not ItemInfo.Damage.

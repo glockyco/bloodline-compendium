@@ -121,10 +121,13 @@ public sealed class CatalogTests
         );
     }
 
-    [Fact]
-    public void UnrelatedItemsDoNotClaimToBeOneHandedWeapons()
+    [Theory]
+    [InlineData("Etc.")]
+    [InlineData("Armor")]
+    [InlineData("Food")]
+    public void UnrelatedItemsDoNotClaimToBeOneHandedWeapons(string category)
     {
-        var result = Build(Records([Item(category: "Etc.")]));
+        var result = Build(Records([Item(category: category)]));
         Assert.DoesNotContain(result.Items[0].Facts, fact => fact.Label == "Type");
     }
 
@@ -304,5 +307,82 @@ public sealed class CatalogTests
         {
             Directory.Delete(directory, recursive: true);
         }
+    }
+
+    [Fact]
+    public void MissingTextureIndexEntryMakesTheIconUnknown()
+    {
+        var result = Build(Records() with { Textures = [] });
+        Assert.Null(result.Items[0].Icon);
+        Assert.Single(
+            result.Coverage.Gaps.Single(gap => gap.Kind == GapKind.ItemWithoutIcon).Entries
+        );
+    }
+
+    [Fact]
+    public void EntranceTargetsUsePlacedOverridesAndInheritedDisplayNames()
+    {
+        var item = Item();
+        var entranceClass = new ClassRecord(
+            "/Game/Entrance.Entrance_C",
+            [],
+            Parse("""{"Location Name":{"$text":"Green Valley"},"Level to Load":"Unused"}""")
+        );
+        var entrance = new ActorRecord(
+            "Entrance",
+            entranceClass.Path,
+            Parse("""{"Level to Load":"Valley_Map"}""")
+        );
+        var result = Build(
+            Records(
+                [item, entranceClass],
+                [
+                    new LevelRecord("/Game/Overworld", [], [entrance]),
+                    new LevelRecord(
+                        "/Game/Valley_Map",
+                        [],
+                        [new ActorRecord("Sword", item.Path, new JsonObject())]
+                    ),
+                ]
+            )
+        );
+        Assert.Equal("Green Valley", Assert.Single(result.Items[0].Sources).Places[0].Name);
+    }
+
+    [Fact]
+    public void SuccessfulOutputReplacementRemovesObsoleteItemPages()
+    {
+        var directory = Path.Combine(
+            Path.GetTempPath(),
+            "bloodline-catalog-" + Guid.NewGuid().ToString("N")
+        );
+        try
+        {
+            var layout = new RecordLayout(directory, 1);
+            var oldPage = Path.Combine(layout.SiteDirectory, "items", "obsolete.json");
+            CanonicalJson.Write(oldPage, new { name = "Obsolete item" });
+            var catalog = Build(Records() with { Textures = [] });
+            CatalogWriter.Write(layout, new SiteBuild(1159290, 1, [], "abc", false), catalog);
+            Assert.False(File.Exists(oldPage));
+            var itemFile = Assert.Single(
+                Directory.EnumerateFiles(Path.Combine(layout.SiteDirectory, "items"))
+            );
+            Assert.Equal(catalog.Items[0].Id, CanonicalJson.Read<ItemPage>(itemFile).Id);
+            Assert.Single(Directory.EnumerateDirectories(layout.BuildDirectory));
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void UnrecordedPlacesRetainReadableNamesAndRemainVisibleAsUnknown()
+    {
+        var places = new Places(Records(), new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+        var place = places.Get("/Game/HiddenValley");
+        Assert.Equal("Hidden Valley", place.Name);
+        Assert.False(places.HasName(place.Id));
+        Assert.Contains(place, places.All);
     }
 }

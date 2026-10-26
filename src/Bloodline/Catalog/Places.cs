@@ -6,6 +6,25 @@ namespace Bloodline.Catalog;
 
 internal sealed class Places
 {
+    private static readonly string[] DisplayFields =
+    [
+        "Location Name",
+        "Village Name",
+        "Castle Name",
+        "Display Name",
+        "LocationName",
+        "DisplayName",
+    ];
+    private static readonly string[] DestinationFields =
+    [
+        "City Name",
+        "Village Map",
+        "Level To Load",
+        "Level to Load",
+        "Level Name",
+        "LevelName",
+        "Map",
+    ];
     private readonly Dictionary<string, Place> places;
     private readonly HashSet<string> named = new(StringComparer.OrdinalIgnoreCase);
     public IReadOnlyCollection<Place> All => places.Values;
@@ -13,9 +32,15 @@ internal sealed class Places
 
     public bool HasName(string path) => named.Contains(path);
 
-    public Place Get(string path) =>
-        places.GetValueOrDefault(path)
-        ?? new Place(path, ItemIdentity.Readable(ItemIdentity.ClassName(path)));
+    public Place Get(string path)
+    {
+        if (!places.TryGetValue(path, out var place))
+        {
+            place = new Place(path, ItemIdentity.Readable(ItemIdentity.ClassName(path)));
+            places.Add(path, place);
+        }
+        return place;
+    }
 
     public Places(CatalogRecords records, IReadOnlySet<string> excludedLevels)
     {
@@ -41,41 +66,31 @@ internal sealed class Places
             item => item.Path,
             StringComparer.OrdinalIgnoreCase
         );
-        void Read(JsonObject properties)
+        void Read(JsonObject properties, JsonObject? defaults = null)
         {
-            var display = new[] { "Location Name", "Display Name", "LocationName", "DisplayName" }
-                .Select(field => RecordValues.Text(properties[field]))
+            JsonNode? Value(string field) =>
+                properties.TryGetPropertyValue(field, out var value) ? value : defaults?[field];
+            var display = DisplayFields
+                .Select(field => RecordValues.Text(Value(field)))
                 .FirstOrDefault(value => !string.IsNullOrWhiteSpace(value));
             if (display is not null)
             {
-                foreach (
-                    var field in new[]
-                    {
-                        "City Name",
-                        "Village Map",
-                        "Level To Load",
-                        "Level to Load",
-                        "Level Name",
-                        "LevelName",
-                        "Map",
-                    }
-                )
+                foreach (var field in DestinationFields)
                 {
                     var target =
-                        RecordValues.AnyReference(properties[field])
-                        ?? RecordValues.String(properties[field]);
+                        RecordValues.AnyReference(Value(field))
+                        ?? RecordValues.String(Value(field));
                     if (target is null)
                     {
                         continue;
                     }
-                    var matches = places.ContainsKey(target)
-                        ?
-                        [
-                            records.Levels.First(level =>
-                                level.Path.Equals(target, StringComparison.OrdinalIgnoreCase)
-                            ),
-                        ]
-                        : byName.GetValueOrDefault(ItemIdentity.ClassName(target)) ?? [];
+                    if (places.TryGetValue(target, out var known))
+                    {
+                        places[known.Id] = new Place(known.Id, display);
+                        named.Add(known.Id);
+                        continue;
+                    }
+                    var matches = byName.GetValueOrDefault(ItemIdentity.ClassName(target)) ?? [];
                     foreach (var level in matches)
                     {
                         places[level.Path] = new Place(level.Path, display);
@@ -99,10 +114,7 @@ internal sealed class Places
         {
             foreach (var actor in level.Actors)
             {
-                var properties = classes.TryGetValue(actor.Class, out var type)
-                    ? RecordMerge.OverlayProperties(type.Properties, actor.Properties)
-                    : actor.Properties;
-                Read(properties);
+                Read(actor.Properties, classes.GetValueOrDefault(actor.Class)?.Properties);
             }
         }
         // Streamed sublevels share the containing location when every named parent agrees.
