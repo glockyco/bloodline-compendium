@@ -138,7 +138,13 @@ internal sealed record ListFacet(
     string Label,
     IReadOnlyList<string> Categories,
     IReadOnlyList<string> Values
-);
+)
+{
+    /// <summary>Reader labels for values that are keys, such as category slugs. Other values read as they are.</summary>
+    [JsonRequired]
+    public IReadOnlyDictionary<string, string> Labels { get; init; } =
+        new Dictionary<string, string>();
+}
 
 /// <summary>
 /// A column of the item list. <see cref="Categories"/> names the category slugs that show it by default, none when

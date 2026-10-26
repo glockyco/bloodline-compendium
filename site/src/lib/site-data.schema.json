@@ -818,6 +818,12 @@
         "label": {
           "type": "string"
         },
+        "labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
         "values": {
           "items": {
             "type": "string"
@@ -829,7 +835,8 @@
         "id",
         "label",
         "categories",
-        "values"
+        "values",
+        "labels"
       ],
       "title": "ListFacet",
       "type": "object"

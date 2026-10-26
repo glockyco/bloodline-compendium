@@ -265,6 +265,8 @@ internal static class CatalogBuilder
                 Type = item.Type,
                 Qualifier = item.Qualifier,
                 Status = item.Status,
+                Facets = ItemList.FacetsOf(item),
+                Cells = ItemList.CellsOf(item),
             })
             .ToArray();
         var categories = ordered
@@ -300,7 +302,11 @@ internal static class CatalogBuilder
                 .ToArray()
         );
         return new CatalogResult(
-            new ItemIndex(categories, summaries),
+            new ItemIndex(categories, summaries)
+            {
+                Facets = ItemList.FacetDefinitions(ordered, categories),
+                Columns = ItemList.ColumnDefinitions(ordered),
+            },
             ordered,
             report,
             context.Places.NamedCount,

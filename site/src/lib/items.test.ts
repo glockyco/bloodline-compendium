@@ -2,7 +2,7 @@ import { expect, it } from 'vitest';
 import { filterItems, matchesItem, readFilters } from './items.js';
 import fixture from '../../fixtures/site-data/items.json';
 import type { ItemIndex } from './site-data.js';
-const index = fixture as ItemIndex;
+const index = fixture as unknown as ItemIndex;
 const defaults = readFilters(new URLSearchParams());
 
 it('hides items without a known source by default without removing their records', () => {

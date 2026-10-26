@@ -516,6 +516,9 @@ export interface ListFacet {
   categories: string[];
   id: string;
   label: string;
+  labels: {
+    [k: string]: string;
+  };
   values: string[];
   [k: string]: unknown;
 }

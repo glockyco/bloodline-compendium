@@ -38,7 +38,12 @@
 			"key": "/Invented/Items/Cinderpear",
 			"kind": "item",
 			"status": "obtainable",
-			"facets": {},
+			"facets": {
+				"category": ["food"],
+				"source": ["gathering"],
+				"availability": ["obtainable"],
+				"place": ["Glass Reach"]
+			},
 			"cells": {}
 		},
 		{
@@ -53,7 +58,11 @@
 			"key": "/Invented/Items/HollowPrism",
 			"kind": "item",
 			"status": "noKnownSource",
-			"facets": {},
+			"facets": {
+				"category": ["curio"],
+				"source": [],
+				"availability": ["noKnownSource"]
+			},
 			"cells": {}
 		},
 		{
@@ -68,8 +77,23 @@
 			"key": "/Invented/Items/Lanternedge",
 			"kind": "item",
 			"status": "obtainable",
-			"facets": {},
-			"cells": {}
+			"facets": {
+				"category": ["weapon"],
+				"source": ["shop", "currencyShop", "crafting", "containerLoot"],
+				"availability": ["obtainable"],
+				"weaponType": ["Sword"],
+				"place": ["Glass Reach"]
+			},
+			"cells": {
+				"damage": {
+					"number": 12,
+					"text": null
+				},
+				"speed": {
+					"number": null,
+					"text": "Average"
+				}
+			}
 		},
 		{
 			"slug": "mosswoven-coat",
@@ -83,10 +107,86 @@
 			"key": "/Invented/Items/MosswovenCoat",
 			"kind": "item",
 			"status": "obtainable",
-			"facets": {},
-			"cells": {}
+			"facets": {
+				"category": ["armour"],
+				"source": ["enemyDrop"],
+				"availability": ["obtainable"],
+				"place": ["Glass Reach"]
+			},
+			"cells": {
+				"armor": {
+					"number": 0,
+					"text": null
+				}
+			}
 		}
 	],
-	"facets": [],
-	"columns": []
+	"facets": [
+		{
+			"id": "category",
+			"label": "Category",
+			"categories": [],
+			"values": ["weapon", "armour", "food", "curio"],
+			"labels": {
+				"weapon": "Weapons",
+				"armour": "Armour",
+				"food": "Food",
+				"curio": "Curios"
+			}
+		},
+		{
+			"id": "weaponType",
+			"label": "Weapon Type",
+			"categories": ["weapon"],
+			"values": ["Sword"],
+			"labels": {}
+		},
+		{
+			"id": "source",
+			"label": "How to Get",
+			"categories": [],
+			"values": ["shop", "currencyShop", "crafting", "containerLoot", "enemyDrop", "gathering"],
+			"labels": {}
+		},
+		{
+			"id": "place",
+			"label": "Where to Get",
+			"categories": [],
+			"values": ["Glass Reach"],
+			"labels": {}
+		},
+		{
+			"id": "availability",
+			"label": "Availability",
+			"categories": [],
+			"values": ["obtainable", "noKnownSource"],
+			"labels": {
+				"obtainable": "A way to get it is known",
+				"noKnownSource": "No known way to get it"
+			}
+		}
+	],
+	"columns": [
+		{
+			"id": "damage",
+			"label": "Damage",
+			"categories": ["weapon"],
+			"numeric": true,
+			"unit": null
+		},
+		{
+			"id": "speed",
+			"label": "Speed",
+			"categories": ["weapon"],
+			"numeric": false,
+			"unit": null
+		},
+		{
+			"id": "armor",
+			"label": "Armor",
+			"categories": ["armour"],
+			"numeric": true,
+			"unit": null
+		}
+	]
 }
