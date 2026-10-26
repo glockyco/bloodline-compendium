@@ -98,8 +98,9 @@
 			const link = linkOf(event.target);
 			if (!link || !touch || tapped === link) return;
 			event.preventDefault();
-			tapped = link;
+			// Opening a preview closes the previous one, which forgets its tap, so the tap is remembered after.
 			void show(link);
+			tapped = link;
 		};
 		const key = (event: KeyboardEvent) => {
 			if (event.key !== 'Escape' || !anchor) return;
@@ -112,7 +113,8 @@
 		document.addEventListener('focusin', focus);
 		document.addEventListener('focusout', blur);
 		document.addEventListener('pointerdown', down);
-		document.addEventListener('click', click);
+		// The router follows links from its own click listener, so a first tap is caught in the capture phase.
+		document.addEventListener('click', click, true);
 		document.addEventListener('keydown', key);
 		return () => {
 			close();
@@ -122,7 +124,7 @@
 			document.removeEventListener('focusin', focus);
 			document.removeEventListener('focusout', blur);
 			document.removeEventListener('pointerdown', down);
-			document.removeEventListener('click', click);
+			document.removeEventListener('click', click, true);
 			document.removeEventListener('keydown', key);
 		};
 	});

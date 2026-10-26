@@ -165,7 +165,7 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 	).toBeVisible();
 	await expect(page.getByText('No icon is known for this item.')).toBeVisible();
 });
-test('previews an item link on focus, hover and first tap', async ({ page }) => {
+test('previews an item link on keyboard focus and hover', async ({ page }) => {
 	await page.goto('/items/lanternedge/');
 	const ingredient = page.locator('.recipe').getByRole('link', { name: 'Cinderpear' });
 	await ingredient.focus();
@@ -182,6 +182,30 @@ test('previews an item link on focus, hover and first tap', async ({ page }) => 
 	await expect(page.getByRole('heading', { level: 1 })).toHaveText('Cinderpear');
 	await page.waitForTimeout(400);
 	await expect(preview).toHaveCount(0);
+});
+test('a first tap previews an item link and a second tap follows it', async ({
+	browser,
+	baseURL
+}) => {
+	const context = await browser.newContext({
+		baseURL,
+		hasTouch: true,
+		isMobile: true,
+		viewport: { width: 390, height: 844 }
+	});
+	try {
+		const page = await context.newPage();
+		await page.goto('/items/lanternedge/');
+		await page.waitForLoadState('networkidle');
+		const ingredient = page.locator('.recipe').getByRole('link', { name: 'Cinderpear' });
+		await ingredient.tap();
+		await expect(page.locator('#item-preview')).toContainText('Cinderpear');
+		await expect(page).toHaveURL('/items/lanternedge/');
+		await ingredient.tap();
+		await expect(page).toHaveURL('/items/cinderpear/');
+	} finally {
+		await context.close();
+	}
 });
 test('finds items by word prefix from the shared search', async ({ page }) => {
 	await page.goto('/');
