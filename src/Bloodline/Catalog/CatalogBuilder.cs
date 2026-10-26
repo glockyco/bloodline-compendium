@@ -27,6 +27,12 @@ internal static class CatalogBuilder
             new CurrencyShopMechanism(),
             new CraftingMechanism(),
             new CookingMechanism(),
+            new DialogueGrantMechanism(),
+            new FishingMechanism(),
+            new GatheringMechanism(),
+            new FarmingMechanism(),
+            new BountyNoteMechanism(),
+            new SettlementDeliveryMechanism(),
         ];
         Exclusions.Validate(records, exclusions);
         var resolver = new ItemFacts(records.Enums);
