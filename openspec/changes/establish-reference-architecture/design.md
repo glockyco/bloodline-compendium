@@ -138,6 +138,8 @@ Build 24464547's Woodhurst level keeps actors tagged `Halloween Decor` only when
 
 Dialogue requirements are read from their owning nodes. When an ancestor's check can gate a grant through alternative paths, the catalog publishes an unknown requirement rather than joining the paths into a false conjunction. Unsupported condition classes and missing thresholds also remain unknown and appear in coverage.
 
+Reference-only settlement buildings retain the identifiers of their producer. Stock uses the finished actor class, while deliveries use the resource-and-income table row. For example, Alchemist and Alchemist (settlement) remain separate graph identities. Consolidating them needs an authored association, not display-name matching, before building pages can publish one player-facing identity.
+
 Keys are the identifiers the game itself uses, so saves, build links and update comparisons can refer to them:
 - a class path for items, skills and creatures, which is also what saves store,
 - a table and row name for quests, recipes and mounts,
@@ -145,6 +147,8 @@ Keys are the identifiers the game itself uses, so saves, build links and update 
 - a level and actor path, or a dialogue asset, for people.
 
 Keys never derive from display names.
+
+Two fresh extractions and catalog builds of 24464547 produced the same 3,488 unique kind-and-key identities. All 2,087 item slugs matched the site-data snapshot taken before cataloging. The six held-item class paths in the copied `LabRender.sav` matched item keys, including the Winter Warden Cuirass. The snapshot, save copy, key comparison and one sample of every published source mechanism are kept in `artifacts/24464547/entity-graph-check/`.
 
 Placements in levels are published apart from page documents, as the map's own data keyed by entity. Pages show counts and places, not coordinate lists. Afallon moved placements off its relation rows for the same reason.
 
