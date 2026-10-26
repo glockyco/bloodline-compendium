@@ -2,19 +2,19 @@
 
 ## 1. Record where knowledge lives
 
-- [ ] 1.1 Add the rule from design.md "Where findings live" to AGENTS.md as one instruction that points to that section, and verify AGENTS.md names no finding itself
-- [ ] 1.2 Revise the `Independent presentation tokens` and `Readable accessible presentation` requirements in `publish-item-reference` so they no longer forbid the identity's webfonts and decoration, and verify `openspec validate publish-item-reference --strict` passes
-- [ ] 1.3 Rewrite the vault note's `Resume here:` line and tasks to point at this change, and verify the note names no session-only fact
+- [x] 1.1 Add the rule from design.md "Where findings live" to AGENTS.md as one instruction that points to that section, and verify AGENTS.md names no finding itself
+- [x] 1.2 Revise the `Independent presentation tokens` and `Readable accessible presentation` requirements in `publish-item-reference` so they no longer forbid the identity's webfonts and decoration, and verify `openspec validate publish-item-reference --strict` passes
+- [x] 1.3 Rewrite the vault note's `Resume here:` line and tasks to point at this change, and verify the note names no session-only fact
 
 ## 2. Presentation foundation
 
-- [ ] 2.1 Finish the closed token scales and migrate app.css, the layout, Search and the home page to them, and verify `stylelint` passes on all site styles
-- [ ] 2.2 Add `stylelint` to `bun run lint` and CI, and verify a planted raw padding value fails the lint
+- [x] 2.1 Finish the closed token scales and migrate app.css, the layout, Search and the home page to them, and verify `stylelint` passes on all site styles
+- [x] 2.2 Add `stylelint` to `bun run lint` and CI, and verify a planted raw padding value fails the lint
 - [ ] 2.3 Mock the two palette options with a real item tooltip and the home page, decide, and record the choice in this design's Open Questions
 - [ ] 2.4 Add the shared primitives (card with subgrid rows, icon slot, section heading, count, button, relation table, entity link, issue note) and verify each renders on a fixture page with extreme content
 - [ ] 2.5 Add Playwright layout checks for overflow, cross-card row alignment, minimum text size and contrast at 390, 768 and 1280 px, and verify each fails on a planted defect in the fixture page
 - [ ] 2.6 Write the voice rules and banned-phrase list beside the `site/presentation` spec and add a check over built HTML, and verify it fails on a planted phrase
-- [ ] 2.7 Commit the emblem, header mark, favicons and link preview with the token work, and verify the built site serves every brand asset
+- [x] 2.7 Commit the emblem, header mark, favicons and link preview with the token work, and verify the built site serves every brand asset
 - [ ] 2.8 Add the stat vocabulary and one number formatting function, move every stat label and number on the site to them, and verify a list column and a tooltip show armor identically
 
 ## 3. Lab runtime tool
