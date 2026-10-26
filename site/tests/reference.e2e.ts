@@ -88,10 +88,11 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 	page
 }) => {
 	await page.goto('/items/lanternedge/');
-	await expect(page.getByRole('heading', { name: 'How to get it', exact: true })).toBeVisible();
+	await expect(page.getByRole('heading', { name: 'How to Get It', exact: true })).toBeVisible();
+	await expect(page.locator('.acquisition-routes')).toContainText('Buy from');
 	const details = page.getByRole('complementary', { name: 'Item details' });
-	await expect(details).toContainText(/Damage\s*12/);
-	await expect(details).toContainText(/Speed\s*Average/);
+	await expect(details).toContainText('Damage: 12');
+	await expect(details.locator('.first')).toHaveText('Average');
 	await expect(details).toContainText(/Attack Speed\s*1.2/);
 	await expect(details).toContainText(/Range\s*Unknown/);
 	const shopLink = page.locator('.acquisition-routes a[href="#source-shop"]');
@@ -107,7 +108,7 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 		'1 to 2',
 		'50.8%',
 		'per container',
-		'Required items',
+		'Makes',
 		'Silverglass shard',
 		'Requires a lit forge.',
 		'Location unknown'
@@ -128,6 +129,24 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 		page.getByText('No way to get this item is known in this game version.')
 	).toBeVisible();
 	await expect(page.getByText('No icon is known for this item.')).toBeVisible();
+});
+test('previews an item link on focus, hover and first tap', async ({ page }) => {
+	await page.goto('/items/lanternedge/');
+	const ingredient = page.locator('.recipe').getByRole('link', { name: 'Cinderpear' });
+	await ingredient.focus();
+	const preview = page.locator('#item-preview');
+	await expect(preview).toContainText('Cinderpear');
+	await expect(ingredient).toHaveAttribute('aria-describedby', 'item-preview');
+	await page.keyboard.press('Escape');
+	await expect(preview).toBeHidden();
+	await ingredient.hover();
+	await expect(preview).toContainText('Cinderpear');
+	// Following a link leaves no tooltip behind on the next page.
+	await ingredient.click();
+	await expect(page).toHaveURL('/items/cinderpear/');
+	await expect(page.getByRole('heading', { level: 1 })).toHaveText('Cinderpear');
+	await page.waitForTimeout(400);
+	await expect(preview).toHaveCount(0);
 });
 test('finds items by word prefix from the shared search', async ({ page }) => {
 	await page.goto('/');
@@ -308,7 +327,13 @@ test('renders typed references and every relation without JavaScript', async ({
 		const source = page.locator('#source-shop-1');
 		await expect(source).toContainText('Mira at the Glass Market');
 		await expect(source.locator('a')).toHaveCount(0);
-		await expect(source).toContainText('Glass Reach');
+		// Merchants sharing a place stand under one heading for it.
+		await expect(
+			page
+				.locator('.source-group', { has: page.locator('#source-shop') })
+				.locator('.place-heading')
+				.first()
+		).toContainText('Glass Reach');
 		await expect(source).toContainText('Stock refresh conditions are unknown.');
 		await expect(page.locator('article')).toHaveAttribute(
 			'data-pagefind-filter',
@@ -351,6 +376,11 @@ test('notes a known issue on the affected item and explains it on a linked, sear
 	await page.goto('/items/mosswoven-coat/');
 	const note = page.getByRole('complementary', { name: 'Known game issue' });
 	await expect(note).toContainText('The Mosswoven Coat adds no armor');
+	const details = page.getByRole('complementary', { name: 'Item details' });
+	await expect(details).toContainText('ARMOR: 0');
+	await expect(
+		details.getByRole('link', { name: "The game's tooltip shows Armor 8" })
+	).toHaveAttribute('href', '/known-issues/#invented-coat-armor');
 	await note.getByRole('link', { name: 'Read about this issue' }).click();
 	await expect(page).toHaveURL(/\/known-issues\/#invented-coat-armor$/);
 	const entry = page.locator('#invented-coat-armor');

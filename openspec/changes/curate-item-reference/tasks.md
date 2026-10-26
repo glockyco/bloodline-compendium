@@ -51,10 +51,10 @@
 
 ## 8. Item page
 
-- [ ] 8.1 Order the page as design.md states, with the first-screen answer led by verbs and carrying conditions, and remove Related entities, and verify the Dark Brown Scarecrow Hat at 1440 and 390 px
-- [ ] 8.2 Render the recipe line and the uses list with quantities and filters, and verify Apple Pie and Iron Ingot
-- [ ] 8.3 Group detailed sources by method and place with labelled odds and conditions once, and verify Lonland Pistol and Gold Ingot
-- [ ] 8.4 Show displayed tooltip values beside applied values, statuses for items without sources, and previews on every item link with keyboard and touch, and verify Leather Pants, Allseer's Judgement and an ingredient link with JavaScript off
+- [x] 8.1 Order the page as design.md states, with the first-screen answer led by verbs and carrying conditions, and remove Related entities, and verify the Dark Brown Scarecrow Hat at 1440 and 390 px
+- [x] 8.2 Render the recipe line and the uses list with quantities and filters, and verify Apple Pie and Iron Ingot
+- [x] 8.3 Group detailed sources by method and place with labelled odds and conditions once, and verify Lonland Pistol and Gold Ingot
+- [x] 8.4 Show displayed tooltip values beside applied values, statuses for items without sources, and previews on every item link with keyboard and touch, and verify Leather Pants, Allseer's Judgement and an ingredient link with JavaScript off
 
 ## 9. Player tools
 

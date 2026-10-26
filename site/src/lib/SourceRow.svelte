@@ -9,18 +9,26 @@
 		source,
 		showAmount = false,
 		showContext = false,
+		showPlaces = true,
 		id
-	}: { source: Source; showAmount?: boolean; showContext?: boolean; id: string } = $props();
+	}: {
+		source: Source;
+		showAmount?: boolean;
+		showContext?: boolean;
+		showPlaces?: boolean;
+		id: string;
+	} = $props();
 </script>
 
 <tr class="source-row" {id} data-relation-id={source.relationId} data-relation-direction="incoming">
 	<td class="source-identity">
 		<span class="relation-name"><EntityLink entity={source.entity} /></span>
 		<Conditions conditions={source.conditions} />
-		<p class="source-places">
-			{#if source.places.length}{#each source.places as place, index (index)}{#if index},
-					{/if}<EntityLink entity={place} />{/each}{:else}Location unknown{/if}
-		</p>
+		{#if showPlaces}<p class="source-places">
+				{#if source.places.length}{#each source.places as place, index (index)}{#if index}<span
+								>,
+							</span>{/if}<EntityLink entity={place} />{/each}{:else}Location unknown{/if}
+			</p>{/if}
 		{#if source.inputs.length || source.notes.length || source.quotes?.length}
 			<details class="row-details">
 				<summary

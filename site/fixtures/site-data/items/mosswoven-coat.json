@@ -22,10 +22,11 @@
 		{
 			"effect": null,
 			"label": "Armor rating",
-			"number": 8,
+			"number": 0,
 			"stat": "armorRating",
 			"text": null,
-			"tooltipLabel": "Armor"
+			"tooltipLabel": "Armor",
+			"gameShows": "8"
 		}
 	],
 	"sources": [

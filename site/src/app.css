@@ -84,6 +84,13 @@ button {
 	border-radius: var(--radius-1);
 	padding: var(--space-2) var(--space-3);
 }
+select {
+	min-height: var(--size-control);
+	padding: var(--space-2) var(--space-3);
+	border: var(--border-width) solid var(--border-control);
+	border-radius: var(--radius-1);
+	background: var(--surface-panel);
+}
 input[type='search'] {
 	min-height: var(--size-control);
 	width: 100%;
@@ -227,6 +234,43 @@ small {
 .acquisition-routes small {
 	margin: 0;
 }
+.route-line {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 0 var(--space-1);
+}
+.route-line .verb,
+.route-line .more,
+.route-line .where {
+	color: var(--text-soft);
+}
+.acquisition-routes .when {
+	color: var(--text-soft);
+}
+.uses-link {
+	margin: var(--space-3) 0 0;
+}
+.recipes,
+.uses {
+	display: grid;
+	gap: var(--space-3);
+	margin-bottom: var(--space-6);
+}
+.recipes h2,
+.uses h2 {
+	margin: 0;
+}
+.use-filters {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-3) var(--space-5);
+}
+.use-filters label {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+}
 .item-relations {
 	min-width: 0;
 	grid-column: 1;
@@ -249,6 +293,11 @@ table {
 th {
 	font-weight: var(--weight-strong);
 	background: var(--surface-raised);
+}
+.place-heading th {
+	background: var(--surface-panel);
+	color: var(--text-soft);
+	font-weight: var(--weight-regular);
 }
 th,
 td {
@@ -552,6 +601,12 @@ details[open] > summary .show-less {
 	}
 	.item-relations {
 		grid-row: 3;
+	}
+	.long-summary .item-side {
+		grid-row: 1;
+	}
+	.long-summary .answer {
+		grid-row: 2;
 	}
 	.browse-layout {
 		grid-template-columns: minmax(0, 1fr);

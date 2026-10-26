@@ -6,12 +6,12 @@
 	let { reason, id }: { reason: string; id: string } = $props();
 </script>
 
-<span class="unknown" tabindex="0" role="button" aria-describedby={id}
+<span class="unknown-value" tabindex="0" role="button" aria-describedby={id}
 	>Unknown<span class="reason" role="tooltip" {id}>{reason}</span></span
 >
 
 <style>
-	.unknown {
+	.unknown-value {
 		position: relative;
 		color: var(--text-soft);
 		text-decoration: underline dotted;
@@ -38,8 +38,8 @@
 		text-align: start;
 		white-space: normal;
 	}
-	.unknown:hover .reason,
-	.unknown:focus .reason {
+	.unknown-value:hover .reason,
+	.unknown-value:focus .reason {
 		display: block;
 	}
 </style>

@@ -11,7 +11,11 @@
 	const path = $derived(entityPath(entity, page.data.kinds));
 </script>
 
-{#if path}<a href={path} class={className} data-game
+{#if path}<a
+		href={path}
+		class={className}
+		data-game
+		data-preview={entity.kind === 'item' && entity.slug ? entity.slug : undefined}
 		>{#if children}{@render children()}{:else}{entity.name}{/if}</a
 	>{:else}<span class={className} data-game
 		>{#if children}{@render children()}{:else}{entity.name}{/if}</span

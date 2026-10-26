@@ -9,36 +9,82 @@
 		description: string | null;
 		facts: Fact[];
 	}
-	let { item, heading = 'h2' }: { item: TooltipItem; heading?: 'h2' | 'p' } = $props();
+	let {
+		item,
+		heading = 'h2',
+		issueHref
+	}: {
+		item: TooltipItem;
+		heading?: 'h2' | 'p';
+		/** The known issue that explains a value the game's own tooltip misstates. */
+		issueHref?: string;
+	} = $props();
 
-	// The game's tooltip shows its stat lines beside the icon under the vocabulary's tooltip labels.
-	// Other facts follow below the description, in the order the catalog publishes them.
-	const primary = $derived(item.facts.filter((fact) => fact.tooltipLabel));
-	const rest = $derived(item.facts.filter((fact) => !fact.tooltipLabel));
+	const find = (stat: string) => item.facts.find((fact) => fact.stat === stat);
+	// The game's tooltip has two stat lines beside the icon: a weapon's speed word and its damage, or an armor
+	// piece's class and its armor. They read as the game prints them, with the value the game applies.
+	const lines = $derived.by(() => {
+		const speed = find('speed');
+		const damage = find('damage');
+		const type = find('armorType');
+		const armor = find('armorRating');
+		if (speed || damage)
+			return {
+				first: speed ? { fact: speed, text: speed.text ?? 'Unknown' } : null,
+				second: damage ? { fact: damage, text: `Damage: ${factValue(damage) ?? 'Unknown'}` } : null
+			};
+		if (type || armor)
+			return {
+				first:
+					type && type.text !== 'Unarmored' ? { fact: type, text: `Type: ${type.text}` } : null,
+				second: armor ? { fact: armor, text: `ARMOR: ${factValue(armor) ?? 'Unknown'}` } : null
+			};
+		return { first: null, second: null };
+	});
+	const native = $derived(new Set([lines.first?.fact, lines.second?.fact]));
+	// Facts the game's tooltip does not print follow the game card, in the site's own type.
+	const extra = $derived(item.facts.filter((fact) => !native.has(fact)));
+	const misstated = $derived(item.facts.filter((fact) => fact.gameShows));
+	// The game shrinks a long name to keep its ribbon on one line. Here it shrinks to body size at most, and a
+	// name still too long wraps.
+	const nameFit = $derived(26 / Math.max(item.name.length, 1));
+	const nameScale = $derived(Math.max(0.8, Math.min(1, nameFit)));
 </script>
 
 <div class="tooltip" data-ui="tooltip">
-	<svelte:element this={heading} class="name" data-game>{item.name}</svelte:element>
-	<div class="body">
-		<div class="slot">
-			{#if item.icon}<img src="/icons/{item.icon}-160.webp" alt="" width="80" height="80" />{/if}
+	<div class="card">
+		<svelte:element
+			this={heading}
+			class="name"
+			data-game
+			class:wraps={nameFit < 0.8}
+			style:font-size={nameScale < 1 ? `${nameScale * 1.25}rem` : undefined}
+			>{item.name}</svelte:element
+		>
+		<div class="body" class:bare={!lines.first && !lines.second}>
+			<div class="icon">
+				{#if item.icon}<img src="/icons/{item.icon}-160.webp" alt="" width="80" height="80" />{/if}
+			</div>
+			{#if lines.first || lines.second}<div class="lines">
+					{#if lines.first}<p class="first" data-game>{lines.first.text}</p>{/if}
+					{#if lines.second}<p class="second" data-game>{lines.second.text}</p>{/if}
+				</div>{/if}
 		</div>
-		{#if primary.length}<dl class="primary">
-				{#each primary as fact (fact.label)}<div>
-						<dt>{fact.tooltipLabel}</dt>
-						<dd class:unknown={factValue(fact) === null} data-game>
-							{factValue(fact) ?? 'Unknown'}
-						</dd>
-					</div>{/each}
-			</dl>{/if}
+		{#if item.description}<p class="description" data-game>{item.description}</p>{/if}
 	</div>
-	<p class="description" data-game>{item.description ?? 'Description unknown.'}</p>
-	{#if rest.length}<dl class="rest">
-			{#each rest as fact (fact.label)}<div>
+	{#if misstated.length}<p class="game-shows">
+			{#each misstated as fact (fact.stat)}<span
+					>{#if issueHref}<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- callers pass hrefs they resolved. --><a
+							href={issueHref}
+							>The game's tooltip shows {fact.tooltipLabel ?? fact.label} {fact.gameShows}</a
+						>{:else}The game's tooltip shows {fact.tooltipLabel ?? fact.label}
+						{fact.gameShows}{/if}</span
+				>{/each}
+		</p>{/if}
+	{#if extra.length}<dl class="extra">
+			{#each extra as fact (fact.stat + fact.label)}<div>
 					<dt>{titleCase(fact.label)}</dt>
-					<dd class:unknown={factValue(fact) === null} data-game>
-						{factValue(fact) ?? 'Unknown'}
-					</dd>
+					<dd>{factValue(fact) ?? 'Unknown'}</dd>
 				</div>{/each}
 		</dl>{/if}
 </div>
@@ -46,19 +92,25 @@
 <style>
 	.tooltip {
 		display: grid;
-		gap: var(--space-4);
-		padding: var(--space-5);
+		gap: var(--space-3);
+	}
+	/* The game's frame: a thin brown border around a dark, warm gradient. */
+	.card {
+		display: grid;
+		gap: var(--space-3);
+		padding-bottom: var(--space-4);
 		border: var(--marker-width) solid var(--tooltip-frame);
 		border-radius: var(--radius-1);
 		background: radial-gradient(var(--tooltip-surface), var(--tooltip-surface-edge));
 		box-shadow: var(--shadow-raised);
 		color: var(--tooltip-text);
 		font-family: var(--font-game);
+		overflow: hidden;
 	}
-	/* The cream ribbon with notched ends that carries the item name in the game. */
+	/* The cream ribbon across the top, with dark notches at both ends, holds the name on one line. */
 	.name {
 		margin: 0;
-		padding: var(--space-1) var(--space-6);
+		padding: var(--space-1) var(--space-5);
 		background: var(--tooltip-ribbon);
 		color: var(--tooltip-ink);
 		font-family: var(--font-game);
@@ -66,63 +118,81 @@
 		font-weight: var(--weight-regular);
 		line-height: var(--leading-snug);
 		text-align: center;
+		white-space: nowrap;
+		overflow: hidden;
+		clip-path: polygon(
+			0 0,
+			100% 0,
+			calc(100% - var(--size-ribbon-notch)) 50%,
+			100% 100%,
+			0 100%,
+			var(--size-ribbon-notch) 50%
+		);
+	}
+	.name.wraps {
+		white-space: normal;
 		text-wrap: balance;
-		clip-path: polygon(0 0, 100% 0, 96% 50%, 100% 100%, 0 100%, 4% 50%);
 	}
 	.body {
 		display: grid;
 		grid-template-columns: var(--size-icon-title) minmax(0, 1fr);
 		align-items: center;
 		gap: var(--space-4);
+		padding: 0 var(--space-5);
 	}
-	.slot {
+	.body.bare {
+		grid-template-columns: var(--size-icon-title);
+		justify-content: center;
+	}
+	.icon {
 		display: grid;
 		place-items: center;
 		aspect-ratio: 1;
-		border-radius: var(--radius-1);
-		background: var(--tooltip-slot);
 	}
-	.slot img {
-		width: 90%;
-		height: 90%;
+	.icon img {
+		width: 100%;
+		height: 100%;
 		object-fit: contain;
 	}
-	dl {
+	.lines p {
+		margin: 0;
+		line-height: var(--leading-snug);
+	}
+	.first {
+		font-size: var(--type-2);
+	}
+	.second {
+		font-size: var(--type-1);
+	}
+	.description {
+		margin: 0;
+		padding: 0 var(--space-5);
+		font-size: var(--type-2);
+		line-height: var(--leading-snug);
+	}
+	.game-shows {
 		display: grid;
 		gap: var(--space-1);
-		min-width: 0;
+		margin: 0;
+		color: var(--text-soft);
+	}
+	.extra {
+		display: grid;
+		gap: var(--space-1);
 		margin: 0;
 	}
-	/* A long value moves below its label instead of leaving the frame. */
-	dl div {
+	.extra div {
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: space-between;
 		gap: 0 var(--space-4);
 	}
-	.primary {
-		font-size: var(--type-2);
+	.extra dt {
+		color: var(--text-soft);
 	}
-	dt {
-		color: var(--tooltip-muted);
-	}
-	dd {
-		min-width: 0;
+	.extra dd {
 		margin: 0 0 0 auto;
 		text-align: right;
-		overflow-wrap: anywhere;
 		font-variant-numeric: tabular-nums;
-	}
-	.description {
-		margin: 0;
-		color: var(--tooltip-muted);
-		line-height: var(--leading-snug);
-	}
-	.rest {
-		padding-top: var(--space-3);
-		border-top: var(--border-width) solid var(--tooltip-frame);
-	}
-	.unknown {
-		color: var(--text-warning);
 	}
 </style>

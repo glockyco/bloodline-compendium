@@ -116,7 +116,9 @@
 	--size-hero-min: 16rem;
 	--size-hero-max: 46rem;
 	--size-hero-phone: 17rem;
-	--size-tooltip: min(18rem, 70vw);
+	--size-tooltip: min(20rem, 90vw);
+	--size-ribbon-notch: 0.9rem;
+	--size-preview-phone: 60vh;
 	--position-below: 100%;
 
 	--duration-hover: 0.15s;
