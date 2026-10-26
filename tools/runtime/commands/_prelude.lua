@@ -137,9 +137,20 @@ local function items(array)
   return list
 end
 
+--- The inventory slot widgets the open character sheet shows. The sheet rebuilds its grid when the inventory
+--- changes and leaves the replaced slots alive without a parent, and pressing such a slot does nothing.
+local function inventorySlots()
+  local slots = {}
+  for _, slot in ipairs(liveAll("UI_InventoryItem_2_C")) do
+    local parent = slot:GetParent()
+    if parent and parent:IsValid() and slot:IsVisible() then slots[#slots + 1] = slot end
+  end
+  return slots
+end
+
 --- The inventory slot widget that shows an item class. The character sheet must be open.
 local function inventorySlot(path)
-  for _, slot in ipairs(liveAll("UI_InventoryItem_2_C")) do
+  for _, slot in ipairs(inventorySlots()) do
     if classPath(itemInfo(slot.ItemInfo, "ItemClass")) == path then return slot end
   end
   error("No inventory slot shows " .. path .. ". Give the item and open the sheet first.")

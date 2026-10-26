@@ -26,16 +26,29 @@ A fresh session sits in the main menu. `new-save <name>` starts a game and creat
 
 ## Driving the game
 
-Commands in `tools/runtime/commands/` change state only through the game's own functions. A command that does what a player could not, such as `give`, `call`, `set-time` or `set-weather`, says so in its `-- lab setup:` line, and the run records that line with every use.
+Commands in `tools/runtime/commands/` change state only through the game's own functions. A command that does what a player could not, such as `give`, `call`, `take-damage`, `set-time` or `set-weather`, says so in its `-- lab setup:` line, and the run records that line with every use.
 
 - Buttons are pressed by calling the function that the widget class binds to the button's click, which `press` reads from the class's `ComponentDelegateBindings`. A CommonUI button's handler takes the button as its argument. Never click by screen position.
-- `equip` and `use` click the item's inventory slot, which needs `open-sheet` first.
-- `read-tooltips` calls each slot's own `OnMouseEnter`, which builds the tooltip as hovering does, and reads its text blocks.
-- `call` sets inputs on a live object, calls a function and reads outputs, for checking a rule against the game's own result.
+- `give` builds each item as an actor, so its construction script fills its item info as for an item lying in the world, and passes that to the player's `AddItemsToInventory`.
+- `equip` and `use` click the item's inventory slot, which needs `open-sheet` first. Only slots the sheet shows count: the sheet leaves replaced slots alive, and pressing them does nothing.
+- `read-tooltips` calls each shown slot's own `OnMouseEnter`, which builds the tooltip as hovering does, and reads its text blocks. `tooltip-batch` gives a batch of items, reads their tooltips and empties the inventory again.
+- `take-damage` deals damage through the player's own `TakeDamage`, by an amount or down to a Health value.
+- `player` reads player values by dotted path, such as `PlayerPassiveLevelStatComponent.Total Armor`, with the items held and equipped. `read-widget` reads a widget's text blocks.
+- `call` sets inputs on a live object, calls a function and reads outputs, for checking a rule against the game's own result. `params` lists a function's parameters.
 - `sample` reads values every frame for a number of game seconds and can run commands at set times, such as eating while Health is sampled.
 - `eval <file>` runs a Lua file with the command helpers, for exploring. The run records the code.
 
-Commands that look up objects use the instances the game uses. Class defaults and the templates inside a class, whose outer chain reaches a class, are skipped. Fields of the game's own structs carry GUID suffixes in this build, so commands read them through `field`, which takes plain names.
+Commands that look up objects use the instances the game uses. Class defaults and the templates inside a class, whose outer chain reaches a class, are skipped. Fields of the game's own structs carry GUID suffixes in this build, so commands read them through `field`, which takes plain names. Headless, bound text such as the character sheet's lines keeps its design-time value, so read the values behind it.
+
+## Checks
+
+`tools/runtime/checks/` holds the measurements that settle published facts and known issues, each run on a fresh save with `bash tools/runtime/checks/<name>.sh`. Run each twice, in separate runs, and again after every game update:
+
+- `armor.sh` and `armor-slots.sh` measure which armor values and slots reduce damage and speed.
+- `knees.sh` shows when knee armor starts to count.
+- `food.sh` samples Health every frame around meals.
+
+`bun tools/runtime/tooltip-sweep.mjs <build>` reads the tooltip of every published item into the current run. It resumes where earlier sweeps of the build stopped, and retries a batch that stops the game in halves on a restarted game.
 
 ## Captures
 

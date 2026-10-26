@@ -1,7 +1,7 @@
 -- Reads each inventory item's tooltip as the game builds it on hover: calls the slot's own mouse enter and leave
 -- handlers and reads the shown text of every text block in the tooltip. The character sheet must be open.
 local rows = {}
-for _, slot in ipairs(liveAll("UI_InventoryItem_2_C")) do
+for _, slot in ipairs(inventorySlots()) do
   local class = itemInfo(slot.ItemInfo, "ItemClass")
   if class and class:IsValid() then
     slot:OnMouseEnter({}, {})
