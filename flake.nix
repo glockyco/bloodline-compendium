@@ -62,7 +62,7 @@
           pkgs = nixpkgs.legacyPackages.${system};
         in
         {
-          default = pkgs.mkShell {
+          default = pkgs.mkShell ({
             packages = [
               (dotnetSdk pkgs system)
               pkgs.bun
@@ -70,7 +70,11 @@
             ];
             DOTNET_CLI_TELEMETRY_OPTOUT = "1";
             DOTNET_NOLOGO = "1";
-          };
+          }
+          # sharp's prebuilt Linux binary loads libstdc++.so.6, which NixOS hosts and CI runners lack on the default path.
+          // pkgs.lib.optionalAttrs pkgs.stdenv.isLinux {
+            LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [ pkgs.stdenv.cc.cc.lib ];
+          });
         }
       );
 
