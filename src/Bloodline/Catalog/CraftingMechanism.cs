@@ -59,7 +59,21 @@ internal sealed class CraftingMechanism : ISourceMechanism
             }
             if (RecordValues.Integer(output.Values["WeaponsmithingLevelRequired"]) is { } level)
             {
-                notes.Add($"Requires weaponsmithing level {level}.");
+                var part = RecordValues.EnumValue(output.Values["Part"]);
+                // Magical components use focus crafting despite the shared table field's name.
+                var skill = part switch
+                {
+                    "WeaponParts::NewEnumerator17"
+                    or "WeaponParts::NewEnumerator18"
+                    or "WeaponParts::NewEnumerator19" => "focus crafting",
+                    null => null,
+                    _ => "weaponsmithing",
+                };
+                notes.Add(
+                    skill is null
+                        ? $"Required component skill level: {level}. The skill is not recorded."
+                        : $"Requires {skill} level {level}."
+                );
             }
             var amount = checked((int)RecordValues.Integer(row.Values["CraftAmount"])!.Value);
             yield return new ItemSource(

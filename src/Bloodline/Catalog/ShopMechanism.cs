@@ -29,7 +29,15 @@ internal sealed class ShopMechanism : ISourceMechanism
                 type.Path.Contains(
                     "/Construction_Buildings/Buildings_Finished/",
                     StringComparison.OrdinalIgnoreCase
-                ) && !context.IsExcludedClass(type.Path)
+                )
+                && !context.IsExcludedClass(type.Path)
+                && !context.Placements.Any(placement =>
+                    string.Equals(
+                        placement.Actor.Class,
+                        type.Path,
+                        StringComparison.OrdinalIgnoreCase
+                    )
+                )
             )
         )
         {
@@ -122,10 +130,19 @@ internal sealed class ShopMechanism : ISourceMechanism
         }
     }
 
-    internal static string VendorName(JsonObject properties, string classPath) =>
-        RecordValues.Text(properties["Full Name"])
-        ?? RecordValues.Text(properties["Building Name"])
-        ?? ItemIdentity.Readable(ItemIdentity.ClassName(classPath));
+    internal static string VendorName(JsonObject properties, string classPath)
+    {
+        foreach (var field in new[] { "Full Name", "Building Name" })
+        {
+            var name =
+                RecordValues.Text(properties[field]) ?? RecordValues.String(properties[field]);
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                return name;
+            }
+        }
+        return ItemIdentity.Readable(ItemIdentity.ClassName(classPath));
+    }
 
     internal static IEnumerable<(
         Placement Placement,

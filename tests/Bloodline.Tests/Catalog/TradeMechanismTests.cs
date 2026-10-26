@@ -61,7 +61,7 @@ public sealed class TradeMechanismTests
             new TableRow(
                 "SharedKey",
                 Properties(
-                    $$"""{"Class":{"$ref":"{{output.Path}}"},"WeaponsmithingLevelRequired":9}"""
+                    $$$"""{"Class":{"$ref":"{{{output.Path}}}"},"WeaponsmithingLevelRequired":9,"Part":{"$enum":"WeaponParts::NewEnumerator3"}}"""
                 )
             ),
             new TableRow("Zero", Properties($$$"""{"Class":{"$ref":"{{{input.Path}}}"}}"""))
@@ -293,5 +293,39 @@ public sealed class TradeMechanismTests
         Assert.Equal(item.Path, found.ItemClass);
         Assert.Empty(found.Source.Places);
         Assert.Contains("Stock from a constructed settlement building.", found.Source.Notes);
+    }
+
+    [Theory]
+    [InlineData("WeaponParts::NewEnumerator17")]
+    [InlineData("WeaponParts::NewEnumerator18")]
+    [InlineData("WeaponParts::NewEnumerator19")]
+    public void MagicalComponentsUseFocusCraftingSkill(string part)
+    {
+        var item = Item("ArcanePart");
+        var context = Context(
+            [item],
+            [
+                Table(
+                    "ItemRecipes",
+                    new TableRow(
+                        "Shared",
+                        Properties(
+                            """{"CraftAmount":1,"CraftingType":{"$enum":"CraftingTypes::NewEnumerator0"}}"""
+                        )
+                    )
+                ),
+                Table(
+                    "WeaponComponentTable",
+                    new TableRow(
+                        "Shared",
+                        Properties(
+                            $$$"""{"Class":{"$ref":"{{{item.Path}}}"},"WeaponsmithingLevelRequired":15,"Part":{"$enum":"{{{part}}}"}}"""
+                        )
+                    )
+                ),
+            ]
+        );
+        var source = Assert.Single(new CraftingMechanism().FindSources(context)).Source;
+        Assert.Contains("Requires focus crafting level 15.", source.Notes);
     }
 }
