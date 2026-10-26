@@ -1,0 +1,104 @@
+{
+  "$defs": {
+    "KnownIssue": {
+      "additionalProperties": false,
+      "properties": {
+        "builds": {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "cause": {
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "effect": {
+          "type": "string"
+        },
+        "expected": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "observed": {
+          "type": "string"
+        },
+        "report": {
+          "$ref": "#/$defs/ReportStatus"
+        },
+        "reportUrl": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "steps": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "title": {
+          "type": "string"
+        },
+        "workaround": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "effect",
+        "workaround",
+        "steps",
+        "expected",
+        "observed",
+        "cause",
+        "citations",
+        "builds",
+        "report",
+        "reportUrl"
+      ],
+      "title": "KnownIssue",
+      "type": "object"
+    },
+    "ReportStatus": {
+      "enum": [
+        "notReported",
+        "reported"
+      ],
+      "title": "ReportStatus"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "issues": {
+      "items": {
+        "$ref": "#/$defs/KnownIssue"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "issues"
+  ],
+  "title": "KnownIssueRegistry",
+  "type": "object"
+}

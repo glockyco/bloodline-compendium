@@ -182,6 +182,8 @@ small {
 .detail-layout {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) var(--size-item-side);
+	/* The side column spans both rows, and only the flexible row grows when it is the taller one. */
+	grid-template-rows: auto 1fr;
 	align-items: start;
 	gap: var(--space-5) var(--space-6);
 }
@@ -190,6 +192,9 @@ small {
 	margin: 0;
 }
 .item-side {
+	display: grid;
+	gap: var(--space-4);
+	align-content: start;
 	grid-column: 2;
 	grid-row: 1 / span 2;
 	position: sticky;

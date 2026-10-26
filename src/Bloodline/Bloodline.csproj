@@ -16,5 +16,10 @@
       Link="releases.json"
       CopyToOutputDirectory="PreserveNewest"
     />
+    <Content
+      Include="../../issues/known-issues.json"
+      Link="known-issues.json"
+      CopyToOutputDirectory="PreserveNewest"
+    />
   </ItemGroup>
 </Project>

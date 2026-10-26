@@ -56,11 +56,11 @@ Open work before building pages: establish the authored association between fini
 
 ## 7. Known issues
 
-- [ ] 7.1 Add `issues/known-issues.json` with its schema, and verify the catalog fails on a page note naming a missing entry
-- [ ] 7.2 Enter the issues reproduced in group 5 with player facts first, observed and derived parts separated, and confirmed builds, and verify each entry's steps against its run records
-- [ ] 7.3 Render issue notes on affected items and the Known Issues page, link it from About and the footer, and verify search and sitemap include it
-- [ ] 7.4 Add the recheck to the update procedure and write `.agent/skills/game-issues/SKILL.md` with the ownership table and report drafting, and verify it names files that exist
-- [ ] 7.5 Draft developer reports for the confirmed entries for posting on the game's Discord, and verify each follows the entry
+- [x] 7.1 Add `issues/known-issues.json` with its schema, and verify the catalog fails on a page note naming a missing entry
+- [x] 7.2 Enter the issues reproduced in group 5 with player facts first, observed and derived parts separated, and confirmed builds, and verify each entry's steps against its run records
+- [x] 7.3 Render issue notes on affected items and the Known Issues page, link it from About and the footer, and verify search and sitemap include it
+- [x] 7.4 Add the recheck to the update procedure and write `.agent/skills/game-issues/SKILL.md` with the ownership table and report drafting, and verify it names files that exist
+- [x] 7.5 Draft developer reports for the confirmed entries for posting on the game's Discord, and verify each follows the entry
 
 ## 8. Item pages on the foundation
 

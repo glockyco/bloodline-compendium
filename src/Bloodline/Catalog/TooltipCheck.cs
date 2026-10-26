@@ -17,8 +17,11 @@ internal sealed record TooltipObservation(
     IReadOnlyList<string> Hidden
 );
 
-/// <summary>A known cause of tooltip differences and the owner that has to act on it.</summary>
-internal sealed record TooltipReason(string Id, string Owner, string Explanation);
+/// <summary>
+/// A known cause of tooltip differences and the owner that has to act on it. <see cref="Issue"/> marks a game
+/// defect, whose ID names its entry in <c>issues/known-issues.json</c>.
+/// </summary>
+internal sealed record TooltipReason(string Id, string Owner, bool Issue, string Explanation);
 
 /// <summary>
 /// One field where an item's tooltip shows another value than the catalog. <see cref="Reason"/> is null when no
@@ -63,29 +66,34 @@ internal static partial class TooltipCheck
         new(
             "armor-without-row",
             "game",
+            true,
             "Equipping finds no ArmorDataTable row named after the item, so it adds no armor, while the tooltip shows the item's ItemInfo.Damage or the row whose armor name is the item's name."
         ),
         new(
             "armor-slot-adds-none",
             "game",
+            true,
             "Amulets and support items add no armor, while their tooltips show the ArmorDataTable row whose armor name is the item's name."
         ),
         new(
             "crafted-armor-tooltip",
             "game",
+            false,
             "Crafted armor tooltips show the armor that Translate Custom Armor Description writes in place of the description, and no armor class."
         ),
         new(
             "food-tooltip-heals",
             "game",
+            true,
             "Food tooltips show PotionInfo's restoration amount, while eating applies the food's FoodEffectDataTable row."
         ),
         new(
             "food-without-row",
             "game",
+            true,
             "Eating finds no FoodEffectDataTable row for the food, so it has no effect, while its tooltip shows healing."
         ),
-        new("empty-stat-line", "game", "The tooltip shows a stat line without a label."),
+        new("empty-stat-line", "game", true, "The tooltip shows a stat line without a label."),
     ];
 
     /// <summary>

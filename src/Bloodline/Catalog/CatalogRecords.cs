@@ -1,6 +1,7 @@
 using Bloodline.Code;
 using Bloodline.Output;
 using Bloodline.Records;
+using Bloodline.SiteData;
 
 namespace Bloodline.Catalog;
 
@@ -20,6 +21,9 @@ internal sealed record CatalogRecords(
     /// <summary>Inventory tooltips that lab runs of the build read, empty when no run read any.</summary>
     public IReadOnlyList<TooltipObservation> Tooltips { get; init; } = [];
 
+    /// <summary>The repository's known game defects, which the build copies beside the program.</summary>
+    public KnownIssueRegistry Issues { get; init; } = new([]);
+
     public static CatalogRecords Load(RecordLayout layout) =>
         new(
             CanonicalJson.Read<BuildRecord>(layout.BuildFile),
@@ -34,6 +38,7 @@ internal sealed record CatalogRecords(
         {
             Code = CanonicalJson.Read<CodeIndex>(layout.CodeIndexFile),
             Tooltips = TooltipCheck.Load(layout.RuntimeDirectory),
+            Issues = KnownIssues.Load(Path.Combine(AppContext.BaseDirectory, "known-issues.json")),
         };
 
     private static T[] ReadDirectory<T>(string directory) =>

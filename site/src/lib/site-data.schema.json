@@ -405,6 +405,26 @@
       ],
       "title": "GapKind"
     },
+    "IssueNote": {
+      "properties": {
+        "effect": {
+          "type": "string"
+        },
+        "issue": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "issue",
+        "title",
+        "effect"
+      ],
+      "title": "IssueNote",
+      "type": "object"
+    },
     "ItemAmount": {
       "properties": {
         "item": {
@@ -475,6 +495,12 @@
         "name": {
           "type": "string"
         },
+        "notes": {
+          "items": {
+            "$ref": "#/$defs/IssueNote"
+          },
+          "type": "array"
+        },
         "qualifier": {
           "type": [
             "string",
@@ -518,7 +544,8 @@
         "kind",
         "relations",
         "type",
-        "uses"
+        "uses",
+        "notes"
       ],
       "title": "ItemPage",
       "type": "object"
@@ -617,6 +644,78 @@
       "title": "ItemUse",
       "type": "object"
     },
+    "KnownIssue": {
+      "additionalProperties": false,
+      "properties": {
+        "builds": {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "cause": {
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "effect": {
+          "type": "string"
+        },
+        "expected": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "observed": {
+          "type": "string"
+        },
+        "report": {
+          "$ref": "#/$defs/ReportStatus"
+        },
+        "reportUrl": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "steps": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "title": {
+          "type": "string"
+        },
+        "workaround": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "effect",
+        "workaround",
+        "steps",
+        "expected",
+        "observed",
+        "cause",
+        "citations",
+        "builds",
+        "report",
+        "reportUrl"
+      ],
+      "title": "KnownIssue",
+      "type": "object"
+    },
     "Price": {
       "properties": {
         "amount": {
@@ -638,6 +737,25 @@
         "currency"
       ],
       "title": "Price",
+      "type": "object"
+    },
+    "PublishedIssue": {
+      "properties": {
+        "affected": {
+          "items": {
+            "$ref": "#/$defs/EntityReference"
+          },
+          "type": "array"
+        },
+        "issue": {
+          "$ref": "#/$defs/KnownIssue"
+        }
+      },
+      "required": [
+        "issue",
+        "affected"
+      ],
+      "title": "PublishedIssue",
       "type": "object"
     },
     "RelationCondition": {
@@ -730,6 +848,13 @@
       ],
       "title": "RelationRow",
       "type": "object"
+    },
+    "ReportStatus": {
+      "enum": [
+        "notReported",
+        "reported"
+      ],
+      "title": "ReportStatus"
     },
     "SiteBuild": {
       "properties": {
@@ -989,6 +1114,12 @@
     "graph": {
       "$ref": "#/$defs/EntityGraph"
     },
+    "issues": {
+      "items": {
+        "$ref": "#/$defs/PublishedIssue"
+      },
+      "type": "array"
+    },
     "item": {
       "$ref": "#/$defs/ItemPage"
     },
@@ -1008,7 +1139,8 @@
     "item",
     "coverage",
     "kinds",
-    "graph"
+    "graph",
+    "issues"
   ],
   "title": "SiteDataFiles",
   "type": "object"

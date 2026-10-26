@@ -6,7 +6,8 @@ import type {
 	ItemPage,
 	CoverageReport,
 	EntityKindDefinition,
-	EntityGraph
+	EntityGraph,
+	PublishedIssue
 } from '#lib/site-data.js';
 const directory = resolve(process.env.BLOODLINE_SITE_DATA || 'fixtures/site-data');
 async function json<T>(name: string): Promise<T> {
@@ -18,3 +19,4 @@ export const readCoverage = () => json<CoverageReport>('coverage.json');
 export const readItem = (slug: string) => json<ItemPage>('items/' + slug + '.json');
 export const readKinds = () => json<EntityKindDefinition[]>('kinds.json');
 export const readGraph = () => json<EntityGraph>('graph.json');
+export const readIssues = () => json<PublishedIssue[]>('issues.json');

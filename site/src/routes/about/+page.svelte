@@ -28,6 +28,11 @@
 			>Coverage</a
 		> lists the gaps and explains the limits.
 	</p>
+	<p>
+		Where the game's own tooltip or data disagrees with what the game does, item pages show what the
+		game applies. <a href={resolve('known-issues/')}>Known Issues</a> lists the defects in the game that
+		we reproduced, with steps to see them yourself.
+	</p>
 </section>
 <section aria-labelledby="game-release">
 	<h2 id="game-release">Game Release and Data</h2>

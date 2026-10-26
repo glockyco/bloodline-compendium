@@ -42,7 +42,7 @@ dotnet run --project src/Bloodline -- extract
 dotnet run --project src/Bloodline -- catalog
 ```
 
-After a game update, review and add the build's entry in [releases.json](releases.json), repeat extraction and cataloging, compare the new output with the previous build, and review Coverage before publishing.
+After a game update, review and add the build's entry in [releases.json](releases.json), repeat extraction and cataloging, compare the new output with the previous build, recheck every known issue as the [game-issues skill](.agent/skills/game-issues/SKILL.md) describes, and review Coverage before publishing.
 
 Extraction writes the Blueprint function cross-reference to each build's `records/code/index.json`. Cataloging writes fact types, inputs and function citations to `item-claims.json` beside `site/`, without adding them to site data. When lab runs of the build have read item tooltips, cataloging also compares every item's facts with its tooltip, writes each difference and its known cause to `tooltip-check.json`, and lists differences without a known cause in Coverage. After extracting a new build, list the facts whose cited code needs review:
 

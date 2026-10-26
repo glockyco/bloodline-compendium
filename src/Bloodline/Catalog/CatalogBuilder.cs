@@ -15,6 +15,9 @@ internal sealed record CatalogResult(
 
     /// <summary>The comparison with in-game tooltips, null when no lab run of the build read any.</summary>
     public TooltipReport? Tooltips { get; init; }
+
+    /// <summary>The known game issues, each with the published pages that note it.</summary>
+    public IReadOnlyList<PublishedIssue> Issues { get; init; } = [];
 }
 
 internal static class CatalogBuilder
@@ -211,8 +214,22 @@ internal static class CatalogBuilder
                     )
                 );
         }
-        var ordered = graphResult
-            .Items.OrderBy(item => item.Name, StringComparer.OrdinalIgnoreCase)
+        // Issue causes cite code as facts do, so they fail on the same missing or partly parsed functions.
+        if (records.Code is { } code)
+        {
+            foreach (var issue in records.Issues.Issues)
+            {
+                ClaimCitations.Resolve("Known issue " + issue.Id, issue.Citations, code);
+            }
+        }
+        var (noted, issues) = KnownIssues.Attach(
+            graphResult.Items,
+            records.Issues,
+            tooltips,
+            resolver.IgnoredFoodEffects
+        );
+        var ordered = noted
+            .OrderBy(item => item.Name, StringComparer.OrdinalIgnoreCase)
             .ThenBy(item => item.Key, StringComparer.Ordinal)
             .ToArray();
         var summaries = ordered
@@ -264,6 +281,7 @@ internal static class CatalogBuilder
         {
             Claims = claims,
             Tooltips = tooltips,
+            Issues = issues,
         };
     }
 

@@ -1,0 +1,30 @@
+[
+	{
+		"affected": [
+			{
+				"icon": "mosswoven-coat",
+				"key": "/Invented/Items/MosswovenCoat",
+				"kind": "item",
+				"name": "Mosswoven Coat",
+				"slug": "mosswoven-coat"
+			}
+		],
+		"issue": {
+			"builds": [1],
+			"cause": "The invented coat's armor lookup uses a name that no armor row has, an invented cause with a long enough explanation to wrap over several lines on a phone.",
+			"citations": [
+				"/Invented/Blueprints/Wardrobe:Get Armor Slot",
+				"/Invented/Blueprints/A_Package_With_A_Very_Long_Path_That_Must_Wrap/Inside/Narrow/Columns:Retrieve Player Armor"
+			],
+			"effect": "The Mosswoven Coat adds no armor when worn, although its tooltip shows armor.",
+			"expected": "Armor rises by the value the tooltip shows.",
+			"id": "invented-coat-armor",
+			"observed": "Armor stays the same.",
+			"report": "notReported",
+			"reportUrl": null,
+			"steps": ["Equip the Mosswoven Coat.", "Armor on the character sheet does not change."],
+			"title": "The Mosswoven Coat adds no armor",
+			"workaround": "Wear another coat."
+		}
+	}
+]

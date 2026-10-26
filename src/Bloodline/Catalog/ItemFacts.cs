@@ -16,6 +16,11 @@ internal sealed class ItemFacts(
     private readonly ItemClaims claims = new(code, build);
     public IReadOnlyList<FactClaim> Claims => claims.Claims;
 
+    private readonly HashSet<string> ignoredFoodEffects = new(StringComparer.Ordinal);
+
+    /// <summary>Foods whose effect row lists an effect name that the food manager's switch does not apply.</summary>
+    public IReadOnlySet<string> IgnoredFoodEffects => ignoredFoodEffects;
+
     private readonly Dictionary<string, string?> enumDisplays = enums
         .SelectMany(record => record.Entries.Select(entry => (entry.Name, entry.Display)))
         .GroupBy(entry => entry.Name, StringComparer.Ordinal)
@@ -192,7 +197,7 @@ internal sealed class ItemFacts(
         }
         if (category == "Food")
         {
-            AddFoodEffects(facts, name);
+            AddFoodEffects(facts, item.Path, name);
         }
         else if (category == "Potion")
         {
@@ -287,7 +292,7 @@ internal sealed class ItemFacts(
     /// the food, or else the first row whose localized food name is the food's name, with each of its effects
     /// that the manager's switch names. A food without such a row or effect has no effect.
     /// </summary>
-    private void AddFoodEffects(List<Fact> facts, string name)
+    private void AddFoodEffects(List<Fact> facts, string path, string name)
     {
         if (foodRows is null)
         {
@@ -308,6 +313,7 @@ internal sealed class ItemFacts(
                 || !FoodEffects.TryGetValue(effectName, out var effect)
             )
             {
+                ignoredFoodEffects.Add(path);
                 continue;
             }
             var amount = RecordValues.Number(value);

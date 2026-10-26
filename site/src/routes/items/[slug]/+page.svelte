@@ -7,6 +7,7 @@
 	import { entityPath, kindPath } from '#lib/entities.js';
 	import Count from '#lib/ui/Count.svelte';
 	import ItemTooltip from '#lib/ItemTooltip.svelte';
+	import IssueNote from '#lib/ui/IssueNote.svelte';
 	import { sourceHeadings, titleCase } from '#lib/labels.js';
 	import { sortSources, sourceContext, useHeadings } from '#lib/acquisition.js';
 	import { formatNumber } from '#lib/format.js';
@@ -148,6 +149,11 @@
 		<aside class="item-side" aria-label="Item details">
 			<ItemTooltip item={{ ...item, name: displayName }} />
 			{#if !item.icon}<p class="muted">No icon is known for this item.</p>{/if}
+			{#each item.notes as note (note.issue)}
+				<IssueNote title={note.title} href={resolve('known-issues/') + '#' + note.issue}
+					>{note.effect}</IssueNote
+				>
+			{/each}
 		</aside>
 		<div class="item-relations" data-pagefind-ignore="all">
 			{#if sourceGroups.length}<p class="muted">

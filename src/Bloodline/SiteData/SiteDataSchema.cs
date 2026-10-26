@@ -6,8 +6,8 @@ using Bloodline.Output;
 namespace Bloodline.SiteData;
 
 /// <summary>
-/// Exports JSON Schema for <see cref="SiteDataFiles"/>. Each site-data type becomes a named definition, so
-/// generated TypeScript has one type per C# type instead of one copy per use.
+/// Exports JSON Schema for <see cref="SiteDataFiles"/> and for <see cref="KnownIssueRegistry"/>. Each site-data type
+/// becomes a named definition, so generated TypeScript has one type per C# type instead of one copy per use.
 /// </summary>
 internal static class SiteDataSchema
 {
@@ -15,15 +15,33 @@ internal static class SiteDataSchema
     {
         var output = new Option<FileInfo>("--out")
         {
-            Description = "File to write the schema to.",
+            Description = "File to write the site data schema to.",
             Required = true,
         };
-        var command = new Command("schema", "Write the JSON Schema of the site data.") { output };
-        command.SetAction(parse => CanonicalJson.Write(parse.GetValue(output)!.FullName, Export()));
+        var registry = new Option<FileInfo?>("--registry")
+        {
+            Description = "File to write the known issue registry's schema to.",
+        };
+        var command = new Command(
+            "schema",
+            "Write the JSON Schema of the site data and of the known issue registry."
+        )
+        {
+            output,
+            registry,
+        };
+        command.SetAction(parse =>
+        {
+            CanonicalJson.Write(parse.GetValue(output)!.FullName, Export(typeof(SiteDataFiles)));
+            if (parse.GetValue(registry) is { } file)
+            {
+                CanonicalJson.Write(file.FullName, Export(typeof(KnownIssueRegistry)));
+            }
+        });
         return command;
     }
 
-    public static JsonObject Export()
+    public static JsonObject Export(Type type)
     {
         var exporterOptions = new JsonSchemaExporterOptions
         {
@@ -40,9 +58,7 @@ internal static class SiteDataSchema
                 return schema;
             },
         };
-        var root = CanonicalJson
-            .Options.GetJsonSchemaAsNode(typeof(SiteDataFiles), exporterOptions)
-            .AsObject();
+        var root = CanonicalJson.Options.GetJsonSchemaAsNode(type, exporterOptions).AsObject();
         var definitions = new JsonObject();
         var original = root.DeepClone().AsObject();
         foreach (var key in root.Select(pair => pair.Key).ToList())

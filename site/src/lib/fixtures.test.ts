@@ -20,6 +20,10 @@ describe('invented fixtures match the exported contract', () => {
 		const kinds = JSON.parse(await readFile(new URL('kinds.json', directory), 'utf8'));
 		const validKind = ajv.compile({ $ref: 'site#/$defs/EntityKindDefinition' });
 		for (const kind of kinds) expect(validKind(kind), JSON.stringify(validKind.errors)).toBe(true);
+		const issues = JSON.parse(await readFile(new URL('issues.json', directory), 'utf8'));
+		const validIssue = ajv.compile({ $ref: 'site#/$defs/PublishedIssue' });
+		for (const issue of issues)
+			expect(validIssue(issue), JSON.stringify(validIssue.errors)).toBe(true);
 		for (const name of await readdir(new URL('items/', directory)))
 			await validate('items/' + name, 'ItemPage');
 	});

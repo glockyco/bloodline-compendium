@@ -83,5 +83,12 @@
 			"label": "Obtained from",
 			"conditions": []
 		}
+	],
+	"notes": [
+		{
+			"effect": "The Mosswoven Coat adds no armor when worn, although its tooltip shows armor.",
+			"issue": "invented-coat-armor",
+			"title": "The Mosswoven Coat adds no armor"
+		}
 	]
 }

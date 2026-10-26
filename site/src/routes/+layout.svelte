@@ -70,8 +70,8 @@
 	<div class="footer-inner">
 		<nav aria-label="Footer">
 			<a href={itemsPath}>Items</a><a href={resolve('coverage/')}>Coverage</a><a
-				href={resolve('about/')}>About</a
-			><a href="https://ko-fi.com/wowmuch">Support on Ko-fi</a>
+				href={resolve('known-issues/')}>Known Issues</a
+			><a href={resolve('about/')}>About</a><a href="https://ko-fi.com/wowmuch">Support on Ko-fi</a>
 		</nav>
 		<ReleaseInfo release={data.release} />
 		<p>

@@ -77,6 +77,11 @@ export type SourceKind =
   | "settlementDelivery";
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "ReportStatus".
+ */
+export type ReportStatus = "notReported" | "reported";
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "Stat".
  */
 export type Stat =
@@ -107,6 +112,7 @@ export interface SiteDataFiles {
   build: SiteBuild;
   coverage: CoverageReport;
   graph: EntityGraph;
+  issues: PublishedIssue[];
   item: ItemPage;
   items: ItemIndex;
   kinds: EntityKindDefinition[];
@@ -317,6 +323,33 @@ export interface Weight {
 }
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "PublishedIssue".
+ */
+export interface PublishedIssue {
+  affected: EntityReference[];
+  issue: KnownIssue;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "KnownIssue".
+ */
+export interface KnownIssue {
+  builds: number[];
+  cause: string;
+  citations: string[];
+  effect: string;
+  expected: string;
+  id: string;
+  observed: string;
+  report: ReportStatus;
+  reportUrl: string | null;
+  steps: string[];
+  title: string;
+  workaround: string | null;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "ItemPage".
  */
 export interface ItemPage {
@@ -327,6 +360,7 @@ export interface ItemPage {
   key: string;
   kind: EntityKind;
   name: string;
+  notes: IssueNote[];
   qualifier?: string | null;
   relations: EntityRelation[];
   slug: string;
@@ -366,6 +400,16 @@ export interface Effect {
   name: string;
   power: number | null;
   seconds: number;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "IssueNote".
+ */
+export interface IssueNote {
+  effect: string;
+  issue: string;
+  title: string;
   [k: string]: unknown;
 }
 /**

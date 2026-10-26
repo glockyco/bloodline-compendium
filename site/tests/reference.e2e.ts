@@ -240,6 +240,7 @@ test('each public page has production identity, social metadata and generated br
 		'/items/lanternedge/',
 		'/items/hollow-prism/',
 		'/coverage/',
+		'/known-issues/',
 		'/about/'
 	];
 	for (const route of routes) {
@@ -294,6 +295,7 @@ test('each public page has production identity, social metadata and generated br
 			'/',
 			'/items/',
 			'/coverage/',
+			'/known-issues/',
 			'/items/cinderpear/',
 			'/about/',
 			'/items/hollow-prism/',
@@ -369,6 +371,41 @@ test('Pagefind searches with the registry kind filter', async ({ page, request }
 		return result.results.length;
 	}, label);
 	expect(count).toBeGreaterThan(0);
+});
+
+test('notes a known issue on the affected item and explains it on a linked, searchable page', async ({
+	page
+}) => {
+	await page.goto('/items/mosswoven-coat/');
+	const note = page.getByRole('complementary', { name: 'Known game issue' });
+	await expect(note).toContainText('The Mosswoven Coat adds no armor');
+	await note.getByRole('link', { name: 'Read about this issue' }).click();
+	await expect(page).toHaveURL(/\/known-issues\/#invented-coat-armor$/);
+	const entry = page.locator('#invented-coat-armor');
+	await expect(entry).toBeInViewport();
+	await expect(entry.getByRole('link', { name: 'Mosswoven Coat' })).toHaveAttribute(
+		'href',
+		'/items/mosswoven-coat/'
+	);
+	await expect(entry).toContainText('Not reported to the developer yet.');
+	await page.goto('/about/');
+	for (const region of ['main', 'footer'])
+		await expect(page.locator(region).getByRole('link', { name: 'Known Issues' })).toHaveAttribute(
+			'href',
+			'/known-issues/'
+		);
+	const urls = await page.evaluate(async () => {
+		const path = '/pagefind/pagefind.js';
+		// Pagefind is generated at build time and exists only in the served browser bundle.
+		const pagefind = await import(/* @vite-ignore */ path);
+		const result = await pagefind.search('Mosswoven');
+		return Promise.all(
+			result.results.map(
+				async (found: { data: () => Promise<{ url: string }> }) => (await found.data()).url
+			)
+		);
+	});
+	expect(urls).toContain('/known-issues/');
 });
 
 test('condition prose links its entity without repeating the name or threshold', async ({

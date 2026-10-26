@@ -170,7 +170,53 @@ internal sealed record ItemPage(
 
     [JsonRequired]
     public IReadOnlyList<ItemUse> Uses { get; init; } = [];
+
+    /// <summary>Known issues that affect a value this page shows.</summary>
+    [JsonRequired]
+    public IReadOnlyList<IssueNote> Notes { get; init; } = [];
 }
+
+/// <summary>A page's note about a known issue, with the issue's title and its effect on players.</summary>
+internal sealed record IssueNote(string Issue, string Title, string Effect);
+
+internal enum ReportStatus
+{
+    NotReported,
+    Reported,
+}
+
+/// <summary>
+/// A reproduced defect in the game. <see cref="Effect"/> and <see cref="Workaround"/> are for players, and
+/// <see cref="Steps"/> reproduce the defect without mods. <see cref="Observed"/> states what the running game showed.
+/// <see cref="Cause"/> is derived from the game's code and data, which <see cref="Citations"/> name as
+/// package:function. <see cref="Builds"/> are the Steam builds it was confirmed on.
+/// </summary>
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
+internal sealed record KnownIssue(
+    string Id,
+    string Title,
+    string Effect,
+    string? Workaround,
+    IReadOnlyList<string> Steps,
+    string Expected,
+    string Observed,
+    string Cause,
+    IReadOnlyList<string> Citations,
+    IReadOnlyList<long> Builds,
+    ReportStatus Report,
+    string? ReportUrl
+);
+
+/// <summary>The registry of reproduced game defects, <c>issues/known-issues.json</c>.</summary>
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
+internal sealed record KnownIssueRegistry(IReadOnlyList<KnownIssue> Issues)
+{
+    [JsonPropertyName("$schema")]
+    public string? Schema { get; init; }
+}
+
+/// <summary>A known issue with the pages that note it. Written as <c>issues.json</c>.</summary>
+internal sealed record PublishedIssue(KnownIssue Issue, IReadOnlyList<EntityReference> Affected);
 
 internal sealed record ItemUse(SourceKind Kind, string Name, EntityReference Item, int Quantity)
 {
@@ -321,5 +367,6 @@ internal sealed record SiteDataFiles(
     ItemPage Item,
     CoverageReport Coverage,
     IReadOnlyList<EntityKindDefinition> Kinds,
-    EntityGraph Graph
+    EntityGraph Graph,
+    IReadOnlyList<PublishedIssue> Issues
 );

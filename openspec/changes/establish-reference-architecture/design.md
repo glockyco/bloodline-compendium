@@ -51,13 +51,14 @@ Armor, measured in runs armor-1, armor-2, armor-slots, armor-slots-2, knees-1 to
 - Feral Maw (class default 5 Medium, table 1 Light) let a 20 point hit through as 19.8. Adding the Winter Warden Cuirass (class default 2 Light, table 13 Heavy) made it 17.2. The player's `ArmorTotal`, which sums the class defaults, changed nothing measured.
 - Mobility follows the same table values. `Calculate Effective Armor` lowers each item's value by 1.4% per level of its armor class proficiency, and `Retrieve Player Armor` turns the sum into a speed factor. With the cuirass at heavy armor level 1, walking speed fell from 350 to 307, as the formula gives.
 - The item slot named "Back" in item data is the arms slot. Amulets and support items add no armor, and knee armor adds none to mobility.
-- Equipping knee armor does not recalculate armor. Broad Knee Guards (table 7) added nothing, also after a sword was equipped, and counted in full once another armor piece was equipped.
+- Equipping knee armor does not recalculate armor. Broad Knee Guards (table 7) added nothing, also after a sword was equipped, and counted in full once another armor piece was equipped. The knee branch of `FirstPersonCharacter2:Attach Equipment` attaches the guards without calling `Set player Speed based on Armor`, which every other armor branch calls and which recalculates the total through `Retrieve Player Armor`.
+- The character sheet's visible `Armor:` line shows `Total Armor`. In render run issues-sheet it read 0 with Leather Pants and 13 after the Winter Warden Cuirass. A second binding, `Get_Stats_2_Text_0`, formats the class-default sum `ArmorTotal` with experience and movement speed.
 - Leather Pants (class default 4) and Velosian Plume-helm match no table row. Neither added armor, in two runs each. Leather Pants' tooltip showed its class default, `ARMOR: 4` with an empty type line. The plume helm's tooltip showed `ARMOR: 9` and `Type: Medium`, so the tooltip widgets find rows that `Get Armor Slot` misses.
 
 Food, measured in runs food-a, food-b, food-c, misc-1 and misc-2: eating applies the food's row of `FoodEffectDataTable` through `FoodManager:Get Item`, found by the item's name without spaces and apostrophes and else by its display name. Each effect name selects a function: "Heal Player" adds its amount to Health at once, and buffs such as "Boost Health Regeneration" last their value in seconds. The effect raised regeneration from 1 to 4 Health per second. `PotionInfo`'s restoration amount, which the tooltip shows as `Heals: {amount}hp`, did not apply:
 - Apple Sauce (tooltip 0, table 75) healed 75, and Roasted Apple (tooltip 75, table 25) healed 25, in two runs each.
 - Apple Pie (tooltip 15, table 200) and Fondue (tooltip 0, table 300) healed from 15 and 26 to the maximum of 150 in three runs.
-- Druid's Stew lists "Boost Foraging EXP " with a trailing space, which matches no effect. Its foraging boost stayed at 1 after eating, in two runs.
+- Druid's Stew lists "Boost Foraging EXP " with a trailing space, which matches no effect. Its foraging boost stayed at 1 after eating, in two runs. In runs foraging-icons-1 and foraging-icons-2 the status bar then showed only Druidsight, while Carrot Cake added a `Foraging EXP Buff` icon with 10:00 left and set the boost to 1.25.
 - Wheat Seeds lists "Heal PLayer", which the switch matches because effect names are FNames and compare without regard to case. It healed 5 in runs food-wheat-1 and food-wheat-2.
 
 The tooltip sweep (runs tooltips-all and tooltips-sweep) read 2,065 of 2,087 published items. The lab finds no inventory slot for the fetch quest item, Sack of Seeds, and hovering 21 more items, such as contracts and currencies, builds no tooltip widget. `UI_InventoryItem_2:OnMouseEnter` fills the tooltip:
@@ -293,11 +294,11 @@ The armor case runs first: equip two items whose class default and table values 
 
 ### Known issues as typed data
 
-Entries live in `issues/known-issues.json`, validated by a JSON Schema in the repository. The catalog reads the file to attach issue keys to affected facts and to fail on stale references. The site renders notes and the Known Issues page from site data.
+Entries live in `issues/known-issues.json`. Its JSON Schema, `issues/known-issues.schema.json`, is generated from the C# `KnownIssue` type like the site-data schema, and the catalog reads the file with the same type, so an unknown or missing field fails. The catalog also rejects duplicate IDs, entries without steps, citations or a confirmed build, and citations of functions that the build's code index lacks or did not parse completely.
 
-How an entry was verified goes in the commit body, not in the entry.
+Notes reach pages in two ways. Tooltip causes in `TooltipCheck.cs` that are game defects name their entry, and a difference of such a cause notes its page when it concerns a value the page shows, so an empty stat line notes nothing. Defects that no tooltip shows, such as knee armor and ignored food effects, have detectors in `KnownIssues.cs`. A note or cause naming a missing entry fails the catalog. The catalog publishes `issues.json` with the pages that note each entry, and the site renders the notes with the shared issue note and lists every entry on the Known Issues page.
 
-Screenshots are derived from the game, so they live in the build's artifacts and are published at build time like icons. Developer reports are drafted from entries for posting on the game's Discord.
+How an entry was verified goes in the commit body, not in the entry. `scripts/issue-report.mjs` drafts a developer report for the game's Discord from an entry, so a draft cannot drift from its entry.
 
 ### Presentation foundation
 

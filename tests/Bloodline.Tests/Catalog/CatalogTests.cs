@@ -177,6 +177,22 @@ public sealed class CatalogTests
                     Tooltip(sword, "Iron sword", "Damage: 900"),
                     Tooltip(ore, "Iron ore", ": 0"),
                 ],
+                Issues = new KnownIssueRegistry([
+                    new KnownIssue(
+                        "empty-stat-line",
+                        "Invented issue",
+                        "Invented effect.",
+                        null,
+                        ["Invented step."],
+                        "Invented expectation.",
+                        "Invented observation.",
+                        "Invented cause.",
+                        ["/Game/Invented/Tooltip:Show"],
+                        [1],
+                        ReportStatus.NotReported,
+                        null
+                    ),
+                ]),
             }
         );
 

@@ -6,6 +6,7 @@ export async function GET() {
 	const paths = [
 		'/',
 		'/coverage/',
+		'/known-issues/',
 		'/about/',
 		...kinds.map((kind) => kindPath(kind.kind, kinds)).filter((path) => path !== null),
 		...graph.entities.map(({ entity }) => entityPath(entity, kinds)).filter((path) => path !== null)
