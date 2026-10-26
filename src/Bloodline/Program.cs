@@ -6,6 +6,7 @@ var root = new RootCommand("Builds The Bloodline Compendium's data from the inst
 {
     SiteDataSchema.CreateCommand(),
     Bloodline.Extraction.ExtractCommand.CreateCommand(),
+    Bloodline.Catalog.CatalogCommand.CreateCommand(),
 };
 
 try
