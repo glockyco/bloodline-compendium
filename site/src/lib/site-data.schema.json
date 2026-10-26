@@ -1320,12 +1320,6 @@
         "name": {
           "type": "string"
         },
-        "noPriceReason": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
         "notes": {
           "items": {
             "type": "string"

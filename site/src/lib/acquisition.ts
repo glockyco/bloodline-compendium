@@ -24,7 +24,10 @@ export function chanceLabel(source: Source): string {
 
 export function sourceContext(source: Source): string | null {
 	if (source.price) {
-		return `${formatNumber(payPrice(source.price))} ${source.price.currency?.name ?? 'gold'}`;
+		const amount = payPrice(source.price);
+		return amount === 0
+			? 'Free'
+			: `${formatNumber(amount)} ${source.price.currency?.name ?? 'gold'}`;
 	}
 	if (source.chance !== null && source.chanceBasis) {
 		return `${formatChance(source.chance)} ${source.chanceBasis.toLowerCase()}`;

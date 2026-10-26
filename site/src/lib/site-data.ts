@@ -358,7 +358,6 @@ export interface Source {
   inputs: ItemAmount[];
   kind: SourceKind;
   name: string;
-  noPriceReason?: string | null;
   notes: string[];
   odds?: Odds | null;
   picks?: Amount | null;

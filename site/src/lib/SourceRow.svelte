@@ -51,7 +51,9 @@
 		>{/if}
 	{#if showContext}
 		<td class="numeric context-value">
-			{#if source.price}
+			{#if source.price && payPrice(source.price) === 0}
+				Free
+			{:else if source.price}
 				{formatNumber(payPrice(source.price))}<small
 					>{#if source.price.currency}<EntityLink
 							entity={source.price.currency}

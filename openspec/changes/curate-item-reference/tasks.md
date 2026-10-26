@@ -5,7 +5,7 @@
 ## 2. Lab confirmations
 
 - [ ] 2.1 Craft a potion from a treated Gildleaf and verify the applied effect matches `AllIngredientEffects`, in two runs
-- [ ] 2.2 Buy and sell one item in a city shop at neutral respect and at a raised respect, buy one item in the settlement Blacksmith, and try to buy Leather Pants from the settlement Armorer, in two runs
+- [x] 2.2 Buy and sell one item in a city shop at neutral respect and at a raised respect, buy one item in the settlement Blacksmith, and try to buy Leather Pants from the settlement Armorer, in two runs
 - [ ] 2.3 Open containers with equal pick bounds and count the items they make, and kill one enemy with a rare pool that no death event spawns and one that one does, until the pick count and the rare pools are settled
 - [ ] 2.4 Craft and equip D and F quality weapons and read their equipped damage and speed, in two runs
 - [ ] 2.5 Craft armor at each armorsmithing quality and read its armor, attune a rune at attunement level 1, and enchant a weapon and read its value, in two runs
@@ -14,7 +14,7 @@
 ## 3. Catalog economy
 
 - [x] 3.1 Publish ingredient treatments from `AllIngredientEffects` and remove the `ReagentInfo` facts, and verify Gildleaf's chopped treatment reads Restore Health 35
-- [ ] 3.2 Publish base values with each shop's price rule, add `site/src/lib/rules/price.ts` with the respect tiers checked by `rules:check` against the lab purchases, and verify the 16 zero prices follow the lab result
+- [x] 3.2 Publish base values with each shop's price rule, add `site/src/lib/rules/price.ts` with the respect tiers checked by `rules:check` against the lab purchases, and verify the 16 zero prices follow the lab result
 - [ ] 3.3 Replace weights, chances and picks with odds per event for containers, settlement deliveries and enemy drops, publish rare pools only for death events that spawn them, and verify an Ethereal Chest and a settlement building against hand calculations
 - [ ] 3.4 Publish item status and the displayed tooltip values, and verify Allseer's Judgement and Leather Pants
 

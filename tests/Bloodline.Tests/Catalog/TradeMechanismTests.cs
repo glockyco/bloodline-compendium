@@ -9,11 +9,15 @@ public sealed class TradeMechanismTests
 {
     private static JsonObject Properties(string json) => JsonNode.Parse(json)!.AsObject();
 
-    private static ClassRecord Item(string name) =>
+    private static ClassRecord Item(string name, bool defaultsNameClass = true) =>
         new(
             $"/Game/Invented/{name}.{name}_C",
             [ItemIdentity.BaseItem],
-            Properties($$$"""{"ItemInfo":{"ItemName":{"$text":"{{{name}}}"},"ItemValue":17}}""")
+            Properties(
+                $$$"""{"ItemInfo":{"ItemName":{"$text":"{{{name}}}"},"ItemValue":17,"ItemClass":{{{(
+                    defaultsNameClass ? $$"""{"$ref":"/Game/Invented/{{name}}.{{name}}_C"}""" : "null"
+                )}}}}}"""
+            )
         );
 
     private static CatalogContext Context(
@@ -468,18 +472,24 @@ public sealed class TradeMechanismTests
     [InlineData("WizardTower_Finished", "Wizard Tower (settlement)")]
     [InlineData("Fletcher_Finished", "Fletcher (settlement)")]
     [InlineData("Residence_02", "Residence (settlement)")]
-    public void ConstructedSettlementStockKeepsUnknownPlacementVisible(
+    public void ConstructedSettlementStockKeepsUnknownPlacementAndDropsUnnamedItems(
         string buildingClass,
         string name
     )
     {
         var item = Item("Wand");
+        var unnamed = Item("Bracers", defaultsNameClass: false);
         var building = new ClassRecord(
             $"/Game/Invented/Construction_Buildings/Buildings_Finished/{buildingClass}.{buildingClass}_C",
             [],
-            Properties($$"""{"Vendor Contents":[{"$ref":"{{item.Path}}"}]}""")
+            Properties(
+                $$"""{"Vendor Contents":[{"$ref":"{{item.Path}}"},{"$ref":"{{unnamed.Path}}"}]}"""
+            )
         );
-        var found = Assert.Single(new ShopMechanism().FindSources(Context([item, building])));
+        // The shopkeeper never offers an item whose default item info names no class.
+        var found = Assert.Single(
+            new ShopMechanism().FindSources(Context([item, unnamed, building]))
+        );
         Assert.Equal(item.Path, found.ItemClass);
         Assert.Equal(name, found.Source.Name);
         Assert.Equal(new Amount(1, 1), found.Source.Amount);

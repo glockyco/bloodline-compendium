@@ -369,9 +369,6 @@ internal sealed record Source(
     /// <summary>What a crafted, cooked or smithed source needs and gives.</summary>
     public Recipe? Recipe { get; init; }
 
-    /// <summary>Why a shop lists the item but sells it at no price a player can pay.</summary>
-    public string? NoPriceReason { get; init; }
-
     /// <summary>The source is a building in the player's own settlement.</summary>
     public bool Settlement { get; init; }
 }

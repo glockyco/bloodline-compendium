@@ -34,7 +34,10 @@ internal sealed class ShopMechanism : ISourceMechanism
                 : WorldSourceData.Conditions(context, placement.Properties, placement.Level);
             foreach (var field in new[] { "Shop Contents", "Vendor Contents" })
             {
-                foreach (var item in Stock(placement.Properties[field]))
+                foreach (
+                    var item in Stock(placement.Properties[field])
+                        .Where(item => !building || Offered(context, item))
+                )
                 {
                     yield return Sale(
                         context,
@@ -66,7 +69,10 @@ internal sealed class ShopMechanism : ISourceMechanism
         {
             foreach (var field in new[] { "Shop Contents", "Vendor Contents" })
             {
-                foreach (var item in Stock(building.Properties[field]))
+                foreach (
+                    var item in Stock(building.Properties[field])
+                        .Where(item => Offered(context, item))
+                )
                 {
                     var vendor = WorldSourceData.Reference(
                         EntityKind.Building,
@@ -125,6 +131,12 @@ internal sealed class ShopMechanism : ISourceMechanism
             }
         }
     }
+
+    // A settlement building hands its shopkeeper each item's default item info, and the shop event offers only
+    // entries whose item class is set, so an item whose defaults leave it empty never appears in that shop.
+    private static bool Offered(CatalogContext context, string item) =>
+        context.Classes.TryGetValue(item, out var type)
+        && RecordValues.At(type.Properties, "ItemInfo.ItemClass") is JsonObject;
 
     // Window_Trading_Shop:Get Current City names a city only in these persistent levels, and Get City Respect
     // reads saved respect only for them. Every other level, settlements included, trades at neutral respect.

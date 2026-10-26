@@ -43,7 +43,7 @@ A condition SHALL describe what a player does or waits for, in game terms, such 
 A source in a settlement building SHALL name the building as part of the player's settlement instead of reporting an unknown location. Places SHALL take names from travel, entrance and containing-level relationships, and reusable event maps SHALL be named by the encounter or area that uses them. Places that no published source uses SHALL not need a name.
 
 #### Scenario: Settlement Armorer
-- **WHEN** the settlement Armorer sells Leather Pants
+- **WHEN** the settlement Armorer sells Leather Boots
 - **THEN** the source reads as the Armorer in the player's settlement, after it is built
 
 #### Scenario: Interior reached through a door

@@ -7,19 +7,23 @@ Defines how the catalog publishes prices, odds, ingredient treatments and item s
 ## ADDED Requirements
 
 ### Requirement: Prices follow the shop's pricing rule
-The catalog SHALL publish an item's base value and, for each shop source, the rule by which that shop turns the base value into what a player pays and receives: city shops by the player's respect in that city, settlement shops by their discount multiplier, and currency shops by their fixed price. A price SHALL NOT be called a purchase price unless it follows the shop's rule. A shop source whose purchase a lab run could not complete SHALL say so instead of showing a price.
+The catalog SHALL publish an item's base value and, for each shop source, the rule by which that shop turns the base value into what a player pays and receives: merchants who trade through the trading window by the player's respect in the city that keeps respect where they stand, and at neutral respect elsewhere, and currency shops by their fixed price. A price SHALL NOT be called a purchase price unless it follows the shop's rule. A shop SHALL NOT be listed as a source of an item it never offers.
 
 #### Scenario: City shop at neutral respect
 - **WHEN** an item with base value 100 is sold in a city shop and the player's respect there is between 0 and 249
 - **THEN** the page shows a purchase price of 140 gold and a sale price of 10 gold, and names respect as what changes them
 
-#### Scenario: Settlement shop with a discount
-- **WHEN** the settlement Blacksmith sells an item with base value 100 at its discount multiplier of 0.5
-- **THEN** the source shows 50 gold
+#### Scenario: Settlement shop
+- **WHEN** the settlement Blacksmith sells an item with base value 100
+- **THEN** the source shows 140 gold, because its trading window ignores the building's unused discount
 
 #### Scenario: Zero base value
-- **WHEN** a shop lists an item whose base value is 0
-- **THEN** the source shows the price a lab purchase established, or says the item cannot be bought there when the purchase fails
+- **WHEN** a shop offers an item whose base value is 0
+- **THEN** the source shows it as free
+
+#### Scenario: Stock the shop never offers
+- **WHEN** a settlement building's stock lists Leather Pants, whose default item info names no item class
+- **THEN** the building is not a source of Leather Pants
 
 ### Requirement: Odds per event
 The catalog SHALL publish a chance for a source only when the game's selection code for that source is read, and SHALL state the event it applies to: per container, per kill, per delivery or per use. The chance SHALL be the chance of getting at least one copy, computed from the selection rule including empty outcomes and the actual number of picks. Where the rule is not read, the source SHALL carry no chance and the reason.
