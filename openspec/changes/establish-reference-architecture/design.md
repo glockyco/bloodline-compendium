@@ -55,7 +55,7 @@ Disagreements found:
 - Materials and weapon parts show an empty `: 0` stat line.
 - The catalog's "Weapon type" is `WeaponInfo.AttackType`, an attack style. All 19 rifles read Crossbow, and the Lonland Pistol is typed Rifle with weapon type Crossbow. Its `ItemInfo.WeaponType` reads Pistol, and that field names Crossbow, Bow, Dagger and Two Handed Weapon for the other weapons checked.
 - Every equip attaches the item's actor to the player and to the character sheet's preview again without removing the earlier one. After a few equips the player carried five Winter Warden Cuirass actors and eight Bronze Nasal Helms. Not yet checked in a normal session.
-- Speed shows as a word such as `Slow`. The catalog publishes the multiplier.
+- Speed shows as a word such as `Slow`, which is the display name of `ItemInfo.Speed`, an `AttackSpeeds` enum: Slow, Below Average, Average, Above Average, Fast or Standard. All seven flintlock pistols read Slow, as their tooltips do. The catalog publishes the `WeaponInfo.AttackSpeed` multiplier instead.
 
 Comments in `ItemFacts.cs` cite bytecode by line number in a dump that the repository cannot regenerate.
 

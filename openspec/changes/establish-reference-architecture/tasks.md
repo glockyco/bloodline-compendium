@@ -31,15 +31,15 @@
 - [ ] 4.2 Compute function fingerprints from the parsed expression tree, and verify two extractions give equal fingerprints and that a changed fixture function changes its fingerprint
 - [ ] 4.3 Attach claim types and `Package:Function` citations to item facts, reject citations to missing or partly parsed functions, and replace the line-number comments in `ItemFacts.cs`
 - [ ] 4.4 List citations with changed fingerprints in the build comparison report, and verify it on two fixture builds
-- [ ] 4.5 Add the rules module with typed inputs, outputs and worded steps, evaluated at prerender and in the browser, with tests on invented inputs, and verify a rule with an unknown input returns unknown
-- [ ] 4.6 Implement the attack speed word and the experience requirement as the first rules with citations, record game results for them with `call`, add the local check against those results, and verify it fails on a planted mismatch
+- [x] 4.5 Add the rules module with typed inputs, outputs and worded steps, evaluated at prerender and in the browser, with tests on invented inputs, and verify a rule with an unknown input returns unknown
+- [x] 4.6 Implement the experience requirement as the first rule with its citation, record game results for it with `call`, add the local check against those results (`bun run rules:check <build>`), and verify it fails on a planted mismatch. The attack speed word is extracted data, `ItemInfo.Speed`, and moves to task 5.3
 - [ ] 4.7 Spike character progression through the cross-reference and one lab run: which skill tree version players see, which points exist and how they are earned, how discipline, attribute and proficiency levels rise and what passive ranks cost, and record the findings in this design for the planner change
 
 ## 5. Verified item facts
 
 - [ ] 5.1 Equip two armor items whose class default and table values differ in opposite directions and read `Total Armor` and mobility in two runs, then publish the applied source and verify the catalog test
 - [ ] 5.2 Sample Health every frame while eating Apple Pie and Fondue against a regeneration baseline in two runs, then publish the applied healing and verify the catalog test
-- [ ] 5.3 Replace the `Weapon type` fact with the game's attack style label and speed word as the tooltip derives them, and verify Lonland Pistol and a rifle
+- [ ] 5.3 Replace the `Weapon type` fact with the game's attack style label and speed word as the tooltip derives them, from `ItemInfo.WeaponType` and `ItemInfo.Speed`, and verify Lonland Pistol and a rifle
 - [ ] 5.4 Add the bulk tooltip check over every inventory item, report differences with owners, and verify a report on the full catalog with no unexplained difference left unlisted in coverage
 
 ## 6. Entity graph contract
