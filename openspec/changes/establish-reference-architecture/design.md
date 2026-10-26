@@ -163,7 +163,7 @@ The writer resolves every relation into references embedded in both documents. A
 
 Relation rows carry typed conditions where the game sets them: a calendar event or season, a quest or quest stage, a guild rank, a discipline or proficiency level, a settlement building, or another named game state. A condition the catalog cannot read is published as unknown, never as absent. Pages, the map and the planner read the same conditions, which Ancient Kingdoms had to retrofit for seasons.
 
-Build 24464547's Woodhurst level keeps actors tagged `Halloween Decor` only when the persisted game calendar month is Truill or the persisted real-world month is October. `Woodhurst_C:ExecuteUbergraph_Woodhurst` takes the OR of those checks and otherwise destroys the tagged actors. The Hallowed Eve Merchant has that tag. `CheckIfIsHallowedEve:IsConditionMet` repeats the same check. The source therefore carries a calendar-event condition rather than inferring availability from the merchant's name. Evidence is in `artifacts/24464547/research/entity-graph/`. Hallowed Eve has no row in the extracted calendar tables, so its reference has a label without a key and appears in coverage.
+Build 24464547's Woodhurst level keeps actors tagged `Halloween Decor` only when the persisted game calendar month is Truill or the persisted real-world month is October. `Woodhurst_C:ExecuteUbergraph_Woodhurst` takes the OR of those checks and otherwise destroys the tagged actors. The Hallowed Eve Merchant has that tag. `CheckIfIsHallowedEve:IsConditionMet` repeats the same check. The source therefore carries a calendar-event condition rather than inferring availability from the merchant's name. The build's code index lists both functions with their fingerprints. Hallowed Eve has no row in the extracted calendar tables, so its reference has a label without a key and appears in coverage.
 
 Dialogue requirements are read from their owning nodes. When an ancestor's check can gate a grant through alternative paths, the catalog publishes an unknown requirement rather than joining the paths into a false conjunction. Unsupported condition classes and missing thresholds also remain unknown and appear in coverage.
 
@@ -177,7 +177,7 @@ Keys are the identifiers the game itself uses, so saves, build links and update 
 
 Keys never derive from display names.
 
-Two fresh extractions and catalog builds of 24464547 produced the same 3,488 unique kind-and-key identities. All 2,087 item slugs matched the site-data snapshot taken before cataloging. The six held-item class paths in the copied `LabRender.sav` matched item keys, including the Winter Warden Cuirass. The snapshot, save copy, key comparison and one sample of every published source mechanism are kept in `artifacts/24464547/entity-graph-check/`.
+Two fresh extractions and catalog builds of 24464547 produced the same 3,488 unique kind-and-key identities. All 2,087 item slugs matched the site-data snapshot taken before cataloging. The six held-item class paths in the copied `LabRender.sav` matched item keys, including the Winter Warden Cuirass.
 
 Placements in levels are published apart from page documents, as the map's own data keyed by entity. Pages show counts and places, not coordinate lists. Afallon moved placements off its relation rows for the same reason.
 
