@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -66,9 +67,13 @@ internal static class RecordValues
             ? value.GetValue<string>()
             : null;
 
+    /// <summary>
+    /// A number of any width. Values built in code hold their CLR type, such as int or float, and
+    /// <c>GetValue&lt;double&gt;</c> does not convert those, so the JSON text is parsed instead.
+    /// </summary>
     public static double? Number(JsonNode? node) =>
         node is JsonValue value && value.GetValueKind() == JsonValueKind.Number
-            ? value.GetValue<double>()
+            ? double.Parse(value.ToJsonString(), NumberStyles.Float, CultureInfo.InvariantCulture)
             : null;
 
     public static long? Integer(JsonNode? node)
