@@ -298,11 +298,11 @@ public sealed class EntityGraphTests
         Assert.Null(Assert.Single(page.Sources).Entity.Key);
         Assert.Equal(ConditionKind.Unknown, Assert.Single(page.Sources[0].Conditions).Kind);
         Assert.Contains(
-            result.Coverage.Gaps.Single(gap => gap.Kind == GapKind.UnknownCondition).Entries,
+            result.Report.Gaps.Single(gap => gap.Kind == GapKind.UnknownCondition).Entries,
             entry => entry.Entity?.Slug == page.Slug && entry.Detail!.Contains("Unreadable check")
         );
         Assert.Contains(
-            result.Coverage.Gaps.Single(gap => gap.Kind == GapKind.UnresolvedReference).Entries,
+            result.Report.Gaps.Single(gap => gap.Kind == GapKind.UnresolvedReference).Entries,
             entry =>
                 entry.Entity?.Slug == page.Slug && entry.Detail == "Person: Unidentified speaker"
         );

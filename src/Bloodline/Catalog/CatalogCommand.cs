@@ -90,7 +90,7 @@ internal static class CatalogCommand
                     $"Pickup sources: {catalog.Items.Sum(item => item.Sources.Count(source => source.Kind == SourceKind.Pickup))}"
                 );
                 Console.WriteLine($"Named places: {catalog.NamedPlaces}");
-                foreach (var gap in catalog.Coverage.Gaps)
+                foreach (var gap in catalog.Report.Gaps)
                 {
                     Console.WriteLine($"{gap.Kind}: {gap.Entries.Count}");
                 }

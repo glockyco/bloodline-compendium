@@ -18,7 +18,6 @@ internal static class CatalogWriter
         {
             CanonicalJson.Write(Path.Combine(staging, "build.json"), build);
             CanonicalJson.Write(Path.Combine(staging, "items.json"), catalog.Index);
-            CanonicalJson.Write(Path.Combine(staging, "coverage.json"), catalog.Coverage);
             CanonicalJson.Write(Path.Combine(staging, "kinds.json"), EntityKinds.All);
             CanonicalJson.Write(Path.Combine(staging, "graph.json"), catalog.Graph);
             CanonicalJson.Write(Path.Combine(staging, "issues.json"), catalog.Issues);
@@ -57,6 +56,7 @@ internal static class CatalogWriter
                 throw;
             }
             CanonicalJson.Write(layout.ClaimsFile, new ClaimReport(build.BuildId, catalog.Claims));
+            CanonicalJson.Write(layout.ReportFile, catalog.Report);
             if (catalog.Tooltips is null)
             {
                 File.Delete(layout.TooltipReportFile);

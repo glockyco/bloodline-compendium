@@ -50,7 +50,7 @@ it('accepts a complete stage and rejects absent assets, both hosting limits and 
 			'/',
 			'/items/',
 			'/items/invented/',
-			'/coverage/',
+			'/known-issues/',
 			'/about/'
 		]);
 		await expect(assertDeployment(directory, repo, { maxFiles: 1 })).rejects.toThrow(
@@ -80,7 +80,7 @@ it('accepts a complete stage and rejects absent assets, both hosting limits and 
 
 it('smokes real HTTP responses, retries old builds and rejects broken content, search, status and security headers', async () => {
 	const build = { commit: 'invented-commit', dirty: false, buildId: 90000001 };
-	const pages = ['/', '/items/', '/items/invented/', '/coverage/', '/about/'].map((path) => ({
+	const pages = ['/', '/items/', '/items/invented/', '/known-issues/', '/about/'].map((path) => ({
 		path,
 		title: '<title>Invented reference</title>',
 		heading: '<h1>Invented item</h1>'

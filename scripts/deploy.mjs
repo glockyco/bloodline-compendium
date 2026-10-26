@@ -18,7 +18,7 @@ export const requiredFiles = [
   "index.html",
   "404.html",
   "items/index.html",
-  "coverage/index.html",
+  "known-issues/index.html",
   "about/index.html",
   "build-info.json",
   "_headers",
@@ -58,7 +58,7 @@ export async function assertDeployment(directory, repo, limits) {
     ["/", "index.html"],
     ["/items/", "items/index.html"],
     ["/items/" + item.name + "/", "items/" + item.name + "/index.html"],
-    ["/coverage/", "coverage/index.html"],
+    ["/known-issues/", "known-issues/index.html"],
     ["/about/", "about/index.html"],
   ]) {
     const html = await readFile(join(directory, file), "utf8");

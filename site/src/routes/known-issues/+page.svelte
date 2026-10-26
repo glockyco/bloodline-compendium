@@ -3,26 +3,37 @@
 	import Count from '#lib/ui/Count.svelte';
 	import ExpandableList from '#lib/ExpandableList.svelte';
 	import SeoHead from '#lib/SeoHead.svelte';
+	import { formatNumber } from '#lib/format.js';
 	let { data } = $props();
 	const builds = (ids: number[]) =>
 		ids
 			.map((id) =>
-				id === data.buildId && data.release ? `${data.release.name} (build ${id})` : `build ${id}`
+				id === data.buildId && data.release ? `${data.release.title} (build ${id})` : `build ${id}`
 			)
 			.join(', ');
 </script>
 
 <SeoHead
 	title="Known Issues | The Bloodline Compendium"
-	description="Defects in The Bloodline that this reference reproduced in the game, with their effect on players, workarounds and steps to see them yourself."
+	description="Defects in The Bloodline that runs of the game reproduced, with their effect on players, workarounds and steps to see them yourself."
 />
 <div data-pagefind-body>
 	<p class="eyebrow">Problems in the game itself</p>
 	<h1 data-pagefind-meta="title">Known Issues</h1>
 	<p class="intro">
-		These are defects in The Bloodline that we reproduced in the running game. Item pages show what
-		the game actually applies and link the issues that affect them.
+		These are defects in The Bloodline that runs of the game reproduced. Item pages show what the
+		game applies and link the issues that affect them.
 	</p>
+	{#if data.issues.length}<nav class="issue-index panel" aria-label="Issues">
+			<ol>
+				{#each data.issues as { issue, affected } (issue.id)}<li>
+						<a href={'#' + issue.id}>{issue.title}</a>{#if affected.length}<small
+								>{formatNumber(affected.length)}
+								{affected.length === 1 ? 'item' : 'items'}</small
+							>{/if}
+					</li>{/each}
+			</ol>
+		</nav>{/if}
 	<div class="issue-stack">
 		{#each data.issues as { issue, affected } (issue.id)}
 			<section class="panel issue" id={issue.id} aria-labelledby={issue.id + '-title'}>
@@ -35,7 +46,7 @@
 						{#snippet row(entity)}<EntityLink {entity} />{/snippet}
 					</ExpandableList>
 				{/if}
-				<h3>Steps without mods</h3>
+				<h3>Steps to See It</h3>
 				<ol>
 					{#each issue.steps as step, index (index)}<li>{step}</li>{/each}
 				</ol>
@@ -48,32 +59,37 @@
 						<dt>Observed in the game</dt>
 						<dd>{issue.observed}</dd>
 					</div>
-					<div>
-						<dt>Cause, derived from the game's code</dt>
-						<dd>{issue.cause}</dd>
-					</div>
-					<div>
-						<dt>Functions</dt>
-						<dd>
-							<ul class="citations">
-								{#each issue.citations as citation (citation)}<li>
-										<code>{citation}</code>
-									</li>{/each}
-							</ul>
-						</dd>
-					</div>
-					<div>
-						<dt>Confirmed on</dt>
-						<dd>{builds(issue.builds)}</dd>
-					</div>
-					<div>
-						<dt>Report</dt>
-						<dd>
-							{#if issue.reportUrl}<a href={issue.reportUrl}>Reported to the developer</a>{:else}Not
-								reported to the developer yet.{/if}
-						</dd>
-					</div>
 				</dl>
+				<details class="developer" data-developer>
+					<summary>For Developers</summary>
+					<dl>
+						<div>
+							<dt>Cause, derived from the game's code</dt>
+							<dd>{issue.cause}</dd>
+						</div>
+						<div>
+							<dt>Functions</dt>
+							<dd>
+								<ul class="citations">
+									{#each issue.citations as citation (citation)}<li>
+											<code>{citation}</code>
+										</li>{/each}
+								</ul>
+							</dd>
+						</div>
+						<div>
+							<dt>Confirmed on</dt>
+							<dd>{builds(issue.builds)}</dd>
+						</div>
+						<div>
+							<dt>Report</dt>
+							<dd>
+								{#if issue.reportUrl}<a href={issue.reportUrl}>Reported to the developer</a
+									>{:else}Not reported to the developer yet.{/if}
+							</dd>
+						</div>
+					</dl>
+				</details>
 			</section>
 		{:else}
 			<p>No known issues are recorded for this game release.</p>
@@ -82,6 +98,30 @@
 </div>
 
 <style>
+	.issue-index ol {
+		display: grid;
+		gap: var(--space-2);
+		margin: 0;
+		padding-left: var(--space-5);
+	}
+	.issue-index small {
+		margin-left: var(--space-2);
+		color: var(--text-soft);
+	}
+	.issue-index {
+		margin-top: var(--space-5);
+	}
+	.developer {
+		display: grid;
+		gap: var(--space-3);
+	}
+	.developer summary {
+		cursor: pointer;
+		font-weight: var(--weight-strong);
+	}
+	.developer dl {
+		margin-top: var(--space-3);
+	}
 	.issue-stack {
 		display: grid;
 		gap: var(--space-6);

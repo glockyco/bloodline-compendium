@@ -24,20 +24,6 @@ export type EntityKind =
   | "activity";
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
- * via the `definition` "GapKind".
- */
-export type GapKind =
-  | "itemWithoutSource"
-  | "sourceWithoutPlace"
-  | "itemWithoutIcon"
-  | "unknownFact"
-  | "placeWithoutName"
-  | "unreadObject"
-  | "unknownCondition"
-  | "unresolvedReference"
-  | "tooltipDifference";
-/**
- * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "ConditionKind".
  */
 export type ConditionKind =
@@ -130,7 +116,6 @@ export type ItemStatus = "obtainable" | "noKnownSource" | "notInNormalPlay";
 
 export interface SiteDataFiles {
   build: SiteBuild;
-  coverage: CoverageReport;
   crafting: CraftingData;
   graph: EntityGraph;
   issues: PublishedIssue[];
@@ -174,67 +159,6 @@ export interface SiteRelease {
 }
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
- * via the `definition` "CoverageReport".
- */
-export interface CoverageReport {
-  gaps: CoverageGap[];
-  [k: string]: unknown;
-}
-/**
- * This interface was referenced by `SiteDataFiles`'s JSON-Schema
- * via the `definition` "CoverageGap".
- */
-export interface CoverageGap {
-  entries: GapEntry[];
-  kind: GapKind;
-  [k: string]: unknown;
-}
-/**
- * This interface was referenced by `SiteDataFiles`'s JSON-Schema
- * via the `definition` "GapEntry".
- */
-export interface GapEntry {
-  detail: string | null;
-  entity: EntityReference | null;
-  label: string;
-  source?:
-    | "shop"
-    | "currencyShop"
-    | "smithing"
-    | "crafting"
-    | "cooking"
-    | "containerLoot"
-    | "randomLoot"
-    | "enemyDrop"
-    | "pickup"
-    | "dialogue"
-    | "fishing"
-    | "gathering"
-    | "farming"
-    | "bountyNote"
-    | "settlementDelivery"
-    | "stable"
-    | "contract"
-    | "seasonalGift"
-    | "archaeology"
-    | "reward"
-    | null;
-  [k: string]: unknown;
-}
-/**
- * This interface was referenced by `SiteDataFiles`'s JSON-Schema
- * via the `definition` "EntityReference".
- */
-export interface EntityReference {
-  icon: string | null;
-  key: string | null;
-  kind: EntityKind;
-  name: string;
-  slug: string | null;
-  [k: string]: unknown;
-}
-/**
- * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "CraftingData".
  */
 export interface CraftingData {
@@ -267,6 +191,18 @@ export interface WeaponPart {
   kind: string;
   speed: number | null;
   value: number | null;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "EntityReference".
+ */
+export interface EntityReference {
+  icon: string | null;
+  key: string | null;
+  kind: EntityKind;
+  name: string;
+  slug: string | null;
   [k: string]: unknown;
 }
 /**
@@ -381,6 +317,7 @@ export interface Amount {
 export interface ItemAmount {
   item: EntityReference;
   quantity: number;
+  relationId?: string | null;
   [k: string]: unknown;
 }
 /**
@@ -402,6 +339,7 @@ export interface Price {
   amount: number;
   city?: EntityReference | null;
   currency: EntityReference | null;
+  relationId?: string | null;
   rule?: PriceRule;
   [k: string]: unknown;
 }

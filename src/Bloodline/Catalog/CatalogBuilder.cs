@@ -6,7 +6,7 @@ namespace Bloodline.Catalog;
 internal sealed record CatalogResult(
     ItemIndex Index,
     IReadOnlyList<ItemPage> Items,
-    CoverageReport Coverage,
+    MaintainerReport Report,
     int NamedPlaces,
     EntityGraph Graph
 )
@@ -264,11 +264,11 @@ internal static class CatalogBuilder
                 group.Count()
             ))
             .ToArray();
-        var coverage = new CoverageReport(
+        var report = new MaintainerReport(
             gapEntries
                 .Where(pair => pair.Value.Count > 0)
                 .OrderBy(pair => pair.Key)
-                .Select(pair => new CoverageGap(
+                .Select(pair => new ReportGap(
                     pair.Key,
                     pair.Value.Distinct()
                         .OrderBy(entry => entry.Label, StringComparer.Ordinal)
@@ -276,12 +276,20 @@ internal static class CatalogBuilder
                         .ThenBy(entry => entry.Detail, StringComparer.Ordinal)
                         .ToArray()
                 ))
+                .ToArray(),
+            ordered
+                .Where(item => item.Status != ItemStatus.Obtainable)
+                .Select(item => new StatusEvidence(
+                    CatalogGraph.Reference(item),
+                    item.Status,
+                    statuses.NamedBy(item.Key)
+                ))
                 .ToArray()
         );
         return new CatalogResult(
             new ItemIndex(categories, summaries),
             ordered,
-            coverage,
+            report,
             context.Places.NamedCount,
             graphResult.Graph
         )

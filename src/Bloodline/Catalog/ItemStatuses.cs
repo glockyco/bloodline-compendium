@@ -45,19 +45,26 @@ internal sealed class ItemStatuses
     {
         if (sources > 0)
             return ItemStatus.Obtainable;
+        var others = NamedBy(item);
+        return others.Count > 0 && others.All(excludedLevels.Contains)
+            ? ItemStatus.NotInNormalPlay
+            : ItemStatus.NoKnownSource;
+    }
+
+    /// <summary>The levels, classes, tables, dialogues and code packages that name the item, apart from itself.</summary>
+    public IReadOnlyList<string> NamedBy(string item)
+    {
         // The item's own class and its own code name it without making it obtainable.
         var package = item.Split('.')[0];
-        var others = origins.TryGetValue(item, out var found)
+        return origins.TryGetValue(item, out var found)
             ? found
                 .Where(origin =>
                     !string.Equals(origin, item, StringComparison.OrdinalIgnoreCase)
                     && !string.Equals(origin, package, StringComparison.OrdinalIgnoreCase)
                 )
+                .Order(StringComparer.Ordinal)
                 .ToArray()
             : [];
-        return others.Length > 0 && others.All(excludedLevels.Contains)
-            ? ItemStatus.NotInNormalPlay
-            : ItemStatus.NoKnownSource;
     }
 
     private void Collect(JsonNode? node, string origin)

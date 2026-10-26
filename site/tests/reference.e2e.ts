@@ -119,11 +119,9 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 	await expect(page.locator('.source-group')).toContainText('20%');
 	await expect(page.locator('.source-group')).toContainText('per kill');
 	await page.goto('/items/hollow-prism/');
-	await expect(page.getByText('No known source.', { exact: false })).toBeVisible();
-	await expect(page.getByRole('link', { name: 'Read about gaps in coverage' })).toHaveAttribute(
-		'href',
-		'/coverage/#itemWithoutSource'
-	);
+	await expect(
+		page.getByText('No way to get this item is known in this game version.')
+	).toBeVisible();
 	await expect(page.getByText('No icon is known for this item.')).toBeVisible();
 });
 test('finds items by word prefix from the shared search', async ({ page }) => {
@@ -137,22 +135,8 @@ test('finds items by word prefix from the shared search', async ({ page }) => {
 			.first()
 	).toBeVisible();
 });
-test('coverage, release labels, provenance and static 404', async ({ page, request }) => {
-	await page.goto('/coverage/');
-	for (const text of [
-		'Items without a known source',
-		'Sources without a known place',
-		'Items without an icon',
-		'Unknown item facts',
-		'Places without a known name',
-		'Unread objects and packages'
-	])
-		await expect(page.getByRole('heading', { name: text })).toBeVisible();
-	await expect(page.locator('#itemWithoutSource a')).toHaveAttribute(
-		'href',
-		'/items/hollow-prism/'
-	);
-	for (const route of ['/', '/items/', '/items/lanternedge/', '/coverage/', '/missing/page']) {
+test('release labels, provenance and static 404', async ({ page, request }) => {
+	for (const route of ['/', '/items/', '/items/lanternedge/', '/known-issues/', '/missing/page']) {
 		await page.goto(route);
 		await expect(page.locator('footer').getByText('Invented Fixture Release')).toBeVisible();
 		await expect(page.locator('footer').getByRole('link', { name: 'Patch Notes' })).toHaveAttribute(
@@ -165,6 +149,7 @@ test('coverage, release labels, provenance and static 404', async ({ page, reque
 	await expect(page.getByRole('heading', { name: 'Page not found' })).toBeVisible();
 	const missing = await request.get('/missing/page');
 	expect(missing.status()).toBe(404);
+	expect((await request.get('/coverage/')).status()).toBe(404);
 	const info = await (await request.get('/build-info.json')).json();
 	expect(Object.keys(info).sort()).toEqual(['appId', 'buildId', 'commit', 'depots', 'dirty']);
 	expect(info.buildId).toBe(90000001);
@@ -178,7 +163,7 @@ test('reference layouts stay readable on desktop and phone', async ({ page }, te
 		for (const [label, route] of [
 			['list', '/items/'],
 			['item', '/items/lanternedge/'],
-			['coverage', '/coverage/']
+			['issues', '/known-issues/']
 		]) {
 			await page.goto(route);
 			expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
@@ -192,7 +177,7 @@ test('reference layouts stay readable on desktop and phone', async ({ page }, te
 	}
 });
 
-test('source and coverage disclosures work without JavaScript', async ({ browser, baseURL }) => {
+test('source disclosures work without JavaScript', async ({ browser, baseURL }) => {
 	const context = await browser.newContext({ javaScriptEnabled: false, baseURL });
 	try {
 		const page = await context.newPage();
@@ -208,20 +193,6 @@ test('source and coverage disclosures work without JavaScript', async ({ browser
 		await expect(shops.locator('.source-row:visible')).toHaveCount(total);
 		await shops.locator('.more-entries > summary').click();
 		await expect(shops.locator('.source-row:visible')).toHaveCount(8);
-		await page.goto('/coverage/');
-		for (const id of ['sourceWithoutPlace', 'placeWithoutName']) {
-			const gap = page.locator('#' + id);
-			const total = await gap.locator('.gap-list > li').count();
-			await expect(gap.locator('.gap-list > li:visible')).toHaveCount(total <= 10 ? total : 8);
-			if (total > 10) {
-				await gap.locator('summary').click();
-				await expect(gap.locator('.gap-list > li:visible')).toHaveCount(total);
-				await gap.locator('summary').click();
-				await expect(gap.locator('.gap-list > li:visible')).toHaveCount(8);
-			} else {
-				await expect(gap.locator('summary')).toHaveCount(0);
-			}
-		}
 	} finally {
 		await context.close();
 	}
@@ -237,7 +208,6 @@ test('each public page has production identity, social metadata and generated br
 		'/items/',
 		'/items/lanternedge/',
 		'/items/hollow-prism/',
-		'/coverage/',
 		'/known-issues/',
 		'/about/'
 	];
@@ -292,7 +262,6 @@ test('each public page has production identity, social metadata and generated br
 		[
 			'/',
 			'/items/',
-			'/coverage/',
 			'/known-issues/',
 			'/items/cinderpear/',
 			'/about/',
@@ -385,7 +354,12 @@ test('notes a known issue on the affected item and explains it on a linked, sear
 		'href',
 		'/items/mosswoven-coat/'
 	);
-	await expect(entry).toContainText('Not reported to the developer yet.');
+	await expect(entry.getByText('Not reported to the developer yet.')).toBeHidden();
+	await entry.getByText('For Developers').click();
+	await expect(entry.getByText('Not reported to the developer yet.')).toBeVisible();
+	await page.goto('/known-issues/');
+	await page.getByRole('navigation', { name: 'Issues' }).getByRole('link').first().click();
+	await expect(page).toHaveURL(/\/known-issues\/#invented-coat-armor$/);
 	await page.goto('/about/');
 	for (const region of ['main', 'footer'])
 		await expect(page.locator(region).getByRole('link', { name: 'Known Issues' })).toHaveAttribute(

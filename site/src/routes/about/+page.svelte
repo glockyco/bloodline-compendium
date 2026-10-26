@@ -7,7 +7,7 @@
 
 <SeoHead
 	title="About | The Bloodline Compendium"
-	description="How this unofficial The Bloodline item reference uses game data, which game release it describes and where to find coverage limits and patch notes."
+	description="How this unofficial The Bloodline item reference reads the game, what it cannot tell you and which game release it describes."
 />
 <h1>About</h1>
 <p class="intro">
@@ -16,23 +16,38 @@
 	>, a single-player sandbox adventure RPG with exploration, crafting, weapons and magic.
 </p>
 <section aria-labelledby="how-made">
-	<h2 id="how-made">How this reference is made</h2>
+	<h2 id="how-made">How This Reference Is Made</h2>
 	<p>
-		Item names, descriptions, stats, icons and known sources are read from the game's files. Item
-		pages connect shops, recipes, drops, gathering and other ways to obtain an item. Their Used for
-		tables show the recipes and purchases that require it.
+		Item names, descriptions, stats, icons and the ways to get each item are read from the game's
+		files. Where the game's code decides a value, such as a price, a drop chance or the armor a
+		piece adds, item pages show the value the game applies, and runs of the game confirm it.
 	</p>
 	<p>
-		Unknown information stays unknown. A missing source does not prove an item is unobtainable, and
-		a known source does not guarantee that its location is reachable. <a href={resolve('coverage/')}
-			>Coverage</a
-		> lists the gaps and explains the limits.
+		Where the game's own tooltip disagrees with what the game does, item pages show what the game
+		applies beside what the tooltip says. <a href={resolve('known-issues/')}>Known Issues</a> lists these
+		defects with steps to see them yourself.
 	</p>
-	<p>
-		Where the game's own tooltip or data disagrees with what the game does, item pages show what the
-		game applies. <a href={resolve('known-issues/')}>Known Issues</a> lists the defects in the game that
-		we reproduced, with steps to see them yourself.
-	</p>
+</section>
+<section aria-labelledby="limits">
+	<h2 id="limits">What It Cannot Tell You</h2>
+	<ul>
+		<li>
+			Some items are given by quests and events this reference does not read yet. Their pages say
+			that no way to get them is known, which does not mean they cannot be obtained.
+		</li>
+		<li>
+			A place on an item page is where the game puts a merchant, container or enemy. Quests and your
+			progress decide when you can reach it.
+		</li>
+		<li>
+			Prices change with your respect in the merchant's city. Pages show the price at neutral
+			respect.
+		</li>
+		<li>
+			A drop chance appears only where the game's code that chooses the item is read. Elsewhere the
+			chance reads Unknown with the reason.
+		</li>
+	</ul>
 </section>
 <section aria-labelledby="game-release">
 	<h2 id="game-release">Game Release and Data</h2>

@@ -1,4 +1,4 @@
-import type { SourceKind, GapKind } from './site-data.js';
+import type { SourceKind } from './site-data.js';
 export function titleCase(value: string): string {
 	return value
 		.replace(/([a-z])([A-Z])/g, '$1 $2')
@@ -29,6 +29,29 @@ export const sourceHeadings: Record<SourceKind, string> = {
 	archaeology: 'Dug up',
 	reward: 'Rewarded'
 };
+/** What a source table's first column lists for each way of getting an item. */
+export const sourceColumns: Record<SourceKind, string> = {
+	shop: 'Merchant',
+	currencyShop: 'Merchant',
+	smithing: 'Recipe',
+	crafting: 'Recipe',
+	cooking: 'Recipe',
+	containerLoot: 'Container',
+	randomLoot: 'Loot',
+	enemyDrop: 'Creature',
+	pickup: 'Item',
+	dialogue: 'Person',
+	fishing: 'Fishing',
+	gathering: 'Resource',
+	farming: 'Crop',
+	bountyNote: 'Bounty Note',
+	settlementDelivery: 'Building',
+	stable: 'Stable',
+	contract: 'Contract',
+	seasonalGift: 'Gift',
+	archaeology: 'Find',
+	reward: 'Reward'
+};
 /** Short names for each way of getting an item, for filters and overviews. */
 export const sourceNames: Record<SourceKind, string> = {
 	shop: 'Merchants',
@@ -51,49 +74,4 @@ export const sourceNames: Record<SourceKind, string> = {
 	seasonalGift: 'Seasonal gifts',
 	archaeology: 'Archaeology',
 	reward: 'Rewards'
-};
-export const gaps: Record<GapKind, { title: string; explanation: string }> = {
-	unknownCondition: {
-		title: 'Unknown relation conditions',
-		explanation:
-			'These sources or uses depend on conditions the readable data does not determine. The conditions remain unknown rather than being treated as unrestricted.'
-	},
-	unresolvedReference: {
-		title: 'Unresolved entity references',
-		explanation:
-			'These references have a readable label but no known game identifier. They remain unlinked until their identity can be resolved.'
-	},
-	itemWithoutSource: {
-		title: 'Items without a known source',
-		explanation:
-			'We do not know how to obtain these items. They stay in the reference, but their pages cannot yet point to a shop, recipe, drop or other source.'
-	},
-	sourceWithoutPlace: {
-		title: 'Sources without a known place',
-		explanation:
-			'We know what gives these items, but not where to find it. A source is not proof that its location is reachable.'
-	},
-	itemWithoutIcon: {
-		title: 'Items without an icon',
-		explanation: 'No readable icon was found for these items. No substitute image is used.'
-	},
-	unknownFact: {
-		title: 'Unknown item facts',
-		explanation: 'The readable data does not determine these values. Unknown does not mean zero.'
-	},
-	placeWithoutName: {
-		title: 'Places without a known name',
-		explanation:
-			'These places have no known in-game name. Their locations remain unknown in this reference.'
-	},
-	unreadObject: {
-		title: 'Unread objects and packages',
-		explanation:
-			'These parts of the game data could not be read completely. Their contents are absent, so items, sources or places may be missing from this reference.'
-	},
-	tooltipDifference: {
-		title: 'Differences from in-game tooltips',
-		explanation:
-			"The game's own tooltip shows another value for these items than this reference, and we have not confirmed which one the game applies. Where the game's code shows the applied value, this reference shows that one."
-	}
 };

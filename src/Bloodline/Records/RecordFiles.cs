@@ -91,6 +91,9 @@ internal sealed class RecordLayout(string outputDirectory, long buildId)
 
     public string TooltipReportFile => System.IO.Path.Combine(BuildDirectory, "tooltip-check.json");
 
+    /// <summary>The maintainer report of what the catalog could not read or resolve.</summary>
+    public string ReportFile => System.IO.Path.Combine(BuildDirectory, "report.json");
+
     /// <summary>The lab's runs of the build, one directory each with its <c>run.jsonl</c>.</summary>
     public string RuntimeDirectory => System.IO.Path.Combine(BuildDirectory, "runtime");
 

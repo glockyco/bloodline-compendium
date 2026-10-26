@@ -5,7 +5,6 @@ export async function GET() {
 	const [graph, kinds] = await Promise.all([readGraph(), readKinds()]);
 	const paths = [
 		'/',
-		'/coverage/',
 		'/known-issues/',
 		'/about/',
 		...kinds.map((kind) => kindPath(kind.kind, kinds)).filter((path) => path !== null),

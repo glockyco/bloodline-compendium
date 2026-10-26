@@ -10,7 +10,7 @@ for (const width of [1280, 390]) {
 			'/items/',
 			'/items/lanternedge/',
 			'/items/hollow-prism/',
-			'/coverage/',
+			'/known-issues/',
 			'/about/',
 			'/missing/accessibility-probe',
 			'/design/'
@@ -25,8 +25,8 @@ for (const width of [1280, 390]) {
 			});
 		}
 
-		test('expanded acquisition and coverage tables remain accessible', async ({ page }) => {
-			for (const route of ['/items/lanternedge/', '/coverage/']) {
+		test('expanded acquisition tables and issue details remain accessible', async ({ page }) => {
+			for (const route of ['/items/lanternedge/', '/known-issues/']) {
 				await page.goto(route);
 				for (const summary of await page.locator('details > summary').all()) {
 					await summary.click();

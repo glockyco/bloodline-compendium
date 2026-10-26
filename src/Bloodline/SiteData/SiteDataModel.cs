@@ -449,38 +449,18 @@ internal sealed record Price(int Amount, EntityReference? Currency)
 
     /// <summary>The city whose respect sets a trading price, null where respect does not apply.</summary>
     public EntityReference? City { get; init; }
+
+    /// <summary>The graph's relation for paying with <see cref="Currency"/>.</summary>
+    public string? RelationId { get; init; }
 }
 
 /// <summary>How many of the item a source gives at once.</summary>
 internal sealed record Amount(int Min, int Max);
 
-internal sealed record ItemAmount(EntityReference Item, int Quantity);
-
-/// <summary>Every known gap in the site's data. Written as <c>coverage.json</c>.</summary>
-internal sealed record CoverageReport(IReadOnlyList<CoverageGap> Gaps);
-
-internal sealed record CoverageGap(GapKind Kind, IReadOnlyList<GapEntry> Entries);
-
-internal enum GapKind
+/// <summary>An item and how many a source needs. <see cref="RelationId"/> names the graph's relation for it.</summary>
+internal sealed record ItemAmount(EntityReference Item, int Quantity)
 {
-    ItemWithoutSource,
-    SourceWithoutPlace,
-    ItemWithoutIcon,
-    UnknownFact,
-    PlaceWithoutName,
-    UnreadObject,
-    UnknownCondition,
-    UnresolvedReference,
-    TooltipDifference,
-}
-
-/// <summary>
-/// One entry of a gap. <see cref="Entity"/> names the affected entity when there is one.
-/// <see cref="Source"/> names the kind of source a source gap is about, so pages can word it.
-/// </summary>
-internal sealed record GapEntry(string Label, EntityReference? Entity, string? Detail)
-{
-    public SourceKind? Source { get; init; }
+    public string? RelationId { get; init; }
 }
 
 /// <summary>
@@ -526,7 +506,6 @@ internal sealed record SiteDataFiles(
     SiteBuild Build,
     ItemIndex Items,
     ItemPage Item,
-    CoverageReport Coverage,
     IReadOnlyList<EntityKindDefinition> Kinds,
     EntityGraph Graph,
     IReadOnlyList<PublishedIssue> Issues,

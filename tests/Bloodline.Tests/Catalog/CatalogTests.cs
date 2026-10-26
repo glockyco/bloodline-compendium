@@ -100,7 +100,7 @@ public sealed class CatalogTests
         var result = Build(Records([item]));
         Assert.Null(Assert.Single(result.Items[0].Facts, fact => fact.Label == "Damage").Value);
         Assert.Contains(
-            result.Coverage.Gaps.Single(gap => gap.Kind == GapKind.UnknownFact).Entries,
+            result.Report.Gaps.Single(gap => gap.Kind == GapKind.UnknownFact).Entries,
             entry => entry.Entity?.Slug == result.Items[0].Slug && entry.Detail == "Damage"
         );
     }
@@ -198,9 +198,7 @@ public sealed class CatalogTests
 
         Assert.Equal(2, result.Tooltips!.Differences.Count);
         var entry = Assert.Single(
-            Assert
-                .Single(result.Coverage.Gaps, gap => gap.Kind == GapKind.TooltipDifference)
-                .Entries
+            Assert.Single(result.Report.Gaps, gap => gap.Kind == GapKind.TooltipDifference).Entries
         );
         Assert.Equal(sword.Path, entry.Entity!.Key);
         Assert.Contains("900", entry.Detail);
@@ -312,14 +310,14 @@ public sealed class CatalogTests
             )
         );
         Assert.Null(result.Items[0].Icon);
-        Assert.Contains(result.Coverage.Gaps, gap => gap.Kind == GapKind.ItemWithoutSource);
-        Assert.Contains(result.Coverage.Gaps, gap => gap.Kind == GapKind.ItemWithoutIcon);
+        Assert.Contains(result.Report.Gaps, gap => gap.Kind == GapKind.ItemWithoutSource);
+        Assert.Contains(result.Report.Gaps, gap => gap.Kind == GapKind.ItemWithoutIcon);
         Assert.Contains(
-            result.Coverage.Gaps.Single(gap => gap.Kind == GapKind.UnknownFact).Entries,
+            result.Report.Gaps.Single(gap => gap.Kind == GapKind.UnknownFact).Entries,
             entry => entry.Detail == "Value"
         );
         Assert.Contains(
-            result.Coverage.Gaps.Single(gap => gap.Kind == GapKind.UnreadObject).Entries,
+            result.Report.Gaps.Single(gap => gap.Kind == GapKind.UnreadObject).Entries,
             entry =>
                 entry.Label == "/Game/Broken"
                 && entry.Detail!.Contains("Cannot parse", StringComparison.Ordinal)
@@ -351,7 +349,7 @@ public sealed class CatalogTests
         Assert.Equal("Green Valley", result.Items[0].Sources[0].Places[0].Name);
         Assert.Equal(2, result.NamedPlaces);
         Assert.Single(
-            result.Coverage.Gaps.Single(gap => gap.Kind == GapKind.PlaceWithoutName).Entries
+            result.Report.Gaps.Single(gap => gap.Kind == GapKind.PlaceWithoutName).Entries
         );
     }
 
@@ -390,7 +388,7 @@ public sealed class CatalogTests
         var result = Build(Records() with { Textures = [] });
         Assert.Null(result.Items[0].Icon);
         Assert.Single(
-            result.Coverage.Gaps.Single(gap => gap.Kind == GapKind.ItemWithoutIcon).Entries
+            result.Report.Gaps.Single(gap => gap.Kind == GapKind.ItemWithoutIcon).Entries
         );
     }
 
@@ -487,8 +485,8 @@ public sealed class CatalogTests
         );
         Assert.Equal(2, result.Items[0].Sources.Count);
         Assert.Single(
-            result.Coverage.Gaps.Single(gap => gap.Kind == GapKind.SourceWithoutPlace).Entries
+            result.Report.Gaps.Single(gap => gap.Kind == GapKind.SourceWithoutPlace).Entries
         );
-        Assert.Single(result.Coverage.Gaps.Single(gap => gap.Kind == GapKind.UnreadObject).Entries);
+        Assert.Single(result.Report.Gaps.Single(gap => gap.Kind == GapKind.UnreadObject).Entries);
     }
 }

@@ -109,7 +109,6 @@ export async function publicationGate(directory) {
   );
   for (const path of [
     "/",
-    "/coverage/",
     ...kinds
       .filter((kind) => kind.hasPages)
       .map((kind) => "/" + kind.route.replace(/^\/+|\/+$/g, "") + "/"),

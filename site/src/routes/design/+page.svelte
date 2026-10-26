@@ -153,7 +153,7 @@
 
 <section aria-labelledby="tables">
 	<SectionHeading id="tables" title="Tables" />
-	<RelationTable items={rows} label="Table fixture" headings={['Source', 'Price']}
+	<RelationTable items={rows} label="Table fixture" headings={['Merchant', 'Price']}
 		>{#snippet row(entry)}<tr
 				><td><span class="relation-name">{entry.name}</span></td><td class="numeric"
 					>{formatNumber(entry.price)}<small>gold</small></td

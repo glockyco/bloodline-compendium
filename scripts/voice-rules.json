@@ -13,14 +13,20 @@
   },
   {
     "pattern": "\\b(we cannot|we can't|not copied)\\b",
-    "reason": "Defensive asides. State what is known and link to coverage."
+    "reason": "Defensive asides. State what is known where it applies."
   },
   {
     "pattern": "[\\u2014\\u2013]",
     "reason": "Em and en dashes. Use a full stop or a comma."
   },
-  { "pattern": "\\u2026", "reason": "Ellipsis character." },
-  { "pattern": "[\\u2190-\\u21ff]", "reason": "Arrows. Use words." },
+  {
+    "pattern": "\\u2026",
+    "reason": "Ellipsis character."
+  },
+  {
+    "pattern": "[\\u2190-\\u21ff]",
+    "reason": "Arrows. Use words."
+  },
   {
     "pattern": "[\\u2018\\u2019\\u201c\\u201d]",
     "reason": "Curly quotes. Use straight quotes."
@@ -29,5 +35,21 @@
     "pattern": ";",
     "reason": "Semicolons between clauses. Write two sentences."
   },
-  { "pattern": "!", "reason": "Exclamation marks in the site's own text." }
+  {
+    "pattern": "!",
+    "reason": "Exclamation marks in the site's own text."
+  },
+  {
+    "pattern": "\\b(entit(y|ies)|relations?|coverage|mechanisms?|records?|weights?|picks?|relative chance)\\b",
+    "reason": "Pipeline words. Name the game's things and events instead."
+  },
+  {
+    "pattern": "\\b(sources? may be incomplete|may be unreachable|this reference|the reference|our data|the data)\\b",
+    "reason": "Text about the reference. Describe the game, and put the reference's limits on About.",
+    "except": ["about/index.html"]
+  },
+  {
+    "pattern": "(/Game/|/Script/|\\b\\w+_C\\b|NewEnumerator|\\w::\\w|\\b(BP|DT|WBP|SM)_\\w+)",
+    "reason": "Identifiers. Show the game's names, never package paths, class names or enum words."
+  }
 ]

@@ -37,21 +37,21 @@ it('resolves rendered disclosures, relative URLs, fragments, srcsets and social 
 it.each([
 	['item link', 'items/index.html', '<a href="/items/missing/">Missing</a>', 'missing target'],
 	[
-		'coverage link',
+		'issue link',
 		'items/other/index.html',
-		'<a href="/coverage/missing/">Gaps</a>',
+		'<a href="/known-issues/missing/">Issue</a>',
 		'missing target'
 	],
 	[
-		'coverage backlink',
-		'coverage/index.html',
-		'<details><summary>Gaps</summary><a href="/items/missing/">Missing</a></details>',
+		'issue backlink',
+		'known-issues/index.html',
+		'<section id="unknown"><details><summary>Affected items</summary><a href="/items/missing/">Missing</a></details></section>',
 		'missing target'
 	],
 	[
-		'coverage fragment',
+		'issue fragment',
 		'items/other/index.html',
-		'<a href="/coverage/#missing">Gap</a>',
+		'<a href="/known-issues/#missing">Issue</a>',
 		'missing fragment'
 	],
 	[
@@ -69,8 +69,8 @@ it.each([
 	],
 	[
 		'encoded link',
-		'coverage/index.html',
-		'<a href="/items/%6dissing/">Missing</a>',
+		'known-issues/index.html',
+		'<section id="unknown"><a href="/items/%6dissing/">Missing</a></section>',
 		'missing target'
 	]
 ])('rejects a broken %s anywhere in rendered HTML', async (_, file, body, error) => {
@@ -136,7 +136,11 @@ it.each([
 		'Duplicate sitemap'
 	],
 	['404 page', publicationSitemap([...publicationPaths, '/404.html']), 'Invalid sitemap'],
-	['fragment', publicationSitemap([...publicationPaths, '/coverage/#unknown']), 'Invalid sitemap'],
+	[
+		'fragment',
+		publicationSitemap([...publicationPaths, '/known-issues/#unknown']),
+		'Invalid sitemap'
+	],
 	['query', publicationSitemap([...publicationPaths, '/items/?name=blade']), 'Invalid sitemap'],
 	[
 		'external origin',

@@ -52,7 +52,7 @@
 			"sourceKinds": [],
 			"key": "/Invented/Items/HollowPrism",
 			"kind": "item",
-			"status": "obtainable",
+			"status": "noKnownSource",
 			"facets": {},
 			"cells": {}
 		},

@@ -8,30 +8,22 @@
 	import Count from '#lib/ui/Count.svelte';
 	import ItemTooltip from '#lib/ItemTooltip.svelte';
 	import IssueNote from '#lib/ui/IssueNote.svelte';
-	import { sourceHeadings, titleCase } from '#lib/labels.js';
+	import { sourceColumns, sourceHeadings, titleCase } from '#lib/labels.js';
 	import { sortSources, sourceContext, useHeadings } from '#lib/acquisition.js';
 	import { formatNumber } from '#lib/format.js';
 	import { factValue } from '#lib/stats.js';
-	import type { SourceKind } from '#lib/site-data.js';
+	import type { ItemStatus, SourceKind } from '#lib/site-data.js';
 	import SeoHead from '#lib/SeoHead.svelte';
 	let { data } = $props();
 	const item = $derived(data.item);
+	const statusSentence: Record<ItemStatus, string> = {
+		obtainable: '',
+		noKnownSource: 'No way to get this item is known in this game version.',
+		notInNormalPlay:
+			'This item is not obtainable in normal play. Only test areas of the game hold it.'
+	};
 	const kind = $derived(data.kinds.find((entry) => entry.kind === item.kind));
 	const itemsPath = $derived(kindPath(item.kind, data.kinds)!);
-	const extraRelations = $derived(
-		item.relations.filter(
-			(relation) =>
-				!item.sources.some(
-					(source) => source.relationId === relation.id && relation.direction === 'incoming'
-				) &&
-				!item.uses.some(
-					(use) =>
-						use.relationId === relation.id &&
-						relation.direction ===
-							item.relations.find((entry) => entry.id === use.relationId)?.direction
-				)
-		)
-	);
 	const displayName = $derived(item.name + (item.qualifier ? ` (${item.qualifier})` : ''));
 	const sourceGroups = $derived(
 		(Object.keys(sourceHeadings) as SourceKind[])
@@ -48,7 +40,7 @@
 					showAmount,
 					showContext,
 					headings: [
-						'Source',
+						sourceColumns[kind],
 						...(showAmount ? ['Quantity'] : []),
 						...(showContext ? [contextHeading] : [])
 					]
@@ -111,8 +103,7 @@
 		<section class="answer panel" aria-labelledby="how-to-get-it" data-pagefind-ignore="all">
 			<h2 id="how-to-get-it">How to get it</h2>
 			{#if !sourceGroups.length}
-				<p>No known source. This item may still be obtainable in the game.</p>
-				<a href={resolve('coverage/#itemWithoutSource')}>Read about gaps in coverage</a>
+				<p>{statusSentence[item.status]}</p>
 			{:else}
 				<ul class="acquisition-routes">
 					{#each sourceGroups as group (group.kind)}
@@ -144,11 +135,6 @@
 			{/each}
 		</aside>
 		<div class="item-relations" data-pagefind-ignore="all">
-			{#if sourceGroups.length}<p class="muted">
-					Known sources do not guarantee that a location is reachable. <a
-						href={resolve('coverage/')}>Coverage</a
-					>
-				</p>{/if}
 			<div class="source-groups">
 				{#each sourceGroups as group (group.kind)}
 					<section class="source-group" aria-labelledby={'source-' + group.kind}>
@@ -187,22 +173,6 @@
 								><td class="numeric">{formatNumber(use.quantity)}<small>items</small></td></tr
 							>{/snippet}</RelationTable
 					>
-				</section>{/if}
-			{#if extraRelations.length}<section aria-labelledby="related-entities">
-					<h2 id="related-entities">Related entities <Count value={extraRelations.length} /></h2>
-					<RelationTable
-						items={extraRelations}
-						label="Related entities"
-						headings={['Relation', 'Entity']}
-					>
-						{#snippet row(relation)}<tr
-								data-relation-id={relation.id}
-								data-relation-direction={relation.direction}
-							>
-								<td>{relation.label}<Conditions conditions={relation.conditions} /></td>
-								<td><EntityLink entity={relation.entity} /></td>
-							</tr>{/snippet}
-					</RelationTable>
 				</section>{/if}
 		</div>
 	</div>

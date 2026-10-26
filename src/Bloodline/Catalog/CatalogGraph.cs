@@ -84,6 +84,24 @@ internal static class CatalogGraph
                 };
                 var id = Id(source.Kind.ToString(), source.Entity, target, source);
                 source = source with { RelationId = id };
+                // Each input and payment names its own relation, so the page that renders it carries that relation.
+                source = source with
+                {
+                    Inputs = source
+                        .Inputs.Select(input =>
+                            input with
+                            {
+                                RelationId = UseId("Input", input.Item, input.Quantity),
+                            }
+                        )
+                        .ToArray(),
+                    Price = source.Price is { Currency: { } paid } cost
+                        ? cost with
+                        {
+                            RelationId = UseId("Payment", paid, cost.Amount),
+                        }
+                        : source.Price,
+                };
                 rows.TryAdd(
                     id,
                     new RelationRow(
@@ -100,12 +118,15 @@ internal static class CatalogGraph
                 sources.TryAdd(id, source);
                 foreach (var input in source.Inputs)
                 {
-                    AddUse("Input", input.Item, input.Quantity, source, target);
+                    AddUse("Input", input.Item, input.Quantity, input.RelationId!, source, target);
                 }
-                if (source.Price?.Currency is { } payment)
+                if (source.Price is { Currency: { } payment, RelationId: { } paymentId })
                 {
-                    AddUse("Payment", payment, source.Price.Amount, source, target);
+                    AddUse("Payment", payment, source.Price.Amount, paymentId, source, target);
                 }
+
+                string UseId(string kind, EntityReference input, int quantity) =>
+                    Id(kind, input, target, new { RelationId = id, quantity });
             }
             pages.Add(item with { Sources = sources.Values.ToArray() });
         }
@@ -114,11 +135,11 @@ internal static class CatalogGraph
             string kind,
             EntityReference input,
             int quantity,
+            string id,
             Source source,
             EntityReference target
         )
         {
-            var id = Id(kind, input, target, new { source.RelationId, quantity });
             rows.TryAdd(
                 id,
                 new RelationRow(

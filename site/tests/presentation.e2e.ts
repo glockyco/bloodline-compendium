@@ -2,7 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 import { layoutProblems } from './layout.js';
 
-const routes = ['/design/', '/', '/items/', '/items/lanternedge/', '/coverage/', '/about/'];
+const routes = ['/design/', '/', '/items/', '/items/lanternedge/', '/known-issues/', '/about/'];
 
 for (const width of [390, 768, 1280]) {
 	test.describe(`layout at ${width}px`, () => {

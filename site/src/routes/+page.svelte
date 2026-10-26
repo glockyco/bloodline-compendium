@@ -57,7 +57,7 @@
 		<SectionHeading
 			id="items-heading"
 			title="Items"
-			link={{ href: itemsPath, label: `All ${formatNumber(data.count)} items` }}
+			link={{ href: itemsPath, label: `All ${formatNumber(data.known)} items` }}
 		/>
 		<CardGrid rows={3}>
 			{#each data.groups as group (group.slug)}
@@ -138,7 +138,7 @@
 				<span style:width="{(data.known / Math.max(data.count, 1)) * 100}%"></span>
 			</div>
 			{#if unknown}<p>
-					<a href={resolve('coverage/#itemWithoutSource')}
+					<a href={kindPath('item', data.kinds, '?unknown=1')!}
 						>{formatNumber(unknown)} items without a known source</a
 					>
 				</p>{/if}

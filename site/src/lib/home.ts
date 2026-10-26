@@ -116,6 +116,9 @@ function describe(category: CategorySummary, items: ItemSummary[]): string {
 /** The home page's browse entries and source overview, derived from the published site data. */
 export function homeData(index: ItemIndex, pages: ItemPage[]): HomeData {
 	const items = index.items;
+	// The item list hides items without a known source until asked, so counts that link to it count the same.
+	const listed = (category: string) =>
+		items.filter((item) => item.category === category && item.sourceKinds.length > 0).length;
 	const ordered = [
 		...majorOrder
 			.map((slug) => index.categories.find((category) => category.slug === slug))
@@ -129,7 +132,7 @@ export function homeData(index: ItemIndex, pages: ItemPage[]): HomeData {
 		return {
 			slug: category.slug,
 			name: category.plural,
-			count: category.count,
+			count: listed(category.slug),
 			description: describe(category, members),
 			icons: pickIcons(members, featuredIcons[category.slug], iconCount)
 		};
@@ -194,7 +197,10 @@ export function homeData(index: ItemIndex, pages: ItemPage[]): HomeData {
 		known: items.filter((item) => item.sourceKinds.length > 0).length,
 		example: (items.find((item) => item.slug === 'yew-shortbow') ?? items[0])?.name ?? '',
 		groups,
-		minor: ordered.slice(majorCount),
+		minor: ordered
+			.slice(majorCount)
+			.map((category) => ({ ...category, count: listed(category.slug) }))
+			.filter((category) => category.count > 0),
 		ways
 	};
 }

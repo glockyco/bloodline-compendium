@@ -7,7 +7,7 @@ export const publicationPaths = [
 	'/items/',
 	'/items/invented/',
 	'/items/other/',
-	'/coverage/',
+	'/known-issues/',
 	'/about/'
 ];
 
@@ -49,15 +49,15 @@ export async function writePublication(directory) {
 		),
 		'items/invented/index.html': publicationPage(
 			'Invented blade',
-			'<img alt="" src="/icons/invented-160.webp" srcset="/icons/invented-48.webp 48w, /icons/invented-160.webp 160w"><a href="/coverage/#unknown">Coverage</a>'
+			'<img alt="" src="/icons/invented-160.webp" srcset="/icons/invented-48.webp 48w, /icons/invented-160.webp 160w"><a href="/known-issues/#unknown">Known issue</a>'
 		),
 		'items/other/index.html': publicationPage(
 			'Invented pebble',
 			'<a href="../invented/">Blade</a>'
 		),
-		'coverage/index.html': publicationPage(
-			'Invented coverage',
-			'<section id="unknown"><details><summary>Gaps</summary><a href="/items/other/">Pebble</a></details></section>'
+		'known-issues/index.html': publicationPage(
+			'Invented issues',
+			'<section id="unknown"><details><summary>Affected items</summary><a href="/items/other/">Pebble</a></details></section>'
 		),
 		'about/index.html': publicationPage('Invented about'),
 		'404.html': publicationPage(

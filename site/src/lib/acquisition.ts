@@ -24,11 +24,12 @@ const oddsLabels: Record<OddsEvent, string> = {
 	delivery: 'per delivery',
 	use: 'per use',
 	catch: 'per catch',
-	pick: 'per pick'
+	pick: 'per item gathered'
 };
 
-/** What a chance applies to, such as per container. */
-export function oddsLabel(odds: Odds): string {
+/** What a chance applies to, such as per container. A pick is one item that a gather or harvest yields. */
+export function oddsLabel(odds: Odds, kind: SourceKind): string {
+	if (odds.event === 'pick') return kind === 'farming' ? 'per item harvested' : 'per item gathered';
 	return oddsLabels[odds.event];
 }
 
@@ -40,7 +41,7 @@ export function sourceContext(source: Source): string | null {
 			: `${formatNumber(amount)} ${source.price.currency?.name ?? 'gold'}`;
 	}
 	if (source.odds?.chance != null) {
-		return `${formatChance(source.odds.chance)} ${oddsLabel(source.odds)}`;
+		return `${formatChance(source.odds.chance)} ${oddsLabel(source.odds, source.kind)}`;
 	}
 	return null;
 }

@@ -7,13 +7,19 @@ const rules = JSON.parse(
   await readFile(new URL("./voice-rules.json", import.meta.url), "utf8"),
 ).map((rule) => ({ ...rule, expression: new RegExp(rule.pattern, "iu") }));
 
-// Game text, marked with data-game, keeps the game's wording, so only the site's own words are checked.
+// Only the site's own words are checked, not game text or developer details.
 const skipped = new Set(["script", "style", "noscript", "template"]);
 
 function siteText(node, parts) {
   if (node.nodeName === "#text") parts.push(node.value);
   if (skipped.has(node.tagName)) return;
-  if ((node.attrs ?? []).some((attribute) => attribute.name === "data-game"))
+  // Game text keeps the game's wording, and a section for developers names functions and files.
+  if (
+    (node.attrs ?? []).some(
+      (attribute) =>
+        attribute.name === "data-game" || attribute.name === "data-developer",
+    )
+  )
     return;
   for (const child of node.childNodes ?? []) siteText(child, parts);
   // Block boundaries keep words from neighbouring elements apart.
@@ -49,6 +55,8 @@ export async function voiceGate(directory) {
         siteText(body, parts);
         const text = parts.join("").replace(/\s+/g, " ");
         for (const rule of rules) {
+          // About is where the site describes itself, so rules about such text name it as an exception.
+          if (rule.except?.includes(file)) continue;
           const match = rule.expression.exec(text);
           if (match)
             problems.push(

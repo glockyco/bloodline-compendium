@@ -29,7 +29,10 @@
 				{#if source.inputs.length}
 					<p class="detail-label">Required items</p>
 					<ul>
-						{#each source.inputs as input, index (index)}<li>
+						{#each source.inputs as input, index (index)}<li
+								data-relation-id={input.relationId}
+								data-relation-direction={input.relationId ? 'incoming' : undefined}
+							>
 								{formatNumber(input.quantity)} × <EntityLink entity={input.item} />
 							</li>{/each}
 					</ul>
@@ -49,12 +52,14 @@
 				Free
 			{:else if source.price}
 				{formatNumber(payPrice(source.price))}<small
-					>{#if source.price.currency}<EntityLink
-							entity={source.price.currency}
-						/>{:else}gold{/if}</small
+					>{#if source.price.currency}<span
+							data-relation-id={source.price.relationId}
+							data-relation-direction={source.price.relationId ? 'incoming' : undefined}
+							><EntityLink entity={source.price.currency} /></span
+						>{:else}gold{/if}</small
 				>
 			{:else if source.odds?.chance != null}
-				{formatChance(source.odds.chance)}<small>{oddsLabel(source.odds)}</small>
+				{formatChance(source.odds.chance)}<small>{oddsLabel(source.odds, source.kind)}</small>
 			{:else}<span class="muted">Unknown</span>{/if}
 		</td>
 	{/if}

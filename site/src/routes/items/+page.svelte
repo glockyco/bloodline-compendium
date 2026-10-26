@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
 	import { browser } from '$app/env';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
@@ -131,11 +130,7 @@
 					onchange={(event) => update('unknown', event.currentTarget.checked ? ['1'] : [])}
 				/>Show {formatNumber(unknownCount)} items without a known source</label
 			>
-			<p class="filter-hint">
-				No known source does not mean unobtainable. <a href={resolve('coverage/#itemWithoutSource')}
-					>Coverage</a
-				>
-			</p>{/if}
+		{/if}
 		{#if activeCount}<div class="filter-chips" aria-label="Active filters">
 				{#if filters.name}<button type="button" onclick={() => update('name', [])}
 						>Name: {filters.name} <span aria-hidden="true">×</span><span class="sr-only"

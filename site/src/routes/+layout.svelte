@@ -58,7 +58,6 @@
 		</a>
 		<nav aria-label="Main">
 			<a href={itemsPath} aria-current={current(itemsPath)}>Items</a>
-			<a href={resolve('coverage/')} aria-current={current('/coverage/')}>Coverage</a>
 			<a href={resolve('about/')} aria-current={current('/about/')}>About</a>
 		</nav>
 		{#if !home}<div class="header-search"><Search /></div>{/if}
@@ -69,9 +68,9 @@
 <footer class="site-footer">
 	<div class="footer-inner">
 		<nav aria-label="Footer">
-			<a href={itemsPath}>Items</a><a href={resolve('coverage/')}>Coverage</a><a
-				href={resolve('known-issues/')}>Known Issues</a
-			><a href={resolve('about/')}>About</a><a href="https://ko-fi.com/wowmuch">Support on Ko-fi</a>
+			<a href={itemsPath}>Items</a><a href={resolve('known-issues/')}>Known Issues</a><a
+				href={resolve('about/')}>About</a
+			><a href="https://ko-fi.com/wowmuch">Support on Ko-fi</a>
 		</nav>
 		<ReleaseInfo release={data.release} />
 		<p>

@@ -93,40 +93,6 @@
       ],
       "title": "ConditionKind"
     },
-    "CoverageGap": {
-      "properties": {
-        "entries": {
-          "items": {
-            "$ref": "#/$defs/GapEntry"
-          },
-          "type": "array"
-        },
-        "kind": {
-          "$ref": "#/$defs/GapKind"
-        }
-      },
-      "required": [
-        "kind",
-        "entries"
-      ],
-      "title": "CoverageGap",
-      "type": "object"
-    },
-    "CoverageReport": {
-      "properties": {
-        "gaps": {
-          "items": {
-            "$ref": "#/$defs/CoverageGap"
-          },
-          "type": "array"
-        }
-      },
-      "required": [
-        "gaps"
-      ],
-      "title": "CoverageReport",
-      "type": "object"
-    },
     "CraftingData": {
       "properties": {
         "armorQualities": {
@@ -406,75 +372,6 @@
       "title": "Fact",
       "type": "object"
     },
-    "GapEntry": {
-      "properties": {
-        "detail": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "entity": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/EntityReference"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "label": {
-          "type": "string"
-        },
-        "source": {
-          "enum": [
-            "shop",
-            "currencyShop",
-            "smithing",
-            "crafting",
-            "cooking",
-            "containerLoot",
-            "randomLoot",
-            "enemyDrop",
-            "pickup",
-            "dialogue",
-            "fishing",
-            "gathering",
-            "farming",
-            "bountyNote",
-            "settlementDelivery",
-            "stable",
-            "contract",
-            "seasonalGift",
-            "archaeology",
-            "reward",
-            null
-          ]
-        }
-      },
-      "required": [
-        "label",
-        "entity",
-        "detail"
-      ],
-      "title": "GapEntry",
-      "type": "object"
-    },
-    "GapKind": {
-      "enum": [
-        "itemWithoutSource",
-        "sourceWithoutPlace",
-        "itemWithoutIcon",
-        "unknownFact",
-        "placeWithoutName",
-        "unreadObject",
-        "unknownCondition",
-        "unresolvedReference",
-        "tooltipDifference"
-      ],
-      "title": "GapKind"
-    },
     "IssueNote": {
       "properties": {
         "effect": {
@@ -502,6 +399,12 @@
         },
         "quantity": {
           "type": "integer"
+        },
+        "relationId": {
+          "type": [
+            "string",
+            "null"
+          ]
         }
       },
       "required": [
@@ -998,6 +901,12 @@
             {
               "type": "null"
             }
+          ]
+        },
+        "relationId": {
+          "type": [
+            "string",
+            "null"
           ]
         },
         "rule": {
@@ -1499,9 +1408,6 @@
     "build": {
       "$ref": "#/$defs/SiteBuild"
     },
-    "coverage": {
-      "$ref": "#/$defs/CoverageReport"
-    },
     "crafting": {
       "$ref": "#/$defs/CraftingData"
     },
@@ -1531,7 +1437,6 @@
     "build",
     "items",
     "item",
-    "coverage",
     "kinds",
     "graph",
     "issues",

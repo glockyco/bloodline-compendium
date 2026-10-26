@@ -430,7 +430,8 @@
 						"slug": "cinderpear",
 						"icon": "cinderpear"
 					},
-					"quantity": 2
+					"quantity": 2,
+					"relationId": "fixture:cinderpear:use:0"
 				},
 				{
 					"item": {
@@ -474,7 +475,8 @@
 					"name": "Cinderpear",
 					"slug": "cinderpear",
 					"icon": "cinderpear"
-				}
+				},
+				"relationId": "fixture:cinderpear:use:1"
 			},
 			"amount": {
 				"min": 1,
