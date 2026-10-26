@@ -313,7 +313,11 @@ public sealed class WorldMechanismTests
         var placed = Assert.Single(sources, source => source.Source.Places.Count > 0);
         Assert.Equal("/Invented/Crystal.Crystal_C", placed.ItemClass);
         Assert.Equal(new Weight(2, 3), placed.Source.Weight);
-        Assert.DoesNotContain(sources, source => source.ItemClass == "/Invented/Bone.Bone_C");
+        Assert.Empty(
+            Assert
+                .Single(sources, source => source.ItemClass == "/Invented/Bone.Bone_C")
+                .Source.Places
+        );
     }
 
     [Fact]
@@ -354,6 +358,61 @@ public sealed class WorldMechanismTests
                     levels: [Level(spot, """{"Specific Loot Table":{"$map":[]}}""")]
                 )
             ),
+            source => source.Source.Places.Count > 0
+        );
+    }
+
+    [Theory]
+    [InlineData("GatherPoint", true)]
+    [InlineData("Overworld_Gatherpoint", false)]
+    public void GatheringKeepsCrownberryConsumerBranchesDistinct(string className, bool givesItem)
+    {
+        var gatherer = Type(
+            className,
+            """{"GatherPointType":11,"Abyssberry Bush Table":{"$map":[[{"$ref":"/Invented/Berry.Berry_C"},1]]}}"""
+        );
+        var placed = new GatheringMechanism()
+            .FindSources(Context([gatherer], levels: [Level(gatherer)]))
+            .Where(source => source.Source.Places.Count > 0)
+            .ToArray();
+        Assert.Equal(givesItem ? 1 : 0, placed.Length);
+    }
+
+    [Theory]
+    [InlineData(9, "Bone Pile Loot")]
+    [InlineData(10, "Magma Stone Loot")]
+    public void GatheringConstructionSelectsBoneAndMagmaPools(int preset, string field)
+    {
+        var gatherer = Type("HarvestableInteractionObject");
+        gatherer.Properties["Preset"] = preset;
+        gatherer.Properties[field] = Parse(
+            """{"$map":[[{"$ref":"/Invented/Resource.Resource_C"},2],[null,1]]}"""
+        );
+        var placed = Assert.Single(
+            new GatheringMechanism().FindSources(Context([gatherer], levels: [Level(gatherer)])),
+            source => source.Source.Places.Count > 0
+        );
+        Assert.Equal(new Weight(2, 3), placed.Source.Weight);
+    }
+
+    [Theory]
+    [InlineData("Iron", "Iron Deposit Loot")]
+    [InlineData("Copper", "Copper Deposit Loot")]
+    [InlineData("Pine", "Pine Tree Loot")]
+    public void GatheringCustomPresetsUseAuthoredResourceMaps(string preset, string field)
+    {
+        var gatherer = Type("HarvestableInteractionObject", """{"Custom Preset":true}""");
+        gatherer.Properties["Custom Preset Name"] = preset;
+        gatherer.Properties[field] = Parse(
+            """{"$map":[[{"$ref":"/Invented/Resource.Resource_C"},1]]}"""
+        );
+        Assert.Single(
+            new GatheringMechanism().FindSources(Context([gatherer], levels: [Level(gatherer)])),
+            source => source.Source.Places.Count > 0
+        );
+        gatherer.Properties["Table Based Preset?"] = true;
+        Assert.DoesNotContain(
+            new GatheringMechanism().FindSources(Context([gatherer], levels: [Level(gatherer)])),
             source => source.Source.Places.Count > 0
         );
     }

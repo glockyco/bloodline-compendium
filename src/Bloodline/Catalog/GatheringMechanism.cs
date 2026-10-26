@@ -18,6 +18,8 @@ internal sealed class GatheringMechanism : ISourceMechanism
         [6] = "Stone Loot",
         [7] = "Berry Bush Loot",
         [8] = "Mushroom Patch Loot",
+        [9] = "Bone Pile Loot",
+        [10] = "Magma Stone Loot",
         [11] = "Hetrum Deposit Loot",
     };
     private static readonly IReadOnlyDictionary<int, string> GatherPools = new Dictionary<
@@ -33,7 +35,6 @@ internal sealed class GatheringMechanism : ISourceMechanism
         [5] = "Ore Deposit Table",
         [9] = "MushroomLootTable",
         [10] = "Waterfront Mushroom Grove Table",
-        [11] = "Abyssberry Bush Table",
     };
     private static readonly string[] UniformPools =
     [
@@ -101,12 +102,27 @@ internal sealed class GatheringMechanism : ISourceMechanism
         var harvest = WorldSourceData.IsClass(context, path, "HarvestableInteractionObject_C");
         if (harvest && RecordValues.Boolean(properties["Custom Preset"]) == true)
         {
-            return "Selected Loot Table";
+            if (RecordValues.Boolean(properties["Table Based Preset?"]) == true)
+            {
+                return null;
+            }
+            return RecordValues.String(properties["Custom Preset Name"]) switch
+            {
+                "Iron" => "Iron Deposit Loot",
+                "Copper" => "Copper Deposit Loot",
+                "Pine" => "Pine Tree Loot",
+                _ => "Selected Loot Table",
+            };
         }
         var index = WorldSourceData.EnumIndex(
             context,
             properties[harvest ? "Preset" : "GatherPointType"]
         );
+        // GatherPoint routes Crownberry to the Abyssberry table. The overworld consumer has no such branch.
+        if (!harvest && index == 11 && WorldSourceData.IsClass(context, path, "GatherPoint_C"))
+        {
+            return "Abyssberry Bush Table";
+        }
         var pools = harvest ? HarvestPools : GatherPools;
         return index is { } value && pools.TryGetValue(value, out var pool)
             ? pool
@@ -143,7 +159,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
                 .ToList();
             notes.Add(
                 placed
-                    ? "Selected gathering pool. Harvest attempts and bonuses depend on the resource and gathering state."
+                    ? "Gathering pool selected by the authored preset. Construction or preset events may replace it with a scripted pool. Harvest attempts and bonuses depend on gathering state."
                     : "Selectable resource pool. Activation is not resolved to a placed gather point."
             );
             foreach (var (item, weight) in WorldSourceData.Pool(properties[pool]))
