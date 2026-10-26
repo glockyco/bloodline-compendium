@@ -5,6 +5,7 @@ using Bloodline.SiteData;
 var root = new RootCommand("Builds The Bloodline Compendium's data from the installed game.")
 {
     SiteDataSchema.CreateCommand(),
+    Bloodline.Extraction.ExtractCommand.CreateCommand(),
 };
 
 try
