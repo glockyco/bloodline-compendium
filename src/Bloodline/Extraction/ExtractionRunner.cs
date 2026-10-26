@@ -29,8 +29,6 @@ internal sealed class ExtractionRunner
     private readonly HashSet<string> loading = new(StringComparer.Ordinal);
     private readonly Dictionary<string, Exception> failed = new(StringComparer.Ordinal);
     private readonly Dictionary<string, int> unsupported = new(StringComparer.Ordinal);
-    private string currentPackage = "";
-    private string? currentObject;
 
     private ExtractionRunner(DefaultFileProvider provider, FAssetData[] assets, GapCollector gaps)
     {
@@ -46,19 +44,14 @@ internal sealed class ExtractionRunner
             .Where(asset => asset.AssetClass.Text is "UserDefinedStruct" or "UserDefinedEnum")
             .GroupBy(asset => asset.AssetName.Text, StringComparer.Ordinal)
             .ToDictionary(group => group.Key, group => group.ToArray(), StringComparer.Ordinal);
-        encoder = new PropertyEncoder(
-            (type, field) =>
-            {
-                unsupported[type] = unsupported.GetValueOrDefault(type) + 1;
-                gaps.Add(currentPackage, currentObject, $"Unsupported property {type}: {field}");
-            },
-            ResolveType
-        );
+        ConfigureMapStructTypes(assets);
+        encoder = new PropertyEncoder(resolveType: ResolveType);
     }
 
     public static void Run(LocalConfiguration configuration)
     {
         var clock = Stopwatch.StartNew();
+        using var memory = new PeakMemorySample();
         var snapshot = InstallationSnapshot.Capture(configuration);
         var build = snapshot.Manifest.Build;
         var layout = new RecordLayout(configuration.OutputDirectory, build.BuildId);
@@ -76,6 +69,7 @@ internal sealed class ExtractionRunner
         provider.ReadScriptData = false;
         provider.Mount();
         provider.PostMount();
+        provider.LoadVirtualPaths();
         var registry = provider.Files.Single(pair =>
             pair.Key.EndsWith("/AssetRegistry.bin", StringComparison.OrdinalIgnoreCase)
         );
@@ -83,6 +77,15 @@ internal sealed class ExtractionRunner
         var assets = new FAssetRegistryState(registryReader).PreallocatedAssetDataBuffers;
         var runner = new ExtractionRunner(provider, assets, gaps);
         var counts = runner.WriteRecords(root, assets);
+        var icons = Icons.IconExtractor.Extract(
+            provider,
+            ItemIconTexturePaths(runner.merged.Values),
+            Path.Combine(root, "icons")
+        );
+        CanonicalJson.Write(Path.Combine(root, "textures.json"), icons.Textures);
+        foreach (var gap in icons.Gaps)
+            gaps.Add(gap.Package, gap.Object, gap.Error);
+        counts["textures"] = icons.Textures.Count;
         CanonicalJson.Write(Path.Combine(root, "build.json"), build);
         CanonicalJson.Write(Path.Combine(root, "gaps.json"), gaps.Records);
         snapshot.AssertUnchanged();
@@ -109,7 +112,7 @@ internal sealed class ExtractionRunner
             Console.WriteLine($"Unsupported {type.Key}: {type.Value}");
         }
         Console.WriteLine(
-            $"Records {bytes:N0} bytes. Duration {clock.Elapsed.TotalSeconds:F2}s. Peak memory {Process.GetCurrentProcess().PeakWorkingSet64:N0} bytes."
+            $"Records {bytes:N0} bytes. Duration {clock.Elapsed.TotalSeconds:F2}s. Peak sampled memory {memory.Bytes:N0} bytes."
         );
     }
 
@@ -152,7 +155,6 @@ internal sealed class ExtractionRunner
                 )
             )
                 continue;
-            Context(packageName, asset.ObjectPath);
             if (
                 gaps.TryRead<object>(
                     packageName,
@@ -185,6 +187,7 @@ internal sealed class ExtractionRunner
 
         void Write(string kind, string path, object record)
         {
+            ReportUnsupported(path, record);
             CanonicalJson.Write(RecordLayout.PackageFile(Path.Combine(root, kind), path), record);
             counts[kind]++;
         }
@@ -205,6 +208,7 @@ internal sealed class ExtractionRunner
                 ?? throw new InvalidDataException($"Blueprint class not in asset registry: {path}");
             var package = provider.LoadPackage(asset.PackageName.Text);
             var generated = package.GetExport<UClass>(path.Split('.')[^1]);
+            MapStructMetadata.Register(generated, provider.Versions);
             var parent = generated.SuperStruct.ResolvedObject?.GetPathName();
             var ancestors = new List<string>();
             var inherited = new JsonObject();
@@ -218,7 +222,6 @@ internal sealed class ExtractionRunner
                     ancestors.AddRange(parentRecord.Ancestors);
                 }
             }
-            Context(asset.PackageName.Text, path);
             var declarations = generated.ChildProperties?.OfType<FProperty>().ToArray() ?? [];
             var fieldNames = FieldNames.Resolve(
                 declarations.Select(property => property.Name.Text)
@@ -309,7 +312,6 @@ internal sealed class ExtractionRunner
             var classPath = info.Class?.GetPathName();
             if (classPath == null || !classes.ContainsKey(classPath))
                 continue;
-            Context(asset.PackageName.Text, info.GetPathName());
             if (
                 gaps.TryRead(
                     asset.PackageName.Text,
@@ -318,7 +320,6 @@ internal sealed class ExtractionRunner
                     {
                         var actor = package.ExportsLazy[i].Value;
                         var defaults = Class(classPath).Properties;
-                        Context(asset.PackageName.Text, info.GetPathName());
                         var declaration =
                             actor.Class?.Load() as UStruct
                             ?? throw new InvalidDataException(
@@ -358,7 +359,6 @@ internal sealed class ExtractionRunner
             var classPath =
                 info.Class?.GetPathName()
                 ?? throw new InvalidDataException($"Missing class for {info.GetPathName()}");
-            Context(asset.PackageName.Text, info.GetPathName());
             if (
                 gaps.TryRead(
                     asset.PackageName.Text,
@@ -369,7 +369,6 @@ internal sealed class ExtractionRunner
                         var defaults = classes.ContainsKey(classPath)
                             ? Class(classPath).Properties
                             : new JsonObject();
-                        Context(asset.PackageName.Text, info.GetPathName());
                         return new InnerObjectRecord(
                             info.GetPathName(),
                             classPath,
@@ -386,13 +385,33 @@ internal sealed class ExtractionRunner
             )
                 objects.Add(record!);
         }
-        Context(asset.PackageName.Text, asset.ObjectPath);
         return new AssetRecord(
             asset.ObjectPath,
             dialogue.Class?.GetPathName() ?? dialogue.ExportType,
             encoder.Properties(dialogue.Properties),
             objects
         );
+    }
+
+    private void ConfigureMapStructTypes(IEnumerable<FAssetData> assets)
+    {
+        foreach (var asset in assets.Where(asset => asset.AssetClass.Text == "UserDefinedStruct"))
+        {
+            if (
+                gaps.TryRead(
+                    asset.PackageName.Text,
+                    asset.ObjectPath,
+                    () =>
+                        provider
+                            .LoadPackage(asset.PackageName.Text)
+                            .GetExport<UUserDefinedStruct>(asset.AssetName.Text),
+                    out var declaration
+                )
+            )
+            {
+                MapStructMetadata.Register(declaration!, provider.Versions);
+            }
+        }
     }
 
     private UObject? ResolveType(string name)
@@ -413,10 +432,36 @@ internal sealed class ExtractionRunner
         return value;
     }
 
-    private void Context(string package, string? name)
+    private void ReportUnsupported(string package, object record)
     {
-        currentPackage = package;
-        currentObject = name;
+        switch (record)
+        {
+            case ClassRecord generated:
+                Properties(generated.Path, generated.Properties);
+                break;
+            case TableRecord table:
+                for (var index = 0; index < table.Rows.Count; index++)
+                    Properties(table.Path, table.Rows[index].Values, $"/rows/{index}/values");
+                break;
+            case LevelRecord level:
+                foreach (var actor in level.Actors)
+                    Properties(actor.Name, actor.Properties);
+                break;
+            case AssetRecord asset:
+                Properties(asset.Path, asset.Properties);
+                foreach (var inner in asset.Objects)
+                    Properties(inner.Path, inner.Properties);
+                break;
+        }
+
+        void Properties(string name, JsonObject values, string prefix = "")
+        {
+            foreach (var value in UnsupportedValues.Find(values))
+            {
+                unsupported[value.Type] = unsupported.GetValueOrDefault(value.Type) + 1;
+                gaps.Add(package, name, $"Unsupported property {value.Type}: {prefix}{value.Path}");
+            }
+        }
     }
 
     internal static IReadOnlyCollection<string> ItemIconTexturePaths(

@@ -137,6 +137,13 @@ internal sealed class PropertyEncoder(
                 }
             }
         }
+        if (
+            index?.ResolvedObject is { } native
+            && native.GetPathName().StartsWith("/Script/", StringComparison.Ordinal)
+        )
+        {
+            return Enum($"{native.Name.Text}::0", null);
+        }
         return Unsupported("EnumProperty", "The enum has no resolvable member with value zero.");
     }
 
@@ -226,10 +233,68 @@ internal sealed class PropertyEncoder(
         return result;
     }
 
-    private JsonNode? EncodeTag(FPropertyTag property, FProperty? declaration) =>
-        property.Tag is null
-            ? Unsupported(property.PropertyType.Text, $"No decoded value for {property.Name.Text}.")
-            : EncodeValue(property.Tag, property.TagData, declaration, false);
+    private JsonNode? EncodeTag(FPropertyTag property, FProperty? declaration)
+    {
+        if (property.Tag is not null)
+        {
+            return EncodeValue(property.Tag, property.TagData, declaration, false);
+        }
+        if (HasParser(property.PropertyType.Text))
+        {
+            // CUE4Parse can catch a parser exception and leave a supported tag undecoded.
+            throw new InvalidDataException(
+                $"Incomplete {property.PropertyType.Text} value for {property.Name.Text}."
+            );
+        }
+        return Unsupported(
+            property.PropertyType.Text,
+            $"No decoded value for {property.Name.Text}."
+        );
+    }
+
+    private static bool HasParser(string type) =>
+        type
+            is "ArrayProperty"
+                or "AssetObjectProperty"
+                or "AssetClassProperty"
+                or "BoolProperty"
+                or "ByteProperty"
+                or "ClassProperty"
+                or "DelegateProperty"
+                or "DoubleProperty"
+                or "EnumProperty"
+                or "FieldPathProperty"
+                or "FloatProperty"
+                or "Int16Property"
+                or "Int64Property"
+                or "Int8Property"
+                or "IntProperty"
+                or "InterfaceProperty"
+                or "LazyObjectProperty"
+                or "MapProperty"
+                or "MulticastDelegateProperty"
+                or "MulticastInlineDelegateProperty"
+                or "MulticastSparseDelegateProperty"
+                or "NameProperty"
+                or "ObjectProperty"
+                or "SetProperty"
+                or "SoftClassProperty"
+                or "SoftObjectProperty"
+                or "StrProperty"
+                or "AnsiStrProperty"
+                or "Utf8StrProperty"
+                or "StructProperty"
+                or "TextProperty"
+                or "UInt16Property"
+                or "UInt32Property"
+                or "UInt64Property"
+                or "WeakObjectProperty"
+                or "OptionalProperty"
+                or "ReferenceProperty"
+                or "VerseStringProperty"
+                or "VerseFunctionProperty"
+                or "VerseDynamicProperty"
+                or "VerseClassProperty";
 
     private JsonNode? EncodeValue(
         FPropertyTagType? property,

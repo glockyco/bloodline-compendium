@@ -259,6 +259,22 @@ public sealed class ManifestTests : IDisposable
     }
 
     [Fact]
+    public void PublishingRecordsLeavesTheSiteDirectoryUntouched()
+    {
+        var target = CreatePreviousRecords();
+        var site = Path.Combine(Path.GetDirectoryName(target)!, "site");
+        Directory.CreateDirectory(site);
+        var page = Path.Combine(site, "fixture.json");
+        File.WriteAllText(page, "invented site data");
+        using (var output = new AtomicRecordsDirectory(target))
+        {
+            File.WriteAllText(Path.Combine(output.DirectoryPath, "build.json"), "new records");
+            output.Commit();
+        }
+        Assert.Equal("invented site data", File.ReadAllText(page));
+    }
+
+    [Fact]
     public void SuccessfulCommitReplacesRecordsOnlyAtCommit()
     {
         var target = CreatePreviousRecords();

@@ -34,16 +34,17 @@ internal sealed class GapCollector(params string[] privatePaths)
         var reasons = new List<string>();
         for (Exception? current = error; current != null; current = current.InnerException)
         {
-            var message = current.Message;
-            foreach (var path in privatePaths.OrderByDescending(path => path.Length))
-            {
-                message = message.Replace(path, "<local>", StringComparison.OrdinalIgnoreCase);
-            }
-            reasons.Add($"{current.GetType().Name}: {message}");
+            reasons.Add($"{current.GetType().Name}: {current.Message}");
         }
         Add(package, name, string.Join(" | ", reasons));
     }
 
-    public void Add(string package, string? name, string reason) =>
+    public void Add(string package, string? name, string reason)
+    {
+        foreach (var path in privatePaths.OrderByDescending(path => path.Length))
+        {
+            reason = reason.Replace(path, "<local>", StringComparison.OrdinalIgnoreCase);
+        }
         records.Add(new GapRecord(package, name, reason));
+    }
 }

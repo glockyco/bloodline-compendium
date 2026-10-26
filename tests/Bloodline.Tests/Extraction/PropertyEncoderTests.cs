@@ -415,6 +415,48 @@ public sealed class PropertyEncoderTests
         Assert.All(reports, report => Assert.NotEmpty(report.Detail));
     }
 
+    [Theory]
+    [InlineData("MapProperty")]
+    [InlineData("ArrayProperty")]
+    [InlineData("SetProperty")]
+    [InlineData("StructProperty")]
+    [InlineData("IntProperty")]
+    [InlineData("ObjectProperty")]
+    [InlineData("SoftClassProperty")]
+    [InlineData("TextProperty")]
+    public void RejectsUndecodedSupportedTagsRatherThanPublishingPartialObjects(string type)
+    {
+        var missing = new FPropertyTag { Name = "Undecoded", PropertyType = type };
+
+        var error = Assert.Throws<InvalidDataException>(() => encoder.Properties([missing]));
+
+        Assert.Contains(type, error.Message, StringComparison.Ordinal);
+        Assert.Contains("Undecoded", error.Message, StringComparison.Ordinal);
+        Assert.Throws<InvalidDataException>(() => encoder.Value(Struct(missing)));
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void KeepsNativeEnumZeroWhenTheScriptDeclarationHasNoMemberNames(bool hasEnumDeclaration)
+    {
+        UObject enumeration = hasEnumDeclaration
+            ? new UEnum { Name = "E_InventedNative", Names = [] }
+            : new UScriptClass("E_InventedNative");
+        var package = new FixturePackage("/Script/Invented", enumeration);
+        var reports = new List<string>();
+        var reporting = new PropertyEncoder((type, _) => reports.Add(type));
+        var index = new FPackageIndex(package, 1);
+
+        var enumValue = reporting.Zero(new FEnumProperty { Enum = index });
+        var byteValue = reporting.Zero(new FByteProperty { Enum = index });
+
+        Assert.Equal("E_InventedNative::0", RecordValues.EnumValue(enumValue));
+        Assert.True(JsonNode.DeepEquals(enumValue, byteValue));
+        Assert.Null(RecordValues.EnumDisplay(enumValue));
+        Assert.Empty(reports);
+    }
+
     private static UUserDefinedEnum InventedEnum()
     {
         var result = new UUserDefinedEnum
@@ -473,7 +515,10 @@ public sealed class PropertyEncoderTests
     private sealed class FixturePackage : AbstractUePackage
     {
         public FixturePackage(params UObject[] exports)
-            : base("/Game/Invented", null)
+            : this("/Game/Invented", exports) { }
+
+        public FixturePackage(string name, params UObject[] exports)
+            : base(name, null)
         {
             ExportsLazy = exports.Select(value => new Lazy<UObject>(() => value)).ToArray();
             IsFullyLoaded = true;
