@@ -125,10 +125,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
         var overworld = WorldSourceData.IsClass(context, path, "Overworld_Gatherpoint_C");
         var selected = SelectedPool(context, path, properties);
         var pools = harvest
-            ? HarvestPools
-                .Values.Append("Selected Loot Table")
-                .Append("Magma Stone Loot")
-                .Append("Bone Pile Loot")
+            ? HarvestPools.Values.Append("Selected Loot Table")
             : GatherPools.Values;
         foreach (var pool in pools.Distinct(StringComparer.Ordinal))
         {

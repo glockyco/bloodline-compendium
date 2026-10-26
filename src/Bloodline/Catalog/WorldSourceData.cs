@@ -7,6 +7,8 @@ namespace Bloodline.Catalog;
 
 internal static class WorldSourceData
 {
+    private static readonly string[] NameFields = ["Full Name", "Name", "ItemInfo.ItemName"];
+
     public static bool IsClass(CatalogContext context, string path, string name) =>
         ItemIdentity.ClassName(path) == ItemIdentity.ClassName(name)
         || (
@@ -16,14 +18,19 @@ internal static class WorldSourceData
             )
         );
 
-    public static string Name(JsonObject properties, string path) =>
-        RecordValues.Text(properties["Full Name"])
-        ?? RecordValues.String(properties["Full Name"])
-        ?? RecordValues.Text(properties["NPCName"])
-        ?? RecordValues.Text(properties["NPC Name"])
-        ?? RecordValues.Text(properties["Name"])
-        ?? RecordValues.Text(properties["ItemInfo"]?["ItemName"])
-        ?? ItemIdentity.Readable(ItemIdentity.ClassName(path));
+    public static string Name(JsonObject properties, string path)
+    {
+        foreach (var field in NameFields)
+        {
+            var value = RecordValues.At(properties, field);
+            var name = RecordValues.Text(value) ?? RecordValues.String(value);
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                return name;
+            }
+        }
+        return ItemIdentity.Readable(ItemIdentity.ClassName(path));
+    }
 
     public static bool IsTable(TableRecord table, string name) =>
         table.Path.Split('/').Last().Split('.')[0] == name;

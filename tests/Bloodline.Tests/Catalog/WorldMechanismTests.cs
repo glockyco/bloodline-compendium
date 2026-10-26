@@ -122,7 +122,7 @@ public sealed class WorldMechanismTests
         );
         var npc = Type(
             "Storyteller",
-            """{"NPC Name":{"$text":"Invented storyteller"},"Dialogue":{"$ref":"/Invented/Tale.Tale"}}"""
+            """{"Full Name":{"$text":"Invented storyteller"},"Dialogue":{"$ref":"/Invented/Tale.Tale"}}"""
         );
         var dialogue = new AssetRecord(
             "/Invented/Tale.Tale",
@@ -313,11 +313,7 @@ public sealed class WorldMechanismTests
         var placed = Assert.Single(sources, source => source.Source.Places.Count > 0);
         Assert.Equal("/Invented/Crystal.Crystal_C", placed.ItemClass);
         Assert.Equal(new Weight(2, 3), placed.Source.Weight);
-        Assert.Empty(
-            Assert
-                .Single(sources, source => source.ItemClass == "/Invented/Bone.Bone_C")
-                .Source.Places
-        );
+        Assert.DoesNotContain(sources, source => source.ItemClass == "/Invented/Bone.Bone_C");
     }
 
     [Fact]
