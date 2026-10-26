@@ -101,6 +101,8 @@ bun run --cwd site lint && bun run --cwd site format:check && bun run --cwd site
 bun run --cwd site test:unit && bun run --cwd site build:fixtures && bun run --cwd site test:e2e
 ```
 
+In browser accessibility tests, expand content through the enhanced controls before scanning it, because hydration replaces the static fallback disclosures. Keep checks of no-JavaScript disclosures separate from the enhanced page checks.
+
 For OpenSpec validation on Apple silicon Macs or Linux:
 
 ```sh
