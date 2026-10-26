@@ -33,9 +33,19 @@
 	--error: #ffb4b4;
 	--shadow-raised: 0 10px 30px rgb(0 0 0 / 40%);
 	--shadow-text: 0 2px 24px var(--surface);
+	/* The item tooltip, drawn after the game's own: a dark brown panel with a bronze frame and a cream name ribbon. */
+	--tooltip-surface: #2b2119;
+	--tooltip-surface-edge: #18120d;
+	--tooltip-frame: #a8743f;
+	--tooltip-ribbon: #e4cb92;
+	--tooltip-ink: #1a1910;
+	--tooltip-text: #f1e8d8;
+	--tooltip-muted: #c2b8a6;
+	--tooltip-slot: #1f1812;
 
 	--font-body: 'Figtree Variable', system-ui, sans-serif;
 	--font-heading: 'Young Serif', Georgia, serif;
+	--font-game: 'Arbutus Slab', Georgia, serif;
 
 	/* Type. Nothing a reader must read is smaller than step 1. */
 	--type-1: 1rem;

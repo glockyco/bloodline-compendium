@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import '@fontsource/young-serif/400.css';
+	import '@fontsource/arbutus-slab/400.css';
 	import '@fontsource-variable/figtree';
 	import '../app.css';
 	import Search from '#lib/Search.svelte';

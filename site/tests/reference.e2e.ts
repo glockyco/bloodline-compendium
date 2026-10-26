@@ -89,9 +89,10 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 }) => {
 	await page.goto('/items/lanternedge/');
 	await expect(page.getByRole('heading', { name: 'How to get it', exact: true })).toBeVisible();
-	await expect(page.locator('.facts')).toContainText(/Damage\s*12/);
-	await expect(page.locator('.facts')).toContainText(/Attack Speed\s*1.2/);
-	await expect(page.locator('.facts')).toContainText(/Critical Chance\s*Unknown/);
+	const details = page.getByRole('complementary', { name: 'Item details' });
+	await expect(details).toContainText(/Damage\s*12/);
+	await expect(details).toContainText(/Speed\s*1.2/);
+	await expect(details).toContainText(/Critical Chance\s*Unknown/);
 	const shopLink = page.locator('.acquisition-routes a[href="#source-shop"]');
 	await shopLink.click();
 	await expect(page).toHaveURL(/#source-shop$/);

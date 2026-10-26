@@ -3,6 +3,7 @@
 	import SourceRow from '#lib/SourceRow.svelte';
 	import RelationTable from '#lib/RelationTable.svelte';
 	import ItemLink from '#lib/ItemLink.svelte';
+	import ItemTooltip from '#lib/ItemTooltip.svelte';
 	import { sourceHeadings, titleCase } from '#lib/labels.js';
 	import { sortSources, sourceContext, useHeadings } from '#lib/acquisition.js';
 	import { formatNumber } from '#lib/format.js';
@@ -131,25 +132,8 @@
 			{/if}
 		</section>
 		<aside class="item-side" aria-label="Item details">
-			<div class="item-tooltip panel" data-pagefind-ignore="all">
-				<h2>{titleCase(item.type)}</h2>
-				<dl class="facts">
-					{#each item.facts as fact (fact.label)}<div>
-							<dt>{titleCase(fact.label)}</dt>
-							<dd class:unknown={fact.value === null}>
-								{fact.value ?? 'Unknown'}{fact.value !== null &&
-								fact.label.toLowerCase() === 'value'
-									? ' gold'
-									: ''}
-							</dd>
-						</div>{/each}
-				</dl>
-			</div>
-			<section class="about-item" aria-labelledby="about-this-item">
-				<h2 id="about-this-item">About this item</h2>
-				<p>{item.description ?? 'Description unknown.'}</p>
-				{#if !item.icon}<p class="muted">No icon is known for this item.</p>{/if}
-			</section>
+			<ItemTooltip item={{ ...item, name: displayName }} />
+			{#if !item.icon}<p class="muted">No icon is known for this item.</p>{/if}
 		</aside>
 		<div class="item-relations" data-pagefind-ignore="all">
 			{#if sourceGroups.length}<p class="muted">

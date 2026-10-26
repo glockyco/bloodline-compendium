@@ -204,6 +204,7 @@ Screenshots are derived from the game, so they live in the build's artifacts and
 - A fixture page renders each primitive with extreme content. Playwright checks overflow, row alignment, minimum size and contrast at 390, 768 and 1280 px, and axe runs on every page.
 - Voice rules sit with the `site/presentation` spec and a banned-phrase list in the repository, checked on built HTML.
 - Item pages present facts in the game tooltip's order and wording, with Arbutus Slab (SIL OFL) for item names.
+- Pages keep the plum night surfaces sampled from the key art, and item tooltips use the game's brown panel, bronze frame and cream ribbon. Mock-ups of both options on the home and Lonland Pistol pages (`artifacts/design/palette/`) showed that a warm brown page made the tooltip blend into it and left a muddy seam under the lavender hero art, while on plum the tooltip reads as an object from the game.
 
 The emblem is a single front-facing tome illustration generated from the key art's style. It is the source of the header mark, the favicons and the link preview image.
 
@@ -313,5 +314,4 @@ The site-data contract changes in one cutover. The catalog writes references, th
 
 ## Open Questions
 
-- The page palette: plum surfaces from the key art with items in the game's brown tooltip style, or a warm brown theme throughout. Mock-ups decide. Either choice leaves the token roles unchanged.
 - The heading typeface beside Arbutus Slab.
