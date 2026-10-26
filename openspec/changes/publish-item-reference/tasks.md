@@ -11,13 +11,13 @@
 ## 2. Extraction
 
 - [x] 2.1 Add machine-local configuration (a Git-ignored file plus a committed example) for the Steam library and output locations, and verify a missing or invalid file produces an error naming the setting
-- [ ] 2.2 Read build identity from Steam's app manifest and fail when the build changes during a run, and verify the output names build 24464547 and its depot manifest, contains no machine paths, and that a changed app manifest fails the run
-- [ ] 2.3 Load packages with fatal serialization errors and record unreadable objects and packages as gaps, and verify with a test that a failing object leaves no record and that the 2.2 GB Moonhorn Cliffs level appears as a gap
-- [ ] 2.4 Encode property values and merge inherited defaults, and verify with tests for inherited values, partial struct overrides, replaced arrays, explicit empty overrides, struct defaults and unknown native fields
-- [ ] 2.5 Resolve user-defined enum display names and keep each text's namespace, key and source string, and verify `E_ItemType::NewEnumerator3` resolves to its display name
-- [ ] 2.6 Write records for class defaults, DataTables, enums, placed actors per level and dialogues, and verify on build 24464547 that all 2,161 item classes and 48 DataTables appear and that placed vendors carry their stock
-- [ ] 2.7 Decode item icons to PNG named by pixel hash, and verify sampled DXT1, DXT5 and uncompressed icons by viewing them
-- [ ] 2.8 Verify that two extractions of build 24464547 produce identical output hashes
+- [x] 2.2 Read build identity from Steam's app manifest and fail when the build changes during a run, and verify the output names build 24464547 and its depot manifest, contains no machine paths, and that a changed app manifest fails the run
+- [x] 2.3 Load packages with fatal serialization errors and record unreadable objects and packages as gaps, and verify with a test that a failing object leaves no record and that the 2.2 GB Moonhorn Cliffs level appears as a gap
+- [x] 2.4 Encode property values and merge inherited defaults, and verify with tests for inherited values, partial struct overrides, replaced arrays, explicit empty overrides, struct defaults and unknown native fields
+- [x] 2.5 Resolve user-defined enum display names and keep each text's namespace, key and source string, and verify `E_ItemType::NewEnumerator3` resolves to its display name
+- [x] 2.6 Write records for class defaults, DataTables, enums, placed actors per level and dialogues, and verify on build 24464547 that all 2,161 item classes and 48 DataTables appear and that placed vendors carry their stock
+- [x] 2.7 Decode item icons to PNG named by pixel hash, and verify sampled DXT1, DXT5 and uncompressed icons by viewing them
+- [x] 2.8 Verify that two extractions of build 24464547 produce identical output hashes
 
 ## 3. Item catalog
 
