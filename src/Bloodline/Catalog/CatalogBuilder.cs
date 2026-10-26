@@ -33,6 +33,7 @@ internal static class CatalogBuilder
             new FarmingMechanism(),
             new BountyNoteMechanism(),
             new SettlementDeliveryMechanism(),
+            new PickupObjectMechanism(),
             new ContainerLootMechanism(),
             new RandomLootMechanism(),
             new EnemyDropMechanism(),
