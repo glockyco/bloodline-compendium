@@ -14,7 +14,7 @@ flowchart LR
 
 ## Setup
 
-On Apple silicon Macs and Linux, `nix develop` opens a shell with every tool. Elsewhere, install the .NET SDK version named in `global.json`, the Bun version named in `package.json` and Node.js 22.
+On macOS and Linux, `nix develop` opens a shell with every tool. On Windows, install the .NET SDK version named in `global.json`, the Bun version named in `package.json` and Node.js 22.
 
 Then restore the tools and dependencies from the repository root:
 
@@ -40,7 +40,7 @@ dotnet run --project src/Bloodline -- catalog
 
 `bun run --cwd site dev` serves the site with invented fixtures from `site/fixtures/site-data`. To see real data, set `BLOODLINE_SITE_DATA` to the absolute path of a site data directory.
 
-To review a full build of real data locally, run `bun run --cwd site build:preview` with `BLOODLINE_SITE_DATA` set, then `bunx wrangler dev` in `site/`. This build skips only the provenance checks of a production build and never uploads anything.
+To review a full build of real data locally, run `bun run --cwd site build:preview` with `BLOODLINE_SITE_DATA` set, then `bun run --cwd site review`. This build skips only the provenance checks of a production build and never uploads anything.
 
 The C# types in `src/Bloodline/SiteData/SiteDataModel.cs` define the site data. After changing them, run `bun run types` to regenerate the JSON Schema and TypeScript types that the site uses.
 
@@ -55,18 +55,18 @@ bun run --cwd site lint && bun run --cwd site format:check && bun run --cwd site
 bun run --cwd site test:unit && bun run --cwd site build:fixtures && bun run --cwd site test:e2e
 ```
 
-`bun run guard` fails when Git tracks game files or extracted output.
+`bun run guard` fails when Git tracks game files or extracted output. `nix build --no-link .#checks.<system>.openspec` validates the OpenSpec artifacts with the check that every repository on this workstation shares. Its CLI has no Intel Mac build, so the check runs on Apple silicon Macs and Linux only.
 
 ## Publish
 
-Publishing needs Cloudflare credentials for Wrangler (`bunx wrangler login` in `site/`).
+Publishing needs Wrangler logged in to the Cloudflare account that holds `compendiums.org` (`bunx wrangler login` in `site/`).
 
 1. Commit your changes, then run `catalog` again, because site data records the commit it was built from.
-2. Build with `BLOODLINE_SITE_DATA=<absolute path>/artifacts/<build ID>/site bun run --cwd site build`. A production build refuses uncommitted changes and site data from another commit.
-3. Upload a preview with `bun run --cwd site deploy:preview` and review it at the `staging` preview URL that Wrangler prints.
-4. Publish with `bun run --cwd site deploy:production`.
+2. Build with `BLOODLINE_SITE_DATA=<absolute path>/artifacts/<build ID>/site bun run --cwd site build`. A production build refuses uncommitted changes and site data from another commit. Only this build fills `site/.stage/production`, the directory that deployments upload, so fixture and preview builds can never be published.
+3. Run `bun run --cwd site deploy:preview`. It checks the staged build, uploads it as a new version without deploying it, and smoke-tests the `staging` Version URL that Wrangler prints. Review the site there. Its pages keep their canonical links to the production domain, so search engines treat the production pages as the originals.
+4. Run `bun run --cwd site deploy:production`. It repeats the checks, deploys to `bloodline.compendiums.org` and smoke-tests the live site.
 
-To roll back, list versions with `bun run --cwd site deploy:versions`, then run `bun run --cwd site deploy:rollback -- <version ID> --message "<reason>"`.
+`deploy:dry-run` and `deploy:preview:dry-run` run the checks and Wrangler's dry run without uploading. `bun run --cwd site deploy:smoke <origin>` smoke-tests any origin against the staged build. To roll back, list versions with `bun run --cwd site deploy:versions`, then run `bun run --cwd site deploy:rollback -- <version ID> --message "<reason>"`.
 
 ## After a game update
 
