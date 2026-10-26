@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { isDeepStrictEqual } from "node:util";
 import { assetGate } from "./asset-gate.mjs";
 import { assertProductionBuild } from "./provenance.mjs";
+import { publicationGate } from "./publication-gate.mjs";
 
 export const securityHeaders = {
   "x-content-type-options": "nosniff",
@@ -18,6 +19,7 @@ export const requiredFiles = [
   "404.html",
   "items/index.html",
   "coverage/index.html",
+  "about/index.html",
   "build-info.json",
   "_headers",
   "favicon.svg",
@@ -43,6 +45,7 @@ export async function assertDeployment(directory, repo, limits) {
       throw new Error("Deployment is missing " + file);
   }
   const report = await assetGate(directory, limits);
+  const graph = await publicationGate(directory);
   const item = (
     await readdir(join(directory, "items"), { withFileTypes: true })
   )
@@ -55,6 +58,7 @@ export async function assertDeployment(directory, repo, limits) {
     ["/items/", "items/index.html"],
     ["/items/" + item.name + "/", "items/" + item.name + "/index.html"],
     ["/coverage/", "coverage/index.html"],
+    ["/about/", "about/index.html"],
   ]) {
     const html = await readFile(join(directory, file), "utf8");
     const title = html.match(/<title>([^<]+)<\/title>/)?.[0];
@@ -63,7 +67,7 @@ export async function assertDeployment(directory, repo, limits) {
       throw new Error(file + " has no title or main heading.");
     pages.push({ path, title, heading });
   }
-  return { build, pages, report };
+  return { build, pages, report, graph };
 }
 
 export async function smokeDeployment(
@@ -150,6 +154,7 @@ async function main() {
     root,
   );
   console.log(expected.report.report);
+  console.log(expected.graph.report);
   if (mode === "smoke") {
     await smokeDeployment(option, expected);
     console.log("Deployment smoke passed at " + option);

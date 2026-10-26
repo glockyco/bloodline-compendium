@@ -3,22 +3,52 @@
 	let {
 		title,
 		description,
-		noindex = false
+		noindex = false,
+		breadcrumbs = [],
+		website = false
 	}: {
 		title: string;
 		description: string;
 		noindex?: boolean;
+		breadcrumbs?: { name: string; path: string }[];
+		website?: boolean;
 	} = $props();
 	// Review hosts retain production identity instead of creating duplicate indexed pages.
 	const canonical = $derived('https://bloodline.compendiums.org' + page.url.pathname);
 	const image = 'https://bloodline.compendiums.org/og-default.png';
+	const structuredData = $derived([
+		...(website
+			? [
+					{
+						'@context': 'https://schema.org',
+						'@type': 'WebSite',
+						name: 'The Bloodline Compendium',
+						url: 'https://bloodline.compendiums.org/'
+					}
+				]
+			: []),
+		...(breadcrumbs.length
+			? [
+					{
+						'@context': 'https://schema.org',
+						'@type': 'BreadcrumbList',
+						itemListElement: breadcrumbs.map((entry, index) => ({
+							'@type': 'ListItem',
+							position: index + 1,
+							name: entry.name,
+							item: 'https://bloodline.compendiums.org' + entry.path
+						}))
+					}
+				]
+			: [])
+	]);
 </script>
 
 <svelte:head>
 	<title>{title}</title>
 	<meta name="description" content={description} />
 	{#if noindex}<meta name="robots" content="noindex" />{/if}
-	<link rel="canonical" href={canonical} />
+	{#if !noindex}<link rel="canonical" href={canonical} />{/if}
 	<meta property="og:type" content="website" />
 	<meta property="og:site_name" content="The Bloodline Compendium" />
 	<meta property="og:title" content={title} />
@@ -32,6 +62,14 @@
 	<meta name="twitter:title" content={title} />
 	<meta name="twitter:description" content={description} />
 	<meta name="twitter:image" content={image} />
+	<meta name="twitter:image:alt" content="The Bloodline Compendium book emblem" />
+	{#each structuredData as entry, index (index)}
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -- Serialized JSON has '<' escaped to prevent script-tag breakout. The split closing tag avoids the Svelte parser's raw script handling. -->
+		{@html '<script type="application/ld+json">' +
+			JSON.stringify(entry).replace(/</g, '\\u003c') +
+			'</' +
+			'script>'}
+	{/each}
 	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
 	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />

@@ -49,3 +49,18 @@
 ## 6. End-to-end check
 
 - [ ] 6.1 Run extract, catalog, site build and preview from a clean checkout on macOS, and verify the documented workflow produces a working preview
+
+## 7. Reader redesign decisions 1-11
+
+- [x] 7.1 Replace class-derived public URLs with readable display-name slugs and qualified duplicate names, using type, category or stats before an ordinal, and remove legacy aliases.
+- [x] 7.2 Make acquisition the item-page answer, pair it with one facts tooltip, and use compact relation tables with explicit units, at most two numeric columns and the ten-row/eight-preview native disclosure rule.
+- [x] 7.3 Produce reverse uses for recipe, cooking, smithing, farming and currency inputs, expose component part, damage and speed, and classify Iuba and Tithes as Currency.
+- [x] 7.4 Re-read Bloodline consumer evidence before calculating chance, include null no-drop outcomes, label verified event bases, keep container pick count separate, and retain Relative chance where evidence is incomplete.
+- [x] 7.5 Add responsive compact item rows with Type and category facets, sorting, accurate counts, URL state and a counted reveal of items without known sources.
+- [x] 7.6 Resolve every Steam build through reviewed release metadata and reject unmapped builds, keeping the release date distinct from the data-update date.
+- [x] 7.7 Keep header search and support visible and add footer release, Coverage, About and Ko-fi navigation.
+- [x] 7.8 Build the home reference hub and About page with method, release, data update, coverage, patch notes and unofficial status.
+- [x] 7.9 Add unique factual SEO and social metadata, visible breadcrumbs with BreadcrumbList, WebSite without SearchAction, and About sitemap membership without renaming the site Wiki.
+- [x] 7.10 Apply title and sentence casing, rem-based readable type and contrast, neutral dark presentation through one semantic tokens file, and gate the built page graph before deployment with axe browser coverage.
+- [x] 7.11 Reconcile README, AGENTS and this change with decisions 1-11 and document adopted and skipped Afallon lessons, then verify the integrated behavior on real data in desktop and phone browsers.
+

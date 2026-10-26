@@ -7,12 +7,16 @@
 	});
 </script>
 
-<details class="search-panel">
-	<summary>Search items</summary>
+<section class="search-panel" aria-label="Search the compendium">
+	<p class="search-label">Search the Compendium</p>
 	<div class="search-content">
-		<pagefind-searchbox bundle-path="/pagefind/" placeholder="Start typing an item name"
-		></pagefind-searchbox><noscript
+		<pagefind-searchbox
+			bundle-path="/pagefind/"
+			placeholder="Search item names and descriptions"
+			aria-label="Search items"
+		></pagefind-searchbox>
+		<noscript
 			>Search needs JavaScript. Browse the <a href={resolve('items/')}>item list</a> instead.</noscript
 		>
 	</div>
-</details>
+</section>

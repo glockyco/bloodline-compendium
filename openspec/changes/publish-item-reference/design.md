@@ -31,7 +31,7 @@ See proposal.md for motivation. Measurements below come from spikes on Steam bui
 
 ### Regenerate extracted data instead of storing it
 
-Extracted data depends only on the extractor's code and the game build. Git keeps the code and Steam keeps every build, so the data can be regenerated at any time and is not versioned. Extraction writes to a Git-ignored directory named by the Steam build ID. After a game update, the previous build's output is still on disk for comparison. The Afallon, Ardenfall and Ancient Kingdoms compendiums and the Erenshor data mining project also keep extracted data out of Git.
+Extracted data depends only on the extractor's code and the game build. Git keeps the code and Steam keeps every build, so the data can be regenerated at any time and is not versioned. Extraction writes to a Git-ignored directory named by the Steam build ID. After a game update, the previous build's output is still on disk for comparison.
 
 Alternatives:
 
@@ -70,7 +70,7 @@ The extractor enables CUE4Parse's fatal serialization errors. An object that fai
 
 ### Publish every named inventory item and show what is uncertain
 
-An inventory item is a class under `BP_BaseItemAsset_C`, outside `InteractableObject_C`, with a display name. Every inventory item is published. A missing source is not a reason to withhold an item, because source capture is incomplete. Item pages state when no source, icon or value is known, and a coverage page lists every gap with links, as the Afallon Compendium does.
+An inventory item is a class under `BP_BaseItemAsset_C`, outside `InteractableObject_C`, with a display name. Every inventory item is published. A missing source is not a reason to withhold an item, because source capture is incomplete. The default browsing list hides these items behind a counted reveal, while their pages and coverage links remain available.
 
 Alternative: publish only the items that a graph of sources reaches. The graph needs about 30 mechanisms, Blueprint value flow for travel between levels and a review pass after every update. It still misses real items, and then it hides them.
 
@@ -95,7 +95,7 @@ The catalog attaches sources from these mechanisms:
 | Bounty notes | bounty note classes in `DT_UQC_Quests` |
 | Settlement deliveries | loot tables in `BuildingResourceAndIncomeValues` |
 
-Each source keeps consumed inputs apart from the item it gives, and it shows quantities, prices and raw weights as the data states them. Weights become percentages only where the selection rule is known. Some data looks like a source and is not one. `AllLootPresets` only describes how selected loot looks, the dialogue event `GiveItems` removes items, and a shop's currency, a recipe's ingredients and a planted seed are inputs. A null entry in a loot pool is a chance of no drop.
+Each source keeps consumed inputs apart from the item it gives. The catalog derives reverse uses from recipe, cooking, smithing, farming and currency-shop inputs. It computes event probabilities only after checking the consuming selection rule and its required inputs. Null pool entries remain no-drop outcomes. Verified probabilities name their kill, catch, harvest or roll basis. Containers show chance per pick and pick count separately. Incomplete rules retain Relative chance rather than an invented percentage. `AllLootPresets` only describes selected loot, `GiveItems` removes items, and currencies, ingredients and planted seeds are inputs.
 
 ### Reviewed exclusions for known non-content
 
@@ -120,6 +120,42 @@ SvelteKit 3 prerenders every page with the static adapter, and server-only loads
 ### Minimal agent instructions
 
 `AGENTS.md` holds only boundaries that an agent cannot infer from the code. Procedures become skills only once a workflow exists and has been repeated. Measured studies of repository instruction files show no reliable benefit from long, generated briefings and about 20% higher cost.
+
+### Reader identity belongs in the catalog
+
+Class paths remain internal identities. Public names and slugs start with display names and use type, category or distinguishing stats to qualify duplicates. An ordinal is the final fallback. The cutover removes class-derived URLs without compatibility aliases. Weapon components expose their actual part, damage and speed, and currency classification is corrected at the producer rather than in individual pages.
+
+### Reviewed releases, not inferred versions
+
+A reviewed release mapping resolves Steam builds to a release name, release date and official patch notes. An unknown build fails cataloging. The data-update date is separate from the game release date. The initial reviewed entry is build 24464547, Company of Thieves Update, released 2026-08-06, with data updated 2026-10-26 and patch notes at https://store.steampowered.com/news/app/1159290/view/1840310314342150. Values live in the mapping rather than duplicated page constants.
+
+### Answer-first pages and compact browsing
+
+Acquisition answers the first item-page question. One facts tooltip sits alongside it on desktop and follows it on phones. Reverse uses follow the answer. Relation tables show at most two numeric values with explicit units. Up to ten rows remain visible. Longer sections preview eight with all remaining links in a native disclosure. The item list uses compact rows, Type and category facets, sorting, counts and URL state rather than a gallery of repeated cards.
+
+The home page is a reference hub with an introduction, search, category entry points, release and coverage context. Search and support stay visible in the header. The footer links the reviewed release, Coverage, About and https://ko-fi.com/wowmuch. About owns method, release and data dates, patch notes, limitations and the unofficial disclaimer.
+
+### Adopt sibling reader lessons without importing their systems
+
+The Afallon requirements in `openspec/specs/detail-pages/spec.md` establish answer-first item pages, one tooltip, useful numeric columns, the ten-row/eight-preview rule, native static disclosures and phone readability. Adopt those reader contracts, not Afallon's NPC, talent, map-action or multi-kind page machinery. Its `reader-casing/spec.md` separates Title Case titles from sentence-case labels and hints. Adopt that distinction while preserving game names.
+
+Afallon's `static-publication/spec.md` requires reference closure before selection and staging. Adopt the underlying integrity rule as a built-site graph gate for links, icons, sitemap and unique metadata. Skip its sealed SQLite catalog, map parts, geometry, imagery registration and baseline parity machinery because this change publishes item pages from a single generated site contract, not a shared-world map. Do not import its complete-coverage release gate because this project deliberately publishes known gaps.
+
+Use Afallon as the polished reader reference and Ancient Kingdoms as the complete compendium reference. Their cleaned READMEs support short entry points and one actionable workflow per command sequence. Neither their maps nor their game-specific probability formulas establish Bloodline behavior. Only Bloodline consumer evidence justifies its computed chances.
+
+The live comparison of [Afallon's item list](https://afallon.compendiums.org/items/) and [Ancient Kingdoms' item list](https://ancient-kingdoms.compendiums.org/items) favors Afallon's immediate counted, name-sorted rows over an initial Loading state in reader HTML. Bloodline therefore prerenders its initial rows and counts, defaults to name order and uses counted multi-select facets. Its compact rows show name, Type and Value instead of importing wider quality and level columns that its contract does not supply. The home page uses item category tiles rather than links to future content kinds.
+
+### Factual discovery and accessibility are publication requirements
+
+Unique titles and descriptions describe actual page facts. Canonicals, social metadata, visible breadcrumbs and BreadcrumbList agree. WebSite has no unsupported SearchAction. About is visible and in the sitemap. Wiki is a descriptive search term, not the product name or an official-status claim.
+
+Title Case is reserved for titles, navigation, noun headings and columns. Labels and hints use sentence case. Body text uses rem units at least 1rem without decorative letterspacing, with normal text contrast at least 4.5:1. The predeployment graph gate and axe browser checks complement actual desktop and phone review on real data. Fixture success does not establish runtime acceptance.
+
+Visual identity is separate from reader structure. Keep the default theme neutral and dark, with system fonts and no decoration, textures or webfonts. Site-authored colors, fonts, sizes, spacing, radii and shadows live in semantic CSS custom properties in one tokens file so visual work can change the presentation without changing reader behavior.
+
+### Durable contribution rules stay short
+
+Keep producer corrections, behavioral regression coverage, real-data browser review and single-source facts in `AGENTS.md`. Keep setup and commands in README, behavior in specs and rationale here. This prevents presentation work from masking bad catalog facts or turning the README into an internal inventory.
 
 ## Risks / Trade-offs
 

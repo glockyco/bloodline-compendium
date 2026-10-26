@@ -1,4 +1,12 @@
 import type { SourceKind, GapKind } from './site-data.js';
+export function titleCase(value: string): string {
+	return value
+		.replace(/([a-z])([A-Z])/g, '$1 $2')
+		.replace(/[_-]+/g, ' ')
+		.toLowerCase()
+		.replace(/\b[a-z]/g, (letter) => letter.toUpperCase());
+}
+
 export const sourceHeadings: Record<SourceKind, string> = {
 	shop: 'Sold by',
 	currencyShop: 'Sold for special currency',
@@ -38,7 +46,7 @@ export const gaps: Record<GapKind, { title: string; explanation: string }> = {
 	placeWithoutName: {
 		title: 'Places without a known name',
 		explanation:
-			'These places have an internal identifier but no readable in-game name. Sources may show that identifier instead.'
+			'These places have no known in-game name. Their locations remain unknown in this reference.'
 	},
 	unreadObject: {
 		title: 'Unread objects and packages',

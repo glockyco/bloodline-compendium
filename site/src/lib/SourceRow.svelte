@@ -1,57 +1,73 @@
 <script lang="ts">
 	import type { Source } from './site-data.js';
 	import { formatNumber, formatChance } from './format.js';
+	import { chanceLabel, formatAmount } from './acquisition.js';
 	import ItemLink from './ItemLink.svelte';
-	let { source }: { source: Source } = $props();
+	let {
+		source,
+		showAmount = false,
+		showContext = false,
+		id
+	}: { source: Source; showAmount?: boolean; showContext?: boolean; id: string } = $props();
 </script>
 
-<div class="source-row">
-	<div class="source-identity">
-		<h4>{source.name}</h4>
+<tr class="source-row" {id}>
+	<td class="source-identity">
+		<span class="relation-name">{source.name}</span>
 		<p class="source-places">
-			<span>Places:</span>
-			{source.places.length ? source.places.map((place) => place.name).join(', ') : 'Unknown'}
+			{source.places.length
+				? source.places.map((place) => place.name).join(', ')
+				: 'Location unknown'}
 		</p>
-	</div>
-	<div class="source-details">
-		<dl class="source-facts">
-			{#if source.price}<div>
-					<dt>Price</dt>
-					<dd>
-						{formatNumber(source.price.amount)}
-						{#if source.price.currency}<ItemLink item={source.price.currency} />{:else}gold{/if}
-					</dd>
-				</div>{/if}
-			{#if source.amount}<div>
-					<dt>Amount</dt>
-					<dd>
-						{source.amount.min === source.amount.max
-							? formatNumber(source.amount.min)
-							: formatNumber(source.amount.min) + ' to ' + formatNumber(source.amount.max)}
-					</dd>
-				</div>{/if}
-			{#if source.weight}<div>
-					<dt>Raw weight</dt>
-					<dd>{formatNumber(source.weight.value)} of {formatNumber(source.weight.total)}</dd>
-				</div>{/if}
-			{#if source.chance !== null}<div>
-					<dt>Chance</dt>
-					<dd>{formatChance(source.chance)}</dd>
-				</div>{/if}
-		</dl>
-		{#if source.inputs.length}<div class="source-inputs">
-				<span class="detail-label">Consumed inputs:</span>
-				<ul>
-					{#each source.inputs as input, index (index)}<li>
-							{formatNumber(input.quantity)} × <ItemLink item={input.item} />
-						</li>{/each}
-				</ul>
-			</div>{/if}
-		{#if source.notes.length}<div class="source-notes">
-				<span class="detail-label">Notes:</span>
-				<ul>
-					{#each source.notes as note, index (index)}<li>{note}</li>{/each}
-				</ul>
-			</div>{/if}
-	</div>
-</div>
+		{#if source.weight && !(source.chance !== null && source.chanceBasis)}<p class="source-places">
+				Compared with other possible items. The selection rule is unknown, so this is not a drop
+				chance.
+			</p>{/if}
+		{#if source.inputs.length || source.notes.length || (source.chance !== null && !source.chanceBasis)}
+			<details class="row-details">
+				<summary>Details <span class="sr-only">for {source.name}</span></summary>
+				{#if source.inputs.length}
+					<p class="detail-label">Required items</p>
+					<ul>
+						{#each source.inputs as input, index (index)}<li>
+								{formatNumber(input.quantity)} × <ItemLink item={input.item} />
+							</li>{/each}
+					</ul>
+				{/if}
+				{#if source.chance !== null && !source.chanceBasis}<p>
+						Chance: {formatChance(source.chance)}. What this chance applies to is unknown.
+					</p>{/if}
+				{#if source.notes.length}<ul>
+						{#each source.notes as note, index (index)}<li>{note}</li>{/each}
+					</ul>{/if}
+			</details>
+		{/if}
+	</td>
+	{#if showAmount}<td class="numeric"
+			>{source.amount ? formatAmount(source.amount) : 'Unknown'}<small>items</small></td
+		>{/if}
+	{#if showContext}
+		<td class="numeric context-value">
+			{#if source.price}
+				{formatNumber(source.price.amount)}<small
+					>{#if source.price.currency}<ItemLink
+							item={source.price.currency}
+						/>{:else}gold{/if}</small
+				>
+			{:else if source.chance !== null && source.chanceBasis}
+				{formatChance(source.chance)}<small>{chanceLabel(source)}</small>
+			{:else if source.weight}
+				{formatNumber(source.weight.value)} of {formatNumber(source.weight.total)}<small
+					>Relative chance</small
+				>
+			{:else}<span class="muted">Unknown</span>{/if}
+			{#if source.picks}<small
+					>{formatAmount(source.picks)}
+					{source.picks.min === 1 && source.picks.max === 1 ? 'pick' : 'picks'} per {source.kind ===
+					'containerLoot'
+						? 'container'
+						: 'roll'}</small
+				>{/if}
+		</td>
+	{/if}
+</tr>

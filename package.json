@@ -9,6 +9,10 @@
     "types": "bun scripts/generate-types.mjs",
     "types:check": "bun scripts/generate-types.mjs --check",
     "guard": "bun scripts/guard.mjs",
+    "publication:check": "bun scripts/publication-gate.mjs",
     "assets:check": "bun scripts/asset-gate.mjs"
+  },
+  "devDependencies": {
+    "parse5": "8.0.0"
   }
 }

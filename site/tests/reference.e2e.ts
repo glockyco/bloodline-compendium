@@ -1,50 +1,133 @@
 import { expect, test } from '@playwright/test';
-test('filters categories and sorts by name and numeric value', async ({ page }) => {
+test('filters items with counted facets, preserves URL state and sorts numeric values', async ({
+	page
+}) => {
 	await page.goto('/items/');
-	await page.getByRole('combobox', { name: 'Category', exact: true }).selectOption('weapons');
-	await expect(page.locator('.item-name')).toHaveText([/Lanternedge\s*Weapons/]);
-	await page.getByRole('combobox', { name: 'Category', exact: true }).selectOption('');
-	await page.getByRole('combobox', { name: 'Sort by' }).selectOption('value-desc');
+	await expect(page.locator('.item-name[href="/items/hollow-prism/"]')).toHaveCount(0);
+	const categories = page.getByRole('complementary', { name: 'Item filters' });
+	const weapons = categories.getByRole('checkbox', { name: /^Weapons\s/ });
+	await weapons.check();
+	await expect(page.locator('.item-name')).toHaveText(['Lanternedge']);
+	await expect(page).toHaveURL(/category=weapons/);
+	await page.reload();
+	await expect(weapons).toBeChecked();
+	await expect(page.locator('.item-name')).toHaveText(['Lanternedge']);
+	await weapons.uncheck();
+	await page.getByRole('button', { name: 'Value', exact: true }).click();
+	await expect(page.getByRole('columnheader', { name: 'Value' })).toHaveAttribute(
+		'aria-sort',
+		'descending'
+	);
 	await expect(page.locator('.item-name')).toHaveText([
-		/Mosswoven Coat\s*Armour/,
-		/Lanternedge\s*Weapons/,
-		/Cinderpear\s*Food/,
-		/Hollow Prism\s*Curios/
+		'Mosswoven Coat',
+		'Lanternedge',
+		'Cinderpear'
 	]);
-	await page.getByRole('combobox', { name: 'Sort by' }).selectOption('name-desc');
-	await expect(page.locator('.item-name').first()).toContainText('Mosswoven Coat');
-	await expect(page.locator('.item-row img').first()).toHaveAttribute('src', /-48.webp$/);
+	await page.getByRole('checkbox', { name: /Show \d+ items without a known source/ }).check();
+	await expect(page.locator('.item-name').last()).toHaveText('Hollow Prism');
+	await expect(page.locator('.item-name img').first()).toHaveAttribute('src', /-48.webp$/);
+	await page.getByRole('button', { name: 'Item', exact: true }).click();
+	await page.getByRole('button', { name: 'Item', exact: true }).click();
+	await expect(page.locator('.item-name').first()).toHaveText('Mosswoven Coat');
 });
-test('shows facts, complete source fields and unknowns', async ({ page }) => {
+
+test('name filtering combines with facets and empty results can be cleared', async ({ page }) => {
+	await page.goto('/items/');
+	const categories = page.getByRole('complementary', { name: 'Item filters' });
+	await categories.getByRole('checkbox', { name: /^Weapons\s/ }).check();
+	const name = page.getByRole('searchbox', { name: 'Search by name' });
+	await name.fill('Lantern');
+	await name.press('Enter');
+	await expect(page.locator('.item-name')).toHaveText(['Lanternedge']);
+	await expect(page).toHaveURL(/name=Lantern/);
+	await name.fill('No invented match');
+	await name.press('Enter');
+	await expect(page.locator('.item-name')).toHaveCount(0);
+	await expect(page.getByText('No items match these filters.', { exact: false })).toBeVisible();
+	await page.getByRole('button', { name: 'Clear all', exact: true }).click();
+	await expect(name).toHaveValue('');
+	await expect(page.locator('.item-name')).toHaveCount(3);
+	await expect(page).toHaveURL('/items/');
+});
+
+test('combines Category and Type selections and restores them from a shared URL', async ({
+	page
+}) => {
+	await page.goto('/items/?category=weapons&category=food&type=Sword');
+	const facets = page.getByRole('complementary', { name: 'Item filters' });
+	await expect(facets.getByRole('checkbox', { name: /^Weapons\s/ })).toBeChecked();
+	await expect(facets.getByRole('checkbox', { name: /^Food\s/ })).toBeChecked();
+	await expect(facets.getByRole('checkbox', { name: /^Sword\s/ })).toBeChecked();
+	await expect(page.locator('.item-name')).toHaveText(['Lanternedge']);
+	await facets.getByRole('checkbox', { name: /^Fruit\s/ }).check();
+	await expect(page.locator('.item-name')).toHaveText(['Cinderpear', 'Lanternedge']);
+	await page.reload();
+	await expect(page.locator('.item-name')).toHaveText(['Cinderpear', 'Lanternedge']);
+});
+
+test('phone filters open as a keyboard-accessible sheet and apply without navigation', async ({
+	page
+}) => {
+	await page.setViewportSize({ width: 390, height: 900 });
+	await page.goto('/items/');
+	const open = page.getByRole('button', { name: 'Filters', exact: true });
+	await open.focus();
+	await page.keyboard.press('Enter');
+	const dialog = page.getByRole('dialog', { name: 'Filters' });
+	await expect(dialog).toBeVisible();
+	const weapon = dialog.getByRole('checkbox', { name: /^Weapons\s/ });
+	await weapon.focus();
+	await page.keyboard.press('Space');
+	await expect(weapon).toBeChecked();
+	await dialog.getByRole('button', { name: 'Show 1 item', exact: true }).click();
+	await expect(dialog).not.toBeVisible();
+	await expect(page.locator('.item-name')).toHaveText(['Lanternedge']);
+	await expect(page).toHaveURL(/category=weapons/);
+});
+test('answers acquisition first and exposes facts, quantities and uncertainty', async ({
+	page
+}) => {
 	await page.goto('/items/lanternedge/');
+	await expect(page.getByRole('heading', { name: 'How to get it', exact: true })).toBeVisible();
 	await expect(page.locator('.facts')).toContainText(/Damage\s*12/);
-	await expect(page.locator('.facts')).toContainText(/Attack speed\s*1.2/);
-	await expect(page.locator('.facts')).toContainText(/Critical chance\s*Unknown/);
+	await expect(page.locator('.facts')).toContainText(/Attack Speed\s*1.2/);
+	await expect(page.locator('.facts')).toContainText(/Critical Chance\s*Unknown/);
+	const shopLink = page.locator('.acquisition-routes a[href="#source-shop"]');
+	await shopLink.click();
+	await expect(page).toHaveURL(/#source-shop$/);
+	await expect(page.locator('#source-shop')).toBeInViewport();
+	for (const summary of await page.locator('.source-groups details > summary').all())
+		await summary.click();
 	for (const text of [
 		'Glass Reach',
-		'45 gold',
-		'3 Cinderpear',
+		'45',
+		'Cinderpear',
 		'1 to 2',
-		'2 of 18.02',
 		'25%',
-		'Consumed inputs',
+		'Chance per pick',
+		'2 to 3 picks per container',
+		'Required items',
 		'Silverglass shard',
 		'Requires a lit forge.',
-		/Places:\s*Unknown/
+		'Location unknown'
 	])
 		await expect(page.locator('article')).toContainText(text);
-	await expect(page.locator('.large-icon')).toHaveAttribute('src', /-160.webp$/);
+	await expect(page.locator('.title-icon')).toHaveAttribute('src', /-160.webp$/);
+	await expect(page.locator('article')).not.toContainText('Selection weight');
+	await page.goto('/items/mosswoven-coat/');
+	await expect(page.locator('.source-group')).toContainText('1 of 5');
+	await expect(page.locator('.source-group')).toContainText('Relative chance');
+	await expect(page.locator('.source-group')).not.toContainText('20%');
 	await page.goto('/items/hollow-prism/');
-	await expect(page.getByText('No source is known for this item.', { exact: false })).toBeVisible();
+	await expect(page.getByText('No known source.', { exact: false })).toBeVisible();
 	await expect(page.getByRole('link', { name: 'Read about gaps in coverage' })).toHaveAttribute(
 		'href',
 		'/coverage/#itemWithoutSource'
 	);
-	await expect(page.getByText('No icon known')).toBeVisible();
+	await expect(page.getByText('No icon is known for this item.')).toBeVisible();
 });
 test('finds items by word prefix from the shared search', async ({ page }) => {
 	await page.goto('/');
-	await page.getByText('Search items', { exact: true }).click();
 	const search = page.locator('pagefind-searchbox input');
 	await search.fill('Lanter');
 	await expect(
@@ -54,7 +137,7 @@ test('finds items by word prefix from the shared search', async ({ page }) => {
 			.first()
 	).toBeVisible();
 });
-test('coverage, build labels, provenance and static 404', async ({ page, request }) => {
+test('coverage, release labels, provenance and static 404', async ({ page, request }) => {
 	await page.goto('/coverage/');
 	for (const text of [
 		'Items without a known source',
@@ -71,7 +154,13 @@ test('coverage, build labels, provenance and static 404', async ({ page, request
 	);
 	for (const route of ['/', '/items/', '/items/lanternedge/', '/coverage/', '/missing/page']) {
 		await page.goto(route);
-		await expect(page.getByText('Steam build 90000001')).toBeVisible();
+		await expect(page.locator('footer').getByText('Invented Fixture Release')).toBeVisible();
+		await expect(page.locator('footer').getByRole('link', { name: 'Patch Notes' })).toHaveAttribute(
+			'href',
+			'https://example.com/invented-bloodline-patch'
+		);
+		await expect(page.locator('footer time').first()).toHaveAttribute('datetime', '2026-10-01');
+		await expect(page.locator('footer time').last()).toHaveAttribute('datetime', '2026-10-02');
 	}
 	await expect(page.getByRole('heading', { name: 'Page not found' })).toBeVisible();
 	const missing = await request.get('/missing/page');
@@ -105,29 +194,37 @@ test('reference layouts stay readable on desktop and phone', async ({ page }, te
 
 test('source and coverage disclosures work without JavaScript', async ({ browser, baseURL }) => {
 	const context = await browser.newContext({ javaScriptEnabled: false, baseURL });
-	const page = await context.newPage();
-	await page.goto('/items/lanternedge/');
-	const shops = page
-		.locator('.source-group')
-		.filter({ has: page.getByRole('heading', { name: 'Sold by' }) });
-	await expect(shops.locator('.source-row:visible')).toHaveCount(3);
-	await expect(shops.getByText('Lilac Feather Trader', { exact: true })).not.toBeVisible();
-	await shops.locator('summary').click();
-	await expect(shops.locator('.source-row:visible')).toHaveCount(13);
-	await expect(shops.getByText('Lilac Feather Trader', { exact: true })).toBeVisible();
-	await shops.locator('summary').click();
-	await expect(shops.locator('.source-row:visible')).toHaveCount(3);
-	await page.goto('/coverage/');
-	for (const id of ['sourceWithoutPlace', 'placeWithoutName']) {
-		const gap = page.locator('#' + id);
-		await expect(gap.locator('.gap-list > li:visible')).toHaveCount(8);
-		const total = await gap.locator('.gap-list > li').count();
-		await gap.locator('summary').click();
-		await expect(gap.locator('.gap-list > li:visible')).toHaveCount(total);
-		await gap.locator('summary').click();
-		await expect(gap.locator('.gap-list > li:visible')).toHaveCount(8);
+	try {
+		const page = await context.newPage();
+		await page.goto('/items/lanternedge/');
+		const shops = page.locator('.source-group').filter({
+			has: page.getByRole('heading', { name: /^Sold by/ })
+		});
+		const rows = shops.locator('.source-row');
+		const total = await rows.count();
+		expect(total).toBeGreaterThan(10);
+		await expect(shops.locator('.source-row:visible')).toHaveCount(8);
+		await shops.locator('.more-entries > summary').click();
+		await expect(shops.locator('.source-row:visible')).toHaveCount(total);
+		await shops.locator('.more-entries > summary').click();
+		await expect(shops.locator('.source-row:visible')).toHaveCount(8);
+		await page.goto('/coverage/');
+		for (const id of ['sourceWithoutPlace', 'placeWithoutName']) {
+			const gap = page.locator('#' + id);
+			const total = await gap.locator('.gap-list > li').count();
+			await expect(gap.locator('.gap-list > li:visible')).toHaveCount(total <= 10 ? total : 8);
+			if (total > 10) {
+				await gap.locator('summary').click();
+				await expect(gap.locator('.gap-list > li:visible')).toHaveCount(total);
+				await gap.locator('summary').click();
+				await expect(gap.locator('.gap-list > li:visible')).toHaveCount(8);
+			} else {
+				await expect(gap.locator('summary')).toHaveCount(0);
+			}
+		}
+	} finally {
+		await context.close();
 	}
-	await context.close();
 });
 
 test('each public page has production identity, social metadata and generated browser icons', async ({
@@ -135,7 +232,14 @@ test('each public page has production identity, social metadata and generated br
 	request
 }) => {
 	const origin = 'https://bloodline.compendiums.org';
-	const routes = ['/', '/items/', '/items/lanternedge/', '/items/hollow-prism/', '/coverage/'];
+	const routes = [
+		'/',
+		'/items/',
+		'/items/lanternedge/',
+		'/items/hollow-prism/',
+		'/coverage/',
+		'/about/'
+	];
 	for (const route of routes) {
 		await page.goto(route + '?review=1');
 		const title = await page.title();
@@ -161,7 +265,7 @@ test('each public page has production identity, social metadata and generated br
 	await page.goto('/items/lanternedge/');
 	await expect(page.locator('meta[name="description"]')).toHaveAttribute(
 		'content',
-		await page.locator('.item-heading .intro').innerText()
+		/Lanternedge.*The Bloodline/
 	);
 	await page.goto('/items/hollow-prism/');
 	await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /Hollow Prism/);
@@ -188,6 +292,7 @@ test('each public page has production identity, social metadata and generated br
 			'/items/',
 			'/coverage/',
 			'/items/cinderpear/',
+			'/about/',
 			'/items/hollow-prism/',
 			'/items/lanternedge/',
 			'/items/mosswoven-coat/'

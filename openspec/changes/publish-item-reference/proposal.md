@@ -2,24 +2,24 @@
 
 ## Why
 
-The Bloodline has about 2,100 inventory items, and players have no current reference for them. The official wiki has 377 pages and no active editors. Item data can be read offline from the game's packages, so items are the cheapest place to prove the whole path from the installed game to a published page. Later content kinds, maps and mechanics guides reuse that path.
+The Bloodline needs a current searchable item reference alongside its official wiki. Item data can be read offline from the game's packages, so items are the starting point for the whole path from the installed game to a published page. Later content kinds, maps and mechanics guides reuse that path.
 
 ## What Changes
 
 - Read the installed Steam build offline into local records, identified by its Steam build and depot manifest IDs. Records are regenerated from the game files whenever they are needed and never stored in Git.
 - Leave out any object that does not parse completely and list it as a gap, instead of publishing partial data.
-- Build an item catalog from the records: every named inventory item with its facts, its icon and the sources that the game data shows.
-- Show uncertain and missing information on the site instead of withholding items. Items without a known source stay published, and a coverage page lists every gap.
-- Publish a static site with an item list, a page per item, search, the coverage page and the Steam build on every page. Each deployment records the code commit and the Steam build it was built from.
-- Deploy the site to Cloudflare with checks on the number and size of files.
+- Build an item catalog from the records with readable qualified public identities, facts, icons, acquisition sources and reverse uses. Compute chances only where consumer evidence establishes the complete rule.
+- Publish every named inventory item, including items without a known source. Keep those pages accessible while the default list offers a counted reveal. Coverage explains every known gap.
+- Publish an answer-first static item reference with Type and category filtering, shareable list state, search, a home hub, About, reviewed release metadata and factual discovery metadata.
+- Deploy to Cloudflare with provenance, file limits, built-site graph integrity and accessible desktop and phone presentation.
 
 ## Capabilities
 
 ### New Capabilities
 
 - `extraction/source-records`: reading the installed build into local records, with build identity, inherited defaults, readable enums and texts, and gaps for anything that does not parse.
-- `catalog/items`: inventory items with their facts, icons and sources, reviewed exclusions, and coverage gaps.
-- `site/item-reference`: item list, item pages, search, coverage page and build labels on the published site.
+- `catalog/items`: inventory items with readable public identities, facts, icons, sources, reverse uses, reviewed releases and exclusions, and coverage gaps.
+- `site/item-reference`: answer-first item pages, faceted list, home hub, search, About, coverage, release labels, discovery metadata and publication acceptance.
 
 ### Modified Capabilities
 

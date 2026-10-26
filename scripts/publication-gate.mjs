@@ -1,0 +1,170 @@
+import { readFile, readdir, stat } from "node:fs/promises";
+import { join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { parse } from "parse5";
+
+const origin = "https://bloodline.compendiums.org";
+
+function walk(node, visit) {
+  visit(node);
+  for (const child of node.childNodes ?? []) walk(child, visit);
+}
+
+function text(node) {
+  if (node.nodeName === "#text") return node.value;
+  return (node.childNodes ?? []).map(text).join("");
+}
+
+function normalized(value) {
+  return value.normalize("NFKC").replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+function pagePath(file) {
+  return file === "index.html" ? "/" : "/" + file.replace(/index\.html$/, "");
+}
+
+export async function publicationGate(directory) {
+  const files = new Set();
+  async function collect(relative = "") {
+    for (const entry of await readdir(join(directory, relative), {
+      withFileTypes: true,
+    })) {
+      const file = relative ? relative + "/" + entry.name : entry.name;
+      if (entry.isDirectory()) await collect(file);
+      else if (entry.isFile()) files.add(file);
+    }
+  }
+  await collect();
+  const pages = new Map();
+  const metadata = { title: new Map(), description: new Map() };
+  for (const file of [...files].sort()) {
+    if (!file.endsWith(".html")) continue;
+    const page = { file, ids: new Set(), references: [] };
+    const titles = [];
+    const descriptions = [];
+    walk(parse(await readFile(join(directory, file), "utf8")), (node) => {
+      const attrs = Object.fromEntries(
+        (node.attrs ?? []).map(({ name, value }) => [name, value]),
+      );
+      if (attrs.id) page.ids.add(attrs.id);
+      if (node.tagName === "title") titles.push(text(node));
+      if (
+        node.tagName === "meta" &&
+        attrs.name?.toLowerCase() === "description"
+      )
+        descriptions.push(attrs.content ?? "");
+      for (const attribute of ["href", "src"])
+        if (attrs[attribute]) page.references.push(attrs[attribute]);
+      if (attrs.srcset && !attrs.srcset.startsWith("data:"))
+        for (const candidate of attrs.srcset.split(","))
+          page.references.push(candidate.trim().split(/\s+/)[0]);
+      if (
+        node.tagName === "meta" &&
+        (attrs.property === "og:image" || attrs.name === "twitter:image") &&
+        attrs.content
+      )
+        page.references.push(attrs.content);
+    });
+    for (const [name, values] of [
+      ["title", titles],
+      ["description", descriptions],
+    ]) {
+      if (values.length !== 1 || !normalized(values[0]))
+        throw new Error(file + " must have one nonempty " + name + ".");
+      const value = normalized(values[0]);
+      const previous = metadata[name].get(value);
+      if (previous)
+        throw new Error(
+          "Duplicate " + name + " in " + previous + " and " + file,
+        );
+      metadata[name].set(value, file);
+    }
+    pages.set(pagePath(file), page);
+  }
+  for (const path of ["/", "/items/", "/coverage/"])
+    if (!pages.has(path)) throw new Error("Publication is missing " + path);
+  if (![...pages.keys()].some((path) => /^\/items\/[^/]+\/$/.test(path)))
+    throw new Error("Publication has no item pages.");
+
+  const checkedAssets = new Set();
+  let references = 0;
+  async function resolveReference(reference, from, localOnly = false) {
+    const url = new URL(reference, new URL(from, origin));
+    if (url.origin !== origin) {
+      if (localOnly)
+        throw new Error(
+          "Sitemap entry has a non-production origin: " + reference,
+        );
+      return;
+    }
+    const path = decodeURIComponent(url.pathname);
+    let target = pages.get(path);
+    let file = target?.file ?? path.slice(1);
+    if (!files.has(file) && !path.endsWith("/")) {
+      target = pages.get(path + "/") ?? pages.get(path + ".html");
+      if (target) file = target.file;
+    }
+    if (!files.has(file))
+      throw new Error(from + " references missing target " + reference);
+    if (
+      target &&
+      url.hash &&
+      !target.ids.has(decodeURIComponent(url.hash.slice(1)))
+    )
+      throw new Error(from + " references missing fragment " + reference);
+    if (!checkedAssets.has(file)) {
+      if (!(await stat(join(directory, file))).size)
+        throw new Error(from + " references empty target " + reference);
+      checkedAssets.add(file);
+    }
+    references++;
+    return { path, target, url };
+  }
+  for (const [path, page] of pages)
+    for (const reference of page.references)
+      await resolveReference(reference, path);
+
+  const locations = [];
+  walk(
+    parse(await readFile(join(directory, "sitemap.xml"), "utf8")),
+    (node) => {
+      if (node.tagName === "loc") locations.push(text(node).trim());
+    },
+  );
+  const sitemapPaths = new Set();
+  for (const location of locations) {
+    const result = await resolveReference(location, "/sitemap.xml", true);
+    if (
+      !location.startsWith(origin + "/") ||
+      !result.target ||
+      result.url.search ||
+      result.url.hash ||
+      ["/404", "/404.html", "/404/"].includes(result.path)
+    )
+      throw new Error("Invalid sitemap page: " + location);
+    if (sitemapPaths.has(result.path))
+      throw new Error("Duplicate sitemap page: " + location);
+    sitemapPaths.add(result.path);
+  }
+  for (const path of pages.keys())
+    if (!["/404.html", "/404/"].includes(path) && !sitemapPaths.has(path))
+      throw new Error("Sitemap is missing " + path);
+  return {
+    pages: pages.size,
+    references,
+    sitemapEntries: sitemapPaths.size,
+    report:
+      "Publication graph: " +
+      pages.size +
+      " pages, " +
+      references +
+      " local references, " +
+      sitemapPaths.size +
+      " sitemap entries.",
+  };
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const directory = resolve(process.argv[2] ?? "site/build");
+  console.log((await publicationGate(directory)).report);
+}

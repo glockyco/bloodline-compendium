@@ -6,6 +6,7 @@ export async function GET() {
 		'/',
 		'/items/',
 		'/coverage/',
+		'/about/',
 		...index.items.map((item) => `/items/${encodeURIComponent(item.slug)}/`)
 	];
 	return new Response(

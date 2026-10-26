@@ -26,6 +26,7 @@
 		"review": "wrangler dev --assets build"
 	},
 	"devDependencies": {
+		"@axe-core/playwright": "^4.11.1",
 		"@eslint/js": "^10.0.1",
 		"@pagefind/component-ui": "1.5.2",
 		"@playwright/test": "^1.60.0",

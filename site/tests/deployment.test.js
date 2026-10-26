@@ -10,6 +10,7 @@ import {
 	securityHeaders,
 	smokeDeployment
 } from '../../scripts/deploy.mjs';
+import { writePublication } from './fixtures/publication.js';
 
 async function stage(action) {
 	const repo = await mkdtemp(join(tmpdir(), 'bloodline-deploy-'));
@@ -34,6 +35,7 @@ async function stage(action) {
 				'<title>Invented reference</title><h1>Invented item</h1>'
 			);
 		}
+		await writePublication(directory);
 		const build = { commit, dirty: false, buildId: 90000001 };
 		await writeFile(join(directory, 'build-info.json'), JSON.stringify(build));
 		await action({ repo, directory, build });
@@ -48,7 +50,8 @@ it('accepts a complete stage and rejects absent assets, both hosting limits and 
 			'/',
 			'/items/',
 			'/items/invented/',
-			'/coverage/'
+			'/coverage/',
+			'/about/'
 		]);
 		await expect(assertDeployment(directory, repo, { maxFiles: 1 })).rejects.toThrow(
 			'Asset limits exceeded'
@@ -56,6 +59,9 @@ it('accepts a complete stage and rejects absent assets, both hosting limits and 
 		await expect(assertDeployment(directory, repo, { maxBytes: 1 })).rejects.toThrow(
 			'Asset limits exceeded'
 		);
+		await rm(join(directory, 'icons/invented-160.webp'));
+		await expect(assertDeployment(directory, repo)).rejects.toThrow('/icons/invented-160.webp');
+		await writeFile(join(directory, 'icons/invented-160.webp'), 'invented icon');
 		await rm(join(directory, 'pagefind/pagefind.js'));
 		await expect(assertDeployment(directory, repo)).rejects.toThrow('pagefind/pagefind.js');
 		await writeFile(join(directory, 'pagefind/pagefind.js'), 'search');
@@ -74,7 +80,7 @@ it('accepts a complete stage and rejects absent assets, both hosting limits and 
 
 it('smokes real HTTP responses, retries old builds and rejects broken content, search, status and security headers', async () => {
 	const build = { commit: 'invented-commit', dirty: false, buildId: 90000001 };
-	const pages = ['/', '/items/', '/items/invented/', '/coverage/'].map((path) => ({
+	const pages = ['/', '/items/', '/items/invented/', '/coverage/', '/about/'].map((path) => ({
 		path,
 		title: '<title>Invented reference</title>',
 		heading: '<h1>Invented item</h1>'
