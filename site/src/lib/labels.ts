@@ -22,7 +22,12 @@ export const sourceHeadings: Record<SourceKind, string> = {
 	gathering: 'Gathered',
 	farming: 'Grown',
 	bountyNote: 'Obtained from bounty notes',
-	settlementDelivery: 'Delivered by settlements'
+	settlementDelivery: 'Delivered by settlements',
+	stable: 'Sold at stables',
+	contract: 'From contracts',
+	seasonalGift: 'Seasonal gifts',
+	archaeology: 'Dug up',
+	reward: 'Rewarded'
 };
 /** Short names for each way of getting an item, for filters and overviews. */
 export const sourceNames: Record<SourceKind, string> = {
@@ -40,7 +45,12 @@ export const sourceNames: Record<SourceKind, string> = {
 	gathering: 'Gathering',
 	farming: 'Farming',
 	bountyNote: 'Bounty notes',
-	settlementDelivery: 'Settlements'
+	settlementDelivery: 'Settlements',
+	stable: 'Stables',
+	contract: 'Contracts',
+	seasonalGift: 'Seasonal gifts',
+	archaeology: 'Archaeology',
+	reward: 'Rewards'
 };
 export const gaps: Record<GapKind, { title: string; explanation: string }> = {
 	unknownCondition: {

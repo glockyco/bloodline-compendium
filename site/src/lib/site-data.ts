@@ -74,7 +74,22 @@ export type SourceKind =
   | "gathering"
   | "farming"
   | "bountyNote"
-  | "settlementDelivery";
+  | "settlementDelivery"
+  | "stable"
+  | "contract"
+  | "seasonalGift"
+  | "archaeology"
+  | "reward";
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "OddsEvent".
+ */
+export type OddsEvent = "container" | "kill" | "delivery" | "use";
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "PriceRule".
+ */
+export type PriceRule = "fixed" | "city" | "settlement";
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "ReportStatus".
@@ -107,10 +122,16 @@ export type Stat =
   | "cooledEffect"
   | "groundEffect"
   | "heatedEffect";
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "ItemStatus".
+ */
+export type ItemStatus = "obtainable" | "noKnownSource" | "notInNormalPlay";
 
 export interface SiteDataFiles {
   build: SiteBuild;
   coverage: CoverageReport;
+  crafting: CraftingData;
   graph: EntityGraph;
   issues: PublishedIssue[];
   item: ItemPage;
@@ -192,6 +213,11 @@ export interface GapEntry {
     | "farming"
     | "bountyNote"
     | "settlementDelivery"
+    | "stable"
+    | "contract"
+    | "seasonalGift"
+    | "archaeology"
+    | "reward"
     | null;
   [k: string]: unknown;
 }
@@ -205,6 +231,61 @@ export interface EntityReference {
   kind: EntityKind;
   name: string;
   slug: string | null;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "CraftingData".
+ */
+export interface CraftingData {
+  armorQualities: ArmorQuality[];
+  parts: WeaponPart[];
+  qualities: QualityGrade[];
+  weapons: WeaponFamily[];
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "ArmorQuality".
+ */
+export interface ArmorQuality {
+  armorByClass: {
+    [k: string]: number;
+  };
+  level: number;
+  name: string;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "WeaponPart".
+ */
+export interface WeaponPart {
+  damage: number | null;
+  families: string[];
+  item: EntityReference;
+  kind: string;
+  speed: number | null;
+  value: number | null;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "QualityGrade".
+ */
+export interface QualityGrade {
+  grade: string;
+  multiplier: number;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "WeaponFamily".
+ */
+export interface WeaponFamily {
+  id: string;
+  name: string;
+  partKinds: string[];
   [k: string]: unknown;
 }
 /**
@@ -277,11 +358,15 @@ export interface Source {
   inputs: ItemAmount[];
   kind: SourceKind;
   name: string;
+  noPriceReason?: string | null;
   notes: string[];
+  odds?: Odds | null;
   picks?: Amount | null;
   places: EntityReference[];
   price: Price | null;
+  recipe?: Recipe | null;
   relationId: string;
+  settlement?: boolean;
   weight: Weight | null;
   [k: string]: unknown;
 }
@@ -305,11 +390,38 @@ export interface ItemAmount {
 }
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "Odds".
+ */
+export interface Odds {
+  chance: number | null;
+  event: OddsEvent;
+  expected: number | null;
+  unknown: string | null;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "Price".
  */
 export interface Price {
   amount: number;
+  city?: EntityReference | null;
   currency: EntityReference | null;
+  multiplier?: number | null;
+  rule?: PriceRule;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "Recipe".
+ */
+export interface Recipe {
+  discipline: string | null;
+  experience: number | null;
+  learned: string | null;
+  level: number | null;
+  output: number;
+  station: EntityReference | null;
   [k: string]: unknown;
 }
 /**
@@ -365,6 +477,7 @@ export interface ItemPage {
   relations: EntityRelation[];
   slug: string;
   sources: Source[];
+  status: ItemStatus;
   type: string;
   uses: ItemUse[];
   [k: string]: unknown;
@@ -384,6 +497,7 @@ export interface CategoryLink {
  */
 export interface Fact {
   effect: Effect | null;
+  gameShows?: string | null;
   label: string;
   number: number | null;
   stat: Stat;
@@ -418,9 +532,11 @@ export interface IssueNote {
  */
 export interface ItemUse {
   conditions: RelationCondition[];
+  discipline?: string | null;
   item: EntityReference;
   kind: SourceKind;
   name: string;
+  outputCategory?: string | null;
   quantity: number;
   relationId: string;
   [k: string]: unknown;
@@ -431,6 +547,8 @@ export interface ItemUse {
  */
 export interface ItemIndex {
   categories: CategorySummary[];
+  columns: ListColumn[];
+  facets: ListFacet[];
   items: ItemSummary[];
   [k: string]: unknown;
 }
@@ -447,10 +565,39 @@ export interface CategorySummary {
 }
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "ListColumn".
+ */
+export interface ListColumn {
+  categories: string[];
+  id: string;
+  label: string;
+  numeric: boolean;
+  unit: string | null;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "ListFacet".
+ */
+export interface ListFacet {
+  categories: string[];
+  id: string;
+  label: string;
+  values: string[];
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "ItemSummary".
  */
 export interface ItemSummary {
   category: string;
+  cells: {
+    [k: string]: ListCell;
+  };
+  facets: {
+    [k: string]: string[];
+  };
   icon: string | null;
   key: string;
   kind: EntityKind;
@@ -458,8 +605,18 @@ export interface ItemSummary {
   qualifier?: string | null;
   slug: string;
   sourceKinds: SourceKind[];
+  status: ItemStatus;
   type: string;
   value: number | null;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "ListCell".
+ */
+export interface ListCell {
+  number: number | null;
+  text: string | null;
   [k: string]: unknown;
 }
 /**

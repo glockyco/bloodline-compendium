@@ -1,6 +1,6 @@
 ## 1. Contract
 
-- [ ] 1.1 Add the contract changes from design.md to `SiteDataModel.cs`, regenerate types and fixtures, and verify `bun run types:check` and the fixture tests pass
+- [x] 1.1 Add the contract changes from design.md to `SiteDataModel.cs`, regenerate types and fixtures, and verify `bun run types:check` and the fixture tests pass
 
 ## 2. Lab confirmations
 

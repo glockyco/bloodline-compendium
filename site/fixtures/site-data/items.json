@@ -36,7 +36,10 @@
 			"icon": "cinderpear",
 			"sourceKinds": ["gathering"],
 			"key": "/Invented/Items/Cinderpear",
-			"kind": "item"
+			"kind": "item",
+			"status": "obtainable",
+			"facets": {},
+			"cells": {}
 		},
 		{
 			"slug": "hollow-prism",
@@ -48,7 +51,10 @@
 			"icon": null,
 			"sourceKinds": [],
 			"key": "/Invented/Items/HollowPrism",
-			"kind": "item"
+			"kind": "item",
+			"status": "obtainable",
+			"facets": {},
+			"cells": {}
 		},
 		{
 			"slug": "lanternedge",
@@ -60,7 +66,10 @@
 			"icon": "lanternedge",
 			"sourceKinds": ["shop", "crafting", "currencyShop", "containerLoot"],
 			"key": "/Invented/Items/Lanternedge",
-			"kind": "item"
+			"kind": "item",
+			"status": "obtainable",
+			"facets": {},
+			"cells": {}
 		},
 		{
 			"slug": "mosswoven-coat",
@@ -72,7 +81,12 @@
 			"icon": "mosswoven-coat",
 			"sourceKinds": ["enemyDrop"],
 			"key": "/Invented/Items/MosswovenCoat",
-			"kind": "item"
+			"kind": "item",
+			"status": "obtainable",
+			"facets": {},
+			"cells": {}
 		}
-	]
+	],
+	"facets": [],
+	"columns": []
 }

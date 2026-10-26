@@ -113,11 +113,47 @@ internal sealed record SiteRelease(
     string DataDate
 );
 
-/// <summary>The categories and a summary of every item, in name order. Written as <c>items.json</c>.</summary>
+/// <summary>
+/// The categories, the list's filters and columns, and a summary of every item, in name order. Written as
+/// <c>items.json</c>.
+/// </summary>
 internal sealed record ItemIndex(
     IReadOnlyList<CategorySummary> Categories,
     IReadOnlyList<ItemSummary> Items
+)
+{
+    [JsonRequired]
+    public IReadOnlyList<ListFacet> Facets { get; init; } = [];
+
+    [JsonRequired]
+    public IReadOnlyList<ListColumn> Columns { get; init; } = [];
+}
+
+/// <summary>
+/// A filter of the item list. <see cref="Categories"/> names the category slugs it applies to, all when empty.
+/// <see cref="Values"/> gives the value order, alphabetical when empty.
+/// </summary>
+internal sealed record ListFacet(
+    string Id,
+    string Label,
+    IReadOnlyList<string> Categories,
+    IReadOnlyList<string> Values
 );
+
+/// <summary>
+/// A column of the item list. <see cref="Categories"/> names the category slugs that show it by default, none when
+/// empty. A <see cref="Numeric"/> column can also become a stat filter.
+/// </summary>
+internal sealed record ListColumn(
+    string Id,
+    string Label,
+    IReadOnlyList<string> Categories,
+    bool Numeric,
+    string? Unit
+);
+
+/// <summary>A cell of the item list, with the number it sorts and filters by when it has one.</summary>
+internal sealed record ListCell(double? Number, string? Text);
 
 /// <summary>A category with its plural name for headings, such as Weapon and Weapons.</summary>
 internal sealed record CategorySummary(string Slug, string Name, string Plural, int Count);
@@ -141,6 +177,19 @@ internal sealed record ItemSummary(
     [JsonRequired]
     public string Type { get; init; } = "Unknown";
     public string? Qualifier { get; init; }
+
+    [JsonRequired]
+    public ItemStatus Status { get; init; } = ItemStatus.Obtainable;
+
+    /// <summary>The item's values for each facet of <see cref="ItemIndex.Facets"/>.</summary>
+    [JsonRequired]
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Facets { get; init; } =
+        new Dictionary<string, IReadOnlyList<string>>();
+
+    /// <summary>The item's cells for each column of <see cref="ItemIndex.Columns"/> that it has a value for.</summary>
+    [JsonRequired]
+    public IReadOnlyDictionary<string, ListCell> Cells { get; init; } =
+        new Dictionary<string, ListCell>();
 }
 
 /// <summary>
@@ -174,6 +223,9 @@ internal sealed record ItemPage(
     /// <summary>Known issues that affect a value this page shows.</summary>
     [JsonRequired]
     public IReadOnlyList<IssueNote> Notes { get; init; } = [];
+
+    [JsonRequired]
+    public ItemStatus Status { get; init; } = ItemStatus.Obtainable;
 }
 
 /// <summary>A page's note about a known issue, with the issue's title and its effect on players.</summary>
@@ -225,6 +277,12 @@ internal sealed record ItemUse(SourceKind Kind, string Name, EntityReference Ite
 
     [JsonRequired]
     public IReadOnlyList<RelationCondition> Conditions { get; init; } = [];
+
+    /// <summary>The discipline that consumes the item, such as Weaponsmithing, for filtering long use lists.</summary>
+    public string? Discipline { get; init; }
+
+    /// <summary>The category of what the use makes, such as Weapon Part.</summary>
+    public string? OutputCategory { get; init; }
 }
 
 internal sealed record CategoryLink(string Slug, string Name);
@@ -239,6 +297,9 @@ internal sealed record Fact(Stat Stat, string Label, double? Number, string? Tex
 {
     public string? TooltipLabel { get; init; }
     public string? Unit { get; init; }
+
+    /// <summary>The value the game's tooltip shows where it differs from the applied value for a known reason.</summary>
+    public string? GameShows { get; init; }
 }
 
 /// <summary>
@@ -301,6 +362,64 @@ internal sealed record Source(
     public string RelationId { get; init; } = "";
     public string? ChanceBasis { get; init; }
     public Amount? Picks { get; init; }
+
+    /// <summary>The chance per event, replacing <see cref="Weight"/>, <see cref="Chance"/> and picks.</summary>
+    public Odds? Odds { get; init; }
+
+    /// <summary>What a crafted, cooked or smithed source needs and gives.</summary>
+    public Recipe? Recipe { get; init; }
+
+    /// <summary>Why a shop lists the item but sells it at no price a player can pay.</summary>
+    public string? NoPriceReason { get; init; }
+
+    /// <summary>The source is a building in the player's own settlement.</summary>
+    public bool Settlement { get; init; }
+}
+
+internal enum OddsEvent
+{
+    Container,
+    Kill,
+    Delivery,
+    Use,
+}
+
+/// <summary>
+/// The chance of at least one copy per <see cref="Event"/>, and the copies expected per event. Both are null when
+/// the selection rule is not read, and <see cref="Unknown"/> then says why in player terms.
+/// </summary>
+internal sealed record Odds(OddsEvent Event, double? Chance, double? Expected, string? Unknown);
+
+/// <summary>
+/// A recipe's context. <see cref="Station"/> names where it is made, <see cref="Level"/> the discipline level it
+/// needs, <see cref="Output"/> how many it makes, and <see cref="Learned"/> how the recipe becomes available.
+/// </summary>
+internal sealed record Recipe(
+    EntityReference? Station,
+    string? Discipline,
+    int? Level,
+    double? Experience,
+    int Output,
+    string? Learned
+);
+
+internal enum ItemStatus
+{
+    Obtainable,
+    NoKnownSource,
+    NotInNormalPlay,
+}
+
+internal enum PriceRule
+{
+    /// <summary>The amount is what the player pays.</summary>
+    Fixed,
+
+    /// <summary>The amount is the base value, and the player's respect in <see cref="Price.City"/> sets the price.</summary>
+    City,
+
+    /// <summary>The amount is the base value, and <see cref="Price.Multiplier"/> sets the price.</summary>
+    Settlement,
 }
 
 internal enum SourceKind
@@ -320,10 +439,20 @@ internal enum SourceKind
     Farming,
     BountyNote,
     SettlementDelivery,
+    Stable,
+    Contract,
+    SeasonalGift,
+    Archaeology,
+    Reward,
 }
 
 /// <summary>A price in gold, the game's money, or in a currency item when <see cref="Currency"/> is set.</summary>
-internal sealed record Price(int Amount, EntityReference? Currency);
+internal sealed record Price(int Amount, EntityReference? Currency)
+{
+    public PriceRule Rule { get; init; } = PriceRule.Fixed;
+    public EntityReference? City { get; init; }
+    public double? Multiplier { get; init; }
+}
 
 /// <summary>How many of the item a source gives at once.</summary>
 internal sealed record Amount(int Min, int Max);
@@ -360,6 +489,44 @@ internal sealed record GapEntry(string Label, EntityReference? Entity, string? D
     public SourceKind? Source { get; init; }
 }
 
+/// <summary>
+/// The crafting rules that tools and part pages use. Written as <c>crafting.json</c>.
+/// </summary>
+internal sealed record CraftingData(
+    IReadOnlyList<WeaponFamily> Weapons,
+    IReadOnlyList<WeaponPart> Parts,
+    IReadOnlyList<QualityGrade> Qualities,
+    IReadOnlyList<ArmorQuality> ArmorQualities
+);
+
+/// <summary>A crafted weapon family, such as Greatsword, and the part kinds it is assembled from, in order.</summary>
+internal sealed record WeaponFamily(string Id, string Name, IReadOnlyList<string> PartKinds);
+
+/// <summary>
+/// A weapon part with the part kind it fills, the weapon families it fits and what it adds to the finished weapon.
+/// </summary>
+internal sealed record WeaponPart(
+    EntityReference Item,
+    string Kind,
+    IReadOnlyList<string> Families,
+    double? Damage,
+    double? Speed,
+    double? Value
+);
+
+/// <summary>A crafting quality grade, such as S, and the factor it applies to the finished weapon's stats.</summary>
+internal sealed record QualityGrade(string Grade, double Multiplier);
+
+/// <summary>
+/// An armorsmithing quality, such as Masterwork, the armorsmithing level it needs and the armor it gives for each
+/// armor class, such as Heavy.
+/// </summary>
+internal sealed record ArmorQuality(
+    string Name,
+    int Level,
+    IReadOnlyDictionary<string, double> ArmorByClass
+);
+
 /// <summary>The files of the site data, gathered only to export one schema for all of them.</summary>
 internal sealed record SiteDataFiles(
     SiteBuild Build,
@@ -368,5 +535,6 @@ internal sealed record SiteDataFiles(
     CoverageReport Coverage,
     IReadOnlyList<EntityKindDefinition> Kinds,
     EntityGraph Graph,
-    IReadOnlyList<PublishedIssue> Issues
+    IReadOnlyList<PublishedIssue> Issues,
+    CraftingData Crafting
 );

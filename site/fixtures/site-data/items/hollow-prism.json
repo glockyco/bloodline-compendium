@@ -31,5 +31,6 @@
 	"key": "/Invented/Items/HollowPrism",
 	"kind": "item",
 	"relations": [],
-	"notes": []
+	"notes": [],
+	"status": "noKnownSource"
 }

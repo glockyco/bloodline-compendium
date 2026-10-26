@@ -16,6 +16,29 @@
       "title": "Amount",
       "type": "object"
     },
+    "ArmorQuality": {
+      "properties": {
+        "armorByClass": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "type": "object"
+        },
+        "level": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "level",
+        "armorByClass"
+      ],
+      "title": "ArmorQuality",
+      "type": "object"
+    },
     "CategoryLink": {
       "properties": {
         "name": {
@@ -102,6 +125,42 @@
         "gaps"
       ],
       "title": "CoverageReport",
+      "type": "object"
+    },
+    "CraftingData": {
+      "properties": {
+        "armorQualities": {
+          "items": {
+            "$ref": "#/$defs/ArmorQuality"
+          },
+          "type": "array"
+        },
+        "parts": {
+          "items": {
+            "$ref": "#/$defs/WeaponPart"
+          },
+          "type": "array"
+        },
+        "qualities": {
+          "items": {
+            "$ref": "#/$defs/QualityGrade"
+          },
+          "type": "array"
+        },
+        "weapons": {
+          "items": {
+            "$ref": "#/$defs/WeaponFamily"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "weapons",
+        "parts",
+        "qualities",
+        "armorQualities"
+      ],
+      "title": "CraftingData",
       "type": "object"
     },
     "Effect": {
@@ -300,6 +359,12 @@
             }
           ]
         },
+        "gameShows": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "label": {
           "type": "string"
         },
@@ -379,6 +444,11 @@
             "farming",
             "bountyNote",
             "settlementDelivery",
+            "stable",
+            "contract",
+            "seasonalGift",
+            "archaeology",
+            "reward",
             null
           ]
         }
@@ -449,6 +519,18 @@
           },
           "type": "array"
         },
+        "columns": {
+          "items": {
+            "$ref": "#/$defs/ListColumn"
+          },
+          "type": "array"
+        },
+        "facets": {
+          "items": {
+            "$ref": "#/$defs/ListFacet"
+          },
+          "type": "array"
+        },
         "items": {
           "items": {
             "$ref": "#/$defs/ItemSummary"
@@ -458,7 +540,9 @@
       },
       "required": [
         "categories",
-        "items"
+        "items",
+        "facets",
+        "columns"
       ],
       "title": "ItemIndex",
       "type": "object"
@@ -522,6 +606,9 @@
           },
           "type": "array"
         },
+        "status": {
+          "$ref": "#/$defs/ItemStatus"
+        },
         "type": {
           "type": "string"
         },
@@ -545,15 +632,39 @@
         "relations",
         "type",
         "uses",
-        "notes"
+        "notes",
+        "status"
       ],
       "title": "ItemPage",
       "type": "object"
+    },
+    "ItemStatus": {
+      "enum": [
+        "obtainable",
+        "noKnownSource",
+        "notInNormalPlay"
+      ],
+      "title": "ItemStatus"
     },
     "ItemSummary": {
       "properties": {
         "category": {
           "type": "string"
+        },
+        "cells": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ListCell"
+          },
+          "type": "object"
+        },
+        "facets": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "type": "object"
         },
         "icon": {
           "type": [
@@ -585,6 +696,9 @@
           },
           "type": "array"
         },
+        "status": {
+          "$ref": "#/$defs/ItemStatus"
+        },
         "type": {
           "type": "string"
         },
@@ -604,7 +718,10 @@
         "sourceKinds",
         "key",
         "kind",
-        "type"
+        "type",
+        "status",
+        "facets",
+        "cells"
       ],
       "title": "ItemSummary",
       "type": "object"
@@ -617,6 +734,12 @@
           },
           "type": "array"
         },
+        "discipline": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "item": {
           "$ref": "#/$defs/EntityReference"
         },
@@ -625,6 +748,12 @@
         },
         "name": {
           "type": "string"
+        },
+        "outputCategory": {
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "quantity": {
           "type": "integer"
@@ -716,10 +845,148 @@
       "title": "KnownIssue",
       "type": "object"
     },
+    "ListCell": {
+      "properties": {
+        "number": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "text": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "number",
+        "text"
+      ],
+      "title": "ListCell",
+      "type": "object"
+    },
+    "ListColumn": {
+      "properties": {
+        "categories": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "numeric": {
+          "type": "boolean"
+        },
+        "unit": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "categories",
+        "numeric",
+        "unit"
+      ],
+      "title": "ListColumn",
+      "type": "object"
+    },
+    "ListFacet": {
+      "properties": {
+        "categories": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "values": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "categories",
+        "values"
+      ],
+      "title": "ListFacet",
+      "type": "object"
+    },
+    "Odds": {
+      "properties": {
+        "chance": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "event": {
+          "$ref": "#/$defs/OddsEvent"
+        },
+        "expected": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "unknown": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "event",
+        "chance",
+        "expected",
+        "unknown"
+      ],
+      "title": "Odds",
+      "type": "object"
+    },
+    "OddsEvent": {
+      "enum": [
+        "container",
+        "kill",
+        "delivery",
+        "use"
+      ],
+      "title": "OddsEvent"
+    },
     "Price": {
       "properties": {
         "amount": {
           "type": "integer"
+        },
+        "city": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EntityReference"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "currency": {
           "anyOf": [
@@ -730,6 +997,15 @@
               "type": "null"
             }
           ]
+        },
+        "multiplier": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "rule": {
+          "$ref": "#/$defs/PriceRule"
         }
       },
       "required": [
@@ -738,6 +1014,14 @@
       ],
       "title": "Price",
       "type": "object"
+    },
+    "PriceRule": {
+      "enum": [
+        "fixed",
+        "city",
+        "settlement"
+      ],
+      "title": "PriceRule"
     },
     "PublishedIssue": {
       "properties": {
@@ -756,6 +1040,73 @@
         "affected"
       ],
       "title": "PublishedIssue",
+      "type": "object"
+    },
+    "QualityGrade": {
+      "properties": {
+        "grade": {
+          "type": "string"
+        },
+        "multiplier": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "grade",
+        "multiplier"
+      ],
+      "title": "QualityGrade",
+      "type": "object"
+    },
+    "Recipe": {
+      "properties": {
+        "discipline": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "experience": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "learned": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "level": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "output": {
+          "type": "integer"
+        },
+        "station": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EntityReference"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "station",
+        "discipline",
+        "level",
+        "experience",
+        "output",
+        "learned"
+      ],
+      "title": "Recipe",
       "type": "object"
     },
     "RelationCondition": {
@@ -976,11 +1327,27 @@
         "name": {
           "type": "string"
         },
+        "noPriceReason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "notes": {
           "items": {
             "type": "string"
           },
           "type": "array"
+        },
+        "odds": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Odds"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "picks": {
           "anyOf": [
@@ -1008,8 +1375,21 @@
             }
           ]
         },
+        "recipe": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Recipe"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "relationId": {
           "type": "string"
+        },
+        "settlement": {
+          "type": "boolean"
         },
         "weight": {
           "anyOf": [
@@ -1055,7 +1435,12 @@
         "gathering",
         "farming",
         "bountyNote",
-        "settlementDelivery"
+        "settlementDelivery",
+        "stable",
+        "contract",
+        "seasonalGift",
+        "archaeology",
+        "reward"
       ],
       "title": "SourceKind"
     },
@@ -1086,6 +1471,73 @@
       ],
       "title": "Stat"
     },
+    "WeaponFamily": {
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "partKinds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "partKinds"
+      ],
+      "title": "WeaponFamily",
+      "type": "object"
+    },
+    "WeaponPart": {
+      "properties": {
+        "damage": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "families": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "item": {
+          "$ref": "#/$defs/EntityReference"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "speed": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "value": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "item",
+        "kind",
+        "families",
+        "damage",
+        "speed",
+        "value"
+      ],
+      "title": "WeaponPart",
+      "type": "object"
+    },
     "Weight": {
       "properties": {
         "total": {
@@ -1110,6 +1562,9 @@
     },
     "coverage": {
       "$ref": "#/$defs/CoverageReport"
+    },
+    "crafting": {
+      "$ref": "#/$defs/CraftingData"
     },
     "graph": {
       "$ref": "#/$defs/EntityGraph"
@@ -1140,7 +1595,8 @@
     "coverage",
     "kinds",
     "graph",
-    "issues"
+    "issues",
+    "crafting"
   ],
   "title": "SiteDataFiles",
   "type": "object"
