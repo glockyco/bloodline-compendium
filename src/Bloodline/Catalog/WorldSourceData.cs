@@ -33,12 +33,25 @@ internal static class WorldSourceData
             ? (int)number
             : null;
 
-    public static int? EnumIndex(JsonNode? value)
+    public static int? EnumIndex(CatalogContext context, JsonNode? value)
     {
         var name = RecordValues.EnumValue(value);
-        return name is not null && int.TryParse(name.Split("NewEnumerator").Last(), out var index)
-            ? index
-            : Integer(value);
+        if (name is null)
+        {
+            return Integer(value);
+        }
+        var separator = name.IndexOf("::", StringComparison.Ordinal);
+        if (separator < 0)
+        {
+            return null;
+        }
+        var enumName = name[..separator];
+        var entryName = name[(separator + 2)..];
+        var entry = context
+            .Records.Enums.Where(type => ItemIdentity.ClassName(type.Path) == enumName)
+            .SelectMany(type => type.Entries)
+            .FirstOrDefault(entry => entry.Name == name || entry.Name == entryName);
+        return entry?.Value is >= int.MinValue and <= int.MaxValue ? (int)entry.Value : null;
     }
 
     public static IEnumerable<(string Item, Weight Weight)> Pool(JsonNode? pool)

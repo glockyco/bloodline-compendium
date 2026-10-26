@@ -19,14 +19,15 @@ public sealed class WorldMechanismTests
         ClassRecord[]? classes = null,
         TableRecord[]? tables = null,
         LevelRecord[]? levels = null,
-        AssetRecord[]? dialogues = null
+        AssetRecord[]? dialogues = null,
+        EnumRecord[]? enums = null
     ) =>
         new(
             new CatalogRecords(
                 new BuildRecord(1, 1, []),
                 classes ?? [],
                 tables ?? [],
-                [],
+                enums ?? [],
                 levels ?? [],
                 dialogues ?? [],
                 [],
@@ -74,10 +75,16 @@ public sealed class WorldMechanismTests
         var table = Table(
             "DT_UQC_Quests",
             """
-            {"Type":{"$enum":"QuestType::NewEnumerator5"},"ItemBountyNoteClass":{"$ref":"/Invented/Note.Note_C"},"RequiredItemItemBounties":{"$ref":"/Invented/Requirement.Requirement_C"},"DisplayName":{"$text":"Invented bounty"}}
+            {"Type":{"$enum":"QuestType::NewEnumerator99"},"ItemBountyNoteClass":{"$ref":"/Invented/Note.Note_C"},"RequiredItemItemBounties":{"$ref":"/Invented/Requirement.Requirement_C"},"DisplayName":{"$text":"Invented bounty"}}
             """
         );
-        var result = Assert.Single(new BountyNoteMechanism().FindSources(Context([note], [table])));
+        var enumType = new EnumRecord(
+            "/Invented/QuestType.QuestType",
+            [new EnumEntry("NewEnumerator99", 5, "Contract")]
+        );
+        var result = Assert.Single(
+            new BountyNoteMechanism().FindSources(Context([note], [table], enums: [enumType]))
+        );
         Assert.Equal(note.Path, result.ItemClass);
         Assert.Equal(new Amount(2, 2), result.Source.Amount);
         Assert.Empty(result.Source.Inputs);
@@ -242,11 +249,15 @@ public sealed class WorldMechanismTests
         var gatherer = Type(
             "HarvestableInteractionObject",
             """
-            {"Preset":{"$enum":"Resource::NewEnumerator1"},"Iron Deposit Loot":{"$map":[[{"$ref":"/Invented/Ore.Ore_C"},2],[null,3],[{"$ref":"/Invented/Dud.Dud_C"},0]]},"Copper Deposit Loot":{"$map":[[{"$ref":"/Invented/Other.Other_C"},1]]}}
+            {"Preset":{"$enum":"Resource::NewEnumerator99"},"Iron Deposit Loot":{"$map":[[{"$ref":"/Invented/Ore.Ore_C"},2],[null,3],[{"$ref":"/Invented/Dud.Dud_C"},0]]},"Copper Deposit Loot":{"$map":[[{"$ref":"/Invented/Other.Other_C"},1]]}}
             """
         );
+        var enumType = new EnumRecord(
+            "/Invented/Resource.Resource",
+            [new EnumEntry("NewEnumerator99", 1, "Ore")]
+        );
         var sources = new GatheringMechanism()
-            .FindSources(Context([gatherer], levels: [Level(gatherer)]))
+            .FindSources(Context([gatherer], levels: [Level(gatherer)], enums: [enumType]))
             .ToArray();
         var result = Assert.Single(sources, source => source.Source.Places.Count > 0);
         Assert.Equal("/Invented/Ore.Ore_C", result.ItemClass);
@@ -276,5 +287,78 @@ public sealed class WorldMechanismTests
         Assert.Equal(2.0 / 3, result.Source.Chance);
         Assert.Null(result.Source.Weight);
         Assert.Contains("Maximum amount of items that can be harvested: 4", result.Source.Notes);
+    }
+
+    [Fact]
+    public void GatheringHetrumPresetUsesItsOwnPoolAndPlacedOverride()
+    {
+        var gatherer = Type(
+            "HarvestableInteractionObject",
+            """{"Preset":11,"Hetrum Deposit Loot":{"$map":[[{"$ref":"/Invented/Old.Old_C"},1]]},"Bone Pile Loot":{"$map":[[{"$ref":"/Invented/Bone.Bone_C"},1]]}}"""
+        );
+        var sources = new GatheringMechanism()
+            .FindSources(
+                Context(
+                    [gatherer],
+                    levels:
+                    [
+                        Level(
+                            gatherer,
+                            """{"Hetrum Deposit Loot":{"$map":[[{"$ref":"/Invented/Crystal.Crystal_C"},2],[null,1]]}}"""
+                        ),
+                    ]
+                )
+            )
+            .ToArray();
+        var placed = Assert.Single(sources, source => source.Source.Places.Count > 0);
+        Assert.Equal("/Invented/Crystal.Crystal_C", placed.ItemClass);
+        Assert.Equal(new Weight(2, 3), placed.Source.Weight);
+        Assert.Empty(
+            Assert
+                .Single(sources, source => source.ItemClass == "/Invented/Bone.Bone_C")
+                .Source.Places
+        );
+    }
+
+    [Fact]
+    public void AllZeroFarmingPoolsDoNotGrantItems()
+    {
+        var table = Table(
+            "SeedDataTable",
+            """{"Yield":10,"HarvestItems":{"$map":[[{"$ref":"/Invented/Fruit.Fruit_C"},0]]}}"""
+        );
+        Assert.Empty(new FarmingMechanism().FindSources(Context(tables: [table])));
+    }
+
+    [Fact]
+    public void BountyNoteReferencesInOtherQuestTypesAreNotAcceptanceGrants()
+    {
+        var table = Table(
+            "DT_UQC_Quests",
+            """{"Type":1,"ItemBountyNoteClass":{"$ref":"/Invented/Note.Note_C"}}"""
+        );
+        Assert.Empty(new BountyNoteMechanism().FindSources(Context(tables: [table])));
+    }
+
+    [Fact]
+    public void ExplicitEmptyPlacedFishingPoolDoesNotFallBackToMinigameLoot()
+    {
+        var minigame = Type(
+            "Fishing_Minigame",
+            """{"Beginner Loot Table":{"$map":[[{"$ref":"/Invented/Fish.Fish_C"},1]]}}"""
+        );
+        var spot = Type(
+            "FishingSpot",
+            """{"Min Difficulty":1,"Max Difficulty":1,"Remaining Fish":3,"Use Specific Loot table?":true,"Specific Loot Table":{"$map":[[{"$ref":"/Invented/Old.Old_C"},1]]}}"""
+        );
+        Assert.DoesNotContain(
+            new FishingMechanism().FindSources(
+                Context(
+                    [minigame, spot],
+                    levels: [Level(spot, """{"Specific Loot Table":{"$map":[]}}""")]
+                )
+            ),
+            source => source.Source.Places.Count > 0
+        );
     }
 }

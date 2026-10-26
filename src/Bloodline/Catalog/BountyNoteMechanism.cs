@@ -13,7 +13,7 @@ internal sealed class BountyNoteMechanism : ISourceMechanism
                 .SelectMany(table => table.Rows)
         )
         {
-            if (WorldSourceData.EnumIndex(row.Values["Type"]) is not (5 or 6))
+            if (WorldSourceData.EnumIndex(context, row.Values["Type"]) is not (5 or 6))
             {
                 continue;
             }

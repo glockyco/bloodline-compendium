@@ -18,7 +18,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
         [6] = "Stone Loot",
         [7] = "Berry Bush Loot",
         [8] = "Mushroom Patch Loot",
-        [11] = "Bone Pile Loot",
+        [11] = "Hetrum Deposit Loot",
     };
     private static readonly IReadOnlyDictionary<int, string> GatherPools = new Dictionary<
         int,
@@ -103,7 +103,10 @@ internal sealed class GatheringMechanism : ISourceMechanism
         {
             return "Selected Loot Table";
         }
-        var index = WorldSourceData.EnumIndex(properties[harvest ? "Preset" : "GatherPointType"]);
+        var index = WorldSourceData.EnumIndex(
+            context,
+            properties[harvest ? "Preset" : "GatherPointType"]
+        );
         var pools = harvest ? HarvestPools : GatherPools;
         return index is { } value && pools.TryGetValue(value, out var pool)
             ? pool
@@ -125,7 +128,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
             ? HarvestPools
                 .Values.Append("Selected Loot Table")
                 .Append("Magma Stone Loot")
-                .Append("Hetrum Deposit Loot")
+                .Append("Bone Pile Loot")
             : GatherPools.Values;
         foreach (var pool in pools.Distinct(StringComparer.Ordinal))
         {
