@@ -19,7 +19,7 @@
 					<dt>Price</dt>
 					<dd>
 						{formatNumber(source.price.amount)}
-						{#if source.price.currency}<ItemLink item={source.price.currency} />{:else}money{/if}
+						{#if source.price.currency}<ItemLink item={source.price.currency} />{:else}gold{/if}
 					</dd>
 				</div>{/if}
 			{#if source.amount}<div>

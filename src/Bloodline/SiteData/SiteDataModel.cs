@@ -93,7 +93,7 @@ internal enum SourceKind
 /// <summary>A level, identified by its package path, with the name players know it by.</summary>
 internal sealed record Place(string Id, string Name);
 
-/// <summary>A price in the game's money, or in a currency item when <see cref="Currency"/> is set.</summary>
+/// <summary>A price in gold, the game's money, or in a currency item when <see cref="Currency"/> is set.</summary>
 internal sealed record Price(int Amount, ItemLink? Currency);
 
 /// <summary>How many of the item a source gives at once.</summary>

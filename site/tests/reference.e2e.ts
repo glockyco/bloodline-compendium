@@ -22,7 +22,7 @@ test('shows facts, complete source fields and unknowns', async ({ page }) => {
 	await expect(page.locator('.facts')).toContainText(/Critical chance\s*Unknown/);
 	for (const text of [
 		'Glass Reach',
-		'45 money',
+		'45 gold',
 		'3 Cinderpear',
 		'1 to 2',
 		'2 of 18.02',
