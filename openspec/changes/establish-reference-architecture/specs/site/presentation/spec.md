@@ -34,6 +34,20 @@ Item facts SHALL appear in the order and wording of the game's own tooltip, with
 - **WHEN** a reader opens a weapon page
 - **THEN** its tooltip shows the name, icon, speed word, damage and description in the game's order
 
+### Requirement: Entity tooltips
+Every link to an entity of a kind with pages SHALL show that entity's tooltip on hover and on keyboard focus, in its kind's tooltip style, without loading the target page. Without JavaScript the link SHALL still lead to the page.
+
+#### Scenario: Item linked from a recipe
+- **WHEN** a reader hovers or focuses an ingredient link on a recipe
+- **THEN** the ingredient's item tooltip appears beside the link and the link still opens its page
+
+### Requirement: One stat vocabulary
+Every stat label, unit and number format SHALL come from one stat vocabulary that uses the game's own terms, and every number SHALL pass through one formatting function. Tooltips, tables, filters, formulas, calculators and the planner SHALL use the same entries.
+
+#### Scenario: Armor in two places
+- **WHEN** an item tooltip and a list column both show armor
+- **THEN** both use the same label, unit and number format
+
 ### Requirement: Voice rules
 Site-authored text SHALL use the game's own terms for labels and state facts plainly. A check SHALL fail on the banned constructions listed in the voice rules.
 

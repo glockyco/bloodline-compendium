@@ -52,6 +52,24 @@ Disagreements found:
 
 Comments in `ItemFacts.cs` cite bytecode by line number in a dump that the repository cannot regenerate.
 
+### Character progression in the game data
+
+Read from the widget and struct assets of build 24464547 with the design harness. Not yet confirmed in the running game.
+
+- **Skill trees are widget data.** Each of 21 disciplines has a tree widget whose slots name the skill class, the required discipline level (`Required Level`, `Level To Check`) and passive buttons with their names, descriptions and required proficiency levels. Pyromancy's passive Burning Efficiency, for example, needs proficiency 85 and reduces pyromancy mana cost by 3.5% per rank.
+- **Two tree versions exist.** Every discipline has a level-based tree (`*LBSkillTree`) and an older tree with skill point prerequisites (`Skills Needed`) and skill upgrades. The skill category menus hold variables only for the level-based trees. Which version players see, and what the `Skill Points` and `Proficiency Points` texts on both mean, is unsettled.
+- **Disciplines:**
+  - Magic: Pyromancy, Cryomancy, Electromancy, Geomancy, Aeromancy, Arcane, Blood Magic, Necromancy, Druidism, Vampirism.
+  - Weapons: Dagger, One-Handed, Two-Handed, Spear, Staff, Shield, Unarmed.
+  - Other: Bow, Flintlock, Lute, Utility Gadgets.
+- **Skills:** `SkillsDataTable` holds 599 skills with mana cost, cooldown, cast time and a skill class. Its tab column groups them as Magic 371, Blades 145, Ranged 45, Gadgets 17 and Leadership 9.
+- **Attributes and proficiencies:**
+  - `PlayerStatLevels` names 12 attributes: Fortitude, Wisdom, Dexterity, Strength, Constitution, Vitality, Intelligence, Perception, Agility, Reflexes, Acrobatics and Willpower.
+  - The lab save also stores levels for Endurance, Focus Crafting, and Light, Medium and Heavy Armor with their EXP. So the armor type decides which armor proficiency a player trains.
+  - Calling the game's `Set Required EXP` matched the experience formula read from bytecode at 14 levels in an earlier spike.
+- **Equipment:** the player has 11 equipment slots. Further layers are armor runes in three tiers with an attunement table, enchantments with melee trigger types, grapple mods, mounts and companions.
+- **Saves:** the save stores inventory items by class path, such as `/Game/BloodlinesAlpha/Interactables/Crafting_Items/Apple.Apple_C`. It also stores attribute and proficiency levels, the character level, completed achievements and the rolled calendar events.
+
 ### What the sibling projects rebuilt
 
 - **Afallon:** started on 2026-09-06.
@@ -67,6 +85,22 @@ Comments in `ItemFacts.cs` cite bytecode by line number in a dump that the repos
   - It needed one shared number-formatting capability and an item page redesign.
 - **Erenshor:** its code-facts spec, matched against decompiled syntax, changed in 45 commits, partly from decompiler output changes.
 
+### Features the siblings built or planned
+
+| Feature | Sibling evidence | What it needed underneath |
+|---|---|---|
+| Character planner | Afallon proposed it on 2026-09-28. Talent and gear planning were split into separate changes on 2026-10-03. The planner payload, compressed build links and the multi-character store landed on 2026-10-11. `build-character-planner` still has 15 of 23 tasks open, `plan-character-gear` 21 of 21 and `plan-party` 31 of 31. | A route-scoped payload of trees, nodes, ranks, costs and conditions, separate from page documents. One tested evaluator (`apps/site/src/lib/planner/talents.ts`). Build links in a versioned compressed fragment that refer to keys. Characters kept in the browser. The active character adds cues to reference pages (`page-context.ts`), and level controls are shared. |
+| Combat planner | Ancient Kingdoms held 213 mutually blocking tasks in `add-gear-and-rotation-planner` and `add-combat-verification-harness` before `rebuild-combat-model` (2026-09-18). It retired the engine on 2026-10-16: the engine "produced no results the site could publish, yet every game update cost fixture refreshes". | A simulator and fixture characters measured in game. It was never finished. |
+| Calculators and formulas | Ancient Kingdoms' `unify-formula-presentation` (2026-10-13) replaced five formula notations that had drifted from each other. Afallon has `add-kill-calculator` and `shared-level-control`. | One calculation model with worded steps, evaluated both when pages prerender and in the browser. Shared remembered character inputs. |
+| Entity tooltips | Afallon's `compendium-tooltips` spec. | Tooltip data for each kind, shown on hover and keyboard focus with the active character's context. |
+| Search over every kind | Ancient Kingdoms added global search (`add-global-entity-search`, 2026-09-27), then specified entity registries a day later. | A registry of kinds that feeds search, the sitemap, artwork and page metadata. |
+| Requirements and seasons | Ancient Kingdoms retrofitted seasonal availability (`integrate-seasonal-content`, 2026-10-25) after season facts had spread over booleans and sentinel values, and unified requirements in `unify-acquisition-usage-requirements` (2026-10-18). | Typed conditions on every source, use and unlock. |
+| Stat names and numbers | Ancient Kingdoms' `unify-stat-vocabulary` (2026-10-17) and `unify-number-formatting` (2026-10-25). | One stat vocabulary and one number format boundary. |
+| Interactive map | Both siblings. Afallon kept placements off relation rows (2026-09-18). Ancient Kingdoms plans links from lists to the map. | Placements keyed by entity, published separately from page documents, with map state in the URL. |
+| Save progress | Afallon's `show-save-progress` (25 of 25 tasks open). | Keys that match the identifiers saves store. Reading the save in the browser. |
+| Changes per update | Afallon's `show-update-changes` (18 of 18 tasks open). | Stable keys and a comparison of facts between builds, linked to the patch notes. |
+| Known bugs | Ancient Kingdoms' `add-known-bugs-page`. | Covered by `site/known-issues`. |
+
 ## Goals / Non-Goals
 
 **Goals:**
@@ -81,6 +115,7 @@ Comments in `ItemFacts.cs` cite bytecode by line number in a dump that the repos
 - Publishing pages for kinds other than items. Each kind arrives in its own change, in the order below.
 - A general interpreter for Blueprint code. Calling the game's own functions tests behaviour more cheaply.
 - Running checks in CI. CI has no game files.
+- A combat simulator or damage optimizer. Ancient Kingdoms retired one that never produced a publishable result and cost work on every update.
 
 ## Decisions
 
@@ -90,11 +125,19 @@ The C# catalog builds an in-memory graph of entities and relation rows and write
 
 The writer resolves every relation into references embedded in both documents. A reference holds the kind, key, name, slug when the kind has pages, and the icon. The site therefore renders links without joins. A graph check runs in the catalog and again on the built site.
 
-Keys derive from the game object:
-- a class path for items and creatures,
-- a table and row name for quests, skills, recipes and mounts,
+Relation rows carry typed conditions where the game sets them: a calendar event or season, a quest or quest stage, a guild rank, a discipline or proficiency level, a settlement building, or another named game state. A condition the catalog cannot read is published as unknown, never as absent. Pages, the map and the planner read the same conditions, which Ancient Kingdoms had to retrofit for seasons.
+
+Keys are the identifiers the game itself uses, so saves, build links and update comparisons can refer to them:
+- a class path for items, skills and creatures, which is also what saves store,
+- a table and row name for quests, recipes and mounts,
 - a level path for places,
 - a level and actor path, or a dialogue asset, for people.
+
+Keys never derive from display names.
+
+Placements in levels are published apart from page documents, as the map's own data keyed by entity. Pages show counts and places, not coordinate lists. Afallon moved placements off its relation rows for the same reason.
+
+A registry of kinds lists each kind once with its page decision, route, search filter and structured-data type. Routes, Pagefind filters, the sitemap and page metadata all read it.
 
 Slugs derive from display names under the existing qualification rules. URLs are `/<kind>/<slug>/`, and item URLs keep their current form.
 
@@ -168,6 +211,47 @@ Screenshots are derived from the game, so they live in the build's artifacts and
 
 The emblem is a single front-facing tome illustration generated from the key art's style. It is the source of the header mark, the favicons and the link preview image.
 
+### Rules implemented once in the site
+
+Every game rule a reader can recompute is implemented once, in TypeScript, as a function with typed inputs, typed outputs and worded steps. Examples are the experience requirement, the attack speed word, weapon part totals, crafting quality and armor totals.
+
+The same function produces the values pages prerender, the formulas mechanics pages show, the calculators and the planner. The catalog publishes the inputs. A rule that depends on an unknown input returns unknown.
+
+Rules are tested in two ways:
+- Invented fixtures in Git cover their behaviour, because game-derived values may not enter the repository.
+- A local check compares each rule with vectors recorded by calling the game's own function in the lab with chosen inputs. The vectors live in the build's artifacts.
+
+Each rule cites the game functions it mirrors, so a changed fingerprint flags it on update.
+
+Alternative: rule code in the C# catalog. The browser could then not recompute rules for a reader's inputs, and a second copy would drift, as Ancient Kingdoms' five formula notations did.
+
+### Stats and numbers
+
+One stat vocabulary maps each game stat to its reader name, unit and number format, using the game's own terms. Tooltips, tables, filters, formulas, calculators and the planner read it, and all numbers pass through one format boundary.
+
+### Entity tooltips
+
+Every entity link shows that entity's tooltip on hover and keyboard focus, in its kind's game-familiar style. The item tooltip of group 8 is the first. Tooltip data loads per entity without loading the target page, and the link works without JavaScript.
+
+### The planner covers what the game enforces
+
+The planner lets a reader plan a character against the game's own trees, unlock levels and rules. It builds on the foundation above and arrives early, in the order below.
+
+It plans what the game enforces and computes only what verified rules compute:
+- discipline and attribute levels,
+- the skills and passive ranks they unlock,
+- points and their costs,
+- equipment, crafted weapons, runes and enchantments, with armor and mobility totals.
+
+It does not simulate fights. A rule or condition the catalog does not know stays visible as a gap, as in Afallon's planner.
+
+Constraints that apply from the start:
+- **Build links:** versioned and refer to keys, compressed into the URL fragment, with size limits.
+- **Characters:** kept in the browser, with shared builds opening as previews.
+- **Planner data:** a route-scoped payload with its own size budget, separate from page documents.
+- **Context on pages:** reference pages prerender neutral content. The active character adds cues in the browser, such as the discipline level a skill needs against the character's level. Search engines and readers without a character see the same pages.
+- **Scope:** planning is split by domain, skills first and equipment second, each its own change, because Afallon's single planner plan had to be split.
+
 ### Where findings live
 
 Session history is not a record. Each finding goes where the next reader looks:
@@ -192,26 +276,40 @@ Each item below is its own change with its own specs. Each publishes into the gr
 1. Finish `publish-item-reference` on this contract:
    - verified armor, food and weapon facts,
    - CI, preview and production deploys.
-2. Places and people:
-   - levels as places with their merchants,
+2. Disciplines, skills and the skill planner:
+   - pages for disciplines, skills, passives and spellsongs,
+   - the planner's first part: discipline and attribute levels, unlocked skills and passive ranks, points, build links, characters in the browser, and the active character's context on pages.
+3. Crafting and equipment:
+   - smithing with weapon parts, quality and a weapon builder,
+   - crafting, cooking with ingredient treatments, and farming,
+   - the planner's second part: equipment, crafted weapons, runes and enchantments with armor and mobility totals.
+4. Places and people:
+   - levels as places with their merchants and trainers,
    - conversation givers,
-   - containers and settlement buildings.
-3. Creatures and loot, with drop tables.
-4. Crafting: smithing with weapon parts and quality, crafting, cooking with ingredient treatments, and farming.
-5. Quests, achievements and guilds with their ranks.
-6. Skills and spellsongs.
-7. Mounts, companions, diseases, calendar events and the arena.
-8. The interactive map from level captures and placements.
-9. Mechanics guides: experience, combat, armor, crafting quality and settlement income.
-10. 3D model renders of items, creatures and people.
+   - containers and settlement buildings,
+   - placements for the map.
+5. Creatures and loot, with drop tables and spawn odds.
+6. Quests, achievements and guilds with their ranks.
+7. The interactive map from level captures and placements, with links both ways between map and pages.
+8. Mounts, companions, diseases, calendar events and the arena.
+9. Mechanics guides with calculators on the shared rules: experience, armor, crafting quality, settlement income and farming.
+10. A page per update listing changed facts, linked to the patch notes. It needs the project context line "The site describes only the current game build" revised.
+11. Reading a save in the browser to show progress and to start a planned character from it.
+12. 3D model renders of items, creatures and people.
+
+Skills and the planner come before places and people. The planner offers what the official wiki cannot, and it exercises the rules module early. Item sources keep naming merchants and places as unlinked references until change 4 publishes them.
+
+Not planned: a combat simulator, and mods for players. Mods need UE4SS installed and break with Early Access updates.
 
 ## Risks / Trade-offs
 
-- [The graph is designed before most kinds exist] → Only the key, reference and relation shapes are fixed now. Kinds and relation kinds are added by their own changes.
-- [Function fingerprints change with CUE4Parse upgrades] → CUE4Parse updates are reviewed separately from game updates, and the report separates the two causes.
-- [Runtime checks need the game in front] → Batch runs, and test running off screen early.
-- [Typed references make site data larger] → References carry only kind, key, name, slug and icon. The file-size gate catches growth.
-- [Known issues published on unconfirmed causes] → An entry requires an observation, and code-derived causes are labelled as derived.
+- The graph is designed before most kinds exist. Only the key, reference, condition and relation shapes are fixed now, and each later change adds its own kinds and relation kinds.
+- Function fingerprints change with CUE4Parse upgrades. CUE4Parse updates are reviewed separately from game updates, and the report separates the two causes.
+- Runtime checks need the game in front. Runs are batched, and running off screen is tested early.
+- Typed references make site data larger. References carry only kind, key, name, slug and icon, and the file-size gate catches growth.
+- Known issues could be published on unconfirmed causes. An entry requires an observation, and code-derived causes are labelled as derived.
+- The planner could grow into one change that never closes, as in both siblings. It is split by domain, it plans only what the game enforces, and unknown rules stay gaps.
+- Recorded rule vectors could go stale when a game update changes a rule. The update report lists rules whose cited functions changed, and their vectors are recorded again.
 
 ## Migration Plan
 
