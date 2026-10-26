@@ -11,6 +11,14 @@ internal sealed record ContainerDetails(
     bool Loose = false
 )
 {
+    // The container loop starts at zero and tests an inclusive, freshly rolled limit.
+    public Amount? Picks =>
+        LootLimits is not { } limits ? null
+        : Loose ? new Amount(Math.Max(0, limits.Max), Math.Max(0, limits.Max))
+        : limits.Min >= 0 && limits.Max >= limits.Min && limits.Max < int.MaxValue
+            ? new Amount(limits.Min + 1, limits.Max + 1)
+        : null;
+
     public IReadOnlyList<string> Notes => Describe([this]);
 
     public static IReadOnlyList<string> Describe(IReadOnlyList<ContainerDetails> variants)
@@ -18,7 +26,7 @@ internal sealed record ContainerDetails(
         var notes = new List<string>();
         var containers = variants.Where(variant => !variant.Loose).ToArray();
         var limits = containers
-            .Select(variant => variant.LootLimits)
+            .Select(variant => variant.Picks)
             .OfType<Amount>()
             .Distinct()
             .ToArray();
@@ -27,15 +35,15 @@ internal sealed record ContainerDetails(
             var minimum = limits.Min(limit => limit.Min);
             var maximum = limits.Max(limit => limit.Max);
             notes.Add(
-                minimum == maximum ? $"Holds up to {maximum} items, so it can be empty."
+                minimum == maximum ? $"Makes {maximum} loot picks. Picks can find nothing."
                 : limits.Length == 1
-                    ? $"Holds up to a limit rolled from {minimum} to {maximum} items, so it can be empty."
-                : $"Holds up to a limit rolled from {minimum} to {maximum} items, depending on the container. It can be empty."
+                    ? $"Makes {minimum} to {maximum} loot picks. Picks can find nothing."
+                : $"Makes {minimum} to {maximum} loot picks, depending on the container. Picks can find nothing."
             );
         }
-        if (containers.Any(variant => variant.LootLimits is null))
+        if (containers.Any(variant => variant.Picks is null))
         {
-            notes.Add("The number of items some containers can hold is unknown.");
+            notes.Add("The number of loot picks some containers make is unknown.");
         }
         var chances = containers
             .Select(variant => variant.AppearanceChance)
@@ -60,25 +68,18 @@ internal sealed record ContainerDetails(
         }
         var loose = variants.Where(variant => variant.Loose).ToArray();
         var looseLimits = loose
-            .Select(variant => variant.LootLimits)
+            .Select(variant => variant.Picks)
             .OfType<Amount>()
             .Distinct()
             .ToArray();
         if (looseLimits.Length > 0)
         {
             var minimum = looseLimits.Min(limit => limit.Min);
-            var maximumMinimum = looseLimits.Max(limit => limit.Min);
-            notes.Add(
-                minimum == maximumMinimum
-                    ? $"The minimum amount is {minimum}, but it does not limit how few loose items can appear."
-                    : $"Minimum amounts range from {minimum} to {maximumMinimum}, but they do not limit how few loose items can appear."
-            );
-            var minimumMaximum = looseLimits.Min(limit => limit.Max);
             var maximum = looseLimits.Max(limit => limit.Max);
             notes.Add(
-                minimumMaximum == maximum
-                    ? $"Up to {maximum} loose {(maximum == 1 ? "item" : "items")} can appear."
-                    : $"The maximum number of loose items ranges from {minimumMaximum} to {maximum}, depending on the source."
+                minimum == maximum
+                    ? $"Makes {maximum} loose loot picks. Empty outcomes do not produce an item."
+                    : $"Makes {minimum} to {maximum} loose loot picks, depending on the source. Empty outcomes do not produce an item."
             );
         }
         if (loose.Any(variant => variant.LootLimits is null))
@@ -115,7 +116,16 @@ internal static class ContainerSourceMerge
                 continue;
             }
             var key = CanonicalJson.Serialize(
-                new { candidate.ItemClass, Source = source with { Places = [], Notes = [] } }
+                new
+                {
+                    candidate.ItemClass,
+                    Source = source with
+                    {
+                        Places = [],
+                        Notes = [],
+                        Picks = null,
+                    },
+                }
             );
             if (!groups.TryGetValue(key, out var group))
             {
@@ -157,6 +167,10 @@ internal static class ContainerSourceMerge
             {
                 notes.Add("Some containers have no known location.");
             }
+            var picks = group
+                .Select(candidate => candidate.Source.Picks)
+                .OfType<Amount>()
+                .ToArray();
             yield return group[0].Source with
             {
                 Places = group
@@ -164,6 +178,10 @@ internal static class ContainerSourceMerge
                     .DistinctBy(place => place.Id, StringComparer.OrdinalIgnoreCase)
                     .ToArray(),
                 Notes = notes,
+                Picks =
+                    picks.Length == group.Count
+                        ? new Amount(picks.Min(value => value.Min), picks.Max(value => value.Max))
+                        : null,
             };
         }
     }

@@ -1,6 +1,12 @@
 {
 	"appId": 1159290,
 	"buildId": 90000001,
+	"release": {
+		"title": "Invented Fixture Release",
+		"patchDate": "2026-10-01",
+		"patchNotesUrl": "https://example.com/invented-bloodline-patch",
+		"dataDate": "2026-10-02"
+	},
 	"depots": [
 		{
 			"depotId": 1159291,

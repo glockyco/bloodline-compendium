@@ -25,6 +25,8 @@
 		{
 			"slug": "cinderpear",
 			"name": "Cinderpear",
+			"type": "Fruit",
+			"qualifier": null,
 			"category": "food",
 			"value": 8,
 			"icon": "cinderpear",
@@ -33,6 +35,8 @@
 		{
 			"slug": "hollow-prism",
 			"name": "Hollow Prism",
+			"type": "Curio",
+			"qualifier": null,
 			"category": "curios",
 			"value": null,
 			"icon": null,
@@ -41,6 +45,8 @@
 		{
 			"slug": "lanternedge",
 			"name": "Lanternedge",
+			"type": "Sword",
+			"qualifier": null,
 			"category": "weapons",
 			"value": 45,
 			"icon": "lanternedge",
@@ -49,6 +55,8 @@
 		{
 			"slug": "mosswoven-coat",
 			"name": "Mosswoven Coat",
+			"type": "Coat",
+			"qualifier": null,
 			"category": "armour",
 			"value": 90,
 			"icon": "mosswoven-coat",

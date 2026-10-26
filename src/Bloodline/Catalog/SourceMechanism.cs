@@ -70,7 +70,7 @@ internal sealed class CatalogContext
 
     public ItemLink ItemLink(string path) =>
         Items.TryGetValue(path, out var item)
-            ? new ItemLink(item.Slug, item.Name)
+            ? new ItemLink(IsExcludedClass(path) ? null : item.Slug, ItemIdentity.DisplayName(item))
             : new ItemLink(null, ItemIdentity.Readable(ItemIdentity.ClassName(path)));
 
     public static IReadOnlyList<Source> MergeSources(

@@ -1,4 +1,3 @@
-using System.Globalization;
 using Bloodline.Records;
 using Bloodline.SiteData;
 
@@ -20,7 +19,6 @@ internal sealed class RandomLootMechanism : ISourceMechanism
                 || RecordValues.Number(row.Values["BaseSpawnRate"]) is not > 0
             )
                 continue;
-            var rate = RecordValues.Number(row.Values["BaseSpawnRate"])!.Value;
             yield return new ItemSource(
                 item,
                 new Source(
@@ -33,8 +31,8 @@ internal sealed class RandomLootMechanism : ISourceMechanism
                     null,
                     [],
                     [
-                        $"Base loot rate: {rate.ToString(CultureInfo.InvariantCulture)}. Player level, item level and item type modify this rate before an item is chosen.",
-                        "Available from containers that draw from general loot. Each container allows only certain item types and requires matching item tags. Not every container can drop this item.",
+                        "Some containers can contain this item. Not every container can drop it.",
+                        "The chance depends on the container, player level, item level and item type, so a fixed chance is unknown.",
                     ]
                 )
             );

@@ -216,6 +216,8 @@ public sealed class WorldMechanismTests
         var result = Assert.Single(sources, source => source.Source.Places.Count > 0);
         Assert.Equal("/Invented/Fish.Fish_C", result.ItemClass);
         Assert.Equal(new Weight(4, 5), result.Source.Weight);
+        Assert.Equal(0.8, result.Source.Chance);
+        Assert.Equal("Chance per catch", result.Source.ChanceBasis);
         Assert.Equal(new[] { 1d, 1d, 5d }, NoteNumbers(result.Source));
         Assert.DoesNotContain(
             sources,
@@ -239,6 +241,8 @@ public sealed class WorldMechanismTests
             source => source.Source.Places.Count > 0
         );
         Assert.Equal("/Invented/Medium.Medium_C", result.ItemClass);
+        Assert.Equal(1, result.Source.Chance);
+        Assert.Equal("Chance per catch", result.Source.ChanceBasis);
         var lava = Assert.Single(
             new FishingMechanism().FindSources(
                 Context([spot, minigame], levels: [Level(spot, """{"Lava Fish":true}""")])
@@ -246,6 +250,12 @@ public sealed class WorldMechanismTests
             source => source.Source.Places.Count > 0
         );
         Assert.Equal("/Invented/Lava.Lava_C", lava.ItemClass);
+        Assert.Null(lava.Source.Chance);
+        Assert.Null(lava.Source.ChanceBasis);
+        Assert.Contains(
+            lava.Source.Notes,
+            note => note.Contains("unconfirmed", StringComparison.Ordinal)
+        );
     }
 
     [Fact]
@@ -268,7 +278,8 @@ public sealed class WorldMechanismTests
         Assert.Equal("/Invented/Ore.Ore_C", result.ItemClass);
         Assert.Single(sources, source => source.ItemClass == "/Invented/Ore.Ore_C");
         Assert.Equal(new Weight(2, 5), result.Source.Weight);
-        Assert.Null(result.Source.Chance);
+        Assert.Equal(0.4, result.Source.Chance);
+        Assert.Equal("Chance per roll", result.Source.ChanceBasis);
         Assert.Equal(new[] { 0d, 3d }, NoteNumbers(result.Source));
         Assert.DoesNotContain(
             sources,
@@ -292,6 +303,7 @@ public sealed class WorldMechanismTests
         );
         var result = Assert.Single(new GatheringMechanism().FindSources(Context([gatherer])));
         Assert.Equal(2.0 / 3, result.Source.Chance);
+        Assert.Equal("Chance per roll", result.Source.ChanceBasis);
         Assert.Null(result.Source.Weight);
         Assert.Equal(new[] { 4d }, NoteNumbers(result.Source));
     }

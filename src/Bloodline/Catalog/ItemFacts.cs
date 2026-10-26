@@ -5,12 +5,27 @@ using Bloodline.SiteData;
 
 namespace Bloodline.Catalog;
 
-internal sealed class ItemFacts(IReadOnlyList<EnumRecord> enums)
+internal sealed class ItemFacts(
+    IReadOnlyList<EnumRecord> enums,
+    IReadOnlyList<TableRecord>? tables = null
+)
 {
     private readonly Dictionary<string, string?> enumDisplays = enums
         .SelectMany(record => record.Entries.Select(entry => (entry.Name, entry.Display)))
         .GroupBy(entry => entry.Name, StringComparer.Ordinal)
         .ToDictionary(group => group.Key, group => group.First().Display, StringComparer.Ordinal);
+
+    private readonly Dictionary<string, TableRow[]> components = (tables ?? [])
+        .Where(table => ItemIdentity.ClassName(table.Path) == "WeaponComponentTable")
+        .SelectMany(table => table.Rows)
+        .Select(row => (Item: RecordValues.AnyReference(row.Values["Class"]), Row: row))
+        .Where(entry => entry.Item is not null)
+        .GroupBy(entry => entry.Item!, entry => entry.Row, StringComparer.OrdinalIgnoreCase)
+        .ToDictionary(
+            group => group.Key,
+            group => group.ToArray(),
+            StringComparer.OrdinalIgnoreCase
+        );
 
     public string? Display(JsonNode? value) =>
         RecordValues.Text(value)
@@ -30,6 +45,20 @@ internal sealed class ItemFacts(IReadOnlyList<EnumRecord> enums)
     {
         var properties = item.Properties;
         var category = Display(RecordValues.At(properties, "ItemInfo.ItemType"));
+        var component = components.GetValueOrDefault(item.Path);
+        var componentPart = component is null ? null : ComponentValue(component, "Part");
+        var type = ItemIdentity.ClassName(item.Path) switch
+        {
+            // CustomCurrencyShop's default shop functions select these inventory classes as currency.
+            "Iuba_Coin" or "Tithes" => "Currency",
+            _ when component is not null => componentPart,
+            _ => category switch
+            {
+                "Weapon" => Display(RecordValues.At(properties, "ItemInfo.SpecificItemType")),
+                "Armor" => Display(RecordValues.At(properties, "ItemInfo.ItemSlot")),
+                _ => category,
+            },
+        };
         var facts = new List<Fact>();
         void Add(string label, string path) =>
             facts.Add(new Fact(label, Display(RecordValues.At(properties, path))));
@@ -38,9 +67,15 @@ internal sealed class ItemFacts(IReadOnlyList<EnumRecord> enums)
         {
             facts.Add(new Fact("Category", null));
         }
-        if (category == "Weapon")
+        if (component is not null)
         {
-            Add("Type", "ItemInfo.SpecificItemType");
+            // Crafting's component selector and Retrieve Component Stats read these table fields.
+            // They are contributions, not the item's inherited weapon defaults or final weapon stats.
+            facts.Add(new Fact("Damage contribution", ComponentValue(component, "Damage")));
+            facts.Add(new Fact("Speed contribution", ComponentValue(component, "Speed")));
+        }
+        else if (category == "Weapon")
+        {
             Add("Weapon type", "WeaponInfo.AttackType");
             // BP_BaseWeapon ExecuteUbergraph L13640 passes WeaponInfo.Damage to ApplyDamage.
             // FirstPersonCharacter2 also reads it into Arrow/Bullet Damage at L188281 and L196673.
@@ -68,8 +103,6 @@ internal sealed class ItemFacts(IReadOnlyList<EnumRecord> enums)
         }
         if (category == "Armor")
         {
-            // SpecificItemType retains the weapon default on most armour. ItemSlot governs equipment placement.
-            Add("Slot", "ItemInfo.ItemSlot");
             Add("Armor type", "ItemInfo.ArmorType");
             // FirstPersonCharacter2's equipment function assigns Head Armor at L3650 and Torso Armor
             // at L6506 from ArmorInfo.DamageRating. TakeDamage uses Total Armor, not ItemInfo.Damage.
@@ -106,7 +139,24 @@ internal sealed class ItemFacts(IReadOnlyList<EnumRecord> enums)
             null,
             facts,
             []
-        );
+        )
+        {
+            Type = type ?? "Unknown",
+        };
+    }
+
+    private string? ComponentValue(IReadOnlyList<TableRow> rows, string field)
+    {
+        var value = Display(rows[0].Values[field]);
+        // A class can occur in several rows with conflicting stats. No row is authoritative.
+        for (var index = 1; index < rows.Count; index++)
+        {
+            if (Display(rows[index].Values[field]) != value)
+            {
+                return null;
+            }
+        }
+        return value;
     }
 
     private void AddEffects(List<Fact> facts, JsonNode? potion)

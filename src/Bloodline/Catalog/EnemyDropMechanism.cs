@@ -89,7 +89,8 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
                     SourceKind.EnemyDrop,
                     name,
                     sourcePlaces,
-                    RollNotes(field, places.Count == 0 && sourcePlaces.Count > 0, nameNotes)
+                    RollNotes(field, places.Count == 0 && sourcePlaces.Count > 0, nameNotes),
+                    "Chance per kill"
                 )
             )
                 yield return source;
@@ -111,7 +112,8 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
                     SourceKind.EnemyDrop,
                     name,
                     places,
-                    RollNotes(field, true, nameNotes)
+                    RollNotes(field, true, nameNotes),
+                    "Chance per kill"
                 )
             )
                 yield return source;

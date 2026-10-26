@@ -22,7 +22,11 @@ public sealed class ContainerSourceMergeTests
                 null,
                 [],
                 details.Notes
-            ),
+            )
+            {
+                ChanceBasis = "Chance per pick",
+                Picks = details.Picks,
+            },
             details
         );
     }
@@ -41,6 +45,8 @@ public sealed class ContainerSourceMergeTests
         );
         Assert.Equal(new Amount(2, 2), merged.Amount);
         Assert.Equal(new Weight(0.5, 18.02), merged.Weight);
+        Assert.Equal(new Amount(2, 9), merged.Picks);
+        Assert.Equal("Chance per pick", merged.ChanceBasis);
         Assert.Equal(
             new[] { "/Invented/A", "/Invented/B" },
             merged.Places.Select(place => place.Id)
@@ -49,13 +55,14 @@ public sealed class ContainerSourceMergeTests
             .Matches(string.Join(" ", merged.Notes), @"\d+(?:\.\d+)?")
             .Select(match => double.Parse(match.Value, CultureInfo.InvariantCulture))
             .Order();
-        Assert.Equal(new[] { 1d, 8d, 25d, 75d }, numbers);
+        Assert.Equal(new[] { 2d, 9d, 25d, 75d }, numbers);
     }
 
     [Theory]
     [InlineData("Weight")]
     [InlineData("Weight total")]
     [InlineData("Chance")]
+    [InlineData("Chance basis")]
     [InlineData("Amount")]
     [InlineData("Price")]
     [InlineData("Inputs")]
@@ -67,6 +74,7 @@ public sealed class ContainerSourceMergeTests
             "Weight" => a.Source with { Weight = new Weight(1, 18.02) },
             "Weight total" => a.Source with { Weight = new Weight(0.5, 20) },
             "Chance" => a.Source with { Chance = 0.2 },
+            "Chance basis" => a.Source with { ChanceBasis = "Chance per roll" },
             "Amount" => a.Source with { Amount = new Amount(3, 3) },
             "Price" => a.Source with { Price = new Price(5, null) },
             "Inputs" => a.Source with { Inputs = [new ItemAmount(new ItemLink("key", "Key"), 1)] },
@@ -81,6 +89,7 @@ public sealed class ContainerSourceMergeTests
                 source.Amount == changed.Amount
                 && source.Weight == changed.Weight
                 && source.Chance == changed.Chance
+                && source.ChanceBasis == changed.ChanceBasis
                 && source.Price == changed.Price
                 && source.Inputs.SequenceEqual(changed.Inputs)
         );
@@ -116,7 +125,7 @@ public sealed class ContainerSourceMergeTests
             return candidate with
             {
                 Container = details,
-                Source = candidate.Source with { Notes = details.Notes },
+                Source = candidate.Source with { Notes = details.Notes, Picks = details.Picks },
             };
         }
         var source = Assert.Single(
@@ -129,8 +138,9 @@ public sealed class ContainerSourceMergeTests
             .Matches(string.Join(" ", source.Notes), @"\d+(?:\.\d+)?")
             .Select(match => double.Parse(match.Value, CultureInfo.InvariantCulture))
             .Order();
-        Assert.Equal(new[] { 1d, 3d, 5d, 8d }, numbers);
+        Assert.Equal(new[] { 5d, 8d }, numbers);
         Assert.Equal(2, source.Places.Count);
+        Assert.Equal(new Amount(5, 8), source.Picks);
     }
 
     [Fact]
@@ -148,5 +158,18 @@ public sealed class ContainerSourceMergeTests
                 note.Contains("location", StringComparison.OrdinalIgnoreCase)
                 && note.Contains("no known", StringComparison.OrdinalIgnoreCase)
         );
+    }
+
+    [Fact]
+    public void UnknownPickCountIsNotReplacedByKnownVariantBounds()
+    {
+        var known = Container("/Invented/A", 1, new Amount(1, 5));
+        var unknown = Container("/Invented/B", 1, null);
+        var source = Assert.Single(
+            CatalogContext.MergeSources([known, unknown], new HashSet<string>())
+        );
+        Assert.Null(source.Picks);
+        Assert.Equal(2, source.Places.Count);
+        Assert.Contains(source.Notes, note => note.Contains("unknown", StringComparison.Ordinal));
     }
 }

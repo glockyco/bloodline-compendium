@@ -2,6 +2,22 @@
 	"id": "/Invented/Items/Cinderpear",
 	"slug": "cinderpear",
 	"name": "Cinderpear",
+	"type": "Fruit",
+	"qualifier": null,
+	"uses": [
+		{
+			"kind": "crafting",
+			"name": "Star-forged blade recipe",
+			"item": { "slug": "lanternedge", "name": "Lanternedge" },
+			"quantity": 2
+		},
+		{
+			"kind": "currencyShop",
+			"name": "Orris the Collector",
+			"item": { "slug": "lanternedge", "name": "Lanternedge" },
+			"quantity": 3
+		}
+	],
 	"description": "Sweet fruit that stays warm after picking.",
 	"category": {
 		"slug": "food",
@@ -35,6 +51,8 @@
 			},
 			"weight": null,
 			"chance": null,
+			"chanceBasis": null,
+			"picks": null,
 			"inputs": [],
 			"notes": []
 		}

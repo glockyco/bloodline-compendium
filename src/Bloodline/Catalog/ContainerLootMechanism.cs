@@ -84,7 +84,9 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                     SourceKind.ContainerLoot,
                     name,
                     places,
-                    notes
+                    notes,
+                    "Chance per pick",
+                    details.Picks
                 )
             )
                 yield return source with
@@ -107,31 +109,21 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
             {
                 "Appears as loose loot rather than inside a container.",
             };
-            var minimum = RecordValues.Integer(properties["Min Spawn Amount"]);
             var maximum = RecordValues.Integer(properties["Max Spawn Amount"]);
-            var details =
-                minimum is { } min && maximum is { } max
-                    ? new ContainerDetails(
-                        null,
-                        new Amount(checked((int)min), checked((int)max)),
-                        Loose: true
-                    )
-                    : null;
+            var details = maximum is >= 0 and <= int.MaxValue
+                ? new ContainerDetails(
+                    null,
+                    new Amount((int)maximum.Value, (int)maximum.Value),
+                    Loose: true
+                )
+                : null;
             if (details is not null)
             {
                 notes.AddRange(details.Notes);
             }
             else
             {
-                if (minimum is { } knownMinimum)
-                    notes.Add(
-                        $"The minimum amount is {knownMinimum}, but it does not limit how few loose items can appear."
-                    );
-                if (maximum is { } knownMaximum)
-                    notes.Add(
-                        $"Up to {knownMaximum} loose {(knownMaximum == 1 ? "item" : "items")} can appear."
-                    );
-                notes.Add("The full range of loose-item counts is unknown.");
+                notes.Add("The number of loose loot picks is unknown.");
             }
             JsonNode? pool = properties["Loot Table"];
             if (
@@ -173,7 +165,9 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                     SourceKind.ContainerLoot,
                     name,
                     places,
-                    notes
+                    notes,
+                    "Chance per pick",
+                    details?.Picks
                 )
             )
                 yield return source with
@@ -254,7 +248,8 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                 "Sword Loot Table - Dwarven Dungeon RARE" => "Rare dwarven sword loot.",
                 "Undead Mace Dungeon Loot Table" => "Undead dungeon mace loot.",
                 "Undead Sword Loot Table Undead Dungeon" => "Undead dungeon sword loot.",
-                _ => "The contents are known, but how they were chosen is unknown.",
+                _ =>
+                    "The possible contents are known, but why this container uses this set of items is unknown.",
             }
         );
         if (lootType == 5 || RecordValues.Boolean(properties["Add Custom Loot to Table"]) != true)
@@ -352,7 +347,9 @@ internal static class LootRecords
         SourceKind kind,
         string name,
         IReadOnlyList<Place> places,
-        IReadOnlyList<string> notes
+        IReadOnlyList<string> notes,
+        string? chanceBasis = null,
+        Amount? picks = null
     )
     {
         var entries = RecordValues.MapEntries(pool).ToArray();
@@ -364,7 +361,7 @@ internal static class LootRecords
             notes =
             [
                 .. notes,
-                $"The chance of finding nothing has a relative weight of {noDrop.ToString(CultureInfo.InvariantCulture)}.",
+                "A pick may give nothing. Empty outcomes are included when comparing the chances.",
             ];
         foreach (var (key, value) in entries)
         {
@@ -374,6 +371,8 @@ internal static class LootRecords
                 || total <= 0
             )
                 continue;
+            var weight = new Weight(RecordValues.Number(value)!.Value, total);
+            var chance = chanceBasis is null ? null : WeightTotals.Chance(weight);
             yield return new ItemSource(
                 item,
                 new Source(
@@ -382,11 +381,15 @@ internal static class LootRecords
                     places,
                     null,
                     Quantity(context, item),
-                    new Weight(RecordValues.Number(value)!.Value, total),
-                    null,
+                    weight,
+                    chance,
                     [],
                     notes
                 )
+                {
+                    ChanceBasis = chance is null ? null : chanceBasis,
+                    Picks = picks,
+                }
             );
         }
     }

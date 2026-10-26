@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.RegularExpressions;
 using Bloodline.Records;
 
@@ -22,34 +20,69 @@ internal static partial class ItemIdentity
 
     public static Dictionary<string, string> Slugs(IEnumerable<ClassRecord> classes)
     {
-        var groups = classes
-            .GroupBy(item => Slug(ClassName(item.Path)), StringComparer.Ordinal)
-            .ToArray();
-        var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var facts = new ItemFacts([]);
+        return Identities(classes.Select(item => facts.Resolve(item, "")))
+            .ToDictionary(
+                pair => pair.Key,
+                pair => pair.Value.Slug,
+                StringComparer.OrdinalIgnoreCase
+            );
+    }
+
+    public static Dictionary<string, (string Slug, string? Qualifier)> Identities(
+        IEnumerable<Bloodline.SiteData.ItemPage> items
+    )
+    {
+        var groups = items.GroupBy(item => Slug(item.Name), StringComparer.Ordinal).ToArray();
+        var result = new Dictionary<string, (string Slug, string? Qualifier)>(
+            StringComparer.OrdinalIgnoreCase
+        );
         var reserved = groups.Select(group => group.Key).ToHashSet(StringComparer.Ordinal);
         foreach (var group in groups.OrderBy(group => group.Key, StringComparer.Ordinal))
         {
-            var members = group.OrderBy(item => item.Path, StringComparer.Ordinal).ToArray();
-            foreach (var item in members)
+            var members = group.OrderBy(item => item.Id, StringComparer.Ordinal).ToArray();
+            for (var index = 0; index < members.Length; index++)
             {
+                var item = members[index];
+                string? qualifier = null;
                 var slug = group.Key;
                 if (members.Length > 1)
                 {
-                    // A path hash, rather than an ordinal suffix, keeps colliding classes independent of input order.
-                    var hash = Convert.ToHexStringLower(
-                        SHA256.HashData(Encoding.UTF8.GetBytes(item.Path))
+                    var candidates = new[] { item.Type, item.Category.Name }.Concat(
+                        item.Facts.Where(fact => fact.Value is not null && fact.Label != "Value")
+                            .Select(fact => fact.Value + " " + fact.Label)
                     );
-                    var length = 8;
-                    do
+                    qualifier = candidates.FirstOrDefault(candidate =>
+                        !string.IsNullOrWhiteSpace(candidate)
+                        && candidate != "Unknown"
+                        && members.Count(other =>
+                            other.Type == candidate
+                            || other.Category.Name == candidate
+                            || other.Facts.Any(fact => fact.Value + " " + fact.Label == candidate)
+                        ) == 1
+                    );
+                    qualifier ??= (index + 1).ToString(
+                        System.Globalization.CultureInfo.InvariantCulture
+                    );
+                    slug += "-" + Slug(qualifier);
+                    var ordinal = 2;
+                    var basis = slug;
+                    while (!reserved.Add(slug))
                     {
-                        slug = group.Key + "-" + hash[..length++];
-                    } while (!reserved.Add(slug));
+                        qualifier +=
+                            " "
+                            + ordinal.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                        slug = basis + "-" + ordinal++;
+                    }
                 }
-                result.Add(item.Path, slug);
+                result.Add(item.Id, (slug, qualifier));
             }
         }
         return result;
     }
+
+    public static string DisplayName(Bloodline.SiteData.ItemPage item) =>
+        item.Qualifier is null ? item.Name : item.Name + " (" + item.Qualifier + ")";
 
     public static string ClassName(string path)
     {

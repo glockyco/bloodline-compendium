@@ -170,6 +170,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
             );
             foreach (var (item, weight) in WorldSourceData.Pool(properties[pool]))
             {
+                var chance = WeightTotals.Chance(weight);
                 yield return new ItemSource(
                     item,
                     new Source(
@@ -179,10 +180,16 @@ internal sealed class GatheringMechanism : ISourceMechanism
                         null,
                         null,
                         weight,
-                        null,
+                        chance,
                         [],
-                        notes
+                        [
+                            .. notes,
+                            "A gathering action can make multiple loot rolls. This chance describes one roll, not the whole gathering point.",
+                        ]
                     )
+                    {
+                        ChanceBasis = chance is null ? null : "Chance per roll",
+                    }
                 );
             }
         }
@@ -216,6 +223,9 @@ internal sealed class GatheringMechanism : ISourceMechanism
                             .. HarvestNotes(properties, false),
                         ]
                     )
+                    {
+                        ChanceBasis = "Chance per roll",
+                    }
                 );
             }
         }

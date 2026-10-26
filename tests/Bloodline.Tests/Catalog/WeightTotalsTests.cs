@@ -1,6 +1,4 @@
-using System.Globalization;
 using System.Text.Json.Nodes;
-using System.Text.RegularExpressions;
 using Bloodline.Catalog;
 using Bloodline.Records;
 using Bloodline.SiteData;
@@ -39,10 +37,12 @@ public sealed class WeightTotalsTests
             .ToArray();
         Assert.Equal(100, sources.Length);
         Assert.All(sources, source => Assert.Equal(new Weight(0.1, 18.02), source.Source.Weight));
-        var numbers = Regex
-            .Matches(Assert.Single(sources[0].Source.Notes), @"\d+(?:\.\d+)?")
-            .Select(match => double.Parse(match.Value, CultureInfo.InvariantCulture));
-        Assert.Equal([8.02], numbers);
+        Assert.All(sources, source => Assert.Null(source.Source.Chance));
+        Assert.All(sources, source => Assert.Null(source.Source.ChanceBasis));
+        Assert.Equal(
+            "A pick may give nothing. Empty outcomes are included when comparing the chances.",
+            Assert.Single(sources[0].Source.Notes)
+        );
     }
 
     [Fact]
@@ -56,5 +56,44 @@ public sealed class WeightTotalsTests
         };
         Assert.Equal(1.3, WeightTotals.Sum(native));
         Assert.Equal(1.3, WeightTotals.Sum(JsonNode.Parse("[0.1,0.2,1]")!.AsArray()));
+    }
+
+    [Fact]
+    public void ConfirmedSingleChoiceIncludesEmptyOutcomeWeightsInChance()
+    {
+        var records = new CatalogRecords(new BuildRecord(1, 1, []), [], [], [], [], [], [], []);
+        var context = new CatalogContext(records, new Dictionary<string, ItemPage>(), []);
+        var sources = LootRecords.Pool(
+            context,
+            Pool(),
+            SourceKind.EnemyDrop,
+            "Invented enemy",
+            [],
+            [],
+            "Chance per kill"
+        );
+        Assert.All(
+            sources,
+            source =>
+            {
+                Assert.Equal(0.1 / 18.02, source.Source.Chance);
+                Assert.Equal("Chance per kill", source.Source.ChanceBasis);
+            }
+        );
+    }
+
+    [Theory]
+    [InlineData(2, 8, 0.25)]
+    [InlineData(2, 2, 1.0)]
+    [InlineData(2, 0, null)]
+    [InlineData(2, -1, null)]
+    [InlineData(2, 1, null)]
+    public void ChanceRequiresAUsableSingleChoiceDenominator(
+        double value,
+        double total,
+        double? expected
+    )
+    {
+        Assert.Equal(expected, WeightTotals.Chance(new Weight(value, total)));
     }
 }

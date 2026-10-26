@@ -2,6 +2,9 @@
 	"id": "/Invented/Items/MosswovenCoat",
 	"slug": "mosswoven-coat",
 	"name": "Mosswoven Coat",
+	"type": "Coat",
+	"qualifier": null,
+	"uses": [],
 	"description": "A coat stitched from soft, rain-green fibres.",
 	"category": {
 		"slug": "armour",
@@ -33,8 +36,10 @@
 				"min": 1,
 				"max": 1
 			},
-			"weight": null,
+			"weight": { "value": 1, "total": 5 },
 			"chance": null,
+			"chanceBasis": null,
+			"picks": null,
 			"inputs": [],
 			"notes": []
 		}

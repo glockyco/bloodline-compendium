@@ -8,6 +8,13 @@ namespace Bloodline.Tests.Catalog;
 
 public sealed class CatalogTests
 {
+    private static readonly SiteRelease TestRelease = new(
+        "Invented Update",
+        "2026-01-01",
+        "https://example.com/patch",
+        "2026-01-02"
+    );
+
     private static JsonObject Parse(string json) => JsonNode.Parse(json)!.AsObject();
 
     private static ClassRecord Item(
@@ -62,14 +69,14 @@ public sealed class CatalogTests
     }
 
     [Fact]
-    public void SlugsIgnoreDisplayNamesAndResolveCollisionsIndependentlyOfOrdering()
+    public void SlugsUseDisplayNamesAndResolveCollisionsIndependentlyOfOrdering()
     {
         var a = Item("/Game/A/IronSword.IronSword_C");
-        var b = Item("/Game/B/Iron_Sword.Iron_Sword_C", "Different name");
+        var b = Item("/Game/B/Iron_Sword.Iron_Sword_C");
         var alone = ItemIdentity.Slugs([a]);
         Assert.Equal("iron-sword", alone[a.Path]);
         Assert.Equal(
-            alone[a.Path],
+            "renamed",
             ItemIdentity.Slugs([a with { Properties = Item(name: "Renamed").Properties }])[a.Path]
         );
         var forward = ItemIdentity.Slugs([a, b]);
@@ -300,7 +307,7 @@ public sealed class CatalogTests
             Assert.Throws<DirectoryNotFoundException>(() =>
                 CatalogWriter.Write(
                     layout,
-                    new SiteBuild(1159290, 1, [], "abc", false),
+                    new SiteBuild(1159290, 1, [], "abc", false, TestRelease),
                     Build(Records())
                 )
             );
@@ -366,7 +373,11 @@ public sealed class CatalogTests
             var oldPage = Path.Combine(layout.SiteDirectory, "items", "obsolete.json");
             CanonicalJson.Write(oldPage, new { name = "Obsolete item" });
             var catalog = Build(Records() with { Textures = [] });
-            CatalogWriter.Write(layout, new SiteBuild(1159290, 1, [], "abc", false), catalog);
+            CatalogWriter.Write(
+                layout,
+                new SiteBuild(1159290, 1, [], "abc", false, TestRelease),
+                catalog
+            );
             Assert.False(File.Exists(oldPage));
             var itemFile = Assert.Single(
                 Directory.EnumerateFiles(Path.Combine(layout.SiteDirectory, "items"))

@@ -228,12 +228,27 @@
         "name": {
           "type": "string"
         },
+        "qualifier": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "slug": {
           "type": "string"
         },
         "sources": {
           "items": {
             "$ref": "#/$defs/Source"
+          },
+          "type": "array"
+        },
+        "type": {
+          "type": "string"
+        },
+        "uses": {
+          "items": {
+            "$ref": "#/$defs/ItemUse"
           },
           "type": "array"
         }
@@ -246,7 +261,9 @@
         "category",
         "icon",
         "facts",
-        "sources"
+        "sources",
+        "type",
+        "uses"
       ],
       "title": "ItemPage",
       "type": "object"
@@ -265,6 +282,12 @@
         "name": {
           "type": "string"
         },
+        "qualifier": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "slug": {
           "type": "string"
         },
@@ -273,6 +296,9 @@
             "$ref": "#/$defs/SourceKind"
           },
           "type": "array"
+        },
+        "type": {
+          "type": "string"
         },
         "value": {
           "type": [
@@ -287,9 +313,34 @@
         "category",
         "value",
         "icon",
-        "sourceKinds"
+        "sourceKinds",
+        "type"
       ],
       "title": "ItemSummary",
+      "type": "object"
+    },
+    "ItemUse": {
+      "properties": {
+        "item": {
+          "$ref": "#/$defs/ItemLink"
+        },
+        "kind": {
+          "$ref": "#/$defs/SourceKind"
+        },
+        "name": {
+          "type": "string"
+        },
+        "quantity": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "name",
+        "item",
+        "quantity"
+      ],
+      "title": "ItemUse",
       "type": "object"
     },
     "Place": {
@@ -350,6 +401,9 @@
         },
         "dirty": {
           "type": "boolean"
+        },
+        "release": {
+          "$ref": "#/$defs/SiteRelease"
         }
       },
       "required": [
@@ -357,7 +411,8 @@
         "buildId",
         "depots",
         "commit",
-        "dirty"
+        "dirty",
+        "release"
       ],
       "title": "SiteBuild",
       "type": "object"
@@ -378,6 +433,30 @@
       "title": "SiteDepot",
       "type": "object"
     },
+    "SiteRelease": {
+      "properties": {
+        "dataDate": {
+          "type": "string"
+        },
+        "patchDate": {
+          "type": "string"
+        },
+        "patchNotesUrl": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "patchDate",
+        "patchNotesUrl",
+        "dataDate"
+      ],
+      "title": "SiteRelease",
+      "type": "object"
+    },
     "Source": {
       "properties": {
         "amount": {
@@ -393,6 +472,12 @@
         "chance": {
           "type": [
             "number",
+            "null"
+          ]
+        },
+        "chanceBasis": {
+          "type": [
+            "string",
             "null"
           ]
         },
@@ -413,6 +498,16 @@
             "type": "string"
           },
           "type": "array"
+        },
+        "picks": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Amount"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "places": {
           "items": {

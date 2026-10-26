@@ -11,5 +11,10 @@
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Bloodline.Tests" />
+    <Content
+      Include="../../releases.json"
+      Link="releases.json"
+      CopyToOutputDirectory="PreserveNewest"
+    />
   </ItemGroup>
 </Project>

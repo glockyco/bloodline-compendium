@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Bloodline.SiteData;
 
 // Site data is the contract with the site. JSON Schema is exported from these types, and the site
@@ -9,11 +11,19 @@ internal sealed record SiteBuild(
     long BuildId,
     IReadOnlyList<SiteDepot> Depots,
     string Commit,
-    bool Dirty
+    bool Dirty,
+    SiteRelease Release
 );
 
 /// <summary>An installed depot. Manifest IDs exceed what JavaScript numbers hold exactly, so they stay strings.</summary>
 internal sealed record SiteDepot(long DepotId, string ManifestId);
+
+internal sealed record SiteRelease(
+    string Title,
+    string PatchDate,
+    string PatchNotesUrl,
+    string DataDate
+);
 
 /// <summary>The categories and a summary of every item, in name order. Written as <c>items.json</c>.</summary>
 internal sealed record ItemIndex(
@@ -31,7 +41,12 @@ internal sealed record ItemSummary(
     int? Value,
     string? Icon,
     IReadOnlyList<SourceKind> SourceKinds
-);
+)
+{
+    [JsonRequired]
+    public string Type { get; init; } = "Unknown";
+    public string? Qualifier { get; init; }
+}
 
 /// <summary>
 /// Everything an item page shows. Written as <c>items/&lt;slug&gt;.json</c>. <see cref="Id"/> is the item's
@@ -46,7 +61,17 @@ internal sealed record ItemPage(
     string? Icon,
     IReadOnlyList<Fact> Facts,
     IReadOnlyList<Source> Sources
-);
+)
+{
+    [JsonRequired]
+    public string Type { get; init; } = "Unknown";
+    public string? Qualifier { get; init; }
+
+    [JsonRequired]
+    public IReadOnlyList<ItemUse> Uses { get; init; } = [];
+}
+
+internal sealed record ItemUse(SourceKind Kind, string Name, ItemLink Item, int Quantity);
 
 internal sealed record CategoryLink(string Slug, string Name);
 
@@ -69,7 +94,11 @@ internal sealed record Source(
     double? Chance,
     IReadOnlyList<ItemAmount> Inputs,
     IReadOnlyList<string> Notes
-);
+)
+{
+    public string? ChanceBasis { get; init; }
+    public Amount? Picks { get; init; }
+}
 
 internal enum SourceKind
 {

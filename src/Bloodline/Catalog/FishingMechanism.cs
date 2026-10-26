@@ -48,7 +48,9 @@ internal sealed class FishingMechanism : ISourceMechanism
                     FormattableString.Invariant($"Fish remaining at this spot: {remaining}.")
                 );
             }
-            notes.Add("Each successful catch adds one item. Fish size is determined separately.");
+            notes.Add(
+                "Each successful catch makes one loot roll. Fish size is determined separately."
+            );
             if (RecordValues.Boolean(properties["Use Specific Loot table?"]) == true)
             {
                 foreach (
@@ -79,7 +81,8 @@ internal sealed class FishingMechanism : ISourceMechanism
                         [
                             .. notes,
                             "Lava catches are listed, but whether they are available at this spot is unknown.",
-                        ]
+                        ],
+                        confirmedChoice: false
                     )
                 )
                 {
@@ -126,7 +129,8 @@ internal sealed class FishingMechanism : ISourceMechanism
                         [],
                         [
                             "Possible fishing catches. Availability depends on the spot being active and its difficulty.",
-                        ]
+                        ],
+                        confirmedChoice: pool != "Standard Lava Loot"
                     )
                 )
                 {
@@ -151,14 +155,35 @@ internal sealed class FishingMechanism : ISourceMechanism
         JsonNode? pool,
         string name,
         IReadOnlyList<Place> places,
-        IReadOnlyList<string> notes
+        IReadOnlyList<string> notes,
+        bool confirmedChoice = true
     )
     {
         foreach (var (item, weight) in WorldSourceData.Pool(pool))
         {
+            var chance = confirmedChoice ? WeightTotals.Chance(weight) : null;
             yield return new ItemSource(
                 item,
-                new Source(SourceKind.Fishing, name, places, null, null, weight, null, [], notes)
+                new Source(
+                    SourceKind.Fishing,
+                    name,
+                    places,
+                    null,
+                    null,
+                    weight,
+                    chance,
+                    [],
+                    !confirmedChoice
+                        ?
+                        [
+                            .. notes,
+                            "Only relative chance is known because lava fishing's selection rule is unconfirmed.",
+                        ]
+                        : notes
+                )
+                {
+                    ChanceBasis = chance is null ? null : "Chance per catch",
+                }
             );
         }
     }

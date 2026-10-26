@@ -45,6 +45,22 @@ internal static class CatalogCommand
                         $"Records in build {buildId} identify build {records.Build.BuildId}."
                     );
                 }
+                var releases =
+                    JsonSerializer.Deserialize<Dictionary<string, SiteRelease>>(
+                        File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "releases.json")),
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+                    ) ?? throw new InvalidDataException("The reviewed release registry is empty.");
+                if (
+                    !releases.TryGetValue(
+                        buildId.ToString(CultureInfo.InvariantCulture),
+                        out var release
+                    )
+                )
+                {
+                    throw new InvalidDataException(
+                        $"Build {buildId} has no reviewed entry in releases.json."
+                    );
+                }
                 var commit = Git("rev-parse", "HEAD").Trim();
                 var dirty = Git("status", "--porcelain").Length != 0;
                 var timer = Stopwatch.StartNew();
@@ -59,7 +75,8 @@ internal static class CatalogCommand
                         ))
                         .ToArray(),
                     commit,
-                    dirty
+                    dirty,
+                    release
                 );
                 CatalogWriter.Write(layout, provenance, catalog);
                 Console.WriteLine(

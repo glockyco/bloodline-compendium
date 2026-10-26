@@ -49,6 +49,7 @@ export interface SiteBuild {
   commit: string;
   depots: SiteDepot[];
   dirty: boolean;
+  release: SiteRelease;
   [k: string]: unknown;
 }
 /**
@@ -58,6 +59,17 @@ export interface SiteBuild {
 export interface SiteDepot {
   depotId: number;
   manifestId: string;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "SiteRelease".
+ */
+export interface SiteRelease {
+  dataDate: string;
+  patchDate: string;
+  patchNotesUrl: string;
+  title: string;
   [k: string]: unknown;
 }
 /**
@@ -98,8 +110,11 @@ export interface ItemPage {
   icon: string | null;
   id: string;
   name: string;
+  qualifier?: string | null;
   slug: string;
   sources: Source[];
+  type: string;
+  uses: ItemUse[];
   [k: string]: unknown;
 }
 /**
@@ -127,10 +142,12 @@ export interface Fact {
 export interface Source {
   amount: Amount | null;
   chance: number | null;
+  chanceBasis?: string | null;
   inputs: ItemAmount[];
   kind: SourceKind;
   name: string;
   notes: string[];
+  picks?: Amount | null;
   places: Place[];
   price: Price | null;
   weight: Weight | null;
@@ -192,6 +209,17 @@ export interface Weight {
 }
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "ItemUse".
+ */
+export interface ItemUse {
+  item: ItemLink;
+  kind: SourceKind;
+  name: string;
+  quantity: number;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "ItemIndex".
  */
 export interface ItemIndex {
@@ -217,8 +245,10 @@ export interface ItemSummary {
   category: string;
   icon: string | null;
   name: string;
+  qualifier?: string | null;
   slug: string;
   sourceKinds: SourceKind[];
+  type: string;
   value: number | null;
   [k: string]: unknown;
 }

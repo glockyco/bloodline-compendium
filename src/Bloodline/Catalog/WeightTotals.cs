@@ -1,5 +1,6 @@
 using System.Text.Json.Nodes;
 using Bloodline.Records;
+using Bloodline.SiteData;
 
 namespace Bloodline.Catalog;
 
@@ -18,4 +19,9 @@ internal static class WeightTotals
         }
         return (double)total;
     }
+
+    public static double? Chance(Weight weight) =>
+        weight.Total > 0 && weight.Value >= 0 && weight.Value <= weight.Total
+            ? weight.Value / weight.Total
+            : null;
 }

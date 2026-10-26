@@ -18,14 +18,14 @@ The catalog SHALL contain every Blueprint class under the game's item base class
 - **THEN** the catalog has an item for it
 
 ### Requirement: Item identity
-Each item SHALL be identified by its Blueprint class path. Its URL SHALL derive from that identity and stay stable across builds while the class exists.
+Each item SHALL be identified internally by its Blueprint class path. Its public URL SHALL use a readable display-name slug. Duplicate names SHALL use readable type, category or distinguishing stats as qualifiers, with an ordinal only as a last resort. Internal class names and hashes SHALL NOT appear in public slugs. The cutover SHALL NOT retain legacy aliases.
 
-#### Scenario: Same item in two builds
-- **WHEN** an item class exists in two builds
-- **THEN** both catalogs give it the same identifier and URL
+#### Scenario: Duplicate display names
+- **WHEN** two items have the same display name but different types
+- **THEN** their public names and slugs distinguish them with readable type qualifiers
 
 ### Requirement: Item facts
-Each item SHALL carry its display name, description, category, value and type-specific stats as the records state them. A fact that the records do not determine SHALL be marked unknown and not guessed.
+Each item SHALL carry its display name, description, category, value and type-specific stats as the records state them. A fact that the records do not determine SHALL be marked unknown and not guessed. Weapon components SHALL expose their part type, damage and speed, with the part as their displayed Type. Iuba and Tithes SHALL be classified as Currency.
 
 #### Scenario: Weapon facts
 - **WHEN** an item is a weapon
@@ -46,9 +46,18 @@ Each item SHALL list the sources that the records show for it, with the place, q
 - **WHEN** a recipe produces an item
 - **THEN** the item lists the recipe with its ingredients, their quantities and the output count
 
-#### Scenario: Weighted loot
-- **WHEN** a loot pool gives an item with a weight
-- **THEN** the source shows the raw weight and does not claim a percentage that the data does not state
+#### Scenario: Verified weighted selection
+- **WHEN** consumer evidence establishes a pool's selection rule and all necessary inputs
+- **THEN** the source shows the computed chance with its per-kill, per-catch, per-harvest or per-roll basis
+- **AND** null outcomes remain in the probability denominator
+
+#### Scenario: Incomplete selection evidence
+- **WHEN** a weight is known but the complete selection rule is not
+- **THEN** the source labels it Relative chance and does not invent an event probability
+
+#### Scenario: Container picks
+- **WHEN** a container chooses several entries from a pool
+- **THEN** the source distinguishes chance per pick from the number of picks instead of claiming a per-open chance
 
 ### Requirement: Items without a known source
 An item SHALL be published whether or not a source is known. An item without a known source SHALL say so.
@@ -81,3 +90,17 @@ The catalog SHALL list every known gap: items without a known source, sources wi
 #### Scenario: Unread package
 - **WHEN** extraction records a package as a gap
 - **THEN** the coverage gaps name the package and the error
+
+### Requirement: Reverse item uses
+The catalog SHALL derive reverse uses from every recipe, cooking, smithing, farming and currency-shop input. Each use SHALL identify its output or purchase, input quantity and applicable conditions without presenting consumed items as acquisition outputs.
+
+#### Scenario: Currency purchase
+- **WHEN** a shop consumes an inventory currency item to buy another item
+- **THEN** the currency item's uses identify the purchased item and its price
+
+### Requirement: Reviewed release identity
+The catalog SHALL resolve each Steam build through a reviewed release mapping, carrying the release name, release date, patch-note URL and separate data-update date. Cataloging an unmapped build SHALL fail rather than guess release information.
+
+#### Scenario: Unknown release
+- **WHEN** the extracted Steam build has no reviewed release mapping
+- **THEN** cataloging fails and identifies the missing build

@@ -2,6 +2,9 @@
 	"id": "/Invented/Items/HollowPrism",
 	"slug": "hollow-prism",
 	"name": "Hollow Prism",
+	"type": "Curio",
+	"qualifier": null,
+	"uses": [],
 	"description": null,
 	"category": {
 		"slug": "curios",

@@ -59,7 +59,7 @@ public sealed class LootMechanismTests
     }
 
     [Fact]
-    public void ContainerUsesSelectedPoolAndKeepsNullWeightAndRollSettings()
+    public void ContainerUsesSelectedPoolAndKeepsEmptyOutcomesInPerPickChance()
     {
         var properties = Parse(
             """{"Object Name":{"$text":"Old box"},"Min amount of loot items":2,"Max amount of loot items":4,"Spawn Chance":0.5}"""
@@ -75,11 +75,20 @@ public sealed class LootMechanismTests
         Assert.Equal(new Weight(2, 8), source.Weight);
         Assert.Equal(new Amount(3, 3), source.Amount);
         Assert.Equal(Level, Assert.Single(source.Places).Id);
-        Assert.Null(source.Chance);
+        Assert.Equal(0.25, source.Chance);
+        Assert.Equal("Chance per pick", source.ChanceBasis);
+        Assert.Equal(new Amount(3, 5), source.Picks);
         Assert.Empty(source.Inputs);
-        Assert.Contains(source.Notes, note => note.Contains("2 to 4", StringComparison.Ordinal));
+        Assert.Contains(source.Notes, note => note.Contains("3 to 5", StringComparison.Ordinal));
         Assert.Contains(source.Notes, note => note.Contains("50%", StringComparison.Ordinal));
-        Assert.Contains(source.Notes, note => note.Contains("6", StringComparison.Ordinal));
+        Assert.Contains(
+            source.Notes,
+            note => note.Contains("Empty outcomes", StringComparison.Ordinal)
+        );
+        Assert.Contains(
+            "The possible contents are known, but why this container uses this set of items is unknown.",
+            source.Notes
+        );
     }
 
     [Theory]
@@ -221,12 +230,16 @@ public sealed class LootMechanismTests
         Assert.Equal(new Weight(4, 10), source.Weight);
     }
 
-    [Fact]
-    public void LooseLootUsesGenericPoolAndRecordsItsMaximumSpawnCount()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void LooseLootUsesMaximumSpawnCountRatherThanAnUnusedMinimum(bool hasMinimum)
     {
         var properties = Parse(
             """{"Use Preset Table?":true,"Preset Table Name":"generic","Min Spawn Amount":2,"Max Spawn Amount":5}"""
         );
+        if (!hasMinimum)
+            properties.Remove("Min Spawn Amount");
         properties["Generic Loot Table"] = Pool(4);
         properties["Loot Table"] = Pool(99);
         var source = Assert
@@ -246,13 +259,19 @@ public sealed class LootMechanismTests
             )
             .Source;
         Assert.Equal(new Weight(4, 10), source.Weight);
+        Assert.Equal(0.4, source.Chance);
+        Assert.Equal("Chance per pick", source.ChanceBasis);
+        Assert.Equal(new Amount(5, 5), source.Picks);
         Assert.Equal(Level, Assert.Single(source.Places).Id);
         Assert.Contains(
             source.Notes,
             note => note.Contains("loose loot", StringComparison.Ordinal)
         );
         Assert.Contains(source.Notes, note => note.Contains("5", StringComparison.Ordinal));
-        Assert.Contains(source.Notes, note => note.Contains("2", StringComparison.Ordinal));
+        Assert.DoesNotContain(
+            source.Notes,
+            note => note.Contains("minimum", StringComparison.Ordinal)
+        );
     }
 
     [Fact]
@@ -351,11 +370,16 @@ public sealed class LootMechanismTests
     {
         var properties = Parse("""{"Min amount of loot items":0,"Max amount of loot items":0}""");
         properties["Selected Loot Table"] = Pool();
-        Assert.Single(
-            new ContainerLootMechanism().FindSources(
-                Context([new ClassRecord(Container, [ContainerLootMechanism.Root], properties)])
+        var source = Assert
+            .Single(
+                new ContainerLootMechanism().FindSources(
+                    Context([new ClassRecord(Container, [ContainerLootMechanism.Root], properties)])
+                )
             )
-        );
+            .Source;
+        Assert.Equal(new Amount(1, 1), source.Picks);
+        Assert.Equal(0.25, source.Chance);
+        Assert.Equal("Chance per pick", source.ChanceBasis);
     }
 
     [Fact]
@@ -435,7 +459,7 @@ public sealed class LootMechanismTests
     }
 
     [Fact]
-    public void RandomLootKeepsBaseRateAsNoteWithoutInventingProbability()
+    public void RandomLootExplainsDynamicEligibilityWithoutInventingProbability()
     {
         var row = Parse(
             """{"ItemClass":{"$ref":"/Game/Invented/Token.Token_C"},"BaseSpawnRate":0.25,"Level":12}"""
@@ -457,10 +481,15 @@ public sealed class LootMechanismTests
         Assert.Equal(SourceKind.RandomLoot, source.Kind);
         Assert.Equal("General random loot", source.Name);
         Assert.Null(source.Chance);
+        Assert.Null(source.ChanceBasis);
+        Assert.Null(source.Picks);
         Assert.Null(source.Weight);
         Assert.Equal(new Amount(3, 3), source.Amount);
         Assert.Empty(source.Places);
-        Assert.Contains(source.Notes, note => note.Contains("0.25", StringComparison.Ordinal));
+        Assert.Contains(
+            source.Notes,
+            note => note.Contains("player level", StringComparison.Ordinal)
+        );
     }
 
     [Fact]
@@ -490,6 +519,9 @@ public sealed class LootMechanismTests
                 Assert.Equal(Level, Assert.Single(source.Places).Id);
                 Assert.Equal(new Weight(2, 8), source.Weight);
                 Assert.Equal(new Amount(3, 3), source.Amount);
+                Assert.Equal(0.25, source.Chance);
+                Assert.Equal("Chance per kill", source.ChanceBasis);
+                Assert.Null(source.Picks);
             }
         );
         Assert.NotEqual(sources[0].Notes, sources[1].Notes);
@@ -600,7 +632,8 @@ public sealed class LootMechanismTests
             .Source;
         Assert.Equal(expectedPlaces, source.Places.Count);
         Assert.Equal(new Weight(2, 8), source.Weight);
-        Assert.Null(source.Chance);
+        Assert.Equal(0.25, source.Chance);
+        Assert.Equal("Chance per kill", source.ChanceBasis);
     }
 
     [Fact]
@@ -617,5 +650,22 @@ public sealed class LootMechanismTests
             .Source;
         Assert.Equal("Beast", source.Name);
         Assert.Contains(LootRecords.UnnamedNote, source.Notes);
+    }
+
+    [Fact]
+    public void ContainerWithUnknownPickCountStillHasAConditionalPerPickChance()
+    {
+        var properties = new JsonObject { ["Selected Loot Table"] = Pool() };
+        var source = Assert
+            .Single(
+                new ContainerLootMechanism().FindSources(
+                    Context([new ClassRecord(Container, [ContainerLootMechanism.Root], properties)])
+                )
+            )
+            .Source;
+        Assert.Equal(0.25, source.Chance);
+        Assert.Equal("Chance per pick", source.ChanceBasis);
+        Assert.Null(source.Picks);
+        Assert.Contains(source.Notes, note => note.Contains("unknown", StringComparison.Ordinal));
     }
 }

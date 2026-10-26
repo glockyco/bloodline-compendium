@@ -218,4 +218,244 @@ public sealed class ItemFactsTests
             Assert.Null(facts.Single(fact => fact.Label == label).Value);
         }
     }
+
+    private static ClassRecord Item(string? category = "Etc.", string className = "Invented") =>
+        new(
+            $"/Game/Invented/{className}.{className}_C",
+            [],
+            new JsonObject
+            {
+                ["ItemInfo"] = new JsonObject
+                {
+                    ["ItemName"] = new JsonObject { ["$text"] = "Invented item" },
+                    ["ItemType"] = category is null
+                        ? null
+                        : new JsonObject
+                        {
+                            ["$enum"] = "InventedCategory::Item",
+                            ["display"] = category,
+                        },
+                    ["ItemValue"] = 9,
+                },
+            }
+        );
+
+    private static TableRow ComponentRow(
+        ClassRecord item,
+        string fields,
+        string name = "InventedPart",
+        bool softReference = false
+    )
+    {
+        var values = Parse(fields);
+        values["Class"] = new JsonObject { [softReference ? "$soft" : "$ref"] = item.Path };
+        return new TableRow(name, values);
+    }
+
+    private static TableRecord Components(params TableRow[] rows) =>
+        new("/Game/Invented/WeaponComponentTable.WeaponComponentTable", null, rows);
+
+    [Theory]
+    [InlineData("Pommel")]
+    [InlineData("Blade")]
+    [InlineData("Wand Focus")]
+    public void ComponentFactsUseTableContributionsInsteadOfInheritedWeaponStats(string part)
+    {
+        var item = Item("Weapon");
+        item.Properties["WeaponInfo"] = Parse("""{"Damage":999,"AttackSpeed":999}""");
+        item.Properties["ItemInfo"]!["Damage"] = 888;
+        item.Properties["ItemInfo"]!["Speed"] = 888;
+        var row = ComponentRow(
+            item,
+            $$$"""
+            {"Part":{"$enum":"InventedParts::Part","display":"{{{part}}}"},"Damage":7.5,"Speed":-0.125}
+            """
+        );
+
+        var page = new ItemFacts([], [Components(row)]).Resolve(item, "invented");
+
+        Assert.Equal(part, page.Type);
+        Assert.DoesNotContain(
+            page.Facts,
+            fact => fact.Label is "Type" or "Slot" or "Component part"
+        );
+        Assert.Equal("7.5", page.Facts.Single(fact => fact.Label == "Damage contribution").Value);
+        Assert.Equal("-0.125", page.Facts.Single(fact => fact.Label == "Speed contribution").Value);
+        Assert.Equal("9", page.Facts.Single(fact => fact.Label == "Value").Value);
+        Assert.DoesNotContain(
+            page.Facts,
+            fact => fact.Label is "Damage" or "Attack speed" or "Weapon type"
+        );
+    }
+
+    [Fact]
+    public void ComponentPartUsesEnumRecordsWhenTheRowHasNoDisplay()
+    {
+        var item = Item();
+        var row = ComponentRow(
+            item,
+            """{"Part":{"$enum":"InventedParts::EndCap"},"Damage":0,"Speed":0}""",
+            softReference: true
+        );
+        var enums = new[]
+        {
+            new EnumRecord(
+                "/Game/Invented/InventedParts",
+                [new EnumEntry("InventedParts::EndCap", 0, "Pommel")]
+            ),
+        };
+
+        var page = new ItemFacts(enums, [Components(row)]).Resolve(item, "invented");
+
+        Assert.Equal("Pommel", page.Type);
+        Assert.Equal("0", page.Facts.Single(fact => fact.Label == "Damage contribution").Value);
+        Assert.Equal("0", page.Facts.Single(fact => fact.Label == "Speed contribution").Value);
+    }
+
+    [Theory]
+    [InlineData("Part", "Component part")]
+    [InlineData("Damage", "Damage contribution")]
+    [InlineData("Speed", "Speed contribution")]
+    public void MissingComponentFieldsRemainUnknown(string field, string label)
+    {
+        var item = Item();
+        var row = ComponentRow(
+            item,
+            """{"Part":{"$enum":"InventedParts::EndCap","display":"Pommel"},"Damage":3,"Speed":0.25}"""
+        );
+        row.Values.Remove(field);
+
+        var page = new ItemFacts([], [Components(row)]).Resolve(item, "invented");
+
+        if (field != "Part")
+            Assert.Null(page.Facts.Single(fact => fact.Label == label).Value);
+        Assert.Equal(field == "Part" ? "Unknown" : "Pommel", page.Type);
+    }
+
+    [Fact]
+    public void ComponentLookupMatchesClassReferencesWithoutDependingOnRowNames()
+    {
+        var item = Item();
+        var row = ComponentRow(
+            item,
+            """{"Part":{"$enum":"InventedParts::Edge","display":"Blade"},"Damage":12,"Speed":0.5}""",
+            "UnrelatedInventedRecipeName"
+        );
+        row.Values["Class"] = new JsonObject { ["$ref"] = item.Path.ToUpperInvariant() };
+        var unrelated = ComponentRow(
+            Item(className: "OtherInventedItem"),
+            """{"Part":{"$enum":"InventedParts::EndCap","display":"Pommel"},"Damage":100,"Speed":100}"""
+        );
+
+        var page = new ItemFacts([], [Components(unrelated, row)]).Resolve(item, "invented");
+
+        Assert.Equal("Blade", page.Type);
+        Assert.Equal("12", page.Facts.Single(fact => fact.Label == "Damage contribution").Value);
+    }
+
+    [Fact]
+    public void ConflictingComponentRowsKeepOnlyTheFieldsTheyAgreeOn()
+    {
+        var item = Item();
+        var first = ComponentRow(
+            item,
+            """{"Part":{"$enum":"InventedParts::Edge","display":"Blade"},"Damage":12,"Speed":0.5}""",
+            "FirstInventedRecipe"
+        );
+        var second = ComponentRow(
+            item,
+            """{"Part":{"$enum":"InventedParts::Edge","display":"Blade"},"Damage":18,"Speed":0.5}""",
+            "SecondInventedRecipe"
+        );
+
+        foreach (var rows in new[] { new[] { first, second }, new[] { second, first } })
+        {
+            var page = new ItemFacts([], [Components(rows)]).Resolve(item, "invented");
+            Assert.Equal("Blade", page.Type);
+            Assert.Null(page.Facts.Single(fact => fact.Label == "Damage contribution").Value);
+            Assert.Equal(
+                "0.5",
+                page.Facts.Single(fact => fact.Label == "Speed contribution").Value
+            );
+        }
+    }
+
+    [Fact]
+    public void IdenticalComponentRowsDoNotDuplicateFacts()
+    {
+        var item = Item();
+        const string fields =
+            """{"Part":{"$enum":"InventedParts::EndCap","display":"Pommel"},"Damage":2,"Speed":0.1}""";
+        var page = new ItemFacts(
+            [],
+            [Components(ComponentRow(item, fields, "First"), ComponentRow(item, fields, "Second"))]
+        ).Resolve(item, "invented");
+
+        Assert.Equal("Pommel", page.Type);
+        Assert.DoesNotContain(page.Facts, fact => fact.Label == "Component part");
+        Assert.Equal("2", page.Facts.Single(fact => fact.Label == "Damage contribution").Value);
+    }
+
+    [Fact]
+    public void OtherTablesDoNotDefineWeaponComponentFacts()
+    {
+        var item = Item();
+        var row = ComponentRow(
+            item,
+            """{"Part":{"$enum":"InventedParts::Edge","display":"Blade"},"Damage":12,"Speed":0.5}"""
+        );
+        var unrelated = new TableRecord("/Game/Invented/OtherTable.OtherTable", null, [row]);
+        var page = new ItemFacts([], [unrelated]).Resolve(item, "invented");
+
+        Assert.Equal("Etc.", page.Type);
+        Assert.DoesNotContain(page.Facts, fact => fact.Label == "Damage contribution");
+    }
+
+    [Theory]
+    [InlineData("Iuba_Coin")]
+    [InlineData("Tithes")]
+    public void CurrencyConsumersDetermineTypeWithoutChangingTheRecordedCategory(string className)
+    {
+        var page = new ItemFacts([]).Resolve(Item(className: className), "invented");
+
+        Assert.Equal("Currency", page.Type);
+        Assert.Equal("Etc.", page.Category.Name);
+    }
+
+    [Theory]
+    [InlineData("Weapon", "SpecificItemType", "Invented sword")]
+    [InlineData("Armor", "ItemSlot", "Invented head slot")]
+    public void EquippedItemsUseTheirRelevantSubtype(string category, string field, string type)
+    {
+        var item = Item(category);
+        item.Properties["ItemInfo"]![field] = new JsonObject
+        {
+            ["$enum"] = "InventedTypes::Subtype",
+            ["display"] = type,
+        };
+
+        Assert.Equal(type, new ItemFacts([]).Resolve(item, "invented").Type);
+    }
+
+    [Theory]
+    [InlineData("Food")]
+    [InlineData("Potion")]
+    [InlineData("Etc.")]
+    public void OtherItemsUseTheirRecordedCategoryAsType(string category)
+    {
+        Assert.Equal(category, new ItemFacts([]).Resolve(Item(category), "invented").Type);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("Weapon")]
+    [InlineData("Armor")]
+    public void UndeterminedItemTypesRemainUnknown(string? category)
+    {
+        var page = new ItemFacts([]).Resolve(Item(category), "invented");
+
+        Assert.Equal("Unknown", page.Type);
+        Assert.Null(page.Qualifier);
+        Assert.Empty(page.Uses);
+    }
 }

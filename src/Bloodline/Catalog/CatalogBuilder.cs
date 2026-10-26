@@ -39,14 +39,18 @@ internal static class CatalogBuilder
             new EnemyDropMechanism(),
         ];
         Exclusions.Validate(records, exclusions);
-        var resolver = new ItemFacts(records.Enums);
+        var resolver = new ItemFacts(records.Enums, records.Tables);
         var selected = records.Classes.Where(ItemIdentity.IsInventoryItem).ToArray();
-        var slugs = ItemIdentity.Slugs(selected);
         var initial = selected.ToDictionary(
             item => item.Path,
-            item => resolver.Resolve(item, slugs[item.Path]),
+            item => resolver.Resolve(item, ""),
             StringComparer.OrdinalIgnoreCase
         );
+        var identities = ItemIdentity.Identities(initial.Values);
+        foreach (var (id, identity) in identities)
+        {
+            initial[id] = initial[id] with { Slug = identity.Slug, Qualifier = identity.Qualifier };
+        }
         var context = new CatalogContext(records, initial, exclusions);
         var candidates = mechanisms
             .SelectMany(mechanism => mechanism.FindSources(context))
@@ -99,6 +103,10 @@ internal static class CatalogBuilder
             {
                 Gap(GapKind.UnknownFact, item.Name, fact.Label);
             }
+            if (item.Type == "Unknown")
+            {
+                Gap(GapKind.UnknownFact, item.Name, "Type");
+            }
             if (item.Description is null)
             {
                 Gap(GapKind.UnknownFact, item.Name, "Description");
@@ -121,6 +129,60 @@ internal static class CatalogBuilder
             gapEntries[GapKind.UnreadObject]
                 .Add(new GapEntry(gap.Object ?? gap.Package, null, gap.Package + ": " + gap.Error));
         }
+        var uses = items.ToDictionary(
+            item => item.Slug,
+            _ => new List<ItemUse>(),
+            StringComparer.Ordinal
+        );
+        foreach (var output in items)
+        {
+            foreach (var source in output.Sources)
+            {
+                foreach (var input in source.Inputs)
+                {
+                    if (
+                        input.Item.Slug is { } inputSlug
+                        && uses.TryGetValue(inputSlug, out var entries)
+                    )
+                    {
+                        entries.Add(
+                            new ItemUse(
+                                source.Kind,
+                                source.Name,
+                                new ItemLink(output.Slug, ItemIdentity.DisplayName(output)),
+                                input.Quantity
+                            )
+                        );
+                    }
+                }
+                if (
+                    source.Price?.Currency?.Slug is { } currencySlug
+                    && uses.TryGetValue(currencySlug, out var payments)
+                )
+                {
+                    payments.Add(
+                        new ItemUse(
+                            source.Kind,
+                            source.Name,
+                            new ItemLink(output.Slug, ItemIdentity.DisplayName(output)),
+                            source.Price.Amount
+                        )
+                    );
+                }
+            }
+        }
+        items = items
+            .Select(item =>
+                item with
+                {
+                    Uses = uses[item.Slug]
+                        .Distinct()
+                        .OrderBy(use => use.Item.Name, StringComparer.OrdinalIgnoreCase)
+                        .ThenBy(use => use.Name, StringComparer.OrdinalIgnoreCase)
+                        .ToArray(),
+                }
+            )
+            .ToList();
         var ordered = items
             .OrderBy(item => item.Name, StringComparer.OrdinalIgnoreCase)
             .ThenBy(item => item.Id, StringComparer.Ordinal)
@@ -133,7 +195,11 @@ internal static class CatalogBuilder
                 ReadValue(item),
                 item.Icon,
                 item.Sources.Select(source => source.Kind).Distinct().Order().ToArray()
-            ))
+            )
+            {
+                Type = item.Type,
+                Qualifier = item.Qualifier,
+            })
             .ToArray();
         var categories = ordered
             .GroupBy(item => item.Category)
