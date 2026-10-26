@@ -145,7 +145,7 @@
 		left: 0;
 		visibility: hidden;
 		width: var(--size-tooltip);
-		padding: var(--space-3);
+		padding: var(--inset);
 		border: var(--border-width) solid var(--border-control);
 		border-radius: var(--radius-2);
 		background: var(--surface-panel);
@@ -154,15 +154,15 @@
 		pointer-events: none;
 	}
 	.route {
-		margin: var(--space-3) 0 0;
-		padding-top: var(--space-3);
+		margin: var(--gap-block) 0 0;
+		padding-top: var(--inset);
 		border-top: var(--border-width) solid var(--border);
 		color: var(--text-soft);
 	}
 	/* Phones dock the tooltip at the bottom, where it covers no link the reader is reading. */
 	@media (width < 40rem) {
 		.item-preview {
-			inset: auto var(--space-4) var(--space-4) !important;
+			inset: auto var(--gap-block) var(--gap-block) !important;
 			width: auto;
 			max-height: var(--size-preview-phone) !important;
 			visibility: visible;

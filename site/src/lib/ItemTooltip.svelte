@@ -92,13 +92,13 @@
 <style>
 	.tooltip {
 		display: grid;
-		gap: var(--space-3);
+		gap: var(--gap-block);
 	}
 	/* The game's frame: a thin brown border around a dark, warm gradient. */
 	.card {
 		display: grid;
-		gap: var(--space-3);
-		padding-bottom: var(--space-4);
+		gap: var(--gap-block);
+		padding-bottom: var(--inset);
 		border: var(--marker-width) solid var(--tooltip-frame);
 		border-radius: var(--radius-1);
 		background: radial-gradient(var(--tooltip-surface), var(--tooltip-surface-edge));
@@ -110,7 +110,7 @@
 	/* The cream ribbon across the top, with dark notches at both ends, holds the name on one line. */
 	.name {
 		margin: 0;
-		padding: var(--space-1) var(--space-5);
+		padding: var(--inset-line) var(--inset-loose);
 		background: var(--tooltip-ribbon);
 		color: var(--tooltip-ink);
 		font-family: var(--font-game);
@@ -137,8 +137,8 @@
 		display: grid;
 		grid-template-columns: var(--size-icon-title) minmax(0, 1fr);
 		align-items: center;
-		gap: var(--space-4);
-		padding: 0 var(--space-5);
+		gap: var(--gap-block);
+		padding: 0 var(--inset-loose);
 	}
 	.body.bare {
 		grid-template-columns: var(--size-icon-title);
@@ -166,26 +166,26 @@
 	}
 	.description {
 		margin: 0;
-		padding: 0 var(--space-5);
+		padding: 0 var(--inset-loose);
 		font-size: var(--type-2);
 		line-height: var(--leading-snug);
 	}
 	.game-shows {
 		display: grid;
-		gap: var(--space-1);
+		gap: var(--gap-line);
 		margin: 0;
 		color: var(--text-soft);
 	}
 	.extra {
 		display: grid;
-		gap: var(--space-1);
+		gap: var(--gap-line);
 		margin: 0;
 	}
 	.extra div {
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: space-between;
-		gap: 0 var(--space-4);
+		gap: 0 var(--gap-block);
 	}
 	.extra dt {
 		color: var(--text-soft);

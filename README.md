@@ -57,6 +57,12 @@ BLOODLINE_SITE_DATA=<absolute-site-data-directory> bun run --cwd site build:prev
 bun run --cwd site review
 ```
 
+Before committing a change to the site's interface, check the real-data pages that stress layout most at four widths against the running development server:
+
+```sh
+bun run --cwd site layout:check <site-data-directory>
+```
+
 Authenticate Wrangler with `bunx wrangler login` from `site/`. Commit changes and rerun `catalog` before the production build:
 
 ```sh

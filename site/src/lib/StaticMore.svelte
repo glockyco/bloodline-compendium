@@ -44,7 +44,7 @@
 <style>
 	.more-toggle {
 		min-height: var(--size-control);
-		padding: var(--space-3);
+		padding: var(--inset);
 		border: 0;
 		background: none;
 		color: var(--accent);

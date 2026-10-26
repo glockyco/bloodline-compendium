@@ -18,7 +18,7 @@
 	.card-grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--size-card)), 1fr));
-		gap: 0 var(--space-4);
+		gap: 0 var(--gap-block);
 		margin: 0;
 		padding: 0;
 		list-style: none;

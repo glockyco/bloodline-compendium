@@ -134,7 +134,7 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 	await shopLink.click();
 	await expect(page).toHaveURL(/#source-shop$/);
 	await expect(page.locator('#source-shop')).toBeInViewport();
-	for (const summary of await page.locator('.source-groups details > summary').all())
+	for (const summary of await page.locator('.item-relations details > summary').all())
 		await summary.click();
 	for (const text of [
 		'Glass Reach',

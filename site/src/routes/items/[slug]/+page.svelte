@@ -5,11 +5,12 @@
 	import EntityLink from '#lib/ui/EntityLink.svelte';
 	import Conditions from '#lib/Conditions.svelte';
 	import { entityPath, kindPath } from '#lib/entities.js';
-	import Count from '#lib/ui/Count.svelte';
+	import Section from '#lib/ui/Section.svelte';
 	import ItemTooltip from '#lib/ItemTooltip.svelte';
 	import IssueNote from '#lib/ui/IssueNote.svelte';
 	import { sourceColumns, sourceHeadings, titleCase } from '#lib/labels.js';
 	import {
+		oddsLabel,
 		recipeKinds,
 		sortSources,
 		sourceContext,
@@ -36,9 +37,11 @@
 		(Object.keys(sourceHeadings) as SourceKind[])
 			.map((kind) => {
 				const listed = sortSources(item.sources.filter((source) => source.kind === kind));
-				// Sources share a place heading where several stand in the same place.
+				// Sources share a place heading where several stand in the same place. A source in several places
+				// would sit under one of them while naming the others, so such groups list places in their rows.
 				const places = listed.map(placeOf);
 				const byPlace =
+					listed.every((source) => source.places.length <= 1) &&
 					new Set(places).size > 1 &&
 					places.some((place, index) => places.indexOf(place) !== index);
 				const sources = byPlace
@@ -48,7 +51,20 @@
 					(source) => source.amount && (source.amount.min !== 1 || source.amount.max !== 1)
 				);
 				const showContext = sources.some((source) => source.price || source.odds);
-				const contextHeading = sources.some((source) => source.price) ? 'Price' : 'Chance';
+				// A chance names its event once in the heading when every row shares it.
+				const events = [
+					...new Set(
+						sources.flatMap((source) =>
+							source.odds?.chance != null ? [oddsLabel(source.odds, source.kind)] : []
+						)
+					)
+				];
+				const sharedUnit = !sources.some((source) => source.price) && events.length === 1;
+				const contextHeading = sources.some((source) => source.price)
+					? 'Price'
+					: sharedUnit
+						? `Chance ${events[0]}`
+						: 'Chance';
 				return {
 					kind,
 					sources,
@@ -57,6 +73,7 @@
 					summary: sources.length ? summarize(kind, sources) : null,
 					showAmount,
 					showContext,
+					sharedUnit,
 					headings: [
 						sourceColumns[kind],
 						...(showAmount ? ['Quantity'] : []),
@@ -95,6 +112,15 @@
 				(!useDiscipline || (use.discipline ?? useLabel(use.kind)) === useDiscipline) &&
 				(!useCategory || use.outputCategory === useCategory)
 		)
+	);
+	// The skill level a use needs shows in its own column, so the condition that states it does not repeat.
+	const levelOf = (use: (typeof uses)[number]) =>
+		use.conditions.find((condition) => condition.kind === 'proficiencyLevel')?.value ?? null;
+	const otherConditions = (use: (typeof uses)[number]) =>
+		use.conditions.filter((condition) => condition.kind !== 'proficiencyLevel');
+	// The type adds nothing when it only repeats the category, as for most materials.
+	const showType = $derived(
+		item.type.toLocaleLowerCase('en') !== item.category.name.toLocaleLowerCase('en')
 	);
 	function placeOf(source: Source): string {
 		return source.places[0]?.name ?? 'Location unknown';
@@ -144,41 +170,42 @@
 					data.kinds,
 					`?category=${encodeURIComponent(item.category.slug)}`
 				)!}>{titleCase(item.category.name)}</a
-			>
-			· <span data-game>{titleCase(item.type)}</span>
+			>{#if showType}<span aria-hidden="true">·</span>
+				<span data-game>{titleCase(item.type)}</span>{/if}
 		</p>
 	</div>
 	<div class="detail-layout" class:long-summary={longSummary}>
-		<section class="answer panel" aria-labelledby="how-to-get-it" data-pagefind-ignore="all">
-			<h2 id="how-to-get-it">How to Get It</h2>
-			{#if !groups.length}
-				<p>{statusSentence[item.status]}</p>
-			{:else}
-				<ul class="acquisition-routes">
-					{#each groups as group (group.kind)}{@const summary = group.summary!}
-						<li>
-							<a href={group.recipe ? '#recipes' : '#source-' + group.kind}
-								><span class="route-line"
-									><span class="verb">{summary.verb}</span>{#if summary.names}<strong data-game
-											>{summary.names}</strong
-										>{/if}{#if summary.more}<span class="more"
-											>and {formatNumber(summary.more)} more</span
-										>{/if}{#if summary.places.length}<span class="where"
-											>in <span data-game>{summary.places.join(', ')}</span></span
-										>{/if}</span
-								>{#if summary.context}<small>{summary.context}</small
-									>{/if}{#each summary.conditions as condition (condition)}<small class="when"
-										>{condition}</small
-									>{/each}</a
-							>
-						</li>
-					{/each}
-				</ul>
-			{/if}
-			{#if uses.length > 10}<p class="uses-link">
-					<a href="#used-for">Used for {formatNumber(uses.length)} recipes and purchases</a>
-				</p>{/if}
-		</section>
+		<div class="answer" data-pagefind-ignore="all">
+			<Section id="how-to-get-it" title="How to Get It">
+				{#snippet action()}{#if uses.length}<a href="#used-for"
+							>Used for {formatNumber(uses.length)}</a
+						>{/if}{/snippet}
+				{#if !groups.length}
+					<p class="surface">{statusSentence[item.status]}</p>
+				{:else}
+					<ul class="surface acquisition-routes">
+						{#each groups as group (group.kind)}{@const summary = group.summary!}
+							<li>
+								<a href={group.recipe ? '#recipes' : '#source-' + group.kind}
+									><span class="route-line"
+										><span class="verb">{summary.verb}</span>{#if summary.names}<strong data-game
+												>{summary.names}</strong
+											>{/if}{#if summary.more}<span class="more"
+												>and {formatNumber(summary.more)} more</span
+											>{/if}{#if summary.places.length}<span class="where"
+												>in <span data-game>{summary.places.join(', ')}</span></span
+											>{/if}</span
+									>{#if summary.context}<small>{summary.context}</small
+										>{/if}{#each summary.conditions as condition (condition)}<small class="when"
+											>{condition}</small
+										>{/each}</a
+								>
+							</li>
+						{/each}
+					</ul>
+				{/if}
+			</Section>
+		</div>
 		<aside class="item-side" aria-label="Item details">
 			<ItemTooltip
 				item={{ ...item, name: displayName }}
@@ -194,18 +221,19 @@
 			{/each}
 		</aside>
 		<div class="item-relations" data-pagefind-ignore="all">
-			{#if recipes.length}<section class="recipes" aria-labelledby="recipes">
-					<h2 id="recipes">
-						{recipes.length === 1 ? 'Recipe' : 'Recipes'}
-						{#if recipes.length > 1}<Count value={recipes.length} />{/if}
-					</h2>
-					{#each recipes as source, index (source.relationId)}<RecipeLine
-							{source}
-							id={`recipe-${index + 1}`}
-						/>{/each}
-				</section>{/if}
-			{#if uses.length}<section class="uses" aria-labelledby="used-for">
-					<h2 id="used-for">Used For <Count value={uses.length} /></h2>
+			{#if recipes.length}<div class="recipes">
+					<Section
+						id="recipes"
+						title={recipes.length === 1 ? 'Recipe' : 'Recipes'}
+						count={recipes.length > 1 ? recipes.length : undefined}
+					>
+						{#each recipes as source, index (source.relationId)}<RecipeLine
+								{source}
+								id={`recipe-${index + 1}`}
+							/>{/each}
+					</Section>
+				</div>{/if}
+			{#if uses.length}<Section id="used-for" title="Used For" count={uses.length}>
 					{#if useFilters}<div class="use-filters">
 							<label
 								>Skill <select bind:value={useDiscipline}
@@ -224,52 +252,57 @@
 									></label
 								>{/if}
 						</div>{/if}
-					<RelationTable items={shownUses} label="Used for" headings={['Makes', 'Needs']}
+					<RelationTable
+						items={shownUses}
+						label="Used for"
+						headings={['Makes', 'Skill', 'Needed']}
+						numeric={[false, true]}
 						>{#snippet row(use, index)}<tr
 								id={`use-${index + 1}`}
 								data-relation-id={use.relationId}
 								data-relation-direction="outgoing"
 								><td
-									><EntityLink entity={use.item} /><small
-										>{use.discipline ?? useLabel(use.kind)} ·
-										<span data-game>{use.name}</span></small
-									><Conditions conditions={use.conditions} /></td
-								><td class="numeric"
-									>{formatNumber(use.quantity)} <span data-game>{item.name}</span></td
-								></tr
+									><EntityLink entity={use.item} icon /><Conditions
+										conditions={otherConditions(use)}
+									/></td
+								><td
+									>{use.discipline ?? useLabel(use.kind)}{#if levelOf(use) != null}<span
+											class="muted">{` ${formatNumber(levelOf(use)!)}`}</span
+										>{/if}</td
+								><td class="numeric">{formatNumber(use.quantity)}</td></tr
 							>{/snippet}</RelationTable
 					>
-				</section>{/if}
-			<div class="source-groups">
-				{#each sourceGroups as group (group.kind)}
-					<section class="source-group" aria-labelledby={'source-' + group.kind}>
-						<h2 id={'source-' + group.kind}>
-							{sourceHeadings[group.kind]}
-							<Count value={group.sources.length} />
-						</h2>
-						<RelationTable
-							items={group.sources}
-							label={sourceHeadings[group.kind]}
-							headings={group.headings}
-							>{#snippet row(
-								source,
-								index
-							)}{#if group.byPlace && (index === 0 || placeOf(group.sources[index - 1]) !== placeOf(source))}<tr
-										class="place-heading"
-										><th colspan={group.headings.length} scope="colgroup" data-game
-											>{placeOf(source)}</th
-										></tr
-									>{/if}<SourceRow
-									{source}
-									showAmount={group.showAmount}
-									showContext={group.showContext}
-									showPlaces={!group.byPlace || source.places.length > 1}
-									id={`source-${group.kind}-${index + 1}`}
-								/>{/snippet}</RelationTable
-						>
-					</section>
-				{/each}
-			</div>
+				</Section>{/if}
+			{#each sourceGroups as group (group.kind)}
+				<Section
+					class="source-group"
+					id={'source-' + group.kind}
+					title={sourceHeadings[group.kind]}
+					count={group.sources.length}
+				>
+					<RelationTable
+						items={group.sources}
+						label={sourceHeadings[group.kind]}
+						headings={group.headings}
+						>{#snippet row(
+							source,
+							index
+						)}{#if group.byPlace && (index === 0 || placeOf(group.sources[index - 1]) !== placeOf(source))}<tr
+									class="place-heading"
+									><th colspan={group.headings.length} scope="colgroup" data-game
+										>{placeOf(source)}</th
+									></tr
+								>{/if}<SourceRow
+								{source}
+								showAmount={group.showAmount}
+								showContext={group.showContext}
+								showUnit={!group.sharedUnit}
+								showPlaces={!group.byPlace}
+								id={`source-${group.kind}-${index + 1}`}
+							/>{/snippet}</RelationTable
+					>
+				</Section>
+			{/each}
 		</div>
 	</div>
 </article>

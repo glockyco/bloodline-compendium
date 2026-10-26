@@ -11,6 +11,8 @@
 	--surface-panel: #1c1827;
 	--surface-raised: #251f33;
 	--surface-hover: #2c2540;
+	/* Every other table row, a tint over its surface as in Afallon. */
+	--surface-stripe: rgb(255 255 255 / 2.5%);
 	--surface-slot: #261f37;
 	--surface-backdrop: rgb(10 8 16 / 72%);
 	--surface-fade: rgb(21 18 29 / 0%);
@@ -47,12 +49,13 @@
 	--font-heading: 'Young Serif', Georgia, serif;
 	--font-game: 'Arbutus Slab', Georgia, serif;
 
-	/* Type. Nothing a reader must read is smaller than step 1. */
+	/* Type. Body text is step 1. Labels, counts and secondary lines are step 0, as in Afallon, and nothing is smaller. */
+	--type-0: 0.875rem;
 	--type-1: 1rem;
 	--type-2: 1.25rem;
 	--type-3: 1.5rem;
 	--type-4: 2rem;
-	--type-5: clamp(2.25rem, 1.5rem + 2.5vw, 3.5rem);
+	--type-5: clamp(2rem, 1.5rem + 1.5vw, 2.5rem);
 	--type-6: clamp(2.5rem, 1rem + 4.5vw, 4.5rem);
 	--weight-regular: 400;
 	--weight-heading: 400;
@@ -72,10 +75,27 @@
 	--space-7: 3rem;
 	--space-8: 4rem;
 	--space-9: 6rem;
-	/* Roles that change with the viewport. */
-	--space-gutter: var(--space-6);
-	--space-panel: var(--space-5);
-	--space-section: var(--space-9);
+
+	/*
+	 * Spacing roles. Every style outside this file spaces by role, never by a step of the scale above, so the same
+	 * relation between two things gets the same space on every page. The rhythm follows Afallon's: containers space
+	 * their children with gap, and children have no outer margins.
+	 */
+	/* Padding: inside a line, a table cell or list row, every surface, and large overlays such as the filter sheet. */
+	--inset-line: var(--space-1);
+	--inset-cell: var(--space-2);
+	--inset: var(--space-3);
+	--inset-loose: var(--space-5);
+	/* Gaps: between the lines of one entry, inline neighbours, the blocks of a section, headed groups, sections, and
+	   the regions of a page. */
+	--gap-line: var(--space-1);
+	--gap-inline: var(--space-2);
+	--gap-block: var(--space-3);
+	--gap-groups: var(--space-5);
+	--gap-section: 1.75rem;
+	--gap-page: var(--space-7);
+	/* The page's distance from the screen edge. */
+	--gutter: var(--space-6);
 
 	--radius-1: 0.5rem;
 	--radius-2: 0.75rem;
@@ -92,12 +112,11 @@
 	--size-header: 4.5rem;
 	--size-checkbox: 1.125rem;
 	--size-emblem: 3rem;
-	--size-icon-row: 2.5rem;
+	--size-icon-row: 2rem;
+	--size-icon-inline: 1.5rem;
 	--size-icon-stack: 2.5rem;
 	--size-icon-title: 5rem;
 	--size-meter: 0.5rem;
-	--size-sort-half-width: 0.3rem;
-	--size-sort-height: 0.4rem;
 	--size-page: 75rem;
 	--size-page-min-height: 72vh;
 	--size-reading: 48rem;
@@ -107,7 +126,12 @@
 	--size-hero-search: 40rem;
 	--size-card: 20rem;
 	--size-way: 30rem;
-	--size-filters: 15rem;
+	--size-filters: 15.5rem;
+	/* Compact controls of lists and filters, after Afallon's: an option row, a chip and a control in a sheet. */
+	--size-option: 1.85rem;
+	--size-chip: 1.75rem;
+	--size-control-compact: 2.25rem;
+	--size-chevron: 0.875rem;
 	--size-filter-sheet: 26rem;
 	--size-item-side: 20rem;
 	--size-relation-number: 7.5rem;
@@ -122,7 +146,7 @@
 	--size-facet-values: 15rem;
 	--size-item-type: 8rem;
 	/* A row's note lines up with the name beside its icon. */
-	--space-status-note: calc(var(--size-icon-row) + var(--space-3));
+	--inset-note: calc(var(--size-icon-row) + var(--gap-inline));
 	--position-below: 100%;
 
 	--duration-hover: 0.15s;
@@ -135,9 +159,8 @@
 
 @media (width < 40rem) {
 	:root {
-		--space-gutter: var(--space-4);
-		--space-panel: var(--space-4);
-		--space-section: var(--space-8);
+		--gutter: var(--space-4);
+		--gap-page: var(--space-6);
 		--size-icon-title: 3.5rem;
 		--size-icon-row: 1.75rem;
 		--size-relation-number: 5.5rem;

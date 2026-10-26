@@ -16,15 +16,15 @@
 		display: grid;
 		grid-row: span var(--card-rows);
 		grid-template-rows: subgrid;
-		margin-bottom: var(--space-4);
+		margin-bottom: var(--gap-block);
 	}
 	.body {
 		display: grid;
 		grid-row: span var(--card-rows);
 		grid-template-rows: subgrid;
-		gap: var(--space-3);
+		gap: var(--gap-block);
 		min-width: 0;
-		padding: var(--space-panel);
+		padding: var(--inset);
 		border: var(--border-width) solid var(--border);
 		border-radius: var(--radius-2);
 		background: var(--surface-panel);

@@ -22,12 +22,12 @@
 		position: absolute;
 		z-index: var(--layer-tooltip);
 		inset-block-start: var(--position-below);
-		margin-block-start: var(--space-1);
+		margin-block-start: var(--gap-line);
 		inset-inline-end: 0;
 		display: none;
 		width: max-content;
 		max-width: var(--size-tooltip);
-		padding: var(--space-2) var(--space-3);
+		padding: var(--inset-cell) var(--inset);
 		border: var(--border-width) solid var(--border-control);
 		border-radius: var(--radius-1);
 		background: var(--surface-raised);

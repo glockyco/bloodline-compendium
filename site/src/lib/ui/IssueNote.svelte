@@ -16,8 +16,8 @@
 <style>
 	.note {
 		display: grid;
-		gap: var(--space-2);
-		padding: var(--space-4);
+		gap: var(--gap-inline);
+		padding: var(--inset);
 		border: var(--border-width) solid var(--border-control);
 		border-left: var(--focus-width) solid var(--text-warning);
 		border-radius: var(--radius-1);

@@ -12,7 +12,7 @@
 		align-items: center;
 		justify-content: center;
 		min-height: var(--size-control);
-		padding: 0 var(--space-5);
+		padding: 0 var(--inset-loose);
 		border-radius: var(--radius-1);
 		background: var(--brand);
 		color: var(--text-on-brand);

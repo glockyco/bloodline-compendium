@@ -59,8 +59,8 @@
 <style>
 	.recipe {
 		display: grid;
-		gap: var(--space-3);
-		padding: var(--space-4);
+		gap: var(--gap-block);
+		padding: var(--inset);
 		border: var(--border-width) solid var(--border);
 		border-radius: var(--radius-2);
 		background: var(--surface-panel);
@@ -68,7 +68,7 @@
 	.ingredients {
 		display: flex;
 		flex-wrap: wrap;
-		gap: var(--space-2) var(--space-4);
+		gap: var(--gap-inline) var(--gap-block);
 		margin: 0;
 		padding: 0;
 		list-style: none;
@@ -76,7 +76,7 @@
 	.ingredients li {
 		display: flex;
 		align-items: center;
-		gap: var(--space-2);
+		gap: var(--gap-inline);
 	}
 	.ingredients img {
 		width: var(--size-icon-row);
@@ -90,12 +90,12 @@
 	.recipe-facts {
 		display: flex;
 		flex-wrap: wrap;
-		gap: var(--space-2) var(--space-5);
+		gap: var(--gap-inline) var(--gap-groups);
 		margin: 0;
 	}
 	.recipe-facts div {
 		display: flex;
-		gap: var(--space-2);
+		gap: var(--gap-inline);
 	}
 	.recipe-facts dt {
 		color: var(--text-soft);
@@ -105,6 +105,6 @@
 	}
 	.recipe-notes {
 		margin: 0;
-		padding-left: var(--space-5);
+		padding-left: var(--inset-loose);
 	}
 </style>

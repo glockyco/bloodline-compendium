@@ -169,13 +169,13 @@
 
 <style>
 	section {
-		margin-top: var(--space-7);
+		margin-top: var(--gap-page);
 	}
 	.card-head {
 		display: flex;
 		align-items: baseline;
 		justify-content: space-between;
-		gap: var(--space-4);
+		gap: var(--gap-block);
 	}
 	h3 {
 		margin: 0;
@@ -191,15 +191,15 @@
 	.slots {
 		display: grid;
 		grid-template-columns: repeat(5, minmax(0, 1fr));
-		gap: var(--space-2);
+		gap: var(--gap-inline);
 		align-self: end;
 	}
 	.row {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
-		gap: var(--space-4);
-		margin-bottom: var(--space-5);
+		gap: var(--gap-block);
+		margin-bottom: var(--gap-groups);
 	}
 	.tooltip-fixture {
 		max-width: var(--size-item-side);

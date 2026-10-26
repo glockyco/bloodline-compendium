@@ -23,7 +23,8 @@
 		"deploy:dry-run": "bun ../scripts/deploy.mjs production --dry-run",
 		"deploy:preview:dry-run": "bun ../scripts/deploy.mjs preview --dry-run",
 		"deploy:smoke": "bun ../scripts/deploy.mjs smoke",
-		"review": "wrangler dev --assets build"
+		"review": "wrangler dev --assets build",
+		"layout:check": "bun scripts/layout-check.mjs"
 	},
 	"devDependencies": {
 		"@axe-core/playwright": "^4.11.1",

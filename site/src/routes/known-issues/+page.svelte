@@ -15,15 +15,17 @@
 
 <SeoHead
 	title="Known Issues | The Bloodline Compendium"
-	description="Defects in The Bloodline that runs of the game reproduced, with their effect on players, workarounds and steps to see them yourself."
+	description="Defects in The Bloodline, each reproduced in the game, with their effect on players, workarounds and steps to see them yourself."
 />
-<div data-pagefind-body>
-	<p class="eyebrow">Problems in the game itself</p>
-	<h1 data-pagefind-meta="title">Known Issues</h1>
-	<p class="intro">
-		These are defects in The Bloodline that runs of the game reproduced. Item pages show what the
-		game applies and link the issues that affect them.
-	</p>
+<div class="sections" data-pagefind-body>
+	<header class="page-heading">
+		<p class="eyebrow">Problems in the game itself</p>
+		<h1 data-pagefind-meta="title">Known Issues</h1>
+		<p class="intro">
+			Defects in The Bloodline, each reproduced in the game. Item pages show what the game applies
+			and link the issues that affect them.
+		</p>
+	</header>
 	{#if data.issues.length}<nav class="issue-index panel" aria-label="Issues">
 			<ol>
 				{#each data.issues as { issue, affected } (issue.id)}<li>
@@ -100,36 +102,36 @@
 <style>
 	.issue-index ol {
 		display: grid;
-		gap: var(--space-2);
+		gap: var(--gap-inline);
 		margin: 0;
-		padding-left: var(--space-5);
+		padding-left: var(--inset-loose);
 	}
 	.issue-index small {
-		margin-left: var(--space-2);
+		margin-left: var(--gap-inline);
 		color: var(--text-soft);
 	}
 	.issue-index {
-		margin-top: var(--space-5);
+		margin-top: var(--gap-groups);
 	}
 	.developer {
 		display: grid;
-		gap: var(--space-3);
+		gap: var(--gap-block);
 	}
 	.developer summary {
 		cursor: pointer;
 		font-weight: var(--weight-strong);
 	}
 	.developer dl {
-		margin-top: var(--space-3);
+		margin-top: var(--gap-block);
 	}
 	.issue-stack {
 		display: grid;
-		gap: var(--space-6);
-		margin-top: var(--space-6);
+		gap: var(--gap-section);
+		margin-top: var(--gap-section);
 	}
 	.issue {
 		display: grid;
-		gap: var(--space-3);
+		gap: var(--gap-block);
 	}
 	h2,
 	h3,
@@ -140,7 +142,7 @@
 	}
 	dl {
 		display: grid;
-		gap: var(--space-3);
+		gap: var(--gap-block);
 	}
 	dt {
 		font-weight: var(--weight-strong);
@@ -151,7 +153,7 @@
 	}
 	.citations {
 		margin: 0;
-		padding-left: var(--space-4);
+		padding-left: var(--inset);
 		overflow-wrap: anywhere;
 	}
 </style>

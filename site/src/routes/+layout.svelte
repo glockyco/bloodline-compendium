@@ -100,16 +100,16 @@
 	.bar {
 		display: flex;
 		align-items: center;
-		gap: var(--space-6);
+		gap: var(--gap-section);
 		max-width: var(--size-page);
 		min-height: var(--size-header);
 		margin: 0 auto;
-		padding: var(--space-3) var(--space-gutter);
+		padding: var(--inset) var(--gutter);
 	}
 	.brand {
 		display: flex;
 		align-items: center;
-		gap: var(--space-3);
+		gap: var(--gap-block);
 		color: var(--text);
 		text-decoration: none;
 	}
@@ -133,7 +133,7 @@
 	}
 	nav {
 		display: flex;
-		gap: var(--space-5);
+		gap: var(--gap-groups);
 	}
 	nav a,
 	.support {
@@ -168,23 +168,23 @@
 		max-width: var(--size-page);
 		min-height: var(--size-page-min-height);
 		margin: 0 auto;
-		padding: var(--space-5) var(--space-gutter) var(--space-8);
+		padding: var(--inset-loose) var(--gutter) var(--gap-page);
 	}
 	.site-footer {
-		margin-top: var(--space-section);
+		margin-top: var(--gap-section);
 		border-top: var(--border-width) solid var(--border);
 		color: var(--text-muted);
 	}
 	.footer-inner {
 		display: grid;
-		gap: var(--space-3);
+		gap: var(--gap-block);
 		max-width: var(--size-page);
 		margin: 0 auto;
-		padding: var(--space-6) var(--space-gutter) var(--space-7);
+		padding: var(--inset-loose) var(--gutter) var(--gap-page);
 	}
 	.footer-inner nav {
 		flex-wrap: wrap;
-		gap: var(--space-2) var(--space-5);
+		gap: var(--gap-inline) var(--gap-groups);
 	}
 	.footer-inner nav a {
 		min-height: 0;
@@ -198,7 +198,7 @@
 	@media (width < 64rem) {
 		.bar {
 			flex-wrap: wrap;
-			gap: 0 var(--space-4);
+			gap: 0 var(--gap-block);
 		}
 		nav {
 			order: 3;
@@ -211,7 +211,7 @@
 			order: 4;
 			flex-basis: 100%;
 			max-width: none;
-			padding-bottom: var(--space-1);
+			padding-bottom: var(--inset-line);
 		}
 	}
 </style>

@@ -8,7 +8,7 @@
 <style>
 	.count {
 		display: inline-block;
-		padding: 0 var(--space-2);
+		padding: 0 var(--inset-cell);
 		border-radius: var(--radius-round);
 		background: var(--surface-raised);
 		color: var(--text-muted);

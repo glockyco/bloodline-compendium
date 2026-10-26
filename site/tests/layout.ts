@@ -5,7 +5,10 @@ import type { Page } from '@playwright/test';
  * - the page scrolls sideways,
  * - content leaves a card or tooltip,
  * - the rows of cards that share a line do not start at the same height,
- * - visible text is smaller than 1rem.
+ * - visible text is smaller than step 0 of the type scale,
+ * - a surface or table cell is padded off the shared inset,
+ * - a numeric cell or heading is not right-aligned,
+ * - a comma in site text has no space after it.
  */
 export async function layoutProblems(page: Page): Promise<string[]> {
 	// Search and other components render after load, and their text counts too.
@@ -74,8 +77,26 @@ export async function layoutProblems(page: Page): Promise<string[]> {
 			}
 		}
 
+		// Every surface and every cell starts its content at the shared inset, so stacked sections share one edge.
+		const root = getComputedStyle(document.documentElement);
+		const inset = parseFloat(root.getPropertyValue('--inset')) * parseFloat(root.fontSize);
+		for (const element of document.querySelectorAll(
+			// A list surface passes its inset to its entries, so its dividers span the surface.
+			'.surface:not(.acquisition-routes), .relation-panel td, .relation-panel th, .acquisition-routes a'
+		)) {
+			if (!visible(element)) continue;
+			const padding = parseFloat(getComputedStyle(element).paddingLeft);
+			if (Math.abs(padding - inset) > tolerance)
+				problems.push(`${describe(element)} is inset ${padding}px instead of ${inset}px`);
+		}
+		for (const cell of document.querySelectorAll('td.numeric, th.numeric')) {
+			if (visible(cell) && getComputedStyle(cell).textAlign !== 'right')
+				problems.push(`${describe(cell)} is a number that is not right-aligned`);
+		}
+
 		const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-		const minimum = parseFloat(getComputedStyle(document.documentElement).fontSize);
+		// Labels, counts and secondary lines use step 0, .875rem, as in Afallon, and nothing is smaller.
+		const minimum = parseFloat(root.fontSize) * 0.875;
 		for (let node = walker.nextNode(); node; node = walker.nextNode()) {
 			const parent = node.parentElement;
 			if (
@@ -88,6 +109,9 @@ export async function layoutProblems(page: Page): Promise<string[]> {
 			const size = parseFloat(getComputedStyle(parent).fontSize);
 			if (size < minimum - 0.01)
 				problems.push(`${describe(parent)} is ${size}px, below ${minimum}px`);
+			// Game text keeps its own punctuation.
+			if (!parent.closest('[data-game]') && /,[^\s\d]/.test(parent.innerText ?? ''))
+				problems.push(`${describe(parent)} has a comma without a space after it`);
 		}
 		return problems;
 	});

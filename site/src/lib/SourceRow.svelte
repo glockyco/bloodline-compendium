@@ -10,12 +10,15 @@
 		showAmount = false,
 		showContext = false,
 		showPlaces = true,
+		showUnit = true,
 		id
 	}: {
 		source: Source;
 		showAmount?: boolean;
 		showContext?: boolean;
 		showPlaces?: boolean;
+		/** Whether the chance names its event, which the heading names instead when every row shares it. */
+		showUnit?: boolean;
 		id: string;
 	} = $props();
 </script>
@@ -62,16 +65,20 @@
 		<td class="numeric context-value">
 			{#if source.price && payPrice(source.price) === 0}
 				Free
+			{:else if source.price && !source.price.currency}
+				{`${formatNumber(payPrice(source.price))} gold`}
 			{:else if source.price}
 				{formatNumber(payPrice(source.price))}<small
-					>{#if source.price.currency}<span
-							data-relation-id={source.price.relationId}
-							data-relation-direction={source.price.relationId ? 'incoming' : undefined}
-							><EntityLink entity={source.price.currency} /></span
-						>{:else}gold{/if}</small
+					><span
+						data-relation-id={source.price.relationId}
+						data-relation-direction={source.price.relationId ? 'incoming' : undefined}
+						><EntityLink entity={source.price.currency!} icon /></span
+					></small
 				>
 			{:else if source.odds?.chance != null}
-				{formatChance(source.odds.chance)}<small>{oddsLabel(source.odds, source.kind)}</small>
+				{formatChance(source.odds.chance)}{#if showUnit}<small
+						>{oddsLabel(source.odds, source.kind)}</small
+					>{/if}
 			{:else if source.odds?.unknown}<UnknownValue
 					reason={source.odds.unknown}
 					id={id + '-odds'}

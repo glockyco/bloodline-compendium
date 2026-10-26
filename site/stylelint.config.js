@@ -1,10 +1,12 @@
 /**
  * Raw values live only in src/tokens.css. Every other style picks a token, so spacing, type, radii,
  * colours and layers stay on the same small scales and a new page cannot introduce a near-miss value.
+ * Spacing goes further: styles pick a role, such as a surface's inset or the gap between sections.
  */
-// A spacing value is a list of 0, auto, spacing tokens or negated spacing tokens.
-const spacing =
-	'/^(\\s*(0|auto|var\\(--space-[a-z0-9-]+\\)|calc\\(-1 \\* var\\(--space-[a-z0-9-]+\\)\\)))+\\s*$/';
+// A spacing value is a list of 0, auto or spacing roles, possibly negated. Steps of the spacing scale are for
+// tokens.css alone, so the same relation between two things gets the same space everywhere.
+const role = 'var\\(--(inset|gap|gutter)[a-z0-9-]*\\)';
+const spacing = `/^(\\s*(0|auto|${role}|calc\\(-1 \\* ${role}\\)))+\\s*$/`;
 const token = (scale) => `/^var\\(--${scale}-[a-z0-9-]+\\)$/`;
 
 /** @type {import('stylelint').Config} */

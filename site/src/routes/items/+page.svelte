@@ -52,7 +52,18 @@
 	);
 	const groups = $derived(facetGroups(index.items, items, list, index, valueLabel));
 	const columns = $derived(shownColumns(items, list, index));
-	const numericColumns = $derived(index.columns.filter((column) => column.numeric));
+	const selectedCategories = $derived(list.facets.category ?? []);
+	// The stat picker offers the stats of the selected categories, or every stat while none is selected.
+	const statColumns = $derived(
+		index.columns.filter(
+			(column) =>
+				column.numeric &&
+				!list.stats.some((filter) => filter.column === column.id) &&
+				(!selectedCategories.length ||
+					!column.categories.length ||
+					column.categories.some((category) => selectedCategories.includes(category)))
+		)
+	);
 	const sortColumns = $derived([
 		{ id: 'name', label: 'Item', numeric: false },
 		{ id: 'type', label: 'Type', numeric: false },
@@ -131,80 +142,98 @@
 	description="Find The Bloodline items by name, category, type and stats. Compare values and open known shops, recipes, drops and gathering sources."
 />
 <h1>Items</h1>
-<p class="intro">Find equipment, ingredients and curios, then see how to get them.</p>
-<div class="list-controls">
-	<label
-		>Search by name<input
-			type="search"
-			value={list.name}
-			oninput={(event) => apply({ ...list, name: event.currentTarget.value })}
-			placeholder="Item name"
-		/></label
-	>
-	<button class="mobile-filters" type="button" onclick={() => dialog.showModal()}
-		>Filters{activeCount ? ` (${activeCount})` : ''}</button
-	>
-</div>
-<div class="browse-layout">
-	<aside class="desktop-filters" aria-label="Item filters">{@render filters('side')}</aside>
-	<dialog bind:this={dialog} class="filter-sheet" aria-labelledby="filter-heading">
-		<div class="sheet-heading">
+<div class="layout">
+	<aside class="sidebar" aria-label="Item filters">
+		<a class="skip-results" href="#results">Skip to results</a>
+		{@render filters('side')}
+	</aside>
+	<dialog bind:this={dialog} class="sheet" aria-labelledby="filter-heading">
+		<div class="sheet-head">
 			<h2 id="filter-heading">Filters</h2>
-			<button type="button" onclick={() => dialog.close()} aria-label="Close filters">Close</button>
+			<button type="button" class="close" onclick={() => dialog.close()} aria-label="Close filters"
+				>×</button
+			>
 		</div>
-		{@render filters('sheet')}
-		<button class="button result-button" type="button" onclick={() => dialog.close()}
-			>Show {formatNumber(items.length)} {items.length === 1 ? 'item' : 'items'}</button
-		>
+		<div class="sheet-body">{@render filters('sheet')}</div>
+		<div class="sheet-foot">
+			<span>{formatNumber(items.length)} {items.length === 1 ? 'item' : 'items'}</span>
+			<button class="show" type="button" onclick={() => dialog.close()}
+				>Show {formatNumber(items.length)} {items.length === 1 ? 'item' : 'items'}</button
+			>
+		</div>
 	</dialog>
-	<div class="list-results">
-		<p role="status" aria-live="polite">
-			{formatNumber(items.length)} of {formatNumber(index.items.length)} items
-		</p>
-		{#if hiddenCount}<p class="availability">
-				<button type="button" class="link-button" onclick={() => apply({ ...list, reveal: true })}
-					>Show {formatNumber(hiddenCount)} more without a known way to get them</button
-				>
-			</p>{:else if list.reveal}<p class="availability">
-				<button type="button" class="link-button" onclick={() => apply({ ...list, reveal: false })}
-					>Hide items without a known way to get them</button
-				>
-			</p>{/if}
-		{#if activeCount}<div class="filter-chips" aria-label="Active filters">
-				{#if list.name}<button type="button" onclick={() => apply({ ...list, name: '' })}
-						>Name: {list.name} <span aria-hidden="true">×</span><span class="sr-only"
-							>Remove name filter</span
-						></button
-					>{/if}
-				{#each index.facets as facet (facet.id)}{#each list.facets[facet.id] ?? [] as value (value)}<button
+	<div class="results" id="results" tabindex="-1">
+		<div class="search-row">
+			<input
+				type="search"
+				aria-label="Search by name"
+				value={list.name}
+				oninput={(event) => apply({ ...list, name: event.currentTarget.value })}
+				placeholder="Filter items by name"
+			/>
+			<button class="filters-button" type="button" onclick={() => dialog.showModal()}
+				>Filters{activeCount ? ` (${activeCount})` : ''}</button
+			>
+		</div>
+		<div class="bar">
+			<p role="status" aria-live="polite">
+				<strong>{formatNumber(items.length)}</strong> of {formatNumber(index.items.length)} items
+			</p>
+			{#if activeCount}<ul class="chips" aria-label="Active filters">
+					{#if list.name}<li>
+							<button type="button" class="chip" onclick={() => apply({ ...list, name: '' })}
+								>Name: {list.name} <span aria-hidden="true">×</span><span class="sr-only"
+									>Remove name filter</span
+								></button
+							>
+						</li>{/if}
+					{#each index.facets as facet (facet.id)}{#each list.facets[facet.id] ?? [] as value (value)}<li
+							>
+								<button type="button" class="chip" onclick={() => toggle(facet.id, value, false)}
+									>{valueLabel(facet, value)} <span aria-hidden="true">×</span><span class="sr-only"
+										>Remove {facet.label} filter</span
+									></button
+								>
+							</li>{/each}{/each}
+					{#each list.stats as filter, position (filter.column)}<li>
+							<button
+								type="button"
+								class="chip"
+								onclick={() =>
+									apply({ ...list, stats: list.stats.filter((_, other) => other !== position) })}
+								>{index.columns.find((column) => column.id === filter.column)?.label}{filter.min
+									? ` from ${filter.min}`
+									: ''}{filter.max ? ` to ${filter.max}` : ''}
+								<span aria-hidden="true">×</span><span class="sr-only">Remove stat filter</span
+								></button
+							>
+						</li>{/each}
+					<li>
+						<button
 							type="button"
-							onclick={() => toggle(facet.id, value, false)}
-							>{valueLabel(facet, value)} <span aria-hidden="true">×</span><span class="sr-only"
-								>Remove {facet.label} filter</span
-							></button
-						>{/each}{/each}
-				{#each list.stats as filter, position (filter.column)}<button
-						type="button"
-						onclick={() =>
-							apply({ ...list, stats: list.stats.filter((_, other) => other !== position) })}
-						>{index.columns.find((column) => column.id === filter.column)?.label}{filter.min
-							? ` from ${filter.min}`
-							: ''}{filter.max ? ` to ${filter.max}` : ''}
-						<span aria-hidden="true">×</span><span class="sr-only">Remove stat filter</span></button
-					>{/each}
-				<button
+							class="clear"
+							onclick={() =>
+								apply({
+									name: '',
+									facets: {},
+									stats: [],
+									match: 'all',
+									reveal: false,
+									sort: list.sort
+								})}>Clear all</button
+						>
+					</li>
+				</ul>{/if}
+			<!-- One button that changes its text keeps keyboard focus when it is used. -->
+			{#if hiddenCount || list.reveal}<button
 					type="button"
-					onclick={() =>
-						apply({
-							name: '',
-							facets: {},
-							stats: [],
-							match: 'all',
-							reveal: false,
-							sort: list.sort
-						})}>Clear all</button
-				>
-			</div>{/if}
+					class="reveal"
+					onclick={() => apply({ ...list, reveal: !list.reveal })}
+					>{list.reveal
+						? 'Hide items without a known way to get them'
+						: `Show ${formatNumber(hiddenCount)} more without a known way to get them`}</button
+				>{/if}
+		</div>
 		<label class="phone-sort"
 			>Sort by <select
 				value={`${list.sort.column}:${list.sort.direction}`}
@@ -224,59 +253,64 @@
 						>{/each}{/each}</select
 			></label
 		>
-		<div class="table-scroll">
-			<table class="item-table">
-				<thead
-					><tr
-						>{#each sortColumns as column (column.id)}<th
-								scope="col"
-								class:numeric={column.numeric}
-								aria-sort={ariaSort(column.id)}
-								><button type="button" onclick={() => sort(column.id)}
-									>{column.label}{#if list.sort.column === column.id}<span
-											class="sort-indicator"
-											class:descending={list.sort.direction === 'desc'}
-											aria-hidden="true"
-										></span>{/if}</button
-								></th
-							>{/each}</tr
-					></thead
-				>
-				<tbody
-					>{#each rows as item (item.slug)}<tr>
-							<td
-								><EntityLink class="item-name" entity={item}
-									>{#if item.icon}<img
-											src={'/icons/' + item.icon + '-48.webp'}
-											alt=""
-											width="40"
-											height="40"
-											loading="lazy"
-										/>{/if}<span
-										><span data-game>{item.name}</span>{#if item.qualifier}<small
-												>{item.qualifier}</small
-											>{/if}</span
-									></EntityLink
-								>{#if statusNote[item.status]}<small class="status-note"
-										>{statusNote[item.status]}</small
-									>{/if}</td
-							>
-							<td class="item-type" data-label="Type"><span data-game>{item.type}</span></td>
-							{#each columns as column (column.id)}<td
+		<div class="list">
+			<div class="table-scroll">
+				<table>
+					<thead
+						><tr
+							>{#each sortColumns as column (column.id)}<th
+									scope="col"
 									class:numeric={column.numeric}
-									data-label={cellText(item, column.id) ? column.label : undefined}
-									>{cellText(item, column.id)}</td
-								>{/each}
-							<td class="numeric" data-label="Value"
-								>{item.value === null ? 'Unknown' : formatNumber(item.value) + ' gold'}</td
-							>
-						</tr>{/each}</tbody
-				>
-			</table>
+									aria-sort={ariaSort(column.id)}
+									><button type="button" class="sort" onclick={() => sort(column.id)}
+										>{column.label}<span
+											class="sort-mark"
+											class:idle={list.sort.column !== column.id}
+											aria-hidden="true"
+											>{list.sort.column === column.id && list.sort.direction === 'desc'
+												? '▼'
+												: '▲'}</span
+										></button
+									></th
+								>{/each}</tr
+						></thead
+					>
+					<tbody
+						>{#each rows as item (item.slug)}<tr>
+								<td class="name"
+									><EntityLink class="item-name" entity={item}
+										>{#if item.icon}<img
+												src={'/icons/' + item.icon + '-48.webp'}
+												alt=""
+												width="32"
+												height="32"
+												loading="lazy"
+											/>{/if}<span data-game
+											>{item.name}{#if item.qualifier}<span class="qualifier"
+													>{` (${item.qualifier})`}</span
+												>{/if}</span
+										></EntityLink
+									>{#if statusNote[item.status]}<small class="status-note"
+											>{statusNote[item.status]}</small
+										>{/if}</td
+								>
+								<td data-label="Type"><span data-game>{item.type}</span></td>
+								{#each columns as column (column.id)}<td
+										class:numeric={column.numeric}
+										data-label={cellText(item, column.id) ? column.label : undefined}
+										>{cellText(item, column.id)}</td
+									>{/each}
+								<td class="numeric" data-label="Value"
+									>{item.value === null ? 'Unknown' : formatNumber(item.value) + ' gold'}</td
+								>
+							</tr>{/each}</tbody
+					>
+				</table>
+			</div>
+			{#if !items.length}<p class="empty">
+					No items match these filters. Change a filter or clear all to browse again.
+				</p>{/if}
 		</div>
-		{#if !items.length}<p class="empty-state">
-				No items match these filters. Change a filter or clear all to browse again.
-			</p>{/if}
 		<noscript
 			><p>
 				Name filtering, filters and sorting need JavaScript. Follow an item link to read its
@@ -286,48 +320,60 @@
 	</div>
 </div>
 
-{#snippet filters(instance: string)}
-	<h2 class="desktop-filter-title">Filters</h2>
-	{#each groups as group (group.facet.id)}
-		{@const selected = list.facets[group.facet.id] ?? []}
-		{@const needle = (narrowing[group.facet.id] ?? '').toLocaleLowerCase('en')}
-		<details class="facet" open>
-			<summary
-				>{group.facet.label}{#if selected.length}<span class="picked">{selected.length}</span
-					>{/if}</summary
-			>
-			{#if group.options.length > 10}<label
-					>Find {group.facet.label.toLowerCase()}<input
-						type="search"
-						value={narrowing[group.facet.id] ?? ''}
-						oninput={(event) =>
-							(narrowing = { ...narrowing, [group.facet.id]: event.currentTarget.value })}
-					/></label
-				>{/if}
-			<div class="facet-values" class:long={group.options.length > 10}>
-				{#each group.options.filter((option) => option.label
-						.toLocaleLowerCase('en')
-						.includes(needle)) as option (option.value)}<label class="check-label"
+{#snippet facet(group: (typeof groups)[number])}
+	{@const selected = list.facets[group.facet.id] ?? []}
+	{@const needle = (narrowing[group.facet.id] ?? '').toLocaleLowerCase('en')}
+	<!-- Places are many, so their group starts closed unless it holds a choice. -->
+	<details class="group" open={group.facet.id !== 'place' || selected.length > 0}>
+		<summary
+			><span class="title">{group.facet.label}</span>{#if selected.length}<span class="picked"
+					>{selected.length}</span
+				>{/if}<span class="chevron" aria-hidden="true"></span></summary
+		>
+		{#if group.options.length > 10}<input
+				class="narrow"
+				type="search"
+				aria-label={`Find ${group.facet.label.toLowerCase()} values`}
+				placeholder={`Find ${group.facet.label.toLowerCase()}`}
+				value={narrowing[group.facet.id] ?? ''}
+				oninput={(event) =>
+					(narrowing = { ...narrowing, [group.facet.id]: event.currentTarget.value })}
+			/>{/if}
+		<ul class="options" class:long={group.options.length > 10}>
+			{#each group.options.filter((option) => option.label
+					.toLocaleLowerCase('en')
+					.includes(needle)) as option (option.value)}<li>
+					<label
 						><input
 							type="checkbox"
 							checked={selected.includes(option.value)}
 							onchange={(event) =>
 								toggle(group.facet.id, option.value, event.currentTarget.checked)}
-						/><span>{option.label}</span><span class="facet-count"
+						/><span class="option-name">{option.label}</span><span class="count"
 							>{formatNumber(option.count)}</span
 						></label
-					>{/each}
-			</div>
-		</details>
-	{/each}
-	{#if numericColumns.length}
-		<details class="facet" open={list.stats.length > 0}>
+					>
+				</li>{/each}
+		</ul>
+	</details>
+{/snippet}
+
+{#snippet filters(instance: string)}
+	<h2 class="sr-only">Filters</h2>
+	<!-- What an item is comes first, then its stats, then how and where to get it. -->
+	{#each groups.filter((group) => group.facet.id === 'category' || group.facet.categories.length) as group (group.facet.id)}{@render facet(
+			group
+		)}{/each}
+	{#if statColumns.length || list.stats.length}
+		<details class="group" open={list.stats.length > 0}>
 			<summary
-				>Stats{#if list.stats.length}<span class="picked">{list.stats.length}</span>{/if}</summary
+				><span class="title">Stats</span>{#if list.stats.length}<span class="picked"
+						>{list.stats.length}</span
+					>{/if}<span class="chevron" aria-hidden="true"></span></summary
 			>
 			{#each list.stats as filter, position (filter.column)}
 				{@const label = index.columns.find((column) => column.id === filter.column)?.label}
-				<div class="stat-filter">
+				<div class="stat">
 					<span>{label}</span>
 					<button
 						type="button"
@@ -378,7 +424,7 @@
 						><option value="all">every stat</option><option value="any">any stat</option></select
 					></label
 				>{/if}
-			{#if numericColumns.some((column) => !list.stats.some((filter) => filter.column === column.id))}<select
+			{#if statColumns.length}<select
 					id={`${instance}-add-stat`}
 					aria-label="Add a stat filter"
 					value=""
@@ -392,14 +438,419 @@
 								sort: { column, direction: 'desc' }
 							});
 					}}
-					><option value="">Add a stat</option
-					>{#each numericColumns.filter((column) => !list.stats.some((filter) => filter.column === column.id)) as column (column.id)}<option
+					><option value="">Add a stat</option>{#each statColumns as column (column.id)}<option
 							value={column.id}
-							>{column.label}{column.categories.length === 1
+							>{column.label}{column.categories.length === 1 && !selectedCategories.length
 								? ` (${index.categories.find((category) => category.slug === column.categories[0])?.plural ?? column.categories[0]})`
 								: ''}</option
 						>{/each}</select
 				>{/if}
 		</details>
 	{/if}
+	{#each groups.filter((group) => group.facet.id !== 'category' && !group.facet.categories.length) as group (group.facet.id)}{@render facet(
+			group
+		)}{/each}
 {/snippet}
+
+<style>
+	/* The list follows Afallon's: filters beside the results, a name search above them, the count, chips and the
+	   reveal on one line, and a compact striped table in one surface. */
+	.layout {
+		display: grid;
+		grid-template-columns: var(--size-filters) minmax(0, 1fr);
+		gap: var(--gap-section);
+		align-items: start;
+	}
+	.sidebar {
+		display: grid;
+	}
+	.skip-results {
+		justify-self: start;
+	}
+	.skip-results:not(:focus) {
+		clip-path: inset(50%);
+		position: absolute;
+	}
+	.results {
+		display: grid;
+		gap: var(--gap-block);
+		min-width: 0;
+	}
+	.search-row {
+		display: flex;
+		gap: var(--gap-inline);
+	}
+	.bar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--gap-inline) var(--gap-block);
+	}
+	.bar p {
+		color: var(--text-soft);
+	}
+	.chips {
+		display: contents;
+		list-style: none;
+	}
+	.chip,
+	.clear,
+	.reveal {
+		min-height: var(--size-chip);
+		padding: var(--inset-line) var(--inset-cell);
+		font-size: var(--type-0);
+	}
+	.chip {
+		border-color: var(--accent);
+		border-radius: var(--radius-1);
+		background: transparent;
+	}
+	.chip span {
+		color: var(--text-muted);
+	}
+	.clear,
+	.reveal {
+		border: 0;
+		background: none;
+		text-decoration: underline;
+		text-underline-offset: var(--underline-offset);
+	}
+	.clear {
+		color: var(--accent);
+	}
+	/* Hidden entries matter to few readers, so the reveal is a quiet link at the end of the bar. */
+	.reveal {
+		margin-left: auto;
+		color: var(--text-muted);
+		text-decoration-style: dotted;
+	}
+	.list {
+		padding: var(--inset-line) var(--inset-cell) var(--inset-cell);
+		border: var(--border-width) solid var(--border);
+		border-radius: var(--radius-1);
+		background: var(--surface-panel);
+	}
+	.table-scroll {
+		overflow-x: auto;
+	}
+	table {
+		width: 100%;
+		border-collapse: collapse;
+	}
+	th,
+	td {
+		padding: var(--inset-cell) var(--inset);
+		text-align: left;
+		vertical-align: middle;
+		border: 0;
+	}
+	thead th {
+		position: sticky;
+		top: 0;
+		z-index: var(--layer-table-heading);
+		background: var(--surface-panel);
+		border-bottom: var(--border-width) solid var(--border);
+		color: var(--text-muted);
+		font-size: var(--type-0);
+		font-weight: var(--weight-strong);
+		white-space: nowrap;
+	}
+	tbody td {
+		border-top: var(--border-width) solid var(--border);
+	}
+	tbody tr:nth-child(even) {
+		background: var(--surface-stripe);
+	}
+	tbody tr:hover {
+		background: var(--surface-hover);
+	}
+	.numeric {
+		text-align: right;
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+	}
+	.sort {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--gap-line);
+		min-height: auto;
+		padding: 0;
+		border: 0;
+		background: none;
+		color: inherit;
+		font-weight: inherit;
+	}
+	/* A numeric heading keeps its arrow on the left, so the label lines up with the numbers below it. */
+	th.numeric .sort {
+		flex-direction: row-reverse;
+	}
+	.sort:hover {
+		color: var(--accent);
+	}
+	.sort-mark {
+		color: var(--accent);
+	}
+	/* Only the active column shows its arrow, and an idle arrow appears on hover and focus. */
+	.sort-mark.idle {
+		opacity: 0;
+	}
+	.sort:hover .sort-mark.idle,
+	.sort:focus-visible .sort-mark.idle {
+		opacity: 0.8;
+	}
+	/* The link covers its icon and name only, so pointing at empty cell space neither follows nor previews it. */
+	:global(.item-name) {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--gap-inline);
+		vertical-align: middle;
+		text-decoration: none;
+		overflow-wrap: break-word;
+	}
+	:global(.item-name:hover) {
+		text-decoration: underline;
+	}
+	:global(.item-name img) {
+		flex: none;
+		width: var(--size-icon-row);
+		height: var(--size-icon-row);
+		object-fit: contain;
+	}
+	.qualifier {
+		color: var(--text-muted);
+	}
+	.status-note {
+		display: block;
+		padding-left: var(--inset-note);
+		color: var(--text-muted);
+		font-size: var(--type-0);
+	}
+	.empty {
+		padding: var(--inset-loose) var(--inset);
+		text-align: center;
+		color: var(--text-muted);
+	}
+	.phone-sort,
+	.filters-button {
+		display: none;
+	}
+
+	/* Filters are disclosure groups, as in Afallon's filter panel: a title, a count of choices and a chevron. */
+	.group {
+		padding: var(--inset) 0;
+		border-top: var(--border-width) solid var(--border);
+	}
+	.group:first-of-type {
+		border-top: 0;
+		padding-top: 0;
+	}
+	summary {
+		display: flex;
+		align-items: center;
+		gap: var(--gap-inline);
+		min-height: var(--size-chip);
+		font-size: var(--type-0);
+		font-weight: var(--weight-strong);
+		list-style: none;
+	}
+	summary::-webkit-details-marker {
+		display: none;
+	}
+	.chevron {
+		width: var(--size-chevron);
+		height: var(--size-chevron);
+		margin-left: auto;
+		border-right: var(--marker-width) solid var(--text-muted);
+		border-bottom: var(--marker-width) solid var(--text-muted);
+		transform: rotate(45deg) scale(0.6);
+	}
+	details[open] > summary .chevron {
+		transform: rotate(225deg) scale(0.6);
+	}
+	.picked {
+		padding: 0 var(--inset-cell);
+		border-radius: var(--radius-round);
+		background: var(--accent);
+		color: var(--surface);
+		font-size: var(--type-0);
+	}
+	.options {
+		display: grid;
+		margin: var(--gap-line) 0 0;
+		padding: 0;
+		list-style: none;
+	}
+	/* A long group scrolls inside a bounded height, so it does not push the later groups off the screen. */
+	.options.long {
+		max-height: var(--size-facet-values);
+		overflow-y: auto;
+	}
+	.options label {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr) auto;
+		align-items: center;
+		gap: var(--gap-inline);
+		min-height: var(--size-option);
+		color: var(--text-soft);
+	}
+	.option-name {
+		overflow-wrap: break-word;
+	}
+	.count {
+		color: var(--text-muted);
+		font-size: var(--type-0);
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+	}
+	.narrow,
+	.group select,
+	.bounds input {
+		width: 100%;
+		min-height: var(--size-control-compact);
+		margin-top: var(--gap-line);
+		padding: var(--inset-line) var(--inset-cell);
+		border: var(--border-width) solid var(--border-control);
+		border-radius: var(--radius-1);
+		background: var(--surface);
+	}
+	.stat {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		align-items: center;
+		gap: 0 var(--gap-inline);
+		margin-top: var(--gap-block);
+	}
+	.stat .bounds {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+		grid-column: 1 / -1;
+		gap: var(--gap-inline);
+	}
+	.remove {
+		min-height: var(--size-chip);
+		padding: 0 var(--inset-cell);
+	}
+	.match {
+		display: grid;
+		gap: var(--gap-line);
+		margin-top: var(--gap-block);
+	}
+
+	/* Phones open the filters as a sheet whose footer stays in view. */
+	.sheet {
+		width: 100%;
+		max-width: 100%;
+		height: 100%;
+		max-height: 100%;
+		margin: 0;
+		padding: 0;
+		border: 0;
+		background: var(--surface-panel);
+		color: var(--text);
+	}
+	.sheet[open] {
+		display: flex;
+		flex-direction: column;
+	}
+	.sheet::backdrop {
+		background: var(--surface-backdrop);
+	}
+	.sheet-head,
+	.sheet-foot {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--gap-block);
+		padding: var(--inset);
+	}
+	.sheet-head {
+		border-bottom: var(--border-width) solid var(--border);
+	}
+	.sheet-head h2 {
+		font-size: var(--type-2);
+	}
+	.close {
+		width: var(--size-control-compact);
+		min-height: var(--size-control-compact);
+		padding: 0;
+	}
+	.sheet-body {
+		flex: 1 1 auto;
+		overflow-y: auto;
+		padding: var(--inset);
+	}
+	.sheet-foot {
+		border-top: var(--border-width) solid var(--border);
+	}
+	.show {
+		background: var(--accent);
+		color: var(--surface);
+		font-weight: var(--weight-strong);
+	}
+
+	@media (width < 64rem) {
+		.layout {
+			grid-template-columns: minmax(0, 1fr);
+		}
+		.sidebar {
+			display: none;
+		}
+		.filters-button {
+			display: inline-flex;
+			align-items: center;
+		}
+	}
+	@media (width >= 64rem) {
+		.sheet {
+			display: none;
+		}
+	}
+	/* A phone reads each item as a card: its name, then each column as a labelled line. */
+	@media (width < 40rem) {
+		.phone-sort {
+			display: flex;
+			align-items: center;
+			gap: var(--gap-inline);
+		}
+		.list {
+			padding: 0;
+			border: 0;
+			background: none;
+		}
+		thead {
+			display: none;
+		}
+		table,
+		tbody,
+		tr,
+		td {
+			display: block;
+		}
+		tbody {
+			display: grid;
+			gap: var(--gap-inline);
+		}
+		tbody tr,
+		tbody tr:nth-child(even) {
+			padding: var(--inset-cell) var(--inset);
+			border: var(--border-width) solid var(--border);
+			border-radius: var(--radius-1);
+			background: var(--surface-panel);
+		}
+		tbody td {
+			display: flex;
+			justify-content: space-between;
+			gap: var(--gap-block);
+			padding: var(--inset-line) 0;
+			border: 0;
+		}
+		tbody td.name {
+			display: block;
+		}
+		td[data-label]::before {
+			content: attr(data-label);
+			color: var(--text-muted);
+			font-size: var(--type-0);
+		}
+	}
+</style>

@@ -31,8 +31,8 @@
 		flex-wrap: wrap;
 		align-items: baseline;
 		justify-content: space-between;
-		gap: var(--space-2) var(--space-4);
-		margin-bottom: var(--space-5);
+		gap: var(--gap-inline) var(--gap-block);
+		margin-bottom: var(--gap-groups);
 	}
 	h2 {
 		margin: 0;
