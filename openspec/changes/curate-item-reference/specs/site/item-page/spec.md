@@ -7,11 +7,15 @@ Defines what an item page shows and in which order, so that its first screen ans
 ## ADDED Requirements
 
 ### Requirement: First-screen answer
-The first screen SHALL show the item's tooltip and a summary of every way to get it, each led by a verb such as Buy, Craft, Cook, Loot, Find or Receive, with up to two named sources, a count of further sources, the place, the price or chance, and any season or unlock condition. On phones, the summary SHALL precede the tooltip only when it is short, and the tooltip's key values SHALL be visible within the first screen.
+The first screen SHALL show the item's tooltip and a summary of every way to get it, each led by a verb such as Buy, Craft, Cook, Loot, Find or Receive, with up to two named sources, a count of further sources, the place, the price or chance, and any season or unlock condition. A level, price or chance on a summary line SHALL hold for every source the line names, and the line SHALL show their range otherwise. On phones, the summary SHALL precede the tooltip only when it is short, and the tooltip's key values and a link to the uses SHALL be visible within the first screen.
 
 #### Scenario: Seasonal merchant
 - **WHEN** a reader opens the Dark Brown Scarecrow Hat
 - **THEN** the summary names the Hallowed Eve Merchant in Woodhurst, the price in Ghostgreen Apples, and October or Truill
+
+#### Scenario: Containers with different chances
+- **WHEN** a reader opens Azure Lover, whose containers give 1.7% to 38.5%
+- **THEN** the container line shows that range instead of one container's chance
 
 ### Requirement: Recipe line
 A crafted item SHALL show its recipe as a visible line: ingredients with quantities and icons, station, discipline and level, output quantity and experience. Nothing essential to crafting SHALL sit behind a disclosure.
@@ -21,11 +25,18 @@ A crafted item SHALL show its recipe as a visible line: ingredients with quantit
 - **THEN** 3 Apple and 1 Bread, the cooking fire and 35 cooking experience are visible without opening anything
 
 ### Requirement: Uses
-An item used by recipes, purchases or construction SHALL list each use with the quantity it consumes and what it makes, with filters by discipline and output category when there are more than ten uses, and a link from the first screen when the list is long.
+An item used by recipes, purchases or construction SHALL list each use with what it makes, the skill and level it needs and the quantity it consumes as a number, without repeating the item's own name. Long lists SHALL filter by discipline, made item type and level and by name when there are more than ten uses, and the first screen SHALL link to the list.
 
 #### Scenario: Iron Ingot
 - **WHEN** a reader opens Iron Ingot
-- **THEN** a Used For link on the first screen leads to a list that filters by weaponsmithing, armorsmithing and other uses and shows quantities such as 6 Iron Ingot
+- **THEN** a Used For link on the first screen leads to rows such as Angled Iron Blade with its icon, Weaponsmithing 8 and 6, filterable by skill, type and level
+
+### Requirement: Items shown with their icons
+Wherever a page lists items, each item SHALL show its icon beside its name, and the icon, name and quantity of one entry SHALL form one link target.
+
+#### Scenario: Recipe ingredient on a phone
+- **WHEN** a reader taps beside the Apple ingredient's name on Apple Juice's recipe
+- **THEN** the tap reaches the Apple link because its icon and quantity belong to the same target
 
 ### Requirement: Sources grouped and explained
 Detailed sources SHALL be grouped by how they are obtained, then by place where several share one. Each group SHALL label its numbers with their event. Conditions SHALL appear once, on the source they restrict. The page SHALL NOT repeat sources, prices or ingredients in another section.
@@ -42,7 +53,7 @@ Where the game's tooltip shows another value than the game applies, the page SHA
 - **THEN** the tooltip shows Armor 0 and notes that the game's tooltip shows 4, linking the issue
 
 ### Requirement: Status without a known source
-An item without a known source SHALL state its status in one sentence that says what is known, such as not obtainable in normal play, or that no way to get it is known in this game version, and SHALL still show its uses and facts.
+An item without a known source SHALL state its status in one sentence that says what is known, such as not obtainable in normal play, or that no way to get it is known yet and a quest or event may give it, and SHALL still show its uses and facts.
 
 #### Scenario: Test-only armor
 - **WHEN** a reader opens Allseer's Judgement

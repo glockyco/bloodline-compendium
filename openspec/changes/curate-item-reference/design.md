@@ -68,6 +68,20 @@ Title and identity, then the tooltip with any displayed-value notes and issue no
 
 Coverage mixes player limits with extraction diagnostics, and the review found most of it unusable for players. Its player-relevant content becomes item statuses on pages and one About section. The rest goes to `report.json`, which the update procedure reviews.
 
+### Spacing belongs to roles and layout primitives
+
+Pages drifted although the tokens file closed every scale. 233 spacing declarations used 55 different values, 103 of them in the shared stylesheet, because each new section chose its own step. Text in the acquisition panel started at a different edge than text in the table below it, dividers were inset in one surface and full width in the next, a fixed-width chance column overflowed its table, and one section put its heading inside its surface while the next put it outside. A closed scale stops raw values, not different choices for the same role.
+
+Spacing is chosen by role. `tokens.css` defines each role once: the inset of every surface and table cell, the block padding of rows, the gaps between lines of one entry, between entries, between a heading and its content and between sections, the inline gap and the page gutter. Stylelint accepts only roles for padding, margin, gap and inset outside `tokens.css`.
+
+Layout primitives own the roles. `Section` places a heading, its count and its controls above one body. `Surface` applies the inset and full-width dividers between entries. `DataTable` applies the cell inset, right-aligns numeric columns with their unit in the header, renders group rows as subheadings and lets columns size to their content and wrap at spaces. `ItemRef` makes an item's icon and name one link. Pages compose primitives and declare no spacing, and every section puts its heading outside its surface.
+
+A layout check loads extreme pages, such as the longest names, the most sources, places and uses, special-currency prices and items without icons, at 1440, 1024, 768 and 390 px. It fails on horizontal overflow, a surface or cell off its inset, differing text edges inside one column, numeric cells that are not right-aligned and list separators without a space. It runs on fixtures in CI and on the real-data preview before a UI commit, because invented fixtures alone missed every one of these defects.
+
+### A source names what the player meets
+
+Source rows named the wrong things: ingot pickups said Sporing Gloves, ore deposits said Abyssberry Bush, a Miner's Crate said Cabinet and Wakazashi's merchant said Jasper Thorne while the summary above said Connor Selby. Mechanisms keyed pickups, containers, gathering nodes and some merchants by their actor class, which many different objects share, and the graph kept the first name it saw for a key. A source entity's key now identifies what the player meets: a placed person by level and actor, a container or node by its class and the name the player sees, and a pickup by the item itself. The graph rejects one key with two names, so a shared key fails the catalog instead of renaming sources.
+
 ### Order of work
 
 Values come before presentation, because pages built on wrong numbers would be rebuilt twice: catalog economy first, then reader text and support pages, the item page, browsing, recovered sources, crafting and tools. Lab checks run as each value needs them, one session at a time, because the lab has one game copy.
@@ -87,3 +101,15 @@ Lab confirmations are recorded here as they complete.
 - Container picks, run prices-1. `Generate New Loot` on a live container made 5 entries for bounds 4 and 4, 2 for 1 and 1, and 1 for 0 and 0, in 400 calls each. Bounds 3 and 11 gave 4 to 12 entries, most often 6 or 7, because the loop redraws its bound on each pass.
 - Dialogue states. `AddSpecialTagDialogue` sets a tag that `CheckIfDialogueTagIsValid` and `CheckIfDialogueTagIsNOTValid` test. The Hallowed Eve Merchant, the Scarecrow shopkeeper's conversation, sets `SpokeWithScarecrow` when the player asks what he sells and tests it on the way to his stock, so the stock has no requirement beyond the season.
 - Enemy drops, run odds-1. Enemies spawned beside the player and killed with the engine's ApplyDamage. A Copper Crown Bandit dropped its one-entry rare pool on each of 3 kills, and a Herald Ashbinder dropped its five-entry pool on 8 of 23 kills, against the 25 percent gate its Drop Loot draws first. A Bandit Cutter and a Bandit Heavy Swordsman each dropped a one-entry table holding a weapon outside their authored rare pools, because their construction scripts replace the pool. The loose-loot placer's loop runs from 1 to its maximum without a condition on the ground trace, read from its BeginPlay and not yet observed.
+
+## Persona review
+
+Six reviewers used the real-data preview as a phone newcomer, a weaponsmith, a gear optimizer, a completionist, a design critic and a keyboard user, at 1440, 1024, 768 and 390 px. Their reports and screenshots are in `artifacts/design/ux-review/personas/`. Beyond the spacing and source identity problems above, they found:
+
+- Summaries merge facts of different sources. Standard Mystcopper Axe Head's summary requires weaponsmithing 40 while one of its recipes needs 10, and Azure Lover's summary gives 1.7% for six containers whose chances reach 38.5%.
+- Crafting chains break. Ores say they refine into ingots, but no smelting recipe is published. Some steel recipes produce a mystcopper part, and some parts list identical recipes twice.
+- Places include internal area names such as "Generic Autumn Birch Area", which bury the places players know.
+- Weapons carry two type vocabularies: the list and title show the item type, such as Rifle, while the filter and details show the weapon type, such as Pistol. Speed sorts alphabetically, Range has no unit and absent values show as blank cells.
+- Wording misleads: a guaranteed drop is called rare, a container row adds an unexplained second percentage, an unresolved pickup reads "Find lying", and a bounty note is received from its own quest.
+- The missing page lost its styles at nested addresses, a first tap followed links instead of previewing them, and places ran together without spaces. All three are fixed.
+- Interaction gaps: filter counts break inside numbers, the desktop filters put 100 controls before the results, the availability toggle drops focus, Show more leaves focus behind the revealed rows, wide tables lose the item name when scrolled, tall tooltips clip at 200% zoom and long tooltip names run under the ribbon's notch.

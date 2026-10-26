@@ -14,11 +14,22 @@ The item list SHALL offer separate filters for category, weapon type, armor slot
 - **THEN** the weapon type filter shows only weapon types with matching items and no armor slot, food or part values appear
 
 ### Requirement: Columns for the category
-The list SHALL show columns that suit the selected category: damage, speed and type for weapons, armor, class and slot for armor, healing and effects for food and potions, contributions and fitting weapons for parts, and the number of uses for materials. Selecting a stat filter SHALL add its column. Several stat filters SHALL match all or any of them as the reader chooses. All columns SHALL sort.
+The list SHALL show columns that suit the selected category: damage, speed and type for weapons, armor, class and slot for armor, healing and effects for food and potions, contributions and fitting weapons for parts, and the number of uses for materials. Selecting a stat filter SHALL add its column, and the stat picker SHALL offer the stats of the selected category. Several stat filters SHALL match all or any of them as the reader chooses. All columns SHALL sort by meaning, so speed words sort from slowest to fastest. A column SHALL name its unit, and a cell without a value SHALL say whether the value is unknown or does not apply. On narrow screens the item name SHALL stay visible while the other columns scroll.
 
 #### Scenario: Healing food
 - **WHEN** a reader selects Food and sorts by healing
 - **THEN** the food that heals most comes first and its healing shows in its row
+
+#### Scenario: Speed sort
+- **WHEN** a reader sorts weapons by speed
+- **THEN** Slow comes before Below Average, Average and Above Average, and Fast comes last
+
+### Requirement: Filters that agree
+A place filter combined with a way-to-get filter SHALL match an item only through a source of a selected way in a selected place. Filter counts SHALL stay on one line, and a skip link SHALL lead past the filters to the results.
+
+#### Scenario: Buying ingots in one place
+- **WHEN** a reader selects Materials, Merchants and Elderglen Woods
+- **THEN** only materials sold by a merchant in Elderglen Woods remain, and Copper Ingot, sold only in Squalls End, does not
 
 ### Requirement: Every item findable
 Name search SHALL match every item, including items without a known source, which SHALL show that status in their row. Browsing MAY leave items without a known source out by default only with a visible count and one action that shows them. Category counts on the home page and the list SHALL agree.
