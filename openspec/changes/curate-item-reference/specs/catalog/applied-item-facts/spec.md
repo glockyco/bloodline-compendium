@@ -7,7 +7,7 @@ Defines how the catalog publishes prices, odds, ingredient treatments and item s
 ## ADDED Requirements
 
 ### Requirement: Prices follow the shop's pricing rule
-The catalog SHALL publish an item's base value and, for each shop source, the rule by which that shop turns the base value into what a player pays and receives: merchants who trade through the trading window by the player's respect in the city that keeps respect where they stand, and at neutral respect elsewhere, and currency shops by their fixed price. A price SHALL NOT be called a purchase price unless it follows the shop's rule. A shop SHALL NOT be listed as a source of an item it never offers.
+The catalog SHALL publish an item's base value and, for each shop source, the rule by which that shop turns the base value into what a player pays and receives: merchants who trade through the trading window by the player's respect in the city that keeps respect where they stand, and at neutral respect elsewhere, and currency shops by their fixed price.
 
 #### Scenario: City shop at neutral respect
 - **WHEN** an item with base value 100 is sold in a city shop and the player's respect there is between 0 and 249
@@ -20,6 +20,16 @@ The catalog SHALL publish an item's base value and, for each shop source, the ru
 #### Scenario: Zero base value
 - **WHEN** a shop offers an item whose base value is 0
 - **THEN** the source shows it as free
+
+### Requirement: Purchase prices use the shop rule
+A price SHALL NOT be called a purchase price unless it follows the shop's rule.
+
+#### Scenario: Base value without a shop rule
+- WHEN only an item's base value is established
+- THEN the catalog does not call that value a purchase price
+
+### Requirement: Shop sources offer the item
+A shop SHALL NOT be listed as a source of an item it never offers.
 
 #### Scenario: Stock the shop never offers
 - **WHEN** a settlement building's stock lists Leather Pants, whose default item info names no item class

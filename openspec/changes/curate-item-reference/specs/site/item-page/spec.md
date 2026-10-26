@@ -7,15 +7,25 @@ Defines what an item page shows and in which order, so that its first screen ans
 ## ADDED Requirements
 
 ### Requirement: First-screen answer
-The first screen SHALL show the item's tooltip and a summary of every way to get it, each led by a verb such as Buy, Craft, Cook, Loot, Find or Receive, with up to two named sources, a count of further sources, the place, the price or chance, and any season or unlock condition. A level, price or chance on a summary line SHALL hold for every source the line names, and the line SHALL show their range otherwise. On phones, the summary SHALL precede the tooltip only when it is short, and the tooltip's key values and a link to the uses SHALL be visible within the first screen.
+The first screen SHALL show the item's tooltip and a summary of every way to get it, each led by a verb such as Buy, Craft, Cook, Loot, Find or Receive, with up to two named sources, a count of further sources, the place, the price or chance, and any season or unlock condition.
 
 #### Scenario: Seasonal merchant
 - **WHEN** a reader opens the Dark Brown Scarecrow Hat
 - **THEN** the summary names the Hallowed Eve Merchant in Woodhurst, the price in Ghostgreen Apples, and October or Truill
 
+### Requirement: Summary values describe every named source
+A level, price or chance on a summary line SHALL hold for every source the line names, and the line SHALL show their range otherwise.
+
 #### Scenario: Containers with different chances
 - **WHEN** a reader opens Azure Lover, whose containers give 1.7% to 38.5%
 - **THEN** the container line shows that range instead of one container's chance
+
+### Requirement: Phone first screens retain key facts
+On phones, the summary SHALL precede the tooltip only when it is short, and the tooltip's key values and a link to the uses SHALL be visible within the first screen.
+
+#### Scenario: Long summary on a phone
+- WHEN an item's acquisition summary is long on a phone
+- THEN it does not precede the tooltip and the first screen retains the tooltip's key values and a link to uses
 
 ### Requirement: Recipe line
 A crafted item SHALL show its recipe as a visible line: ingredients with quantities and icons, station, discipline and level, output quantity and experience. Nothing essential to crafting SHALL sit behind a disclosure.

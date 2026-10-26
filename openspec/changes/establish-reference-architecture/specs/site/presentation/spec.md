@@ -49,7 +49,21 @@ Every stat label, unit and number format SHALL come from one stat vocabulary tha
 - **THEN** both use the same label, unit and number format
 
 ### Requirement: Voice rules
-Site-authored text SHALL use the game's own terms for labels and state facts plainly: no filler that claims ease, no marketing phrases, no cute labels, no defensive asides about what the site lacks, no exclamation marks, no semicolons between clauses, no em or en dashes, ellipsis characters or arrows, and straight quotes only. Text from the game keeps its own wording and SHALL be marked as game text so the rules skip it. A check over every built page SHALL fail on the constructions listed in the repository's voice rules file and name the page and the passage.
+Site-authored text SHALL use the game's own terms for labels and state facts plainly: no filler that claims ease, no marketing phrases, no cute labels, no defensive asides about what the site lacks, no exclamation marks, no semicolons between clauses, no em or en dashes, ellipsis characters or arrows, and straight quotes only.
+
+#### Scenario: Site-authored label
+- WHEN the site labels a game fact
+- THEN it uses the game's term without filler
+
+### Requirement: Game quotations retain their wording
+Text from the game keeps its own wording and SHALL be marked as game text so the rules skip it.
+
+#### Scenario: Quoted game punctuation
+- WHEN marked game text contains punctuation the voice rules forbid in site-authored text
+- THEN the wording is retained and the voice rules skip it
+
+### Requirement: Built pages enforce the voice rules
+A check over every built page SHALL fail on the constructions listed in the repository's voice rules file and name the page and the passage.
 
 #### Scenario: Banned phrase
 - **WHEN** a page contains a banned construction
