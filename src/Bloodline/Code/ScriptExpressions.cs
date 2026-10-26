@@ -57,6 +57,8 @@ internal static class ScriptExpressions
                                 or "UserDefinedStruct"
                             ? "struct"
                             : "property",
+                        ["$local"] =
+                            field.ResolvedOwner?.ResolvedObject?.Class?.Name.Text == "Function",
                     }
                     : new JsonObject { ["$field"] = pointer.Old?.ResolvedObject?.GetPathName() };
             case string text:

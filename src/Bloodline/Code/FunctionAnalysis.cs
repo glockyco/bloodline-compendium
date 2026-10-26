@@ -198,7 +198,7 @@ internal sealed class FunctionAnalysis(
                     var normalized = new JsonObject();
                     foreach (var (name, value) in obj)
                     {
-                        if (name == "StatementIndex")
+                        if (name is "StatementIndex" or "$local")
                             continue;
                         if (
                             name == "Offset"
@@ -324,6 +324,8 @@ internal sealed class FunctionAnalysis(
             return;
         if (Text(obj["$field"]) is { } field)
         {
+            if (obj["$local"]?.GetValue<bool>() == true)
+                return;
             var owner = field.Split(':')[0];
             var target = new CodeTarget(
                 structs.Contains(owner) || Text(obj["$fieldKind"]) == "struct"

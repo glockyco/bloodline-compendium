@@ -246,4 +246,27 @@ public sealed class CodeIndexTests
         );
         Assert.Empty(result.Reads);
     }
+
+    [Fact]
+    public void FunctionLocalsStayInCodeButNotInTheStateCrossReference()
+    {
+        var variable = Node(
+            "EX_LocalVariable",
+            0,
+            ("Variable", Field(Owner + ":Inspect:Parameter"))
+        );
+        var plain = Analyze(
+            Function("Inspect", variable, Read(10, "Guard"), Node("EX_Return", 20))
+        );
+        variable["Variable"]!["$local"] = true;
+        var indexed = Analyze(
+            Function("Inspect", variable, Read(10, "Guard"), Node("EX_Return", 20))
+        );
+        Assert.Equal(plain.Fingerprint, indexed.Fingerprint);
+        Assert.DoesNotContain(
+            indexed.Reads.Concat(indexed.Writes),
+            target => target.Path.Contains(":Inspect:", StringComparison.Ordinal)
+        );
+        Assert.Contains(indexed.Reads, target => target.Label == "Protection.Guard");
+    }
 }
