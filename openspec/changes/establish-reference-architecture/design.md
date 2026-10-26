@@ -178,7 +178,9 @@ The index attributes an event stub's accesses and calls to its named entry in `E
 
 The reference kinds are class and instance properties, struct fields, DataTables, table row structs and referenced objects. Function locals, compiler temporaries and parameters stay in the reached code but are excluded from the state cross-reference. Their scope metadata does not affect the fingerprint. Two full extractions produced identical fingerprints for all 57,869 functions. The invented changed-code fixture changes its fingerprint, while moving an unrelated event does not.
 
-The baseline extraction took 432.05 seconds and peaked at 2,675,228,672 sampled bytes. The full-export index first took 680.19 seconds and 8,227,684,352 bytes. Loading only function exports and writing canonical index entries one at a time reduced two measured extractions to 589.40 and 601.86 seconds, with sampled peaks of 3,615,981,568 and 4,631,887,872 bytes. That is 1.36 to 1.39 times the baseline duration and 1.35 to 1.73 times its sampled memory. Measurements and generated outputs stay in `artifacts/24464547/`.
+The baseline extraction took 432.05 seconds and peaked at 2,675,228,672 sampled bytes. The first full-export index took 680.19 seconds and 8,227,684,352 bytes, exceeding the memory target.
+
+Loading only function exports, writing canonical entries one at a time and excluding local references reduced the final extraction to 551.47 seconds and 4,711,219,200 sampled bytes. That is 1.28 times the baseline duration and 1.76 times its sampled memory. The final index holds 52,797 references in 139,544,955 bytes, down from 538,111,729 bytes. Measurements, fingerprint comparisons and byte-comparison results stay in `artifacts/24464547/`.
 
 Unresolved computed entry points, unread execution targets, unsupported tokens and execution-flow states that exceed the analysis bound are marked partial. Raw ubergraphs have no fixed entry and cannot be cited as a substitute for an event. Virtual dispatch retains the unresolved function name rather than inventing a receiver class. The index does not interpret native functions or infer runtime branch outcomes.
 
