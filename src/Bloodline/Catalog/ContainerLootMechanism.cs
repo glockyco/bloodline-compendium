@@ -50,7 +50,9 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                         ItemIdentity.ClassName(table.Path) == "PresetLootTables_DT"
                     )
                     .SelectMany(table => table.Rows)
-                    .FirstOrDefault(row => row.Name == rowName);
+                    .FirstOrDefault(row =>
+                        string.Equals(row.Name, rowName, StringComparison.OrdinalIgnoreCase)
+                    );
                 if (row is null)
                     continue;
                 pool = row.Values["ContainerLootTable"];
@@ -98,14 +100,20 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
             if (RecordValues.Integer(properties["Max Spawn Amount"]) is { } max)
                 notes.Add($"Maximum spawn amount: {max}.");
             JsonNode? pool = properties["Loot Table"];
-            if (preset is not null and not "None" and not "Generic")
+            if (
+                preset is not null
+                && !preset.Equals("None", StringComparison.OrdinalIgnoreCase)
+                && !preset.Equals("Generic", StringComparison.OrdinalIgnoreCase)
+            )
             {
                 var row = context
                     .Records.Tables.Where(table =>
                         ItemIdentity.ClassName(table.Path) == "PresetLootTables_DT"
                     )
                     .SelectMany(table => table.Rows)
-                    .FirstOrDefault(row => row.Name == preset);
+                    .FirstOrDefault(row =>
+                        string.Equals(row.Name, preset, StringComparison.OrdinalIgnoreCase)
+                    );
                 if (row is null)
                     continue;
                 pool = row.Values["ContainerLootTable"];
@@ -118,7 +126,7 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
             }
             else if (
                 RecordValues.Boolean(properties["Use Preset Table?"]) == true
-                && preset == "Generic"
+                && string.Equals(preset, "Generic", StringComparison.OrdinalIgnoreCase)
             )
             {
                 pool = properties["Generic Loot Table"];

@@ -169,7 +169,7 @@ public sealed class LootMechanismTests
     public void LooseLootUsesGenericPoolAndRecordsItsMaximumSpawnCount()
     {
         var properties = Parse(
-            """{"Use Preset Table?":true,"Preset Table Name":"Generic","Min Spawn Amount":2,"Max Spawn Amount":5}"""
+            """{"Use Preset Table?":true,"Preset Table Name":"generic","Min Spawn Amount":2,"Max Spawn Amount":5}"""
         );
         properties["Generic Loot Table"] = Pool(4);
         properties["Loot Table"] = Pool(99);
@@ -202,7 +202,7 @@ public sealed class LootMechanismTests
     public void LooseLootUsesNamedPresetEvenWithoutConstructionPresetSwitch()
     {
         var properties = Parse(
-            """{"Preset Table Name":"InventedPreset","Use Preset Table?":false}"""
+            """{"Preset Table Name":"inventedpreset","Use Preset Table?":false}"""
         );
         properties["Loot Table"] = Pool(99);
         var row = Parse("""{"ContainerName":{"$text":"Scattered fruit"}}""");
@@ -252,7 +252,7 @@ public sealed class LootMechanismTests
     public void PresetPoolUsesRowNameAndPlayerFacingContainerName()
     {
         var properties = Parse(
-            """{"Use Specific Loot Table?":true,"Loot Table Name":"InventedPreset"}"""
+            """{"Use Specific Loot Table?":true,"Loot Table Name":"inventedpreset"}"""
         );
         properties["Selected Loot Table"] = Pool(9);
         var row = Parse("""{"ContainerName":{"$text":"Fruit basket"}}""");
