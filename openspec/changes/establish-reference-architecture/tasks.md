@@ -27,10 +27,10 @@
 
 ## 4. Code cross-reference, citations and rules
 
-- [ ] 4.1 Build the per-build cross-reference of properties and tables to the functions and widgets that read or write them, and verify it lists `ArmorDataTable` under the three tooltip widgets and `ArmorInfo.DamageRating` under `FirstPersonCharacter2`
-- [ ] 4.2 Compute function fingerprints from the parsed expression tree, and verify two extractions give equal fingerprints and that a changed fixture function changes its fingerprint
-- [ ] 4.3 Attach claim types and `Package:Function` citations to item facts, reject citations to missing or partly parsed functions, and replace the line-number comments in `ItemFacts.cs`
-- [ ] 4.4 List citations with changed fingerprints in the build comparison report, and verify it on two fixture builds
+- [x] 4.1 Build the per-build cross-reference of properties and tables to the functions and widgets that read or write them, and verify it lists `ArmorDataTable` under the three tooltip widgets and `ArmorInfo.DamageRating` under `FirstPersonCharacter2`
+- [x] 4.2 Compute function fingerprints from the parsed expression tree, and verify two extractions give equal fingerprints and that a changed fixture function changes its fingerprint
+- [x] 4.3 Attach claim types and `Package:Function` citations to item facts, reject citations to missing or partly parsed functions, and replace the line-number comments in `ItemFacts.cs`
+- [x] 4.4 List citations with changed fingerprints in the build comparison report, and verify it on two fixture builds
 - [x] 4.5 Add the rules module with typed inputs, outputs and worded steps, evaluated at prerender and in the browser, with tests on invented inputs, and verify a rule with an unknown input returns unknown
 - [x] 4.6 Implement the experience requirement as the first rule with its citation, record game results for it with `call`, add the local check against those results (`bun run rules:check <build>`), and verify it fails on a planted mismatch. The attack speed word is extracted data, `ItemInfo.Speed`, and moves to task 5.3
 - [x] 4.7 Spike character progression through the cross-reference and one lab run: which skill tree version players see, which points exist and how they are earned, how discipline, attribute and proficiency levels rise and what passive ranks cost, and record the findings in this design for the planner change

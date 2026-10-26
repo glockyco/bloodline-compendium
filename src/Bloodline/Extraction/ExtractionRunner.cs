@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text.Json.Nodes;
+using Bloodline.Code;
 using Bloodline.Configuration;
 using Bloodline.Output;
 using Bloodline.Records;
@@ -22,6 +23,7 @@ internal sealed class ExtractionRunner
     private readonly DefaultFileProvider provider;
     private readonly GapCollector gaps;
     private readonly PropertyEncoder encoder;
+    private readonly CodeExtractor code;
     private readonly Dictionary<string, FAssetData> classes;
     private readonly Dictionary<string, FAssetData[]> types;
     private readonly Dictionary<string, UObject> typeCache = new(StringComparer.Ordinal);
@@ -34,6 +36,7 @@ internal sealed class ExtractionRunner
     {
         this.provider = provider;
         this.gaps = gaps;
+        code = new CodeExtractor(assets);
         classes = assets
             .Where(asset => Tag(asset, "GeneratedClass") != null)
             .ToDictionary(
@@ -66,7 +69,7 @@ internal sealed class ExtractionRunner
             StringComparer.OrdinalIgnoreCase
         );
         provider.Initialize();
-        provider.ReadScriptData = false;
+        provider.ReadScriptData = true;
         provider.Mount();
         provider.PostMount();
         provider.LoadVirtualPaths();
@@ -77,6 +80,9 @@ internal sealed class ExtractionRunner
         var assets = new FAssetRegistryState(registryReader).PreallocatedAssetDataBuffers;
         var runner = new ExtractionRunner(provider, assets, gaps);
         var counts = runner.WriteRecords(root, assets);
+        var codeIndex = runner.code.Complete();
+        CodeIndexWriter.Write(Path.Combine(root, "code", "index.json"), codeIndex);
+        counts["functions"] = codeIndex.Functions.Count;
         var icons = Icons.IconExtractor.Extract(
             provider,
             ItemIconTexturePaths(runner.merged.Values),
@@ -207,6 +213,11 @@ internal sealed class ExtractionRunner
                 classes.GetValueOrDefault(path)
                 ?? throw new InvalidDataException($"Blueprint class not in asset registry: {path}");
             var package = provider.LoadPackage(asset.PackageName.Text);
+            code.ReadPackage(
+                package,
+                asset.PackageName.Text,
+                asset.AssetClass.Text == "WidgetBlueprint"
+            );
             var generated = package.GetExport<UClass>(path.Split('.')[^1]);
             MapStructMetadata.Register(generated, provider.Versions);
             var parent = generated.SuperStruct.ResolvedObject?.GetPathName();
@@ -264,6 +275,7 @@ internal sealed class ExtractionRunner
             throw new InvalidDataException($"DataTable {path} did not deserialize its rows");
         var pointer = table.GetOrDefault<FPackageIndex?>("RowStruct");
         var scriptStruct = pointer?.ResolvedObject?.Load() as UStruct;
+        code.RegisterTable(path, pointer?.ResolvedObject?.GetPathName() ?? table.RowStructName);
         var defaults =
             scriptStruct == null ? new JsonObject() : encoder.StructDefaults(scriptStruct);
         return new TableRecord(
@@ -285,6 +297,7 @@ internal sealed class ExtractionRunner
 
     private LevelRecord Level(IPackage package, FAssetData asset)
     {
+        code.ReadPackage(package, asset.PackageName.Text, false);
         var world = package.GetExport<UWorld>(asset.AssetName.Text);
         var streaming = new List<string>();
         foreach (var reference in world.StreamingLevels ?? [])

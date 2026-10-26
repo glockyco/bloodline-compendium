@@ -100,6 +100,7 @@ internal static class CatalogCommand
                 when (error
                         is IOException
                             or JsonException
+                            or InvalidDataException
                             or ConfigurationException
                             or InvalidOperationException
                 )

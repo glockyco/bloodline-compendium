@@ -213,6 +213,24 @@ The catalog marks each fact as extracted, formula, observed or unknown. Facts wh
 
 A per-build cross-reference lists, for each property and table, the functions and widgets that read or write it. It is built from the same parse and written to the build's artifacts. Writing a citation starts from that cross-reference, and the update report lists citations whose fingerprints changed. The line-number comments in `ItemFacts.cs` are replaced.
 
+Extraction enables CUE4Parse script reading for all registered Blueprint classes and widget Blueprint classes and the Blueprint functions exported by worlds. No `/Game/` folder is excluded. Build 24464547 produces 57,869 functions in 4,532 packages, including `/Game/BloodlinesAlpha`, `/Game/UI`, `/Game/fantasy_gui_4`, the skill system, AI, animations, cities and the overworld.
+
+The index attributes an event stub's accesses and calls to its named entry in `ExecuteUbergraph_<Class>`. It follows jumps, conditional branches, the execution-flow stack and latent action resume offsets. Array element type pointers are metadata, not value reads. References retain full object and property paths. Fingerprints hash the reached expression graph with traversal positions instead of byte addresses. Context skip lengths and latent action IDs are normalized without discarding their expression structure. Vector constants retain their components.
+
+The reference kinds are class and instance properties, struct fields, DataTables, table row structs and referenced objects. Function locals, compiler temporaries and parameters stay in the reached code but are excluded from the state cross-reference. Their scope metadata does not affect the fingerprint. Two full extractions produced identical fingerprints for all 57,869 functions. The invented changed-code fixture changes its fingerprint, while moving an unrelated event does not.
+
+The baseline extraction took 432.05 seconds and peaked at 2,675,228,672 sampled bytes. The first full-export index took 680.19 seconds and 8,227,684,352 bytes, exceeding the memory target.
+
+Loading only function exports, writing canonical entries one at a time and excluding local references reduced the final extraction to 551.47 seconds and 4,711,219,200 sampled bytes. That is 1.28 times the baseline duration and 1.76 times its sampled memory. The final index holds 52,797 references in 139,544,955 bytes, down from 538,111,729 bytes. Measurements, fingerprint comparisons and byte-comparison results stay in `artifacts/24464547/`.
+
+Unresolved computed entry points, unread execution targets, unsupported tokens and execution-flow states that exceed the analysis bound are marked partial. Raw ubergraphs have no fixed entry and cannot be cited as a substitute for an event. Virtual dispatch retains the unresolved function name rather than inventing a receiver class. The index does not interpret native functions or infer runtime branch outcomes.
+
+Item facts keep claim metadata inside the catalog. `item-claims.json` beside `site/` records each published item's identity fields and stats, the build, input fields, claim type and consuming function fingerprints. Citations use the current structs and shared player, item, crafting and tooltip consumers rather than every skill that copies a field. The catalog rejects missing and partly parsed cited functions with the item and fact named. The site contract is unchanged.
+
+Directly extracted fields can have no value-reading consumer. The reagent treatment powers and durations are such fields in this build. `PotionCrafting:Craft Potion` writes them into new item structs, but that does not establish an applied gameplay effect. Their claims retain the extracted inputs without inventing a consuming citation. Armor and food retain their current extracted sources here. Their applied meanings are settled by the later runtime tasks.
+
+The `compare` command reads the previous build's claim report and the current build's code index, so review can start before the new catalog accepts its citations. Its report groups changed or removed citations with every item fact that used them. Invented fixture builds exercise the command, and missing and partly parsed consumer fixtures exercise catalog rejection. With publication provenance held constant, all 2,090 real-data JSON files are byte-identical with and without claim collection. The 871 published icons also match the pre-change byte hashes.
+
 Alternatives:
 - Hashing decompiled text lines, as Ancient Kingdoms does. Its lock churned with every source movement.
 - Matching decompiled syntax shapes, as Erenshor does. It breaks when the decompiler changes.
