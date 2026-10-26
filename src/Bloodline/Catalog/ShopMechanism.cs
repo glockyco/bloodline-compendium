@@ -29,12 +29,7 @@ internal sealed class ShopMechanism : ISourceMechanism
                 ?
                 [
                     .. WorldSourceData.Conditions(context, placement.Properties, placement.Level),
-                    new RelationCondition(
-                        ConditionKind.Building,
-                        entity,
-                        null,
-                        "Requires the completed settlement building."
-                    ),
+                    WorldSourceData.BuildingCondition(entity),
                 ]
                 : WorldSourceData.Conditions(context, placement.Properties, placement.Level);
             foreach (var field in new[] { "Shop Contents", "Vendor Contents" })
@@ -73,27 +68,17 @@ internal sealed class ShopMechanism : ISourceMechanism
             {
                 foreach (var item in Stock(building.Properties[field]))
                 {
+                    var vendor = WorldSourceData.Reference(
+                        EntityKind.Building,
+                        building.Path,
+                        VendorName(building.Properties, building.Path)
+                    );
                     var sale = Sale(
                         context,
                         item,
-                        WorldSourceData.Reference(
-                            EntityKind.Building,
-                            building.Path,
-                            VendorName(building.Properties, building.Path)
-                        ),
+                        vendor,
                         [],
-                        [
-                            new RelationCondition(
-                                ConditionKind.Building,
-                                WorldSourceData.Reference(
-                                    EntityKind.Building,
-                                    building.Path,
-                                    VendorName(building.Properties, building.Path)
-                                ),
-                                null,
-                                "Requires the completed settlement building."
-                            ),
-                        ]
+                        [WorldSourceData.BuildingCondition(vendor)]
                     );
                     yield return sale;
                 }

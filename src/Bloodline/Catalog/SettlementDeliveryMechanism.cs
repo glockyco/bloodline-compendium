@@ -52,15 +52,7 @@ internal sealed class SettlementDeliveryMechanism : ISourceMechanism
                     )
                     {
                         Entity = building,
-                        Conditions =
-                        [
-                            new RelationCondition(
-                                ConditionKind.Building,
-                                building,
-                                null,
-                                "Requires the completed settlement building."
-                            ),
-                        ],
+                        Conditions = [WorldSourceData.BuildingCondition(building)],
                     }
                 );
             }

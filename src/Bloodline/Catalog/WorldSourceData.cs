@@ -11,6 +11,15 @@ internal static class WorldSourceData
     public static EntityReference Reference(EntityKind kind, string? key, string name) =>
         new(kind, key, name, null, null);
 
+    /// <summary>Limits a source to a completed settlement building, naming the building so pages can link it.</summary>
+    public static RelationCondition BuildingCondition(EntityReference building) =>
+        new(
+            ConditionKind.Building,
+            building,
+            null,
+            "Requires the completed " + building.Name + "."
+        );
+
     public static EntityReference PlacementEntity(
         CatalogContext context,
         Placement placement,

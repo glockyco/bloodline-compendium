@@ -13,9 +13,11 @@
 					{condition.label.slice(0, nameIndex)}<EntityLink {entity} />{condition.label.slice(
 						nameIndex + entity.name.length
 					)}
+				{:else if entity}
+					<!-- Svelte drops whitespace at the start of a block, so the space travels with the label. -->
+					{`${condition.label} (`}<EntityLink {entity} />)
 				{:else}
-					{condition.label}{#if entity}
-						(<EntityLink {entity} />){/if}
+					{condition.label}
 				{/if}
 			</li>{/each}
 	</ul>{/if}
