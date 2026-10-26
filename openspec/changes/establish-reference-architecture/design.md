@@ -180,6 +180,12 @@ The baseline extraction took 432.05 seconds and peaked at 2,675,228,672 sampled 
 
 Unresolved computed entry points, unread execution targets, unsupported tokens and execution-flow states that exceed the analysis bound are marked partial. Raw ubergraphs have no fixed entry and cannot be cited as a substitute for an event. Virtual dispatch retains the unresolved function name rather than inventing a receiver class. The index does not interpret native functions or infer runtime branch outcomes.
 
+Item facts keep claim metadata inside the catalog. `item-claims.json` beside `site/` records each published item's identity fields and stats, the build, input fields, claim type and consuming function fingerprints. Citations use the current structs and shared player, item, crafting and tooltip consumers rather than every skill that copies a field. The catalog rejects missing and partly parsed cited functions with the item and fact named. The site contract is unchanged.
+
+Directly extracted fields can have no value-reading consumer. The reagent treatment powers and durations are such fields in this build. `PotionCrafting:Craft Potion` writes them into new item structs, but that does not establish an applied gameplay effect. Their claims retain the extracted inputs without inventing a consuming citation. Armor and food retain their current extracted sources here. Their applied meanings are settled by the later runtime tasks.
+
+The `compare` command reads the previous build's claim report and the current build's code index, so review can start before the new catalog accepts its citations. Its report groups changed or removed citations with every item fact that used them. Invented fixture builds exercise the command, and missing and partly parsed consumer fixtures exercise catalog rejection. With publication provenance held constant, all 2,090 real-data JSON files are byte-identical with and without claim collection. The 871 published icons also match the pre-change byte hashes.
+
 Alternatives:
 - Hashing decompiled text lines, as Ancient Kingdoms does. Its lock churned with every source movement.
 - Matching decompiled syntax shapes, as Erenshor does. It breaks when the decompiler changes.

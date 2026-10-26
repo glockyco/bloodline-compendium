@@ -1,3 +1,4 @@
+using Bloodline.Code;
 using Bloodline.Output;
 using Bloodline.Records;
 
@@ -14,6 +15,8 @@ internal sealed record CatalogRecords(
     IReadOnlyList<GapRecord> Gaps
 )
 {
+    public CodeIndex? Code { get; init; }
+
     public static CatalogRecords Load(RecordLayout layout) =>
         new(
             CanonicalJson.Read<BuildRecord>(layout.BuildFile),
@@ -24,7 +27,10 @@ internal sealed record CatalogRecords(
             ReadDirectory<AssetRecord>(layout.DialoguesDirectory),
             CanonicalJson.Read<TextureRecord[]>(layout.TexturesFile),
             CanonicalJson.Read<GapRecord[]>(layout.GapsFile)
-        );
+        )
+        {
+            Code = CanonicalJson.Read<CodeIndex>(layout.CodeIndexFile),
+        };
 
     private static T[] ReadDirectory<T>(string directory) =>
         Directory

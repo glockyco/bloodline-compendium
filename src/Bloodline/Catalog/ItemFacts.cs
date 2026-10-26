@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json.Nodes;
+using Bloodline.Code;
 using Bloodline.Records;
 using Bloodline.SiteData;
 
@@ -7,9 +8,14 @@ namespace Bloodline.Catalog;
 
 internal sealed class ItemFacts(
     IReadOnlyList<EnumRecord> enums,
-    IReadOnlyList<TableRecord>? tables = null
+    IReadOnlyList<TableRecord>? tables = null,
+    CodeIndex? code = null,
+    long build = 0
 )
 {
+    private readonly ItemClaims claims = new(code, build);
+    public IReadOnlyList<FactClaim> Claims => claims.Claims;
+
     private readonly Dictionary<string, string?> enumDisplays = enums
         .SelectMany(record => record.Entries.Select(entry => (entry.Name, entry.Display)))
         .GroupBy(entry => entry.Name, StringComparer.Ordinal)
@@ -88,11 +94,9 @@ internal sealed class ItemFacts(
         else if (category == "Weapon")
         {
             Add(Stat.WeaponType, "WeaponInfo.AttackType");
-            // BP_BaseWeapon ExecuteUbergraph L13640 passes WeaponInfo.Damage to ApplyDamage.
-            // FirstPersonCharacter2 also reads it into Arrow/Bullet Damage at L188281 and L196673.
-            // ItemInfo.Damage is inventory display data, not the equipped weapon's base damage.
+            // Equipped damage comes from WeaponInfo, not the inventory display's ItemInfo.Damage.
             Add(Stat.Damage, "WeaponInfo.Damage");
-            // FirstPersonCharacter2 L165197 multiplies WeaponInfo.AttackSpeed for the attack montage.
+            // The equipped attack montage uses this multiplier.
             Add(Stat.AttackSpeed, "WeaponInfo.AttackSpeed");
             var range = RecordValues.Number(RecordValues.At(properties, "WeaponInfo.Range"));
             if (range is null || range > 0)
@@ -115,8 +119,7 @@ internal sealed class ItemFacts(
         if (category == "Armor")
         {
             Add(Stat.ArmorType, "ItemInfo.ArmorType");
-            // FirstPersonCharacter2's equipment function assigns Head Armor at L3650 and Torso Armor
-            // at L6506 from ArmorInfo.DamageRating. TakeDamage uses Total Armor, not ItemInfo.Damage.
+            // Keep this class default separate from ArmorDataTable's distinct gameplay rating.
             Add(Stat.ArmorRating, "ArmorInfo.DamageRating");
         }
         if (category is "Food" or "Potion")
@@ -150,7 +153,7 @@ internal sealed class ItemFacts(
                 );
             }
         }
-        return new ItemPage(
+        var page = new ItemPage(
             item.Path,
             slug,
             RecordValues.Text(RecordValues.At(properties, "ItemInfo.ItemName"))!,
@@ -166,6 +169,8 @@ internal sealed class ItemFacts(
         {
             Type = type ?? "Unknown",
         };
+        claims.Record(item.Path, page);
+        return page;
     }
 
     private string? ComponentValue(IReadOnlyList<TableRow> rows, string field)
@@ -244,7 +249,7 @@ internal sealed class ItemFacts(
         double? duration
     )
     {
-        // Zero power leaves enum and duration defaults inactive, even when they look like a named effect.
+        // Hide zero-power entries so inherited enum and duration defaults do not become facts.
         if (power == 0)
         {
             return;

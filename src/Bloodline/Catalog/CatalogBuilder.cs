@@ -8,7 +8,10 @@ internal sealed record CatalogResult(
     IReadOnlyList<ItemPage> Items,
     CoverageReport Coverage,
     int NamedPlaces
-);
+)
+{
+    public IReadOnlyList<FactClaim> Claims { get; init; } = [];
+}
 
 internal static class CatalogBuilder
 {
@@ -39,7 +42,12 @@ internal static class CatalogBuilder
             new EnemyDropMechanism(),
         ];
         Exclusions.Validate(records, exclusions);
-        var resolver = new ItemFacts(records.Enums, records.Tables);
+        var resolver = new ItemFacts(
+            records.Enums,
+            records.Tables,
+            records.Code,
+            records.Build.BuildId
+        );
         var selected = records.Classes.Where(ItemIdentity.IsInventoryItem).ToArray();
         var initial = selected.ToDictionary(
             item => item.Path,
@@ -231,7 +239,10 @@ internal static class CatalogBuilder
             ordered,
             coverage,
             context.Places.NamedCount
-        );
+        )
+        {
+            Claims = resolver.Claims.Where(claim => !context.IsExcludedClass(claim.Item)).ToArray(),
+        };
     }
 
     private static int? ReadValue(ItemPage item) =>

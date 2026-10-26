@@ -53,6 +53,7 @@ internal static class CatalogWriter
                 }
                 throw;
             }
+            CanonicalJson.Write(layout.ClaimsFile, new ClaimReport(build.BuildId, catalog.Claims));
         }
         finally
         {
