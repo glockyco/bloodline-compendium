@@ -461,4 +461,82 @@ public sealed class LootMechanismTests
         Assert.Contains(sources, source => source.Source.Weight == new Weight(1, 7));
         Assert.Contains(sources, source => source.Source.Weight == new Weight(2, 8));
     }
+
+    [Theory]
+    [InlineData("Enemy To Spawn")]
+    [InlineData("Actor To Spawn")]
+    [InlineData("Enemy Type")]
+    public void AuthoredSpawnerClassFieldsRetainUncheckedConditions(string field)
+    {
+        var properties = Parse("""{"Enemy Name":{"$text":"Marsh beast"}}""");
+        properties["Loot Table"] = Pool();
+        var spawner = new JsonObject { [field] = new JsonObject { ["$ref"] = Enemy } };
+        var source = Assert
+            .Single(
+                new EnemyDropMechanism().FindSources(
+                    Context(
+                        [new ClassRecord(Enemy, [], properties)],
+                        [new ActorRecord("Spawner", "/Game/Invented/Spawner.Spawner_C", spawner)]
+                    )
+                )
+            )
+            .Source;
+        Assert.Equal(Level, Assert.Single(source.Places).Id);
+        Assert.Contains("Spawner activation conditions have not been checked.", source.Notes);
+    }
+
+    [Theory]
+    [InlineData("Quest Units To Spawn")]
+    [InlineData("Wave 3 Invented Challenge")]
+    public void QuestAndWaveSpawnerArraysNameEnemyClasses(string field)
+    {
+        var properties = Parse("""{"Enemy Name":{"$text":"Marsh beast"}}""");
+        properties["Loot Table"] = Pool();
+        var spawner = new JsonObject
+        {
+            [field] = new JsonArray(new JsonObject { ["$ref"] = Enemy }),
+        };
+        var source = Assert
+            .Single(
+                new EnemyDropMechanism().FindSources(
+                    Context(
+                        [new ClassRecord(Enemy, [], properties)],
+                        [new ActorRecord("Spawner", "/Game/Invented/Spawner.Spawner_C", spawner)]
+                    )
+                )
+            )
+            .Source;
+        Assert.Equal(Level, Assert.Single(source.Places).Id);
+    }
+
+    [Theory]
+    [InlineData(1, 1)]
+    [InlineData(0, 0)]
+    public void LeveledSpawnerMapIgnoresZeroSpawnWeights(double weight, int expectedPlaces)
+    {
+        var properties = Parse("""{"Enemy Name":{"$text":"Marsh beast"}}""");
+        properties["Loot Table"] = Pool();
+        var spawner = new JsonObject
+        {
+            ["Level 7 Spawn Rates"] = new JsonObject
+            {
+                ["$map"] = new JsonArray(
+                    new JsonArray(new JsonObject { ["$ref"] = Enemy }, JsonValue.Create(weight))
+                ),
+            },
+        };
+        var source = Assert
+            .Single(
+                new EnemyDropMechanism().FindSources(
+                    Context(
+                        [new ClassRecord(Enemy, [], properties)],
+                        [new ActorRecord("Spawner", "/Game/Invented/Spawner.Spawner_C", spawner)]
+                    )
+                )
+            )
+            .Source;
+        Assert.Equal(expectedPlaces, source.Places.Count);
+        Assert.Equal(new Weight(2, 8), source.Weight);
+        Assert.Null(source.Chance);
+    }
 }

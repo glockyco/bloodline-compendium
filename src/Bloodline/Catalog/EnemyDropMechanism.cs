@@ -22,7 +22,32 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
                 if (RecordValues.Number(value) is > 0)
                     Add(RecordValues.AnyReference(key));
             }
-            Add(RecordValues.AnyReference(placement.Properties["Enemy to Spawn"]));
+            foreach (
+                var field in new[]
+                {
+                    "Enemy to Spawn",
+                    "Enemy To Spawn",
+                    "Actor To Spawn",
+                    "Enemy Type",
+                }
+            )
+                Add(RecordValues.AnyReference(placement.Properties[field]));
+            foreach (var (field, value) in placement.Properties)
+            {
+                if (
+                    field == "Quest Units To Spawn"
+                    || field.StartsWith("Wave ", StringComparison.Ordinal)
+                )
+                    foreach (var entry in RecordValues.Elements(value))
+                        Add(RecordValues.AnyReference(entry));
+                if (
+                    field.StartsWith("Level ", StringComparison.Ordinal)
+                    && field.EndsWith(" Spawn Rates", StringComparison.Ordinal)
+                )
+                    foreach (var (key, weight) in RecordValues.MapEntries(value))
+                        if (RecordValues.Number(weight) is > 0)
+                            Add(RecordValues.AnyReference(key));
+            }
 
             void Add(string? enemy)
             {
@@ -61,21 +86,17 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
                     SourceKind.EnemyDrop,
                     name,
                     sourcePlaces,
-                    [
-                        field == "Loot Table"
-                            ? "Corpse loot roll. Separate from the rare pickup roll."
-                            : "Rare pickup roll. Separate from corpse loot.",
-                    ]
+                    RollNotes(field, places.Count == 0 && sourcePlaces.Count > 0)
                 )
             )
                 yield return source;
         }
+        var placedClasses = context
+            .Placements.Select(placement => placement.Actor.Class)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
         foreach (var (path, places) in spawnedPlaces)
         {
-            if (
-                !context.Classes.TryGetValue(path, out var type)
-                || !context.Placements.Any(placement => placement.Actor.Class == path)
-            )
+            if (!context.Classes.TryGetValue(path, out var type) || !placedClasses.Contains(path))
                 continue;
             var name = LootRecords.Name(type.Properties, "Enemy Name", path);
             foreach (var field in new[] { "Loot Table", "Rare Pickup Loot" })
@@ -86,14 +107,21 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
                     SourceKind.EnemyDrop,
                     name,
                     places,
-                    [
-                        field == "Loot Table"
-                            ? "Corpse loot roll. Separate from the rare pickup roll."
-                            : "Rare pickup roll. Separate from corpse loot.",
-                    ]
+                    RollNotes(field, true)
                 )
             )
                 yield return source;
         }
+    }
+
+    private static IReadOnlyList<string> RollNotes(string field, bool fromSpawner)
+    {
+        var roll =
+            field == "Loot Table"
+                ? "Corpse loot roll. Separate from the rare pickup roll."
+                : "Rare pickup roll. Separate from corpse loot.";
+        return fromSpawner
+            ? [roll, "Spawner activation conditions have not been checked."]
+            : [roll];
     }
 }
