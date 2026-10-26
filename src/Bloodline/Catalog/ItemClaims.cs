@@ -201,7 +201,8 @@ internal sealed class ItemClaims(CodeIndex? code, long build)
             "FoodEffectDataTable" => package
                 == "/Game/BloodlinesAlpha/UI/CharacterSheet/FoodManager",
             "PotionInfo" => tooltip || player,
-            "ReagentInfo" => package == "/Game/fantasy_gui_4/widgets/sample_windows/PotionCrafting",
+            "AllIngredientEffects" => package
+                == "/Game/BloodlinesAlpha/UI/Inventory/Potioncrafting_Ingredient_Slot",
             "WeaponComponentTable" => package == "/Game/BloodlinesAlpha/Crafting",
             _ => false,
         };
@@ -237,17 +238,10 @@ internal sealed class ItemClaims(CodeIndex? code, long build)
             Stat.RestorationAmount => ["PotionInfo.AmountofHealthorManatorestore"],
             Stat.HealthDamage => ["PotionInfo.Amountofdamagetodealtohealth"],
             Stat.ManaDamage => ["PotionInfo.Amountofdamagetodealtomana"],
-            Stat.ChoppedEffect => Reagent("Chopped"),
-            Stat.CooledEffect => Reagent("Cooled"),
-            Stat.GroundEffect => Reagent("Ground"),
-            Stat.HeatedEffect => Reagent("Heated"),
+            Stat.ChoppedEffect => ["AllIngredientEffects.ChoppedEffect"],
+            Stat.CooledEffect => ["AllIngredientEffects.CooledEffect"],
+            Stat.GroundEffect => ["AllIngredientEffects.GroundEffect"],
+            Stat.HeatedEffect => ["AllIngredientEffects.HeatedEffect"],
             _ => throw new InvalidOperationException("No claim inputs for " + fact.Stat),
         };
-
-    private static string[] Reagent(string treatment) =>
-        [
-            "ReagentInfo." + treatment + "Effects",
-            "ReagentInfo." + treatment + "EffectPower",
-            "ReagentInfo." + treatment + "EffectDuration",
-        ];
 }

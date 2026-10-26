@@ -42,6 +42,25 @@ internal sealed class ItemFacts(
     private readonly RowLookup? armorRows = RowLookup.Find(tables, "ArmorDataTable");
     private readonly RowLookup? foodRows = RowLookup.Find(tables, "FoodEffectDataTable");
 
+    // Potioncrafting_Ingredient_Slot:Retrieve Prep Effects finds an ingredient's row by its Item class.
+    private readonly Dictionary<string, TableRow> ingredientRows = (tables ?? [])
+        .Where(table => ItemIdentity.ClassName(table.Path) == "AllIngredientEffects")
+        .SelectMany(table => table.Rows)
+        .Where(row => RecordValues.AnyReference(row.Values["Item"]) is not null)
+        .GroupBy(
+            row => RecordValues.AnyReference(row.Values["Item"])!,
+            StringComparer.OrdinalIgnoreCase
+        )
+        .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
+
+    // PotionCrafting:Get_Ing_1_Effect words these effects as points and every other effect as seconds.
+    private static readonly HashSet<string> PointEffects = new(StringComparer.Ordinal)
+    {
+        "Restore Health",
+        "Restore Stamina",
+        "Restore Mana",
+    };
+
     // PlayerPassiveLevelStatComponent:Retrieve Player Armor adds up the armor of these item slots. Items of the
     // slot Back go into the character sheet's arms slot. Amulets and support items add no armor.
     private static readonly HashSet<string> ArmoredSlots = new(StringComparer.Ordinal)
@@ -203,7 +222,7 @@ internal sealed class ItemFacts(
         {
             AddEffects(facts, RecordValues.At(properties, "ItemInfo.PotionInfo"));
         }
-        if (RecordValues.At(properties, "ItemInfo.ReagentInfo") is JsonObject reagent)
+        if (ingredientRows.GetValueOrDefault(item.Path) is { } ingredient)
         {
             foreach (
                 var (treatment, stat) in new[]
@@ -215,18 +234,22 @@ internal sealed class ItemFacts(
                 }
             )
             {
-                var effects = RecordValues.Elements(reagent[treatment + "Effects"]).ToArray();
-                if (reagent[treatment + "Effects"] is JsonArray && effects.Length == 0)
+                // Retrieve Prep Effects reads only the first effect of a treatment.
+                var (key, value) = RecordValues
+                    .MapEntries(ingredient.Values[treatment + "Effect"])
+                    .FirstOrDefault();
+                if (RecordValues.String(key) is not { } effectName)
                 {
                     continue;
                 }
-                AddEffect(
-                    facts,
-                    stat,
-                    null,
-                    reagent[treatment + "Effects"] is JsonArray ? JoinEffects(effects) : null,
-                    RecordValues.Number(reagent[treatment + "EffectPower"]),
-                    RecordValues.Number(reagent[treatment + "EffectDuration"])
+                var amount = RecordValues.Number(value);
+                facts.Add(
+                    StatVocabulary.Effect(
+                        stat,
+                        amount is null ? null
+                            : PointEffects.Contains(effectName) ? new Effect(effectName, amount, 0)
+                            : new Effect(effectName, null, amount.Value)
+                    )
                 );
             }
         }

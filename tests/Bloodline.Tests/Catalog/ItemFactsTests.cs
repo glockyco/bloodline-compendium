@@ -12,7 +12,6 @@ public sealed class ItemFactsTests
     private static IReadOnlyList<Bloodline.SiteData.Fact> Facts(
         string category,
         JsonObject? potion = null,
-        JsonObject? reagent = null,
         JsonObject? weapon = null
     )
     {
@@ -27,7 +26,6 @@ public sealed class ItemFactsTests
                     ["display"] = category,
                 },
                 ["PotionInfo"] = potion,
-                ["ReagentInfo"] = reagent,
             },
             ["WeaponInfo"] = weapon,
         };
@@ -129,51 +127,47 @@ public sealed class ItemFactsTests
         }
     }
 
-    [Theory]
-    [InlineData("Chopped")]
-    [InlineData("Cooled")]
-    [InlineData("Ground")]
-    [InlineData("Heated")]
-    public void ReagentEffectsOnlyAppearWithActivePower(string treatment)
+    [Fact]
+    public void TreatmentsFollowTheIngredientTableAndIgnoreReagentInfo()
     {
-        JsonObject Reagent(int power, int duration) =>
+        var item = new ClassRecord(
+            "/Game/Invented/Leaf.Leaf_C",
+            [],
             Parse(
-                $$$"""
-                {"{{{treatment}}}Effects":[{"$enum":"Effects::Default","display":"Enhance Speed"}],"{{{treatment}}}EffectPower":{{{power}}},"{{{treatment}}}EffectDuration":{{{duration}}}}
                 """
-            );
-        Assert.DoesNotContain(
-            Facts("Etc.", reagent: Reagent(0, 60)),
-            fact => fact.Label.StartsWith(treatment, StringComparison.Ordinal)
+                {"ItemInfo":{"ItemName":{"$text":"Leaf"},"ItemType":{"$enum":"E_ItemType::Etc","display":"Etc."},
+                 "ReagentInfo":{"ChoppedEffects":[{"$enum":"Effects::Health","display":"Restore Health"}],"ChoppedEffectPower":75,"ChoppedEffectDuration":0}}}
+                """
+            )
         );
-        Assert.Equal(
-            "Enhance Speed 10 for 60 s",
-            Facts("Etc.", reagent: Reagent(10, 60))
-                .Single(fact => fact.Label == treatment + " effect")
-                .Value
+        var table = new TableRecord(
+            "/Game/Invented/AllIngredientEffects.AllIngredientEffects",
+            null,
+            [
+                new TableRow(
+                    "Leaf",
+                    Parse(
+                        """
+                        {"Item":{"$ref":"/Game/Invented/Leaf.Leaf_C"},
+                         "ChoppedEffect":{"$map":[["Restore Health",35],["Druidsight",90]]},
+                         "CooledEffect":{"$map":[["Druidsight",60]]},
+                         "GroundEffect":{"$map":[]},
+                         "HeatedEffect":{"$map":[["Restore Mana",15]]}}
+                        """
+                    )
+                ),
+            ]
         );
-        Assert.Equal(
-            "Enhance Speed 10",
-            Facts("Etc.", reagent: Reagent(10, 0))
-                .Single(fact => fact.Label == treatment + " effect")
-                .Value
-        );
-    }
 
-    [Theory]
-    [InlineData("ChoppedEffects")]
-    [InlineData("ChoppedEffectPower")]
-    [InlineData("ChoppedEffectDuration")]
-    public void MissingReagentEffectFieldsRemainUnknown(string field)
-    {
-        var reagent = Parse(
-            """
-            {"ChoppedEffects":[{"$enum":"Effects::Speed","display":"Enhance Speed"}],"ChoppedEffectPower":10,"ChoppedEffectDuration":60}
-            """
-        );
-        reagent.Remove(field);
-        Assert.Null(
-            Facts("Etc.", reagent: reagent).Single(fact => fact.Label == "Chopped effect").Value
+        var facts = new ItemFacts([], [table]).Resolve(item, "leaf").Facts;
+
+        Assert.Equal("Restore Health 35", Value(facts, Stat.ChoppedEffect));
+        Assert.Equal("Druidsight for 60 s", Value(facts, Stat.CooledEffect));
+        Assert.Equal("Restore Mana 15", Value(facts, Stat.HeatedEffect));
+        Assert.DoesNotContain(facts, fact => fact.Stat == Stat.GroundEffect);
+        Assert.DoesNotContain(
+            new ItemFacts([]).Resolve(item, "leaf").Facts,
+            fact => fact.Stat == Stat.ChoppedEffect
         );
     }
 

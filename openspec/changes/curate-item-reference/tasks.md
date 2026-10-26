@@ -13,7 +13,7 @@
 
 ## 3. Catalog economy
 
-- [ ] 3.1 Publish ingredient treatments from `AllIngredientEffects` and remove the `ReagentInfo` facts, and verify Gildleaf's chopped treatment reads Restore Health 35
+- [x] 3.1 Publish ingredient treatments from `AllIngredientEffects` and remove the `ReagentInfo` facts, and verify Gildleaf's chopped treatment reads Restore Health 35
 - [ ] 3.2 Publish base values with each shop's price rule, add `site/src/lib/rules/price.ts` with the respect tiers checked by `rules:check` against the lab purchases, and verify the 16 zero prices follow the lab result
 - [ ] 3.3 Replace weights, chances and picks with odds per event for containers, settlement deliveries and enemy drops, publish rare pools only for death events that spawn them, and verify an Ethereal Chest and a settlement building against hand calculations
 - [ ] 3.4 Publish item status and the displayed tooltip values, and verify Allseer's Judgement and Leather Pants
