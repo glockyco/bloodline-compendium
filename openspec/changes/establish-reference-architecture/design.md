@@ -34,7 +34,7 @@ Levels (108 read, one too large to load), 607 dialogue assets and 149 creature k
 
 Lab saves were driven through the bridge in the lab copy. Every observation below came from the game's own functions:
 - Menu and character creation buttons were pressed by calling the function their `ComponentDelegateBindings` entry names.
-- Items were added with the pawn's `AddItemsToInventory` and each class's default `ItemInfo`.
+- Items were added with the pawn's `AddItemsToInventory`, passing the item info of an item actor built as the world builds one. The class defaults of 95 items lack their own item class, which only the construction script fills in.
 - The character sheet was opened with the pawn's `Open/Close Character Sheet`.
 - Items were equipped and eaten by clicking their inventory slot, whose handler calls the slot's `Use`.
 
@@ -46,15 +46,37 @@ The game runs off screen at full rate:
 - In both modes the bridge answered while other apps stayed in front.
 - The game resets `t.MaxFPS` to 0 on every level load, and the first level opens with a tutorial popup that pauses the game.
 
-Equipping the Winter Warden Cuirass on a new character set `ArmorTotal` and `Torso Armor` to 2, its class default, while the character sheet showed `Armor: 13` and `Mobility: 88%`. Walk and run speed fell by 12.2%. This is one observation, not yet the two-item measurement below.
+Armor, measured in runs armor-1, armor-2, armor-slots, armor-slots-2, knees-1 to knees-4, misc-1 and misc-2:
+- Damage taken follows the armor table. `FirstPersonCharacter2:TakeDamage` multiplies damage by (1 - Total Armor / 100). `PlayerPassiveLevelStatComponent:Retrieve Player Armor` sums `Get Armor Slot` over the character sheet's torso, head, arms, legs, knee, feet and shoulder slots. `Get Armor Slot` reads `ArmorDataTable` by the item's English name without spaces and apostrophes, uses `ItemInfo.Damage` for crafted armor, and gives 0 when no row matches.
+- Feral Maw (class default 5 Medium, table 1 Light) let a 20 point hit through as 19.8. Adding the Winter Warden Cuirass (class default 2 Light, table 13 Heavy) made it 17.2. The player's `ArmorTotal`, which sums the class defaults, changed nothing measured.
+- Mobility follows the same table values. `Calculate Effective Armor` lowers each item's value by 1.4% per level of its armor class proficiency, and `Retrieve Player Armor` turns the sum into a speed factor. With the cuirass at heavy armor level 1, walking speed fell from 350 to 307, as the formula gives.
+- The item slot named "Back" in item data is the arms slot. Amulets and support items add no armor, and knee armor adds none to mobility.
+- Equipping knee armor does not recalculate armor. Broad Knee Guards (table 7) added nothing, also after a sword was equipped, and counted in full once another armor piece was equipped.
+- Leather Pants (class default 4) and Velosian Plume-helm match no table row. Neither added armor, in two runs each. Leather Pants' tooltip showed its class default, `ARMOR: 4` with an empty type line. The plume helm's tooltip showed `ARMOR: 9` and `Type: Medium`, so the tooltip widgets find rows that `Get Armor Slot` misses.
+
+Food, measured in runs food-a, food-b, food-c, misc-1 and misc-2: eating applies the food's row of `FoodEffectDataTable` through `FoodManager:Get Item`, found by the item's name without spaces and apostrophes and else by its display name. Each effect name selects a function: "Heal Player" adds its amount to Health at once, and buffs such as "Boost Health Regeneration" last their value in seconds. The effect raised regeneration from 1 to 4 Health per second. `PotionInfo`'s restoration amount, which the tooltip shows as `Heals: {amount}hp`, did not apply:
+- Apple Sauce (tooltip 0, table 75) healed 75, and Roasted Apple (tooltip 75, table 25) healed 25, in two runs each.
+- Apple Pie (tooltip 15, table 200) and Fondue (tooltip 0, table 300) healed from 15 and 26 to the maximum of 150 in three runs.
+- Druid's Stew lists "Boost Foraging EXP " with a trailing space, which matches no effect. Its foraging boost stayed at 1 after eating, in two runs.
+
+The tooltip sweep (runs tooltips-all and tooltips-sweep) read 2,086 of 2,087 published items. The fetch quest item has no tooltip, and 21 more items use another tooltip widget. Against the catalog:
+- Of 398 armor tooltips, 350 show their row of `ArmorDataTable`.
+- 325 weapon tooltips show the catalog's damage, `WeaponInfo.Damage`. 55 show another value, such as Poison Pike with 40 against 25. Which value combat applies is not yet observed.
+- 1,039 tooltips of materials, ingredients and other items show an empty `: 0` line.
+
+Headless, bound text such as the character sheet's `Armor:` line is not evaluated and keeps its design-time text, so runs read the values the bindings show instead.
 
 Disagreements found:
 
-- Armor has two sources. The inventory, equipment slot and trader tooltip widgets read `ArmorDataTable` (`ArmorValue`, `ArmorClass`). `FirstPersonCharacter2` reads `ArmorInfo.DamageRating` and `Total Armor` and never reads the table. The catalog publishes the class defaults. Of 404 armor items, 47 have no table row. For 329 of the other 357 the ratings differ. Winter Warden Cuirass shows Heavy and 13 in game against Light and 2 in its class defaults.
-- Food tooltips show `Heals: {restoration}hp`, while descriptions state other amounts: Apple Pie 15 against 200, Fondue 0 against 300.
-- Materials and weapon parts show an empty `: 0` stat line.
+- The catalog publishes armor from the class defaults (`ArmorInfo.DamageRating`, `ItemInfo.ArmorType`), which the game does not apply. Owner: the catalog, task 5.1.
+- 35 published armor pieces for body slots match no row of `ArmorDataTable` by the game's lookup, so the game applies no armor for them while their tooltips show the class default or a row the tooltip finds by display name. Observed for Leather Pants and Velosian Plume-helm. Owner: the game, a known issue. 13 more published items without a row are amulets and support items, which add no armor in any case.
+- Knee armor counts only after another armor piece is equipped. Owner: the game, a known issue.
+- Druid's Stew's foraging boost does not apply, because its effect name has a trailing space. Owner: the game, a known issue.
+- 55 weapon tooltips show a damage other than `WeaponInfo.Damage`. Owner: open until a run measures the damage dealt.
+- Food tooltips show `PotionInfo`'s restoration amount, while eating heals by `FoodEffectDataTable`. Owner: the game for the tooltip, a known issue, and the catalog for its "Heals" fact, task 5.2.
+- 1,039 tooltips show an empty `: 0` stat line. Owner: the game, a known issue of the tooltip only.
 - The catalog's "Weapon type" is `WeaponInfo.AttackType`, an attack style. All 19 rifles read Crossbow, and the Lonland Pistol is typed Rifle with weapon type Crossbow. Its `ItemInfo.WeaponType` reads Pistol, and that field names Crossbow, Bow, Dagger and Two Handed Weapon for the other weapons checked.
-- Every equip attaches the item's actor to the player and to the character sheet's preview again without removing the earlier one. After a few equips the player carried five Winter Warden Cuirass actors and eight Bronze Nasal Helms. Not yet checked in a normal session.
+- The player carries two actors for each equipped head item. Swapping helmets in a fresh save kept two, so equipping does not accumulate actors in normal play. The five Winter Warden Cuirass actors seen earlier followed repeated equips of copies of an item that was already equipped, as `capture-model` did. That case was not repeated.
 - Speed shows as a word such as `Slow`, which is the display name of `ItemInfo.Speed`, an `AttackSpeeds` enum: Slow, Below Average, Average, Above Average, Fast or Standard. All seven flintlock pistols read Slow, as their tooltips do. The catalog publishes the `WeaponInfo.AttackSpeed` multiplier instead.
 
 Comments in `ItemFacts.cs` cite bytecode by line number in a dump that the repository cannot regenerate.
