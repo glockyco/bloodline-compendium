@@ -8,3 +8,4 @@
 - Add regression tests for observable behavior rather than implementation details, so refactoring does not invalidate the contract.
 - Inspect changed interfaces in a browser with real data at desktop and phone widths. Invented fixtures exercise edge cases but do not prove that the game data reads correctly.
 - Keep each fact at its producer and link to its contract instead of duplicating it across pages or instructions.
+- Write each finding, decision and piece of open work to its home before a session ends, as the "Where findings live" section of the active architecture change's `design.md` lists, because session history is not a record.

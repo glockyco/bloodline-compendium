@@ -85,7 +85,7 @@ Site-authored titles, navigation, noun headings and table columns SHALL use Titl
 - **THEN** acquisition precedes the facts tooltip and relation values remain legible
 
 ### Requirement: Independent presentation tokens
-The site SHALL default to a neutral dark theme with no decoration, textures or webfonts. Every site-authored color, font, size, spacing, radius and shadow SHALL be defined by a semantic CSS custom property in one tokens file.
+The site SHALL use a dark theme in the visual identity drawn from the game's own art. Every site-authored color, font, size, spacing, radius and shadow SHALL be defined by a semantic CSS custom property in one tokens file.
 
 #### Scenario: Changing visual identity
 - **WHEN** presentation tokens change
