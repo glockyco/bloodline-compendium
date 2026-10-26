@@ -71,6 +71,17 @@ bun run --cwd site deploy:versions
 bun run --cwd site deploy:rollback -- <version-ID> --message "<reason>"
 ```
 
+## Observe the running game
+
+Facts that the game data cannot settle are checked in a modded copy of the game, which `tools/runtime/lab.mjs` runs off screen through CrossOver on macOS. Make the copy once per game build, then start it:
+
+```sh
+bun tools/runtime/lab.mjs prepare
+bun tools/runtime/lab.mjs launch
+```
+
+The [runtime-checks skill](.agent/skills/runtime-checks/SKILL.md) lists the commands and the procedure. Runs land in `artifacts/<build>/runtime/`.
+
 ## Change the project
 
 Read [AGENTS.md](AGENTS.md) for contribution boundaries and browser-review requirements. [openspec/](openspec/) holds behavior requirements and change designs. [SiteDataModel.cs](src/Bloodline/SiteData/SiteDataModel.cs) defines the site contract. Regenerate its consumers with `bun run types` after changing it.

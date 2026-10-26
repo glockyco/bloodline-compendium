@@ -4,5 +4,9 @@
   "steamLibrary": "/path/to/Steam",
   // Where extraction writes records and site data, one directory per Steam build.
   // Relative paths resolve against the configuration file.
-  "outputDirectory": "artifacts"
+  "outputDirectory": "artifacts",
+  // Optional. Where tools/runtime keeps its modded copies of the game, one per Steam build. It must be a folder
+  // on the C: drive of the CrossOver bottle that holds steamLibrary, outside the Steam library. Leave it out to
+  // use BloodlineLab on that drive.
+  // "labDirectory": "/path/to/bottle/drive_c/BloodlineLab"
 }

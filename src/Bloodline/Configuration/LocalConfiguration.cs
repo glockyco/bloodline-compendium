@@ -75,7 +75,12 @@ internal sealed record LocalConfiguration(string SteamLibrary, string OutputDire
         AllowTrailingCommas = true,
     };
 
-    private sealed record FileSettings(string? SteamLibrary, string? OutputDirectory);
+    /// <summary>The file's settings. Only the lab runtime in <c>tools/runtime</c> reads <c>labDirectory</c>.</summary>
+    private sealed record FileSettings(
+        string? SteamLibrary,
+        string? OutputDirectory,
+        string? LabDirectory
+    );
 }
 
 /// <summary>A missing or invalid machine-local setting. The message names the setting and how to fix it.</summary>
