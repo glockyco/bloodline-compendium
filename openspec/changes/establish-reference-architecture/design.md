@@ -83,10 +83,17 @@ Comments in `ItemFacts.cs` cite bytecode by line number in a dump that the repos
 
 ### Character progression in the game data
 
-Read from the widget and struct assets of build 24464547 with the design harness. Not yet confirmed in the running game.
+Read from the widget and struct assets of build 24464547 with the design harness, then confirmed in lab run progression-1 where stated.
 
 - Skill trees are widget data. Each of 21 disciplines has a tree widget whose slots name the skill class, the required discipline level (`Required Level`, `Level To Check`) and passive buttons with their names, descriptions and required proficiency levels. Pyromancy's passive Burning Efficiency, for example, needs proficiency 85 and reduces pyromancy mana cost by 3.5% per rank.
-- Every discipline has two tree versions: a level-based tree (`*LBSkillTree`) and an older tree with skill point prerequisites (`Skills Needed`) and skill upgrades. The skill category menus hold variables only for the level-based trees. Which version players see, and what the `Skill Points` and `Proficiency Points` texts on both mean, is unsettled.
+- Players see the level-based trees (`*LBSkillTree`). The skill window offers four categories, Magic, Melee, Ranged and Tech, and every discipline button opens its level-based tree, the Magic menu's Biomancy button the Arcane tree. The older trees with skill point prerequisites are not reachable from the menu (run progression-1).
+- Points, observed in run progression-1. The game instance holds them, and the passive stat component holds the levels:
+  - A character level grants 1 skill point and 3 level up points.
+  - Unlocking a skill in a tree costs 1 skill point and needs the slot's discipline level, as Ember Flick did at Pyromancy 1.
+  - Level up points raise attributes by 1 each in the level up window, which the radial menu's Level Up opens through `PlayerPassiveLevelStatComponent:Level Up`. Its decrease buttons refund them. One point of Fortitude raised Max Health from 150 to 175.
+  - A discipline rises with its own experience, such as `Pyromancy Level Tracking`, which casting calls. Pyromancy needed 152 experience at level 1 and 156 at level 2, and 50 experience given counted as 51.
+  - Every discipline level grants 1 proficiency point of that discipline. A passive rank costs the passive's `Point Cost` in those points and needs its required discipline level, up to its `Max MultiLevel` ranks: Blazing Fire cost 1 at Pyromancy 2, and a second click without points did nothing.
+- Armor proficiencies rise through `Damage Armor EXP Tracking` and the armor class's level tracking, not yet observed.
 - The disciplines are the magic schools Pyromancy, Cryomancy, Electromancy, Geomancy, Aeromancy, Arcane, Blood Magic, Necromancy, Druidism and Vampirism, the weapon disciplines Dagger, One-Handed, Two-Handed, Spear, Staff, Shield and Unarmed, and Bow, Flintlock, Lute and Utility Gadgets.
 - `SkillsDataTable` holds 599 skills with mana cost, cooldown, cast time and a skill class. Its tab column groups them as Magic 371, Blades 145, Ranged 45, Gadgets 17 and Leadership 9.
 - `PlayerStatLevels` names 12 attributes: Fortitude, Wisdom, Dexterity, Strength, Constitution, Vitality, Intelligence, Perception, Agility, Reflexes, Acrobatics and Willpower.
