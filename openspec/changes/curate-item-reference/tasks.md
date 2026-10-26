@@ -22,11 +22,12 @@
 
 - [ ] 4.1 Read the hardcoded crafting mappings and faction shop defaults, and verify Copper Claymore and the Lionsmane Cuirass gain sources and Atacamite Ingot goes to the report
 - [ ] 4.2 Read stables, contract scroll pools, seasonal gifts, archaeology rewards and level reward variables, and verify Brown Horse, Meteor Storm, Holly Harpoon, a fossil and Feral Maw gain sources
-- [ ] 4.3 Publish recipe stations, levels, experience, output and learning, and verify Apple Pie and Angled Iron Blade
+- [x] 4.3 Publish recipe stations, levels, experience and output, and verify Apple Pie and Angled Iron Blade
 - [x] 4.4 Replace generic condition warnings with specific player conditions, translate dialogue states to actions where the dialogue shows them, and verify the Scarecrow merchant's condition
 - [ ] 4.5 Name settlement buildings as the player's settlement and name places from entrances and event maps, and verify the Mages College Main Hall and the settlement Armorer
 - [ ] 4.6 Read the weapon each enemy sets as its rare drop on construction and the finds Fenraen digs up, and verify a Bandit Cutter's weapon drop
 - [ ] 4.7 Read the settlement Blacksmith's stock drawn from its item pool, and verify the Knight's Broadsword gains the Blacksmith with its chance per restock
+- [ ] 4.8 Read how a recipe becomes available to the player and publish it as the recipe's learning, and verify Apple Pie
 
 ## 5. Catalog crafting
 

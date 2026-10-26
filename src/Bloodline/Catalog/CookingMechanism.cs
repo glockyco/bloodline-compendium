@@ -1,4 +1,3 @@
-using System.Globalization;
 using Bloodline.Records;
 using Bloodline.SiteData;
 
@@ -27,10 +26,6 @@ internal sealed class CookingMechanism : ISourceMechanism
                 .GroupBy(path => path, StringComparer.OrdinalIgnoreCase)
                 .Select(group => new ItemAmount(context.ItemLink(group.Key), group.Count()))
                 .ToArray();
-            IReadOnlyList<string> notes = RecordValues.Number(row.Values["EXPReward"])
-                is { } experience
-                ? [$"Cooking experience: {experience.ToString(CultureInfo.InvariantCulture)}."]
-                : [];
             yield return new ItemSource(
                 item,
                 new Source(
@@ -42,7 +37,7 @@ internal sealed class CookingMechanism : ISourceMechanism
                     null,
                     new Amount(1, 1),
                     inputs,
-                    notes
+                    []
                 )
                 {
                     Entity = WorldSourceData.Reference(
@@ -51,6 +46,14 @@ internal sealed class CookingMechanism : ISourceMechanism
                         RecordValues.Text(row.Values["LocalizedName"])
                             ?? RecordValues.String(row.Values["RecipeName"])
                             ?? context.ItemLink(item).Name
+                    ),
+                    Recipe = new Recipe(
+                        Stations.For("Cooking"),
+                        "Cooking",
+                        null,
+                        RecordValues.Number(row.Values["EXPReward"]),
+                        1,
+                        null
                     ),
                 }
             );

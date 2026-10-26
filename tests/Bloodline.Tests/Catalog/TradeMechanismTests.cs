@@ -86,9 +86,16 @@ public sealed class TradeMechanismTests
                 && condition.Value == 9
                 && condition.Label.Contains("weaponsmithing")
         );
-        Assert.Contains(
-            source.Source.Notes,
-            note => note.Contains("experience") && note.Contains("12")
+        var recipe = source.Source.Recipe!;
+        Assert.Equal(
+            ("Anvil", "Weaponsmithing", 9, 12d, 4),
+            (
+                recipe.Station!.Name,
+                recipe.Discipline,
+                recipe.Level,
+                recipe.Experience,
+                recipe.Output
+            )
         );
         Assert.Empty(source.Source.Places);
         Assert.Equal(EntityKind.Recipe, source.Source.Entity.Kind);
@@ -120,7 +127,11 @@ public sealed class TradeMechanismTests
         );
         var source = Assert.Single(new CraftingMechanism().FindSources(context)).Source;
         Assert.Equal(SourceKind.Crafting, source.Kind);
-        Assert.Contains(source.Notes, note => note.Contains("Carving"));
+        // A discipline without a known station keeps its name and no station.
+        Assert.Equal(
+            ("Carving", null, 2),
+            (source.Recipe!.Discipline, source.Recipe.Station, source.Recipe.Output)
+        );
     }
 
     [Fact]
@@ -152,6 +163,14 @@ public sealed class TradeMechanismTests
         Assert.Equal(
             "/Game/Invented/AllFoodRecipes.AllFoodRecipes:Recipe",
             found.Source.Entity.Key
+        );
+        Assert.Equal(
+            ("Cooking Fire", "Cooking", 3d),
+            (
+                found.Source.Recipe!.Station!.Name,
+                found.Source.Recipe.Discipline,
+                found.Source.Recipe.Experience
+            )
         );
     }
 

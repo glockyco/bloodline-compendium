@@ -65,29 +65,19 @@ internal sealed class CraftingMechanism : ISourceMechanism
                         _ => null,
                     }
                 );
-            if (type is not null)
+            var part = RecordValues.EnumValue(output.Values["Part"]);
+            // Magical components use focus crafting despite the shared table field's name.
+            var focus =
+                part
+                is "WeaponParts::NewEnumerator17"
+                    or "WeaponParts::NewEnumerator18"
+                    or "WeaponParts::NewEnumerator19";
+            var requiredLevel = RecordValues.Integer(output.Values["WeaponsmithingLevelRequired"]);
+            if (requiredLevel is { } level)
             {
-                notes.Add(
-                    typeName is null
-                        ? "The crafting discipline is unknown."
-                        : $"Crafting discipline: {typeName}."
-                );
-            }
-            if (RecordValues.Number(row.Values["EXPrewardforcrafting"]) is { } experience)
-            {
-                notes.Add(
-                    $"Crafting experience: {experience.ToString(CultureInfo.InvariantCulture)}."
-                );
-            }
-            if (RecordValues.Integer(output.Values["WeaponsmithingLevelRequired"]) is { } level)
-            {
-                var part = RecordValues.EnumValue(output.Values["Part"]);
-                // Magical components use focus crafting despite the shared table field's name.
                 var skill = part switch
                 {
-                    "WeaponParts::NewEnumerator17"
-                    or "WeaponParts::NewEnumerator18"
-                    or "WeaponParts::NewEnumerator19" => "focus crafting",
+                    _ when focus => "focus crafting",
                     null => null,
                     _ => "weaponsmithing",
                 };
@@ -134,6 +124,14 @@ internal sealed class CraftingMechanism : ISourceMechanism
                         RecordValues.Text(output.Values["ItemName"]) ?? context.ItemLink(item).Name
                     ),
                     Conditions = conditions,
+                    Recipe = new Recipe(
+                        Stations.For(focus ? "Focus crafting" : typeName),
+                        focus ? "Focus crafting" : typeName,
+                        requiredLevel is >= 0 and <= int.MaxValue ? (int)requiredLevel.Value : null,
+                        RecordValues.Number(row.Values["EXPrewardforcrafting"]),
+                        amount,
+                        null
+                    ),
                 }
             );
         }
