@@ -1,13 +1,20 @@
 {
   description = "Development shell for The Bloodline Compendium";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+  inputs = {
+    # Share the workstation's package set and binary cache.
+    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.2605";
+    fleet = {
+      url = "github:glockyco/omp-agent-setup";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
 
   outputs =
-    { nixpkgs, ... }:
+    { self, nixpkgs, fleet }:
     let
       # Microsoft's SHA-512 hashes from the .NET 10.0 release metadata.
-      # nixpkgs-unstable no longer supports x86_64-darwin, so Intel Macs install the SDK directly.
+      # The pinned nixpkgs release supports Linux and both Mac architectures.
       sdks = {
         aarch64-darwin = {
           rid = "osx-arm64";
@@ -16,6 +23,10 @@
         aarch64-linux = {
           rid = "linux-arm64";
           sha512 = "0966aa2b70f4677b8319be9df447a78a0dcd6164836425b55a68fd714f4023feb87b4cac21b9a996b79472ad54487cd0adcd2a9dfd570e2b2a1d26423a2baa9b";
+        };
+        x86_64-darwin = {
+          rid = "osx-x64";
+          sha512 = "ce95d225b86d2401f111c2aa6df0f5e6855c375b7b34ab4a73df90c56f2b0fc2a44398cfe455cb689670bc8590012e943b64c7a590122af98cdc067721b12223";
         };
         x86_64-linux = {
           rid = "linux-x64";
@@ -60,6 +71,20 @@
             DOTNET_CLI_TELEMETRY_OPTOUT = "1";
             DOTNET_NOLOGO = "1";
           };
+        }
+      );
+
+      checks = forEachSystem (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        {
+          devShell = self.devShells.${system}.default;
+        }
+        # The fleet's pinned OpenSpec package has no Intel Mac output.
+        // pkgs.lib.optionalAttrs (system != "x86_64-darwin") {
+          openspec = fleet.lib.openspecCheck { inherit pkgs; src = ./.; };
         }
       );
     };

@@ -8,6 +8,16 @@ concurrency:
   group: checks-${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  openspec:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: DeterminateSystems/determinate-nix-action@92957199488000b908fdad19f63711000965d8f3 # v3.24.1
+      - name: Validate OpenSpec artifacts
+        run: nix build --no-link .#checks.x86_64-linux.openspec
   check:
     runs-on: ubuntu-24.04
     timeout-minutes: 25
@@ -15,11 +25,13 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
-      - uses: nixbuild/nix-quick-install-action@9f63be77f412a248c9d9a65a4c82cf066cdf8f0c # v35
+      - uses: DeterminateSystems/determinate-nix-action@92957199488000b908fdad19f63711000965d8f3 # v3.24.1
         with:
-          nix_conf: |
+          # Preserve the patched SDK and shell closure for the store cache.
+          extra-conf: |
             keep-env-derivations = true
             keep-outputs = true
+      # The patched SDK is built locally rather than served by the nixpkgs cache.
       - uses: nix-community/cache-nix-action@7df957e333c1e5da7721f60227dbba6d06080569 # v7
         with:
           primary-key: nix-${{ runner.os }}-${{ hashFiles('flake.lock', 'flake.nix') }}

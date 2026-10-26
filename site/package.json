@@ -51,6 +51,5 @@
 	},
 	"imports": {
 		"#lib/*": "./src/lib/*"
-	},
-	"packageManager": "bun@1.4.2"
+	}
 }

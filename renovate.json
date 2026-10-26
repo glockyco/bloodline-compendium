@@ -15,6 +15,12 @@
       "groupName": "site tooling"
     },
     {
+      "description": "Keep Bun aligned with the Nix development shell",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["packageManager"],
+      "enabled": false
+    },
+    {
       "matchManagers": ["nuget"],
       "matchPackageNames": ["!CUE4Parse"],
       "groupName": ".NET tooling"
