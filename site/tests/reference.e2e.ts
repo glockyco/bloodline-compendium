@@ -206,6 +206,11 @@ test('release labels, provenance and static 404', async ({ page, request }) => {
 		await expect(page.locator('footer time').last()).toHaveAttribute('datetime', '2026-10-02');
 	}
 	await expect(page.getByRole('heading', { name: 'Page not found' })).toBeVisible();
+	// The missing page loads the site's styles and scripts at a nested address too.
+	expect(
+		await page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)
+	).not.toBe('rgba(0, 0, 0, 0)');
+	await expect(page.locator('pagefind-searchbox input')).toBeVisible();
 	const missing = await request.get('/missing/page');
 	expect(missing.status()).toBe(404);
 	expect((await request.get('/coverage/')).status()).toBe(404);

@@ -49,6 +49,8 @@ export default defineConfig({
 					filename.split(/[/\\]/).includes('node_modules') ? undefined : true
 			},
 			adapter: adapter(),
+			// The 404 page is served at whatever address was missing, where relative asset paths would not resolve.
+			paths: { relative: false },
 			prerender: {
 				handleHttpError: ({ path, message }) => {
 					if (generatedImage.test(path)) return;
