@@ -13,7 +13,8 @@ const imageTypes: Record<string, string> = {
 
 // Generated images are copied into the build after prerendering, and the publication gate checks every link
 // to them, so prerendering may treat them as missing.
-const generatedImage = /^\/(icons|art|brand)\/|^\/(favicon-\d+x\d+|apple-touch-icon|og-default)\.png$/;
+const generatedImage =
+	/^\/(icons|art|brand)\/|^\/(favicon-\d+x\d+|apple-touch-icon|og-default)\.png$/;
 
 /**
  * Serves the images the build generates for the development server's data source. They live outside static/,
