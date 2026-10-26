@@ -1,0 +1,212 @@
+using System.Globalization;
+using System.Text.Json.Nodes;
+using Bloodline.Records;
+using Bloodline.SiteData;
+
+namespace Bloodline.Catalog;
+
+internal sealed class ContainerLootMechanism : ISourceMechanism
+{
+    internal const string Root =
+        "/Game/BloodlinesAlpha/Interactables/LootableObject.LootableObject_C";
+
+    public IEnumerable<ItemSource> FindSources(CatalogContext context)
+    {
+        foreach (
+            var (path, properties, places) in LootRecords.Instances(
+                context,
+                type => type.Path == Root || type.Ancestors.Contains(Root)
+            )
+        )
+        {
+            if (
+                RecordValues.Number(properties["Spawn Chance"]) is <= 0
+                || RecordValues.Integer(properties["Max amount of loot items"]) is < 0
+            )
+                continue;
+            if (RecordValues.Boolean(properties["Use Entire Data Table?"]) == true)
+                continue;
+            var name = LootRecords.Name(properties, "Object Name", path);
+            var notes = new List<string>();
+            if (RecordValues.Number(properties["Spawn Chance"]) is { } spawn)
+                notes.Add(
+                    $"Container spawn chance: {spawn.ToString(CultureInfo.InvariantCulture)}."
+                );
+            if (
+                RecordValues.Integer(properties["Min amount of loot items"]) is { } min
+                && RecordValues.Integer(properties["Max amount of loot items"]) is { } max
+            )
+                notes.Add(
+                    $"Loot count settings: {min} to {max}. The consumer rolls from zero through a newly sampled inclusive bound."
+                );
+            var pool = SelectPool(properties, notes);
+            if (RecordValues.Boolean(properties["Use Specific Loot Table?"]) == true)
+            {
+                var rowName = RecordValues.String(properties["Loot Table Name"]);
+                var row = context
+                    .Records.Tables.Where(table =>
+                        ItemIdentity.ClassName(table.Path) == "PresetLootTables_DT"
+                    )
+                    .SelectMany(table => table.Rows)
+                    .FirstOrDefault(row => row.Name == rowName);
+                if (row is null)
+                    continue;
+                pool = row.Values["ContainerLootTable"];
+                name = RecordValues.Text(row.Values["ContainerName"]) ?? name;
+                notes.Add($"Preset loot table: {row.Name}.");
+            }
+            foreach (
+                var source in LootRecords.Pool(
+                    context,
+                    pool,
+                    SourceKind.ContainerLoot,
+                    name,
+                    places,
+                    notes
+                )
+            )
+                yield return source;
+        }
+    }
+
+    private static JsonNode? SelectPool(JsonObject properties, List<string> notes)
+    {
+        if (RecordValues.Boolean(properties["Use Custom Loot Table"]) == true)
+        {
+            notes.Add("Uses the custom loot pool.");
+            return properties["Custom Loot Table"];
+        }
+        var type = RecordValues.EnumValue(properties["Loot Type"]);
+        var field = type?.Split("NewEnumerator").LastOrDefault() switch
+        {
+            "0" => "Loot Table - Towns",
+            "1" => "Loot Table - Dungeon",
+            "3" => "Loot Table - Minolurk Fort",
+            "6" => "Loot Table - Barrel DRY",
+            "8" => "Coffin Loot",
+            "9" => "Urn Loot",
+            "10" => "Bandit Loot Table",
+            "5" => RecordValues
+                .EnumValue(properties["Randomized Loot Style"])
+                ?.Split("NewEnumerator")
+                .LastOrDefault() switch
+            {
+                "0" => "Sword Loot Table - Dwarven Dungeon RARE",
+                "3" => "Undead Sword Loot Table Undead Dungeon",
+                _ => null,
+            },
+            _ => null,
+        };
+        var pool = field is null ? properties["Selected Loot Table"] : properties[field];
+        notes.Add(
+            field is null
+                ? "Uses the stored selected loot pool. Pool selection is not recorded."
+                : $"Selected pool: {field}."
+        );
+        if (RecordValues.Boolean(properties["Add Custom Loot to Table"]) != true)
+            return pool;
+        notes.Add("Custom entries replace matching entries in the selected pool.");
+        var entries = RecordValues.MapEntries(pool).ToList();
+        foreach (var entry in RecordValues.MapEntries(properties["Custom Loot Table"]))
+        {
+            entries.RemoveAll(existing => JsonNode.DeepEquals(existing.Key, entry.Key));
+            entries.Add(entry);
+        }
+        return new JsonObject
+        {
+            ["$map"] = new JsonArray(
+                entries
+                    .Select(entry =>
+                        (JsonNode)new JsonArray(entry.Key?.DeepClone(), entry.Value?.DeepClone())
+                    )
+                    .ToArray()
+            ),
+        };
+    }
+}
+
+internal static class LootRecords
+{
+    internal static IEnumerable<(
+        string Path,
+        JsonObject Properties,
+        IReadOnlyList<Place> Places
+    )> Instances(CatalogContext context, Func<ClassRecord, bool> matches)
+    {
+        var byClass = context.Placements.ToLookup(
+            placement => placement.Actor.Class,
+            StringComparer.OrdinalIgnoreCase
+        );
+        foreach (
+            var type in context.Records.Classes.Where(type =>
+                matches(type) && !context.IsExcludedClass(type.Path)
+            )
+        )
+        {
+            var placements = byClass[type.Path];
+            if (!placements.Any())
+                yield return (type.Path, type.Properties, []);
+            foreach (var placement in placements)
+                yield return (
+                    type.Path,
+                    placement.Properties,
+                    [context.Places.Get(placement.Level)]
+                );
+        }
+    }
+
+    internal static string Name(JsonObject properties, string field, string path) =>
+        RecordValues.Text(properties[field])
+        ?? RecordValues.String(properties[field])
+        ?? ItemIdentity.Readable(ItemIdentity.ClassName(path));
+
+    internal static IEnumerable<ItemSource> Pool(
+        CatalogContext context,
+        JsonNode? pool,
+        SourceKind kind,
+        string name,
+        IReadOnlyList<Place> places,
+        IReadOnlyList<string> notes
+    )
+    {
+        var entries = RecordValues.MapEntries(pool).ToArray();
+        var total = entries.Sum(entry => RecordValues.Number(entry.Value) ?? 0);
+        var noDrop = entries
+            .Where(entry => entry.Key is null)
+            .Sum(entry => RecordValues.Number(entry.Value) ?? 0);
+        if (noDrop > 0)
+            notes =
+            [
+                .. notes,
+                $"No-drop outcome weight: {noDrop.ToString(CultureInfo.InvariantCulture)}.",
+            ];
+        foreach (var (key, value) in entries)
+        {
+            if (
+                RecordValues.AnyReference(key) is not { } item
+                || RecordValues.Number(value) is not > 0
+                || total <= 0
+            )
+                continue;
+            var quantity = context.Classes.TryGetValue(item, out var type)
+                ? RecordValues.Integer(RecordValues.At(type.Properties, "ItemInfo.Quantity"))
+                : null;
+            yield return new ItemSource(
+                item,
+                new Source(
+                    kind,
+                    name,
+                    places,
+                    null,
+                    quantity is > 0 and <= int.MaxValue
+                        ? new Amount((int)quantity.Value, (int)quantity.Value)
+                        : null,
+                    new Weight(RecordValues.Number(value)!.Value, total),
+                    null,
+                    [],
+                    notes
+                )
+            );
+        }
+    }
+}

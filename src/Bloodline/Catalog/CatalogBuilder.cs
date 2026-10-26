@@ -33,6 +33,9 @@ internal static class CatalogBuilder
             new FarmingMechanism(),
             new BountyNoteMechanism(),
             new SettlementDeliveryMechanism(),
+            new ContainerLootMechanism(),
+            new RandomLootMechanism(),
+            new EnemyDropMechanism(),
         ];
         Exclusions.Validate(records, exclusions);
         var resolver = new ItemFacts(records.Enums);
