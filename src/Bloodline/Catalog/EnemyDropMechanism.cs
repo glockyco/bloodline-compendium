@@ -5,12 +5,22 @@ namespace Bloodline.Catalog;
 
 internal sealed class EnemyDropMechanism : ISourceMechanism
 {
+    private static readonly string[] PopulationFields = ["spawnDataArr", "npcParametersArr"];
+    private static readonly string[] SpawnClassFields =
+    [
+        "Enemy to Spawn",
+        "Enemy To Spawn",
+        "Actor To Spawn",
+        "Enemy Type",
+    ];
+    private static readonly string[] LootFields = ["Loot Table", "Rare Pickup Loot"];
+
     public IEnumerable<ItemSource> FindSources(CatalogContext context)
     {
         var spawnedPlaces = new Dictionary<string, List<Place>>(StringComparer.OrdinalIgnoreCase);
         foreach (var placement in context.Placements)
         {
-            foreach (var field in new[] { "spawnDataArr", "npcParametersArr" })
+            foreach (var field in PopulationFields)
             foreach (var entry in RecordValues.Elements(placement.Properties[field]))
             {
                 if (RecordValues.Integer(RecordValues.At(entry, "maxSpawnNPC")) is <= 0)
@@ -22,15 +32,7 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
                 if (RecordValues.Number(value) is > 0)
                     Add(RecordValues.AnyReference(key));
             }
-            foreach (
-                var field in new[]
-                {
-                    "Enemy to Spawn",
-                    "Enemy To Spawn",
-                    "Actor To Spawn",
-                    "Enemy Type",
-                }
-            )
+            foreach (var field in SpawnClassFields)
                 Add(RecordValues.AnyReference(placement.Properties[field]));
             foreach (var (field, value) in placement.Properties)
             {
@@ -79,7 +81,7 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
                 places.Count == 0 && spawnedPlaces.TryGetValue(path, out var spawned)
                     ? spawned
                     : places;
-            foreach (var field in new[] { "Loot Table", "Rare Pickup Loot" })
+            foreach (var field in LootFields)
             foreach (
                 var source in LootRecords.Pool(
                     context,
@@ -101,7 +103,7 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
                 continue;
             var nameNotes = new List<string>();
             var name = LootRecords.Name(type.Properties, "Enemy Name", path, nameNotes);
-            foreach (var field in new[] { "Loot Table", "Rare Pickup Loot" })
+            foreach (var field in LootFields)
             foreach (
                 var source in LootRecords.Pool(
                     context,
