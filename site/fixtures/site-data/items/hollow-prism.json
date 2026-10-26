@@ -13,12 +13,19 @@
 	"icon": null,
 	"facts": [
 		{
+			"effect": null,
 			"label": "Value",
-			"value": null
+			"number": null,
+			"stat": "value",
+			"text": null,
+			"unit": "gold"
 		},
 		{
-			"label": "Weight",
-			"value": null
+			"effect": null,
+			"label": "Magazine size",
+			"number": null,
+			"stat": "magazineSize",
+			"text": null
 		}
 	],
 	"sources": []

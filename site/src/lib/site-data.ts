@@ -13,6 +13,32 @@ export type GapKind =
   "itemWithoutSource" | "sourceWithoutPlace" | "itemWithoutIcon" | "unknownFact" | "placeWithoutName" | "unreadObject";
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "Stat".
+ */
+export type Stat =
+  | "value"
+  | "category"
+  | "damageContribution"
+  | "speedContribution"
+  | "weaponType"
+  | "damage"
+  | "attackSpeed"
+  | "range"
+  | "damageType"
+  | "magazineSize"
+  | "armorType"
+  | "armorRating"
+  | "effects"
+  | "effect"
+  | "restorationAmount"
+  | "healthDamage"
+  | "manaDamage"
+  | "choppedEffect"
+  | "cooledEffect"
+  | "groundEffect"
+  | "heatedEffect";
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "SourceKind".
  */
 export type SourceKind =
@@ -131,8 +157,23 @@ export interface CategoryLink {
  * via the `definition` "Fact".
  */
 export interface Fact {
+  effect: Effect | null;
   label: string;
-  value: string | null;
+  number: number | null;
+  stat: Stat;
+  text: string | null;
+  tooltipLabel?: string | null;
+  unit?: string | null;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "Effect".
+ */
+export interface Effect {
+  name: string;
+  power: number;
+  seconds: number;
   [k: string]: unknown;
 }
 /**

@@ -76,8 +76,45 @@ internal sealed record ItemUse(SourceKind Kind, string Name, ItemLink Item, int 
 
 internal sealed record CategoryLink(string Slug, string Name);
 
-/// <summary>A fact about an item, such as its value or damage. A null value means that the game files do not determine it.</summary>
-internal sealed record Fact(string Label, string? Value);
+/// <summary>
+/// A fact about an item, such as its value or damage. <see cref="Stat"/> names it, and the label, tooltip
+/// label and unit come from <see cref="StatVocabulary"/>, so every page uses the same terms. At most one of
+/// <see cref="Number"/>, <see cref="Text"/> and <see cref="Effect"/> holds the value. All three are null when
+/// the game files do not determine it.
+/// </summary>
+internal sealed record Fact(Stat Stat, string Label, double? Number, string? Text, Effect? Effect)
+{
+    public string? TooltipLabel { get; init; }
+    public string? Unit { get; init; }
+}
+
+/// <summary>An effect with its strength and duration in seconds. A zero duration means it does not expire.</summary>
+internal sealed record Effect(string Name, double Power, double Seconds);
+
+internal enum Stat
+{
+    Value,
+    Category,
+    DamageContribution,
+    SpeedContribution,
+    WeaponType,
+    Damage,
+    AttackSpeed,
+    Range,
+    DamageType,
+    MagazineSize,
+    ArmorType,
+    ArmorRating,
+    Effects,
+    Effect,
+    RestorationAmount,
+    HealthDamage,
+    ManaDamage,
+    ChoppedEffect,
+    CooledEffect,
+    GroundEffect,
+    HeatedEffect,
+}
 
 /// <summary>
 /// One way to get an item. <see cref="Name"/> names what gives it, such as a vendor, recipe, container or

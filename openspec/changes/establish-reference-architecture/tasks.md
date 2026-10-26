@@ -15,7 +15,7 @@
 - [ ] 2.5 Add Playwright layout checks for overflow, cross-card row alignment, minimum text size and contrast at 390, 768 and 1280 px, and verify each fails on a planted defect in the fixture page
 - [ ] 2.6 Write the voice rules and banned-phrase list beside the `site/presentation` spec and add a check over built HTML, and verify it fails on a planted phrase
 - [x] 2.7 Commit the emblem, header mark, favicons and link preview with the token work, and verify the built site serves every brand asset
-- [ ] 2.8 Add the stat vocabulary and one number formatting function, move every stat label and number on the site to them, and verify a list column and a tooltip show armor identically
+- [x] 2.8 Add the stat vocabulary and one number formatting function, move every stat label and number on the site to them, and verify that the item list and a tooltip show an item's value identically and that every item slug and qualifier stays the same
 
 ## 3. Lab runtime tool
 

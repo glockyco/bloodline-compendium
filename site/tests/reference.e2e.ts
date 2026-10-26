@@ -92,7 +92,7 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 	const details = page.getByRole('complementary', { name: 'Item details' });
 	await expect(details).toContainText(/Damage\s*12/);
 	await expect(details).toContainText(/Speed\s*1.2/);
-	await expect(details).toContainText(/Critical Chance\s*Unknown/);
+	await expect(details).toContainText(/Range\s*Unknown/);
 	const shopLink = page.locator('.acquisition-routes a[href="#source-shop"]');
 	await shopLink.click();
 	await expect(page).toHaveURL(/#source-shop$/);

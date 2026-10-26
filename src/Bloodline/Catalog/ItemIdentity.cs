@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using Bloodline.Records;
+using Bloodline.SiteData;
 
 namespace Bloodline.Catalog;
 
@@ -49,8 +50,9 @@ internal static partial class ItemIdentity
                 if (members.Length > 1)
                 {
                     var candidates = new[] { item.Type, item.Category.Name }.Concat(
-                        item.Facts.Where(fact => fact.Value is not null && fact.Label != "Value")
-                            .Select(fact => fact.Value + " " + fact.Label)
+                        item.Facts.Where(fact => fact.Stat != Stat.Value)
+                            .Select(Qualifier)
+                            .OfType<string>()
                     );
                     qualifier = candidates.FirstOrDefault(candidate =>
                         !string.IsNullOrWhiteSpace(candidate)
@@ -58,7 +60,7 @@ internal static partial class ItemIdentity
                         && members.Count(other =>
                             other.Type == candidate
                             || other.Category.Name == candidate
-                            || other.Facts.Any(fact => fact.Value + " " + fact.Label == candidate)
+                            || other.Facts.Any(fact => Qualifier(fact) == candidate)
                         ) == 1
                     );
                     qualifier ??= (index + 1).ToString(
@@ -83,6 +85,10 @@ internal static partial class ItemIdentity
 
     public static string DisplayName(Bloodline.SiteData.ItemPage item) =>
         item.Qualifier is null ? item.Name : item.Name + " (" + item.Qualifier + ")";
+
+    /// <summary>A known fact as a qualifier, such as "5 Armor rating", or null when its value is unknown.</summary>
+    private static string? Qualifier(Fact fact) =>
+        StatVocabulary.Display(fact) is { } value ? value + " " + fact.Label : null;
 
     public static string ClassName(string path)
     {

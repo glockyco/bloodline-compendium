@@ -60,53 +60,64 @@ internal sealed class ItemFacts(
                 _ => readerCategory?.Name,
             };
         var facts = new List<Fact>();
-        void Add(string label, string path) =>
-            facts.Add(new Fact(label, Display(RecordValues.At(properties, path))));
-        Add("Value", "ItemInfo.ItemValue");
+        void Add(Stat stat, string path)
+        {
+            var value = RecordValues.At(properties, path);
+            facts.Add(
+                RecordValues.Number(value) is { } number
+                    ? StatVocabulary.Number(stat, number)
+                    : StatVocabulary.Text(stat, Display(value))
+            );
+        }
+        Add(Stat.Value, "ItemInfo.ItemValue");
         if (category is null)
         {
-            facts.Add(new Fact("Category", null));
+            facts.Add(StatVocabulary.Unknown(Stat.Category));
         }
         if (component is not null)
         {
             // Crafting's component selector and Retrieve Component Stats read these table fields.
             // They are contributions, not the item's inherited weapon defaults or final weapon stats.
-            facts.Add(new Fact("Damage contribution", ComponentValue(component, "Damage")));
-            facts.Add(new Fact("Speed contribution", ComponentValue(component, "Speed")));
+            facts.Add(
+                StatVocabulary.Number(Stat.DamageContribution, ComponentNumber(component, "Damage"))
+            );
+            facts.Add(
+                StatVocabulary.Number(Stat.SpeedContribution, ComponentNumber(component, "Speed"))
+            );
         }
         else if (category == "Weapon")
         {
-            Add("Weapon type", "WeaponInfo.AttackType");
+            Add(Stat.WeaponType, "WeaponInfo.AttackType");
             // BP_BaseWeapon ExecuteUbergraph L13640 passes WeaponInfo.Damage to ApplyDamage.
             // FirstPersonCharacter2 also reads it into Arrow/Bullet Damage at L188281 and L196673.
             // ItemInfo.Damage is inventory display data, not the equipped weapon's base damage.
-            Add("Damage", "WeaponInfo.Damage");
+            Add(Stat.Damage, "WeaponInfo.Damage");
             // FirstPersonCharacter2 L165197 multiplies WeaponInfo.AttackSpeed for the attack montage.
-            Add("Attack speed", "WeaponInfo.AttackSpeed");
+            Add(Stat.AttackSpeed, "WeaponInfo.AttackSpeed");
             var range = RecordValues.Number(RecordValues.At(properties, "WeaponInfo.Range"));
             if (range is null || range > 0)
             {
-                Add("Range", "WeaponInfo.Range");
+                Add(Stat.Range, "WeaponInfo.Range");
             }
             var damageType = Display(RecordValues.At(properties, "WeaponInfo.DamageType"));
             if (damageType != "None")
             {
-                facts.Add(new Fact("Damage type", damageType));
+                facts.Add(StatVocabulary.Text(Stat.DamageType, damageType));
             }
             var magazine = RecordValues.Number(
                 RecordValues.At(properties, "WeaponInfo.MagazineSize")
             );
             if (magazine is null || magazine > 0)
             {
-                Add("Magazine size", "WeaponInfo.MagazineSize");
+                Add(Stat.MagazineSize, "WeaponInfo.MagazineSize");
             }
         }
         if (category == "Armor")
         {
-            Add("Armor type", "ItemInfo.ArmorType");
+            Add(Stat.ArmorType, "ItemInfo.ArmorType");
             // FirstPersonCharacter2's equipment function assigns Head Armor at L3650 and Torso Armor
             // at L6506 from ArmorInfo.DamageRating. TakeDamage uses Total Armor, not ItemInfo.Damage.
-            Add("Armor rating", "ArmorInfo.DamageRating");
+            Add(Stat.ArmorRating, "ArmorInfo.DamageRating");
         }
         if (category is "Food" or "Potion")
         {
@@ -114,7 +125,15 @@ internal sealed class ItemFacts(
         }
         if (RecordValues.At(properties, "ItemInfo.ReagentInfo") is JsonObject reagent)
         {
-            foreach (var treatment in new[] { "Chopped", "Cooled", "Ground", "Heated" })
+            foreach (
+                var (treatment, stat) in new[]
+                {
+                    ("Chopped", Stat.ChoppedEffect),
+                    ("Cooled", Stat.CooledEffect),
+                    ("Ground", Stat.GroundEffect),
+                    ("Heated", Stat.HeatedEffect),
+                }
+            )
             {
                 var effects = RecordValues.Elements(reagent[treatment + "Effects"]).ToArray();
                 if (reagent[treatment + "Effects"] is JsonArray && effects.Length == 0)
@@ -123,7 +142,8 @@ internal sealed class ItemFacts(
                 }
                 AddEffect(
                     facts,
-                    treatment + " effect",
+                    stat,
+                    null,
                     reagent[treatment + "Effects"] is JsonArray ? JoinEffects(effects) : null,
                     RecordValues.Number(reagent[treatment + "EffectPower"]),
                     RecordValues.Number(reagent[treatment + "EffectDuration"])
@@ -162,12 +182,26 @@ internal sealed class ItemFacts(
         return value;
     }
 
+    private static double? ComponentNumber(IReadOnlyList<TableRow> rows, string field)
+    {
+        var value = RecordValues.Number(rows[0].Values[field]);
+        // A class can occur in several rows with conflicting stats. No row is authoritative.
+        for (var index = 1; index < rows.Count; index++)
+        {
+            if (RecordValues.Number(rows[index].Values[field]) != value)
+            {
+                return null;
+            }
+        }
+        return value;
+    }
+
     private void AddEffects(List<Fact> facts, JsonNode? potion)
     {
         var effects = RecordValues.At(potion, "PotionEffects");
         if (effects is not JsonArray array)
         {
-            facts.Add(new Fact("Effects", null));
+            facts.Add(StatVocabulary.Unknown(Stat.Effects));
         }
         else
         {
@@ -176,6 +210,7 @@ internal sealed class ItemFacts(
                 var number = (index + 1).ToString(CultureInfo.InvariantCulture);
                 AddEffect(
                     facts,
+                    Stat.Effect,
                     "Effect " + number,
                     Display(array[index]),
                     RecordValues.Number(RecordValues.At(potion, "Effect" + number + "Power")),
@@ -184,25 +219,26 @@ internal sealed class ItemFacts(
             }
         }
         foreach (
-            var (field, label) in new[]
+            var (field, stat) in new[]
             {
-                ("AmountofHealthorManatorestore", "Restoration amount"),
-                ("Amountofdamagetodealtohealth", "Health damage"),
-                ("Amountofdamagetodealtomana", "Mana damage"),
+                ("AmountofHealthorManatorestore", Stat.RestorationAmount),
+                ("Amountofdamagetodealtohealth", Stat.HealthDamage),
+                ("Amountofdamagetodealtomana", Stat.ManaDamage),
             }
         )
         {
             var value = RecordValues.Number(RecordValues.At(potion, field));
             if (value != 0)
             {
-                facts.Add(new Fact(label, value?.ToString("G", CultureInfo.InvariantCulture)));
+                facts.Add(StatVocabulary.Number(stat, value));
             }
         }
     }
 
     private static void AddEffect(
         List<Fact> facts,
-        string label,
+        Stat stat,
+        string? label,
         string? name,
         double? power,
         double? duration
@@ -213,20 +249,15 @@ internal sealed class ItemFacts(
         {
             return;
         }
-        var value =
-            name is null || power is null || duration is null
-                ? null
-                : name
-                    + " "
-                    + power.Value.ToString("G", CultureInfo.InvariantCulture)
-                    + (
-                        duration == 0
-                            ? ""
-                            : " for "
-                                + duration.Value.ToString("G", CultureInfo.InvariantCulture)
-                                + " s"
-                    );
-        facts.Add(new Fact(label, value));
+        facts.Add(
+            StatVocabulary.Effect(
+                stat,
+                name is null || power is null || duration is null
+                    ? null
+                    : new Effect(name, power.Value, duration.Value),
+                label
+            )
+        );
     }
 
     private string? JoinEffects(IEnumerable<JsonNode?> effects)

@@ -90,12 +90,63 @@
       "title": "CoverageReport",
       "type": "object"
     },
+    "Effect": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "power": {
+          "type": "number"
+        },
+        "seconds": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "name",
+        "power",
+        "seconds"
+      ],
+      "title": "Effect",
+      "type": "object"
+    },
     "Fact": {
       "properties": {
+        "effect": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Effect"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "label": {
           "type": "string"
         },
-        "value": {
+        "number": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "stat": {
+          "$ref": "#/$defs/Stat"
+        },
+        "text": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tooltipLabel": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "unit": {
           "type": [
             "string",
             "null"
@@ -103,8 +154,11 @@
         }
       },
       "required": [
+        "stat",
         "label",
-        "value"
+        "number",
+        "text",
+        "effect"
       ],
       "title": "Fact",
       "type": "object"
@@ -573,6 +627,32 @@
         "settlementDelivery"
       ],
       "title": "SourceKind"
+    },
+    "Stat": {
+      "enum": [
+        "value",
+        "category",
+        "damageContribution",
+        "speedContribution",
+        "weaponType",
+        "damage",
+        "attackSpeed",
+        "range",
+        "damageType",
+        "magazineSize",
+        "armorType",
+        "armorRating",
+        "effects",
+        "effect",
+        "restorationAmount",
+        "healthDamage",
+        "manaDamage",
+        "choppedEffect",
+        "cooledEffect",
+        "groundEffect",
+        "heatedEffect"
+      ],
+      "title": "Stat"
     },
     "Weight": {
       "properties": {

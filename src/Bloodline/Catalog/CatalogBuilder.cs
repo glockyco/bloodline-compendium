@@ -99,7 +99,7 @@ internal static class CatalogBuilder
                     texturePath ?? "No icon texture reference."
                 );
             }
-            foreach (var fact in item.Facts.Where(fact => fact.Value is null))
+            foreach (var fact in item.Facts.Where(fact => StatVocabulary.Display(fact) is null))
             {
                 Gap(GapKind.UnknownFact, item.Name, fact.Label);
             }
@@ -234,13 +234,10 @@ internal static class CatalogBuilder
     }
 
     private static int? ReadValue(ItemPage item) =>
-        int.TryParse(
-            item.Facts.First(fact => fact.Label == "Value").Value,
-            System.Globalization.NumberStyles.Integer,
-            System.Globalization.CultureInfo.InvariantCulture,
-            out var value
-        )
-            ? value
+        item.Facts.First(fact => fact.Stat == Stat.Value).Number is { } value
+        && value == Math.Floor(value)
+        && value is >= int.MinValue and <= int.MaxValue
+            ? (int)value
             : null;
 
     private static bool IsTextureGap(GapRecord gap, string path) =>

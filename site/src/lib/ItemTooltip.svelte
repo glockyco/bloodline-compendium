@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Fact } from './site-data.js';
 	import { titleCase } from './labels.js';
+	import { factValue } from './stats.js';
 
 	interface TooltipItem {
 		name: string;
@@ -10,44 +11,34 @@
 	}
 	let { item, heading = 'h2' }: { item: TooltipItem; heading?: 'h2' | 'p' } = $props();
 
-	/**
-	 * The game's tooltip shows two stat lines beside the icon, under these labels. Other facts follow
-	 * below the description, in the order the catalog publishes them.
-	 */
-	const primaryLabels: Record<string, string> = {
-		'Armor type': 'Type',
-		'Armor rating': 'Armor',
-		'Weapon type': 'Type',
-		Damage: 'Damage',
-		'Attack speed': 'Speed',
-		'Restoration amount': 'Heals'
-	};
-	const primary = $derived(item.facts.filter((fact) => fact.label in primaryLabels));
-	const rest = $derived(item.facts.filter((fact) => !(fact.label in primaryLabels)));
-	function shown(fact: Fact) {
-		if (fact.value === null) return 'Unknown';
-		return fact.label === 'Value' ? `${fact.value} gold` : fact.value;
-	}
+	// The game's tooltip shows its stat lines beside the icon under the vocabulary's tooltip labels.
+	// Other facts follow below the description, in the order the catalog publishes them.
+	const primary = $derived(item.facts.filter((fact) => fact.tooltipLabel));
+	const rest = $derived(item.facts.filter((fact) => !fact.tooltipLabel));
 </script>
 
 <div class="tooltip">
-	<svelte:element this={heading} class="name">{item.name}</svelte:element>
+	<svelte:element this={heading} class="name" data-game>{item.name}</svelte:element>
 	<div class="body">
 		<div class="slot">
 			{#if item.icon}<img src="/icons/{item.icon}-160.webp" alt="" width="80" height="80" />{/if}
 		</div>
 		{#if primary.length}<dl class="primary">
 				{#each primary as fact (fact.label)}<div>
-						<dt>{primaryLabels[fact.label]}</dt>
-						<dd class:unknown={fact.value === null}>{shown(fact)}</dd>
+						<dt>{fact.tooltipLabel}</dt>
+						<dd class:unknown={factValue(fact) === null} data-game>
+							{factValue(fact) ?? 'Unknown'}
+						</dd>
 					</div>{/each}
 			</dl>{/if}
 	</div>
-	<p class="description">{item.description ?? 'Description unknown.'}</p>
+	<p class="description" data-game>{item.description ?? 'Description unknown.'}</p>
 	{#if rest.length}<dl class="rest">
 			{#each rest as fact (fact.label)}<div>
 					<dt>{titleCase(fact.label)}</dt>
-					<dd class:unknown={fact.value === null}>{shown(fact)}</dd>
+					<dd class:unknown={factValue(fact) === null} data-game>
+						{factValue(fact) ?? 'Unknown'}
+					</dd>
 				</div>{/each}
 		</dl>{/if}
 </div>

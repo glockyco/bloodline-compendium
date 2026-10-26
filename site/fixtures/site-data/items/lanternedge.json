@@ -13,20 +13,35 @@
 	"icon": "lanternedge",
 	"facts": [
 		{
+			"effect": null,
 			"label": "Value",
-			"value": "45"
+			"number": 45,
+			"stat": "value",
+			"text": null,
+			"unit": "gold"
 		},
 		{
+			"effect": null,
 			"label": "Damage",
-			"value": "12"
+			"number": 12,
+			"stat": "damage",
+			"text": null,
+			"tooltipLabel": "Damage"
 		},
 		{
+			"effect": null,
 			"label": "Attack speed",
-			"value": "1.2"
+			"number": 1.2,
+			"stat": "attackSpeed",
+			"text": null,
+			"tooltipLabel": "Speed"
 		},
 		{
-			"label": "Critical chance",
-			"value": null
+			"effect": null,
+			"label": "Range",
+			"number": null,
+			"stat": "range",
+			"text": null
 		}
 	],
 	"sources": [
@@ -58,8 +73,14 @@
 			"kind": "shop",
 			"name": "Amber Lantern Trader",
 			"places": [],
-			"price": { "amount": 46, "currency": null },
-			"amount": { "min": 1, "max": 1 },
+			"price": {
+				"amount": 46,
+				"currency": null
+			},
+			"amount": {
+				"min": 1,
+				"max": 1
+			},
 			"weight": null,
 			"chance": null,
 			"chanceBasis": null,
@@ -71,8 +92,14 @@
 			"kind": "shop",
 			"name": "Blue Glass Trader",
 			"places": [],
-			"price": { "amount": 47, "currency": null },
-			"amount": { "min": 1, "max": 1 },
+			"price": {
+				"amount": 47,
+				"currency": null
+			},
+			"amount": {
+				"min": 1,
+				"max": 1
+			},
 			"weight": null,
 			"chance": null,
 			"chanceBasis": null,
@@ -84,8 +111,14 @@
 			"kind": "shop",
 			"name": "Copper Crescent Trader",
 			"places": [],
-			"price": { "amount": 48, "currency": null },
-			"amount": { "min": 1, "max": 1 },
+			"price": {
+				"amount": 48,
+				"currency": null
+			},
+			"amount": {
+				"min": 1,
+				"max": 1
+			},
 			"weight": null,
 			"chance": null,
 			"chanceBasis": null,
@@ -97,8 +130,14 @@
 			"kind": "shop",
 			"name": "Dappled Star Trader",
 			"places": [],
-			"price": { "amount": 49, "currency": null },
-			"amount": { "min": 1, "max": 1 },
+			"price": {
+				"amount": 49,
+				"currency": null
+			},
+			"amount": {
+				"min": 1,
+				"max": 1
+			},
 			"weight": null,
 			"chance": null,
 			"chanceBasis": null,
@@ -110,8 +149,14 @@
 			"kind": "shop",
 			"name": "Emerald Kite Trader",
 			"places": [],
-			"price": { "amount": 50, "currency": null },
-			"amount": { "min": 1, "max": 1 },
+			"price": {
+				"amount": 50,
+				"currency": null
+			},
+			"amount": {
+				"min": 1,
+				"max": 1
+			},
 			"weight": null,
 			"chance": null,
 			"chanceBasis": null,
@@ -123,8 +168,14 @@
 			"kind": "shop",
 			"name": "Frosted Wheel Trader",
 			"places": [],
-			"price": { "amount": 51, "currency": null },
-			"amount": { "min": 1, "max": 1 },
+			"price": {
+				"amount": 51,
+				"currency": null
+			},
+			"amount": {
+				"min": 1,
+				"max": 1
+			},
 			"weight": null,
 			"chance": null,
 			"chanceBasis": null,
@@ -136,8 +187,14 @@
 			"kind": "shop",
 			"name": "Golden Spiral Trader",
 			"places": [],
-			"price": { "amount": 52, "currency": null },
-			"amount": { "min": 1, "max": 1 },
+			"price": {
+				"amount": 52,
+				"currency": null
+			},
+			"amount": {
+				"min": 1,
+				"max": 1
+			},
 			"weight": null,
 			"chance": null,
 			"chanceBasis": null,
@@ -149,8 +206,14 @@
 			"kind": "shop",
 			"name": "Hazel Comet Trader",
 			"places": [],
-			"price": { "amount": 53, "currency": null },
-			"amount": { "min": 1, "max": 1 },
+			"price": {
+				"amount": 53,
+				"currency": null
+			},
+			"amount": {
+				"min": 1,
+				"max": 1
+			},
 			"weight": null,
 			"chance": null,
 			"chanceBasis": null,
@@ -162,8 +225,14 @@
 			"kind": "shop",
 			"name": "Indigo Prism Trader",
 			"places": [],
-			"price": { "amount": 54, "currency": null },
-			"amount": { "min": 1, "max": 1 },
+			"price": {
+				"amount": 54,
+				"currency": null
+			},
+			"amount": {
+				"min": 1,
+				"max": 1
+			},
 			"weight": null,
 			"chance": null,
 			"chanceBasis": null,
@@ -175,8 +244,14 @@
 			"kind": "shop",
 			"name": "Jade Compass Trader",
 			"places": [],
-			"price": { "amount": 55, "currency": null },
-			"amount": { "min": 1, "max": 1 },
+			"price": {
+				"amount": 55,
+				"currency": null
+			},
+			"amount": {
+				"min": 1,
+				"max": 1
+			},
 			"weight": null,
 			"chance": null,
 			"chanceBasis": null,
@@ -188,8 +263,14 @@
 			"kind": "shop",
 			"name": "Knotted Ribbon Trader",
 			"places": [],
-			"price": { "amount": 56, "currency": null },
-			"amount": { "min": 1, "max": 1 },
+			"price": {
+				"amount": 56,
+				"currency": null
+			},
+			"amount": {
+				"min": 1,
+				"max": 1
+			},
 			"weight": null,
 			"chance": null,
 			"chanceBasis": null,
@@ -201,8 +282,14 @@
 			"kind": "shop",
 			"name": "Lilac Feather Trader",
 			"places": [],
-			"price": { "amount": 57, "currency": null },
-			"amount": { "min": 1, "max": 1 },
+			"price": {
+				"amount": 57,
+				"currency": null
+			},
+			"amount": {
+				"min": 1,
+				"max": 1
+			},
 			"weight": null,
 			"chance": null,
 			"chanceBasis": null,
@@ -288,7 +375,10 @@
 			},
 			"chance": 0.25,
 			"chanceBasis": "Chance per pick",
-			"picks": { "min": 2, "max": 3 },
+			"picks": {
+				"min": 2,
+				"max": 3
+			},
 			"inputs": [],
 			"notes": []
 		}

@@ -8,13 +8,19 @@
 		{
 			"kind": "crafting",
 			"name": "Star-forged blade recipe",
-			"item": { "slug": "lanternedge", "name": "Lanternedge" },
+			"item": {
+				"slug": "lanternedge",
+				"name": "Lanternedge"
+			},
 			"quantity": 2
 		},
 		{
 			"kind": "currencyShop",
 			"name": "Orris the Collector",
-			"item": { "slug": "lanternedge", "name": "Lanternedge" },
+			"item": {
+				"slug": "lanternedge",
+				"name": "Lanternedge"
+			},
 			"quantity": 3
 		}
 	],
@@ -26,12 +32,20 @@
 	"icon": "cinderpear",
 	"facts": [
 		{
+			"effect": null,
 			"label": "Value",
-			"value": "8"
+			"number": 8,
+			"stat": "value",
+			"text": null,
+			"unit": "gold"
 		},
 		{
-			"label": "Health restored",
-			"value": "15"
+			"effect": null,
+			"label": "Restoration amount",
+			"number": 15,
+			"stat": "restorationAmount",
+			"text": null,
+			"tooltipLabel": "Heals"
 		}
 	],
 	"sources": [

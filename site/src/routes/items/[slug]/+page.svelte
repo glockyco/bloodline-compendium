@@ -7,6 +7,7 @@
 	import { sourceHeadings, titleCase } from '#lib/labels.js';
 	import { sortSources, sourceContext, useHeadings } from '#lib/acquisition.js';
 	import { formatNumber } from '#lib/format.js';
+	import { factValue } from '#lib/stats.js';
 	import type { SourceKind } from '#lib/site-data.js';
 	import SeoHead from '#lib/SeoHead.svelte';
 	let { data } = $props();
@@ -56,12 +57,9 @@
 		[
 			`${displayName}: ${titleCase(item.type)} in The Bloodline.`,
 			...item.facts
-				.filter((fact) => fact.value !== null)
+				.filter((fact) => factValue(fact) !== null)
 				.slice(0, 2)
-				.map(
-					(fact) =>
-						`${fact.label}: ${fact.value}${fact.label.toLowerCase() === 'value' ? ' gold' : ''}.`
-				),
+				.map((fact) => `${fact.label}: ${factValue(fact)}.`),
 			item.sources.length
 				? `${sourceHeadings[item.sources[0].kind]}: ${item.sources[0].name}${sourceContext(item.sources[0]) ? ` (${sourceContext(item.sources[0])})` : ''}.`
 				: 'How to obtain it is unknown.'
