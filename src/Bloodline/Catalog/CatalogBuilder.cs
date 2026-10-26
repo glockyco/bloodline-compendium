@@ -90,7 +90,7 @@ internal static class CatalogBuilder
             {
                 Gap(GapKind.UnknownFact, item.Name, "Description");
             }
-            foreach (var source in sources.Where(source => source.Places.Count == 0))
+            foreach (var source in sources.Where(SourceCoverage.HasUnknownPlace))
             {
                 Gap(GapKind.SourceWithoutPlace, item.Name, source.Kind + ": " + source.Name);
             }
