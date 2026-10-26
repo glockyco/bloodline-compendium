@@ -369,3 +369,14 @@ test('Pagefind searches with the registry kind filter', async ({ page, request }
 	}, label);
 	expect(count).toBeGreaterThan(0);
 });
+
+test('condition prose links its entity without repeating the name or threshold', async ({
+	page
+}) => {
+	await page.goto('/design/');
+	const condition = page.locator('#condition-fixture li');
+	const name = await condition.getByRole('link').innerText();
+	const text = await condition.innerText();
+	expect(text.split(name)).toHaveLength(2);
+	expect(text.match(/13/g)).toHaveLength(1);
+});
