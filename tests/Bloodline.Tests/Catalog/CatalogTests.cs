@@ -1,0 +1,308 @@
+using System.Text.Json.Nodes;
+using Bloodline.Catalog;
+using Bloodline.Output;
+using Bloodline.Records;
+using Bloodline.SiteData;
+
+namespace Bloodline.Tests.Catalog;
+
+public sealed class CatalogTests
+{
+    private static JsonObject Parse(string json) => JsonNode.Parse(json)!.AsObject();
+
+    private static ClassRecord Item(
+        string path = "/Game/Items/IronSword.IronSword_C",
+        string name = "Iron sword",
+        string category = "Weapon"
+    ) =>
+        new(
+            path,
+            [ItemIdentity.BaseItem],
+            Parse(
+                $$$"""
+                {"ItemInfo":{"ItemName":{"$text":"{{{name}}}"},"Description":{"$text":"Invented description"},"ItemType":{"$enum":"E_ItemType::Weapon","display":"{{{category}}}"},"ItemValue":12,"SpecificItemType":{"$enum":"Specific::OneHand","display":"One Handed Weapon"},"ItemImage":{"$ref":"/Game/Icons/Sword.Sword"},"Damage":900},
+                 "WeaponInfo":{"Damage":10,"AttackSpeed":1.25,"Range":150,"DamageType":{"$enum":"Damage::Slash","display":"Slashing"},"AttackType":{"$enum":"Attack::Sword","display":"Sword"},"MagazineSize":0}}
+                """
+            )
+        );
+
+    private static CatalogRecords Records(
+        IReadOnlyList<ClassRecord>? classes = null,
+        IReadOnlyList<LevelRecord>? levels = null,
+        IReadOnlyList<GapRecord>? gaps = null
+    ) =>
+        new(
+            new BuildRecord(1159290, 1, []),
+            classes ?? [Item()],
+            [],
+            [],
+            levels ?? [],
+            [],
+            [new TextureRecord("/Game/Icons/Sword.Sword", "aabb", 1, 1, "BGRA")],
+            gaps ?? []
+        );
+
+    private static CatalogResult Build(
+        CatalogRecords records,
+        IReadOnlyList<Exclusion>? exclusions = null
+    ) => CatalogBuilder.Build(records, exclusions ?? []);
+
+    [Fact]
+    public void SelectsNamedInventoryItemsButNotPlacedInteractables()
+    {
+        var item = Item();
+        var bench = Item("/Game/Bench.Bench_C") with
+        {
+            Ancestors = [ItemIdentity.Interactable, ItemIdentity.BaseItem],
+        };
+        var rootInteractable = Item(ItemIdentity.Interactable);
+        var unnamed = Item("/Game/Unnamed.Unnamed_C", " ");
+        var unrelated = Item("/Game/Other.Other_C") with { Ancestors = [] };
+        Assert.Single(Build(Records([bench, unrelated, item, unnamed, rootInteractable])).Items);
+    }
+
+    [Fact]
+    public void SlugsIgnoreDisplayNamesAndResolveCollisionsIndependentlyOfOrdering()
+    {
+        var a = Item("/Game/A/IronSword.IronSword_C");
+        var b = Item("/Game/B/Iron_Sword.Iron_Sword_C", "Different name");
+        var alone = ItemIdentity.Slugs([a]);
+        Assert.Equal("iron-sword", alone[a.Path]);
+        Assert.Equal(
+            alone[a.Path],
+            ItemIdentity.Slugs([a with { Properties = Item(name: "Renamed").Properties }])[a.Path]
+        );
+        var forward = ItemIdentity.Slugs([a, b]);
+        var backward = ItemIdentity.Slugs([b, a]);
+        Assert.Equal(forward[a.Path], backward[a.Path]);
+        Assert.Equal(forward[b.Path], backward[b.Path]);
+        Assert.NotEqual(forward[a.Path], forward[b.Path]);
+    }
+
+    [Theory]
+    [InlineData("HeadArmor_CelestialKnightHelm", "head-armor-celestial-knight-helm")]
+    [InlineData("BP_ABCThing", "bp-abc-thing")]
+    public void SplitsClassNames(string name, string expected) =>
+        Assert.Equal(expected, ItemIdentity.Slug(name));
+
+    [Fact]
+    public void MissingDamageIsUnknownRatherThanUsingInventoryDisplayDamage()
+    {
+        var item = Item();
+        item.Properties["WeaponInfo"]!.AsObject().Remove("Damage");
+        var result = Build(Records([item]));
+        Assert.Null(Assert.Single(result.Items[0].Facts, fact => fact.Label == "Damage").Value);
+        Assert.Contains(
+            result.Coverage.Gaps.Single(gap => gap.Kind == GapKind.UnknownFact).Entries,
+            entry => entry.ItemSlug == result.Items[0].Slug && entry.Detail == "Damage"
+        );
+    }
+
+    [Fact]
+    public void UsesEquippedWeaponAndArmourValuesInsteadOfInventoryDisplayDamage()
+    {
+        var weapon = Item();
+        var armor = Item("/Game/Armor.Armor_C", "Armor", "Armor");
+        armor.Properties["ArmorInfo"] = Parse("""{"DamageRating":7}""");
+        var result = Build(Records([weapon, armor]));
+        Assert.Equal(
+            "10",
+            result
+                .Items.Single(item => item.Id == weapon.Path)
+                .Facts.Single(fact => fact.Label == "Damage")
+                .Value
+        );
+        Assert.Equal(
+            "7",
+            result
+                .Items.Single(item => item.Id == armor.Path)
+                .Facts.Single(fact => fact.Label == "Armor rating")
+                .Value
+        );
+    }
+
+    [Fact]
+    public void UnrelatedItemsDoNotClaimToBeOneHandedWeapons()
+    {
+        var result = Build(Records([Item(category: "Etc.")]));
+        Assert.DoesNotContain(result.Items[0].Facts, fact => fact.Label == "Type");
+    }
+
+    [Fact]
+    public void FoodEffectsKeepMissingPowerUnknownAndResolveEnums()
+    {
+        var food = Item(category: "Food");
+        food.Properties["ItemInfo"]!["PotionInfo"] = Parse(
+            """{"PotionEffects":[{"$enum":"Effects::Mana","display":"Restore mana"}],"DurationofEffect1":15}"""
+        );
+        var page = Build(Records([food])).Items[0];
+        Assert.Equal("Restore mana", page.Facts.Single(fact => fact.Label == "Effect 1").Value);
+        Assert.Null(page.Facts.Single(fact => fact.Label == "Effect 1 power").Value);
+    }
+
+    [Fact]
+    public void ExcludedLevelPlacementsCannotBecomePickupSources()
+    {
+        var item = Item();
+        var levels = new[]
+        {
+            new LevelRecord(
+                "/Game/Test",
+                [],
+                [new ActorRecord("Sword", item.Path, new JsonObject())]
+            ),
+            new LevelRecord(
+                "/Game/Live",
+                [],
+                [new ActorRecord("Sword", item.Path, new JsonObject())]
+            ),
+        };
+        var result = Build(
+            Records([item], levels),
+            [new Exclusion(ExclusionKind.Level, "/Game/Test", "Test", "Invented test")]
+        );
+        var source = Assert.Single(result.Items[0].Sources);
+        Assert.Equal("/Game/Live", Assert.Single(source.Places).Id);
+    }
+
+    [Fact]
+    public void FailsWithTheStaleExclusionPath()
+    {
+        var error = Assert.Throws<InvalidDataException>(() =>
+            Build(
+                Records(),
+                [new Exclusion(ExclusionKind.Level, "/Game/Missing", "Test", "Invented test")]
+            )
+        );
+        Assert.Contains("/Game/Missing", error.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void MergesRepeatedPickupsAcrossLevels()
+    {
+        var item = Item();
+        var actor = new ActorRecord("Sword", item.Path, new JsonObject());
+        var result = Build(
+            Records(
+                [item],
+                [
+                    new LevelRecord("/Game/A", [], [actor, actor]),
+                    new LevelRecord("/Game/B", [], [actor]),
+                ]
+            )
+        );
+        Assert.Equal(2, Assert.Single(result.Items[0].Sources).Places.Count);
+    }
+
+    [Fact]
+    public void CentralMergerDropsExcludedPlacesAndPreservesDistinctPrices()
+    {
+        Source Source(int price, params string[] levels) =>
+            new(
+                SourceKind.Shop,
+                "Vendor",
+                levels.Select(path => new Place(path, path)).ToArray(),
+                new Price(price, null),
+                null,
+                null,
+                null,
+                [],
+                []
+            );
+        var sources = CatalogContext.MergeSources(
+            [Source(1, "/Game/Test"), Source(2, "/Game/A", "/Game/Test"), Source(3, "/Game/A")],
+            new HashSet<string>(["/Game/Test"], StringComparer.OrdinalIgnoreCase)
+        );
+        Assert.Equal(2, sources.Count);
+        Assert.All(sources, source => Assert.Equal("/Game/A", Assert.Single(source.Places).Id));
+        Assert.Equal([2, 3], sources.Select(source => source.Price!.Amount).Order());
+    }
+
+    [Fact]
+    public void ListsNoSourceMissingIconUnknownFactAndUnreadPackage()
+    {
+        var item = Item();
+        item.Properties["ItemInfo"]!.AsObject().Remove("ItemValue");
+        var result = Build(
+            Records(
+                [item],
+                gaps:
+                [
+                    new GapRecord("/Game/Broken", null, "Cannot parse"),
+                    new GapRecord("/Game/Icons/Sword", "/Game/Icons/Sword.Sword", "Cannot decode"),
+                ]
+            )
+        );
+        Assert.Null(result.Items[0].Icon);
+        Assert.Contains(result.Coverage.Gaps, gap => gap.Kind == GapKind.ItemWithoutSource);
+        Assert.Contains(result.Coverage.Gaps, gap => gap.Kind == GapKind.ItemWithoutIcon);
+        Assert.Contains(
+            result.Coverage.Gaps.Single(gap => gap.Kind == GapKind.UnknownFact).Entries,
+            entry => entry.Detail == "Value"
+        );
+        Assert.Contains(
+            result.Coverage.Gaps.Single(gap => gap.Kind == GapKind.UnreadObject).Entries,
+            entry =>
+                entry.Label == "/Game/Broken"
+                && entry.Detail!.Contains("Cannot parse", StringComparison.Ordinal)
+        );
+    }
+
+    [Fact]
+    public void UsesEntranceDisplayNamesAndReportsUnnamedPlaces()
+    {
+        var item = Item();
+        var entrance = new ActorRecord(
+            "Entrance",
+            "/Game/Entrance.Entrance_C",
+            Parse("""{"Location Name":{"$text":"Green Valley"},"Level to Load":"Valley_Map"}""")
+        );
+        var records = Records(
+            [item],
+            [
+                new LevelRecord("/Game/Overworld", [], [entrance]),
+                new LevelRecord(
+                    "/Game/Valley_Map",
+                    ["/Game/Valley_Caves"],
+                    [new ActorRecord("Sword", item.Path, new JsonObject())]
+                ),
+                new LevelRecord("/Game/Valley_Caves", [], []),
+            ]
+        );
+        var result = Build(records);
+        Assert.Equal("Green Valley", result.Items[0].Sources[0].Places[0].Name);
+        Assert.Equal(2, result.NamedPlaces);
+        Assert.Single(
+            result.Coverage.Gaps.Single(gap => gap.Kind == GapKind.PlaceWithoutName).Entries
+        );
+    }
+
+    [Fact]
+    public void FailedIconCopyLeavesPublishedSiteUntouched()
+    {
+        var directory = Path.Combine(
+            Path.GetTempPath(),
+            "bloodline-catalog-" + Guid.NewGuid().ToString("N")
+        );
+        try
+        {
+            var layout = new RecordLayout(directory, 1);
+            Directory.CreateDirectory(layout.SiteDirectory);
+            var sentinel = Path.Combine(layout.SiteDirectory, "existing.txt");
+            File.WriteAllText(sentinel, "Previous site");
+            Assert.Throws<DirectoryNotFoundException>(() =>
+                CatalogWriter.Write(
+                    layout,
+                    new SiteBuild(1159290, 1, [], "abc", false),
+                    Build(Records())
+                )
+            );
+            Assert.Equal("Previous site", File.ReadAllText(sentinel));
+            Assert.Single(Directory.EnumerateDirectories(layout.BuildDirectory));
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+}
