@@ -51,8 +51,18 @@ internal sealed class GatheringMechanism : ISourceMechanism
         "WaterfrontMushroom Items",
     ];
 
+    private static readonly (string ClassName, string Field)[] BespokeGrants =
+    [
+        ("WarpSpike_C", "Warpshards"),
+        ("WheatField_Volume_C", "Wheat Ref"),
+    ];
+
     public IEnumerable<ItemSource> FindSources(CatalogContext context)
     {
+        foreach (var source in BespokeSources(context))
+        {
+            yield return source;
+        }
         foreach (
             var type in context.Classes.Values.Where(type =>
                 !context.IsExcludedClass(type.Path) && IsGatherer(context, type.Path)
@@ -214,6 +224,73 @@ internal sealed class GatheringMechanism : ISourceMechanism
                         ]
                     )
                 );
+            }
+        }
+    }
+
+    private static IEnumerable<ItemSource> BespokeSources(CatalogContext context)
+    {
+        foreach (var (className, field) in BespokeGrants)
+        {
+            foreach (
+                var type in context.Classes.Values.Where(type =>
+                    !context.IsExcludedClass(type.Path)
+                    && WorldSourceData.IsClass(context, type.Path, className)
+                )
+            )
+            {
+                var placements = context
+                    .Placements.Where(placement => placement.Actor.Class == type.Path)
+                    .ToArray();
+                if (placements.Length == 0)
+                {
+                    if (Create(type.Properties, []) is { } source)
+                    {
+                        yield return source;
+                    }
+                }
+                foreach (var placement in placements)
+                {
+                    if (
+                        Create(placement.Properties, [context.Places.Get(placement.Level)]) is
+                        { } source
+                    )
+                    {
+                        yield return source;
+                    }
+                }
+                ItemSource? Create(JsonObject properties, IReadOnlyList<Place> places)
+                {
+                    if (RecordValues.AnyReference(properties[field]) is not { } item)
+                    {
+                        return null;
+                    }
+                    var quantity = context.Classes.TryGetValue(item, out var output)
+                        ? WorldSourceData.Integer(
+                            RecordValues.At(output.Properties, "ItemInfo.Quantity")
+                        )
+                        : null;
+                    if (quantity is <= 0)
+                    {
+                        return null;
+                    }
+                    return new ItemSource(
+                        item,
+                        new Source(
+                            SourceKind.Gathering,
+                            ItemIdentity.Readable(ItemIdentity.ClassName(type.Path)),
+                            places,
+                            null,
+                            quantity is { } count ? new Amount(count, count) : null,
+                            null,
+                            null,
+                            [],
+                            [
+                                "Granted by the harvesting interaction. The number of harvesting actions depends on interaction state.",
+                            ]
+                        )
+                    );
+                }
             }
         }
     }

@@ -416,4 +416,54 @@ public sealed class WorldMechanismTests
             source => source.Source.Places.Count > 0
         );
     }
+
+    [Theory]
+    [InlineData("WarpSpike", "Warpshards")]
+    [InlineData("WheatField_Volume", "Wheat Ref")]
+    public void BespokeGatheringUsesMergedGrantReferencesAndInventoryQuantities(
+        string className,
+        string field
+    )
+    {
+        var gatherer = Type(className);
+        gatherer.Properties[field] = Parse("""{"$ref":"/Invented/Old.Old_C"}""");
+        var output = Type("Resource", """{"ItemInfo":{"Quantity":3}}""");
+        var properties = new JsonObject
+        {
+            [field] = Parse("""{"$ref":"/Invented/Resource.Resource_C"}"""),
+        };
+        var level = new LevelRecord(
+            "/Invented/Coast",
+            [],
+            [new ActorRecord("Harvest", gatherer.Path, properties)]
+        );
+        var source = Assert.Single(
+            new GatheringMechanism().FindSources(Context([gatherer, output], levels: [level]))
+        );
+        Assert.Equal(output.Path, source.ItemClass);
+        Assert.Equal(new Amount(3, 3), source.Source.Amount);
+        Assert.Equal("/Invented/Coast", Assert.Single(source.Source.Places).Id);
+        var unplaced = Assert.Single(
+            new GatheringMechanism().FindSources(Context([gatherer, output]))
+        );
+        Assert.Empty(unplaced.Source.Places);
+        gatherer.Properties[field] = null;
+        Assert.Empty(new GatheringMechanism().FindSources(Context([gatherer, output])));
+    }
+
+    [Theory]
+    [InlineData(true, "Readable name")]
+    [InlineData(false, "Invented Character")]
+    public void UnreadableFormattedNpcNamesUseReadableFallbacks(bool hasName, string expected)
+    {
+        var properties = Parse("""{"Full Name":{"$unsupported":"TextHistory.ArgumentFormat"}}""");
+        if (hasName)
+        {
+            properties["Name"] = "Readable name";
+        }
+        Assert.Equal(
+            expected,
+            WorldSourceData.Name(properties, "/Invented/InventedCharacter.InventedCharacter_C")
+        );
+    }
 }
