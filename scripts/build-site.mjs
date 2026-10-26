@@ -92,6 +92,9 @@ execFileSync("bun", ["run", "vite", "build"], {
   stdio: "inherit",
   env: { ...process.env, BLOODLINE_SITE_DATA: directory },
 });
+// The presentation fixture page serves layout checks and review, not readers.
+if (production)
+  await rm(join(site, "build/design"), { recursive: true, force: true });
 execFileSync("bun", ["run", "pagefind", "--site", "build"], {
   cwd: site,
   stdio: "inherit",

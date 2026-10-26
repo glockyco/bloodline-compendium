@@ -2,7 +2,7 @@
 	import type { Source } from './site-data.js';
 	import { formatNumber, formatChance } from './format.js';
 	import { chanceLabel, formatAmount } from './acquisition.js';
-	import ItemLink from './ItemLink.svelte';
+	import EntityLink from './ui/EntityLink.svelte';
 	let {
 		source,
 		showAmount = false,
@@ -13,11 +13,11 @@
 
 <tr class="source-row" {id}>
 	<td class="source-identity">
-		<span class="relation-name">{source.name}</span>
+		<span class="relation-name" data-game>{source.name}</span>
 		<p class="source-places">
-			{source.places.length
-				? source.places.map((place) => place.name).join(', ')
-				: 'Location unknown'}
+			{#if source.places.length}<span data-game
+					>{source.places.map((place) => place.name).join(', ')}</span
+				>{:else}Location unknown{/if}
 		</p>
 		{#if source.weight && !(source.chance !== null && source.chanceBasis)}<p class="source-places">
 				Compared with other possible items. The selection rule is unknown, so this is not a drop
@@ -25,12 +25,14 @@
 			</p>{/if}
 		{#if source.inputs.length || source.notes.length || (source.chance !== null && !source.chanceBasis)}
 			<details class="row-details">
-				<summary>Details <span class="sr-only">for {source.name}</span></summary>
+				<summary
+					>Details <span class="sr-only">for <span data-game>{source.name}</span></span></summary
+				>
 				{#if source.inputs.length}
 					<p class="detail-label">Required items</p>
 					<ul>
 						{#each source.inputs as input, index (index)}<li>
-								{formatNumber(input.quantity)} × <ItemLink item={input.item} />
+								{formatNumber(input.quantity)} × <EntityLink entity={input.item} />
 							</li>{/each}
 					</ul>
 				{/if}
@@ -50,8 +52,8 @@
 		<td class="numeric context-value">
 			{#if source.price}
 				{formatNumber(source.price.amount)}<small
-					>{#if source.price.currency}<ItemLink
-							item={source.price.currency}
+					>{#if source.price.currency}<EntityLink
+							entity={source.price.currency}
 						/>{:else}gold{/if}</small
 				>
 			{:else if source.chance !== null && source.chanceBasis}

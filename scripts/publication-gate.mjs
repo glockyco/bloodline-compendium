@@ -39,7 +39,7 @@ export async function publicationGate(directory) {
   const metadata = { title: new Map(), description: new Map() };
   for (const file of [...files].sort()) {
     if (!file.endsWith(".html")) continue;
-    const page = { file, ids: new Set(), references: [] };
+    const page = { file, ids: new Set(), references: [], noindex: false };
     const titles = [];
     const descriptions = [];
     walk(parse(await readFile(join(directory, file), "utf8")), (node) => {
@@ -53,6 +53,12 @@ export async function publicationGate(directory) {
         attrs.name?.toLowerCase() === "description"
       )
         descriptions.push(attrs.content ?? "");
+      if (
+        node.tagName === "meta" &&
+        attrs.name?.toLowerCase() === "robots" &&
+        /noindex/i.test(attrs.content ?? "")
+      )
+        page.noindex = true;
       for (const attribute of ["href", "src"])
         if (attrs[attribute]) page.references.push(attrs[attribute]);
       if (attrs.srcset && !attrs.srcset.startsWith("data:"))
@@ -139,15 +145,16 @@ export async function publicationGate(directory) {
       !result.target ||
       result.url.search ||
       result.url.hash ||
-      ["/404", "/404.html", "/404/"].includes(result.path)
+      result.target.noindex
     )
       throw new Error("Invalid sitemap page: " + location);
     if (sitemapPaths.has(result.path))
       throw new Error("Duplicate sitemap page: " + location);
     sitemapPaths.add(result.path);
   }
-  for (const path of pages.keys())
-    if (!["/404.html", "/404/"].includes(path) && !sitemapPaths.has(path))
+  // Pages marked noindex, such as the 404 page and the presentation fixtures, stay out of the sitemap.
+  for (const [path, page] of pages)
+    if (!page.noindex && !sitemapPaths.has(path))
       throw new Error("Sitemap is missing " + path);
   return {
     pages: pages.size,

@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { publicationGate } from '../../scripts/publication-gate.mjs';
@@ -151,6 +151,22 @@ it.each([
 	await publication(async (directory) => {
 		await writeFile(join(directory, 'sitemap.xml'), sitemap);
 		await expect(publicationGate(directory)).rejects.toThrow(error);
+	});
+});
+
+it('keeps a noindex page out of the sitemap without failing the gate', async () => {
+	await publication(async (directory) => {
+		await mkdir(join(directory, 'design'));
+		await writeFile(
+			join(directory, 'design/index.html'),
+			publicationPage('Invented fixtures', '', undefined, '<meta name="robots" content="noindex">')
+		);
+		expect((await publicationGate(directory)).sitemapEntries).toBe(publicationPaths.length);
+		await writeFile(
+			join(directory, 'sitemap.xml'),
+			publicationSitemap([...publicationPaths, '/design/'])
+		);
+		await expect(publicationGate(directory)).rejects.toThrow('Invalid sitemap');
 	});
 });
 

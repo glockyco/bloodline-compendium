@@ -17,7 +17,7 @@
 	const rest = $derived(item.facts.filter((fact) => !fact.tooltipLabel));
 </script>
 
-<div class="tooltip">
+<div class="tooltip" data-ui="tooltip">
 	<svelte:element this={heading} class="name" data-game>{item.name}</svelte:element>
 	<div class="body">
 		<div class="slot">
@@ -90,12 +90,15 @@
 	dl {
 		display: grid;
 		gap: var(--space-1);
+		min-width: 0;
 		margin: 0;
 	}
+	/* A long value moves below its label instead of leaving the frame. */
 	dl div {
 		display: flex;
+		flex-wrap: wrap;
 		justify-content: space-between;
-		gap: var(--space-4);
+		gap: 0 var(--space-4);
 	}
 	.primary {
 		font-size: var(--type-2);
@@ -104,8 +107,10 @@
 		color: var(--tooltip-muted);
 	}
 	dd {
-		margin: 0;
+		min-width: 0;
+		margin: 0 0 0 auto;
 		text-align: right;
+		overflow-wrap: anywhere;
 		font-variant-numeric: tabular-nums;
 	}
 	.description {

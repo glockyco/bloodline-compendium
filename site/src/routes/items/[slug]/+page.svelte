@@ -2,7 +2,8 @@
 	import { resolve } from '$app/paths';
 	import SourceRow from '#lib/SourceRow.svelte';
 	import RelationTable from '#lib/RelationTable.svelte';
-	import ItemLink from '#lib/ItemLink.svelte';
+	import EntityLink from '#lib/ui/EntityLink.svelte';
+	import Count from '#lib/ui/Count.svelte';
 	import ItemTooltip from '#lib/ItemTooltip.svelte';
 	import { sourceHeadings, titleCase } from '#lib/labels.js';
 	import { sortSources, sourceContext, useHeadings } from '#lib/acquisition.js';
@@ -80,27 +81,18 @@
 	<ol>
 		<li><a href={resolve('/')}>Home</a></li>
 		<li><a href={resolve('items/')}>Items</a></li>
-		<li aria-current="page">{displayName}</li>
+		<li aria-current="page" data-game>{displayName}</li>
 	</ol>
 </nav>
 <article data-pagefind-body>
 	<div class="item-heading">
-		{#if item.icon}<img
-				class="title-icon"
-				src={'/icons/' + item.icon + '-160.webp'}
-				width="80"
-				height="80"
-				alt=""
-			/>{/if}
-		<div>
-			<h1 data-pagefind-meta="title">{displayName}</h1>
-			<p class="identity">
-				<a href={resolve(`items/?category=${encodeURIComponent(item.category.slug)}`)}
-					>{titleCase(item.category.name)}</a
-				>
-				· {titleCase(item.type)}
-			</p>
-		</div>
+		<h1 data-pagefind-meta="title" data-game>{displayName}</h1>
+		<p class="identity">
+			<a href={resolve(`items/?category=${encodeURIComponent(item.category.slug)}`)}
+				>{titleCase(item.category.name)}</a
+			>
+			· <span data-game>{titleCase(item.type)}</span>
+		</p>
 	</div>
 	<div class="detail-layout">
 		<section class="answer panel" aria-labelledby="how-to-get-it" data-pagefind-ignore="all">
@@ -113,7 +105,7 @@
 					{#each sourceGroups as group (group.kind)}
 						<li>
 							<a href={'#source-' + group.kind}
-								><span>{sourceHeadings[group.kind]}</span><strong
+								><span>{sourceHeadings[group.kind]}</span><strong data-game
 									>{group.sources
 										.slice(0, 2)
 										.map((source) => source.name)
@@ -143,7 +135,8 @@
 				{#each sourceGroups as group (group.kind)}
 					<section class="source-group" aria-labelledby={'source-' + group.kind}>
 						<h2 id={'source-' + group.kind}>
-							{sourceHeadings[group.kind]} <span class="count">{group.sources.length}</span>
+							{sourceHeadings[group.kind]}
+							<Count value={group.sources.length} />
 						</h2>
 						<RelationTable
 							items={group.sources}
@@ -160,12 +153,13 @@
 				{/each}
 			</div>
 			{#if uses.length}<section aria-labelledby="used-for">
-					<h2 id="used-for">Used for <span class="count">{uses.length}</span></h2>
+					<h2 id="used-for">Used for <Count value={uses.length} /></h2>
 					<RelationTable items={uses} label="Used for" headings={['Item', 'Required Quantity']}
 						>{#snippet row(use, index)}<tr id={`use-${index + 1}`}
 								><td
-									><ItemLink item={use.item} /><small
-										>{useHeadings[use.kind] ?? sourceHeadings[use.kind]} · {use.name}</small
+									><EntityLink entity={use.item} /><small
+										>{useHeadings[use.kind] ?? sourceHeadings[use.kind]} ·
+										<span data-game>{use.name}</span></small
 									></td
 								><td class="numeric">{formatNumber(use.quantity)}<small>items</small></td></tr
 							>{/snippet}</RelationTable

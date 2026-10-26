@@ -4,6 +4,12 @@
 	import Search from '#lib/Search.svelte';
 	import ReleaseInfo from '#lib/ReleaseInfo.svelte';
 	import { formatNumber } from '#lib/format.js';
+	import ButtonLink from '#lib/ui/ButtonLink.svelte';
+	import Card from '#lib/ui/Card.svelte';
+	import CardGrid from '#lib/ui/CardGrid.svelte';
+	import Count from '#lib/ui/Count.svelte';
+	import IconSlot from '#lib/ui/IconSlot.svelte';
+	import SectionHeading from '#lib/ui/SectionHeading.svelte';
 	let { data } = $props();
 	const unknown = $derived(data.count - data.known);
 </script>
@@ -35,7 +41,7 @@
 			<Search variant="hero" placeholder="Search items, for example {data.example}" />
 		</div>
 		<div class="actions">
-			<a class="primary" href={resolve('items/')}>Browse All Items</a>
+			<ButtonLink href={resolve('items/')}>Browse All Items</ButtonLink>
 			<a href="https://store.steampowered.com/app/1159290/The_Bloodline/" rel="external"
 				>The Bloodline on Steam</a
 			>
@@ -46,45 +52,39 @@
 
 <div class="content">
 	<section aria-labelledby="items-heading">
-		<div class="section-head">
-			<h2 id="items-heading">Items</h2>
-			<a href={resolve('items/')}>All {formatNumber(data.count)} items</a>
-		</div>
-		<ul class="groups">
+		<SectionHeading
+			id="items-heading"
+			title="Items"
+			link={{ href: resolve('items/'), label: `All ${formatNumber(data.count)} items` }}
+		/>
+		<CardGrid rows={3}>
 			{#each data.groups as group (group.slug)}
-				<li class="group">
-					<a href={resolve(`items/?category=${group.slug}`)}>
-						<span class="group-head"
-							><h3>{group.name}</h3>
-							<span class="count">{formatNumber(group.count)}</span></span
-						>
-						<span class="group-text">{group.description}</span>
-						<span class="slots">
-							{#each group.icons as icon (icon)}<span class="slot"
-									><img
-										src="/icons/{icon}-160.webp"
-										alt=""
-										width="80"
-										height="80"
-										loading="lazy"
-									/></span
-								>{/each}
-						</span>
-					</a>
-				</li>
+				<Card href={resolve(`items/?category=${group.slug}`)}>
+					<span class="group-head"
+						><h3>{group.name}</h3>
+						<Count value={group.count} /></span
+					>
+					<span class="group-text">{group.description}</span>
+					<!-- Five slots in every card, empty where a category has fewer icons, so rows keep one rhythm. -->
+					<span class="slots" data-ui="slots">
+						{#each [0, 1, 2, 3, 4] as slot (slot)}<IconSlot
+								icon={group.icons[slot] ?? null}
+							/>{/each}
+					</span>
+				</Card>
 			{/each}
-		</ul>
+		</CardGrid>
 		{#if data.minor.length}<p class="minor">
 				<span>Also</span>
 				{#each data.minor as category (category.slug)}<a
 						href={resolve(`items/?category=${category.slug}`)}
-						>{category.plural} <span class="count">{formatNumber(category.count)}</span></a
+						>{category.plural} <Count value={category.count} /></a
 					>{/each}
 			</p>{/if}
 	</section>
 
 	<section aria-labelledby="ways-heading">
-		<div class="section-head"><h2 id="ways-heading">How to Get Items</h2></div>
+		<SectionHeading id="ways-heading" title="How to Get Items" />
 		<ul class="ways">
 			{#each data.ways as way (way.key)}
 				<li>
@@ -93,15 +93,7 @@
 						href={resolve(`items/?${way.kinds.map((kind) => `source=${kind}`).join('&')}`)}
 					>
 						<span class="stack">
-							{#each way.icons as icon (icon)}<span class="slot"
-									><img
-										src="/icons/{icon}-48.webp"
-										alt=""
-										width="40"
-										height="40"
-										loading="lazy"
-									/></span
-								>{/each}
+							{#each way.icons as icon (icon)}<IconSlot {icon} size="stack" />{/each}
 						</span>
 						<span class="way-text"><b>{way.label}</b><span>{way.text}</span></span>
 						<span class="way-count">{formatNumber(way.count)}<small>items</small></span>
@@ -205,21 +197,6 @@
 		gap: var(--space-4) var(--space-5);
 		margin: var(--space-5) 0;
 	}
-	.primary {
-		display: inline-flex;
-		align-items: center;
-		min-height: var(--size-control);
-		padding: 0 var(--space-5);
-		border-radius: var(--radius-1);
-		background: var(--brand);
-		color: var(--text-on-brand);
-		font-weight: var(--weight-strong);
-		text-decoration: none;
-	}
-	.primary:hover {
-		background: var(--brand-hover);
-		color: var(--text-on-brand);
-	}
 
 	.content {
 		max-width: var(--size-page);
@@ -229,55 +206,10 @@
 	.content > section {
 		margin: var(--space-section) 0 0;
 	}
-	.section-head {
-		display: flex;
-		align-items: baseline;
-		justify-content: space-between;
-		gap: var(--space-4);
-		margin-bottom: var(--space-5);
-	}
-	h2 {
-		margin: 0;
-		font-size: var(--type-4);
-		line-height: var(--leading-title);
-	}
 	ul {
 		margin: 0;
 		padding: 0;
 		list-style: none;
-	}
-	.groups {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--size-card)), 1fr));
-		grid-auto-rows: auto auto auto;
-		gap: 0 var(--space-4);
-	}
-	/* Each card spans three shared rows, so headings, descriptions and icon rows line up across a row of cards. */
-	.group {
-		display: grid;
-		grid-row: span 3;
-		grid-template-rows: subgrid;
-		margin-bottom: var(--space-4);
-	}
-	.group a {
-		display: grid;
-		grid-row: span 3;
-		grid-template-rows: subgrid;
-		gap: var(--space-3);
-		padding: var(--space-panel);
-		border: var(--border-width) solid var(--border);
-		border-radius: var(--radius-2);
-		background: var(--surface-panel);
-		color: var(--text);
-		text-decoration: none;
-		transition:
-			border-color var(--duration-hover),
-			background-color var(--duration-hover);
-	}
-	.group a:hover {
-		border-color: var(--border-control);
-		background: var(--surface-raised);
-		color: var(--text);
 	}
 	.group-head {
 		display: flex;
@@ -290,10 +222,6 @@
 		font-size: var(--type-3);
 		line-height: var(--leading-title);
 	}
-	.count {
-		color: var(--text-muted);
-		font-variant-numeric: tabular-nums;
-	}
 	.group-text {
 		color: var(--text-muted);
 		line-height: var(--leading-snug);
@@ -303,20 +231,6 @@
 		grid-template-columns: repeat(5, minmax(0, 1fr));
 		gap: var(--space-2);
 		align-self: end;
-	}
-	.slot {
-		display: grid;
-		place-items: center;
-		aspect-ratio: 1;
-		border-radius: var(--radius-1);
-		background: var(--surface-slot);
-		box-shadow: inset 0 0 0 var(--border-width) var(--slot-edge);
-		overflow: hidden;
-	}
-	.slot img {
-		width: 88%;
-		height: 88%;
-		object-fit: contain;
 	}
 	.minor {
 		display: flex;

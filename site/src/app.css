@@ -116,23 +116,6 @@ section {
 	font-size: var(--type-1);
 	margin-bottom: var(--space-3);
 }
-.button {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	min-height: var(--size-control);
-	padding: var(--space-3) var(--space-4);
-	background: var(--brand);
-	color: var(--text-on-brand);
-	border: 0;
-	border-radius: var(--radius-1);
-	font-weight: var(--weight-strong);
-	text-decoration: none;
-}
-.button:hover {
-	color: var(--text-on-brand);
-	background: var(--brand-hover);
-}
 .panel,
 .relation-panel {
 	background: var(--surface-panel);
@@ -186,20 +169,11 @@ small {
 	min-height: auto;
 }
 .item-heading {
-	display: flex;
-	gap: var(--space-4);
-	align-items: center;
 	margin-bottom: var(--space-5);
 }
 .item-heading h1 {
 	font-size: var(--type-5);
 	margin-bottom: var(--space-2);
-}
-.title-icon {
-	width: var(--size-icon-title);
-	height: var(--size-icon-title);
-	object-fit: contain;
-	flex-shrink: 0;
 }
 .identity {
 	margin: 0;
@@ -261,17 +235,6 @@ small {
 .source-group {
 	margin: 0;
 	min-width: 0;
-}
-.count {
-	font-family: var(--font-body);
-	font-size: var(--type-1);
-	font-weight: var(--weight-regular);
-	color: var(--text-muted);
-	background: var(--surface-raised);
-	border-radius: var(--radius-round);
-	padding: var(--space-1) var(--space-2);
-	vertical-align: middle;
-	white-space: nowrap;
 }
 table {
 	width: 100%;
@@ -597,10 +560,6 @@ details[open] > summary .show-less {
 }
 
 @media (width < 40rem) {
-	.item-heading {
-		align-items: start;
-		gap: var(--space-3);
-	}
 	th,
 	td,
 	.item-table th button {

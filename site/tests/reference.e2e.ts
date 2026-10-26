@@ -113,7 +113,7 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 		'Location unknown'
 	])
 		await expect(page.locator('article')).toContainText(text);
-	await expect(page.locator('.title-icon')).toHaveAttribute('src', /-160.webp$/);
+	await expect(details.locator('img')).toHaveAttribute('src', /-160.webp$/);
 	await expect(page.locator('article')).not.toContainText('Selection weight');
 	await page.goto('/items/mosswoven-coat/');
 	await expect(page.locator('.source-group')).toContainText('1 of 5');
