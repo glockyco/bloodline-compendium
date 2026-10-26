@@ -35,12 +35,17 @@ test.describe('planted defects on the fixture page', () => {
 
 	test('reports a cell off the shared inset and a comma without a space', async ({ page }) => {
 		await page.goto('/items/lanternedge/');
+		// Hydration can rebuild server-rendered nodes, so plant text only after enhancement is visible.
+		await expect(
+			page.getByRole('button', { name: 'Show 5 more in Sold by', exact: true })
+		).toBeVisible();
 		await page.addStyleTag({ content: '.relation-panel td { padding-left: 2px !important; }' });
-		await page.evaluate(() => {
-			const places = document.querySelector('.source-places');
-			if (places) places.textContent = 'Glass Reach,Amber Coast';
+		const places = page.locator('.source-places').first();
+		await places.evaluate((element) => {
+			element.textContent = 'Glass Reach,Amber Coast';
 		});
 		const problems = (await layoutProblems(page)).join('\n');
+		await expect(places).toHaveText('Glass Reach,Amber Coast');
 		expect(problems).toContain('instead of');
 		expect(problems).toContain('comma without a space');
 	});

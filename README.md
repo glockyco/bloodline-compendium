@@ -109,6 +109,8 @@ bun run --cwd site test:unit && bun run --cwd site build:fixtures && bun run --c
 
 In browser accessibility tests, expand content through the enhanced controls before scanning it, because hydration replaces the static fallback disclosures. Keep checks of no-JavaScript disclosures separate from the enhanced page checks.
 
+When planting DOM defects in browser tests, wait for an enhanced control before changing the page, because hydration can rebuild server-rendered nodes.
+
 For OpenSpec validation on Apple silicon Macs or Linux:
 
 ```sh
