@@ -72,4 +72,4 @@ Open work before building pages: establish the authored association between fini
 ## 9. Integration
 
 - [ ] 9.1 Run every check (dotnet, types, guard, lint, stylelint, format, svelte-check, unit, fixtures build, e2e, voice, OpenSpec strict validation), and verify all pass
-- [ ] 9.2 Create the change for disciplines, skills and the skill planner from design.md "Order of later changes" and the findings of 4.7, and verify `openspec validate --strict` passes for it
+- [x] 9.2 Create the change for disciplines, skills and the skill planner from design.md "Order of later changes" and the findings of 4.7, and verify `openspec validate --strict` passes for it
