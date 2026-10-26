@@ -9,16 +9,17 @@ const site = join(root, "site");
 const require = createRequire(join(site, "package.json"));
 const sharp = require("sharp");
 const fixtures = process.argv.includes("--fixtures");
+const preview = process.argv.includes("--preview");
 const input = fixtures
   ? join(site, "fixtures/site-data")
   : process.env.BLOODLINE_SITE_DATA;
 if (!input)
   throw new Error(
-    "Production requires BLOODLINE_SITE_DATA. Use build:fixtures for invented data.",
+    "Set BLOODLINE_SITE_DATA to build game data. Use build:fixtures for invented data.",
   );
 const directory = resolve(input);
 const build = JSON.parse(await readFile(join(directory, "build.json"), "utf8"));
-if (!fixtures) assertProductionBuild(build, root);
+if (!fixtures && !preview) assertProductionBuild(build, root);
 const started = performance.now();
 const icons = join(site, "static/icons");
 await rm(icons, { recursive: true, force: true });

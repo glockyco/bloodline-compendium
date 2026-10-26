@@ -1,20 +1,20 @@
 import type { SourceKind, GapKind } from './site-data.js';
-export const sourceLabels: Record<SourceKind, string> = {
-	shop: 'Shop',
-	currencyShop: 'Currency shop',
-	smithing: 'Smithing',
-	crafting: 'Crafting',
-	cooking: 'Cooking',
-	containerLoot: 'Container loot',
-	randomLoot: 'Random loot',
-	enemyDrop: 'Enemy drop',
-	pickup: 'Pickup',
-	dialogue: 'Dialogue grant',
-	fishing: 'Fishing',
-	gathering: 'Gathering',
-	farming: 'Farming',
-	bountyNote: 'Bounty note',
-	settlementDelivery: 'Settlement delivery'
+export const sourceHeadings: Record<SourceKind, string> = {
+	shop: 'Sold by',
+	currencyShop: 'Sold for special currency',
+	smithing: 'Made by smithing',
+	crafting: 'Crafted',
+	cooking: 'Cooked',
+	containerLoot: 'Found in containers',
+	randomLoot: 'Found as random loot',
+	enemyDrop: 'Dropped by',
+	pickup: 'Picked up',
+	dialogue: 'Given in dialogue',
+	fishing: 'Fished',
+	gathering: 'Gathered',
+	farming: 'Grown',
+	bountyNote: 'Obtained from bounty notes',
+	settlementDelivery: 'Delivered by settlements'
 };
 export const gaps: Record<GapKind, { title: string; explanation: string }> = {
 	itemWithoutSource: {

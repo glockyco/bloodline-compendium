@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { gaps } from '#lib/labels.js';
+	import ExpandableList from '#lib/ExpandableList.svelte';
 	let { data } = $props();
 </script>
 
@@ -23,11 +24,14 @@
 	{#each data.coverage.gaps as gap (gap.kind)}<section class="panel" id={gap.kind}>
 			<h2>{gaps[gap.kind].title} <span class="count">{gap.entries.length}</span></h2>
 			<p class="muted">{gaps[gap.kind].explanation}</p>
-			{#if gap.entries.length}<ul class="gap-list">
-					{#each gap.entries as entry, index (index)}<li>
-							{#if entry.itemSlug}<a href={resolve(`items/${entry.itemSlug}/`)}>{entry.label}</a
-								>{:else}<span>{entry.label}</span>{/if}{#if entry.detail}<p>{entry.detail}</p>{/if}
-						</li>{/each}
-				</ul>{:else}<p>No known gaps of this kind.</p>{/if}
+			{#if gap.entries.length}
+				<ExpandableList items={gap.entries} initial={8} noun="entries" className="gap-list">
+					{#snippet row(entry)}
+						{#if entry.itemSlug}<a href={resolve(`items/${entry.itemSlug}/`)}>{entry.label}</a
+							>{:else}<span>{entry.label}</span>{/if}
+						{#if entry.detail}<p>{entry.detail}</p>{/if}
+					{/snippet}
+				</ExpandableList>
+			{:else}<p>No known gaps of this kind.</p>{/if}
 		</section>{/each}
 </div>

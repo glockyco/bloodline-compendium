@@ -1,9 +1,16 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import ItemLink from '#lib/ItemLink.svelte';
-	import { sourceLabels } from '#lib/labels.js';
+	import ExpandableList from '#lib/ExpandableList.svelte';
+	import SourceRow from '#lib/SourceRow.svelte';
+	import { sourceHeadings } from '#lib/labels.js';
+	import type { SourceKind } from '#lib/site-data.js';
 	let { data } = $props();
 	const item = $derived(data.item);
+	const sourceGroups = $derived(
+		(Object.keys(sourceHeadings) as SourceKind[])
+			.map((kind) => ({ kind, sources: item.sources.filter((source) => source.kind === kind) }))
+			.filter((group) => group.sources.length)
+	);
 </script>
 
 <svelte:head
@@ -47,52 +54,22 @@
 			</aside>{:else}<p class="muted">
 				Sources describe what the data says, not a guarantee that a place is reachable.
 			</p>
-			<div class="source-grid">
-				{#each item.sources as source, index (index)}<section class="panel source">
-						<p class="eyebrow">{sourceLabels[source.kind]}</p>
-						<h3>{source.name}</h3>
-						<dl class="source-facts">
-							<div>
-								<dt>Places</dt>
-								<dd>
-									{source.places.length ? source.places.map((p) => p.name).join(', ') : 'Unknown'}
-								</dd>
-							</div>
-							{#if source.price}<div>
-									<dt>Price</dt>
-									<dd>
-										{source.price.amount}
-										{#if source.price.currency}<ItemLink
-												item={source.price.currency}
-											/>{:else}money{/if}
-									</dd>
-								</div>{/if}{#if source.amount}<div>
-									<dt>Amount</dt>
-									<dd>
-										{source.amount.min === source.amount.max
-											? source.amount.min
-											: source.amount.min + ' to ' + source.amount.max}
-									</dd>
-								</div>{/if}{#if source.weight}<div>
-									<dt>Raw weight</dt>
-									<dd>{source.weight.value} of {source.weight.total}</dd>
-								</div>{/if}{#if source.chance !== null}<div>
-									<dt>Chance</dt>
-									<dd>
-										{(source.chance * 100).toLocaleString('en', { maximumFractionDigits: 4 })}%
-									</dd>
-								</div>{/if}
-						</dl>
-						{#if source.inputs.length}<h4>Consumed inputs</h4>
-							<ul>
-								{#each source.inputs as input, i (i)}<li>
-										{input.quantity} × <ItemLink item={input.item} />
-									</li>{/each}
-							</ul>{/if}{#if source.notes.length}<h4>Notes</h4>
-							<ul>
-								{#each source.notes as note, i (i)}<li>{note}</li>{/each}
-							</ul>{/if}
-					</section>{/each}
+			<div class="source-groups">
+				{#each sourceGroups as group (group.kind)}
+					<section class="source-group" aria-labelledby={'source-' + group.kind}>
+						<h3 id={'source-' + group.kind}>
+							{sourceHeadings[group.kind]} <span class="count">{group.sources.length}</span>
+						</h3>
+						<ExpandableList
+							items={group.sources}
+							initial={3}
+							noun="sources"
+							className="source-list"
+						>
+							{#snippet row(source)}<SourceRow {source} />{/snippet}
+						</ExpandableList>
+					</section>
+				{/each}
 			</div>{/if}
 	</section>
 </article>

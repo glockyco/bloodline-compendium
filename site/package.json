@@ -7,6 +7,7 @@
 		"dev": "vite dev",
 		"build": "bun ../scripts/build-site.mjs",
 		"build:fixtures": "bun ../scripts/build-site.mjs --fixtures",
+		"build:preview": "bun ../scripts/build-site.mjs --preview",
 		"preview": "vite preview --host 127.0.0.1",
 		"prepare": "svelte-kit sync",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",

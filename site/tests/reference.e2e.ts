@@ -25,12 +25,12 @@ test('shows facts, complete source fields and unknowns', async ({ page }) => {
 		'45 money',
 		'3 Cinderpear',
 		'1 to 2',
-		'2 of 11',
+		'2 of 18.02',
 		'25%',
 		'Consumed inputs',
 		'Silverglass shard',
 		'Requires a lit forge.',
-		/Places\s*Unknown/
+		/Places:\s*Unknown/
 	])
 		await expect(page.locator('article')).toContainText(text);
 	await expect(page.locator('.large-icon')).toHaveAttribute('src', /-160.webp$/);
@@ -101,4 +101,31 @@ test('reference layouts stay readable on desktop and phone', async ({ page }, te
 			});
 		}
 	}
+});
+
+test('source and coverage disclosures work without JavaScript', async ({ browser, baseURL }) => {
+	const context = await browser.newContext({ javaScriptEnabled: false, baseURL });
+	const page = await context.newPage();
+	await page.goto('/items/lanternedge/');
+	const shops = page
+		.locator('.source-group')
+		.filter({ has: page.getByRole('heading', { name: 'Sold by' }) });
+	await expect(shops.locator('.source-row:visible')).toHaveCount(3);
+	await expect(shops.getByText('Lilac Feather Trader', { exact: true })).not.toBeVisible();
+	await shops.locator('summary').click();
+	await expect(shops.locator('.source-row:visible')).toHaveCount(13);
+	await expect(shops.getByText('Lilac Feather Trader', { exact: true })).toBeVisible();
+	await shops.locator('summary').click();
+	await expect(shops.locator('.source-row:visible')).toHaveCount(3);
+	await page.goto('/coverage/');
+	for (const id of ['sourceWithoutPlace', 'placeWithoutName']) {
+		const gap = page.locator('#' + id);
+		await expect(gap.locator('.gap-list > li:visible')).toHaveCount(8);
+		const total = await gap.locator('.gap-list > li').count();
+		await gap.locator('summary').click();
+		await expect(gap.locator('.gap-list > li:visible')).toHaveCount(total);
+		await gap.locator('summary').click();
+		await expect(gap.locator('.gap-list > li:visible')).toHaveCount(8);
+	}
+	await context.close();
 });

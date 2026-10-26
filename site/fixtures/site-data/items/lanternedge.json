@@ -50,6 +50,138 @@
 			"notes": ["Stock refresh conditions are unknown."]
 		},
 		{
+			"kind": "shop",
+			"name": "Amber Lantern Trader",
+			"places": [],
+			"price": { "amount": 46, "currency": null },
+			"amount": { "min": 1, "max": 1 },
+			"weight": null,
+			"chance": null,
+			"inputs": [],
+			"notes": []
+		},
+		{
+			"kind": "shop",
+			"name": "Blue Glass Trader",
+			"places": [],
+			"price": { "amount": 47, "currency": null },
+			"amount": { "min": 1, "max": 1 },
+			"weight": null,
+			"chance": null,
+			"inputs": [],
+			"notes": []
+		},
+		{
+			"kind": "shop",
+			"name": "Copper Crescent Trader",
+			"places": [],
+			"price": { "amount": 48, "currency": null },
+			"amount": { "min": 1, "max": 1 },
+			"weight": null,
+			"chance": null,
+			"inputs": [],
+			"notes": []
+		},
+		{
+			"kind": "shop",
+			"name": "Dappled Star Trader",
+			"places": [],
+			"price": { "amount": 49, "currency": null },
+			"amount": { "min": 1, "max": 1 },
+			"weight": null,
+			"chance": null,
+			"inputs": [],
+			"notes": []
+		},
+		{
+			"kind": "shop",
+			"name": "Emerald Kite Trader",
+			"places": [],
+			"price": { "amount": 50, "currency": null },
+			"amount": { "min": 1, "max": 1 },
+			"weight": null,
+			"chance": null,
+			"inputs": [],
+			"notes": []
+		},
+		{
+			"kind": "shop",
+			"name": "Frosted Wheel Trader",
+			"places": [],
+			"price": { "amount": 51, "currency": null },
+			"amount": { "min": 1, "max": 1 },
+			"weight": null,
+			"chance": null,
+			"inputs": [],
+			"notes": []
+		},
+		{
+			"kind": "shop",
+			"name": "Golden Spiral Trader",
+			"places": [],
+			"price": { "amount": 52, "currency": null },
+			"amount": { "min": 1, "max": 1 },
+			"weight": null,
+			"chance": null,
+			"inputs": [],
+			"notes": []
+		},
+		{
+			"kind": "shop",
+			"name": "Hazel Comet Trader",
+			"places": [],
+			"price": { "amount": 53, "currency": null },
+			"amount": { "min": 1, "max": 1 },
+			"weight": null,
+			"chance": null,
+			"inputs": [],
+			"notes": []
+		},
+		{
+			"kind": "shop",
+			"name": "Indigo Prism Trader",
+			"places": [],
+			"price": { "amount": 54, "currency": null },
+			"amount": { "min": 1, "max": 1 },
+			"weight": null,
+			"chance": null,
+			"inputs": [],
+			"notes": []
+		},
+		{
+			"kind": "shop",
+			"name": "Jade Compass Trader",
+			"places": [],
+			"price": { "amount": 55, "currency": null },
+			"amount": { "min": 1, "max": 1 },
+			"weight": null,
+			"chance": null,
+			"inputs": [],
+			"notes": []
+		},
+		{
+			"kind": "shop",
+			"name": "Knotted Ribbon Trader",
+			"places": [],
+			"price": { "amount": 56, "currency": null },
+			"amount": { "min": 1, "max": 1 },
+			"weight": null,
+			"chance": null,
+			"inputs": [],
+			"notes": []
+		},
+		{
+			"kind": "shop",
+			"name": "Lilac Feather Trader",
+			"places": [],
+			"price": { "amount": 57, "currency": null },
+			"amount": { "min": 1, "max": 1 },
+			"weight": null,
+			"chance": null,
+			"inputs": [],
+			"notes": []
+		},
+		{
 			"kind": "crafting",
 			"name": "Star-forged blade recipe",
 			"places": [
@@ -119,7 +251,7 @@
 			},
 			"weight": {
 				"value": 2,
-				"total": 11
+				"total": 18.020000000000028
 			},
 			"chance": 0.25,
 			"inputs": [],
