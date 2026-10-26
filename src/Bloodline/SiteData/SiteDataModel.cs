@@ -189,8 +189,14 @@ internal enum GapKind
     UnreadObject,
 }
 
-/// <summary>One entry of a gap. <see cref="ItemSlug"/> links to the affected item when there is one.</summary>
-internal sealed record GapEntry(string Label, string? ItemSlug, string? Detail);
+/// <summary>
+/// One entry of a gap. <see cref="ItemSlug"/> links to the affected item when there is one.
+/// <see cref="Source"/> names the kind of source a source gap is about, so pages can word it.
+/// </summary>
+internal sealed record GapEntry(string Label, string? ItemSlug, string? Detail)
+{
+    public SourceKind? Source { get; init; }
+}
 
 /// <summary>The files of the site data, gathered only to export one schema for all of them.</summary>
 internal sealed record SiteDataFiles(

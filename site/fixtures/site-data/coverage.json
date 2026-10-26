@@ -14,69 +14,82 @@
 			"kind": "sourceWithoutPlace",
 			"entries": [
 				{
-					"label": "Orris the Collector",
+					"label": "Lanternedge",
 					"itemSlug": "lanternedge",
-					"detail": "No location is known for this currency shop."
+					"detail": "Orris the Collector",
+					"source": "currencyShop"
 				},
 				{
-					"label": "Amber Lantern Trader",
+					"label": "Lanternedge",
 					"itemSlug": "lanternedge",
-					"detail": "The shop's location is unknown."
+					"detail": "Amber Lantern Trader",
+					"source": "shop"
 				},
 				{
-					"label": "Blue Glass Trader",
+					"label": "Lanternedge",
 					"itemSlug": "lanternedge",
-					"detail": "The shop's location is unknown."
+					"detail": "Blue Glass Trader",
+					"source": "shop"
 				},
 				{
-					"label": "Copper Crescent Trader",
+					"label": "Lanternedge",
 					"itemSlug": "lanternedge",
-					"detail": "The shop's location is unknown."
+					"detail": "Copper Crescent Trader",
+					"source": "shop"
 				},
 				{
-					"label": "Dappled Star Trader",
+					"label": "Lanternedge",
 					"itemSlug": "lanternedge",
-					"detail": "The shop's location is unknown."
+					"detail": "Dappled Star Trader",
+					"source": "shop"
 				},
 				{
-					"label": "Emerald Kite Trader",
+					"label": "Lanternedge",
 					"itemSlug": "lanternedge",
-					"detail": "The shop's location is unknown."
+					"detail": "Emerald Kite Trader",
+					"source": "shop"
 				},
 				{
-					"label": "Frosted Wheel Trader",
+					"label": "Lanternedge",
 					"itemSlug": "lanternedge",
-					"detail": "The shop's location is unknown."
+					"detail": "Frosted Wheel Trader",
+					"source": "shop"
 				},
 				{
-					"label": "Golden Spiral Trader",
+					"label": "Lanternedge",
 					"itemSlug": "lanternedge",
-					"detail": "The shop's location is unknown."
+					"detail": "Golden Spiral Trader",
+					"source": "shop"
 				},
 				{
-					"label": "Hazel Comet Trader",
+					"label": "Lanternedge",
 					"itemSlug": "lanternedge",
-					"detail": "The shop's location is unknown."
+					"detail": "Hazel Comet Trader",
+					"source": "shop"
 				},
 				{
-					"label": "Indigo Prism Trader",
+					"label": "Lanternedge",
 					"itemSlug": "lanternedge",
-					"detail": "The shop's location is unknown."
+					"detail": "Indigo Prism Trader",
+					"source": "shop"
 				},
 				{
-					"label": "Jade Compass Trader",
+					"label": "Lanternedge",
 					"itemSlug": "lanternedge",
-					"detail": "The shop's location is unknown."
+					"detail": "Jade Compass Trader",
+					"source": "shop"
 				},
 				{
-					"label": "Knotted Ribbon Trader",
+					"label": "Lanternedge",
 					"itemSlug": "lanternedge",
-					"detail": "The shop's location is unknown."
+					"detail": "Knotted Ribbon Trader",
+					"source": "shop"
 				},
 				{
-					"label": "Lilac Feather Trader",
+					"label": "Lanternedge",
 					"itemSlug": "lanternedge",
-					"detail": "The shop's location is unknown."
+					"detail": "Lilac Feather Trader",
+					"source": "shop"
 				}
 			]
 		},

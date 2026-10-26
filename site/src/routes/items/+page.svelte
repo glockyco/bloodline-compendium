@@ -200,7 +200,9 @@
 										height="40"
 										loading="lazy"
 									/>{/if}<span
-									>{item.name}{#if item.qualifier}<small>{item.qualifier}</small>{/if}</span
+									><span data-game>{item.name}</span>{#if item.qualifier}<small
+											>{item.qualifier}</small
+										>{/if}</span
 								></a
 							></td
 						>

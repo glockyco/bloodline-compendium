@@ -113,7 +113,8 @@ internal static class CatalogBuilder
             }
             foreach (var source in sources.Where(SourceCoverage.HasUnknownPlace))
             {
-                Gap(GapKind.SourceWithoutPlace, item.Name, source.Kind + ": " + source.Name);
+                gapEntries[GapKind.SourceWithoutPlace]
+                    .Add(new GapEntry(item.Name, item.Slug, source.Name) { Source = source.Kind });
             }
         }
         foreach (

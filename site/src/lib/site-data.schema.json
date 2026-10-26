@@ -179,6 +179,26 @@
         },
         "label": {
           "type": "string"
+        },
+        "source": {
+          "enum": [
+            "shop",
+            "currencyShop",
+            "smithing",
+            "crafting",
+            "cooking",
+            "containerLoot",
+            "randomLoot",
+            "enemyDrop",
+            "pickup",
+            "dialogue",
+            "fishing",
+            "gathering",
+            "farming",
+            "bountyNote",
+            "settlementDelivery",
+            null
+          ]
         }
       },
       "required": [

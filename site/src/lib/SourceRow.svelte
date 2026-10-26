@@ -39,7 +39,8 @@
 				{#if source.chance !== null && !source.chanceBasis}<p>
 						Chance: {formatChance(source.chance)}. What this chance applies to is unknown.
 					</p>{/if}
-				{#if source.notes.length}<ul>
+				<!-- Notes quote dialogue lines from the game. The entity graph replaces them with typed conditions. -->
+				{#if source.notes.length}<ul data-game>
 						{#each source.notes as note, index (index)}<li>{note}</li>{/each}
 					</ul>{/if}
 			</details>

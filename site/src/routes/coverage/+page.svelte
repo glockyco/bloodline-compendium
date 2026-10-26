@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import { gaps } from '#lib/labels.js';
+	import { gaps, sourceHeadings } from '#lib/labels.js';
+	import Count from '#lib/ui/Count.svelte';
 	import ExpandableList from '#lib/ExpandableList.svelte';
 	import SeoHead from '#lib/SeoHead.svelte';
 	let { data } = $props();
@@ -22,14 +23,17 @@
 </p>
 <div class="coverage-stack">
 	{#each data.coverage.gaps as gap (gap.kind)}<section class="panel" id={gap.kind}>
-			<h2>{gaps[gap.kind].title} <span class="count">{gap.entries.length}</span></h2>
+			<h2>{gaps[gap.kind].title} <Count value={gap.entries.length} /></h2>
 			<p class="muted">{gaps[gap.kind].explanation}</p>
 			{#if gap.entries.length}
 				<ExpandableList items={gap.entries} initial={8} noun="entries" className="gap-list">
 					{#snippet row(entry)}
-						{#if entry.itemSlug}<a href={resolve(`items/${entry.itemSlug}/`)}>{entry.label}</a
-							>{:else}<span>{entry.label}</span>{/if}
-						{#if entry.detail}<p>{entry.detail}</p>{/if}
+						{#if entry.itemSlug}<a href={resolve(`items/${entry.itemSlug}/`)} data-game
+								>{entry.label}</a
+							>{:else}<span data-game>{entry.label}</span>{/if}
+						{#if entry.source}<p>
+								{sourceHeadings[entry.source]} <span data-game>{entry.detail}</span>
+							</p>{:else if entry.detail}<p>{entry.detail}</p>{/if}
 					{/snippet}
 				</ExpandableList>
 			{:else}<p>No known gaps of this kind.</p>{/if}

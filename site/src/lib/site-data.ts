@@ -123,6 +123,23 @@ export interface GapEntry {
   detail: string | null;
   itemSlug: string | null;
   label: string;
+  source?:
+    | "shop"
+    | "currencyShop"
+    | "smithing"
+    | "crafting"
+    | "cooking"
+    | "containerLoot"
+    | "randomLoot"
+    | "enemyDrop"
+    | "pickup"
+    | "dialogue"
+    | "fishing"
+    | "gathering"
+    | "farming"
+    | "bountyNote"
+    | "settlementDelivery"
+    | null;
   [k: string]: unknown;
 }
 /**

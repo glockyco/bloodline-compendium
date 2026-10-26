@@ -6,6 +6,7 @@ import { assetGate } from "./asset-gate.mjs";
 import { assertProductionBuild } from "./provenance.mjs";
 import { publicationGate } from "./publication-gate.mjs";
 import { storeHeroArt } from "./store-art.mjs";
+import { voiceGate } from "./voice-gate.mjs";
 const root = resolve(import.meta.dirname, "..");
 const site = join(root, "site");
 const require = createRequire(join(site, "package.json"));
@@ -108,6 +109,7 @@ console.log(
   ).report,
 );
 console.log((await publicationGate(join(site, "build"))).report);
+console.log((await voiceGate(join(site, "build"))).report);
 if (production) {
   assertProductionBuild(build, root);
   await mkdir(join(site, ".stage"), { recursive: true });
