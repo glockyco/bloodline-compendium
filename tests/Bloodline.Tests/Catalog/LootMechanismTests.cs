@@ -38,7 +38,15 @@ public sealed class LootMechanismTests
             new BuildRecord(1159290, 1, []),
             [item, .. classes],
             tables ?? [],
-            [],
+            [
+                new EnumRecord(
+                    "/Game/Invented/Loot",
+                    [
+                        new EnumEntry("Loot::NewEnumerator1", 1, "Dungeon"),
+                        new EnumEntry("Loot::NewEnumerator99", 3, "Fort"),
+                    ]
+                ),
+            ],
             [new LevelRecord(Level, [], actors ?? [])],
             [],
             [],
@@ -111,6 +119,105 @@ public sealed class LootMechanismTests
     }
 
     [Fact]
+    public void PoolSelectorUsesEnumNumericValueRatherThanEnumeratorSuffix()
+    {
+        var properties = Parse("""{"Loot Type":{"$enum":"Loot::NewEnumerator99"}}""");
+        properties["Loot Table - Minolurk Fort"] = Pool(4);
+        properties["Selected Loot Table"] = Pool(99);
+        var source = Assert
+            .Single(
+                new ContainerLootMechanism().FindSources(
+                    Context([new ClassRecord(Container, [ContainerLootMechanism.Root], properties)])
+                )
+            )
+            .Source;
+        Assert.Equal(new Weight(4, 10), source.Weight);
+    }
+
+    [Fact]
+    public void LooseLootUsesGenericPoolAndRecordsItsMaximumSpawnCount()
+    {
+        var properties = Parse(
+            """{"Use Preset Table?":true,"Preset Table Name":"Generic","Min Spawn Amount":2,"Max Spawn Amount":5}"""
+        );
+        properties["Generic Loot Table"] = Pool(4);
+        properties["Loot Table"] = Pool(99);
+        var source = Assert
+            .Single(
+                new ContainerLootMechanism().FindSources(
+                    Context(
+                        [
+                            new ClassRecord(
+                                Container,
+                                [ContainerLootMechanism.LooseRoot],
+                                properties
+                            ),
+                        ],
+                        [new ActorRecord("Loose1", Container, new JsonObject())]
+                    )
+                )
+            )
+            .Source;
+        Assert.Equal(new Weight(4, 10), source.Weight);
+        Assert.Equal(Level, Assert.Single(source.Places).Id);
+        Assert.Contains(
+            source.Notes,
+            note => note.Contains("loose loot", StringComparison.Ordinal)
+        );
+        Assert.Contains("Maximum spawn amount: 5.", source.Notes);
+    }
+
+    [Fact]
+    public void LooseLootUsesNamedPresetEvenWithoutConstructionPresetSwitch()
+    {
+        var properties = Parse(
+            """{"Preset Table Name":"InventedPreset","Use Preset Table?":false}"""
+        );
+        properties["Loot Table"] = Pool(99);
+        var row = Parse("""{"ContainerName":{"$text":"Scattered fruit"}}""");
+        row["ContainerLootTable"] = Pool(4);
+        var source = Assert
+            .Single(
+                new ContainerLootMechanism().FindSources(
+                    Context(
+                        [
+                            new ClassRecord(
+                                Container,
+                                [ContainerLootMechanism.LooseRoot],
+                                properties
+                            ),
+                        ],
+                        tables:
+                        [
+                            new TableRecord(
+                                "/Game/Invented/PresetLootTables_DT",
+                                null,
+                                [new TableRow("InventedPreset", row)]
+                            ),
+                        ]
+                    )
+                )
+            )
+            .Source;
+        Assert.Equal("Scattered fruit", source.Name);
+        Assert.Equal(new Weight(4, 10), source.Weight);
+    }
+
+    [Fact]
+    public void LooseLootDoesNotInventMissingOrBytecodeOnlyPresetPools()
+    {
+        var properties = Parse("""{"Preset Table Name":"Mining","Use Preset Table?":true}""");
+        properties["Loot Table"] = Pool(99);
+        Assert.Empty(
+            new ContainerLootMechanism().FindSources(
+                Context([
+                    new ClassRecord(Container, [ContainerLootMechanism.LooseRoot], properties),
+                ])
+            )
+        );
+    }
+
+    [Fact]
     public void PresetPoolUsesRowNameAndPlayerFacingContainerName()
     {
         var properties = Parse(
@@ -140,17 +247,85 @@ public sealed class LootMechanismTests
         Assert.Equal(new Weight(1, 7), source.Weight);
     }
 
-    [Theory]
-    [InlineData("Spawn Chance", 0)]
-    [InlineData("Max amount of loot items", -1)]
-    public void DisabledContainerDoesNotGrant(string field, int value)
+    [Fact]
+    public void DisabledContainerDoesNotGrant()
     {
-        var properties = new JsonObject { [field] = value, ["Selected Loot Table"] = Pool() };
+        var properties = new JsonObject { ["Spawn Chance"] = 0, ["Selected Loot Table"] = Pool() };
         Assert.Empty(
             new ContainerLootMechanism().FindSources(
                 Context([new ClassRecord(Container, [ContainerLootMechanism.Root], properties)])
             )
         );
+    }
+
+    [Fact]
+    public void ZeroLootCountSettingsRetainTheInclusiveInitialRoll()
+    {
+        var properties = Parse("""{"Min amount of loot items":0,"Max amount of loot items":0}""");
+        properties["Selected Loot Table"] = Pool();
+        Assert.Single(
+            new ContainerLootMechanism().FindSources(
+                Context([new ClassRecord(Container, [ContainerLootMechanism.Root], properties)])
+            )
+        );
+    }
+
+    [Fact]
+    public void EnemyZeroWeightEntriesDoNotGrant()
+    {
+        var properties = Parse("""{"Enemy Name":{"$text":"Marsh beast"}}""");
+        properties["Loot Table"] = Pool(0);
+        properties["Rare Pickup Loot"] = Pool(0);
+        Assert.Empty(
+            new EnemyDropMechanism().FindSources(Context([new ClassRecord(Enemy, [], properties)]))
+        );
+    }
+
+    [Theory]
+    [InlineData("npcParametersArr")]
+    [InlineData("spawnDataArr")]
+    public void PopulationSpawnerUsesBothRecordedArrays(string field)
+    {
+        var properties = Parse("""{"Enemy Name":{"$text":"Marsh beast"}}""");
+        properties["Loot Table"] = Pool();
+        var spawner = new JsonObject
+        {
+            [field] = JsonNode.Parse(
+                """[{"classNPC":{"$ref":"/Game/Invented/Beast.Beast_C"},"maxSpawnNPC":1}]"""
+            ),
+        };
+        var source = Assert
+            .Single(
+                new EnemyDropMechanism().FindSources(
+                    Context(
+                        [new ClassRecord(Enemy, [], properties)],
+                        [new ActorRecord("Spawner", "/Game/Invented/Spawner.Spawner_C", spawner)]
+                    )
+                )
+            )
+            .Source;
+        Assert.Equal(Level, Assert.Single(source.Places).Id);
+    }
+
+    [Fact]
+    public void CustomAndDungeonSpawnersNameEnemyClasses()
+    {
+        var properties = Parse("""{"Enemy Name":{"$text":"Marsh beast"}}""");
+        properties["Loot Table"] = Pool();
+        var spawner = Parse(
+            """{"Spawns":{"$map":[[{"$ref":"/Game/Invented/Beast.Beast_C"},1]]},"Enemy to Spawn":{"$ref":"/Game/Invented/Beast.Beast_C"}}"""
+        );
+        var source = Assert
+            .Single(
+                new EnemyDropMechanism().FindSources(
+                    Context(
+                        [new ClassRecord(Enemy, [], properties)],
+                        [new ActorRecord("Spawner", "/Game/Invented/Spawner.Spawner_C", spawner)]
+                    )
+                )
+            )
+            .Source;
+        Assert.Equal(Level, Assert.Single(source.Places).Id);
     }
 
     [Fact]

@@ -9,9 +9,14 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
 {
     internal const string Root =
         "/Game/BloodlinesAlpha/Interactables/LootableObject.LootableObject_C";
+    internal const string LooseRoot =
+        "/Game/Overworld/Villages/VillageBuildings/GenericDungeon_StructuresAndEvents/Lootables/Dungeon_Generic_Lootable_Item_Placer.Dungeon_Generic_Lootable_Item_Placer_C";
 
     public IEnumerable<ItemSource> FindSources(CatalogContext context)
     {
+        var enumValues = context
+            .Records.Enums.SelectMany(type => type.Entries)
+            .ToDictionary(entry => entry.Name, entry => entry.Value, StringComparer.Ordinal);
         foreach (
             var (path, properties, places) in LootRecords.Instances(
                 context,
@@ -19,10 +24,7 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
             )
         )
         {
-            if (
-                RecordValues.Number(properties["Spawn Chance"]) is <= 0
-                || RecordValues.Integer(properties["Max amount of loot items"]) is < 0
-            )
+            if (RecordValues.Number(properties["Spawn Chance"]) is <= 0)
                 continue;
             if (RecordValues.Boolean(properties["Use Entire Data Table?"]) == true)
                 continue;
@@ -39,7 +41,7 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                 notes.Add(
                     $"Loot count settings: {min} to {max}. The consumer rolls from zero through a newly sampled inclusive bound."
                 );
-            var pool = SelectPool(properties, notes);
+            var pool = SelectPool(properties, notes, enumValues);
             if (RecordValues.Boolean(properties["Use Specific Loot Table?"]) == true)
             {
                 var rowName = RecordValues.String(properties["Loot Table Name"]);
@@ -67,32 +69,88 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
             )
                 yield return source;
         }
+        foreach (
+            var (path, properties, places) in LootRecords.Instances(
+                context,
+                type => type.Path == LooseRoot || type.Ancestors.Contains(LooseRoot)
+            )
+        )
+        {
+            if (RecordValues.Integer(properties["Max Spawn Amount"]) is <= 0)
+                continue;
+            var preset = RecordValues.String(properties["Preset Table Name"]);
+            var name = "Dungeon loose loot";
+            var notes = new List<string>
+            {
+                "Appears as loose loot rather than inside a container.",
+            };
+            if (RecordValues.Integer(properties["Min Spawn Amount"]) is { } min)
+                notes.Add(
+                    $"Minimum spawn amount setting: {min}. The consumer uses the maximum setting for its loop bound."
+                );
+            if (RecordValues.Integer(properties["Max Spawn Amount"]) is { } max)
+                notes.Add($"Maximum spawn amount: {max}.");
+            JsonNode? pool = properties["Loot Table"];
+            if (preset is not null and not "None" and not "Generic")
+            {
+                var row = context
+                    .Records.Tables.Where(table =>
+                        ItemIdentity.ClassName(table.Path) == "PresetLootTables_DT"
+                    )
+                    .SelectMany(table => table.Rows)
+                    .FirstOrDefault(row => row.Name == preset);
+                if (row is null)
+                    continue;
+                pool = row.Values["ContainerLootTable"];
+                name = RecordValues.Text(row.Values["ContainerName"]) ?? name;
+                notes.Add($"Preset loot table: {row.Name}.");
+            }
+            else if (
+                RecordValues.Boolean(properties["Use Preset Table?"]) == true
+                && preset == "Generic"
+            )
+            {
+                pool = properties["Generic Loot Table"];
+                notes.Add("Uses the generic loot pool.");
+            }
+            foreach (
+                var source in LootRecords.Pool(
+                    context,
+                    pool,
+                    SourceKind.ContainerLoot,
+                    name,
+                    places,
+                    notes
+                )
+            )
+                yield return source;
+        }
     }
 
-    private static JsonNode? SelectPool(JsonObject properties, List<string> notes)
+    private static JsonNode? SelectPool(
+        JsonObject properties,
+        List<string> notes,
+        IReadOnlyDictionary<string, long> enumValues
+    )
     {
         if (RecordValues.Boolean(properties["Use Custom Loot Table"]) == true)
         {
             notes.Add("Uses the custom loot pool.");
             return properties["Custom Loot Table"];
         }
-        var type = RecordValues.EnumValue(properties["Loot Type"]);
-        var field = type?.Split("NewEnumerator").LastOrDefault() switch
+        var field = EnumNumber(properties["Loot Type"]) switch
         {
-            "0" => "Loot Table - Towns",
-            "1" => "Loot Table - Dungeon",
-            "3" => "Loot Table - Minolurk Fort",
-            "6" => "Loot Table - Barrel DRY",
-            "8" => "Coffin Loot",
-            "9" => "Urn Loot",
-            "10" => "Bandit Loot Table",
-            "5" => RecordValues
-                .EnumValue(properties["Randomized Loot Style"])
-                ?.Split("NewEnumerator")
-                .LastOrDefault() switch
+            0 => "Loot Table - Towns",
+            1 => "Loot Table - Dungeon",
+            3 => "Loot Table - Minolurk Fort",
+            6 => "Loot Table - Barrel DRY",
+            8 => "Coffin Loot",
+            9 => "Urn Loot",
+            10 => "Bandit Loot Table",
+            5 => EnumNumber(properties["Randomized Loot Style"]) switch
             {
-                "0" => "Sword Loot Table - Dwarven Dungeon RARE",
-                "3" => "Undead Sword Loot Table Undead Dungeon",
+                0 => "Sword Loot Table - Dwarven Dungeon RARE",
+                3 => "Undead Sword Loot Table Undead Dungeon",
                 _ => null,
             },
             _ => null,
@@ -122,6 +180,11 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                     .ToArray()
             ),
         };
+
+        long? EnumNumber(JsonNode? node) =>
+            RecordValues.EnumValue(node) is { } name && enumValues.TryGetValue(name, out var value)
+                ? value
+                : null;
     }
 }
 
