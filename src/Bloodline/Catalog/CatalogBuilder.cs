@@ -20,7 +20,14 @@ internal static class CatalogBuilder
     )
     {
         exclusions ??= Exclusions.Reviewed;
-        mechanisms ??= [new PickupMechanism()];
+        mechanisms ??=
+        [
+            new PickupMechanism(),
+            new ShopMechanism(),
+            new CurrencyShopMechanism(),
+            new CraftingMechanism(),
+            new CookingMechanism(),
+        ];
         Exclusions.Validate(records, exclusions);
         var resolver = new ItemFacts(records.Enums);
         var selected = records.Classes.Where(ItemIdentity.IsInventoryItem).ToArray();
