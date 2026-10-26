@@ -23,9 +23,9 @@
 
 - [x] 3.1 Select inventory items with identities and URLs, and verify that workbenches and containers are not items and that every URL is unique
 - [x] 3.2 Resolve item facts, categories and stats, marking unknown facts, and verify a weapon, an armour piece and a food item against the records
-- [ ] 3.3 Add shop, currency shop, smithing, crafting and cooking sources, and verify sample items for each against the spike evidence
-- [ ] 3.4 Add container loot, random loot, enemy drop and pickup sources, and verify sample items for each against the spike evidence
-- [ ] 3.5 Add dialogue grant, fishing, gathering, farming, bounty note and settlement delivery sources, and verify sample items for each against the spike evidence
+- [x] 3.3 Add shop, currency shop, smithing, crafting and cooking sources, and verify sample items for each against the spike evidence
+- [x] 3.4 Add container loot, random loot, enemy drop and pickup sources, and verify sample items for each against the spike evidence
+- [x] 3.5 Add dialogue grant, fishing, gathering, farming, bounty note and settlement delivery sources, and verify sample items for each against the spike evidence
 - [x] 3.6 Add reviewed exclusions for the test levels, and verify that DevTestMap placements are not sources and that a stale entry fails the catalog
 - [x] 3.7 List coverage gaps, and verify that items without sources, missing icons, unknown facts and unread packages appear
 - [x] 3.8 Write site data with exported JSON Schema and generated TypeScript types, add invented site-data fixtures, and verify the fixtures match the schema and a check fails when generated files are stale
