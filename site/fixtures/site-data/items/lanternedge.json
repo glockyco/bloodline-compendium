@@ -1,5 +1,4 @@
 {
-	"id": "/Invented/Items/Lanternedge",
 	"slug": "lanternedge",
 	"name": "Lanternedge",
 	"type": "Sword",
@@ -50,8 +49,11 @@
 			"name": "Mira at the Glass Market",
 			"places": [
 				{
-					"id": "/Invented/Places/GlassReach",
-					"name": "Glass Reach"
+					"kind": "place",
+					"key": "/Invented/Places/GlassReach",
+					"name": "Glass Reach",
+					"slug": null,
+					"icon": null
 				}
 			],
 			"price": {
@@ -67,7 +69,23 @@
 			"chanceBasis": null,
 			"picks": null,
 			"inputs": [],
-			"notes": ["Stock refresh conditions are unknown."]
+			"notes": ["Stock refresh conditions are unknown."],
+			"entity": {
+				"kind": "merchant",
+				"key": "/Invented/merchant/lanternedge/0",
+				"name": "Mira at the Glass Market",
+				"slug": null,
+				"icon": null
+			},
+			"conditions": [
+				{
+					"kind": "unknown",
+					"entity": null,
+					"value": null,
+					"label": "Stock refresh conditions are unknown."
+				}
+			],
+			"relationId": "fixture:lanternedge:source:0"
 		},
 		{
 			"kind": "shop",
@@ -86,7 +104,16 @@
 			"chanceBasis": null,
 			"picks": null,
 			"inputs": [],
-			"notes": []
+			"notes": [],
+			"entity": {
+				"kind": "merchant",
+				"key": "/Invented/merchant/lanternedge/1",
+				"name": "Amber Lantern Trader",
+				"slug": null,
+				"icon": null
+			},
+			"conditions": [],
+			"relationId": "fixture:lanternedge:source:1"
 		},
 		{
 			"kind": "shop",
@@ -105,7 +132,16 @@
 			"chanceBasis": null,
 			"picks": null,
 			"inputs": [],
-			"notes": []
+			"notes": [],
+			"entity": {
+				"kind": "merchant",
+				"key": "/Invented/merchant/lanternedge/2",
+				"name": "Blue Glass Trader",
+				"slug": null,
+				"icon": null
+			},
+			"conditions": [],
+			"relationId": "fixture:lanternedge:source:2"
 		},
 		{
 			"kind": "shop",
@@ -124,7 +160,16 @@
 			"chanceBasis": null,
 			"picks": null,
 			"inputs": [],
-			"notes": []
+			"notes": [],
+			"entity": {
+				"kind": "merchant",
+				"key": "/Invented/merchant/lanternedge/3",
+				"name": "Copper Crescent Trader",
+				"slug": null,
+				"icon": null
+			},
+			"conditions": [],
+			"relationId": "fixture:lanternedge:source:3"
 		},
 		{
 			"kind": "shop",
@@ -143,7 +188,16 @@
 			"chanceBasis": null,
 			"picks": null,
 			"inputs": [],
-			"notes": []
+			"notes": [],
+			"entity": {
+				"kind": "merchant",
+				"key": "/Invented/merchant/lanternedge/4",
+				"name": "Dappled Star Trader",
+				"slug": null,
+				"icon": null
+			},
+			"conditions": [],
+			"relationId": "fixture:lanternedge:source:4"
 		},
 		{
 			"kind": "shop",
@@ -162,7 +216,16 @@
 			"chanceBasis": null,
 			"picks": null,
 			"inputs": [],
-			"notes": []
+			"notes": [],
+			"entity": {
+				"kind": "merchant",
+				"key": "/Invented/merchant/lanternedge/5",
+				"name": "Emerald Kite Trader",
+				"slug": null,
+				"icon": null
+			},
+			"conditions": [],
+			"relationId": "fixture:lanternedge:source:5"
 		},
 		{
 			"kind": "shop",
@@ -181,7 +244,16 @@
 			"chanceBasis": null,
 			"picks": null,
 			"inputs": [],
-			"notes": []
+			"notes": [],
+			"entity": {
+				"kind": "merchant",
+				"key": "/Invented/merchant/lanternedge/6",
+				"name": "Frosted Wheel Trader",
+				"slug": null,
+				"icon": null
+			},
+			"conditions": [],
+			"relationId": "fixture:lanternedge:source:6"
 		},
 		{
 			"kind": "shop",
@@ -200,7 +272,16 @@
 			"chanceBasis": null,
 			"picks": null,
 			"inputs": [],
-			"notes": []
+			"notes": [],
+			"entity": {
+				"kind": "merchant",
+				"key": "/Invented/merchant/lanternedge/7",
+				"name": "Golden Spiral Trader",
+				"slug": null,
+				"icon": null
+			},
+			"conditions": [],
+			"relationId": "fixture:lanternedge:source:7"
 		},
 		{
 			"kind": "shop",
@@ -219,7 +300,16 @@
 			"chanceBasis": null,
 			"picks": null,
 			"inputs": [],
-			"notes": []
+			"notes": [],
+			"entity": {
+				"kind": "merchant",
+				"key": "/Invented/merchant/lanternedge/8",
+				"name": "Hazel Comet Trader",
+				"slug": null,
+				"icon": null
+			},
+			"conditions": [],
+			"relationId": "fixture:lanternedge:source:8"
 		},
 		{
 			"kind": "shop",
@@ -238,7 +328,16 @@
 			"chanceBasis": null,
 			"picks": null,
 			"inputs": [],
-			"notes": []
+			"notes": [],
+			"entity": {
+				"kind": "merchant",
+				"key": "/Invented/merchant/lanternedge/9",
+				"name": "Indigo Prism Trader",
+				"slug": null,
+				"icon": null
+			},
+			"conditions": [],
+			"relationId": "fixture:lanternedge:source:9"
 		},
 		{
 			"kind": "shop",
@@ -257,7 +356,16 @@
 			"chanceBasis": null,
 			"picks": null,
 			"inputs": [],
-			"notes": []
+			"notes": [],
+			"entity": {
+				"kind": "merchant",
+				"key": "/Invented/merchant/lanternedge/10",
+				"name": "Jade Compass Trader",
+				"slug": null,
+				"icon": null
+			},
+			"conditions": [],
+			"relationId": "fixture:lanternedge:source:10"
 		},
 		{
 			"kind": "shop",
@@ -276,7 +384,16 @@
 			"chanceBasis": null,
 			"picks": null,
 			"inputs": [],
-			"notes": []
+			"notes": [],
+			"entity": {
+				"kind": "merchant",
+				"key": "/Invented/merchant/lanternedge/11",
+				"name": "Knotted Ribbon Trader",
+				"slug": null,
+				"icon": null
+			},
+			"conditions": [],
+			"relationId": "fixture:lanternedge:source:11"
 		},
 		{
 			"kind": "shop",
@@ -295,15 +412,27 @@
 			"chanceBasis": null,
 			"picks": null,
 			"inputs": [],
-			"notes": []
+			"notes": [],
+			"entity": {
+				"kind": "merchant",
+				"key": "/Invented/merchant/lanternedge/12",
+				"name": "Lilac Feather Trader",
+				"slug": null,
+				"icon": null
+			},
+			"conditions": [],
+			"relationId": "fixture:lanternedge:source:12"
 		},
 		{
 			"kind": "crafting",
 			"name": "Star-forged blade recipe",
 			"places": [
 				{
-					"id": "/Invented/Places/GlassReach",
-					"name": "Glass Reach"
+					"kind": "place",
+					"key": "/Invented/Places/GlassReach",
+					"name": "Glass Reach",
+					"slug": null,
+					"icon": null
 				}
 			],
 			"price": null,
@@ -318,20 +447,42 @@
 			"inputs": [
 				{
 					"item": {
+						"kind": "item",
+						"key": "/Invented/Items/Cinderpear",
+						"name": "Cinderpear",
 						"slug": "cinderpear",
-						"name": "Cinderpear"
+						"icon": "cinderpear"
 					},
 					"quantity": 2
 				},
 				{
 					"item": {
+						"kind": "item",
+						"key": null,
+						"name": "Silverglass shard",
 						"slug": null,
-						"name": "Silverglass shard"
+						"icon": null
 					},
 					"quantity": 3
 				}
 			],
-			"notes": ["Requires a lit forge."]
+			"notes": ["Requires a lit forge."],
+			"entity": {
+				"kind": "recipe",
+				"key": "/Invented/recipe/lanternedge/13",
+				"name": "Star-forged blade recipe",
+				"slug": null,
+				"icon": null
+			},
+			"conditions": [
+				{
+					"kind": "unknown",
+					"entity": null,
+					"value": null,
+					"label": "Requires a lit forge."
+				}
+			],
+			"relationId": "fixture:lanternedge:source:13"
 		},
 		{
 			"kind": "currencyShop",
@@ -340,8 +491,11 @@
 			"price": {
 				"amount": 3,
 				"currency": {
+					"kind": "item",
+					"key": "/Invented/Items/Cinderpear",
+					"name": "Cinderpear",
 					"slug": "cinderpear",
-					"name": "Cinderpear"
+					"icon": "cinderpear"
 				}
 			},
 			"amount": {
@@ -353,15 +507,27 @@
 			"chanceBasis": null,
 			"picks": null,
 			"inputs": [],
-			"notes": []
+			"notes": [],
+			"entity": {
+				"kind": "merchant",
+				"key": "/Invented/merchant/lanternedge/14",
+				"name": "Orris the Collector",
+				"slug": null,
+				"icon": null
+			},
+			"conditions": [],
+			"relationId": "fixture:lanternedge:source:14"
 		},
 		{
 			"kind": "containerLoot",
 			"name": "Stargazer cache",
 			"places": [
 				{
-					"id": "/Invented/Places/GlassReach",
-					"name": "Glass Reach"
+					"kind": "place",
+					"key": "/Invented/Places/GlassReach",
+					"name": "Glass Reach",
+					"slug": null,
+					"icon": null
 				}
 			],
 			"price": null,
@@ -380,7 +546,286 @@
 				"max": 3
 			},
 			"inputs": [],
-			"notes": []
+			"notes": [],
+			"entity": {
+				"kind": "container",
+				"key": "/Invented/container/lanternedge/15",
+				"name": "Stargazer cache",
+				"slug": null,
+				"icon": null
+			},
+			"conditions": [],
+			"relationId": "fixture:lanternedge:source:15"
+		}
+	],
+	"key": "/Invented/Items/Lanternedge",
+	"kind": "item",
+	"relations": [
+		{
+			"id": "fixture:lanternedge:source:0",
+			"kind": "shop",
+			"direction": "incoming",
+			"entity": {
+				"kind": "merchant",
+				"key": "/Invented/merchant/lanternedge/0",
+				"name": "Mira at the Glass Market",
+				"slug": null,
+				"icon": null
+			},
+			"label": "Obtained from",
+			"conditions": [
+				{
+					"kind": "unknown",
+					"entity": null,
+					"value": null,
+					"label": "Stock refresh conditions are unknown."
+				}
+			]
+		},
+		{
+			"id": "fixture:lanternedge:source:1",
+			"kind": "shop",
+			"direction": "incoming",
+			"entity": {
+				"kind": "merchant",
+				"key": "/Invented/merchant/lanternedge/1",
+				"name": "Amber Lantern Trader",
+				"slug": null,
+				"icon": null
+			},
+			"label": "Obtained from",
+			"conditions": []
+		},
+		{
+			"id": "fixture:lanternedge:source:2",
+			"kind": "shop",
+			"direction": "incoming",
+			"entity": {
+				"kind": "merchant",
+				"key": "/Invented/merchant/lanternedge/2",
+				"name": "Blue Glass Trader",
+				"slug": null,
+				"icon": null
+			},
+			"label": "Obtained from",
+			"conditions": []
+		},
+		{
+			"id": "fixture:lanternedge:source:3",
+			"kind": "shop",
+			"direction": "incoming",
+			"entity": {
+				"kind": "merchant",
+				"key": "/Invented/merchant/lanternedge/3",
+				"name": "Copper Crescent Trader",
+				"slug": null,
+				"icon": null
+			},
+			"label": "Obtained from",
+			"conditions": []
+		},
+		{
+			"id": "fixture:lanternedge:source:4",
+			"kind": "shop",
+			"direction": "incoming",
+			"entity": {
+				"kind": "merchant",
+				"key": "/Invented/merchant/lanternedge/4",
+				"name": "Dappled Star Trader",
+				"slug": null,
+				"icon": null
+			},
+			"label": "Obtained from",
+			"conditions": []
+		},
+		{
+			"id": "fixture:lanternedge:source:5",
+			"kind": "shop",
+			"direction": "incoming",
+			"entity": {
+				"kind": "merchant",
+				"key": "/Invented/merchant/lanternedge/5",
+				"name": "Emerald Kite Trader",
+				"slug": null,
+				"icon": null
+			},
+			"label": "Obtained from",
+			"conditions": []
+		},
+		{
+			"id": "fixture:lanternedge:source:6",
+			"kind": "shop",
+			"direction": "incoming",
+			"entity": {
+				"kind": "merchant",
+				"key": "/Invented/merchant/lanternedge/6",
+				"name": "Frosted Wheel Trader",
+				"slug": null,
+				"icon": null
+			},
+			"label": "Obtained from",
+			"conditions": []
+		},
+		{
+			"id": "fixture:lanternedge:source:7",
+			"kind": "shop",
+			"direction": "incoming",
+			"entity": {
+				"kind": "merchant",
+				"key": "/Invented/merchant/lanternedge/7",
+				"name": "Golden Spiral Trader",
+				"slug": null,
+				"icon": null
+			},
+			"label": "Obtained from",
+			"conditions": []
+		},
+		{
+			"id": "fixture:lanternedge:source:8",
+			"kind": "shop",
+			"direction": "incoming",
+			"entity": {
+				"kind": "merchant",
+				"key": "/Invented/merchant/lanternedge/8",
+				"name": "Hazel Comet Trader",
+				"slug": null,
+				"icon": null
+			},
+			"label": "Obtained from",
+			"conditions": []
+		},
+		{
+			"id": "fixture:lanternedge:source:9",
+			"kind": "shop",
+			"direction": "incoming",
+			"entity": {
+				"kind": "merchant",
+				"key": "/Invented/merchant/lanternedge/9",
+				"name": "Indigo Prism Trader",
+				"slug": null,
+				"icon": null
+			},
+			"label": "Obtained from",
+			"conditions": []
+		},
+		{
+			"id": "fixture:lanternedge:source:10",
+			"kind": "shop",
+			"direction": "incoming",
+			"entity": {
+				"kind": "merchant",
+				"key": "/Invented/merchant/lanternedge/10",
+				"name": "Jade Compass Trader",
+				"slug": null,
+				"icon": null
+			},
+			"label": "Obtained from",
+			"conditions": []
+		},
+		{
+			"id": "fixture:lanternedge:source:11",
+			"kind": "shop",
+			"direction": "incoming",
+			"entity": {
+				"kind": "merchant",
+				"key": "/Invented/merchant/lanternedge/11",
+				"name": "Knotted Ribbon Trader",
+				"slug": null,
+				"icon": null
+			},
+			"label": "Obtained from",
+			"conditions": []
+		},
+		{
+			"id": "fixture:lanternedge:source:12",
+			"kind": "shop",
+			"direction": "incoming",
+			"entity": {
+				"kind": "merchant",
+				"key": "/Invented/merchant/lanternedge/12",
+				"name": "Lilac Feather Trader",
+				"slug": null,
+				"icon": null
+			},
+			"label": "Obtained from",
+			"conditions": []
+		},
+		{
+			"id": "fixture:lanternedge:source:13",
+			"kind": "crafting",
+			"direction": "incoming",
+			"entity": {
+				"kind": "recipe",
+				"key": "/Invented/recipe/lanternedge/13",
+				"name": "Star-forged blade recipe",
+				"slug": null,
+				"icon": null
+			},
+			"label": "Obtained from",
+			"conditions": [
+				{
+					"kind": "unknown",
+					"entity": null,
+					"value": null,
+					"label": "Requires a lit forge."
+				}
+			]
+		},
+		{
+			"id": "fixture:lanternedge:source:14",
+			"kind": "currencyShop",
+			"direction": "incoming",
+			"entity": {
+				"kind": "merchant",
+				"key": "/Invented/merchant/lanternedge/14",
+				"name": "Orris the Collector",
+				"slug": null,
+				"icon": null
+			},
+			"label": "Obtained from",
+			"conditions": []
+		},
+		{
+			"id": "fixture:lanternedge:source:15",
+			"kind": "containerLoot",
+			"direction": "incoming",
+			"entity": {
+				"kind": "container",
+				"key": "/Invented/container/lanternedge/15",
+				"name": "Stargazer cache",
+				"slug": null,
+				"icon": null
+			},
+			"label": "Obtained from",
+			"conditions": []
+		},
+		{
+			"id": "fixture:cinderpear:use:0",
+			"kind": "Input",
+			"direction": "incoming",
+			"entity": {
+				"kind": "item",
+				"key": "/Invented/Items/Cinderpear",
+				"name": "Cinderpear",
+				"slug": "cinderpear",
+				"icon": "cinderpear"
+			},
+			"label": "Requires",
+			"conditions": []
+		},
+		{
+			"id": "fixture:cinderpear:use:1",
+			"kind": "Payment",
+			"direction": "incoming",
+			"entity": {
+				"kind": "item",
+				"key": "/Invented/Items/Cinderpear",
+				"name": "Cinderpear",
+				"slug": "cinderpear",
+				"icon": "cinderpear"
+			},
+			"label": "Requires",
+			"conditions": []
 		}
 	]
 }

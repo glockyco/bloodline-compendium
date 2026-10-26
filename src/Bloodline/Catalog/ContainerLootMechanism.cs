@@ -85,8 +85,14 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                     name,
                     places,
                     notes,
+                    WorldSourceData.Reference(EntityKind.Container, path, name),
                     "Chance per pick",
-                    details.Picks
+                    details.Picks,
+                    WorldSourceData.Conditions(
+                        context,
+                        properties,
+                        places.Count == 1 ? places[0].Key : null
+                    )
                 )
             )
                 yield return source with
@@ -166,8 +172,14 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                     name,
                     places,
                     notes,
+                    WorldSourceData.Reference(EntityKind.Container, path, name),
                     "Chance per pick",
-                    details?.Picks
+                    details?.Picks,
+                    WorldSourceData.Conditions(
+                        context,
+                        properties,
+                        places.Count == 1 ? places[0].Key : null
+                    )
                 )
             )
                 yield return source with
@@ -287,7 +299,7 @@ internal static class LootRecords
     internal static IEnumerable<(
         string Path,
         JsonObject Properties,
-        IReadOnlyList<Place> Places
+        IReadOnlyList<EntityReference> Places
     )> Instances(CatalogContext context, Func<ClassRecord, bool> matches)
     {
         var byClass = context.Placements.ToLookup(
@@ -346,10 +358,12 @@ internal static class LootRecords
         JsonNode? pool,
         SourceKind kind,
         string name,
-        IReadOnlyList<Place> places,
+        IReadOnlyList<EntityReference> places,
         IReadOnlyList<string> notes,
+        EntityReference entity,
         string? chanceBasis = null,
-        Amount? picks = null
+        Amount? picks = null,
+        IReadOnlyList<RelationCondition>? conditions = null
     )
     {
         var entries = RecordValues.MapEntries(pool).ToArray();
@@ -387,6 +401,8 @@ internal static class LootRecords
                     notes
                 )
                 {
+                    Entity = entity,
+                    Conditions = conditions ?? [],
                     ChanceBasis = chance is null ? null : chanceBasis,
                     Picks = picks,
                 }

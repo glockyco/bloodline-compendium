@@ -8,11 +8,11 @@ internal sealed class SettlementDeliveryMechanism : ISourceMechanism
     public IEnumerable<ItemSource> FindSources(CatalogContext context)
     {
         foreach (
-            var row in context
+            var (table, row) in context
                 .Records.Tables.Where(table =>
                     WorldSourceData.IsTable(table, "BuildingResourceAndIncomeValues")
                 )
-                .SelectMany(table => table.Rows)
+                .SelectMany(table => table.Rows.Select(row => (table, row)))
         )
         {
             var count = WorldSourceData.Integer(row.Values["LootDeliveryQuantity"]);
@@ -25,8 +25,13 @@ internal sealed class SettlementDeliveryMechanism : ISourceMechanism
             {
                 notes.Add(FormattableString.Invariant($"Delivery attempts: {attempts}."));
             }
-            notes.Add(
-                "Each delivery attempt randomly selects an item. Requires the completed settlement building."
+            notes.Add("Each delivery attempt randomly selects an item.");
+            var building = WorldSourceData.Reference(
+                EntityKind.Building,
+                table.Path + ":" + row.Name,
+                RecordValues.Text(row.Values["BuildingName"])
+                    ?? RecordValues.String(row.Values["BuildingName"])
+                    ?? ItemIdentity.Readable(row.Name)
             );
             foreach (var (item, weight) in WorldSourceData.Pool(row.Values["LootTable"]))
             {
@@ -45,6 +50,18 @@ internal sealed class SettlementDeliveryMechanism : ISourceMechanism
                         [],
                         notes
                     )
+                    {
+                        Entity = building,
+                        Conditions =
+                        [
+                            new RelationCondition(
+                                ConditionKind.Building,
+                                building,
+                                null,
+                                "Requires the completed settlement building."
+                            ),
+                        ],
+                    }
                 );
             }
         }

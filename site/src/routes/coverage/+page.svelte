@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
+	import EntityLink from '#lib/ui/EntityLink.svelte';
 	import { gaps, sourceHeadings } from '#lib/labels.js';
 	import Count from '#lib/ui/Count.svelte';
 	import ExpandableList from '#lib/ExpandableList.svelte';
@@ -28,9 +28,9 @@
 			{#if gap.entries.length}
 				<ExpandableList items={gap.entries} initial={8} noun="entries" className="gap-list">
 					{#snippet row(entry)}
-						{#if entry.itemSlug}<a href={resolve(`items/${entry.itemSlug}/`)} data-game
-								>{entry.label}</a
-							>{:else}<span data-game>{entry.label}</span>{/if}
+						{#if entry.entity}<EntityLink entity={entry.entity} />{:else}<span data-game
+								>{entry.label}</span
+							>{/if}
 						{#if entry.source}<p>
 								{sourceHeadings[entry.source]} <span data-game>{entry.detail}</span>
 							</p>{:else if entry.detail}<p>{entry.detail}</p>{/if}

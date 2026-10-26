@@ -15,11 +15,39 @@ internal sealed class ShopMechanism : ISourceMechanism
         foreach (var placement in context.Placements)
         {
             var name = VendorName(placement.Properties, placement.Actor.Class);
+            var building = placement.Actor.Class.Contains(
+                "/Construction_Buildings/Buildings_Finished/",
+                StringComparison.OrdinalIgnoreCase
+            );
+            var entity = WorldSourceData.PlacementEntity(
+                context,
+                placement,
+                building ? EntityKind.Building : EntityKind.Merchant,
+                name
+            );
+            IReadOnlyList<RelationCondition> conditions = building
+                ?
+                [
+                    .. WorldSourceData.Conditions(context, placement.Properties, placement.Level),
+                    new RelationCondition(
+                        ConditionKind.Building,
+                        entity,
+                        null,
+                        "Requires the completed settlement building."
+                    ),
+                ]
+                : WorldSourceData.Conditions(context, placement.Properties, placement.Level);
             foreach (var field in new[] { "Shop Contents", "Vendor Contents" })
             {
                 foreach (var item in Stock(placement.Properties[field]))
                 {
-                    yield return Sale(context, item, name, [context.Places.Get(placement.Level)]);
+                    yield return Sale(
+                        context,
+                        item,
+                        entity,
+                        [context.Places.Get(placement.Level)],
+                        conditions
+                    );
                 }
             }
         }
@@ -48,16 +76,26 @@ internal sealed class ShopMechanism : ISourceMechanism
                     var sale = Sale(
                         context,
                         item,
-                        VendorName(building.Properties, building.Path),
-                        []
+                        WorldSourceData.Reference(
+                            EntityKind.Building,
+                            building.Path,
+                            VendorName(building.Properties, building.Path)
+                        ),
+                        [],
+                        [
+                            new RelationCondition(
+                                ConditionKind.Building,
+                                WorldSourceData.Reference(
+                                    EntityKind.Building,
+                                    building.Path,
+                                    VendorName(building.Properties, building.Path)
+                                ),
+                                null,
+                                "Requires the completed settlement building."
+                            ),
+                        ]
                     );
-                    yield return sale with
-                    {
-                        Source = sale.Source with
-                        {
-                            Notes = ["Stock from a constructed settlement building."],
-                        },
-                    };
+                    yield return sale;
                 }
             }
         }
@@ -85,7 +123,20 @@ internal sealed class ShopMechanism : ISourceMechanism
             }
             foreach (var item in Stock(stock))
             {
-                yield return Sale(context, item, name, [context.Places.Get(placement.Level)]);
+                yield return Sale(
+                    context,
+                    item,
+                    WorldSourceData.PlacementEntity(context, placement, EntityKind.Merchant, name),
+                    [context.Places.Get(placement.Level)],
+                    [
+                        .. WorldSourceData.Conditions(
+                            context,
+                            placement.Properties,
+                            placement.Level
+                        ),
+                        .. WorldSourceData.DialogueConditions(context, dialogue, instance),
+                    ]
+                );
             }
         }
     }
@@ -93,8 +144,9 @@ internal sealed class ShopMechanism : ISourceMechanism
     private static ItemSource Sale(
         CatalogContext context,
         string item,
-        string name,
-        IReadOnlyList<Place> places
+        EntityReference entity,
+        IReadOnlyList<EntityReference> places,
+        IReadOnlyList<RelationCondition> conditions
     )
     {
         var value = context.Classes.TryGetValue(item, out var type)
@@ -104,7 +156,7 @@ internal sealed class ShopMechanism : ISourceMechanism
             item,
             new Source(
                 SourceKind.Shop,
-                name,
+                entity.Name,
                 places,
                 value is { } price ? new Price(checked((int)price), null) : null,
                 new Amount(1, 1),
@@ -113,6 +165,10 @@ internal sealed class ShopMechanism : ISourceMechanism
                 [],
                 []
             )
+            {
+                Entity = entity,
+                Conditions = conditions,
+            }
         );
     }
 

@@ -1,22 +1,38 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import type { EntityReference, EntityKindDefinition } from './site-data.js';
 	let {
 		title,
 		description,
 		noindex = false,
 		breadcrumbs = [],
-		website = false
+		website = false,
+		entity,
+		kind
 	}: {
 		title: string;
 		description: string;
 		noindex?: boolean;
 		breadcrumbs?: { name: string; path: string }[];
 		website?: boolean;
+		entity?: EntityReference;
+		kind?: EntityKindDefinition;
 	} = $props();
 	// Review hosts retain production identity instead of creating duplicate indexed pages.
 	const canonical = $derived('https://bloodline.compendiums.org' + page.url.pathname);
 	const image = 'https://bloodline.compendiums.org/og-default.png';
 	const structuredData = $derived([
+		...(entity && kind?.structuredDataType
+			? [
+					{
+						'@context': 'https://schema.org',
+						'@type': kind.structuredDataType,
+						name: entity.name,
+						identifier: entity.key,
+						url: canonical
+					}
+				]
+			: []),
 		...(website
 			? [
 					{

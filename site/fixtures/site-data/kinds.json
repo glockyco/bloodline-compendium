@@ -1,0 +1,86 @@
+[
+	{
+		"kind": "item",
+		"hasPages": true,
+		"route": "items",
+		"searchFilter": "Items",
+		"structuredDataType": "Thing"
+	},
+	{
+		"kind": "merchant",
+		"hasPages": false,
+		"route": null,
+		"searchFilter": "Merchant",
+		"structuredDataType": "Thing"
+	},
+	{
+		"kind": "person",
+		"hasPages": false,
+		"route": null,
+		"searchFilter": "Person",
+		"structuredDataType": "Thing"
+	},
+	{
+		"kind": "creature",
+		"hasPages": false,
+		"route": null,
+		"searchFilter": "Creature",
+		"structuredDataType": "Thing"
+	},
+	{
+		"kind": "place",
+		"hasPages": false,
+		"route": null,
+		"searchFilter": "Place",
+		"structuredDataType": "Thing"
+	},
+	{
+		"kind": "container",
+		"hasPages": false,
+		"route": null,
+		"searchFilter": "Container",
+		"structuredDataType": "Thing"
+	},
+	{
+		"kind": "recipe",
+		"hasPages": false,
+		"route": null,
+		"searchFilter": "Recipe",
+		"structuredDataType": "Thing"
+	},
+	{
+		"kind": "building",
+		"hasPages": false,
+		"route": null,
+		"searchFilter": "Building",
+		"structuredDataType": "Thing"
+	},
+	{
+		"kind": "calendarEvent",
+		"hasPages": false,
+		"route": null,
+		"searchFilter": "Calendarevent",
+		"structuredDataType": "Thing"
+	},
+	{
+		"kind": "quest",
+		"hasPages": false,
+		"route": null,
+		"searchFilter": "Quest",
+		"structuredDataType": "Thing"
+	},
+	{
+		"kind": "resource",
+		"hasPages": false,
+		"route": null,
+		"searchFilter": "Resource",
+		"structuredDataType": "Thing"
+	},
+	{
+		"kind": "activity",
+		"hasPages": false,
+		"route": null,
+		"searchFilter": "Activity",
+		"structuredDataType": "Thing"
+	}
+]

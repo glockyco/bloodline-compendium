@@ -1,5 +1,4 @@
 {
-	"id": "/Invented/Items/Cinderpear",
 	"slug": "cinderpear",
 	"name": "Cinderpear",
 	"type": "Fruit",
@@ -9,19 +8,29 @@
 			"kind": "crafting",
 			"name": "Star-forged blade recipe",
 			"item": {
+				"kind": "item",
+				"key": "/Invented/Items/Lanternedge",
+				"name": "Lanternedge",
 				"slug": "lanternedge",
-				"name": "Lanternedge"
+				"icon": "lanternedge"
 			},
-			"quantity": 2
+			"quantity": 2,
+			"conditions": [],
+			"relationId": "fixture:cinderpear:use:0"
 		},
 		{
 			"kind": "currencyShop",
 			"name": "Orris the Collector",
 			"item": {
+				"kind": "item",
+				"key": "/Invented/Items/Lanternedge",
+				"name": "Lanternedge",
 				"slug": "lanternedge",
-				"name": "Lanternedge"
+				"icon": "lanternedge"
 			},
-			"quantity": 3
+			"quantity": 3,
+			"conditions": [],
+			"relationId": "fixture:cinderpear:use:1"
 		}
 	],
 	"description": "Sweet fruit that stays warm after picking.",
@@ -54,8 +63,11 @@
 			"name": "Ember orchard",
 			"places": [
 				{
-					"id": "/Invented/Places/GlassReach",
-					"name": "Glass Reach"
+					"kind": "place",
+					"key": "/Invented/Places/GlassReach",
+					"name": "Glass Reach",
+					"slug": null,
+					"icon": null
 				}
 			],
 			"price": null,
@@ -68,7 +80,62 @@
 			"chanceBasis": null,
 			"picks": null,
 			"inputs": [],
-			"notes": []
+			"notes": [],
+			"entity": {
+				"kind": "resource",
+				"key": "/Invented/resource/cinderpear/0",
+				"name": "Ember orchard",
+				"slug": null,
+				"icon": null
+			},
+			"conditions": [],
+			"relationId": "fixture:cinderpear:source:0"
+		}
+	],
+	"key": "/Invented/Items/Cinderpear",
+	"kind": "item",
+	"relations": [
+		{
+			"id": "fixture:cinderpear:source:0",
+			"kind": "gathering",
+			"direction": "incoming",
+			"entity": {
+				"kind": "resource",
+				"key": "/Invented/resource/cinderpear/0",
+				"name": "Ember orchard",
+				"slug": null,
+				"icon": null
+			},
+			"label": "Obtained from",
+			"conditions": []
+		},
+		{
+			"id": "fixture:cinderpear:use:0",
+			"kind": "Input",
+			"direction": "outgoing",
+			"entity": {
+				"kind": "item",
+				"key": "/Invented/Items/Lanternedge",
+				"name": "Lanternedge",
+				"slug": "lanternedge",
+				"icon": "lanternedge"
+			},
+			"label": "Used for",
+			"conditions": []
+		},
+		{
+			"id": "fixture:cinderpear:use:1",
+			"kind": "Payment",
+			"direction": "outgoing",
+			"entity": {
+				"kind": "item",
+				"key": "/Invented/Items/Lanternedge",
+				"name": "Lanternedge",
+				"slug": "lanternedge",
+				"icon": "lanternedge"
+			},
+			"label": "Used for",
+			"conditions": []
 		}
 	]
 }

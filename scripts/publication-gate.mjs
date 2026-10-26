@@ -2,6 +2,7 @@ import { readFile, readdir, stat } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse } from "parse5";
+import { entityGraphGate } from "./entity-graph-gate.mjs";
 
 const origin = "https://bloodline.compendiums.org";
 
@@ -39,7 +40,13 @@ export async function publicationGate(directory) {
   const metadata = { title: new Map(), description: new Map() };
   for (const file of [...files].sort()) {
     if (!file.endsWith(".html")) continue;
-    const page = { file, ids: new Set(), references: [], noindex: false };
+    const page = {
+      file,
+      ids: new Set(),
+      references: [],
+      relations: new Set(),
+      noindex: false,
+    };
     const titles = [];
     const descriptions = [];
     walk(parse(await readFile(join(directory, file), "utf8")), (node) => {
@@ -47,6 +54,16 @@ export async function publicationGate(directory) {
         (node.attrs ?? []).map(({ name, value }) => [name, value]),
       );
       if (attrs.id) page.ids.add(attrs.id);
+      if (
+        attrs["data-relation-id"] &&
+        !["script", "style", "template"].includes(node.tagName)
+      )
+        page.relations.add(
+          JSON.stringify([
+            attrs["data-relation-id"],
+            attrs["data-relation-direction"],
+          ]),
+        );
       if (node.tagName === "title") titles.push(text(node));
       if (
         node.tagName === "meta" &&
@@ -87,10 +104,26 @@ export async function publicationGate(directory) {
     }
     pages.set(pagePath(file), page);
   }
-  for (const path of ["/", "/items/", "/coverage/"])
+  const kinds = JSON.parse(
+    await readFile(join(directory, "kinds.json"), "utf8"),
+  );
+  for (const path of [
+    "/",
+    "/coverage/",
+    ...kinds
+      .filter((kind) => kind.hasPages)
+      .map((kind) => "/" + kind.route.replace(/^\/+|\/+$/g, "") + "/"),
+  ])
     if (!pages.has(path)) throw new Error("Publication is missing " + path);
-  if (![...pages.keys()].some((path) => /^\/items\/[^/]+\/$/.test(path)))
-    throw new Error("Publication has no item pages.");
+  for (const kind of kinds.filter((kind) => kind.hasPages)) {
+    const prefix = "/" + kind.route.replace(/^\/+|\/+$/g, "") + "/";
+    if (
+      ![...pages.keys()].some(
+        (path) => path.startsWith(prefix) && path !== prefix,
+      )
+    )
+      throw new Error("Publication has no pages for " + kind.kind);
+  }
 
   const checkedAssets = new Set();
   let references = 0;
@@ -156,9 +189,11 @@ export async function publicationGate(directory) {
   for (const [path, page] of pages)
     if (!page.noindex && !sitemapPaths.has(path))
       throw new Error("Sitemap is missing " + path);
+  const relations = await entityGraphGate(directory, pages);
   return {
     pages: pages.size,
     references,
+    relations,
     sitemapEntries: sitemapPaths.size,
     report:
       "Publication graph: " +

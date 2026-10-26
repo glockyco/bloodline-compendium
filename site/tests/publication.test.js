@@ -178,3 +178,179 @@ it('decodes HTML entities before checking destinations and metadata', async () =
 		expect((await publicationGate(directory)).references).toBeGreaterThan(0);
 	});
 });
+
+async function writeRelationFixture(directory) {
+	const source = {
+		kind: 'item',
+		key: '/Invented/Blade',
+		name: 'Blade',
+		slug: 'invented',
+		icon: null
+	};
+	const target = {
+		kind: 'item',
+		key: '/Invented/Pebble',
+		name: 'Pebble',
+		slug: 'other',
+		icon: null
+	};
+	const row = {
+		id: 'invented-input',
+		kind: 'Input',
+		source,
+		target,
+		forwardLabel: 'Used for',
+		reverseLabel: 'Requires',
+		conditions: [],
+		attributes: null
+	};
+	const graph = {
+		entities: [
+			{
+				entity: source,
+				relations: [
+					{
+						id: row.id,
+						kind: row.kind,
+						direction: 'outgoing',
+						entity: target,
+						label: row.forwardLabel,
+						conditions: []
+					}
+				]
+			},
+			{
+				entity: target,
+				relations: [
+					{
+						id: row.id,
+						kind: row.kind,
+						direction: 'incoming',
+						entity: source,
+						label: row.reverseLabel,
+						conditions: []
+					}
+				]
+			}
+		],
+		relations: [row]
+	};
+	await writeFile(join(directory, 'graph.json'), JSON.stringify(graph));
+	for (const [slug, direction] of [
+		['invented', 'outgoing'],
+		['other', 'incoming']
+	])
+		await writeFile(
+			join(directory, `items/${slug}/index.html`),
+			publicationPage(
+				slug,
+				`<p data-relation-id="${row.id}" data-relation-direction="${direction}">Related item</p>`
+			)
+		);
+	return graph;
+}
+
+it('requires both directions of item relations in static HTML', async () => {
+	await publication(async (directory) => {
+		await writeRelationFixture(directory);
+		expect((await publicationGate(directory)).relations).toBe(1);
+		await writeFile(
+			join(directory, 'items/other/index.html'),
+			publicationPage('Other', '<p>Relation omitted</p>')
+		);
+		await expect(publicationGate(directory)).rejects.toThrow(
+			'missing static relation invented-input (incoming)'
+		);
+	});
+});
+
+it('rejects a relation planted only by JavaScript', async () => {
+	await publication(async (directory) => {
+		await writeRelationFixture(directory);
+		await writeFile(
+			join(directory, 'items/other/index.html'),
+			publicationPage(
+				'Other',
+				`<script>document.body.insertAdjacentHTML('beforeend', '<p data-relation-id="invented-input" data-relation-direction="incoming">Related item</p>')</script>`
+			)
+		);
+		await expect(publicationGate(directory)).rejects.toThrow('missing static relation');
+	});
+});
+
+it.each([
+	[
+		'missing reference key',
+		(graph) => {
+			graph.relations[0].target = { ...graph.relations[0].target, key: '/Missing' };
+		},
+		'Missing reference key'
+	],
+	[
+		'duplicate key',
+		(graph) => {
+			graph.entities.push(graph.entities[0]);
+		},
+		'Duplicate entity key'
+	],
+	[
+		'duplicate slug',
+		(graph) => {
+			graph.entities[1].entity = { ...graph.entities[1].entity, slug: 'invented' };
+		},
+		'Duplicate entity slug'
+	],
+	[
+		'missing reverse relation',
+		(graph) => {
+			graph.entities[1].relations = [];
+		},
+		'Missing or invalid incoming relation'
+	],
+	[
+		'invalid slug decision',
+		(graph) => {
+			graph.entities[0].entity = { ...graph.entities[0].entity, slug: null };
+			graph.relations[0].source = graph.entities[0].entity;
+		},
+		'Invalid slug decision'
+	]
+])('rejects graph integrity defect: %s', async (_, plant, error) => {
+	await publication(async (directory) => {
+		const graph = await writeRelationFixture(directory);
+		plant(graph);
+		await writeFile(join(directory, 'graph.json'), JSON.stringify(graph));
+		await expect(publicationGate(directory)).rejects.toThrow(error);
+	});
+});
+
+it('rejects a slug on a kind without pages', async () => {
+	await publication(async (directory) => {
+		const graph = await writeRelationFixture(directory);
+		const source = { ...graph.entities[0].entity, kind: 'merchant' };
+		graph.entities[0].entity = source;
+		graph.relations[0].source = source;
+		graph.entities[1].relations[0].entity = source;
+		await writeFile(
+			join(directory, 'kinds.json'),
+			JSON.stringify([
+				{
+					kind: 'item',
+					hasPages: true,
+					route: 'items',
+					searchFilter: 'Items',
+					structuredDataType: 'Thing'
+				},
+				{
+					kind: 'merchant',
+					hasPages: false,
+					route: null,
+					searchFilter: 'Merchants',
+					structuredDataType: 'Person'
+				}
+			])
+		);
+		await writeFile(join(directory, 'graph.json'), JSON.stringify(graph));
+		await expect(publicationGate(directory)).rejects.toThrow('Invalid slug decision');
+	});
+});

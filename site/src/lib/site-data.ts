@@ -7,10 +7,73 @@
 
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "EntityKind".
+ */
+export type EntityKind =
+  | "item"
+  | "merchant"
+  | "person"
+  | "creature"
+  | "place"
+  | "container"
+  | "recipe"
+  | "building"
+  | "calendarEvent"
+  | "quest"
+  | "resource"
+  | "activity";
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "GapKind".
  */
 export type GapKind =
-  "itemWithoutSource" | "sourceWithoutPlace" | "itemWithoutIcon" | "unknownFact" | "placeWithoutName" | "unreadObject";
+  | "itemWithoutSource"
+  | "sourceWithoutPlace"
+  | "itemWithoutIcon"
+  | "unknownFact"
+  | "placeWithoutName"
+  | "unreadObject"
+  | "unknownCondition"
+  | "unresolvedReference";
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "ConditionKind".
+ */
+export type ConditionKind =
+  | "calendarEvent"
+  | "quest"
+  | "questStage"
+  | "guildRank"
+  | "disciplineLevel"
+  | "proficiencyLevel"
+  | "building"
+  | "gameState"
+  | "unknown";
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "RelationDirection".
+ */
+export type RelationDirection = "outgoing" | "incoming";
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "SourceKind".
+ */
+export type SourceKind =
+  | "shop"
+  | "currencyShop"
+  | "smithing"
+  | "crafting"
+  | "cooking"
+  | "containerLoot"
+  | "randomLoot"
+  | "enemyDrop"
+  | "pickup"
+  | "dialogue"
+  | "fishing"
+  | "gathering"
+  | "farming"
+  | "bountyNote"
+  | "settlementDelivery";
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "Stat".
@@ -37,32 +100,14 @@ export type Stat =
   | "cooledEffect"
   | "groundEffect"
   | "heatedEffect";
-/**
- * This interface was referenced by `SiteDataFiles`'s JSON-Schema
- * via the `definition` "SourceKind".
- */
-export type SourceKind =
-  | "shop"
-  | "currencyShop"
-  | "smithing"
-  | "crafting"
-  | "cooking"
-  | "containerLoot"
-  | "randomLoot"
-  | "enemyDrop"
-  | "pickup"
-  | "dialogue"
-  | "fishing"
-  | "gathering"
-  | "farming"
-  | "bountyNote"
-  | "settlementDelivery";
 
 export interface SiteDataFiles {
   build: SiteBuild;
   coverage: CoverageReport;
+  graph: EntityGraph;
   item: ItemPage;
   items: ItemIndex;
+  kinds: EntityKindDefinition[];
   [k: string]: unknown;
 }
 /**
@@ -121,7 +166,7 @@ export interface CoverageGap {
  */
 export interface GapEntry {
   detail: string | null;
-  itemSlug: string | null;
+  entity: EntityReference | null;
   label: string;
   source?:
     | "shop"
@@ -144,6 +189,132 @@ export interface GapEntry {
 }
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "EntityReference".
+ */
+export interface EntityReference {
+  icon: string | null;
+  key: string | null;
+  kind: EntityKind;
+  name: string;
+  slug: string | null;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "EntityGraph".
+ */
+export interface EntityGraph {
+  entities: EntityDocument[];
+  relations: RelationRow[];
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "EntityDocument".
+ */
+export interface EntityDocument {
+  entity: EntityReference;
+  relations: EntityRelation[];
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "EntityRelation".
+ */
+export interface EntityRelation {
+  conditions: RelationCondition[];
+  direction: RelationDirection;
+  entity: EntityReference;
+  id: string;
+  kind: string;
+  label: string;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "RelationCondition".
+ */
+export interface RelationCondition {
+  entity: EntityReference | null;
+  kind: ConditionKind;
+  label: string;
+  value: number | null;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "RelationRow".
+ */
+export interface RelationRow {
+  attributes: Source | null;
+  conditions: RelationCondition[];
+  forwardLabel: string;
+  id: string;
+  kind: string;
+  reverseLabel: string;
+  source: EntityReference;
+  target: EntityReference;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "Source".
+ */
+export interface Source {
+  amount: Amount | null;
+  chance: number | null;
+  chanceBasis?: string | null;
+  conditions: RelationCondition[];
+  entity: EntityReference;
+  inputs: ItemAmount[];
+  kind: SourceKind;
+  name: string;
+  notes: string[];
+  picks?: Amount | null;
+  places: EntityReference[];
+  price: Price | null;
+  relationId: string;
+  weight: Weight | null;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "Amount".
+ */
+export interface Amount {
+  max: number;
+  min: number;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "ItemAmount".
+ */
+export interface ItemAmount {
+  item: EntityReference;
+  quantity: number;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "Price".
+ */
+export interface Price {
+  amount: number;
+  currency: EntityReference | null;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "Weight".
+ */
+export interface Weight {
+  total: number;
+  value: number;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "ItemPage".
  */
 export interface ItemPage {
@@ -151,9 +322,11 @@ export interface ItemPage {
   description: string | null;
   facts: Fact[];
   icon: string | null;
-  id: string;
+  key: string;
+  kind: EntityKind;
   name: string;
   qualifier?: string | null;
+  relations: EntityRelation[];
   slug: string;
   sources: Source[];
   type: string;
@@ -195,85 +368,15 @@ export interface Effect {
 }
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
- * via the `definition` "Source".
- */
-export interface Source {
-  amount: Amount | null;
-  chance: number | null;
-  chanceBasis?: string | null;
-  inputs: ItemAmount[];
-  kind: SourceKind;
-  name: string;
-  notes: string[];
-  picks?: Amount | null;
-  places: Place[];
-  price: Price | null;
-  weight: Weight | null;
-  [k: string]: unknown;
-}
-/**
- * This interface was referenced by `SiteDataFiles`'s JSON-Schema
- * via the `definition` "Amount".
- */
-export interface Amount {
-  max: number;
-  min: number;
-  [k: string]: unknown;
-}
-/**
- * This interface was referenced by `SiteDataFiles`'s JSON-Schema
- * via the `definition` "ItemAmount".
- */
-export interface ItemAmount {
-  item: ItemLink;
-  quantity: number;
-  [k: string]: unknown;
-}
-/**
- * This interface was referenced by `SiteDataFiles`'s JSON-Schema
- * via the `definition` "ItemLink".
- */
-export interface ItemLink {
-  name: string;
-  slug: string | null;
-  [k: string]: unknown;
-}
-/**
- * This interface was referenced by `SiteDataFiles`'s JSON-Schema
- * via the `definition` "Place".
- */
-export interface Place {
-  id: string;
-  name: string;
-  [k: string]: unknown;
-}
-/**
- * This interface was referenced by `SiteDataFiles`'s JSON-Schema
- * via the `definition` "Price".
- */
-export interface Price {
-  amount: number;
-  currency: ItemLink | null;
-  [k: string]: unknown;
-}
-/**
- * This interface was referenced by `SiteDataFiles`'s JSON-Schema
- * via the `definition` "Weight".
- */
-export interface Weight {
-  total: number;
-  value: number;
-  [k: string]: unknown;
-}
-/**
- * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "ItemUse".
  */
 export interface ItemUse {
-  item: ItemLink;
+  conditions: RelationCondition[];
+  item: EntityReference;
   kind: SourceKind;
   name: string;
   quantity: number;
+  relationId: string;
   [k: string]: unknown;
 }
 /**
@@ -303,11 +406,25 @@ export interface CategorySummary {
 export interface ItemSummary {
   category: string;
   icon: string | null;
+  key: string;
+  kind: EntityKind;
   name: string;
   qualifier?: string | null;
   slug: string;
   sourceKinds: SourceKind[];
   type: string;
   value: number | null;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "EntityKindDefinition".
+ */
+export interface EntityKindDefinition {
+  hasPages: boolean;
+  kind: EntityKind;
+  route: string | null;
+  searchFilter: string;
+  structuredDataType: string;
   [k: string]: unknown;
 }

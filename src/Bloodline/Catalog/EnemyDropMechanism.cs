@@ -17,7 +17,9 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
 
     public IEnumerable<ItemSource> FindSources(CatalogContext context)
     {
-        var spawnedPlaces = new Dictionary<string, List<Place>>(StringComparer.OrdinalIgnoreCase);
+        var spawnedPlaces = new Dictionary<string, List<EntityReference>>(
+            StringComparer.OrdinalIgnoreCase
+        );
         foreach (var placement in context.Placements)
         {
             foreach (var field in PopulationFields)
@@ -89,8 +91,29 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
                     SourceKind.EnemyDrop,
                     name,
                     sourcePlaces,
-                    RollNotes(field, places.Count == 0 && sourcePlaces.Count > 0, nameNotes),
-                    "Chance per kill"
+                    RollNotes(field, nameNotes),
+                    WorldSourceData.Reference(EntityKind.Creature, path, name),
+                    "Chance per kill",
+                    conditions: places.Count == 0 && sourcePlaces.Count > 0
+                        ?
+                        [
+                            .. WorldSourceData.Conditions(
+                                context,
+                                properties,
+                                sourcePlaces.Count == 1 ? sourcePlaces[0].Key : null
+                            ),
+                            new RelationCondition(
+                                ConditionKind.Unknown,
+                                null,
+                                null,
+                                "Spawner requirements are unknown."
+                            ),
+                        ]
+                        : WorldSourceData.Conditions(
+                            context,
+                            properties,
+                            sourcePlaces.Count == 1 ? sourcePlaces[0].Key : null
+                        )
                 )
             )
                 yield return source;
@@ -112,26 +135,35 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
                     SourceKind.EnemyDrop,
                     name,
                     places,
-                    RollNotes(field, true, nameNotes),
-                    "Chance per kill"
+                    RollNotes(field, nameNotes),
+                    WorldSourceData.Reference(EntityKind.Creature, path, name),
+                    "Chance per kill",
+                    conditions:
+                    [
+                        .. WorldSourceData.Conditions(
+                            context,
+                            type.Properties,
+                            places.Count == 1 ? places[0].Key : null
+                        ),
+                        new RelationCondition(
+                            ConditionKind.Unknown,
+                            null,
+                            null,
+                            "Spawner requirements are unknown."
+                        ),
+                    ]
                 )
             )
                 yield return source;
         }
     }
 
-    private static IReadOnlyList<string> RollNotes(
-        string field,
-        bool fromSpawner,
-        IReadOnlyList<string> nameNotes
-    )
+    private static IReadOnlyList<string> RollNotes(string field, IReadOnlyList<string> nameNotes)
     {
         var roll =
             field == "Loot Table"
                 ? "Dropped when defeated."
                 : "Rare loot dropped when defeated. Checked separately from normal loot.";
-        return fromSpawner
-            ? [roll, .. nameNotes, "Comes from a spawner whose conditions are unknown."]
-            : [roll, .. nameNotes];
+        return [roll, .. nameNotes];
     }
 }

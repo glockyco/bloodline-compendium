@@ -157,7 +157,17 @@ The C# catalog builds an in-memory graph of entities and relation rows and write
 
 The writer resolves every relation into references embedded in both documents. A reference holds the kind, key, name, slug when the kind has pages, and the icon. The site therefore renders links without joins. A graph check runs in the catalog and again on the built site.
 
+`CatalogGraph` turns each acquisition source into one row from its provider to its item. Ingredient and currency uses become separate rows from the consumed item to the acquired item. Item source and use lists and the graph's reverse documents project those rows, so they cannot compute contradictory directions. Mechanism attributes remain on the row. Embedded references contain only identity and presentation fields.
+
+`graph.json` retains documents for reference-only entities as well as items. The publication gate reads the prerendered graph and requires each paged document's relation ID and direction in static HTML. It also rejects invalid keys, slugs and page decisions. `EntityLink` reads the published kind registry before creating a link.
+
 Relation rows carry typed conditions where the game sets them: a calendar event or season, a quest or quest stage, a guild rank, a discipline or proficiency level, a settlement building, or another named game state. A condition the catalog cannot read is published as unknown, never as absent. Pages, the map and the planner read the same conditions, which Ancient Kingdoms had to retrofit for seasons.
+
+Build 24464547's Woodhurst level keeps actors tagged `Halloween Decor` only when the persisted game calendar month is Truill or the persisted real-world month is October. `Woodhurst_C:ExecuteUbergraph_Woodhurst` takes the OR of those checks and otherwise destroys the tagged actors. The Hallowed Eve Merchant has that tag. `CheckIfIsHallowedEve:IsConditionMet` repeats the same check. The source therefore carries a calendar-event condition rather than inferring availability from the merchant's name. Evidence is in `artifacts/24464547/research/entity-graph/`. Hallowed Eve has no row in the extracted calendar tables, so its reference has a label without a key and appears in coverage.
+
+Dialogue requirements are read from their owning nodes. When an ancestor's check can gate a grant through alternative paths, the catalog publishes an unknown requirement rather than joining the paths into a false conjunction. Unsupported condition classes and missing thresholds also remain unknown and appear in coverage.
+
+Reference-only settlement buildings retain the identifiers of their producer. Stock uses the finished actor class, while deliveries use the resource-and-income table row. For example, Alchemist and Alchemist (settlement) remain separate graph identities. Consolidating them needs an authored association, not display-name matching, before building pages can publish one player-facing identity.
 
 Keys are the identifiers the game itself uses, so saves, build links and update comparisons can refer to them:
 - a class path for items, skills and creatures, which is also what saves store,
@@ -167,6 +177,8 @@ Keys are the identifiers the game itself uses, so saves, build links and update 
 
 Keys never derive from display names.
 
+Two fresh extractions and catalog builds of 24464547 produced the same 3,488 unique kind-and-key identities. All 2,087 item slugs matched the site-data snapshot taken before cataloging. The six held-item class paths in the copied `LabRender.sav` matched item keys, including the Winter Warden Cuirass. The snapshot, save copy, key comparison and one sample of every published source mechanism are kept in `artifacts/24464547/entity-graph-check/`.
+
 Placements in levels are published apart from page documents, as the map's own data keyed by entity. Pages show counts and places, not coordinate lists. Afallon moved placements off its relation rows for the same reason.
 
 A registry of kinds lists each kind once with its page decision, route, search filter and structured-data type. Routes, Pagefind filters, the sitemap and page metadata all read it.
@@ -175,7 +187,7 @@ Slugs derive from display names under the existing qualification rules. URLs are
 
 Alternatives:
 - A SQLite catalog queried by the site, as Ancient Kingdoms does. It suits a server-rendered site with ad hoc queries. This site is static, and the C# graph with generated types keeps one contract.
-- Per-page relation arrays without relation rows, as the item catalog does today. Each direction is then produced separately and can disagree, which is what Ancient Kingdoms unified later.
+- Per-page relation arrays without relation rows. Each direction would then be produced separately and could disagree, which is what Ancient Kingdoms unified later.
 
 ### Page kinds follow what a player thinks of
 

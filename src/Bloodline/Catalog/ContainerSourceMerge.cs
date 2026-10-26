@@ -104,7 +104,9 @@ internal static class ContainerSourceMerge
         foreach (var candidate in candidates)
         {
             var source = candidate.Source;
-            var places = source.Places.Where(place => !excludedLevels.Contains(place.Id)).ToArray();
+            var places = source
+                .Places.Where(place => place.Key is null || !excludedLevels.Contains(place.Key))
+                .ToArray();
             if (source.Places.Count > 0 && places.Length == 0)
             {
                 continue;
@@ -175,7 +177,7 @@ internal static class ContainerSourceMerge
             {
                 Places = group
                     .SelectMany(candidate => candidate.Source.Places)
-                    .DistinctBy(place => place.Id, StringComparer.OrdinalIgnoreCase)
+                    .DistinctBy(place => place.Key, StringComparer.OrdinalIgnoreCase)
                     .ToArray(),
                 Notes = notes,
                 Picks =

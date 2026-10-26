@@ -32,6 +32,16 @@ export function publicationSitemap(paths = publicationPaths) {
 
 export async function writePublication(directory) {
 	const contents = {
+		'kinds.json': JSON.stringify([
+			{
+				kind: 'item',
+				hasPages: true,
+				route: 'items',
+				searchFilter: 'Items',
+				structuredDataType: 'Thing'
+			}
+		]),
+		'graph.json': JSON.stringify({ entities: [], relations: [] }),
 		'index.html': publicationPage('Invented home', '<a href="/items/">Items</a>'),
 		'items/index.html': publicationPage(
 			'Invented items',

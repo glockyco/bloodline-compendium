@@ -1,13 +1,14 @@
-import { readIndex } from '#lib/server/data.js';
+import { readGraph, readKinds } from '#lib/server/data.js';
+import { entityPath, kindPath } from '#lib/entities.js';
 export const prerender = true;
 export async function GET() {
-	const index = await readIndex();
+	const [graph, kinds] = await Promise.all([readGraph(), readKinds()]);
 	const paths = [
 		'/',
-		'/items/',
 		'/coverage/',
 		'/about/',
-		...index.items.map((item) => `/items/${encodeURIComponent(item.slug)}/`)
+		...kinds.map((kind) => kindPath(kind.kind, kinds)).filter((path) => path !== null),
+		...graph.entities.map(({ entity }) => entityPath(entity, kinds)).filter((path) => path !== null)
 	];
 	return new Response(
 		'<?xml version="1.0" encoding="UTF-8"?>\n' +

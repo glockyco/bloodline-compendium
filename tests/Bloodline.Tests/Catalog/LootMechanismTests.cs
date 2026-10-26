@@ -74,7 +74,7 @@ public sealed class LootMechanismTests
         Assert.Equal("Old box", source.Name);
         Assert.Equal(new Weight(2, 8), source.Weight);
         Assert.Equal(new Amount(3, 3), source.Amount);
-        Assert.Equal(Level, Assert.Single(source.Places).Id);
+        Assert.Equal(Level, Assert.Single(source.Places).Key);
         Assert.Equal(0.25, source.Chance);
         Assert.Equal("Chance per pick", source.ChanceBasis);
         Assert.Equal(new Amount(3, 5), source.Picks);
@@ -121,7 +121,7 @@ public sealed class LootMechanismTests
         Assert.Equal(unknownName, source.Notes.Contains(LootRecords.UnnamedNote));
         Assert.Equal(new Weight(2, 8), source.Weight);
         Assert.Equal(new Amount(3, 3), source.Amount);
-        Assert.Equal(Level, Assert.Single(source.Places).Id);
+        Assert.Equal(Level, Assert.Single(source.Places).Key);
     }
 
     [Theory]
@@ -262,7 +262,7 @@ public sealed class LootMechanismTests
         Assert.Equal(0.4, source.Chance);
         Assert.Equal("Chance per pick", source.ChanceBasis);
         Assert.Equal(new Amount(5, 5), source.Picks);
-        Assert.Equal(Level, Assert.Single(source.Places).Id);
+        Assert.Equal(Level, Assert.Single(source.Places).Key);
         Assert.Contains(
             source.Notes,
             note => note.Contains("loose loot", StringComparison.Ordinal)
@@ -416,7 +416,7 @@ public sealed class LootMechanismTests
                 )
             )
             .Source;
-        Assert.Equal(Level, Assert.Single(source.Places).Id);
+        Assert.Equal(Level, Assert.Single(source.Places).Key);
     }
 
     [Fact]
@@ -437,7 +437,7 @@ public sealed class LootMechanismTests
                 )
             )
             .Source;
-        Assert.Equal(Level, Assert.Single(source.Places).Id);
+        Assert.Equal(Level, Assert.Single(source.Places).Key);
     }
 
     [Fact]
@@ -516,7 +516,7 @@ public sealed class LootMechanismTests
             source =>
             {
                 Assert.Equal("Marsh beast", source.Name);
-                Assert.Equal(Level, Assert.Single(source.Places).Id);
+                Assert.Equal(Level, Assert.Single(source.Places).Key);
                 Assert.Equal(new Weight(2, 8), source.Weight);
                 Assert.Equal(new Amount(3, 3), source.Amount);
                 Assert.Equal(0.25, source.Chance);
@@ -571,12 +571,12 @@ public sealed class LootMechanismTests
                 )
             )
             .Source;
-        Assert.Equal(Level, Assert.Single(source.Places).Id);
+        Assert.Equal(Level, Assert.Single(source.Places).Key);
         Assert.Contains(
-            source.Notes,
-            note =>
-                note.Contains("spawner", StringComparison.OrdinalIgnoreCase)
-                && note.Contains("unknown", StringComparison.OrdinalIgnoreCase)
+            source.Conditions,
+            condition =>
+                condition.Kind == ConditionKind.Unknown
+                && condition.Label.Contains("spawner", StringComparison.OrdinalIgnoreCase)
         );
     }
 
@@ -601,7 +601,7 @@ public sealed class LootMechanismTests
                 )
             )
             .Source;
-        Assert.Equal(Level, Assert.Single(source.Places).Id);
+        Assert.Equal(Level, Assert.Single(source.Places).Key);
     }
 
     [Theory]

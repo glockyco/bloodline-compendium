@@ -9,11 +9,11 @@ internal sealed class CookingMechanism : ISourceMechanism
     public IEnumerable<ItemSource> FindSources(CatalogContext context)
     {
         foreach (
-            var row in context
+            var (table, row) in context
                 .Records.Tables.Where(table =>
                     ItemIdentity.ClassName(table.Path) == "AllFoodRecipes"
                 )
-                .SelectMany(table => table.Rows)
+                .SelectMany(table => table.Rows.Select(row => (table, row)))
         )
         {
             if (RecordValues.AnyReference(row.Values["CompletedMeal"]) is not { } item)
@@ -46,6 +46,15 @@ internal sealed class CookingMechanism : ISourceMechanism
                     inputs,
                     notes
                 )
+                {
+                    Entity = WorldSourceData.Reference(
+                        EntityKind.Recipe,
+                        table.Path + ":" + row.Name,
+                        RecordValues.Text(row.Values["LocalizedName"])
+                            ?? RecordValues.String(row.Values["RecipeName"])
+                            ?? context.ItemLink(item).Name
+                    ),
+                }
             );
         }
     }

@@ -33,7 +33,7 @@ public sealed class TradeMechanismTests
             [],
             []
         );
-        var pages = CatalogBuilder.Build(records, [], []).Items.ToDictionary(item => item.Id);
+        var pages = CatalogBuilder.Build(records, [], []).Items.ToDictionary(item => item.Key);
         return new CatalogContext(records, pages, []);
     }
 
@@ -76,14 +76,20 @@ public sealed class TradeMechanismTests
         Assert.Equal(new Amount(4, 4), source.Source.Amount);
         Assert.Equal(5, Assert.Single(source.Source.Inputs).Quantity);
         Assert.Contains(
-            source.Source.Notes,
-            note => note.Contains("weaponsmithing") && note.Contains("9")
+            source.Source.Conditions,
+            condition =>
+                condition.Kind == ConditionKind.ProficiencyLevel
+                && condition.Value == 9
+                && condition.Label.Contains("weaponsmithing")
         );
         Assert.Contains(
             source.Source.Notes,
             note => note.Contains("experience") && note.Contains("12")
         );
         Assert.Empty(source.Source.Places);
+        Assert.Equal(EntityKind.Recipe, source.Source.Entity.Kind);
+        Assert.Equal(recipes.Path + ":SharedKey", source.Source.Entity.Key);
+        Assert.Equal(input.Path, Assert.Single(source.Source.Inputs).Item.Key);
     }
 
     [Fact]
@@ -138,6 +144,11 @@ public sealed class TradeMechanismTests
         Assert.Equal(new Amount(1, 1), found.Source.Amount);
         Assert.Equal("Root stew", found.Source.Name);
         Assert.Empty(found.Source.Places);
+        Assert.Equal(EntityKind.Recipe, found.Source.Entity.Kind);
+        Assert.Equal(
+            "/Game/Invented/AllFoodRecipes.AllFoodRecipes:Recipe",
+            found.Source.Entity.Key
+        );
     }
 
     [Fact]
@@ -193,8 +204,110 @@ public sealed class TradeMechanismTests
         Assert.Equal(stock.Path, found.ItemClass);
         Assert.Equal("Placed name", found.Source.Name);
         Assert.Equal(17, found.Source.Price!.Amount);
-        Assert.Equal("/Game/Invented/Town", Assert.Single(found.Source.Places).Id);
+        Assert.Equal("/Game/Invented/Town", Assert.Single(found.Source.Places).Key);
         Assert.Null(found.Source.Weight);
+    }
+
+    [Fact]
+    public void SharedMerchantClassesUseDialogueIdentityNotTheirDisplayName()
+    {
+        var stock = Item("Stock");
+        var vendor = new ClassRecord(
+            "/Game/Invented/ShopKeeper_Base.ShopKeeper_Base_C",
+            [],
+            Properties(
+                $$"""{"Full Name":{"$text":"Not a seasonal name"},"Dialogue":{"$ref":"/Game/Invented/ShopTalk.ShopTalk"},"Shop Contents":[{"$ref":"{{stock.Path}}"}]}"""
+            )
+        );
+        var level = new LevelRecord(
+            "/Game/Invented/Town",
+            [],
+            [new ActorRecord("Vendor1", vendor.Path, new JsonObject())]
+        );
+        var source = Assert
+            .Single(new ShopMechanism().FindSources(Context([stock, vendor], levels: [level])))
+            .Source;
+        Assert.Equal(EntityKind.Merchant, source.Entity.Kind);
+        Assert.Equal("/Game/Invented/ShopTalk.ShopTalk", source.Entity.Key);
+        Assert.Null(source.Entity.Slug);
+        Assert.Empty(source.Conditions);
+        vendor.Properties["Full Name"] = Properties("""{"$text":"Hallowed Eve Merchant"}""");
+        var renamed = Assert
+            .Single(new ShopMechanism().FindSources(Context([stock, vendor], levels: [level])))
+            .Source;
+        Assert.Equal(source.Entity.Key, renamed.Entity.Key);
+        Assert.Empty(renamed.Conditions);
+        vendor.Properties["Tags"] = new JsonArray("Halloween Decor");
+        var tagged = Assert
+            .Single(new ShopMechanism().FindSources(Context([stock, vendor], levels: [level])))
+            .Source;
+        Assert.Contains(
+            tagged.Conditions,
+            condition =>
+                condition.Kind == ConditionKind.Unknown
+                && condition.Label.Contains("Halloween Decor", StringComparison.Ordinal)
+        );
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void WoodhurstTaggedMerchantCarriesTheActualCalendarWindows(bool customCurrency)
+    {
+        var stock = Item("SeasonalStock");
+        var vendor = new ClassRecord(
+            "/Game/Invented/ShopKeeper_Base.ShopKeeper_Base_C",
+            [],
+            Properties(
+                """
+                {"Full Name":{"$text":"A different display name"},"Dialogue":{"$ref":"/Game/Invented/SeasonalTalk.SeasonalTalk"}}
+                """
+            )
+        );
+        if (!customCurrency)
+            vendor.Properties["Shop Contents"] = new JsonArray(
+                new JsonObject { ["$ref"] = stock.Path }
+            );
+        var shop = new InnerObjectRecord(
+            "/Game/Invented/SeasonalTalk.SeasonalTalk:Open",
+            "/Game/Invented/OpenCustomCurrencyShop.OpenCustomCurrencyShop_C",
+            Properties(
+                $$$"""{"Shop Contents (Items)":{"$map":[[{"$ref":"{{{stock.Path}}}"},10]]}}"""
+            )
+        );
+        var dialogue = new AssetRecord(
+            "/Game/Invented/SeasonalTalk.SeasonalTalk",
+            "Dialogue",
+            Properties($$"""{"Data":[{"Events":[{"$ref":"{{shop.Path}}"}]}]}"""),
+            [shop]
+        );
+        var level = new LevelRecord(
+            "/Game/Cities/Woodhurst/Woodhurst",
+            [],
+            [
+                new ActorRecord(
+                    "SeasonalVendor",
+                    vendor.Path,
+                    Properties("""{"Tags":["Halloween Decor"]}""")
+                ),
+            ]
+        );
+        var context = Context([stock, vendor], levels: [level], dialogues: [dialogue]);
+        var source = Assert
+            .Single(
+                customCurrency
+                    ? new CurrencyShopMechanism().FindSources(context)
+                    : new ShopMechanism().FindSources(context)
+            )
+            .Source;
+        var condition = Assert.Single(source.Conditions);
+        Assert.Equal(ConditionKind.CalendarEvent, condition.Kind);
+        Assert.Equal("Hallowed Eve", condition.Entity!.Name);
+        Assert.Equal(EntityKind.CalendarEvent, condition.Entity.Kind);
+        Assert.Null(condition.Entity.Key);
+        Assert.Null(condition.Entity.Slug);
+        Assert.Contains("Truill", condition.Label);
+        Assert.Contains("October", condition.Label);
     }
 
     [Theory]
@@ -340,7 +453,9 @@ public sealed class TradeMechanismTests
         Assert.Equal(new Amount(1, 1), found.Source.Amount);
         Assert.Equal(17, found.Source.Price!.Amount);
         Assert.Empty(found.Source.Places);
-        Assert.Contains(found.Source.Notes, note => note.Contains("settlement"));
+        var condition = Assert.Single(found.Source.Conditions);
+        Assert.Equal(ConditionKind.Building, condition.Kind);
+        Assert.Equal(building.Path, condition.Entity!.Key);
     }
 
     [Theory]
@@ -375,8 +490,11 @@ public sealed class TradeMechanismTests
         );
         var source = Assert.Single(new CraftingMechanism().FindSources(context)).Source;
         Assert.Contains(
-            source.Notes,
-            note => note.Contains("focus crafting") && note.Contains("15")
+            source.Conditions,
+            condition =>
+                condition.Kind == ConditionKind.ProficiencyLevel
+                && condition.Value == 15
+                && condition.Label.Contains("focus crafting")
         );
         Assert.DoesNotContain(source.Notes, note => note.Contains("NewEnumerator"));
     }
@@ -449,7 +567,7 @@ public sealed class TradeMechanismTests
         Assert.Equal(SourceKind.Dialogue, found.Source.Kind);
         Assert.Equal(new Amount(3, 3), found.Source.Amount);
         Assert.Equal("Speaker", found.Source.Name);
-        Assert.Equal("/Game/Invented/Village", Assert.Single(found.Source.Places).Id);
+        Assert.Equal("/Game/Invented/Village", Assert.Single(found.Source.Places).Key);
         Assert.Null(found.Source.Price);
         Assert.Null(found.Source.Weight);
         Assert.Null(found.Source.Chance);
@@ -459,8 +577,8 @@ public sealed class TradeMechanismTests
             note => note.Contains("/Game/") || note.Contains(":Gift")
         );
         Assert.Contains(
-            found.Source.Notes,
-            note => note.Contains("unknown") || note.Contains("not fully known")
+            found.Source.Conditions,
+            condition => condition.Kind == ConditionKind.Unknown
         );
         Assert.Equal(linked, found.Source.Notes.Any(note => note.Contains("Take this gift.")));
         Assert.Equal(
@@ -469,7 +587,11 @@ public sealed class TradeMechanismTests
         );
         Assert.Equal(
             linked,
-            found.Source.Notes.Any(note => note.Contains("5") && note.Contains("gold"))
+            found.Source.Conditions.Any(condition =>
+                condition.Kind == ConditionKind.GameState
+                && condition.Value == 5
+                && condition.Label.Contains("gold")
+            )
         );
     }
 }

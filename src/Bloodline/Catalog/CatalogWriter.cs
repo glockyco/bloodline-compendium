@@ -19,6 +19,8 @@ internal static class CatalogWriter
             CanonicalJson.Write(Path.Combine(staging, "build.json"), build);
             CanonicalJson.Write(Path.Combine(staging, "items.json"), catalog.Index);
             CanonicalJson.Write(Path.Combine(staging, "coverage.json"), catalog.Coverage);
+            CanonicalJson.Write(Path.Combine(staging, "kinds.json"), EntityKinds.All);
+            CanonicalJson.Write(Path.Combine(staging, "graph.json"), catalog.Graph);
             Directory.CreateDirectory(Path.Combine(staging, "items"));
             Directory.CreateDirectory(Path.Combine(staging, "icons"));
             foreach (var item in catalog.Items)

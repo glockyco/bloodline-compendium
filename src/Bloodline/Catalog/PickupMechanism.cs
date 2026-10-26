@@ -23,6 +23,14 @@ internal sealed class PickupMechanism : ISourceMechanism
                         [],
                         []
                     )
+                    {
+                        Entity = context.Places.Get(placement.Level),
+                        Conditions = WorldSourceData.Conditions(
+                            context,
+                            placement.Properties,
+                            placement.Level
+                        ),
+                    }
                 );
             }
         }

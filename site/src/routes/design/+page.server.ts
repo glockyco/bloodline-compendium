@@ -7,5 +7,8 @@ export async function load() {
 	const index = await readIndex();
 	const icons = index.items.flatMap((item) => (item.icon ? [item.icon] : [])).slice(0, 5);
 	const item = index.items[0];
-	return { icons, item: { name: item.name, slug: item.slug } };
+	return {
+		icons,
+		item: { kind: item.kind, key: item.key, name: item.name, slug: item.slug, icon: item.icon }
+	};
 }

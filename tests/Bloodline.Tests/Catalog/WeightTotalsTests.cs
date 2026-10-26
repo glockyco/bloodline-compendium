@@ -33,7 +33,21 @@ public sealed class WeightTotalsTests
         var records = new CatalogRecords(new BuildRecord(1, 1, []), [], [], [], [], [], [], []);
         var context = new CatalogContext(records, new Dictionary<string, ItemPage>(), []);
         var sources = LootRecords
-            .Pool(context, Pool(), SourceKind.ContainerLoot, "Invented box", [], [])
+            .Pool(
+                context,
+                Pool(),
+                SourceKind.ContainerLoot,
+                "Invented box",
+                [],
+                [],
+                new EntityReference(
+                    EntityKind.Container,
+                    "/Game/Box.Box_C",
+                    "Invented box",
+                    null,
+                    null
+                )
+            )
             .ToArray();
         Assert.Equal(100, sources.Length);
         Assert.All(sources, source => Assert.Equal(new Weight(0.1, 18.02), source.Source.Weight));
@@ -70,6 +84,13 @@ public sealed class WeightTotalsTests
             "Invented enemy",
             [],
             [],
+            new EntityReference(
+                EntityKind.Creature,
+                "/Invented/Enemy.Enemy_C",
+                "Invented enemy",
+                null,
+                null
+            ),
             "Chance per kill"
         );
         Assert.All(

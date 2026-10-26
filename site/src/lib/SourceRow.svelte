@@ -3,6 +3,7 @@
 	import { formatNumber, formatChance } from './format.js';
 	import { chanceLabel, formatAmount } from './acquisition.js';
 	import EntityLink from './ui/EntityLink.svelte';
+	import Conditions from './Conditions.svelte';
 	let {
 		source,
 		showAmount = false,
@@ -11,13 +12,13 @@
 	}: { source: Source; showAmount?: boolean; showContext?: boolean; id: string } = $props();
 </script>
 
-<tr class="source-row" {id}>
+<tr class="source-row" {id} data-relation-id={source.relationId} data-relation-direction="incoming">
 	<td class="source-identity">
-		<span class="relation-name" data-game>{source.name}</span>
+		<span class="relation-name"><EntityLink entity={source.entity} /></span>
+		<Conditions conditions={source.conditions} />
 		<p class="source-places">
-			{#if source.places.length}<span data-game
-					>{source.places.map((place) => place.name).join(', ')}</span
-				>{:else}Location unknown{/if}
+			{#if source.places.length}{#each source.places as place, index (index)}{#if index},
+					{/if}<EntityLink entity={place} />{/each}{:else}Location unknown{/if}
 		</p>
 		{#if source.weight && !(source.chance !== null && source.chanceBasis)}<p class="source-places">
 				Compared with other possible items. The selection rule is unknown, so this is not a drop
@@ -39,7 +40,6 @@
 				{#if source.chance !== null && !source.chanceBasis}<p>
 						Chance: {formatChance(source.chance)}. What this chance applies to is unknown.
 					</p>{/if}
-				<!-- Notes quote dialogue lines from the game. The entity graph replaces them with typed conditions. -->
 				{#if source.notes.length}<ul data-game>
 						{#each source.notes as note, index (index)}<li>{note}</li>{/each}
 					</ul>{/if}

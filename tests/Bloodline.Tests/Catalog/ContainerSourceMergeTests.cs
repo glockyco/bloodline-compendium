@@ -15,7 +15,7 @@ public sealed class ContainerSourceMergeTests
             new Source(
                 SourceKind.ContainerLoot,
                 "Filled Barrels",
-                [new Place(level, level)],
+                [new EntityReference(EntityKind.Place, level, level, null, null)],
                 null,
                 new Amount(2, 2),
                 new Weight(0.5, 18.02),
@@ -49,7 +49,7 @@ public sealed class ContainerSourceMergeTests
         Assert.Equal("Chance per pick", merged.ChanceBasis);
         Assert.Equal(
             new[] { "/Invented/A", "/Invented/B" },
-            merged.Places.Select(place => place.Id)
+            merged.Places.Select(place => place.Key)
         );
         var numbers = Regex
             .Matches(string.Join(" ", merged.Notes), @"\d+(?:\.\d+)?")
@@ -77,7 +77,22 @@ public sealed class ContainerSourceMergeTests
             "Chance basis" => a.Source with { ChanceBasis = "Chance per roll" },
             "Amount" => a.Source with { Amount = new Amount(3, 3) },
             "Price" => a.Source with { Price = new Price(5, null) },
-            "Inputs" => a.Source with { Inputs = [new ItemAmount(new ItemLink("key", "Key"), 1)] },
+            "Inputs" => a.Source with
+            {
+                Inputs =
+                [
+                    new ItemAmount(
+                        new EntityReference(
+                            EntityKind.Item,
+                            "/Invented/Key.Key_C",
+                            "Key",
+                            "key",
+                            null
+                        ),
+                        1
+                    ),
+                ],
+            },
             _ => throw new InvalidOperationException(),
         };
         var b = a with { Source = changed };

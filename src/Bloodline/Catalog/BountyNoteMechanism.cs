@@ -8,9 +8,9 @@ internal sealed class BountyNoteMechanism : ISourceMechanism
     public IEnumerable<ItemSource> FindSources(CatalogContext context)
     {
         foreach (
-            var row in context
+            var (table, row) in context
                 .Records.Tables.Where(table => WorldSourceData.IsTable(table, "DT_UQC_Quests"))
-                .SelectMany(table => table.Rows)
+                .SelectMany(table => table.Rows.Select(row => (table, row)))
         )
         {
             if (WorldSourceData.EnumIndex(context, row.Values["Type"]) is not (5 or 6))
@@ -36,9 +36,31 @@ internal sealed class BountyNoteMechanism : ISourceMechanism
                     null,
                     [],
                     [
-                        "Received when accepting the quest. Required bounty items are needed to complete the quest, not to receive the note. They are not rewards.",
+                        "Required bounty items are needed to complete the quest, not to receive the note. They are not rewards.",
                     ]
                 )
+                {
+                    Entity = WorldSourceData.Reference(
+                        EntityKind.Quest,
+                        table.Path + ":" + row.Name,
+                        RecordValues.Text(row.Values["DisplayName"])
+                            ?? ItemIdentity.Readable(row.Name)
+                    ),
+                    Conditions =
+                    [
+                        new RelationCondition(
+                            ConditionKind.Quest,
+                            WorldSourceData.Reference(
+                                EntityKind.Quest,
+                                table.Path + ":" + row.Name,
+                                RecordValues.Text(row.Values["DisplayName"])
+                                    ?? ItemIdentity.Readable(row.Name)
+                            ),
+                            null,
+                            "Received when accepting the quest."
+                        ),
+                    ],
+                }
             );
         }
     }

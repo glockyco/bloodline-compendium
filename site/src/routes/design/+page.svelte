@@ -1,6 +1,7 @@
 <script lang="ts">
 	import SeoHead from '#lib/SeoHead.svelte';
 	import RelationTable from '#lib/RelationTable.svelte';
+	import Conditions from '#lib/Conditions.svelte';
 	import ItemTooltip from '#lib/ItemTooltip.svelte';
 	import type { Fact } from '#lib/site-data.js';
 	import ButtonLink from '#lib/ui/ButtonLink.svelte';
@@ -123,9 +124,27 @@
 	</div>
 	<p>
 		Linked: <EntityLink entity={data.item} />. Without a page: <EntityLink
-			entity={{ name: 'Unpublished Merchant', slug: null }}
+			entity={{
+				kind: 'merchant',
+				key: '/Invented/Merchant',
+				name: 'Unpublished Merchant',
+				slug: null,
+				icon: null
+			}}
 		/>.
 	</p>
+	<div id="condition-fixture">
+		<Conditions
+			conditions={[
+				{
+					kind: 'gameState',
+					entity: data.item,
+					value: 13,
+					label: `Requires ${data.item.name} at level 13.`
+				}
+			]}
+		/>
+	</div>
 	<IssueNote title="An issue title that runs long enough to wrap">
 		The game shows one value in its tooltip and applies another when the item is equipped. This body
 		runs over several lines.

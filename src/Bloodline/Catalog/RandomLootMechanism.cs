@@ -35,6 +35,13 @@ internal sealed class RandomLootMechanism : ISourceMechanism
                         "The chance depends on the container, player level, item level and item type, so a fixed chance is unknown.",
                     ]
                 )
+                {
+                    Entity = WorldSourceData.Reference(
+                        EntityKind.Activity,
+                        table.Path,
+                        "General random loot"
+                    ),
+                }
             );
         }
     }

@@ -8,9 +8,9 @@ internal sealed class FarmingMechanism : ISourceMechanism
     public IEnumerable<ItemSource> FindSources(CatalogContext context)
     {
         foreach (
-            var row in context
+            var (table, row) in context
                 .Records.Tables.Where(table => WorldSourceData.IsTable(table, "SeedDataTable"))
-                .SelectMany(table => table.Rows)
+                .SelectMany(table => table.Rows.Select(row => (table, row)))
         )
         {
             var values = row.Values;
@@ -32,10 +32,6 @@ internal sealed class FarmingMechanism : ISourceMechanism
             {
                 notes.Add(FormattableString.Invariant($"Growing time in days: {days}."));
             }
-            if (RecordValues.Number(values["FarmingLevel"]) is { } level)
-            {
-                notes.Add(FormattableString.Invariant($"Requires farming level {level}."));
-            }
             foreach (var (item, weight) in WorldSourceData.Pool(values["HarvestItems"]))
             {
                 yield return new ItemSource(
@@ -51,6 +47,37 @@ internal sealed class FarmingMechanism : ISourceMechanism
                         seed is null ? [] : [new ItemAmount(context.ItemLink(seed), 1)],
                         notes
                     )
+                    {
+                        Entity = WorldSourceData.Reference(
+                            EntityKind.Resource,
+                            table.Path + ":" + row.Name,
+                            RecordValues.Text(values["ItemName"]) ?? ItemIdentity.Readable(row.Name)
+                        ),
+                        Conditions =
+                            RecordValues.Number(values["FarmingLevel"]) is { } level
+                                ?
+                                [
+                                    new RelationCondition(
+                                        ConditionKind.ProficiencyLevel,
+                                        null,
+                                        level,
+                                        FormattableString.Invariant(
+                                            $"Requires farming level {level}."
+                                        )
+                                    ),
+                                ]
+                            : values.ContainsKey("FarmingLevel")
+                                ?
+                                [
+                                    new RelationCondition(
+                                        ConditionKind.Unknown,
+                                        null,
+                                        null,
+                                        "The required farming level could not be read."
+                                    ),
+                                ]
+                            : [],
+                    }
                 );
             }
         }

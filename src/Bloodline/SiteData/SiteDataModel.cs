@@ -5,6 +5,94 @@ namespace Bloodline.SiteData;
 // Site data is the contract with the site. JSON Schema is exported from these types, and the site
 // generates its TypeScript types from that schema, so change these types instead of the generated files.
 
+internal enum EntityKind
+{
+    Item,
+    Merchant,
+    Person,
+    Creature,
+    Place,
+    Container,
+    Recipe,
+    Building,
+    CalendarEvent,
+    Quest,
+    Resource,
+    Activity,
+}
+
+internal sealed record EntityKindDefinition(
+    EntityKind Kind,
+    bool HasPages,
+    string? Route,
+    string SearchFilter,
+    string StructuredDataType
+);
+
+internal sealed record EntityReference(
+    EntityKind Kind,
+    string? Key,
+    string Name,
+    string? Slug,
+    string? Icon
+);
+
+internal enum ConditionKind
+{
+    CalendarEvent,
+    Quest,
+    QuestStage,
+    GuildRank,
+    DisciplineLevel,
+    ProficiencyLevel,
+    Building,
+    GameState,
+    Unknown,
+}
+
+internal sealed record RelationCondition(
+    ConditionKind Kind,
+    EntityReference? Entity,
+    double? Value,
+    string Label
+);
+
+internal enum RelationDirection
+{
+    Outgoing,
+    Incoming,
+}
+
+internal sealed record EntityRelation(
+    string Id,
+    string Kind,
+    RelationDirection Direction,
+    EntityReference Entity,
+    string Label,
+    IReadOnlyList<RelationCondition> Conditions
+);
+
+internal sealed record RelationRow(
+    string Id,
+    string Kind,
+    EntityReference Source,
+    EntityReference Target,
+    string ForwardLabel,
+    string ReverseLabel,
+    IReadOnlyList<RelationCondition> Conditions,
+    Source? Attributes
+);
+
+internal sealed record EntityDocument(
+    EntityReference Entity,
+    IReadOnlyList<EntityRelation> Relations
+);
+
+internal sealed record EntityGraph(
+    IReadOnlyList<EntityDocument> Entities,
+    IReadOnlyList<RelationRow> Relations
+);
+
 /// <summary>The game build and code commit that one site's data comes from. Written as <c>build.json</c>.</summary>
 internal sealed record SiteBuild(
     int AppId,
@@ -45,16 +133,22 @@ internal sealed record ItemSummary(
 )
 {
     [JsonRequired]
+    public string Key { get; init; } = "";
+
+    [JsonRequired]
+    public EntityKind Kind { get; init; } = EntityKind.Item;
+
+    [JsonRequired]
     public string Type { get; init; } = "Unknown";
     public string? Qualifier { get; init; }
 }
 
 /// <summary>
-/// Everything an item page shows. Written as <c>items/&lt;slug&gt;.json</c>. <see cref="Id"/> is the item's
+/// Everything an item page shows. Written as <c>items/&lt;slug&gt;.json</c>. <see cref="Key"/> is the item's
 /// Blueprint class path. A null <see cref="Icon"/> means that no icon was found or decoded.
 /// </summary>
 internal sealed record ItemPage(
-    string Id,
+    string Key,
     string Slug,
     string Name,
     string? Description,
@@ -65,6 +159,12 @@ internal sealed record ItemPage(
 )
 {
     [JsonRequired]
+    public EntityKind Kind { get; init; } = EntityKind.Item;
+
+    [JsonRequired]
+    public IReadOnlyList<EntityRelation> Relations { get; init; } = [];
+
+    [JsonRequired]
     public string Type { get; init; } = "Unknown";
     public string? Qualifier { get; init; }
 
@@ -72,7 +172,14 @@ internal sealed record ItemPage(
     public IReadOnlyList<ItemUse> Uses { get; init; } = [];
 }
 
-internal sealed record ItemUse(SourceKind Kind, string Name, ItemLink Item, int Quantity);
+internal sealed record ItemUse(SourceKind Kind, string Name, EntityReference Item, int Quantity)
+{
+    [JsonRequired]
+    public string RelationId { get; init; } = "";
+
+    [JsonRequired]
+    public IReadOnlyList<RelationCondition> Conditions { get; init; } = [];
+}
 
 internal sealed record CategoryLink(string Slug, string Name);
 
@@ -125,7 +232,7 @@ internal enum Stat
 internal sealed record Source(
     SourceKind Kind,
     string Name,
-    IReadOnlyList<Place> Places,
+    IReadOnlyList<EntityReference> Places,
     Price? Price,
     Amount? Amount,
     Weight? Weight,
@@ -134,6 +241,14 @@ internal sealed record Source(
     IReadOnlyList<string> Notes
 )
 {
+    [JsonRequired]
+    public EntityReference Entity { get; init; } = new(EntityKind.Activity, null, "", null, null);
+
+    [JsonRequired]
+    public IReadOnlyList<RelationCondition> Conditions { get; init; } = [];
+
+    [JsonRequired]
+    public string RelationId { get; init; } = "";
     public string? ChanceBasis { get; init; }
     public Amount? Picks { get; init; }
 }
@@ -157,11 +272,8 @@ internal enum SourceKind
     SettlementDelivery,
 }
 
-/// <summary>A level, identified by its package path, with the name players know it by.</summary>
-internal sealed record Place(string Id, string Name);
-
 /// <summary>A price in gold, the game's money, or in a currency item when <see cref="Currency"/> is set.</summary>
-internal sealed record Price(int Amount, ItemLink? Currency);
+internal sealed record Price(int Amount, EntityReference? Currency);
 
 /// <summary>How many of the item a source gives at once.</summary>
 internal sealed record Amount(int Min, int Max);
@@ -169,10 +281,7 @@ internal sealed record Amount(int Min, int Max);
 /// <summary>An item's raw weight and the total weight of the pool it is drawn from.</summary>
 internal sealed record Weight(double Value, double Total);
 
-internal sealed record ItemAmount(ItemLink Item, int Quantity);
-
-/// <summary>A link to an item page. <see cref="Slug"/> is null when the item has no page.</summary>
-internal sealed record ItemLink(string? Slug, string Name);
+internal sealed record ItemAmount(EntityReference Item, int Quantity);
 
 /// <summary>Every known gap in the site's data. Written as <c>coverage.json</c>.</summary>
 internal sealed record CoverageReport(IReadOnlyList<CoverageGap> Gaps);
@@ -187,13 +296,15 @@ internal enum GapKind
     UnknownFact,
     PlaceWithoutName,
     UnreadObject,
+    UnknownCondition,
+    UnresolvedReference,
 }
 
 /// <summary>
-/// One entry of a gap. <see cref="ItemSlug"/> links to the affected item when there is one.
+/// One entry of a gap. <see cref="Entity"/> names the affected entity when there is one.
 /// <see cref="Source"/> names the kind of source a source gap is about, so pages can word it.
 /// </summary>
-internal sealed record GapEntry(string Label, string? ItemSlug, string? Detail)
+internal sealed record GapEntry(string Label, EntityReference? Entity, string? Detail)
 {
     public SourceKind? Source { get; init; }
 }
@@ -203,5 +314,7 @@ internal sealed record SiteDataFiles(
     SiteBuild Build,
     ItemIndex Items,
     ItemPage Item,
-    CoverageReport Coverage
+    CoverageReport Coverage,
+    IReadOnlyList<EntityKindDefinition> Kinds,
+    EntityGraph Graph
 );

@@ -71,7 +71,12 @@ public sealed class WorldMechanismTests
         Assert.Null(result.Source.Amount);
         Assert.Equal("Seed", Assert.Single(result.Source.Inputs).Item.Name);
         Assert.Empty(result.Source.Places);
-        Assert.Equal(new[] { 4d, 2d, 7d }, NoteNumbers(result.Source));
+        Assert.Equal(new[] { 4d, 2d }, NoteNumbers(result.Source));
+        Assert.Equal(EntityKind.Resource, result.Source.Entity.Kind);
+        Assert.Equal(table.Path + ":InventedRow", result.Source.Entity.Key);
+        var condition = Assert.Single(result.Source.Conditions);
+        Assert.Equal(ConditionKind.ProficiencyLevel, condition.Kind);
+        Assert.Equal(7, condition.Value);
     }
 
     [Fact]
@@ -95,6 +100,8 @@ public sealed class WorldMechanismTests
         Assert.Equal(new Amount(2, 2), result.Source.Amount);
         Assert.Empty(result.Source.Inputs);
         Assert.Equal("Invented bounty", result.Source.Name);
+        Assert.Equal(EntityKind.Quest, result.Source.Entity.Kind);
+        Assert.Equal(table.Path + ":InventedRow", result.Source.Entity.Key);
     }
 
     [Fact]
@@ -114,6 +121,8 @@ public sealed class WorldMechanismTests
         Assert.Null(result.Source.Amount);
         Assert.Equal(new[] { 10d }, NoteNumbers(result.Source));
         Assert.Empty(result.Source.Places);
+        Assert.Equal(EntityKind.Building, result.Source.Entity.Kind);
+        Assert.Equal(result.Source.Entity, Assert.Single(result.Source.Conditions).Entity);
         table.Rows[0].Values["LootDeliveryQuantity"] = 0;
         Assert.Empty(new SettlementDeliveryMechanism().FindSources(Context(tables: [table])));
     }
@@ -155,12 +164,173 @@ public sealed class WorldMechanismTests
         Assert.Equal("/Invented/Gift.Gift_C", result.ItemClass);
         Assert.Equal(new Amount(3, 3), result.Source.Amount);
         Assert.Equal("Invented storyteller", result.Source.Name);
-        Assert.Equal("/Invented/Coast", Assert.Single(result.Source.Places).Id);
+        Assert.Equal("/Invented/Coast", Assert.Single(result.Source.Places).Key);
         var unplaced = Assert.Single(
             new DialogueGrantMechanism().FindSources(Context([grant], dialogues: [dialogue]))
         );
         Assert.Empty(unplaced.Source.Places);
         Assert.Equal(new Amount(3, 3), unplaced.Source.Amount);
+        Assert.Equal(EntityKind.Person, result.Source.Entity.Kind);
+        Assert.Equal(npc.Path, result.Source.Entity.Key);
+        Assert.Equal(dialogue.Path, unplaced.Source.Entity.Key);
+    }
+
+    [Fact]
+    public void DialoguePublishesKnownAndUnknownConditionsWithoutConditionNotes()
+    {
+        var grant = Type("AddItemDialogue");
+        var questTable = Table("DT_UQC_Quests", """{"DisplayName":{"$text":"Invented quest"}}""");
+        var dialogue = new AssetRecord(
+            "/Invented/Tale.Tale",
+            "Dialogue",
+            Parse(
+                """
+                {"Data":[{"Events":[{"$ref":"Gift"}],"Conditions":[{"$ref":"QuestCheck"},{"$ref":"Unreadable"},{"$ref":"Missing"}]}]}
+                """
+            ),
+            [
+                new InnerObjectRecord(
+                    "Gift",
+                    grant.Path,
+                    Parse("""{"Item To Add":{"$ref":"/Invented/Gift.Gift_C"}}""")
+                ),
+                new InnerObjectRecord(
+                    "QuestCheck",
+                    "/Invented/Quest_is_Active.Quest_is_Active_C",
+                    Parse("""{"Quest Needed":"InventedRow"}""")
+                ),
+                new InnerObjectRecord(
+                    "Unreadable",
+                    "/Invented/CustomCheck.CustomCheck_C",
+                    new JsonObject()
+                ),
+            ]
+        );
+        var source = Assert
+            .Single(
+                new DialogueGrantMechanism().FindSources(
+                    Context([grant], [questTable], dialogues: [dialogue])
+                )
+            )
+            .Source;
+        var quest = Assert.Single(
+            source.Conditions,
+            condition => condition.Kind == ConditionKind.Quest
+        );
+        Assert.Equal(questTable.Path + ":InventedRow", quest.Entity!.Key);
+        Assert.Equal(
+            3,
+            source.Conditions.Count(condition => condition.Kind == ConditionKind.Unknown)
+        );
+        Assert.DoesNotContain(
+            source.Notes,
+            note => note.Contains("Requires", StringComparison.Ordinal)
+        );
+    }
+
+    [Fact]
+    public void DialogueAncestorChecksRemainVisibleAsUnknownPathRequirements()
+    {
+        var grant = Type("AddItemDialogue");
+        var dialogue = new AssetRecord(
+            "/Invented/Tale.Tale",
+            "Dialogue",
+            Parse(
+                """
+                {"Data":[
+                    {"id":0,"Links":[1],"Conditions":[{"$ref":"EarlierCheck"}]},
+                    {"id":1,"Links":[2]},
+                    {"id":2,"Events":[{"$ref":"Gift"}]}
+                ]}
+                """
+            ),
+            [
+                new InnerObjectRecord(
+                    "Gift",
+                    grant.Path,
+                    Parse("""{"Item To Add":{"$ref":"/Invented/Gift.Gift_C"}}""")
+                ),
+                new InnerObjectRecord(
+                    "EarlierCheck",
+                    "/Invented/CustomCheck.CustomCheck_C",
+                    new JsonObject()
+                ),
+            ]
+        );
+        var source = Assert
+            .Single(
+                new DialogueGrantMechanism().FindSources(Context([grant], dialogues: [dialogue]))
+            )
+            .Source;
+        Assert.Contains(
+            source.Conditions,
+            condition =>
+                condition.Kind == ConditionKind.Unknown
+                && condition.Label.Contains("Earlier dialogue checks", StringComparison.Ordinal)
+        );
+    }
+
+    [Theory]
+    [InlineData("PlayerHasEnoughMoney", "Required Money")]
+    [InlineData("EqualOrGreaterFishingLevel", "Required Fishing Level")]
+    [InlineData("ChapterRankCheck", "Required Rank")]
+    public void DialogueUnreadableThresholdIsAnUnknownCondition(string check, string field)
+    {
+        var grant = new InnerObjectRecord(
+            "Gift",
+            "/Invented/AddItemDialogue.AddItemDialogue_C",
+            new JsonObject()
+        );
+        var dialogue = new AssetRecord(
+            "/Invented/Tale.Tale",
+            "Dialogue",
+            Parse("""{"Data":[{"Events":[{"$ref":"Gift"}],"Conditions":[{"$ref":"Check"}]}]}"""),
+            [
+                grant,
+                new InnerObjectRecord(
+                    "Check",
+                    $"/Invented/{check}.{check}_C",
+                    new JsonObject { [field] = new JsonObject { ["$unsupported"] = "value" } }
+                ),
+            ]
+        );
+        var condition = Assert.Single(
+            WorldSourceData.DialogueConditions(Context(), dialogue, grant)
+        );
+        Assert.Equal(ConditionKind.Unknown, condition.Kind);
+        Assert.Null(condition.Value);
+    }
+
+    [Theory]
+    [InlineData(true, "Available during Hallowed Eve.")]
+    [InlineData(false, "Available outside Hallowed Eve.")]
+    public void DialogueCalendarCheckUsesItsRequiredResult(bool required, string label)
+    {
+        var grant = new InnerObjectRecord(
+            "Gift",
+            "/Invented/AddItemDialogue.AddItemDialogue_C",
+            new JsonObject()
+        );
+        var dialogue = new AssetRecord(
+            "/Invented/Tale.Tale",
+            "Dialogue",
+            Parse("""{"Data":[{"Events":[{"$ref":"Gift"}],"Conditions":[{"$ref":"Calendar"}]}]}"""),
+            [
+                grant,
+                new InnerObjectRecord(
+                    "Calendar",
+                    "/Invented/CheckIfIsHallowedEve.CheckIfIsHallowedEve_C",
+                    new JsonObject { ["Required Result"] = required }
+                ),
+            ]
+        );
+        var condition = Assert.Single(
+            WorldSourceData.DialogueConditions(Context(), dialogue, grant)
+        );
+        Assert.Equal(ConditionKind.CalendarEvent, condition.Kind);
+        Assert.Equal(label, condition.Label);
+        Assert.Equal(EntityKind.CalendarEvent, condition.Entity!.Kind);
+        Assert.Null(condition.Entity.Key);
     }
 
     [Fact]
@@ -280,7 +450,9 @@ public sealed class WorldMechanismTests
         Assert.Equal(new Weight(2, 5), result.Source.Weight);
         Assert.Equal(0.4, result.Source.Chance);
         Assert.Equal("Chance per roll", result.Source.ChanceBasis);
-        Assert.Equal(new[] { 0d, 3d }, NoteNumbers(result.Source));
+        Assert.Equal(new[] { 0d }, NoteNumbers(result.Source));
+        Assert.Equal(3, Assert.Single(result.Source.Conditions).Value);
+        Assert.Equal(gatherer.Path, result.Source.Entity.Key);
         Assert.DoesNotContain(
             sources,
             source => source.ItemClass.Contains("Dud", StringComparison.Ordinal)
@@ -462,7 +634,7 @@ public sealed class WorldMechanismTests
         );
         Assert.Equal(output.Path, source.ItemClass);
         Assert.Equal(new Amount(3, 3), source.Source.Amount);
-        Assert.Equal("/Invented/Coast", Assert.Single(source.Source.Places).Id);
+        Assert.Equal("/Invented/Coast", Assert.Single(source.Source.Places).Key);
         var unplaced = Assert.Single(
             new GatheringMechanism().FindSources(Context([gatherer, output]))
         );

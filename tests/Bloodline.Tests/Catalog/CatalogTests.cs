@@ -101,7 +101,7 @@ public sealed class CatalogTests
         Assert.Null(Assert.Single(result.Items[0].Facts, fact => fact.Label == "Damage").Value);
         Assert.Contains(
             result.Coverage.Gaps.Single(gap => gap.Kind == GapKind.UnknownFact).Entries,
-            entry => entry.ItemSlug == result.Items[0].Slug && entry.Detail == "Damage"
+            entry => entry.Entity?.Slug == result.Items[0].Slug && entry.Detail == "Damage"
         );
     }
 
@@ -115,14 +115,14 @@ public sealed class CatalogTests
         Assert.Equal(
             "10",
             result
-                .Items.Single(item => item.Id == weapon.Path)
+                .Items.Single(item => item.Key == weapon.Path)
                 .Facts.Single(fact => fact.Label == "Damage")
                 .Value
         );
         Assert.Equal(
             "7",
             result
-                .Items.Single(item => item.Id == armor.Path)
+                .Items.Single(item => item.Key == armor.Path)
                 .Facts.Single(fact => fact.Label == "Armor rating")
                 .Value
         );
@@ -171,7 +171,7 @@ public sealed class CatalogTests
             [new Exclusion(ExclusionKind.Level, "/Game/Test", "Test", "Invented test")]
         );
         var source = Assert.Single(result.Items[0].Sources);
-        Assert.Equal("/Game/Live", Assert.Single(source.Places).Id);
+        Assert.Equal("/Game/Live", Assert.Single(source.Places).Key);
     }
 
     [Fact]
@@ -187,7 +187,7 @@ public sealed class CatalogTests
     }
 
     [Fact]
-    public void MergesRepeatedPickupsAcrossLevels()
+    public void RepeatedPickupsKeepOneRelationPerPlace()
     {
         var item = Item();
         var actor = new ActorRecord("Sword", item.Path, new JsonObject());
@@ -200,7 +200,14 @@ public sealed class CatalogTests
                 ]
             )
         );
-        Assert.Equal(2, Assert.Single(result.Items[0].Sources).Places.Count);
+        Assert.Equal(
+            ["/Game/A", "/Game/B"],
+            result.Items[0].Sources.Select(source => source.Entity.Key).Order()
+        );
+        Assert.All(
+            result.Items[0].Sources,
+            source => Assert.Equal(source.Entity, Assert.Single(source.Places))
+        );
     }
 
     [Fact]
@@ -210,7 +217,9 @@ public sealed class CatalogTests
             new(
                 SourceKind.Shop,
                 "Vendor",
-                levels.Select(path => new Place(path, path)).ToArray(),
+                levels
+                    .Select(path => new EntityReference(EntityKind.Place, path, path, null, null))
+                    .ToArray(),
                 new Price(price, null),
                 null,
                 null,
@@ -228,7 +237,7 @@ public sealed class CatalogTests
             new HashSet<string>(["/Game/Test"], StringComparer.OrdinalIgnoreCase)
         );
         Assert.Equal(2, sources.Count);
-        Assert.All(sources, source => Assert.Equal("/Game/A", Assert.Single(source.Places).Id));
+        Assert.All(sources, source => Assert.Equal("/Game/A", Assert.Single(source.Places).Key));
         Assert.Equal([2, 3], sources.Select(source => source.Price!.Amount).Order());
     }
 
@@ -382,7 +391,7 @@ public sealed class CatalogTests
             var itemFile = Assert.Single(
                 Directory.EnumerateFiles(Path.Combine(layout.SiteDirectory, "items"))
             );
-            Assert.Equal(catalog.Items[0].Id, CanonicalJson.Read<ItemPage>(itemFile).Id);
+            Assert.Equal(catalog.Items[0].Key, CanonicalJson.Read<ItemPage>(itemFile).Key);
             Assert.Single(Directory.EnumerateDirectories(layout.BuildDirectory));
         }
         finally
@@ -397,7 +406,7 @@ public sealed class CatalogTests
         var places = new Places(Records(), new HashSet<string>(StringComparer.OrdinalIgnoreCase));
         var place = places.Get("/Game/HiddenValley");
         Assert.Equal("Hidden Valley", place.Name);
-        Assert.False(places.HasName(place.Id));
+        Assert.False(places.HasName(place.Key!));
         Assert.Contains(place, places.All);
     }
 

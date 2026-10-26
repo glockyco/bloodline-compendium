@@ -10,7 +10,9 @@
 	import Count from '#lib/ui/Count.svelte';
 	import IconSlot from '#lib/ui/IconSlot.svelte';
 	import SectionHeading from '#lib/ui/SectionHeading.svelte';
+	import { kindPath } from '#lib/entities.js';
 	let { data } = $props();
+	const itemsPath = $derived(kindPath('item', data.kinds)!);
 	const unknown = $derived(data.count - data.known);
 </script>
 
@@ -41,7 +43,7 @@
 			<Search variant="hero" placeholder="Search items, for example {data.example}" />
 		</div>
 		<div class="actions">
-			<ButtonLink href={resolve('items/')}>Browse All Items</ButtonLink>
+			<ButtonLink href={itemsPath}>Browse All Items</ButtonLink>
 			<a href="https://store.steampowered.com/app/1159290/The_Bloodline/" rel="external"
 				>The Bloodline on Steam</a
 			>
@@ -55,11 +57,11 @@
 		<SectionHeading
 			id="items-heading"
 			title="Items"
-			link={{ href: resolve('items/'), label: `All ${formatNumber(data.count)} items` }}
+			link={{ href: itemsPath, label: `All ${formatNumber(data.count)} items` }}
 		/>
 		<CardGrid rows={3}>
 			{#each data.groups as group (group.slug)}
-				<Card href={resolve(`items/?category=${group.slug}`)}>
+				<Card href={kindPath('item', data.kinds, `?category=${group.slug}`)!}>
 					<span class="group-head"
 						><h3>{group.name}</h3>
 						<Count value={group.count} /></span
@@ -77,7 +79,7 @@
 		{#if data.minor.length}<p class="minor">
 				<span>Also</span>
 				{#each data.minor as category (category.slug)}<a
-						href={resolve(`items/?category=${category.slug}`)}
+						href={kindPath('item', data.kinds, `?category=${category.slug}`)!}
 						>{category.plural} <Count value={category.count} /></a
 					>{/each}
 			</p>{/if}
@@ -90,7 +92,11 @@
 				<li>
 					<a
 						class="way"
-						href={resolve(`items/?${way.kinds.map((kind) => `source=${kind}`).join('&')}`)}
+						href={kindPath(
+							'item',
+							data.kinds,
+							`?${way.kinds.map((kind) => `source=${kind}`).join('&')}`
+						)!}
 					>
 						<span class="stack">
 							{#each way.icons as icon (icon)}<IconSlot {icon} size="stack" />{/each}

@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
 	import SeoHead from '#lib/SeoHead.svelte';
 	import ButtonLink from '#lib/ui/ButtonLink.svelte';
+	import { page } from '$app/state';
+	import { kindPath } from '#lib/entities.js';
 </script>
 
 <SeoHead
@@ -12,4 +13,4 @@
 <p class="eyebrow">404</p>
 <h1>Page not found</h1>
 <p class="intro">This page is not in the compendium.</p>
-<ButtonLink href={resolve('items/')}>Browse All Items</ButtonLink>
+<ButtonLink href={kindPath('item', page.data.kinds)!}>Browse All Items</ButtonLink>

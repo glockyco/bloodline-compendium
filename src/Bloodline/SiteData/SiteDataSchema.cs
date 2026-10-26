@@ -44,9 +44,10 @@ internal static class SiteDataSchema
             .Options.GetJsonSchemaAsNode(typeof(SiteDataFiles), exporterOptions)
             .AsObject();
         var definitions = new JsonObject();
+        var original = root.DeepClone().AsObject();
         foreach (var key in root.Select(pair => pair.Key).ToList())
         {
-            root[key] = Hoist(root[key], definitions);
+            root[key] = Hoist(root[key], definitions, original);
         }
         root["$schema"] = "https://json-schema.org/draft/2020-12/schema";
         root["$defs"] = definitions;
@@ -54,20 +55,31 @@ internal static class SiteDataSchema
     }
 
     /// <summary>Moves every titled schema below <paramref name="node"/> into <paramref name="definitions"/> and refers to it instead.</summary>
-    private static JsonNode? Hoist(JsonNode? node, JsonObject definitions)
+    private static JsonNode? Hoist(JsonNode? node, JsonObject definitions, JsonObject original)
     {
         switch (node)
         {
             case JsonArray array:
                 for (var i = 0; i < array.Count; i++)
                 {
-                    array[i] = Hoist(array[i]?.DeepClone(), definitions);
+                    array[i] = Hoist(array[i]?.DeepClone(), definitions, original);
                 }
                 return array;
             case JsonObject obj:
+                // The exporter reuses schemas by JSON pointer, including nullable property schemas.
+                // Resolve before hoisting so those pointers do not outlive their original locations.
+                if (obj["$ref"] is JsonValue pointer)
+                {
+                    JsonNode? target = original;
+                    foreach (var segment in pointer.GetValue<string>()[2..].Split('/'))
+                    {
+                        target = target![segment.Replace("~1", "/").Replace("~0", "~")];
+                    }
+                    return Hoist(target!.DeepClone(), definitions, original);
+                }
                 foreach (var key in obj.Select(pair => pair.Key).ToList())
                 {
-                    obj[key] = Hoist(obj[key]?.DeepClone(), definitions);
+                    obj[key] = Hoist(obj[key]?.DeepClone(), definitions, original);
                 }
                 if (obj["title"] is not JsonValue title)
                 {

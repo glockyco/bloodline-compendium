@@ -27,6 +27,7 @@ internal sealed class CatalogContext
     public Places Places { get; }
     public IReadOnlySet<string> ExcludedLevels { get; }
     public IReadOnlySet<string> ExcludedClasses { get; }
+    public IReadOnlySet<string> SharedPeopleClasses { get; }
 
     public CatalogContext(
         CatalogRecords records,
@@ -60,6 +61,19 @@ internal sealed class CatalogContext
                     ))
             )
             .ToArray();
+        SharedPeopleClasses = Placements
+            .GroupBy(placement => placement.Actor.Class, StringComparer.OrdinalIgnoreCase)
+            .Where(group =>
+                group
+                    .Select(placement =>
+                        WorldSourceData.Name(placement.Properties, placement.Actor.Class)
+                    )
+                    .Distinct(StringComparer.Ordinal)
+                    .Skip(1)
+                    .Any()
+            )
+            .Select(group => group.Key)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
     }
 
     public bool IsExcludedClass(string path) =>
@@ -68,10 +82,24 @@ internal sealed class CatalogContext
             Classes.TryGetValue(path, out var type) && type.Ancestors.Any(ExcludedClasses.Contains)
         );
 
-    public ItemLink ItemLink(string path) =>
-        Items.TryGetValue(path, out var item)
-            ? new ItemLink(IsExcludedClass(path) ? null : item.Slug, ItemIdentity.DisplayName(item))
-            : new ItemLink(null, ItemIdentity.Readable(ItemIdentity.ClassName(path)));
+    public EntityReference ItemLink(string path) =>
+        Items.TryGetValue(path, out var item) && !IsExcludedClass(path)
+            ? new EntityReference(
+                EntityKind.Item,
+                item.Key,
+                ItemIdentity.DisplayName(item),
+                item.Slug,
+                item.Icon
+            )
+            : new EntityReference(
+                EntityKind.Item,
+                null,
+                Items.TryGetValue(path, out var excluded)
+                    ? ItemIdentity.DisplayName(excluded)
+                    : ItemIdentity.Readable(ItemIdentity.ClassName(path)),
+                null,
+                null
+            );
 
     public static IReadOnlyList<Source> MergeSources(
         IEnumerable<ItemSource> candidates,
@@ -80,21 +108,25 @@ internal sealed class CatalogContext
 
     private static IReadOnlyList<Source> MergeKnownPlaces(IEnumerable<Source> candidates)
     {
-        var groups = new Dictionary<string, (Source Source, Dictionary<string, Place> Places)>(
-            StringComparer.Ordinal
-        );
+        var groups = new Dictionary<
+            string,
+            (Source Source, Dictionary<string, EntityReference> Places)
+        >(StringComparer.Ordinal);
         foreach (var source in candidates)
         {
             var allowed = source.Places;
             var key = CanonicalJson.Serialize(source with { Places = [] });
             if (!groups.TryGetValue(key, out var group))
             {
-                group = (source, new Dictionary<string, Place>(StringComparer.OrdinalIgnoreCase));
+                group = (
+                    source,
+                    new Dictionary<string, EntityReference>(StringComparer.OrdinalIgnoreCase)
+                );
                 groups.Add(key, group);
             }
             foreach (var place in allowed)
             {
-                group.Places.TryAdd(place.Id, place);
+                group.Places.TryAdd(place.Key!, place);
             }
         }
         return groups
@@ -104,7 +136,7 @@ internal sealed class CatalogContext
                 {
                     Places = pair
                         .Value.Places.Values.OrderBy(place => place.Name, StringComparer.Ordinal)
-                        .ThenBy(place => place.Id, StringComparer.Ordinal)
+                        .ThenBy(place => place.Key, StringComparer.Ordinal)
                         .ToArray(),
                 }
             )
