@@ -14,7 +14,7 @@ export const publicationPaths = [
 export function publicationPage(title, body = '', description = title + ' invented description.') {
 	return `<!doctype html><html lang="en"><head><title>${title}</title>
 		<meta name="description" content="${description}">
-		<link rel="icon" href="/favicon.svg">
+		<link rel="icon" href="/favicon-32x32.png">
 		<meta property="og:image" content="${publicationOrigin}/og-default.png">
 		</head><body><h1>${title}</h1>${body}</body></html>`;
 }
@@ -47,7 +47,7 @@ export async function writePublication(directory) {
 		'about/index.html': publicationPage('Invented about'),
 		'404.html': publicationPage('Invented not found'),
 		'sitemap.xml': publicationSitemap(),
-		'favicon.svg': '<svg xmlns="http://www.w3.org/2000/svg"></svg>',
+		'favicon-32x32.png': 'invented favicon',
 		'og-default.png': 'invented image',
 		'icons/invented-48.webp': 'invented small icon',
 		'icons/invented-160.webp': 'invented large icon'

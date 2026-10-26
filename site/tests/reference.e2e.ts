@@ -270,7 +270,8 @@ test('each public page has production identity, social metadata and generated br
 	await page.goto('/items/hollow-prism/');
 	await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /Hollow Prism/);
 	for (const icon of [
-		'favicon.svg',
+		'brand/emblem-48.webp',
+		'brand/emblem-96.webp',
 		'favicon-16x16.png',
 		'favicon-32x32.png',
 		'favicon-192x192.png',
@@ -281,7 +282,7 @@ test('each public page has production identity, social metadata and generated br
 		const response = await request.get('/' + icon);
 		expect(response.status()).toBe(200);
 		expect(response.headers()['content-type']).toContain(
-			icon.endsWith('.svg') ? 'image/svg+xml' : 'image/png'
+			icon.endsWith('.webp') ? 'image/webp' : 'image/png'
 		);
 	}
 	const sitemap = await (await request.get('/sitemap.xml')).text();

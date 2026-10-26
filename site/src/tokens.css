@@ -1,190 +1,126 @@
+/*
+ * The only file with raw values. Components pick a step from these scales, and stylelint rejects
+ * anything else, so spacing, type, radii and colours cannot drift page by page.
+ * Add a step only when no existing step fits a repeated need, never for a single use.
+ */
 :root {
 	color-scheme: dark;
-	--surface: #121416;
-	--surface-panel: #1a1d20;
-	--surface-subtle: #22272b;
-	--surface-hover: #2b3339;
-	--surface-backdrop: rgb(0 0 0 / 70%);
-	--text: #edf0f2;
-	--text-muted: #bdc6cb;
-	--text-warning: #efd09b;
-	--text-on-accent: #10161c;
-	--accent: #9bd4fb;
-	--accent-hover: #c9e7ff;
-	--border: #48545e;
-	--border-control: #71818c;
-	--focus: #f4c984;
-	--error: #ffb8b8;
-	--transparent: transparent;
-	--shadow: none;
-	--font-body: system-ui, sans-serif;
-	--font-heading: var(--font-body);
-	--font-size-root: 100%;
-	--font-size-body: 1rem;
-	--font-size-intro: 1.125rem;
-	--font-size-heading: clamp(2.25rem, 5vw, 3.5rem);
-	--font-size-section: 1.5rem;
-	--font-size-subheading: 1.25rem;
-	--font-size-brand: 1.25rem;
-	--font-size-item-heading: var(--font-size-heading);
-	--font-weight-normal: 400;
-	--font-weight-heading: 600;
-	--font-weight-emphasis: 600;
-	--line-height-body: 1.6;
-	--line-height-heading: 1.15;
-	--line-height-section: 1.3;
-	--line-height-compact: 1.45;
-	--space-none: 0;
-	--space-hairline: 1px;
-	--space-detail: 0.25rem;
-	--space-tight: 0.4rem;
-	--space-small: 0.5rem;
-	--space-compact: 0.75rem;
-	--space-medium: 1rem;
-	--space-large: 1.5rem;
-	--space-section: 2rem;
-	--space-block: 2.5rem;
-	--space-page-end: 4rem;
-	--space-list-indent: 1.25rem;
-	--space-sr-offset: -1px;
-	--space-skip-hidden: -100px;
-	--underline-offset: 0.2em;
+
+	/* Night colours sampled from the shadows of the game's key art, with its sky for links. */
+	--surface: #15121d;
+	--surface-panel: #1c1827;
+	--surface-raised: #251f33;
+	--surface-hover: #2c2540;
+	--surface-slot: #261f37;
+	--surface-backdrop: rgb(10 8 16 / 72%);
+	--surface-fade: rgb(21 18 29 / 0%);
+	--surface-veil: rgb(21 18 29 / 80%);
+	--text: #f2eef7;
+	--text-soft: #d6d0e3;
+	--text-muted: #aca5c0;
+	--text-warning: #f0cf8f;
+	--text-on-brand: #ffffff;
+	--accent: #a9bff5;
+	--accent-hover: #cfdcff;
+	--brand: #c93a4b;
+	--brand-hover: #d94b5c;
+	--gold: #e6bb72;
+	--known: #4fbf9f;
+	--border: #322a44;
+	--border-control: #4a3f63;
+	--slot-edge: rgb(255 255 255 / 4%);
+	--focus: #f2c46d;
+	--error: #ffb4b4;
+	--shadow-raised: 0 10px 30px rgb(0 0 0 / 40%);
+	--shadow-text: 0 2px 24px var(--surface);
+
+	--font-body: 'Figtree Variable', system-ui, sans-serif;
+	--font-heading: 'Young Serif', Georgia, serif;
+
+	/* Type. Nothing a reader must read is smaller than step 1. */
+	--type-1: 1rem;
+	--type-2: 1.25rem;
+	--type-3: 1.5rem;
+	--type-4: 2rem;
+	--type-5: clamp(2.25rem, 1.5rem + 2.5vw, 3.5rem);
+	--type-6: clamp(2.5rem, 1rem + 4.5vw, 4.5rem);
+	--weight-regular: 400;
+	--weight-heading: 400;
+	--weight-strong: 600;
+	--leading-body: 1.6;
+	--leading-snug: 1.4;
+	--leading-title: 1.25;
+	--leading-display: 1.05;
+
+	/* Space, in 4 px multiples. */
+	--space-1: 0.25rem;
+	--space-2: 0.5rem;
+	--space-3: 0.75rem;
+	--space-4: 1rem;
+	--space-5: 1.5rem;
+	--space-6: 2rem;
+	--space-7: 3rem;
+	--space-8: 4rem;
+	--space-9: 6rem;
+	/* Roles that change with the viewport. */
+	--space-gutter: var(--space-6);
+	--space-panel: var(--space-5);
+	--space-section: var(--space-9);
+
+	--radius-1: 0.5rem;
+	--radius-2: 0.75rem;
+	--radius-round: 999px;
 	--border-width: 1px;
-	--border-width-focus: 3px;
+	--focus-width: 3px;
 	--focus-offset: 3px;
-	--radius-control: 0;
-	--radius-panel: 0;
-	--radius-count: 0;
-	--size-full: 100%;
-	--size-minimum: 0;
+	--underline-offset: 0.2em;
+	--marker-width: 2px;
+
+	--size-hairline: 1px;
 	--size-control: 2.75rem;
+	--size-control-large: 3.5rem;
+	--size-header: 4.5rem;
 	--size-checkbox: 1.125rem;
+	--size-emblem: 3rem;
+	--size-icon-row: 2.5rem;
+	--size-icon-stack: 2.5rem;
+	--size-icon-title: 5rem;
+	--size-meter: 0.5rem;
+	--size-sort-half-width: 0.3rem;
+	--size-sort-height: 0.4rem;
 	--size-page: 75rem;
 	--size-page-min-height: 72vh;
 	--size-reading: 48rem;
+	--size-lede: 38ch;
 	--size-name-search: 32rem;
-	--size-tile-minimum: 11.25rem;
-	--size-item-side: 20rem;
+	--size-header-search: 22rem;
+	--size-hero-search: 40rem;
+	--size-card: 20rem;
+	--size-way: 30rem;
 	--size-filters: 15rem;
 	--size-filter-sheet: 26rem;
-	--size-screen-height: 100dvh;
-	--size-title-icon: 5rem;
-	--size-row-icon: 2.5rem;
+	--size-item-side: 20rem;
 	--size-relation-number: 7.5rem;
-	--size-name-column: 58%;
 	--size-gap-columns: 17rem;
-	--size-sort-half-width: 0.3rem;
-	--size-sort-height: 0.4rem;
-	--size-sr: 1px;
-	--clip-sr: inset(50%);
-	--sort-descending-rotation: 180deg;
+	--size-screen: 100dvh;
+	--size-hero-min: 16rem;
+	--size-hero-max: 46rem;
+	--size-hero-phone: 17rem;
+
+	--duration-hover: 0.15s;
+
 	--layer-table-heading: 1;
 	--layer-skip: 10;
 	--layer-search: 100;
-	--header-padding: var(--space-medium) var(--space-section);
-	--header-gap: var(--space-section);
-	--nav-gap: var(--space-large);
-	--page-padding: var(--space-large) var(--space-section) var(--space-page-end);
-	--main-padding-top: var(--space-large);
-	--footer-padding: var(--space-section);
-	--panel-padding: var(--space-large);
-	--item-heading-gap: var(--space-medium);
-	--item-heading-align: center;
-	--detail-columns: minmax(var(--size-minimum), 1fr) var(--size-item-side);
-	--detail-gap: var(--space-large) var(--space-section);
-	--item-side-column: 2;
-	--item-side-row: 1 / span 2;
-	--item-side-position: sticky;
-	--relations-row: auto;
-	--browse-columns: var(--size-filters) minmax(var(--size-minimum), 1fr);
-	--desktop-filters-display: block;
-	--mobile-filters-display: none;
-	--table-cell-padding: var(--space-compact);
-	--table-sort-padding: var(--space-compact);
-	--relation-number-whitespace: nowrap;
-	--item-name-gap: var(--space-compact);
 }
 
-:root .search-content {
-	--pf-text: var(--text);
-	--pf-text-secondary: var(--text-muted);
-	--pf-text-muted: var(--text-muted);
-	--pf-background: var(--surface-panel);
-	--pf-border: var(--border);
-	--pf-border-focus: var(--border-control);
-	--pf-skeleton: var(--surface-subtle);
-	--pf-skeleton-shine: var(--surface-hover);
-	--pf-hover: var(--surface-hover);
-	--pf-mark: var(--text);
-	--pf-scroll-shadow: var(--transparent);
-	--pf-shadow-sm: var(--shadow);
-	--pf-shadow-md: var(--shadow);
-	--pf-shadow-lg: var(--shadow);
-	--pf-error-bg: var(--surface-panel);
-	--pf-error-border: var(--border);
-	--pf-error-text: var(--error);
-	--pf-error-text-secondary: var(--error);
-	--pf-outline-focus: var(--focus);
-	--pf-outline-width: var(--border-width-focus);
-	--pf-outline-offset: var(--focus-offset);
-	--pf-font: var(--font-body);
-	--pf-input-height: var(--size-control);
-	--pf-input-font-size: var(--font-size-body);
-	--pf-summary-font-size: var(--font-size-body);
-	--pf-result-title-font-size: var(--font-size-body);
-	--pf-result-excerpt-font-size: var(--font-size-body);
-	--pf-modal-backdrop: var(--surface-backdrop);
-	--pf-results-gap: var(--space-small);
-	--pf-border-radius: var(--radius-control);
-	--pf-image-width: var(--size-row-icon);
-	--pf-image-height: var(--size-row-icon);
-	--pf-dropdown-z-index: var(--layer-search);
-	--pf-modal-max-width: var(--size-name-search);
-	--pf-modal-max-height: var(--size-screen-height);
-	--pf-modal-top: var(--space-large);
-	--pf-searchbox-max-width: var(--size-full);
-	--pf-searchbox-dropdown-max-height: var(--size-filter-sheet);
-	--pf-dropdown-max-height: var(--size-filter-sheet);
-}
-
-@media (max-width: 1023px) {
+@media (width < 40rem) {
 	:root {
-		--detail-columns: minmax(var(--size-minimum), 1fr);
-		--item-side-column: 1;
-		--item-side-row: auto;
-		--item-side-position: static;
-		--relations-row: 3;
-	}
-}
-
-@media (max-width: 959px) {
-	:root {
-		--browse-columns: minmax(var(--size-minimum), 1fr);
-		--desktop-filters-display: none;
-		--mobile-filters-display: block;
-	}
-}
-
-@media (max-width: 600px) {
-	:root {
-		--header-padding: var(--space-medium);
-		--header-gap: var(--space-medium);
-		--nav-gap: var(--space-medium);
-		--page-padding: var(--space-medium) var(--space-medium) var(--space-section);
-		--main-padding-top: var(--space-medium);
-		--footer-padding: var(--space-large) var(--space-medium);
-		--panel-padding: var(--space-medium);
-		--item-heading-align: start;
-		--item-heading-gap: var(--space-compact);
-		--font-size-item-heading: 2.25rem;
-		--size-title-icon: 3.5rem;
-		--size-row-icon: 1.75rem;
+		--space-gutter: var(--space-4);
+		--space-panel: var(--space-4);
+		--space-section: var(--space-8);
+		--size-icon-title: 3.5rem;
+		--size-icon-row: 1.75rem;
 		--size-relation-number: 5.5rem;
-		--size-name-column: 51%;
-		--detail-gap: var(--space-large);
-		--table-cell-padding: var(--space-compact) var(--space-small);
-		--table-sort-padding: var(--space-compact) var(--space-tight);
-		--relation-number-whitespace: normal;
-		--item-name-gap: var(--space-tight);
 	}
 }

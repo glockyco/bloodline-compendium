@@ -80,17 +80,19 @@ it.each([
 	});
 });
 
-it.each(['favicon.svg', 'og-default.png', 'icons/invented-48.webp', 'icons/invented-160.webp'])(
-	'rejects missing and empty referenced asset %s',
-	async (asset) => {
-		await publication(async (directory) => {
-			await rm(join(directory, asset));
-			await expect(publicationGate(directory)).rejects.toThrow(asset);
-			await writeFile(join(directory, asset), '');
-			await expect(publicationGate(directory)).rejects.toThrow('empty target');
-		});
-	}
-);
+it.each([
+	'favicon-32x32.png',
+	'og-default.png',
+	'icons/invented-48.webp',
+	'icons/invented-160.webp'
+])('rejects missing and empty referenced asset %s', async (asset) => {
+	await publication(async (directory) => {
+		await rm(join(directory, asset));
+		await expect(publicationGate(directory)).rejects.toThrow(asset);
+		await writeFile(join(directory, asset), '');
+		await expect(publicationGate(directory)).rejects.toThrow('empty target');
+	});
+});
 
 it.each([
 	['title', publicationPage(' Invented   BLADE ')],
