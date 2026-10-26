@@ -1,96 +1,134 @@
 <script lang="ts">
-	import { browser } from '$app/env';
+	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { SvelteURL } from 'svelte/reactivity';
-	import { filterItems, matchesItem, readFilters } from '#lib/items.js';
-	import { sourceNames, titleCase } from '#lib/labels.js';
-	import type { SourceKind } from '#lib/site-data.js';
+	import {
+		facetGroups,
+		hiddenAvailability,
+		matches,
+		naturalDirection,
+		readState,
+		shownColumns,
+		sortItems,
+		writeState,
+		type ListState
+	} from '#lib/list.js';
+	import { sourceNames } from '#lib/labels.js';
+	import type { ItemSummary, ListFacet, SourceKind } from '#lib/site-data.js';
 	import { formatNumber } from '#lib/format.js';
 	import SeoHead from '#lib/SeoHead.svelte';
 	import EntityLink from '#lib/ui/EntityLink.svelte';
 	import { kindPath } from '#lib/entities.js';
 	let { data } = $props();
+	const index = $derived(data.index);
 	let dialog: HTMLDialogElement;
-	let categorySearch = $state('');
-	let typeSearch = $state('');
-	let sourceSearch = $state('');
+	let narrowing = $state<Record<string, string>>({});
 	const currentUrl = $derived(page.shallow?.url ?? page.url);
-	const filters = $derived(readFilters(browser ? currentUrl.searchParams : undefined));
-	const items = $derived(filterItems(data.index.items, filters));
-	const unknownCount = $derived(data.index.items.filter((item) => !item.sourceKinds.length).length);
-	const activeCount = $derived(
-		filters.categories.length +
-			filters.types.length +
-			filters.sources.length +
-			Number(Boolean(filters.name)) +
-			Number(filters.showUnknown)
+	// The prerendered list has no address query, so hydration starts from the defaults and the address applies after
+	// mount. Hydrating straight into a filtered list keeps the prerendered rows' image sources, which Svelte does not
+	// repair, so rows would show other items' icons.
+	let mounted = $state(false);
+	onMount(() => {
+		mounted = true;
+	});
+	const list = $derived(
+		readState(mounted ? currentUrl.searchParams : new URLSearchParams(), index)
 	);
-	const categories = $derived(
-		data.index.categories.map((category) => ({
-			value: category.slug,
-			label: category.plural,
-			count: data.index.items.filter(
-				(item) =>
-					item.category === category.slug && matchesItem(item, { ...filters, categories: [] })
-			).length
-		}))
+	const items = $derived(
+		sortItems(
+			index.items.filter((item) => matches(item, list, index)),
+			list.sort
+		)
 	);
-	const types = $derived(
-		[...new Set(data.index.items.map((item) => item.type))]
-			.sort((a, b) => a.localeCompare(b, 'en'))
-			.map((type) => ({
-				value: type,
-				label: titleCase(type),
-				count: data.index.items.filter(
-					(item) => item.type === type && matchesItem(item, { ...filters, types: [] })
-				).length
-			}))
-	);
-	const sources = $derived(
-		(Object.keys(sourceNames) as SourceKind[])
-			.map((kind) => ({
-				value: kind,
-				label: sourceNames[kind],
-				count: data.index.items.filter(
+	// Items a reader would see by showing those without a known way to get them.
+	const hiddenCount = $derived(
+		list.reveal || list.name || list.facets.availability?.length
+			? 0
+			: index.items.filter(
 					(item) =>
-						item.sourceKinds.includes(kind) && matchesItem(item, { ...filters, sources: [] })
+						hiddenAvailability.includes(item.status) &&
+						matches(item, { ...list, reveal: true }, index)
 				).length
-			}))
-			.filter((entry) => entry.count > 0 || filters.sources.includes(entry.value))
-			.sort((a, b) => a.label.localeCompare(b.label, 'en'))
 	);
-	function update(key: string, values: string[]) {
-		const url = new SvelteURL(currentUrl.href);
-		url.searchParams.delete(key);
-		for (const value of values) if (value) url.searchParams.append(key, value);
-		goto(kindPath('item', data.kinds, url.search + url.hash)!, { shallow: true });
+	const groups = $derived(facetGroups(index.items, items, list, index, valueLabel));
+	const columns = $derived(shownColumns(items, list, index));
+	const numericColumns = $derived(index.columns.filter((column) => column.numeric));
+	const sortColumns = $derived([
+		{ id: 'name', label: 'Item', numeric: false },
+		{ id: 'type', label: 'Type', numeric: false },
+		...columns,
+		{ id: 'value', label: 'Value', numeric: true }
+	]);
+	const activeCount = $derived(
+		Object.values(list.facets).reduce((sum, values) => sum + values.length, 0) +
+			list.stats.length +
+			Number(Boolean(list.name))
+	);
+	// The first rows render at once and the rest follow in small batches, so a long list never blocks a click.
+	let built = $state(60);
+	$effect(() => {
+		const total = items.length;
+		let count = 60;
+		built = count;
+		let timer: ReturnType<typeof setTimeout> | undefined;
+		const grow = () => {
+			count = Math.min(total, count + 200);
+			built = count;
+			if (count < total) timer = setTimeout(grow, 16);
+		};
+		if (total > count) timer = setTimeout(grow, 16);
+		return () => clearTimeout(timer);
+	});
+	const rows = $derived(items.slice(0, built));
+
+	function valueLabel(facet: ListFacet, value: string): string {
+		return (
+			facet.labels[value] ?? (facet.id === 'source' ? sourceNames[value as SourceKind] : value)
+		);
 	}
-	function toggle(key: 'category' | 'type' | 'source', value: string, checked: boolean) {
-		const values = currentUrl.searchParams.getAll(key).filter((entry) => entry !== value);
-		update(key, checked ? [...values, value] : values);
+	function apply(next: ListState) {
+		const search = writeState(next, index).toString();
+		goto(kindPath('item', data.kinds, (search ? '?' + search : '') + currentUrl.hash)!, {
+			shallow: true
+		});
+	}
+	function toggle(facet: string, value: string, checked: boolean) {
+		const values = (list.facets[facet] ?? []).filter((entry) => entry !== value);
+		apply({
+			...list,
+			facets: { ...list.facets, [facet]: checked ? [...values, value] : values }
+		});
 	}
 	function sort(column: string) {
-		const next =
-			filters.sort === `${column}-asc`
-				? `${column}-desc`
-				: filters.sort === `${column}-desc`
-					? `${column}-asc`
-					: `${column}-${column === 'value' ? 'desc' : 'asc'}`;
-		update('sort', next === 'name-asc' ? [] : [next]);
+		const direction =
+			list.sort.column === column
+				? list.sort.direction === 'asc'
+					? 'desc'
+					: 'asc'
+				: naturalDirection(column, index);
+		apply({ ...list, sort: { column, direction } });
 	}
-	function sortDirection(column: string): 'ascending' | 'descending' | 'none' {
-		return filters.sort.startsWith(column + '-')
-			? filters.sort.endsWith('asc')
+	function ariaSort(column: string): 'ascending' | 'descending' | 'none' {
+		return list.sort.column === column
+			? list.sort.direction === 'asc'
 				? 'ascending'
 				: 'descending'
 			: 'none';
 	}
+	function cellText(item: ItemSummary, column: string): string {
+		const cell = item.cells[column];
+		if (!cell) return '';
+		return cell.number != null ? formatNumber(cell.number) : (cell.text ?? '');
+	}
+	const statusNote: Record<string, string> = {
+		noKnownSource: 'No known way to get it',
+		notInNormalPlay: 'Not in normal play'
+	};
 </script>
 
 <SeoHead
 	title="Items | The Bloodline Compendium"
-	description="Find The Bloodline items by name, category and type. Compare values and open known shops, recipes, drops and gathering sources."
+	description="Find The Bloodline items by name, category, type and stats. Compare values and open known shops, recipes, drops and gathering sources."
 />
 <h1>Items</h1>
 <p class="intro">Find equipment, ingredients and curios, then see how to get them.</p>
@@ -98,8 +136,8 @@
 	<label
 		>Search by name<input
 			type="search"
-			value={filters.name}
-			oninput={(event) => update('name', [event.currentTarget.value])}
+			value={list.name}
+			oninput={(event) => apply({ ...list, name: event.currentTarget.value })}
 			placeholder="Item name"
 		/></label
 	>
@@ -108,147 +146,260 @@
 	>
 </div>
 <div class="browse-layout">
-	<aside class="desktop-filters" aria-label="Item filters">{@render facets()}</aside>
+	<aside class="desktop-filters" aria-label="Item filters">{@render filters('side')}</aside>
 	<dialog bind:this={dialog} class="filter-sheet" aria-labelledby="filter-heading">
 		<div class="sheet-heading">
 			<h2 id="filter-heading">Filters</h2>
 			<button type="button" onclick={() => dialog.close()} aria-label="Close filters">Close</button>
 		</div>
-		{@render facets()}
+		{@render filters('sheet')}
 		<button class="button result-button" type="button" onclick={() => dialog.close()}
-			>Show {items.length} {items.length === 1 ? 'item' : 'items'}</button
+			>Show {formatNumber(items.length)} {items.length === 1 ? 'item' : 'items'}</button
 		>
 	</dialog>
 	<div class="list-results">
 		<p role="status" aria-live="polite">
-			{formatNumber(items.length)} of {formatNumber(data.index.items.length)} items
+			{formatNumber(items.length)} of {formatNumber(index.items.length)} items
 		</p>
-		{#if unknownCount}<label class="check-label availability"
-				><input
-					type="checkbox"
-					checked={filters.showUnknown}
-					onchange={(event) => update('unknown', event.currentTarget.checked ? ['1'] : [])}
-				/>Show {formatNumber(unknownCount)} items without a known source</label
-			>
-		{/if}
+		{#if hiddenCount}<p class="availability">
+				<button type="button" class="link-button" onclick={() => apply({ ...list, reveal: true })}
+					>Show {formatNumber(hiddenCount)} more without a known way to get them</button
+				>
+			</p>{:else if list.reveal}<p class="availability">
+				<button type="button" class="link-button" onclick={() => apply({ ...list, reveal: false })}
+					>Hide items without a known way to get them</button
+				>
+			</p>{/if}
 		{#if activeCount}<div class="filter-chips" aria-label="Active filters">
-				{#if filters.name}<button type="button" onclick={() => update('name', [])}
-						>Name: {filters.name} <span aria-hidden="true">×</span><span class="sr-only"
+				{#if list.name}<button type="button" onclick={() => apply({ ...list, name: '' })}
+						>Name: {list.name} <span aria-hidden="true">×</span><span class="sr-only"
 							>Remove name filter</span
 						></button
 					>{/if}
-				{#each filters.categories as value (value)}<button
+				{#each index.facets as facet (facet.id)}{#each list.facets[facet.id] ?? [] as value (value)}<button
+							type="button"
+							onclick={() => toggle(facet.id, value, false)}
+							>{valueLabel(facet, value)} <span aria-hidden="true">×</span><span class="sr-only"
+								>Remove {facet.label} filter</span
+							></button
+						>{/each}{/each}
+				{#each list.stats as filter, position (filter.column)}<button
 						type="button"
-						onclick={() => toggle('category', value, false)}
-						>{categories.find((category) => category.value === value)?.label ?? titleCase(value)}
-						<span aria-hidden="true">×</span><span class="sr-only">Remove category filter</span
-						></button
-					>{/each}
-				{#each filters.sources as value (value)}<button
-						type="button"
-						onclick={() => toggle('source', value, false)}
-						>{sourceNames[value as SourceKind] ?? titleCase(value)}
-						<span aria-hidden="true">×</span><span class="sr-only">Remove source filter</span
-						></button
-					>{/each}
-				{#each filters.types as value (value)}<button
-						type="button"
-						onclick={() => toggle('type', value, false)}
-						>{titleCase(value)} <span aria-hidden="true">×</span><span class="sr-only"
-							>Remove type filter</span
-						></button
+						onclick={() =>
+							apply({ ...list, stats: list.stats.filter((_, other) => other !== position) })}
+						>{index.columns.find((column) => column.id === filter.column)?.label}{filter.min
+							? ` from ${filter.min}`
+							: ''}{filter.max ? ` to ${filter.max}` : ''}
+						<span aria-hidden="true">×</span><span class="sr-only">Remove stat filter</span></button
 					>{/each}
 				<button
 					type="button"
-					onclick={() => {
-						const url = new SvelteURL(currentUrl.href);
-						url.search = '';
-						goto(kindPath('item', data.kinds, url.search + url.hash)!, { shallow: true });
-					}}>Clear all</button
+					onclick={() =>
+						apply({
+							name: '',
+							facets: {},
+							stats: [],
+							match: 'all',
+							reveal: false,
+							sort: list.sort
+						})}>Clear all</button
 				>
 			</div>{/if}
-		<table class="item-table">
-			<thead
-				><tr
-					>{#each ['name', 'type', 'value'] as column (column)}<th
-							scope="col"
-							class:numeric={column === 'value'}
-							aria-sort={sortDirection(column)}
-							><button type="button" onclick={() => sort(column)}
-								>{column === 'name'
-									? 'Item'
-									: titleCase(column)}{#if filters.sort.startsWith(column + '-')}<span
-										class="sort-indicator"
-										class:descending={filters.sort.endsWith('-desc')}
-										aria-hidden="true"
-									></span>{/if}</button
-							></th
-						>{/each}</tr
-				></thead
-			>
-			<tbody
-				>{#each items as item (item.slug)}<tr>
-						<td
-							><EntityLink class="item-name" entity={item}
-								>{#if item.icon}<img
-										src={'/icons/' + item.icon + '-48.webp'}
-										alt=""
-										width="40"
-										height="40"
-										loading="lazy"
-									/>{/if}<span
-									><span data-game>{item.name}</span>{#if item.qualifier}<small
-											>{item.qualifier}</small
-										>{/if}</span
-								></EntityLink
-							></td
-						>
-						<td class="item-type">{titleCase(item.type)}</td><td class="numeric"
-							>{item.value === null ? 'Unknown' : formatNumber(item.value) + ' gold'}</td
-						>
-					</tr>{/each}</tbody
-			>
-		</table>
+		<label class="phone-sort"
+			>Sort by <select
+				value={`${list.sort.column}:${list.sort.direction}`}
+				onchange={(event) => {
+					const [column, direction] = event.currentTarget.value.split(':');
+					apply({ ...list, sort: { column, direction: direction === 'desc' ? 'desc' : 'asc' } });
+				}}
+				>{#each sortColumns as column (column.id)}{#each column.numeric ? ['desc', 'asc'] : ['asc', 'desc'] as direction (direction)}<option
+							value={`${column.id}:${direction}`}
+							>{column.label}, {column.numeric
+								? direction === 'desc'
+									? 'highest first'
+									: 'lowest first'
+								: direction === 'asc'
+									? 'A to Z'
+									: 'Z to A'}</option
+						>{/each}{/each}</select
+			></label
+		>
+		<div class="table-scroll">
+			<table class="item-table">
+				<thead
+					><tr
+						>{#each sortColumns as column (column.id)}<th
+								scope="col"
+								class:numeric={column.numeric}
+								aria-sort={ariaSort(column.id)}
+								><button type="button" onclick={() => sort(column.id)}
+									>{column.label}{#if list.sort.column === column.id}<span
+											class="sort-indicator"
+											class:descending={list.sort.direction === 'desc'}
+											aria-hidden="true"
+										></span>{/if}</button
+								></th
+							>{/each}</tr
+					></thead
+				>
+				<tbody
+					>{#each rows as item (item.slug)}<tr>
+							<td
+								><EntityLink class="item-name" entity={item}
+									>{#if item.icon}<img
+											src={'/icons/' + item.icon + '-48.webp'}
+											alt=""
+											width="40"
+											height="40"
+											loading="lazy"
+										/>{/if}<span
+										><span data-game>{item.name}</span>{#if item.qualifier}<small
+												>{item.qualifier}</small
+											>{/if}</span
+									></EntityLink
+								>{#if statusNote[item.status]}<small class="status-note"
+										>{statusNote[item.status]}</small
+									>{/if}</td
+							>
+							<td class="item-type" data-label="Type"><span data-game>{item.type}</span></td>
+							{#each columns as column (column.id)}<td
+									class:numeric={column.numeric}
+									data-label={cellText(item, column.id) ? column.label : undefined}
+									>{cellText(item, column.id)}</td
+								>{/each}
+							<td class="numeric" data-label="Value"
+								>{item.value === null ? 'Unknown' : formatNumber(item.value) + ' gold'}</td
+							>
+						</tr>{/each}</tbody
+				>
+			</table>
+		</div>
 		{#if !items.length}<p class="empty-state">
 				No items match these filters. Change a filter or clear all to browse again.
 			</p>{/if}
 		<noscript
 			><p>
-				Name filtering, facets and sorting need JavaScript. Follow an item link to read its complete
-				page.
+				Name filtering, filters and sorting need JavaScript. Follow an item link to read its
+				complete page.
 			</p></noscript
 		>
 	</div>
 </div>
 
-{#snippet facets()}
+{#snippet filters(instance: string)}
 	<h2 class="desktop-filter-title">Filters</h2>
-	{#each [{ key: 'category' as const, title: 'Category', entries: categories, selected: filters.categories, query: categorySearch }, { key: 'source' as const, title: 'How to Get', entries: sources, selected: filters.sources, query: sourceSearch }, { key: 'type' as const, title: 'Type', entries: types, selected: filters.types, query: typeSearch }] as facet (facet.key)}
+	{#each groups as group (group.facet.id)}
+		{@const selected = list.facets[group.facet.id] ?? []}
+		{@const needle = (narrowing[group.facet.id] ?? '').toLocaleLowerCase('en')}
 		<details class="facet" open>
-			<summary>{facet.title}{facet.selected.length ? ` (${facet.selected.length})` : ''}</summary>
-			{#if facet.entries.length > 10}<label
-					>Find {facet.title.toLowerCase()}<input
+			<summary
+				>{group.facet.label}{#if selected.length}<span class="picked">{selected.length}</span
+					>{/if}</summary
+			>
+			{#if group.options.length > 10}<label
+					>Find {group.facet.label.toLowerCase()}<input
 						type="search"
-						value={facet.query}
-						oninput={(event) => {
-							if (facet.key === 'category') categorySearch = event.currentTarget.value;
-							else if (facet.key === 'source') sourceSearch = event.currentTarget.value;
-							else typeSearch = event.currentTarget.value;
-						}}
+						value={narrowing[group.facet.id] ?? ''}
+						oninput={(event) =>
+							(narrowing = { ...narrowing, [group.facet.id]: event.currentTarget.value })}
 					/></label
 				>{/if}
-			<div class="facet-values">
-				{#each facet.entries.filter((entry) => entry.label
-						.toLowerCase()
-						.includes(facet.query.toLowerCase())) as entry (entry.value)}<label class="check-label"
+			<div class="facet-values" class:long={group.options.length > 10}>
+				{#each group.options.filter((option) => option.label
+						.toLocaleLowerCase('en')
+						.includes(needle)) as option (option.value)}<label class="check-label"
 						><input
 							type="checkbox"
-							checked={facet.selected.includes(entry.value)}
-							onchange={(event) => toggle(facet.key, entry.value, event.currentTarget.checked)}
-						/><span>{entry.label}</span><span class="facet-count">{formatNumber(entry.count)}</span
+							checked={selected.includes(option.value)}
+							onchange={(event) =>
+								toggle(group.facet.id, option.value, event.currentTarget.checked)}
+						/><span>{option.label}</span><span class="facet-count"
+							>{formatNumber(option.count)}</span
 						></label
 					>{/each}
 			</div>
 		</details>
 	{/each}
+	{#if numericColumns.length}
+		<details class="facet" open={list.stats.length > 0}>
+			<summary
+				>Stats{#if list.stats.length}<span class="picked">{list.stats.length}</span>{/if}</summary
+			>
+			{#each list.stats as filter, position (filter.column)}
+				{@const label = index.columns.find((column) => column.id === filter.column)?.label}
+				<div class="stat-filter">
+					<span>{label}</span>
+					<button
+						type="button"
+						class="remove"
+						aria-label={`Remove the ${label} filter`}
+						onclick={() =>
+							apply({ ...list, stats: list.stats.filter((_, other) => other !== position) })}
+						>×</button
+					>
+					<div class="bounds">
+						<input
+							type="number"
+							inputmode="decimal"
+							placeholder="From"
+							aria-label={`Lowest ${label}`}
+							value={filter.min}
+							onchange={(event) =>
+								apply({
+									...list,
+									stats: list.stats.map((entry, other) =>
+										other === position ? { ...entry, min: event.currentTarget.value } : entry
+									)
+								})}
+						/>
+						<input
+							type="number"
+							inputmode="decimal"
+							placeholder="To"
+							aria-label={`Highest ${label}`}
+							value={filter.max}
+							onchange={(event) =>
+								apply({
+									...list,
+									stats: list.stats.map((entry, other) =>
+										other === position ? { ...entry, max: event.currentTarget.value } : entry
+									)
+								})}
+						/>
+					</div>
+				</div>
+			{/each}
+			{#if list.stats.length > 1}<label class="match"
+					>Show items with <select
+						id={`${instance}-match`}
+						value={list.match}
+						onchange={(event) =>
+							apply({ ...list, match: event.currentTarget.value === 'any' ? 'any' : 'all' })}
+						><option value="all">every stat</option><option value="any">any stat</option></select
+					></label
+				>{/if}
+			{#if numericColumns.some((column) => !list.stats.some((filter) => filter.column === column.id))}<select
+					id={`${instance}-add-stat`}
+					aria-label="Add a stat filter"
+					value=""
+					onchange={(event) => {
+						const column = event.currentTarget.value;
+						event.currentTarget.value = '';
+						if (column)
+							apply({
+								...list,
+								stats: [...list.stats, { column, min: '', max: '' }],
+								sort: { column, direction: 'desc' }
+							});
+					}}
+					><option value="">Add a stat</option
+					>{#each numericColumns.filter((column) => !list.stats.some((filter) => filter.column === column.id)) as column (column.id)}<option
+							value={column.id}
+							>{column.label}{column.categories.length === 1
+								? ` (${index.categories.find((category) => category.slug === column.categories[0])?.plural ?? column.categories[0]})`
+								: ''}</option
+						>{/each}</select
+				>{/if}
+		</details>
+	{/if}
 {/snippet}

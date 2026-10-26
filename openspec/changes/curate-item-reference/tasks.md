@@ -44,9 +44,9 @@
 
 ## 7. Item browsing
 
-- [ ] 7.1 Render facets and columns from the published definitions with counts that follow the other filters, hidden empty values and narrowing fields only on long groups, and verify the Weapons category at 1440 and 390 px
-- [ ] 7.2 Add stat filters that add sortable columns with all or any matching, and verify the healing sort for food
-- [ ] 7.3 Make name search match every item with its status and keep the hidden-by-default count visible, and verify Coconut
+- [x] 7.1 Render facets and columns from the published definitions with counts that follow the other filters, hidden empty values and narrowing fields only on long groups, and verify the Weapons category at 1440 and 390 px
+- [x] 7.2 Add stat filters that add sortable columns with all or any matching, and verify the healing sort for food
+- [x] 7.3 Make name search match every item with its status and keep the hidden-by-default count visible, and verify Coconut
 - [ ] 7.4 Add Pagefind list entries for category and type words, and verify searching swords
 
 ## 8. Item page

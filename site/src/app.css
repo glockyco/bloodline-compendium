@@ -415,6 +415,48 @@ details[open] > summary .show-less {
 .facet-values {
 	margin-bottom: var(--space-4);
 }
+/* A long group scrolls inside a bounded height, so it does not push the later groups off the screen. */
+.facet-values.long {
+	max-height: var(--size-facet-values);
+	overflow-y: auto;
+}
+.facet summary .picked {
+	margin-left: var(--space-2);
+	padding: 0 var(--space-2);
+	border-radius: var(--radius-round);
+	background: var(--accent);
+	color: var(--surface);
+}
+.stat-filter {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: center;
+	gap: var(--space-2);
+	margin-bottom: var(--space-3);
+}
+.stat-filter .bounds {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	grid-column: 1 / -1;
+	gap: var(--space-2);
+}
+.stat-filter input {
+	min-width: 0;
+	min-height: var(--size-control);
+	padding: var(--space-2);
+	border: var(--border-width) solid var(--border-control);
+	border-radius: var(--radius-1);
+	background: var(--surface-panel);
+}
+.facet select {
+	width: 100%;
+	margin-bottom: var(--space-4);
+}
+.facet .match {
+	display: grid;
+	gap: var(--space-2);
+	margin-bottom: var(--space-3);
+}
 .check-label {
 	display: flex;
 	align-items: center;
@@ -444,6 +486,25 @@ details[open] > summary .show-less {
 }
 .list-results {
 	min-width: 0;
+}
+.table-scroll {
+	overflow-x: auto;
+}
+.status-note {
+	display: block;
+	padding-left: var(--space-status-note);
+	color: var(--text-muted);
+}
+.availability {
+	margin: 0 0 var(--space-3);
+}
+.link-button {
+	min-height: auto;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--accent);
+	text-decoration: underline;
 }
 .list-results > [role='status'] {
 	font-weight: var(--weight-strong);
@@ -483,16 +544,18 @@ details[open] > summary .show-less {
 .item-table td {
 	vertical-align: middle;
 }
-.item-table th:first-child {
-	width: 58%;
+.item-table th {
+	white-space: nowrap;
 }
+/* The link covers its icon and name only, so pointing at empty cell space neither follows nor previews it. */
 .item-name {
-	display: flex;
+	display: inline-flex;
 	gap: var(--space-3);
 	align-items: center;
+	vertical-align: middle;
 	font-weight: var(--weight-strong);
 	text-decoration: none;
-	overflow-wrap: anywhere;
+	overflow-wrap: break-word;
 }
 .item-name:hover {
 	text-decoration: underline;
@@ -504,7 +567,10 @@ details[open] > summary .show-less {
 	object-fit: contain;
 }
 .item-type {
-	overflow-wrap: anywhere;
+	min-width: var(--size-item-type);
+}
+.phone-sort {
+	display: none;
 }
 .item-table .numeric {
 	white-space: nowrap;
@@ -625,8 +691,43 @@ details[open] > summary .show-less {
 	.item-table th button {
 		padding: var(--space-3) var(--space-2);
 	}
-	.item-table th:first-child {
-		width: 51%;
+	/* A phone reads each item as a card: its name, then each column as a labelled line. */
+	.item-table thead {
+		display: none;
+	}
+	.item-table,
+	.item-table tbody,
+	.item-table tr,
+	.item-table td {
+		display: block;
+	}
+	.item-table tr {
+		padding: var(--space-3);
+		border-bottom: var(--border-width) solid var(--border);
+	}
+	.item-table td {
+		display: flex;
+		justify-content: space-between;
+		gap: var(--space-3);
+		padding: var(--space-1) 0;
+		border: 0;
+	}
+	.item-table td:first-child {
+		display: block;
+		padding-bottom: var(--space-2);
+	}
+	.item-table td[data-label]::before {
+		content: attr(data-label);
+		color: var(--text-muted);
+	}
+	.item-type {
+		min-width: 0;
+	}
+	.phone-sort {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		margin-bottom: var(--space-3);
 	}
 	.relation-table .numeric {
 		white-space: normal;

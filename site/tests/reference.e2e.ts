@@ -23,8 +23,11 @@ test('filters items with counted facets, preserves URL state and sorts numeric v
 		'Lanternedge',
 		'Cinderpear'
 	]);
-	await page.getByRole('checkbox', { name: /Show \d+ items without a known source/ }).check();
+	await page.getByRole('button', { name: 'Show 1 more without a known way to get them' }).click();
 	await expect(page.locator('.item-name').last()).toHaveText('Hollow Prism');
+	await expect(page.locator('tr', { hasText: 'Hollow Prism' })).toContainText(
+		'No known way to get it'
+	);
 	await expect(page.locator('.item-name img').first()).toHaveAttribute('src', /-48.webp$/);
 	await page.getByRole('button', { name: 'Item', exact: true }).click();
 	await page.getByRole('button', { name: 'Item', exact: true }).click();
@@ -50,19 +53,51 @@ test('name filtering combines with facets and empty results can be cleared', asy
 	await expect(page).toHaveURL('/items/');
 });
 
-test('combines Category and Type selections and restores them from a shared URL', async ({
+test('combines filters, restores them from a shared URL and adds stat columns', async ({
 	page
 }) => {
-	await page.goto('/items/?category=weapon&category=food&type=Sword');
+	await page.goto('/items/?category=weapon&category=food&weaponType=Sword');
 	const facets = page.getByRole('complementary', { name: 'Item filters' });
 	await expect(facets.getByRole('checkbox', { name: /^Weapons\s/ })).toBeChecked();
 	await expect(facets.getByRole('checkbox', { name: /^Food\s/ })).toBeChecked();
 	await expect(facets.getByRole('checkbox', { name: /^Sword\s/ })).toBeChecked();
 	await expect(page.locator('.item-name')).toHaveText(['Lanternedge']);
-	await facets.getByRole('checkbox', { name: /^Fruit\s/ }).check();
+	// A list opened from a filtered address shows each row with its own icon.
+	await expect(page.locator('.item-name img')).toHaveAttribute('src', '/icons/lanternedge-48.webp');
+	await facets.getByRole('checkbox', { name: /^Sword\s/ }).uncheck();
 	await expect(page.locator('.item-name')).toHaveText(['Cinderpear', 'Lanternedge']);
 	await page.reload();
 	await expect(page.locator('.item-name')).toHaveText(['Cinderpear', 'Lanternedge']);
+	await page.goto('/items/');
+	await facets.locator('summary', { hasText: 'Stats' }).click();
+	await facets.getByRole('combobox', { name: 'Add a stat filter' }).selectOption('armor');
+	await expect(page.getByRole('columnheader', { name: 'Armor' })).toHaveAttribute(
+		'aria-sort',
+		'descending'
+	);
+	await expect(page.locator('.item-name')).toHaveText(['Mosswoven Coat']);
+	await expect(page).toHaveURL(/stat=armor/);
+});
+
+test('name search finds items without a known way to get them', async ({ page }) => {
+	await page.goto('/items/?name=prism');
+	await expect(page.locator('.item-name')).toHaveText(['Hollow Prism']);
+	await expect(page.locator('tr', { hasText: 'Hollow Prism' })).toContainText(
+		'No known way to get it'
+	);
+});
+
+test('an item link covers its icon and name, not the rest of its cell', async ({ page }) => {
+	await page.goto('/items/');
+	const link = page.locator('.item-name', { hasText: 'Lanternedge' });
+	const linkBox = (await link.boundingBox())!;
+	const cellBox = (await page.locator('td', { has: link }).boundingBox())!;
+	expect(linkBox.width).toBeLessThan(cellBox.width - 40);
+	await page.mouse.move(cellBox.x + cellBox.width - 10, cellBox.y + cellBox.height / 2);
+	await page.waitForTimeout(400);
+	await expect(page.locator('#item-preview')).toHaveCount(0);
+	await page.mouse.move(linkBox.x + linkBox.width / 2, linkBox.y + linkBox.height / 2);
+	await expect(page.locator('#item-preview')).toContainText('Lanternedge');
 });
 
 test('phone filters open as a keyboard-accessible sheet and apply without navigation', async ({
