@@ -44,6 +44,9 @@ public sealed class LootMechanismTests
                     [
                         new EnumEntry("Loot::NewEnumerator1", 1, "Dungeon"),
                         new EnumEntry("Loot::NewEnumerator99", 3, "Fort"),
+                        new EnumEntry("Loot::Rare", 5, "Rare"),
+                        new EnumEntry("Style::First", 0, "First"),
+                        new EnumEntry("Style::Second", 3, "Second"),
                     ]
                 ),
             ],
@@ -124,6 +127,34 @@ public sealed class LootMechanismTests
         var properties = Parse("""{"Loot Type":{"$enum":"Loot::NewEnumerator99"}}""");
         properties["Loot Table - Minolurk Fort"] = Pool(4);
         properties["Selected Loot Table"] = Pool(99);
+        var source = Assert
+            .Single(
+                new ContainerLootMechanism().FindSources(
+                    Context([new ClassRecord(Container, [ContainerLootMechanism.Root], properties)])
+                )
+            )
+            .Source;
+        Assert.Equal(new Weight(4, 10), source.Weight);
+    }
+
+    [Theory]
+    [InlineData("Style::First", false, "Hammer or Mace Loot Table Dwarven Dungeon RARE")]
+    [InlineData("Style::First", true, "Spear Loot Table - DWARVEN")]
+    [InlineData("Style::Second", false, "Undead Mace Dungeon Loot Table")]
+    public void RarePoolFlagsOverrideTheGeneratedSwordAndDoNotAppendCustomLoot(
+        string style,
+        bool spear,
+        string selectedField
+    )
+    {
+        var properties = Parse(
+            $$$"""{"Loot Type":{"$enum":"Loot::Rare"},"Randomized Loot Style":{"$enum":"{{{style}}}"},"Hammer or Mace":true,"Add Custom Loot to Table":true}"""
+        );
+        properties["Spear"] = spear;
+        properties["Sword Loot Table - Dwarven Dungeon RARE"] = Pool(99);
+        properties["Undead Sword Loot Table Undead Dungeon"] = Pool(99);
+        properties["Custom Loot Table"] = Pool(99);
+        properties[selectedField] = Pool(4);
         var source = Assert
             .Single(
                 new ContainerLootMechanism().FindSources(

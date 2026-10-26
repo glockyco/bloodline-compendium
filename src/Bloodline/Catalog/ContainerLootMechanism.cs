@@ -138,7 +138,8 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
             notes.Add("Uses the custom loot pool.");
             return properties["Custom Loot Table"];
         }
-        var field = EnumNumber(properties["Loot Type"]) switch
+        var lootType = EnumNumber(properties["Loot Type"]);
+        var field = lootType switch
         {
             0 => "Loot Table - Towns",
             1 => "Loot Table - Dungeon",
@@ -147,9 +148,20 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
             8 => "Coffin Loot",
             9 => "Urn Loot",
             10 => "Bandit Loot Table",
+            // The rare generator sets Sword first. Later enabled weapon flags overwrite its pool.
             5 => EnumNumber(properties["Randomized Loot Style"]) switch
             {
+                0 when RecordValues.Boolean(properties["Spear"]) == true =>
+                    "Spear Loot Table - DWARVEN",
+                0 when RecordValues.Boolean(properties["Hammer or Mace"]) == true =>
+                    "Hammer or Mace Loot Table Dwarven Dungeon RARE",
+                0 when RecordValues.Boolean(properties["Dagger"]) == true =>
+                    "Dagger Loot Table - Dwarven Dungeon RARE",
+                0 when RecordValues.Boolean(properties["Axe"]) == true =>
+                    "Axe Loot Table -Dwarven RARE",
                 0 => "Sword Loot Table - Dwarven Dungeon RARE",
+                3 when RecordValues.Boolean(properties["Hammer or Mace"]) == true =>
+                    "Undead Mace Dungeon Loot Table",
                 3 => "Undead Sword Loot Table Undead Dungeon",
                 _ => null,
             },
@@ -161,7 +173,7 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                 ? "Uses the stored selected loot pool. Pool selection is not recorded."
                 : $"Selected pool: {field}."
         );
-        if (RecordValues.Boolean(properties["Add Custom Loot to Table"]) != true)
+        if (lootType == 5 || RecordValues.Boolean(properties["Add Custom Loot to Table"]) != true)
             return pool;
         notes.Add("Custom entries replace matching entries in the selected pool.");
         var entries = RecordValues.MapEntries(pool).ToList();
