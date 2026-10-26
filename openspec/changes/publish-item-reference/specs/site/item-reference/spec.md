@@ -14,15 +14,39 @@ The site SHALL provide compact item rows filtered by category and Type, with sor
 - **THEN** those items become available and the URL preserves the selected filters and sort
 
 ### Requirement: Item pages
-The site SHALL provide one page per item at its readable qualified URL. Acquisition SHALL be the primary answer, with one game-like facts tooltip beside it on desktop and after it on phones. Reverse uses SHALL follow the answer. Missing facts, sources and icons SHALL remain explicit without blank decorative panels. Relation tables SHALL show at most two numeric columns with interpretable units. Tables of at most ten rows SHALL show all rows. Longer tables SHALL show eight rows and a native disclosure containing every remaining row in prerendered HTML.
+The site SHALL provide one page per item at its readable qualified URL.
 
 #### Scenario: Opening an item page
 - **WHEN** a reader opens an item's page
-- **THEN** the page shows the item's facts and sources
+- THEN the item has a page at its readable qualified URL
+
+### Requirement: Acquisition leads item page content
+Acquisition SHALL be the primary answer, with one game-like facts tooltip beside it on desktop and after it on phones. Reverse uses SHALL follow the answer.
+
+#### Scenario: Item page on a phone
+- WHEN a reader opens an item's page on a phone
+- THEN the acquisition answer precedes its facts tooltip and reverse uses follow the answer
+
+### Requirement: Missing item facts remain explicit
+Missing facts, sources and icons SHALL remain explicit without blank decorative panels.
 
 #### Scenario: Item without a known source
 - **WHEN** a reader opens the page of an item without a known source
 - **THEN** the page states that no source is known and links to the coverage page
+
+### Requirement: Relation tables limit numeric columns
+Relation tables SHALL show at most two numeric columns with interpretable units.
+
+#### Scenario: Numeric relations
+- WHEN a relation table shows numbers
+- THEN at most two numeric columns appear with interpretable units
+
+### Requirement: Relation table length controls disclosure
+Tables of at most ten rows SHALL show all rows. Longer tables SHALL show eight rows and a native disclosure containing every remaining row in prerendered HTML.
+
+#### Scenario: Eleven relation rows
+- WHEN a relation table has eleven rows
+- THEN eight rows are visible and the remaining three are in a native disclosure in prerendered HTML
 
 ### Requirement: Search
 The site SHALL let readers find items by name from every page, without a server.
