@@ -1,0 +1,518 @@
+{
+  "$defs": {
+    "Amount": {
+      "properties": {
+        "max": {
+          "type": "integer"
+        },
+        "min": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "min",
+        "max"
+      ],
+      "title": "Amount",
+      "type": "object"
+    },
+    "CategoryLink": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "slug",
+        "name"
+      ],
+      "title": "CategoryLink",
+      "type": "object"
+    },
+    "CategorySummary": {
+      "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "slug",
+        "name",
+        "count"
+      ],
+      "title": "CategorySummary",
+      "type": "object"
+    },
+    "CoverageGap": {
+      "properties": {
+        "entries": {
+          "items": {
+            "$ref": "#/$defs/GapEntry"
+          },
+          "type": "array"
+        },
+        "kind": {
+          "$ref": "#/$defs/GapKind"
+        }
+      },
+      "required": [
+        "kind",
+        "entries"
+      ],
+      "title": "CoverageGap",
+      "type": "object"
+    },
+    "CoverageReport": {
+      "properties": {
+        "gaps": {
+          "items": {
+            "$ref": "#/$defs/CoverageGap"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "gaps"
+      ],
+      "title": "CoverageReport",
+      "type": "object"
+    },
+    "Fact": {
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "value": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "label",
+        "value"
+      ],
+      "title": "Fact",
+      "type": "object"
+    },
+    "GapEntry": {
+      "properties": {
+        "detail": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "itemSlug": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "itemSlug",
+        "detail"
+      ],
+      "title": "GapEntry",
+      "type": "object"
+    },
+    "GapKind": {
+      "enum": [
+        "itemWithoutSource",
+        "sourceWithoutPlace",
+        "itemWithoutIcon",
+        "unknownFact",
+        "placeWithoutName",
+        "unreadObject"
+      ],
+      "title": "GapKind"
+    },
+    "ItemAmount": {
+      "properties": {
+        "item": {
+          "$ref": "#/$defs/ItemLink"
+        },
+        "quantity": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "item",
+        "quantity"
+      ],
+      "title": "ItemAmount",
+      "type": "object"
+    },
+    "ItemIndex": {
+      "properties": {
+        "categories": {
+          "items": {
+            "$ref": "#/$defs/CategorySummary"
+          },
+          "type": "array"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/ItemSummary"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "categories",
+        "items"
+      ],
+      "title": "ItemIndex",
+      "type": "object"
+    },
+    "ItemLink": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "slug": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "slug",
+        "name"
+      ],
+      "title": "ItemLink",
+      "type": "object"
+    },
+    "ItemPage": {
+      "properties": {
+        "category": {
+          "$ref": "#/$defs/CategoryLink"
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "facts": {
+          "items": {
+            "$ref": "#/$defs/Fact"
+          },
+          "type": "array"
+        },
+        "icon": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/Source"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "slug",
+        "name",
+        "description",
+        "category",
+        "icon",
+        "facts",
+        "sources"
+      ],
+      "title": "ItemPage",
+      "type": "object"
+    },
+    "ItemSummary": {
+      "properties": {
+        "category": {
+          "type": "string"
+        },
+        "icon": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "sourceKinds": {
+          "items": {
+            "$ref": "#/$defs/SourceKind"
+          },
+          "type": "array"
+        },
+        "value": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "slug",
+        "name",
+        "category",
+        "value",
+        "icon",
+        "sourceKinds"
+      ],
+      "title": "ItemSummary",
+      "type": "object"
+    },
+    "Place": {
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "title": "Place",
+      "type": "object"
+    },
+    "Price": {
+      "properties": {
+        "amount": {
+          "type": "integer"
+        },
+        "currency": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ItemLink"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "amount",
+        "currency"
+      ],
+      "title": "Price",
+      "type": "object"
+    },
+    "SiteBuild": {
+      "properties": {
+        "appId": {
+          "type": "integer"
+        },
+        "buildId": {
+          "type": "integer"
+        },
+        "commit": {
+          "type": "string"
+        },
+        "depots": {
+          "items": {
+            "$ref": "#/$defs/SiteDepot"
+          },
+          "type": "array"
+        },
+        "dirty": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "appId",
+        "buildId",
+        "depots",
+        "commit",
+        "dirty"
+      ],
+      "title": "SiteBuild",
+      "type": "object"
+    },
+    "SiteDepot": {
+      "properties": {
+        "depotId": {
+          "type": "integer"
+        },
+        "manifestId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "depotId",
+        "manifestId"
+      ],
+      "title": "SiteDepot",
+      "type": "object"
+    },
+    "Source": {
+      "properties": {
+        "amount": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Amount"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "chance": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "inputs": {
+          "items": {
+            "$ref": "#/$defs/ItemAmount"
+          },
+          "type": "array"
+        },
+        "kind": {
+          "$ref": "#/$defs/SourceKind"
+        },
+        "name": {
+          "type": "string"
+        },
+        "notes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "places": {
+          "items": {
+            "$ref": "#/$defs/Place"
+          },
+          "type": "array"
+        },
+        "price": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Price"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Weight"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "name",
+        "places",
+        "price",
+        "amount",
+        "weight",
+        "chance",
+        "inputs",
+        "notes"
+      ],
+      "title": "Source",
+      "type": "object"
+    },
+    "SourceKind": {
+      "enum": [
+        "shop",
+        "currencyShop",
+        "smithing",
+        "crafting",
+        "cooking",
+        "containerLoot",
+        "randomLoot",
+        "enemyDrop",
+        "pickup",
+        "dialogue",
+        "fishing",
+        "gathering",
+        "farming",
+        "bountyNote",
+        "settlementDelivery"
+      ],
+      "title": "SourceKind"
+    },
+    "Weight": {
+      "properties": {
+        "total": {
+          "type": "number"
+        },
+        "value": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "value",
+        "total"
+      ],
+      "title": "Weight",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "build": {
+      "$ref": "#/$defs/SiteBuild"
+    },
+    "coverage": {
+      "$ref": "#/$defs/CoverageReport"
+    },
+    "item": {
+      "$ref": "#/$defs/ItemPage"
+    },
+    "items": {
+      "$ref": "#/$defs/ItemIndex"
+    }
+  },
+  "required": [
+    "build",
+    "items",
+    "item",
+    "coverage"
+  ],
+  "title": "SiteDataFiles",
+  "type": "object"
+}

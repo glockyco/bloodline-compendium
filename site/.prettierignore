@@ -1,0 +1,15 @@
+# Package Managers
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+bun.lock
+bun.lockb
+
+# Miscellaneous
+/static/
+/src/lib/site-data.ts
+/src/lib/site-data.schema.json
+/test-results/
+/build/
+/.svelte-kit/
+/.wrangler/

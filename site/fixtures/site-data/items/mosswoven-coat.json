@@ -1,0 +1,42 @@
+{
+	"id": "/Invented/Items/MosswovenCoat",
+	"slug": "mosswoven-coat",
+	"name": "Mosswoven Coat",
+	"description": "A coat stitched from soft, rain-green fibres.",
+	"category": {
+		"slug": "armour",
+		"name": "Armour"
+	},
+	"icon": "mosswoven-coat",
+	"facts": [
+		{
+			"label": "Value",
+			"value": "90"
+		},
+		{
+			"label": "Armour",
+			"value": "8"
+		}
+	],
+	"sources": [
+		{
+			"kind": "enemyDrop",
+			"name": "Bramble sentinel",
+			"places": [
+				{
+					"id": "/Invented/Places/GlassReach",
+					"name": "Glass Reach"
+				}
+			],
+			"price": null,
+			"amount": {
+				"min": 1,
+				"max": 1
+			},
+			"weight": null,
+			"chance": null,
+			"inputs": [],
+			"notes": []
+		}
+	]
+}

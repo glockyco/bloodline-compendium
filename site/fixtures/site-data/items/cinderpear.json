@@ -1,0 +1,42 @@
+{
+	"id": "/Invented/Items/Cinderpear",
+	"slug": "cinderpear",
+	"name": "Cinderpear",
+	"description": "Sweet fruit that stays warm after picking.",
+	"category": {
+		"slug": "food",
+		"name": "Food"
+	},
+	"icon": "cinderpear",
+	"facts": [
+		{
+			"label": "Value",
+			"value": "8"
+		},
+		{
+			"label": "Health restored",
+			"value": "15"
+		}
+	],
+	"sources": [
+		{
+			"kind": "gathering",
+			"name": "Ember orchard",
+			"places": [
+				{
+					"id": "/Invented/Places/GlassReach",
+					"name": "Glass Reach"
+				}
+			],
+			"price": null,
+			"amount": {
+				"min": 2,
+				"max": 4
+			},
+			"weight": null,
+			"chance": null,
+			"inputs": [],
+			"notes": []
+		}
+	]
+}

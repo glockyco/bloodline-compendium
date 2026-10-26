@@ -1,0 +1,129 @@
+{
+	"id": "/Invented/Items/Lanternedge",
+	"slug": "lanternedge",
+	"name": "Lanternedge",
+	"description": "A slender blade etched with a path of tiny stars.",
+	"category": {
+		"slug": "weapons",
+		"name": "Weapons"
+	},
+	"icon": "lanternedge",
+	"facts": [
+		{
+			"label": "Value",
+			"value": "45"
+		},
+		{
+			"label": "Damage",
+			"value": "12"
+		},
+		{
+			"label": "Attack speed",
+			"value": "1.2"
+		},
+		{
+			"label": "Critical chance",
+			"value": null
+		}
+	],
+	"sources": [
+		{
+			"kind": "shop",
+			"name": "Mira at the Glass Market",
+			"places": [
+				{
+					"id": "/Invented/Places/GlassReach",
+					"name": "Glass Reach"
+				}
+			],
+			"price": {
+				"amount": 45,
+				"currency": null
+			},
+			"amount": {
+				"min": 1,
+				"max": 1
+			},
+			"weight": null,
+			"chance": null,
+			"inputs": [],
+			"notes": ["Stock refresh conditions are unknown."]
+		},
+		{
+			"kind": "crafting",
+			"name": "Star-forged blade recipe",
+			"places": [
+				{
+					"id": "/Invented/Places/GlassReach",
+					"name": "Glass Reach"
+				}
+			],
+			"price": null,
+			"amount": {
+				"min": 1,
+				"max": 1
+			},
+			"weight": null,
+			"chance": null,
+			"inputs": [
+				{
+					"item": {
+						"slug": "cinderpear",
+						"name": "Cinderpear"
+					},
+					"quantity": 2
+				},
+				{
+					"item": {
+						"slug": null,
+						"name": "Silverglass shard"
+					},
+					"quantity": 3
+				}
+			],
+			"notes": ["Requires a lit forge."]
+		},
+		{
+			"kind": "currencyShop",
+			"name": "Orris the Collector",
+			"places": [],
+			"price": {
+				"amount": 3,
+				"currency": {
+					"slug": "cinderpear",
+					"name": "Cinderpear"
+				}
+			},
+			"amount": {
+				"min": 1,
+				"max": 1
+			},
+			"weight": null,
+			"chance": null,
+			"inputs": [],
+			"notes": []
+		},
+		{
+			"kind": "containerLoot",
+			"name": "Stargazer cache",
+			"places": [
+				{
+					"id": "/Invented/Places/GlassReach",
+					"name": "Glass Reach"
+				}
+			],
+			"price": null,
+			"amount": {
+				"min": 1,
+				"max": 2
+			},
+			"weight": {
+				"value": 2,
+				"total": 11
+			},
+			"chance": 0.25,
+			"inputs": [],
+			"notes": ["Raw pool weight does not imply a probability."]
+		}
+	]
+}

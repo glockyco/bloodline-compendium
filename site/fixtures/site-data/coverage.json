@@ -1,0 +1,69 @@
+{
+	"gaps": [
+		{
+			"kind": "itemWithoutSource",
+			"entries": [
+				{
+					"label": "Hollow Prism",
+					"itemSlug": "hollow-prism",
+					"detail": "No acquisition source was found in the readable data."
+				}
+			]
+		},
+		{
+			"kind": "sourceWithoutPlace",
+			"entries": [
+				{
+					"label": "Orris the Collector",
+					"itemSlug": "lanternedge",
+					"detail": "No location is known for this currency shop."
+				}
+			]
+		},
+		{
+			"kind": "itemWithoutIcon",
+			"entries": [
+				{
+					"label": "Hollow Prism",
+					"itemSlug": "hollow-prism",
+					"detail": "No icon texture is known."
+				}
+			]
+		},
+		{
+			"kind": "unknownFact",
+			"entries": [
+				{
+					"label": "Lanternedge",
+					"itemSlug": "lanternedge",
+					"detail": "Critical chance is unknown."
+				},
+				{
+					"label": "Hollow Prism",
+					"itemSlug": "hollow-prism",
+					"detail": "Value and weight are unknown."
+				}
+			]
+		},
+		{
+			"kind": "placeWithoutName",
+			"entries": [
+				{
+					"label": "/Invented/Places/UnlabelledGarden",
+					"itemSlug": null,
+					"detail": "The place has no readable display name."
+				}
+			]
+		},
+		{
+			"kind": "unreadObject",
+			"entries": [
+				{
+					"label": "/Invented/Places/BrokenObservatory",
+					"itemSlug": null,
+					"detail": "The package could not be read. Its contents are absent."
+				}
+			]
+		}
+	]
+}

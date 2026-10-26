@@ -1,0 +1,14 @@
+{
+  "name": "bloodline-compendium",
+  "private": true,
+  "packageManager": "bun@1.4.2",
+  "workspaces": [
+    "site"
+  ],
+  "scripts": {
+    "types": "bun scripts/generate-types.mjs",
+    "types:check": "bun scripts/generate-types.mjs --check",
+    "guard": "bun scripts/guard.mjs",
+    "assets:check": "bun scripts/asset-gate.mjs"
+  }
+}

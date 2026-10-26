@@ -1,0 +1,22 @@
+{
+	"id": "/Invented/Items/HollowPrism",
+	"slug": "hollow-prism",
+	"name": "Hollow Prism",
+	"description": null,
+	"category": {
+		"slug": "curios",
+		"name": "Curios"
+	},
+	"icon": null,
+	"facts": [
+		{
+			"label": "Value",
+			"value": null
+		},
+		{
+			"label": "Weight",
+			"value": null
+		}
+	],
+	"sources": []
+}

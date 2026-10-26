@@ -1,0 +1,32 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":pinAllExceptPeerDependencies",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "packageRules": [
+    {
+      "matchManagers": ["github-actions"],
+      "groupName": "GitHub Actions"
+    },
+    {
+      "matchManagers": ["npm"],
+      "groupName": "site tooling"
+    },
+    {
+      "matchManagers": ["nuget"],
+      "matchPackageNames": ["!CUE4Parse"],
+      "groupName": ".NET tooling"
+    },
+    {
+      "matchPackageNames": ["CUE4Parse"],
+      "dependencyDashboardApproval": true,
+      "automerge": false,
+      "groupName": null
+    }
+  ],
+  "lockFileMaintenance": {
+    "enabled": true
+  }
+}

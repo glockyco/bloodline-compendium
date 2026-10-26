@@ -1,0 +1,39 @@
+name: Checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: nixbuild/nix-quick-install-action@9f63be77f412a248c9d9a65a4c82cf066cdf8f0c # v35
+        with:
+          nix_conf: |
+            keep-env-derivations = true
+            keep-outputs = true
+      - uses: nix-community/cache-nix-action@7df957e333c1e5da7721f60227dbba6d06080569 # v7
+        with:
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('flake.lock', 'flake.nix') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+          gc-max-store-size-linux: 4G
+      - name: Install locked dependencies
+        run: nix develop -c bash -euc 'dotnet tool restore && dotnet restore --locked-mode && bun install --frozen-lockfile'
+      - name: Check .NET
+        run: nix develop -c bash -euc 'dotnet csharpier check . && dotnet build --no-restore && dotnet test --no-build'
+      - name: Check contracts and tracked files
+        run: nix develop -c bash -euc 'bun run types:check && bun run guard'
+      - name: Check site
+        run: nix develop -c bash -euc 'bun run --cwd site lint && bun run --cwd site format:check && bun run --cwd site check && bun run --cwd site test:unit && bun run --cwd site build:fixtures'
+      - name: Install Chromium
+        run: nix develop -c bun run --cwd site playwright install --with-deps chromium
+      - name: Check browser behaviour
+        run: nix develop -c bun run --cwd site test:e2e

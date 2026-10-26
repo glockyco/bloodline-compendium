@@ -1,0 +1,58 @@
+{
+	"categories": [
+		{
+			"slug": "weapons",
+			"name": "Weapons",
+			"count": 1
+		},
+		{
+			"slug": "armour",
+			"name": "Armour",
+			"count": 1
+		},
+		{
+			"slug": "food",
+			"name": "Food",
+			"count": 1
+		},
+		{
+			"slug": "curios",
+			"name": "Curios",
+			"count": 1
+		}
+	],
+	"items": [
+		{
+			"slug": "cinderpear",
+			"name": "Cinderpear",
+			"category": "food",
+			"value": 8,
+			"icon": "cinderpear",
+			"sourceKinds": ["gathering"]
+		},
+		{
+			"slug": "hollow-prism",
+			"name": "Hollow Prism",
+			"category": "curios",
+			"value": null,
+			"icon": null,
+			"sourceKinds": []
+		},
+		{
+			"slug": "lanternedge",
+			"name": "Lanternedge",
+			"category": "weapons",
+			"value": 45,
+			"icon": "lanternedge",
+			"sourceKinds": ["shop", "crafting", "currencyShop", "containerLoot"]
+		},
+		{
+			"slug": "mosswoven-coat",
+			"name": "Mosswoven Coat",
+			"category": "armour",
+			"value": 90,
+			"icon": "mosswoven-coat",
+			"sourceKinds": ["enemyDrop"]
+		}
+	]
+}
