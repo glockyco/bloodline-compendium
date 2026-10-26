@@ -602,16 +602,19 @@ async function newSave(config, lab, name) {
     "the main menu",
   );
   await game(config, lab, "start-new-game", { name });
-  await waitForGame(
+  // The game can start a new save in the first level without showing character creation.
+  const started = await waitForGame(
     config,
     lab,
     {
       classes: ["CharacterCreation1_C"],
-      until: (s) => s.present.CharacterCreation1_C,
+      until: (s) =>
+        s.present.CharacterCreation1_C || s.pawn === "FirstPersonCharacter2_C",
     },
     180,
-    "character creation",
+    "character creation or the first level",
   );
+  if (!started.present.CharacterCreation1_C) return started;
   await game(config, lab, "create-character", {});
   return waitForGame(
     config,
