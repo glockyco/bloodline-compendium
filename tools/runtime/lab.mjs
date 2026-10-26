@@ -594,6 +594,16 @@ async function waitForGame(config, lab, check, seconds, what) {
 
 async function newSave(config, lab, name) {
   if (!name) throw new Error("Name the save: lab.mjs new-save <name>");
+  // The game keeps 20 characters of a save name, and starting a save that exists loads it without creating a
+  // character, which leaves the run in an earlier run's game.
+  if (name.length > 20)
+    throw new Error(
+      `The game keeps 20 characters of a save name, and ${name} has ${name.length}.`,
+    );
+  if (await exists(join(lab.project, "Saved", "SaveGames", name + ".sav")))
+    throw new Error(
+      `A save named ${name} exists. Starting it would load it instead of creating a character.`,
+    );
   await waitForGame(
     config,
     lab,
@@ -602,19 +612,16 @@ async function newSave(config, lab, name) {
     "the main menu",
   );
   await game(config, lab, "start-new-game", { name });
-  // The game can start a new save in the first level without showing character creation.
-  const started = await waitForGame(
+  await waitForGame(
     config,
     lab,
     {
       classes: ["CharacterCreation1_C"],
-      until: (s) =>
-        s.present.CharacterCreation1_C || s.pawn === "FirstPersonCharacter2_C",
+      until: (s) => s.present.CharacterCreation1_C,
     },
     180,
-    "character creation or the first level",
+    "character creation",
   );
-  if (!started.present.CharacterCreation1_C) return started;
   await game(config, lab, "create-character", {});
   return waitForGame(
     config,

@@ -22,7 +22,7 @@ Run `prepare` again after a game update or after changing `tools/runtime/bridge/
 
 `launch` also starts `limit-frame-rate`, which holds the frame rate at 60, because the game resets the limit on every level load.
 
-A fresh session sits in the main menu. `new-save <name>` starts a game and creates a character with the default look. `close-tutorials` closes the tutorial popups that pause the game afterwards.
+A fresh session sits in the main menu. `new-save <name>` starts a game and creates a character with the default look. Give every run a new name of at most 20 characters: the game keeps only 20, and starting a save that exists loads it without creating a character, so `new-save` refuses both. `close-tutorials` closes the tutorial popups that pause the game afterwards.
 
 ## Driving the game
 
