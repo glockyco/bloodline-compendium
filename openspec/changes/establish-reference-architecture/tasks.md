@@ -19,11 +19,11 @@
 
 ## 3. Lab runtime tool
 
-- [ ] 3.1 Move the bridge mod, host and capture scripts into `tools/runtime/`, pin UE4SS by SHA-256 in the lab configuration, and verify a fresh lab copy answers a ping
-- [ ] 3.2 Add the CLI with `launch`, `new-save`, `quit`, `give`, `equip`, `use`, `open-sheet`, `call`, `read-tooltips`, `sample`, `capture-window` and `capture-model`, writing each run to a new `artifacts/<build>/runtime/<run-id>/`, and verify a run gives three items and reads their tooltip text and that `call` records the result of the game's `Set Required EXP` for chosen levels
-- [ ] 3.3 Refuse targets other than the configured lab copy and stop only the started process, and verify the refusal against the Steam library path
-- [ ] 3.4 Spike running off screen (`-RenderOffScreen`, `-nullrhi`, a second space) and record the result in this design
-- [ ] 3.5 Write `.agent/skills/runtime-checks/SKILL.md` with the procedure, the button binding lookup and the foreground constraint, and verify it names commands that exist
+- [x] 3.1 Move the bridge mod and host into `tools/runtime/`, pin UE4SS by SHA-256, add `prepare` for a fresh lab copy, and verify a fresh lab copy answers a request
+- [x] 3.2 Add the CLI with `launch`, `new-save`, `quit`, `give`, `equip`, `use`, `open-sheet`, `call`, `read-tooltips`, `sample`, `capture-screen` and `capture-model`, writing each run to a new `artifacts/<build>/runtime/<run-id>/`, and verify a run gives three items and reads their tooltip text and that `call` records the result of the game's `Set Required EXP` for chosen levels
+- [x] 3.3 Refuse targets other than the configured lab copy and stop only the started process, and verify the refusal against the Steam library path
+- [x] 3.4 Run the game off screen (`-nullrhi`, `-RenderOffScreen`) without taking focus, and record the result in this design
+- [x] 3.5 Write `.agent/skills/runtime-checks/SKILL.md` with the procedure, the button binding lookup and the off-screen modes, and verify it names commands that exist
 
 ## 4. Code cross-reference, citations and rules
 

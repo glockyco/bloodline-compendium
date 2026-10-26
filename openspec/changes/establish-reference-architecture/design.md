@@ -32,22 +32,29 @@ Levels (108 read, one too large to load), 607 dialogue assets and 149 creature k
 
 ### What the running game showed
 
-A new lab save `LabTooltips` was driven through the file bridge in `C:\BloodlineLab`:
-- The character creation button was pressed by calling the function its `ComponentDelegateBindings` entry names.
+Lab saves were driven through the bridge in the lab copy. Every observation below came from the game's own functions:
+- Menu and character creation buttons were pressed by calling the function their `ComponentDelegateBindings` entry names.
 - Items were added with the pawn's `AddItemsToInventory` and each class's default `ItemInfo`.
 - The character sheet was opened with the pawn's `Open/Close Character Sheet`.
-- Captures were window-only.
+- Items were equipped and eaten by clicking their inventory slot, whose handler calls the slot's `Use`.
 
-The game fills one hidden `W_Tooltip_QualityWhite` per inventory item, and the widget's text blocks hold the name, the speed or type line, the stat line and the description. Reading them needs no hover and no screenshot.
+An inventory slot builds its tooltip in its own `OnMouseEnter`, so calling that handler gives the text that hovering shows.
 
-The game window must stay in front: hidden, the game stops ticking and the bridge stops answering.
+The game runs off screen at full rate:
+- With `-nullrhi` it has no window and runs Blueprints, widgets and tooltips.
+- With `-RenderOffScreen` it renders without a window, and macOS lists it as a background app, so it never takes focus.
+- In both modes the bridge answered while other apps stayed in front.
+- The game resets `t.MaxFPS` to 0 on every level load, and the first level opens with a tutorial popup that pauses the game.
+
+Equipping the Winter Warden Cuirass on a new character set `ArmorTotal` and `Torso Armor` to 2, its class default, while the character sheet showed `Armor: 13` and `Mobility: 88%`. Walk and run speed fell by 12.2%. This is one observation, not yet the two-item measurement below.
 
 Disagreements found:
 
 - Armor has two sources. The inventory, equipment slot and trader tooltip widgets read `ArmorDataTable` (`ArmorValue`, `ArmorClass`). `FirstPersonCharacter2` reads `ArmorInfo.DamageRating` and `Total Armor` and never reads the table. The catalog publishes the class defaults. Of 404 armor items, 47 have no table row. For 329 of the other 357 the ratings differ. Winter Warden Cuirass shows Heavy and 13 in game against Light and 2 in its class defaults.
 - Food tooltips show `Heals: {restoration}hp`, while descriptions state other amounts: Apple Pie 15 against 200, Fondue 0 against 300.
 - Materials and weapon parts show an empty `: 0` stat line.
-- The catalog's "Weapon type" is `WeaponInfo.AttackType`, an attack style. All 19 rifles read Crossbow, and the Lonland Pistol is typed Rifle with weapon type Crossbow.
+- The catalog's "Weapon type" is `WeaponInfo.AttackType`, an attack style. All 19 rifles read Crossbow, and the Lonland Pistol is typed Rifle with weapon type Crossbow. Its `ItemInfo.WeaponType` reads Pistol, and that field names Crossbow, Bow, Dagger and Two Handed Weapon for the other weapons checked.
+- Every equip attaches the item's actor to the player and to the character sheet's preview again without removing the earlier one. After a few equips the player carried five Winter Warden Cuirass actors and eight Bronze Nasal Helms. Not yet checked in a normal session.
 - Speed shows as a word such as `Slow`. The catalog publishes the multiplier.
 
 Comments in `ItemFacts.cs` cite bytecode by line number in a dump that the repository cannot regenerate.
@@ -171,17 +178,48 @@ Alternatives:
 
 ### The lab runtime tool
 
-The bridge mod, the host, `shot.py` and `hover.py` move from `artifacts/runtime` into `tools/runtime/`. A small CLI exposes named commands:
-- `launch`, `new-save` and `quit`,
-- `give`, `equip`, `use` and `open-sheet`,
-- `read-tooltips` and `sample`,
-- `capture-window` and `capture-model`.
+`tools/runtime/lab.mjs` and the Lua commands in `tools/runtime/commands/` drive the lab copy. `.agent/skills/runtime-checks/SKILL.md` gives the procedure.
 
-The Lua side keeps one implementation per command. The protocol follows HotRepl's request and response shape, so a UE4SS HotRepl host can replace the file bridge without changing callers.
+- `prepare` makes the lab copy for the installed Steam build as an APFS clone, which takes no space.
+- It installs UE4SS from an archive pinned by SHA-256, with only the bridge mod enabled.
+- A file bridge carries each request, and Lua runs it on the game thread. Requests can reply after several frames, which per-frame sampling needs.
+- Every request sends a shared prelude and all commands, so one command can run another at a set time.
+- The protocol follows HotRepl's request and response shape, so a UE4SS HotRepl host can replace the file bridge without changing callers.
 
-Runs write to `artifacts/<build>/runtime/<run-id>/`. The tool refuses any target that is not the configured lab copy.
+The game runs off screen, headless or rendering, so the machine stays free to use (see "What the running game showed"). Window capture and window automation are not used. Screenshots come from the engine's own `Shot` command. Off screen, the engine writes those images with alpha 0 wherever the scene is drawn and the colours intact, so the tool drops the alpha channel.
 
-A spike tests whether the game keeps ticking off screen with `-RenderOffScreen`, `-nullrhi` for non-visual checks, or a window placed on a second space. Until then, runs need the game in front, and runs are batched to keep that short.
+Runs write to `artifacts/<build>/runtime/<run-id>/`, with the build, the commit, a hash of the bridge and commands, and every command with its arguments and result. A command that does something a player cannot names it in a `-- lab setup:` line, which the run records with each use. The tool refuses a lab directory that overlaps the Steam library or lies outside the bottle's C: drive, and it stops only the process it started.
+
+Alternatives:
+- Keeping the window in front, as the first spike did. It took the screen for every run.
+- Clicking by screen position. Button bindings name the function a click calls.
+
+### Presenting item models
+
+An item render shows the item alone, with a transparent background, as the game shows it in use. Erenshor's renders, which use the same split, set the pattern.
+
+- Worn items are seen three quarters from the front: the camera stands 25 degrees to the subject's left and 12 degrees above it.
+- Weapons and shields are seen face-on and upright with the grip down, turned 15 degrees so their thickness shows.
+- Firearms and crossbows lie on their side with the muzzle to the right. A crossbow's thinnest axis is its height, so it shows from above with its limbs.
+- The camera has a 25-degree field of view, and the picture is cropped to the subject with a margin of 5% of its longer side.
+
+Colours come from the game's own picture of equipment: the character sheet's preview, `3DMeshCapture_BP`. It is a lit diorama far above each level, with the level's Ultra Dynamic Sky and a point light. Its capture stores scene colour without tonemapping, and the sheet shows that unchanged. A render of the preview's own view with the same capture source matched the sheet. So renders are taken in that diorama, with the same source, at noon in clear weather, which `set-time` and `set-weather` set through the sky's and the weather's own setters. The preview follows the day, so the hour is fixed.
+
+What the game draws for an item decides the subject:
+- The body meshes that armor puts on come from its class default `ArmorInfo`: one mesh, or left and right meshes with their upper parts. `ItemInfo.SkeletalMesh` is a leftover. For the Winter Warden Cuirass it names `SK_Chr_Torso_Male_13`, while the game draws `SK_Chr_Torso_Male_25`.
+- Each body mesh has a female counterpart of the same name with `Female` for `Male`.
+- Helmets name no body mesh. The game attaches the item's own actor at the socket that `ArmorInfo.AttachPoint` names.
+- Weapons are the item's own actor, carried at a socket.
+- The game colours body parts at runtime through material instances of Synty's `ModularFantasyHeroCharacters` with leather, metal, primary and skin colour parameters. Item data names no colours, so the item is equipped and the preview's parts are rendered in place.
+- Weapons are copied with their materials, so they can face the camera whatever socket holds them.
+- Views start from the way the preview character faces, its mesh's local +Y. The preview turns the character 27 degrees from its camera, and a view taken from the camera's direction turned each subject differently.
+
+The subject's pixels come from a second capture of device depth, which is 0 only where nothing was drawn. Both captures are rendered at twice the output size and combined into smooth edges. A normal-buffer mask failed: it stores raw world normals, which read 0 on faces turned away from the world axes.
+
+Alternatives:
+- Own studio lights on a separate lighting channel. They gave consistent but invented colours.
+- Rendering the mesh named in item data. It showed the wrong model.
+- Rendering the player's own parts. First-person flags and the current pose broke them.
 
 ### Settling disagreements
 
@@ -292,7 +330,10 @@ Each item below is its own change with its own specs. Each publishes into the gr
 9. Mechanics guides with calculators on the shared rules: experience, armor, crafting quality, settlement income and farming.
 10. A page per update listing changed facts, linked to the patch notes. It needs the project context line "The site describes only the current game build" revised.
 11. Reading a save in the browser to show progress and to start a planned character from it.
-12. 3D model renders of items, creatures and people.
+12. 3D model renders of items, creatures and people, from the `capture-model` command and the presentation in "Presenting item models":
+    - renders on both bodies where the female meshes differ,
+    - bows and shields, whose views are not settled,
+    - a review step before renders are published.
 
 Skills and the planner come before places and people. The planner offers what the official wiki cannot, and it exercises the rules module early. Item sources keep naming merchants and places as unlinked references until change 4 publishes them.
 
@@ -302,7 +343,7 @@ Not planned: a combat simulator, and mods for players. Mods need UE4SS installed
 
 - The graph is designed before most kinds exist. Only the key, reference, condition and relation shapes are fixed now, and each later change adds its own kinds and relation kinds.
 - Function fingerprints change with CUE4Parse upgrades. CUE4Parse updates are reviewed separately from game updates, and the report separates the two causes.
-- Runtime checks need the game in front. Runs are batched, and running off screen is tested early.
+- The lab tool runs the game through CrossOver on macOS only, and model renders depend on the character sheet's preview. A game update that changes the preview changes every render.
 - Typed references make site data larger. References carry only kind, key, name, slug and icon, and the file-size gate catches growth.
 - Known issues could be published on unconfirmed causes. An entry requires an observation, and code-derived causes are labelled as derived.
 - The planner could grow into one change that never closes, as in both siblings. It is split by domain, it plans only what the game enforces, and unknown rules stay gaps.
