@@ -172,6 +172,14 @@ The catalog marks each fact as extracted, formula, observed or unknown. Facts wh
 
 A per-build cross-reference lists, for each property and table, the functions and widgets that read or write it. It is built from the same parse and written to the build's artifacts. Writing a citation starts from that cross-reference, and the update report lists citations whose fingerprints changed. The line-number comments in `ItemFacts.cs` are replaced.
 
+Extraction enables CUE4Parse script reading for all registered Blueprint classes and widget Blueprint classes and the Blueprint functions exported by worlds. No `/Game/` folder is excluded. Build 24464547 produces 57,869 functions in 4,532 packages, including `/Game/BloodlinesAlpha`, `/Game/UI`, `/Game/fantasy_gui_4`, the skill system, AI, animations, cities and the overworld.
+
+The index attributes an event stub's accesses and calls to its named entry in `ExecuteUbergraph_<Class>`. It follows jumps, conditional branches, the execution-flow stack and latent action resume offsets. Array element type pointers are metadata, not value reads. References retain full object and property paths. Fingerprints hash the reached expression graph with traversal positions instead of byte addresses. Context skip lengths and latent action IDs are normalized without discarding their expression structure. Vector constants retain their components.
+
+The baseline extraction took 432.05 seconds and peaked at 2,675,228,672 sampled bytes. The full-export index first took 680.19 seconds and 8,227,684,352 bytes. Loading only function exports and writing canonical index entries one at a time reduced the measured extraction to 589.40 seconds and 3,615,981,568 bytes, 1.36 times the baseline duration and 1.35 times its sampled memory. Measurements and generated outputs stay in `artifacts/24464547/`.
+
+Unresolved computed entry points, unread execution targets, unsupported tokens and execution-flow states that exceed the analysis bound are marked partial. Raw ubergraphs have no fixed entry and cannot be cited as a substitute for an event. Virtual dispatch retains the unresolved function name rather than inventing a receiver class. The index does not interpret native functions or infer runtime branch outcomes.
+
 Alternatives:
 - Hashing decompiled text lines, as Ancient Kingdoms does. Its lock churned with every source movement.
 - Matching decompiled syntax shapes, as Erenshor does. It breaks when the decompiler changes.

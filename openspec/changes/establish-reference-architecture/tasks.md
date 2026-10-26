@@ -27,7 +27,7 @@
 
 ## 4. Code cross-reference, citations and rules
 
-- [ ] 4.1 Build the per-build cross-reference of properties and tables to the functions and widgets that read or write them, and verify it lists `ArmorDataTable` under the three tooltip widgets and `ArmorInfo.DamageRating` under `FirstPersonCharacter2`
+- [x] 4.1 Build the per-build cross-reference of properties and tables to the functions and widgets that read or write them, and verify it lists `ArmorDataTable` under the three tooltip widgets and `ArmorInfo.DamageRating` under `FirstPersonCharacter2`
 - [ ] 4.2 Compute function fingerprints from the parsed expression tree, and verify two extractions give equal fingerprints and that a changed fixture function changes its fingerprint
 - [ ] 4.3 Attach claim types and `Package:Function` citations to item facts, reject citations to missing or partly parsed functions, and replace the line-number comments in `ItemFacts.cs`
 - [ ] 4.4 List citations with changed fingerprints in the build comparison report, and verify it on two fixture builds

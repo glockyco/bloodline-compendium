@@ -26,6 +26,15 @@ internal static class CanonicalJson
         File.WriteAllText(path, Serialize(value), Utf8);
     }
 
+    public static void WriteValue<T>(Utf8JsonWriter writer, T value)
+    {
+        var node = Sort(JsonSerializer.SerializeToNode(value, Options));
+        if (node is null)
+            writer.WriteNullValue();
+        else
+            node.WriteTo(writer, Options);
+    }
+
     public static T Read<T>(string path) =>
         JsonSerializer.Deserialize<T>(File.ReadAllText(path, Utf8), Options)
         ?? throw new InvalidDataException($"{path} holds null instead of {typeof(T).Name}.");
