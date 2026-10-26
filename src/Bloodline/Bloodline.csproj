@@ -7,6 +7,7 @@
   <ItemGroup>
     <PackageReference Include="CUE4Parse" />
     <PackageReference Include="System.CommandLine" />
+    <PackageReference Include="System.IO.Hashing" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Bloodline.Tests" />

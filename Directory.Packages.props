@@ -6,6 +6,7 @@
   <ItemGroup>
     <PackageVersion Include="CUE4Parse" Version="1.2.2.202610" />
     <PackageVersion Include="System.CommandLine" Version="2.0.14" />
+    <PackageVersion Include="System.IO.Hashing" Version="10.0.8" />
     <PackageVersion Include="xunit.v3.mtp-v2" Version="4.0.2" />
   </ItemGroup>
   <ItemGroup>

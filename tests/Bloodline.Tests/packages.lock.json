@@ -216,11 +216,6 @@
         "resolved": "1.0.3",
         "contentHash": "XV/cpJkajpqg2qMYAZzXFcklLy4KvFEiWQFE+amUAzLzQqk/nyAdQp0gXX2rGz5F/ALkvd8bgKBiDW+QuKOXDQ=="
       },
-      "System.IO.Hashing": {
-        "type": "Transitive",
-        "resolved": "10.0.8",
-        "contentHash": "+dJsbPJ3FyUbTZNplFj0RCKePFizmv6ewDV46JE9q/IVH4c3xTCftHfHelLsAKf0jryIPqgMb5GpS0x7TAY3mg=="
-      },
       "System.Numerics.Tensors": {
         "type": "Transitive",
         "resolved": "10.0.10",
@@ -311,7 +306,8 @@
         "type": "Project",
         "dependencies": {
           "CUE4Parse": "[1.2.2.202610, )",
-          "System.CommandLine": "[2.0.14, )"
+          "System.CommandLine": "[2.0.14, )",
+          "System.IO.Hashing": "[10.0.8, )"
         }
       },
       "CUE4Parse": {
@@ -353,6 +349,12 @@
         "requested": "[2.0.14, )",
         "resolved": "2.0.14",
         "contentHash": "15fyVO4aG6poR6IKmhM74zf7PUzaU6FZAGm2d3SQSO9yIyGAeo44e6t9qeKjjaqyMEqYdqcb2G1B0gpLoDU2cA=="
+      },
+      "System.IO.Hashing": {
+        "type": "CentralTransitive",
+        "requested": "[10.0.8, )",
+        "resolved": "10.0.8",
+        "contentHash": "+dJsbPJ3FyUbTZNplFj0RCKePFizmv6ewDV46JE9q/IVH4c3xTCftHfHelLsAKf0jryIPqgMb5GpS0x7TAY3mg=="
       }
     }
   }
