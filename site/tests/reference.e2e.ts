@@ -201,6 +201,19 @@ test('reference layouts stay readable on desktop and phone', async ({ page }, te
 	}
 });
 
+test('renders rows past the preview only when asked', async ({ page }) => {
+	await page.goto('/items/lanternedge/');
+	const shops = page.locator('.source-group').filter({
+		has: page.getByRole('heading', { name: /^Sold by/ })
+	});
+	await expect(shops.locator('.source-row')).toHaveCount(8);
+	const toggle = shops.getByRole('button', { name: /^Show 5 more/ });
+	await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+	await toggle.click();
+	await expect(shops.locator('.source-row')).toHaveCount(13);
+	await shops.getByRole('button', { name: /^Show fewer/ }).click();
+	await expect(shops.locator('.source-row')).toHaveCount(8);
+});
 test('source disclosures work without JavaScript', async ({ browser, baseURL }) => {
 	const context = await browser.newContext({ javaScriptEnabled: false, baseURL });
 	try {

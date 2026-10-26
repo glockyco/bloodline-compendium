@@ -1,5 +1,6 @@
 <script lang="ts" generics="T">
 	import type { Snippet } from 'svelte';
+	import StaticMore from './StaticMore.svelte';
 	let {
 		items,
 		initial,
@@ -15,16 +16,15 @@
 	{#each items.slice(0, preview) as item, index (index)}<li>{@render row(item, index)}</li>{/each}
 </ul>
 {#if items.length > preview}
-	<details class="more-entries">
-		<summary
-			><span class="show-more">Show {items.length - preview} more {noun}</span><span
-				class="show-less">Hide additional {noun}</span
-			></summary
-		>
+	<StaticMore
+		more={`Show ${items.length - preview} more ${noun}`}
+		less={`Hide additional ${noun}`}
+		label={noun}
+	>
 		<ul class={className}>
 			{#each items.slice(preview) as item, index (index)}<li>
 					{@render row(item, index + preview)}
 				</li>{/each}
 		</ul>
-	</details>
+	</StaticMore>
 {/if}

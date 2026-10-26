@@ -1,0 +1,55 @@
+<script lang="ts">
+	import { onMount, type Snippet } from 'svelte';
+	import { isHydrated } from './hydration.js';
+	/**
+	 * Entries past a preview. The static page keeps them in a native disclosure, so they stay readable without
+	 * JavaScript and reachable for search. Once the page runs, a button replaces it and the entries render only
+	 * when a reader asks for them, so a page with hundreds of rows stays light.
+	 */
+	let {
+		more,
+		less,
+		label,
+		children
+	}: { more: string; less: string; label: string; children: Snippet } = $props();
+	let enhanced = $state(isHydrated());
+	let expanded = $state(false);
+	onMount(() => {
+		enhanced = true;
+	});
+</script>
+
+{#if enhanced}
+	{#if expanded}{@render children()}{/if}
+	<button
+		type="button"
+		class="more-toggle"
+		aria-expanded={expanded}
+		onclick={() => (expanded = !expanded)}
+		>{expanded ? less : more}<span class="sr-only"> in {label}</span></button
+	>
+{:else}
+	<details class="more-entries">
+		<summary
+			><span class="show-more">{more}</span><span class="show-less">{less}</span><span
+				class="sr-only"
+			>
+				in {label}</span
+			></summary
+		>
+		{@render children()}
+	</details>
+{/if}
+
+<style>
+	.more-toggle {
+		min-height: var(--size-control);
+		padding: var(--space-3);
+		border: 0;
+		background: none;
+		color: var(--accent);
+	}
+	.more-toggle:hover {
+		text-decoration: underline;
+	}
+</style>

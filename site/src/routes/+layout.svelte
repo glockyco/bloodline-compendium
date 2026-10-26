@@ -9,6 +9,7 @@
 	import '../app.css';
 	import Search from '#lib/Search.svelte';
 	import ItemPreviews from '#lib/ItemPreviews.svelte';
+	import { markHydrated } from '#lib/hydration.js';
 	import ReleaseInfo from '#lib/ReleaseInfo.svelte';
 	import { kindPath } from '#lib/entities.js';
 	let { data, children } = $props();
@@ -35,6 +36,7 @@
 	}
 	afterNavigate(revealFragment);
 	onMount(() => {
+		markHydrated();
 		revealFragment();
 		window.addEventListener('hashchange', revealFragment);
 		return () => window.removeEventListener('hashchange', revealFragment);
