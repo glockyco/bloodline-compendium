@@ -86,6 +86,7 @@ export type Stat =
   | "weaponType"
   | "damage"
   | "attackSpeed"
+  | "speed"
   | "range"
   | "damageType"
   | "magazineSize"
@@ -362,7 +363,7 @@ export interface Fact {
  */
 export interface Effect {
   name: string;
-  power: number;
+  power: number | null;
   seconds: number;
   [k: string]: unknown;
 }

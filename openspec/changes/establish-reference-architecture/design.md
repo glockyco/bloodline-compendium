@@ -58,6 +58,7 @@ Food, measured in runs food-a, food-b, food-c, misc-1 and misc-2: eating applies
 - Apple Sauce (tooltip 0, table 75) healed 75, and Roasted Apple (tooltip 75, table 25) healed 25, in two runs each.
 - Apple Pie (tooltip 15, table 200) and Fondue (tooltip 0, table 300) healed from 15 and 26 to the maximum of 150 in three runs.
 - Druid's Stew lists "Boost Foraging EXP " with a trailing space, which matches no effect. Its foraging boost stayed at 1 after eating, in two runs.
+- Wheat Seeds lists "Heal PLayer", which the switch matches because effect names are FNames and compare without regard to case. It healed 5 in runs food-wheat-1 and food-wheat-2.
 
 The tooltip sweep (runs tooltips-all and tooltips-sweep) read 2,086 of 2,087 published items. The fetch quest item has no tooltip, and 21 more items use another tooltip widget. Against the catalog:
 - Of 398 armor tooltips, 350 show their row of `ArmorDataTable`.
@@ -68,18 +69,18 @@ Headless, bound text such as the character sheet's `Armor:` line is not evaluate
 
 Disagreements found:
 
-- The catalog publishes armor from the class defaults (`ArmorInfo.DamageRating`, `ItemInfo.ArmorType`), which the game does not apply. Owner: the catalog, task 5.1.
-- 35 published armor pieces for body slots match no row of `ArmorDataTable` by the game's lookup, so the game applies no armor for them while their tooltips show the class default or a row the tooltip finds by display name. Observed for Leather Pants and Velosian Plume-helm. Owner: the game, a known issue. 13 more published items without a row are amulets and support items, which add no armor in any case.
+- The catalog published armor from the class defaults (`ArmorInfo.DamageRating`, `ItemInfo.ArmorType`), which the game does not apply. Owner: the catalog. It now publishes what `Get Armor Slot` returns: the row's class and value, the class `Custom` with `ItemInfo.Damage` for the six crafted armor classes, and `Unarmored` with no armor when no row matches. Amulets and support items get an armor rating of 0 and no armor type.
+- Three published armor items store no `ItemInfo.ItemClass`: Curved Steel Plate Shoes, Leather Pants and Leather Bracers. `Get Armor Slot` gives no armor to an item without a valid class. `BP_BaseItemAsset`'s construction script sets the class on every item actor, so this matters only where the game adds such an item from its class defaults, which no run has shown. Open question.
+- 30 published armor pieces for body slots, not counting the six crafted armor classes, match no row of `ArmorDataTable` by the game's lookup, so the game applies no armor for them while their tooltips show the class default or a row the tooltip finds by display name. Observed for Leather Pants and Velosian Plume-helm. Owner: the game, a known issue. 13 more published items without a row are amulets and support items, which add no armor in any case.
 - Knee armor counts only after another armor piece is equipped. Owner: the game, a known issue.
 - Druid's Stew's foraging boost does not apply, because its effect name has a trailing space. Owner: the game, a known issue.
 - 55 weapon tooltips show a damage other than `WeaponInfo.Damage`. Owner: open until a run measures the damage dealt.
-- Food tooltips show `PotionInfo`'s restoration amount, while eating heals by `FoodEffectDataTable`. Owner: the game for the tooltip, a known issue, and the catalog for its "Heals" fact, task 5.2.
+- Food tooltips show `PotionInfo`'s restoration amount, while eating applies `FoodEffectDataTable`. Owner: the game for the tooltip, a known issue. The catalog publishes the table's effects: the amount of "Heal Player" as Heals, and other effects by how the function that the food manager calls uses the value, as an amount, as seconds or not at all.
+- 74 published foods have no row of `FoodEffectDataTable` by the game's lookup, so eating them applies nothing while their tooltips show healing. Steak, Turkey Leg and Soup were eaten without any heal in runs food-norow-1 and food-norow-2, while Apple Sauce healed 75 in the same runs. Owner: the game, a known issue. The catalog publishes `Effects: None` for them.
 - 1,039 tooltips show an empty `: 0` stat line. Owner: the game, a known issue of the tooltip only.
-- The catalog's "Weapon type" is `WeaponInfo.AttackType`, an attack style. All 19 rifles read Crossbow, and the Lonland Pistol is typed Rifle with weapon type Crossbow. Its `ItemInfo.WeaponType` reads Pistol, and that field names Crossbow, Bow, Dagger and Two Handed Weapon for the other weapons checked.
+- The catalog's "Weapon type" was `WeaponInfo.AttackType`, an attack style. All 19 rifles read Crossbow, and the Lonland Pistol is typed Rifle with weapon type Crossbow. Owner: the catalog. It now publishes `ItemInfo.WeaponType`, which equipping and the ranged weapon checks read and which names the Lonland Pistol a Pistol and the Lonland Rifle a Gun. It hides the value None, which 33 weapons carry, most of them shields.
 - The player carries two actors for each equipped head item. Swapping helmets in a fresh save kept two, so equipping does not accumulate actors in normal play. The five Winter Warden Cuirass actors seen earlier followed repeated equips of copies of an item that was already equipped, as `capture-model` did. That case was not repeated.
-- Speed shows as a word such as `Slow`, which is the display name of `ItemInfo.Speed`, an `AttackSpeeds` enum: Slow, Below Average, Average, Above Average, Fast or Standard. All seven flintlock pistols read Slow, as their tooltips do. The catalog publishes the `WeaponInfo.AttackSpeed` multiplier instead.
-
-Comments in `ItemFacts.cs` cite bytecode by line number in a dump that the repository cannot regenerate.
+- Speed shows as a word such as `Slow`, which is the display name of `ItemInfo.Speed`, an `AttackSpeeds` enum: Slow, Below Average, Average, Above Average, Fast or Standard. All seven flintlock pistols read Slow, as their tooltips do. Owner: the catalog, which publishes the word as Speed and keeps the `WeaponInfo.AttackSpeed` multiplier of the attack montage as Attack speed.
 
 ### Character progression in the game data
 

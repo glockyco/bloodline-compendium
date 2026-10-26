@@ -40,7 +40,7 @@ public sealed class ItemFactsTests
     public void PotionEffectsCombineNamePowerAndNonzeroDuration()
     {
         var facts = Facts(
-            "Food",
+            "Potion",
             potion: Parse(
                 """
                 {"PotionEffects":[{"$enum":"Effects::Health","display":"Restore health"},{"$enum":"Effects::Drunk","display":"Drunk"}],
@@ -122,7 +122,7 @@ public sealed class ItemFactsTests
     [Fact]
     public void MissingEffectNumbersRemainUnknownWhenTheEffectsArrayIsEmpty()
     {
-        var facts = Facts("Food", potion: Parse("""{"PotionEffects":[]}"""));
+        var facts = Facts("Potion", potion: Parse("""{"PotionEffects":[]}"""));
         foreach (var label in new[] { "Restoration amount", "Health damage", "Mana damage" })
         {
             Assert.Null(facts.Single(fact => fact.Label == label).Value);
@@ -481,5 +481,223 @@ public sealed class ItemFactsTests
         Assert.Equal("Unknown", page.Type);
         Assert.Null(page.Qualifier);
         Assert.Empty(page.Uses);
+    }
+
+    private static TableRecord Table(string name, params TableRow[] rows) =>
+        new($"/Game/Invented/{name}.{name}", null, rows);
+
+    private static TableRow Row(string name, string fields) => new(name, Parse(fields));
+
+    private static readonly TableRecord ArmorTable = Table(
+        "ArmorDataTable",
+        Row("WardensCuirass", """{"ArmorClass":{"$text":"Heavy"},"ArmorValue":13}"""),
+        Row("VelosianPlumehelm", """{"ArmorClass":{"$text":"Medium"},"ArmorValue":9}""")
+    );
+
+    private static IReadOnlyList<Bloodline.SiteData.Fact> Armor(
+        string name,
+        string slot,
+        string path = "/Game/Invented/Armor.Armor_C",
+        params TableRecord[] tables
+    ) =>
+        new ItemFacts([], tables)
+            .Resolve(
+                new ClassRecord(
+                    path,
+                    [],
+                    Parse(
+                        $$$"""
+                        {"ItemInfo":{"ItemName":{"$text":"{{{name}}}"},"ItemType":{"$enum":"E_ItemType::Armor","display":"Armor"},
+                         "ItemSlot":{"$enum":"Slot::Invented","display":"{{{slot}}}"},"ArmorType":{"$enum":"Armor::Light","display":"Light"},"Damage":4},
+                         "ArmorInfo":{"DamageRating":2}}
+                        """
+                    )
+                ),
+                "invented"
+            )
+            .Facts;
+
+    private static string? Value(IReadOnlyList<Bloodline.SiteData.Fact> facts, Stat stat) =>
+        facts.Single(fact => fact.Stat == stat).Value;
+
+    [Theory]
+    [InlineData("Warden's Cuirass", "Torso", "Heavy", "13")]
+    [InlineData("warden's cuirass", "Back", "Heavy", "13")]
+    [InlineData("Velosian Plume-helm", "Head", "Unarmored", "0")]
+    public void ArmorFollowsTheTableRowThatEquippingFinds(
+        string name,
+        string slot,
+        string armorType,
+        string rating
+    )
+    {
+        var facts = Armor(name, slot, tables: ArmorTable);
+        Assert.Equal(armorType, Value(facts, Stat.ArmorType));
+        Assert.Equal(rating, Value(facts, Stat.ArmorRating));
+    }
+
+    [Fact]
+    public void CraftedArmorKeepsItsOwnValueOverATableRow()
+    {
+        var facts = Armor(
+            "Warden's Cuirass",
+            "Torso",
+            "/Game/BloodlinesAlpha/Interactables/Armor/Torso/CustomArmor_Torso_Base.CustomArmor_Torso_Base_C",
+            ArmorTable
+        );
+        Assert.Equal("Custom", Value(facts, Stat.ArmorType));
+        Assert.Equal("4", Value(facts, Stat.ArmorRating));
+    }
+
+    [Theory]
+    [InlineData("Amulet")]
+    [InlineData("Support")]
+    public void AmuletsAndSupportItemsAddNoArmorEvenWithATableRow(string slot)
+    {
+        var facts = Armor("Warden's Cuirass", slot, tables: ArmorTable);
+        Assert.Equal("0", Value(facts, Stat.ArmorRating));
+        Assert.DoesNotContain(facts, fact => fact.Stat == Stat.ArmorType);
+    }
+
+    [Fact]
+    public void ArmorStaysUnknownWithoutTheArmorTable()
+    {
+        var facts = Armor("Warden's Cuirass", "Torso");
+        Assert.Null(Value(facts, Stat.ArmorType));
+        Assert.Null(Value(facts, Stat.ArmorRating));
+    }
+
+    private static IReadOnlyList<Bloodline.SiteData.Fact> Food(
+        string name,
+        params TableRow[] rows
+    ) =>
+        new ItemFacts([], rows.Length == 0 ? [] : [Table("FoodEffectDataTable", rows)])
+            .Resolve(
+                new ClassRecord(
+                    "/Game/Invented/Food.Food_C",
+                    [],
+                    Parse(
+                        $$$"""
+                        {"ItemInfo":{"ItemName":{"$text":"{{{name}}}"},"ItemType":{"$enum":"E_ItemType::Food","display":"Food"},
+                         "PotionInfo":{"PotionEffects":[{"$enum":"Effects::Health","display":"Restore Health"}],"Effect1Power":75,"DurationofEffect1":0,
+                          "AmountofHealthorManatorestore":80,"Amountofdamagetodealtohealth":5,"Amountofdamagetodealtomana":0}}
+                        }
+                        """
+                    )
+                ),
+                "invented"
+            )
+            .Facts;
+
+    private static TableRow FoodRow(string row, string localized, string effects) =>
+        Row(
+            row,
+            $$$"""{"FoodName":"{{{row}}}","LocalizedFoodName":{"$text":"{{{localized}}}"},"FoodEffects":{"$map":{{{effects}}}}}"""
+        );
+
+    [Fact]
+    public void FoodAppliesItsEffectRowInsteadOfItsPotionInfo()
+    {
+        var facts = Food(
+            "Apple Pie",
+            FoodRow(
+                "ApplePie",
+                "Apple Pie",
+                """[["Heal Player",200],["Boost Health Regeneration",120],["Restore Mana",15],["Cure Sunburn",0]]"""
+            )
+        );
+        Assert.Equal("200", Value(facts, Stat.RestorationAmount));
+        Assert.Equal(
+            ["Boost Health Regeneration for 120 s", "Restore Mana 15", "Cure Sunburn"],
+            facts.Where(fact => fact.Stat == Stat.Effect).Select(fact => fact.Value)
+        );
+        Assert.DoesNotContain(
+            facts,
+            fact => fact.Stat is Stat.HealthDamage or Stat.ManaDamage or Stat.Effects
+        );
+    }
+
+    [Fact]
+    public void FoodFallsBackToTheFirstRowWithItsLocalizedName()
+    {
+        var facts = Food(
+            "Apple Pie",
+            FoodRow("Unrelated", "Other Food", """[["Heal Player",5]]"""),
+            FoodRow("RenamedPie", "Apple Pie", """[["Heal Player",200]]"""),
+            FoodRow("LaterPie", "Apple Pie", """[["Heal Player",1]]""")
+        );
+        Assert.Equal("200", Value(facts, Stat.RestorationAmount));
+    }
+
+    [Fact]
+    public void OnlyEffectNamesThatTheGameKnowsApplyWithoutRegardToCase()
+    {
+        var facts = Food(
+            "Druid's Stew",
+            FoodRow(
+                "DruidsStew",
+                "Druid's Stew",
+                """[["Heal PLayer",50],["Boost Foraging EXP ",900],["boost foraging exp",60]]"""
+            )
+        );
+        Assert.Equal("50", Value(facts, Stat.RestorationAmount));
+        Assert.Equal(
+            "Boost Foraging EXP 1.25 for 60 s",
+            Assert.Single(facts, fact => fact.Stat == Stat.Effect).Value
+        );
+    }
+
+    [Fact]
+    public void FoodWithoutAnEffectRowHasNoEffectDespiteItsPotionInfo()
+    {
+        var facts = Food("Steak", FoodRow("ApplePie", "Apple Pie", """[["Heal Player",200]]"""));
+        Assert.Equal("None", Value(facts, Stat.Effects));
+        Assert.DoesNotContain(
+            facts,
+            fact => fact.Stat is Stat.RestorationAmount or Stat.Effect or Stat.HealthDamage
+        );
+    }
+
+    [Fact]
+    public void FoodEffectsStayUnknownWithoutTheFoodTable()
+    {
+        var facts = Food("Steak");
+        Assert.Null(Value(facts, Stat.Effects));
+        Assert.DoesNotContain(facts, fact => fact.Stat is Stat.RestorationAmount or Stat.Effect);
+    }
+
+    [Fact]
+    public void WeaponTypeAndSpeedWordFollowTheItemInfoThatEquippingAndTooltipsRead()
+    {
+        var item = Item("Weapon");
+        item.Properties["ItemInfo"]!["WeaponType"] = Parse(
+            """{"$enum":"E_AttackType::Pistol","display":"Pistol"}"""
+        );
+        item.Properties["ItemInfo"]!["Speed"] = Parse(
+            """{"$enum":"AttackSpeeds::Slow","display":"Slow"}"""
+        );
+        item.Properties["WeaponInfo"] = Parse(
+            """{"AttackType":{"$enum":"E_AttackType::Crossbow","display":"Crossbow"},"AttackSpeed":1.5}"""
+        );
+        var facts = new ItemFacts([]).Resolve(item, "invented").Facts;
+
+        Assert.Equal("Pistol", Value(facts, Stat.WeaponType));
+        var speed = facts.Single(fact => fact.Stat == Stat.Speed);
+        Assert.Equal(("Slow", "Speed"), (speed.Value, speed.TooltipLabel));
+        var multiplier = facts.Single(fact => fact.Stat == Stat.AttackSpeed);
+        Assert.Equal(("1.5", (string?)null), (multiplier.Value, multiplier.TooltipLabel));
+    }
+
+    [Fact]
+    public void AShieldsNoneWeaponTypeIsHidden()
+    {
+        var item = Item("Weapon");
+        item.Properties["ItemInfo"]!["WeaponType"] = Parse(
+            """{"$enum":"E_AttackType::None","display":"None"}"""
+        );
+        Assert.DoesNotContain(
+            new ItemFacts([]).Resolve(item, "invented").Facts,
+            fact => fact.Stat == Stat.WeaponType
+        );
     }
 }

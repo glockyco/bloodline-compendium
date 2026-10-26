@@ -91,7 +91,8 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 	await expect(page.getByRole('heading', { name: 'How to get it', exact: true })).toBeVisible();
 	const details = page.getByRole('complementary', { name: 'Item details' });
 	await expect(details).toContainText(/Damage\s*12/);
-	await expect(details).toContainText(/Speed\s*1.2/);
+	await expect(details).toContainText(/Speed\s*Average/);
+	await expect(details).toContainText(/Attack Speed\s*1.2/);
 	await expect(details).toContainText(/Range\s*Unknown/);
 	const shopLink = page.locator('.acquisition-routes a[href="#source-shop"]');
 	await shopLink.click();

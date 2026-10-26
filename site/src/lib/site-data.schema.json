@@ -110,7 +110,10 @@
           "type": "string"
         },
         "power": {
-          "type": "number"
+          "type": [
+            "number",
+            "null"
+          ]
         },
         "seconds": {
           "type": "number"
@@ -939,6 +942,7 @@
         "weaponType",
         "damage",
         "attackSpeed",
+        "speed",
         "range",
         "damageType",
         "magazineSize",

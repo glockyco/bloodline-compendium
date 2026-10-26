@@ -12,8 +12,7 @@ export function factValue(fact: Fact): string | null {
 	if (fact.effect)
 		return (
 			fact.effect.name +
-			' ' +
-			formatNumber(fact.effect.power) +
+			(fact.effect.power === null ? '' : ' ' + formatNumber(fact.effect.power)) +
 			(fact.effect.seconds ? ' for ' + formatNumber(fact.effect.seconds) + ' s' : '')
 		);
 	return null;

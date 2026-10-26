@@ -18,7 +18,8 @@ internal static class StatVocabulary
         [Stat.SpeedContribution] = new("Speed contribution"),
         [Stat.WeaponType] = new("Weapon type", "Type"),
         [Stat.Damage] = new("Damage", "Damage"),
-        [Stat.AttackSpeed] = new("Attack speed", "Speed"),
+        [Stat.AttackSpeed] = new("Attack speed"),
+        [Stat.Speed] = new("Speed", "Speed"),
         [Stat.Range] = new("Range"),
         [Stat.DamageType] = new("Damage type"),
         [Stat.MagazineSize] = new("Magazine size"),
@@ -72,8 +73,11 @@ internal static class StatVocabulary
         ?? (
             fact.Effect is { } effect
                 ? effect.Name
-                    + " "
-                    + effect.Power.ToString("G", CultureInfo.InvariantCulture)
+                    + (
+                        effect.Power is { } power
+                            ? " " + power.ToString("G", CultureInfo.InvariantCulture)
+                            : ""
+                    )
                     + (
                         effect.Seconds == 0
                             ? ""

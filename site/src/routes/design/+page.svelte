@@ -58,8 +58,8 @@
 				effect: null
 			},
 			{
-				stat: 'attackSpeed',
-				label: 'Attack speed',
+				stat: 'speed',
+				label: 'Speed',
 				tooltipLabel: 'Speed',
 				unit: null,
 				number: null,

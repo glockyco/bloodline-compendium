@@ -37,9 +37,9 @@
 
 ## 5. Verified item facts
 
-- [ ] 5.1 Equip two armor items whose class default and table values differ in opposite directions and read `Total Armor` and mobility in two runs, then publish the applied source and verify the catalog test
-- [ ] 5.2 Sample Health every frame while eating Apple Pie and Fondue against a regeneration baseline in two runs, then publish the applied healing and verify the catalog test
-- [ ] 5.3 Replace the `Weapon type` fact with the game's attack style label and speed word as the tooltip derives them, from `ItemInfo.WeaponType` and `ItemInfo.Speed`, and verify Lonland Pistol and a rifle
+- [x] 5.1 Equip two armor items whose class default and table values differ in opposite directions and read `Total Armor` and mobility in two runs, then publish the applied source and verify the catalog test
+- [x] 5.2 Sample Health every frame while eating Apple Pie and Fondue against a regeneration baseline in two runs, then publish the applied healing and verify the catalog test
+- [x] 5.3 Replace the `Weapon type` fact with `ItemInfo.WeaponType`, the attack type that equipping reads, add the speed word that tooltips show from `ItemInfo.Speed`, and verify Lonland Pistol and a rifle
 - [ ] 5.4 Add the bulk tooltip check over every inventory item, report differences with owners, and verify a report on the full catalog with no unexplained difference left unlisted in coverage
 
 ## 6. Entity graph contract

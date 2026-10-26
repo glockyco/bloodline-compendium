@@ -33,6 +33,69 @@ internal sealed class ItemFacts(
             StringComparer.OrdinalIgnoreCase
         );
 
+    // Null when the records hold no such table, so that its facts stay unknown instead of empty.
+    private readonly RowLookup? armorRows = RowLookup.Find(tables, "ArmorDataTable");
+    private readonly RowLookup? foodRows = RowLookup.Find(tables, "FoodEffectDataTable");
+
+    // PlayerPassiveLevelStatComponent:Retrieve Player Armor adds up the armor of these item slots. Items of the
+    // slot Back go into the character sheet's arms slot. Amulets and support items add no armor.
+    private static readonly HashSet<string> ArmoredSlots = new(StringComparer.Ordinal)
+    {
+        "Head",
+        "Torso",
+        "Back",
+        "Arms",
+        "Legs",
+        "Knees",
+        "Feet",
+        "Shoulders",
+    };
+
+    // Get Armor Slot gives these crafted armor classes their own ItemInfo.Damage and the class Custom.
+    private static readonly HashSet<string> CraftedArmor = new(StringComparer.Ordinal)
+    {
+        "/Game/BloodlinesAlpha/Interactables/Armor/Arms/CustomArm_Armor_Base.CustomArm_Armor_Base_C",
+        "/Game/BloodlinesAlpha/Interactables/Armor/Feet/Custom_Foot_Armor_Base.Custom_Foot_Armor_Base_C",
+        "/Game/BloodlinesAlpha/Interactables/Armor/Head/CustomArmor_Base_Head.CustomArmor_Base_Head_C",
+        "/Game/BloodlinesAlpha/Interactables/Armor/Legs/Base_Custom_Leg_Armor.Base_Custom_Leg_Armor_C",
+        "/Game/BloodlinesAlpha/Interactables/Armor/Shoulders/CustomShoulderArmor.CustomShoulderArmor_C",
+        "/Game/BloodlinesAlpha/Interactables/Armor/Torso/CustomArmor_Torso_Base.CustomArmor_Torso_Base_C",
+    };
+
+    private enum FoodValue
+    {
+        Heal,
+        Amount,
+        Seconds,
+        Unused,
+    }
+
+    // FoodManager:Get Item's switch over effect names, with how the function it calls uses the row's value. The
+    // two EXP boosts also pass a fixed multiplier of 1.25. Names are FNames, which compare without regard to case.
+    private static readonly Dictionary<
+        string,
+        (string Name, FoodValue Value, double? Power)
+    > FoodEffects = new[]
+    {
+        ("Heal Player", FoodValue.Heal, (double?)null),
+        ("Boost Woodcutting EXP", FoodValue.Seconds, 1.25),
+        ("Druidsight", FoodValue.Seconds, null),
+        ("Boost Foraging EXP", FoodValue.Seconds, 1.25),
+        ("Drunk", FoodValue.Seconds, null),
+        ("Boost Health Regeneration", FoodValue.Seconds, null),
+        ("Boost Mana Regeneration", FoodValue.Seconds, null),
+        ("Quickness", FoodValue.Seconds, null),
+        ("Restore Mana", FoodValue.Amount, null),
+        ("Restore Stamina", FoodValue.Amount, null),
+        ("Mouse Form", FoodValue.Seconds, null),
+        ("Cure Minor Diseases", FoodValue.Unused, null),
+        ("Sunshade", FoodValue.Seconds, null),
+        ("Cure Sunburn", FoodValue.Unused, null),
+        ("Bat Form", FoodValue.Seconds, null),
+        ("Bloodfeed", FoodValue.Seconds, null),
+        ("Boost Stamina Regeneration", FoodValue.Seconds, null),
+    }.ToDictionary(effect => effect.Item1, StringComparer.OrdinalIgnoreCase);
+
     public string? Display(JsonNode? value) =>
         RecordValues.Text(value)
         ?? RecordValues.EnumDisplay(value)
@@ -50,6 +113,7 @@ internal sealed class ItemFacts(
     public ItemPage Resolve(ClassRecord item, string slug)
     {
         var properties = item.Properties;
+        var name = RecordValues.Text(RecordValues.At(properties, "ItemInfo.ItemName"))!;
         var category = Display(RecordValues.At(properties, "ItemInfo.ItemType"));
         var component = components.GetValueOrDefault(item.Path);
         var componentPart = component is null ? null : ComponentValue(component, "Part");
@@ -93,10 +157,16 @@ internal sealed class ItemFacts(
         }
         else if (category == "Weapon")
         {
-            Add(Stat.WeaponType, "WeaponInfo.AttackType");
+            // Equipping and the ranged weapon checks read this attack type. A shield's None is no weapon type.
+            var weaponType = Display(RecordValues.At(properties, "ItemInfo.WeaponType"));
+            if (weaponType != "None")
+            {
+                facts.Add(StatVocabulary.Text(Stat.WeaponType, weaponType));
+            }
             // Equipped damage comes from WeaponInfo, not the inventory display's ItemInfo.Damage.
             Add(Stat.Damage, "WeaponInfo.Damage");
-            // The equipped attack montage uses this multiplier.
+            // Tooltips show this speed word, and the equipped attack montage plays at the multiplier.
+            Add(Stat.Speed, "ItemInfo.Speed");
             Add(Stat.AttackSpeed, "WeaponInfo.AttackSpeed");
             var range = RecordValues.Number(RecordValues.At(properties, "WeaponInfo.Range"));
             if (range is null || range > 0)
@@ -118,11 +188,13 @@ internal sealed class ItemFacts(
         }
         if (category == "Armor")
         {
-            Add(Stat.ArmorType, "ItemInfo.ArmorType");
-            // Keep this class default separate from ArmorDataTable's distinct gameplay rating.
-            Add(Stat.ArmorRating, "ArmorInfo.DamageRating");
+            AddArmor(facts, item.Path, properties, name);
         }
-        if (category is "Food" or "Potion")
+        if (category == "Food")
+        {
+            AddFoodEffects(facts, name);
+        }
+        else if (category == "Potion")
         {
             AddEffects(facts, RecordValues.At(properties, "ItemInfo.PotionInfo"));
         }
@@ -156,7 +228,7 @@ internal sealed class ItemFacts(
         var page = new ItemPage(
             item.Path,
             slug,
-            RecordValues.Text(RecordValues.At(properties, "ItemInfo.ItemName"))!,
+            name,
             RecordValues.Text(RecordValues.At(properties, "ItemInfo.Description")),
             new CategoryLink(
                 ItemIdentity.Slug(readerCategory?.Name ?? "Unknown"),
@@ -171,6 +243,135 @@ internal sealed class ItemFacts(
         };
         claims.Record(item.Path, page);
         return page;
+    }
+
+    /// <summary>
+    /// The armor class and rating that equipping the item applies, as Get Armor Slot finds them: crafted armor
+    /// keeps its own value, other armor takes the ArmorDataTable row named after the item, and armor without
+    /// such a row counts as Unarmored with no armor.
+    /// </summary>
+    private void AddArmor(List<Fact> facts, string path, JsonObject properties, string name)
+    {
+        var slot = Display(RecordValues.At(properties, "ItemInfo.ItemSlot"));
+        if (slot is null || armorRows is null)
+        {
+            facts.Add(StatVocabulary.Unknown(Stat.ArmorType));
+            facts.Add(StatVocabulary.Unknown(Stat.ArmorRating));
+        }
+        else if (!ArmoredSlots.Contains(slot))
+        {
+            facts.Add(StatVocabulary.Number(Stat.ArmorRating, 0));
+        }
+        else if (CraftedArmor.Contains(path))
+        {
+            facts.Add(StatVocabulary.Text(Stat.ArmorType, "Custom"));
+            Add(Stat.ArmorRating, RecordValues.At(properties, "ItemInfo.Damage"));
+        }
+        else if (armorRows.Named(name) is { } row)
+        {
+            facts.Add(StatVocabulary.Text(Stat.ArmorType, Display(row.Values["ArmorClass"])));
+            Add(Stat.ArmorRating, row.Values["ArmorValue"]);
+        }
+        else
+        {
+            facts.Add(StatVocabulary.Text(Stat.ArmorType, "Unarmored"));
+            facts.Add(StatVocabulary.Number(Stat.ArmorRating, 0));
+        }
+
+        void Add(Stat stat, JsonNode? value) =>
+            facts.Add(StatVocabulary.Number(stat, RecordValues.Number(value)));
+    }
+
+    /// <summary>
+    /// What eating the food applies, as FoodManager:Get Item finds it: the FoodEffectDataTable row named after
+    /// the food, or else the first row whose localized food name is the food's name, with each of its effects
+    /// that the manager's switch names. A food without such a row or effect has no effect.
+    /// </summary>
+    private void AddFoodEffects(List<Fact> facts, string name)
+    {
+        if (foodRows is null)
+        {
+            facts.Add(StatVocabulary.Unknown(Stat.Effects));
+            return;
+        }
+        var row =
+            foodRows.Named(name)
+            ?? foodRows.Rows.FirstOrDefault(row =>
+                RecordValues.Text(row.Values["LocalizedFoodName"]) == name
+            );
+        var count = 0;
+        var heals = false;
+        foreach (var (key, value) in RecordValues.MapEntries(row?.Values["FoodEffects"]))
+        {
+            if (
+                RecordValues.String(key) is not { } effectName
+                || !FoodEffects.TryGetValue(effectName, out var effect)
+            )
+            {
+                continue;
+            }
+            var amount = RecordValues.Number(value);
+            if (effect.Value == FoodValue.Heal)
+            {
+                facts.Add(StatVocabulary.Number(Stat.RestorationAmount, amount));
+                heals = true;
+                continue;
+            }
+            count++;
+            facts.Add(
+                StatVocabulary.Effect(
+                    Stat.Effect,
+                    effect.Value switch
+                    {
+                        FoodValue.Unused => new Effect(effect.Name, null, 0),
+                        _ when amount is null => null,
+                        FoodValue.Amount => new Effect(effect.Name, amount, 0),
+                        _ => new Effect(effect.Name, effect.Power, amount.Value),
+                    },
+                    "Effect " + count.ToString(CultureInfo.InvariantCulture)
+                )
+            );
+        }
+        if (count == 0 && !heals)
+        {
+            facts.Add(StatVocabulary.Text(Stat.Effects, "None"));
+        }
+    }
+
+    /// <summary>
+    /// A data table's rows in table order, found by row name the way the game finds them for an item: by its
+    /// English name without spaces and apostrophes, compared as an FName without regard to case.
+    /// </summary>
+    private sealed class RowLookup(IReadOnlyList<TableRow> rows)
+    {
+        private readonly Dictionary<string, TableRow> named = rows.GroupBy(
+                row => row.Name,
+                StringComparer.OrdinalIgnoreCase
+            )
+            .ToDictionary(
+                group => group.Key,
+                group => group.First(),
+                StringComparer.OrdinalIgnoreCase
+            );
+
+        public IReadOnlyList<TableRow> Rows => rows;
+
+        public TableRow? Named(string itemName) =>
+            named.GetValueOrDefault(
+                itemName
+                    .Replace(" ", "", StringComparison.Ordinal)
+                    .Replace("'", "", StringComparison.Ordinal)
+            );
+
+        public static RowLookup? Find(IReadOnlyList<TableRecord>? tables, string table)
+        {
+            var records = (tables ?? [])
+                .Where(record => ItemIdentity.ClassName(record.Path) == table)
+                .ToArray();
+            return records.Length == 0
+                ? null
+                : new(records.SelectMany(record => record.Rows).ToArray());
+        }
     }
 
     private string? ComponentValue(IReadOnlyList<TableRow> rows, string field)

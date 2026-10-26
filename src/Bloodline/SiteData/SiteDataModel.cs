@@ -195,8 +195,11 @@ internal sealed record Fact(Stat Stat, string Label, double? Number, string? Tex
     public string? Unit { get; init; }
 }
 
-/// <summary>An effect with its strength and duration in seconds. A zero duration means it does not expire.</summary>
-internal sealed record Effect(string Name, double Power, double Seconds);
+/// <summary>
+/// An effect with its strength and its duration in seconds. <see cref="Power"/> is null when the game gives the
+/// effect no strength, and <see cref="Seconds"/> is zero when it gives no duration.
+/// </summary>
+internal sealed record Effect(string Name, double? Power, double Seconds);
 
 internal enum Stat
 {
@@ -207,6 +210,7 @@ internal enum Stat
     WeaponType,
     Damage,
     AttackSpeed,
+    Speed,
     Range,
     DamageType,
     MagazineSize,

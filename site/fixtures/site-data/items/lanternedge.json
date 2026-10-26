@@ -29,11 +29,18 @@
 		},
 		{
 			"effect": null,
+			"label": "Speed",
+			"number": null,
+			"stat": "speed",
+			"text": "Average",
+			"tooltipLabel": "Speed"
+		},
+		{
+			"effect": null,
 			"label": "Attack speed",
 			"number": 1.2,
 			"stat": "attackSpeed",
-			"text": null,
-			"tooltipLabel": "Speed"
+			"text": null
 		},
 		{
 			"effect": null,

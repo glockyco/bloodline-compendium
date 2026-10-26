@@ -106,12 +106,25 @@ public sealed class CatalogTests
     }
 
     [Fact]
-    public void UsesEquippedWeaponAndArmourValuesInsteadOfInventoryDisplayDamage()
+    public void UsesEquippedWeaponDamageAndTheArmorTableInsteadOfDisplayDefaults()
     {
         var weapon = Item();
-        var armor = Item("/Game/Armor.Armor_C", "Armor", "Armor");
+        var armor = Item("/Game/Armor.Armor_C", "Iron Cuirass", "Armor");
+        armor.Properties["ItemInfo"]!["ItemSlot"] = Parse(
+            """{"$enum":"Slot::Torso","display":"Torso"}"""
+        );
         armor.Properties["ArmorInfo"] = Parse("""{"DamageRating":7}""");
-        var result = Build(Records([weapon, armor]));
+        var table = new TableRecord(
+            "/Game/BloodlinesAlpha/ArmorDataTable.ArmorDataTable",
+            null,
+            [
+                new TableRow(
+                    "IronCuirass",
+                    Parse("""{"ArmorClass":{"$text":"Heavy"},"ArmorValue":13}""")
+                ),
+            ]
+        );
+        var result = Build(Records([weapon, armor]) with { Tables = [table] });
         Assert.Equal(
             "10",
             result
@@ -120,7 +133,7 @@ public sealed class CatalogTests
                 .Value
         );
         Assert.Equal(
-            "7",
+            "13",
             result
                 .Items.Single(item => item.Key == armor.Path)
                 .Facts.Single(fact => fact.Label == "Armor rating")
@@ -136,17 +149,6 @@ public sealed class CatalogTests
     {
         var result = Build(Records([Item(category: category)]));
         Assert.DoesNotContain(result.Items[0].Facts, fact => fact.Label == "Type");
-    }
-
-    [Fact]
-    public void FoodEffectsKeepMissingPowerUnknownAndResolveEnums()
-    {
-        var food = Item(category: "Food");
-        food.Properties["ItemInfo"]!["PotionInfo"] = Parse(
-            """{"PotionEffects":[{"$enum":"Effects::Mana","display":"Restore mana"}],"DurationofEffect1":15}"""
-        );
-        var page = Build(Records([food])).Items[0];
-        Assert.Null(page.Facts.Single(fact => fact.Label == "Effect 1").Value);
     }
 
     [Fact]

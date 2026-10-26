@@ -102,7 +102,7 @@ internal sealed class ItemClaims(CodeIndex? code, long build)
         );
         foreach (var fact in page.Facts)
         {
-            var inputs = Inputs(fact);
+            var inputs = Inputs(fact, page.Category.Name);
             Add(fact.Label, StatVocabulary.Display(fact), inputs);
         }
 
@@ -133,7 +133,8 @@ internal sealed class ItemClaims(CodeIndex? code, long build)
                     input
                         is "WeaponInfo.Damage"
                             or "WeaponInfo.AttackSpeed"
-                            or "ArmorInfo.DamageRating"
+                            or "ArmorDataTable.ArmorValue"
+                            or "FoodEffectDataTable.FoodEffects"
                     || input.StartsWith("WeaponComponentTable.", StringComparison.Ordinal)
                 )
             )
@@ -171,7 +172,6 @@ internal sealed class ItemClaims(CodeIndex? code, long build)
         {
             "ItemInfo" => "F_ItemInfoo",
             "WeaponInfo" => "F_WeaponINfo",
-            "ArmorInfo" => "F_ArmorInfo",
             _ => parts[0],
         };
         return owner == type && field == parts[1];
@@ -187,15 +187,19 @@ internal sealed class ItemClaims(CodeIndex? code, long build)
             is "/Game/BloodlinesAlpha/UI/Inventory/UI_InventoryItem_2"
                 or "/Game/BloodlinesAlpha/UI/CharacterSheet/UI_EquipmentSlot"
                 or "/Game/fantasy_gui_4/widgets/sample_windows/Trader_Inventory_Item";
+        var stats =
+            package == "/Game/BloodlinesAlpha/UI/CharacterSheet/PlayerPassiveLevelStatComponent";
         // Cite the shared player and item consumers, not every skill that copies their fields.
         return input.Split('.')[0] switch
         {
-            "ItemInfo" => tooltip || player,
+            "ItemInfo" => tooltip || player || input == "ItemInfo.Damage" && stats,
             "WeaponInfo" => player
                 || package == "/Game/BloodlinesAlpha/Interactables/Weapons/BP_BaseWeapon"
                 || input == "WeaponInfo.DamageType"
                     && package == "/Game/Animations/FirstPersonCharacterBP_Modular1",
-            "ArmorInfo" => player,
+            "ArmorDataTable" => stats,
+            "FoodEffectDataTable" => package
+                == "/Game/BloodlinesAlpha/UI/CharacterSheet/FoodManager",
             "PotionInfo" => tooltip || player,
             "ReagentInfo" => package == "/Game/fantasy_gui_4/widgets/sample_windows/PotionCrafting",
             "WeaponComponentTable" => package == "/Game/BloodlinesAlpha/Crafting",
@@ -203,21 +207,26 @@ internal sealed class ItemClaims(CodeIndex? code, long build)
         };
     }
 
-    private static string[] Inputs(Fact fact) =>
+    private static string[] Inputs(Fact fact, string category) =>
         fact.Stat switch
         {
+            Stat.Effects or Stat.Effect or Stat.RestorationAmount when category == "Food" =>
+            [
+                "FoodEffectDataTable.FoodEffects",
+            ],
             Stat.Value => ["ItemInfo.ItemValue"],
             Stat.Category => ["ItemInfo.ItemType"],
             Stat.DamageContribution => ["WeaponComponentTable.Damage"],
             Stat.SpeedContribution => ["WeaponComponentTable.Speed"],
-            Stat.WeaponType => ["WeaponInfo.AttackType"],
+            Stat.WeaponType => ["ItemInfo.WeaponType"],
             Stat.Damage => ["WeaponInfo.Damage"],
             Stat.AttackSpeed => ["WeaponInfo.AttackSpeed"],
+            Stat.Speed => ["ItemInfo.Speed"],
             Stat.Range => ["WeaponInfo.Range"],
             Stat.DamageType => ["WeaponInfo.DamageType"],
             Stat.MagazineSize => ["WeaponInfo.MagazineSize"],
-            Stat.ArmorType => ["ItemInfo.ArmorType"],
-            Stat.ArmorRating => ["ArmorInfo.DamageRating"],
+            Stat.ArmorType => ["ArmorDataTable.ArmorClass"],
+            Stat.ArmorRating => ["ArmorDataTable.ArmorValue", "ItemInfo.Damage"],
             Stat.Effects => ["PotionInfo.PotionEffects"],
             Stat.Effect =>
             [

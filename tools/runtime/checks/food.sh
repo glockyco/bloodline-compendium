@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Measures what eating heals (task 5.2 of establish-reference-architecture). Run it inside `nix develop` with the
-# lab game running a fresh save. Health is brought to 10 before each meal and sampled every frame: the seconds
-# before the meal give the regeneration rate, and the frame of the meal shows the heal.
+# Measures what eating heals (tasks 5.2 and 5.4 of establish-reference-architecture). Run it inside `nix develop`
+# with the lab game running a fresh save, optionally with the class paths of the foods to eat as arguments. Health
+# is brought to 10 before each meal and sampled every frame: the seconds before the meal give the regeneration rate,
+# and the frame of the meal shows the heal. Without arguments it eats these four:
 #   Apple Pie: tooltip 15, food effect table 200 and a regeneration boost, description 200.
 #   Fondue: tooltip 0, food effect table 300, description 300.
 #   Apple Sauce: tooltip 0, food effect table 75 and a regeneration boost.
@@ -14,6 +15,7 @@ foods=(
   /Game/BloodlinesAlpha/Interactables/AppleSauce.AppleSauce_C
   /Game/BloodlinesAlpha/Interactables/Crafting_Items/RoastedApple.RoastedApple_C
 )
+if (($# > 0)); then foods=("$@"); fi
 values='["Health","Max Health","Health Regen Speed"]'
 items=$(printf '"%s",' "${foods[@]}")
 lab give "{\"items\":[${items%,}]}"
