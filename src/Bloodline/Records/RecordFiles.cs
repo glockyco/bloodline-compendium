@@ -8,7 +8,7 @@ internal sealed record BuildRecord(int AppId, long BuildId, IReadOnlyList<DepotR
 /// <summary>An installed depot. Manifest IDs exceed what JavaScript numbers hold exactly, so they stay strings.</summary>
 internal sealed record DepotRecord(long DepotId, string ManifestId);
 
-/// <summary>An object or package that extraction left out because it did not load or parse completely.</summary>
+/// <summary>An unread object or package, or an unsupported property value, with its extraction error.</summary>
 internal sealed record GapRecord(string Package, string? Object, string Error);
 
 /// <summary>
