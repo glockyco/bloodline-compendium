@@ -306,3 +306,66 @@ test('each public page has production identity, social metadata and generated br
 		'Sitemap: ' + origin + '/sitemap.xml'
 	);
 });
+
+test('renders typed references and every relation without JavaScript', async ({
+	browser,
+	baseURL,
+	request
+}) => {
+	const graph = await (await request.get('/graph.json')).json();
+	const kinds = await (await request.get('/kinds.json')).json();
+	const itemKind = kinds.find((kind: { kind: string }) => kind.kind === 'item');
+	const context = await browser.newContext({ javaScriptEnabled: false, baseURL });
+	try {
+		const page = await context.newPage();
+		for (const document of graph.entities.filter(
+			(entry: { entity: { kind: string } }) => entry.entity.kind === 'item'
+		)) {
+			await page.goto(`/${itemKind.route}/${document.entity.slug}/`);
+			for (const relation of document.relations)
+				await expect(
+					page.locator(
+						`[data-relation-id="${relation.id}"][data-relation-direction="${relation.direction}"]`
+					)
+				).toHaveCount(1);
+		}
+		await page.goto('/items/lanternedge/');
+		const source = page.locator('#source-shop-1');
+		await expect(source).toContainText('Mira at the Glass Market');
+		await expect(source.locator('a')).toHaveCount(0);
+		await expect(source).toContainText('Glass Reach');
+		await expect(source).toContainText('Stock refresh conditions are unknown.');
+		await expect(page.locator('article')).toHaveAttribute(
+			'data-pagefind-filter',
+			`kind:${itemKind.searchFilter}`
+		);
+		const structured = await page.locator('script[type="application/ld+json"]').allTextContents();
+		expect(structured.map((value) => JSON.parse(value))).toContainEqual(
+			expect.objectContaining({
+				'@type': itemKind.structuredDataType,
+				identifier: '/Invented/Items/Lanternedge'
+			})
+		);
+		const sitemap = await (await request.get('/sitemap.xml')).text();
+		for (const document of graph.entities.filter(
+			(entry: { entity: { kind: string } }) => entry.entity.kind === 'item'
+		))
+			expect(sitemap).toContain(`/${itemKind.route}/${document.entity.slug}/`);
+	} finally {
+		await context.close();
+	}
+});
+
+test('Pagefind searches with the registry kind filter', async ({ page, request }) => {
+	const kinds = await (await request.get('/kinds.json')).json();
+	const label = kinds.find((kind: { kind: string }) => kind.kind === 'item').searchFilter;
+	await page.goto('/');
+	const count = await page.evaluate(async (label) => {
+		const path = '/pagefind/pagefind.js';
+		// Pagefind is generated at build time and exists only in the served browser bundle.
+		const pagefind = await import(/* @vite-ignore */ path);
+		const result = await pagefind.search('Lanter', { filters: { kind: label } });
+		return result.results.length;
+	}, label);
+	expect(count).toBeGreaterThan(0);
+});

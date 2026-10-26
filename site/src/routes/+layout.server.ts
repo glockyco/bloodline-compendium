@@ -1,5 +1,5 @@
-import { readBuild } from '#lib/server/data.js';
+import { readBuild, readKinds } from '#lib/server/data.js';
 export async function load() {
-	const build = await readBuild();
-	return { release: build.release };
+	const [build, kinds] = await Promise.all([readBuild(), readKinds()]);
+	return { release: build.release, kinds };
 }

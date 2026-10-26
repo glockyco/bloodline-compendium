@@ -1,4 +1,3 @@
-using System.Globalization;
 using Bloodline.Records;
 using Bloodline.SiteData;
 
@@ -56,10 +55,15 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
                 .Select(placement =>
                     (
                         Name: WorldSourceData.Name(placement.Properties, placement.Actor.Class),
-                        Place: (Place?)context.Places.Get(placement.Level),
+                        Place: (EntityReference?)context.Places.Get(placement.Level),
                         Generated: placement.Actor.Class.Contains(
                             "Spawner",
                             StringComparison.OrdinalIgnoreCase
+                        ),
+                        Entity: WorldSourceData.PlacementEntity(
+                            context,
+                            placement,
+                            EntityKind.Person
                         )
                     )
                 )
@@ -72,7 +76,12 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
                         (
                             WorldSourceData.Name(type.Properties, type.Path),
                             null,
-                            type.Path.Contains("Spawner", StringComparison.OrdinalIgnoreCase)
+                            type.Path.Contains("Spawner", StringComparison.OrdinalIgnoreCase),
+                            WorldSourceData.Reference(
+                                EntityKind.Person,
+                                dialogue.Path,
+                                WorldSourceData.Name(type.Properties, type.Path)
+                            )
                         )
                     );
                 }
@@ -83,7 +92,12 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
                     (
                         ItemIdentity.Readable(dialogue.Path.Split('/').Last().Split('.')[0]),
                         null,
-                        false
+                        false,
+                        WorldSourceData.Reference(
+                            EntityKind.Person,
+                            dialogue.Path,
+                            ItemIdentity.Readable(dialogue.Path.Split('/').Last().Split('.')[0])
+                        )
                     )
                 );
             }
@@ -140,7 +154,7 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
                             )
                     );
                 }
-                foreach (var (name, place, generated) in users)
+                foreach (var (name, place, generated, entity) in users)
                 {
                     yield return new ItemSource(
                         item,
@@ -161,6 +175,19 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
                                 ]
                                 : notes
                         )
+                        {
+                            Entity = entity,
+                            Conditions =
+                            [
+                                .. WorldSourceData.DialogueConditions(context, dialogue, grant),
+                                new RelationCondition(
+                                    ConditionKind.Unknown,
+                                    null,
+                                    null,
+                                    "Other dialogue choices and requirements are not fully known."
+                                ),
+                            ],
+                        }
                     );
                 }
             }
@@ -187,59 +214,18 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
                     )
             )
             .ToArray();
-        var hasChoice = false;
+        // Dialogue wording is context, not a substitute for typed relation conditions.
         foreach (var node in nodes)
         {
             var text = RecordValues.Text(RecordValues.At(node, "Text"));
             if (!string.IsNullOrWhiteSpace(text))
             {
                 var player = RecordValues.Boolean(RecordValues.At(node, "isPlayer")) == true;
-                hasChoice |= player;
                 yield return player
                     ? $"Dialogue choice: \"{text.Trim()}\""
                     : $"During dialogue: \"{text.Trim()}\"";
             }
-            foreach (var condition in RecordValues.Elements(RecordValues.At(node, "Conditions")))
-            {
-                var reference = RecordValues.AnyReference(condition);
-                var instance = dialogue.Objects.FirstOrDefault(obj =>
-                    string.Equals(obj.Path, reference, StringComparison.OrdinalIgnoreCase)
-                );
-                if (instance is null)
-                {
-                    continue;
-                }
-                var properties = context.Classes.TryGetValue(instance.Class, out var defaults)
-                    ? RecordMerge.OverlayProperties(defaults.Properties, instance.Properties)
-                    : instance.Properties;
-                if (WorldSourceData.IsClass(context, instance.Class, "PlayerHasEnoughMoney"))
-                {
-                    yield return RecordValues.Number(properties["Required Money"]) is { } money
-                        ? $"Requires at least {money.ToString(CultureInfo.InvariantCulture)} gold."
-                        : "Requires enough gold. The amount is unknown.";
-                }
-                else if (WorldSourceData.IsClass(context, instance.Class, "Quest_is_Active"))
-                {
-                    var quest = RecordValues.String(properties["Quest Needed"]);
-                    var name = context
-                        .Records.Tables.Where(table =>
-                            WorldSourceData.IsTable(table, "DT_UQC_Quests")
-                        )
-                        .SelectMany(table => table.Rows)
-                        .Where(row =>
-                            string.Equals(row.Name, quest, StringComparison.OrdinalIgnoreCase)
-                        )
-                        .Select(row => RecordValues.Text(row.Values["DisplayName"]))
-                        .FirstOrDefault(title => !string.IsNullOrWhiteSpace(title));
-                    yield return name is null
-                        ? "Requires an active quest. The quest name is unknown."
-                        : $"Requires the active quest \"{name}\".";
-                }
-            }
         }
-        yield return hasChoice
-            ? "Other dialogue choices and requirements are not fully known."
-            : "The dialogue choice and any other requirements are unknown.";
         if (dialogue.Path.Contains("/Dialogue_Unused/", StringComparison.OrdinalIgnoreCase))
         {
             yield return "This conversation is marked unused in the game data. Availability is uncertain.";

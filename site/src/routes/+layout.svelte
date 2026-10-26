@@ -9,7 +9,9 @@
 	import '../app.css';
 	import Search from '#lib/Search.svelte';
 	import ReleaseInfo from '#lib/ReleaseInfo.svelte';
+	import { kindPath } from '#lib/entities.js';
 	let { data, children } = $props();
+	const itemsPath = $derived(kindPath('item', data.kinds)!);
 	// Home opens with the game's art, so its header sits on the art and its search sits in the hero.
 	const home = $derived(page.url.pathname === '/');
 	const current = (path: string) => (page.url.pathname.startsWith(path) ? 'page' : undefined);
@@ -55,7 +57,7 @@
 			>
 		</a>
 		<nav aria-label="Main">
-			<a href={resolve('items/')} aria-current={current('/items/')}>Items</a>
+			<a href={itemsPath} aria-current={current(itemsPath)}>Items</a>
 			<a href={resolve('coverage/')} aria-current={current('/coverage/')}>Coverage</a>
 			<a href={resolve('about/')} aria-current={current('/about/')}>About</a>
 		</nav>
@@ -67,7 +69,7 @@
 <footer class="site-footer">
 	<div class="footer-inner">
 		<nav aria-label="Footer">
-			<a href={resolve('items/')}>Items</a><a href={resolve('coverage/')}>Coverage</a><a
+			<a href={itemsPath}>Items</a><a href={resolve('coverage/')}>Coverage</a><a
 				href={resolve('about/')}>About</a
 			><a href="https://ko-fi.com/wowmuch">Support on Ko-fi</a>
 		</nav>

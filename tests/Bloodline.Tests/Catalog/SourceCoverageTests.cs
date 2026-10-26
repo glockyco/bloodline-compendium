@@ -32,7 +32,10 @@ public sealed class SourceCoverageTests
             SourceCoverage.HasUnknownPlace(
                 source with
                 {
-                    Places = [new Place("/Game/Valley", "Valley")],
+                    Places =
+                    [
+                        new EntityReference(EntityKind.Place, "/Game/Valley", "Valley", null, null),
+                    ],
                 }
             )
         );

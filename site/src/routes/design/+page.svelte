@@ -123,7 +123,13 @@
 	</div>
 	<p>
 		Linked: <EntityLink entity={data.item} />. Without a page: <EntityLink
-			entity={{ name: 'Unpublished Merchant', slug: null }}
+			entity={{
+				kind: 'merchant',
+				key: '/Invented/Merchant',
+				name: 'Unpublished Merchant',
+				slug: null,
+				icon: null
+			}}
 		/>.
 	</p>
 	<IssueNote title="An issue title that runs long enough to wrap">

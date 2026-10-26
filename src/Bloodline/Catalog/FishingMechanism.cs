@@ -58,7 +58,9 @@ internal sealed class FishingMechanism : ISourceMechanism
                         properties["Specific Loot Table"],
                         "Fishing spot",
                         [context.Places.Get(spot.Level)],
-                        notes
+                        notes,
+                        WorldSourceData.Reference(EntityKind.Activity, spot.Actor.Class, "Fishing"),
+                        WorldSourceData.Conditions(context, properties, spot.Level)
                     )
                 )
                 {
@@ -81,6 +83,16 @@ internal sealed class FishingMechanism : ISourceMechanism
                         [
                             .. notes,
                             "Lava catches are listed, but whether they are available at this spot is unknown.",
+                        ],
+                        WorldSourceData.Reference(EntityKind.Activity, spot.Actor.Class, "Fishing"),
+                        [
+                            .. WorldSourceData.Conditions(context, properties, spot.Level),
+                            new RelationCondition(
+                                ConditionKind.Unknown,
+                                null,
+                                null,
+                                "Lava catch availability is unknown."
+                            ),
                         ],
                         confirmedChoice: false
                     )
@@ -105,7 +117,9 @@ internal sealed class FishingMechanism : ISourceMechanism
                         defaults.Properties[pool],
                         SourceName(pool),
                         [context.Places.Get(spot.Level)],
-                        notes
+                        notes,
+                        WorldSourceData.Reference(EntityKind.Activity, spot.Actor.Class, "Fishing"),
+                        WorldSourceData.Conditions(context, properties, spot.Level)
                     )
                 )
                 {
@@ -129,6 +143,15 @@ internal sealed class FishingMechanism : ISourceMechanism
                         [],
                         [
                             "Possible fishing catches. Availability depends on the spot being active and its difficulty.",
+                        ],
+                        WorldSourceData.Reference(EntityKind.Activity, defaults.Path, "Fishing"),
+                        [
+                            new RelationCondition(
+                                ConditionKind.GameState,
+                                null,
+                                null,
+                                "Requires an active fishing spot with the matching difficulty."
+                            ),
                         ],
                         confirmedChoice: pool != "Standard Lava Loot"
                     )
@@ -154,8 +177,10 @@ internal sealed class FishingMechanism : ISourceMechanism
     private static IEnumerable<ItemSource> Sources(
         JsonNode? pool,
         string name,
-        IReadOnlyList<Place> places,
+        IReadOnlyList<EntityReference> places,
         IReadOnlyList<string> notes,
+        EntityReference entity,
+        IReadOnlyList<RelationCondition> conditions,
         bool confirmedChoice = true
     )
     {
@@ -182,6 +207,8 @@ internal sealed class FishingMechanism : ISourceMechanism
                         : notes
                 )
                 {
+                    Entity = entity,
+                    Conditions = conditions,
                     ChanceBasis = chance is null ? null : "Chance per catch",
                 }
             );

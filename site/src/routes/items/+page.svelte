@@ -9,6 +9,8 @@
 	import type { SourceKind } from '#lib/site-data.js';
 	import { formatNumber } from '#lib/format.js';
 	import SeoHead from '#lib/SeoHead.svelte';
+	import EntityLink from '#lib/ui/EntityLink.svelte';
+	import { kindPath } from '#lib/entities.js';
 	let { data } = $props();
 	let dialog: HTMLDialogElement;
 	let categorySearch = $state('');
@@ -63,7 +65,7 @@
 		const url = new SvelteURL(currentUrl.href);
 		url.searchParams.delete(key);
 		for (const value of values) if (value) url.searchParams.append(key, value);
-		goto(resolve(`items/${url.search}${url.hash}`), { shallow: true });
+		goto(kindPath('item', data.kinds, url.search + url.hash)!, { shallow: true });
 	}
 	function toggle(key: 'category' | 'type' | 'source', value: string, checked: boolean) {
 		const values = currentUrl.searchParams.getAll(key).filter((entry) => entry !== value);
@@ -166,7 +168,7 @@
 					onclick={() => {
 						const url = new SvelteURL(currentUrl.href);
 						url.search = '';
-						goto(resolve(`items/${url.search}${url.hash}`), { shallow: true });
+						goto(kindPath('item', data.kinds, url.search + url.hash)!, { shallow: true });
 					}}>Clear all</button
 				>
 			</div>{/if}
@@ -192,7 +194,7 @@
 			<tbody
 				>{#each items as item (item.slug)}<tr>
 						<td
-							><a class="item-name" href={resolve(`items/${item.slug}/`)}
+							><EntityLink class="item-name" entity={item}
 								>{#if item.icon}<img
 										src={'/icons/' + item.icon + '-48.webp'}
 										alt=""
@@ -203,7 +205,7 @@
 									><span data-game>{item.name}</span>{#if item.qualifier}<small
 											>{item.qualifier}</small
 										>{/if}</span
-								></a
+								></EntityLink
 							></td
 						>
 						<td class="item-type">{titleCase(item.type)}</td><td class="numeric"

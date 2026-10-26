@@ -56,6 +56,20 @@
       "title": "CategorySummary",
       "type": "object"
     },
+    "ConditionKind": {
+      "enum": [
+        "calendarEvent",
+        "quest",
+        "questStage",
+        "guildRank",
+        "disciplineLevel",
+        "proficiencyLevel",
+        "building",
+        "gameState",
+        "unknown"
+      ],
+      "title": "ConditionKind"
+    },
     "CoverageGap": {
       "properties": {
         "entries": {
@@ -108,6 +122,167 @@
         "seconds"
       ],
       "title": "Effect",
+      "type": "object"
+    },
+    "EntityDocument": {
+      "properties": {
+        "entity": {
+          "$ref": "#/$defs/EntityReference"
+        },
+        "relations": {
+          "items": {
+            "$ref": "#/$defs/EntityRelation"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "entity",
+        "relations"
+      ],
+      "title": "EntityDocument",
+      "type": "object"
+    },
+    "EntityGraph": {
+      "properties": {
+        "entities": {
+          "items": {
+            "$ref": "#/$defs/EntityDocument"
+          },
+          "type": "array"
+        },
+        "relations": {
+          "items": {
+            "$ref": "#/$defs/RelationRow"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "entities",
+        "relations"
+      ],
+      "title": "EntityGraph",
+      "type": "object"
+    },
+    "EntityKind": {
+      "enum": [
+        "item",
+        "merchant",
+        "person",
+        "creature",
+        "place",
+        "container",
+        "recipe",
+        "building",
+        "calendarEvent",
+        "quest",
+        "resource",
+        "activity"
+      ],
+      "title": "EntityKind"
+    },
+    "EntityKindDefinition": {
+      "properties": {
+        "hasPages": {
+          "type": "boolean"
+        },
+        "kind": {
+          "$ref": "#/$defs/EntityKind"
+        },
+        "route": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "searchFilter": {
+          "type": "string"
+        },
+        "structuredDataType": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "hasPages",
+        "route",
+        "searchFilter",
+        "structuredDataType"
+      ],
+      "title": "EntityKindDefinition",
+      "type": "object"
+    },
+    "EntityReference": {
+      "properties": {
+        "icon": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "key": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "kind": {
+          "$ref": "#/$defs/EntityKind"
+        },
+        "name": {
+          "type": "string"
+        },
+        "slug": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "key",
+        "name",
+        "slug",
+        "icon"
+      ],
+      "title": "EntityReference",
+      "type": "object"
+    },
+    "EntityRelation": {
+      "properties": {
+        "conditions": {
+          "items": {
+            "$ref": "#/$defs/RelationCondition"
+          },
+          "type": "array"
+        },
+        "direction": {
+          "$ref": "#/$defs/RelationDirection"
+        },
+        "entity": {
+          "$ref": "#/$defs/EntityReference"
+        },
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "direction",
+        "entity",
+        "label",
+        "conditions"
+      ],
+      "title": "EntityRelation",
       "type": "object"
     },
     "Fact": {
@@ -171,10 +346,14 @@
             "null"
           ]
         },
-        "itemSlug": {
-          "type": [
-            "string",
-            "null"
+        "entity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EntityReference"
+            },
+            {
+              "type": "null"
+            }
           ]
         },
         "label": {
@@ -203,7 +382,7 @@
       },
       "required": [
         "label",
-        "itemSlug",
+        "entity",
         "detail"
       ],
       "title": "GapEntry",
@@ -216,14 +395,16 @@
         "itemWithoutIcon",
         "unknownFact",
         "placeWithoutName",
-        "unreadObject"
+        "unreadObject",
+        "unknownCondition",
+        "unresolvedReference"
       ],
       "title": "GapKind"
     },
     "ItemAmount": {
       "properties": {
         "item": {
-          "$ref": "#/$defs/ItemLink"
+          "$ref": "#/$defs/EntityReference"
         },
         "quantity": {
           "type": "integer"
@@ -258,25 +439,6 @@
       "title": "ItemIndex",
       "type": "object"
     },
-    "ItemLink": {
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "slug": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      },
-      "required": [
-        "slug",
-        "name"
-      ],
-      "title": "ItemLink",
-      "type": "object"
-    },
     "ItemPage": {
       "properties": {
         "category": {
@@ -300,8 +462,11 @@
             "null"
           ]
         },
-        "id": {
+        "key": {
           "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/EntityKind"
         },
         "name": {
           "type": "string"
@@ -311,6 +476,12 @@
             "string",
             "null"
           ]
+        },
+        "relations": {
+          "items": {
+            "$ref": "#/$defs/EntityRelation"
+          },
+          "type": "array"
         },
         "slug": {
           "type": "string"
@@ -332,7 +503,7 @@
         }
       },
       "required": [
-        "id",
+        "key",
         "slug",
         "name",
         "description",
@@ -340,6 +511,8 @@
         "icon",
         "facts",
         "sources",
+        "kind",
+        "relations",
         "type",
         "uses"
       ],
@@ -356,6 +529,12 @@
             "string",
             "null"
           ]
+        },
+        "key": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/EntityKind"
         },
         "name": {
           "type": "string"
@@ -392,6 +571,8 @@
         "value",
         "icon",
         "sourceKinds",
+        "key",
+        "kind",
         "type"
       ],
       "title": "ItemSummary",
@@ -399,8 +580,14 @@
     },
     "ItemUse": {
       "properties": {
+        "conditions": {
+          "items": {
+            "$ref": "#/$defs/RelationCondition"
+          },
+          "type": "array"
+        },
         "item": {
-          "$ref": "#/$defs/ItemLink"
+          "$ref": "#/$defs/EntityReference"
         },
         "kind": {
           "$ref": "#/$defs/SourceKind"
@@ -410,31 +597,20 @@
         },
         "quantity": {
           "type": "integer"
+        },
+        "relationId": {
+          "type": "string"
         }
       },
       "required": [
         "kind",
         "name",
         "item",
-        "quantity"
+        "quantity",
+        "relationId",
+        "conditions"
       ],
       "title": "ItemUse",
-      "type": "object"
-    },
-    "Place": {
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "id",
-        "name"
-      ],
-      "title": "Place",
       "type": "object"
     },
     "Price": {
@@ -445,7 +621,7 @@
         "currency": {
           "anyOf": [
             {
-              "$ref": "#/$defs/ItemLink"
+              "$ref": "#/$defs/EntityReference"
             },
             {
               "type": "null"
@@ -458,6 +634,97 @@
         "currency"
       ],
       "title": "Price",
+      "type": "object"
+    },
+    "RelationCondition": {
+      "properties": {
+        "entity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EntityReference"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "kind": {
+          "$ref": "#/$defs/ConditionKind"
+        },
+        "label": {
+          "type": "string"
+        },
+        "value": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "entity",
+        "value",
+        "label"
+      ],
+      "title": "RelationCondition",
+      "type": "object"
+    },
+    "RelationDirection": {
+      "enum": [
+        "outgoing",
+        "incoming"
+      ],
+      "title": "RelationDirection"
+    },
+    "RelationRow": {
+      "properties": {
+        "attributes": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Source"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "conditions": {
+          "items": {
+            "$ref": "#/$defs/RelationCondition"
+          },
+          "type": "array"
+        },
+        "forwardLabel": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "reverseLabel": {
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/EntityReference"
+        },
+        "target": {
+          "$ref": "#/$defs/EntityReference"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "source",
+        "target",
+        "forwardLabel",
+        "reverseLabel",
+        "conditions",
+        "attributes"
+      ],
+      "title": "RelationRow",
       "type": "object"
     },
     "SiteBuild": {
@@ -559,6 +826,15 @@
             "null"
           ]
         },
+        "conditions": {
+          "items": {
+            "$ref": "#/$defs/RelationCondition"
+          },
+          "type": "array"
+        },
+        "entity": {
+          "$ref": "#/$defs/EntityReference"
+        },
         "inputs": {
           "items": {
             "$ref": "#/$defs/ItemAmount"
@@ -589,7 +865,7 @@
         },
         "places": {
           "items": {
-            "$ref": "#/$defs/Place"
+            "$ref": "#/$defs/EntityReference"
           },
           "type": "array"
         },
@@ -602,6 +878,9 @@
               "type": "null"
             }
           ]
+        },
+        "relationId": {
+          "type": "string"
         },
         "weight": {
           "anyOf": [
@@ -623,7 +902,10 @@
         "weight",
         "chance",
         "inputs",
-        "notes"
+        "notes",
+        "entity",
+        "conditions",
+        "relationId"
       ],
       "title": "Source",
       "type": "object"
@@ -699,18 +981,29 @@
     "coverage": {
       "$ref": "#/$defs/CoverageReport"
     },
+    "graph": {
+      "$ref": "#/$defs/EntityGraph"
+    },
     "item": {
       "$ref": "#/$defs/ItemPage"
     },
     "items": {
       "$ref": "#/$defs/ItemIndex"
+    },
+    "kinds": {
+      "items": {
+        "$ref": "#/$defs/EntityKindDefinition"
+      },
+      "type": "array"
     }
   },
   "required": [
     "build",
     "items",
     "item",
-    "coverage"
+    "coverage",
+    "kinds",
+    "graph"
   ],
   "title": "SiteDataFiles",
   "type": "object"

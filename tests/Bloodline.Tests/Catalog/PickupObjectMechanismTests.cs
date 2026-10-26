@@ -78,7 +78,7 @@ public sealed class PickupObjectMechanismTests
             .Source;
         Assert.Equal(SourceKind.Pickup, source.Kind);
         Assert.Equal(new Amount(4, 4), source.Amount);
-        Assert.Equal(Level, Assert.Single(source.Places).Id);
+        Assert.Equal(Level, Assert.Single(source.Places).Key);
         Assert.Empty(source.Inputs);
         Assert.Null(source.Chance);
     }
@@ -126,7 +126,7 @@ public sealed class PickupObjectMechanismTests
             )
             .Source;
         Assert.Equal(new Amount(3, 3), source.Amount);
-        Assert.Equal(Level, Assert.Single(source.Places).Id);
+        Assert.Equal(Level, Assert.Single(source.Places).Key);
     }
 
     [Fact]

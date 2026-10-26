@@ -7,7 +7,8 @@ internal sealed record CatalogResult(
     ItemIndex Index,
     IReadOnlyList<ItemPage> Items,
     CoverageReport Coverage,
-    int NamedPlaces
+    int NamedPlaces,
+    EntityGraph Graph
 );
 
 internal static class CatalogBuilder
@@ -82,11 +83,11 @@ internal static class CatalogBuilder
             {
                 icon = texture.Hash;
             }
-            var sources = CatalogContext.MergeSources(candidates[item.Id], context.ExcludedLevels);
+            var sources = CatalogContext.MergeSources(candidates[item.Key], context.ExcludedLevels);
             item = item with { Icon = icon, Sources = sources };
             items.Add(item);
             void Gap(GapKind kind, string label, string? detail = null) =>
-                gapEntries[kind].Add(new GapEntry(label, item.Slug, detail));
+                gapEntries[kind].Add(new GapEntry(label, CatalogGraph.Reference(item), detail));
             if (sources.Count == 0)
             {
                 Gap(GapKind.ItemWithoutSource, item.Name);
@@ -114,79 +115,67 @@ internal static class CatalogBuilder
             foreach (var source in sources.Where(SourceCoverage.HasUnknownPlace))
             {
                 gapEntries[GapKind.SourceWithoutPlace]
-                    .Add(new GapEntry(item.Name, item.Slug, source.Name) { Source = source.Kind });
+                    .Add(
+                        new GapEntry(item.Name, CatalogGraph.Reference(item), source.Name)
+                        {
+                            Source = source.Kind,
+                        }
+                    );
             }
         }
         foreach (
             var place in context.Places.All.Where(place =>
-                !context.ExcludedLevels.Contains(place.Id) && !context.Places.HasName(place.Id)
+                place.Key is { } key
+                && !context.ExcludedLevels.Contains(key)
+                && !context.Places.HasName(key)
             )
         )
         {
-            gapEntries[GapKind.PlaceWithoutName].Add(new GapEntry(place.Name, null, place.Id));
+            gapEntries[GapKind.PlaceWithoutName].Add(new GapEntry(place.Name, place, place.Key));
         }
         foreach (var gap in records.Gaps)
         {
             gapEntries[GapKind.UnreadObject]
                 .Add(new GapEntry(gap.Object ?? gap.Package, null, gap.Package + ": " + gap.Error));
         }
-        var uses = items.ToDictionary(
-            item => item.Slug,
-            _ => new List<ItemUse>(),
-            StringComparer.Ordinal
-        );
-        foreach (var output in items)
+        var graphResult = CatalogGraph.Build(items, context.Places.All);
+        foreach (var item in graphResult.Items)
         {
-            foreach (var source in output.Sources)
+            foreach (var source in item.Sources)
             {
-                foreach (var input in source.Inputs)
+                foreach (var condition in source.Conditions)
                 {
-                    if (
-                        input.Item.Slug is { } inputSlug
-                        && uses.TryGetValue(inputSlug, out var entries)
-                    )
+                    if (condition.Kind == ConditionKind.Unknown)
                     {
-                        entries.Add(
-                            new ItemUse(
-                                source.Kind,
-                                source.Name,
-                                new ItemLink(output.Slug, ItemIdentity.DisplayName(output)),
-                                input.Quantity
-                            )
-                        );
+                        gapEntries[GapKind.UnknownCondition]
+                            .Add(
+                                new GapEntry(
+                                    item.Name,
+                                    CatalogGraph.Reference(item),
+                                    source.Name + ": " + condition.Label
+                                )
+                                {
+                                    Source = source.Kind,
+                                }
+                            );
                     }
                 }
-                if (
-                    source.Price?.Currency?.Slug is { } currencySlug
-                    && uses.TryGetValue(currencySlug, out var payments)
-                )
-                {
-                    payments.Add(
-                        new ItemUse(
-                            source.Kind,
-                            source.Name,
-                            new ItemLink(output.Slug, ItemIdentity.DisplayName(output)),
-                            source.Price.Amount
+            }
+            foreach (var reference in References(item).Where(reference => reference.Key is null))
+            {
+                gapEntries[GapKind.UnresolvedReference]
+                    .Add(
+                        new GapEntry(
+                            item.Name,
+                            CatalogGraph.Reference(item),
+                            reference.Kind + ": " + reference.Name
                         )
                     );
-                }
             }
         }
-        items = items
-            .Select(item =>
-                item with
-                {
-                    Uses = uses[item.Slug]
-                        .Distinct()
-                        .OrderBy(use => use.Item.Name, StringComparer.OrdinalIgnoreCase)
-                        .ThenBy(use => use.Name, StringComparer.OrdinalIgnoreCase)
-                        .ToArray(),
-                }
-            )
-            .ToList();
-        var ordered = items
-            .OrderBy(item => item.Name, StringComparer.OrdinalIgnoreCase)
-            .ThenBy(item => item.Id, StringComparer.Ordinal)
+        var ordered = graphResult
+            .Items.OrderBy(item => item.Name, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(item => item.Key, StringComparer.Ordinal)
             .ToArray();
         var summaries = ordered
             .Select(item => new ItemSummary(
@@ -198,6 +187,7 @@ internal static class CatalogBuilder
                 item.Sources.Select(source => source.Kind).Distinct().Order().ToArray()
             )
             {
+                Key = item.Key,
                 Type = item.Type,
                 Qualifier = item.Qualifier,
             })
@@ -220,7 +210,7 @@ internal static class CatalogBuilder
                     pair.Key,
                     pair.Value.Distinct()
                         .OrderBy(entry => entry.Label, StringComparer.Ordinal)
-                        .ThenBy(entry => entry.ItemSlug, StringComparer.Ordinal)
+                        .ThenBy(entry => entry.Entity?.Slug, StringComparer.Ordinal)
                         .ThenBy(entry => entry.Detail, StringComparer.Ordinal)
                         .ToArray()
                 ))
@@ -230,8 +220,36 @@ internal static class CatalogBuilder
             new ItemIndex(categories, summaries),
             ordered,
             coverage,
-            context.Places.NamedCount
+            context.Places.NamedCount,
+            graphResult.Graph
         );
+    }
+
+    private static IEnumerable<EntityReference> References(ItemPage item)
+    {
+        foreach (var source in item.Sources)
+        {
+            yield return source.Entity;
+            foreach (var place in source.Places)
+            {
+                yield return place;
+            }
+            foreach (var input in source.Inputs)
+            {
+                yield return input.Item;
+            }
+            if (source.Price?.Currency is { } currency)
+            {
+                yield return currency;
+            }
+            foreach (var condition in source.Conditions)
+            {
+                if (condition.Entity is { } entity)
+                {
+                    yield return entity;
+                }
+            }
+        }
     }
 
     private static int? ReadValue(ItemPage item) =>

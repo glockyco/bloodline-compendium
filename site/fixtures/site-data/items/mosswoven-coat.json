@@ -1,5 +1,4 @@
 {
-	"id": "/Invented/Items/MosswovenCoat",
 	"slug": "mosswoven-coat",
 	"name": "Mosswoven Coat",
 	"type": "Coat",
@@ -35,8 +34,11 @@
 			"name": "Bramble sentinel",
 			"places": [
 				{
-					"id": "/Invented/Places/GlassReach",
-					"name": "Glass Reach"
+					"kind": "place",
+					"key": "/Invented/Places/GlassReach",
+					"name": "Glass Reach",
+					"slug": null,
+					"icon": null
 				}
 			],
 			"price": null,
@@ -52,7 +54,34 @@
 			"chanceBasis": null,
 			"picks": null,
 			"inputs": [],
-			"notes": []
+			"notes": [],
+			"entity": {
+				"kind": "creature",
+				"key": "/Invented/creature/mosswoven-coat/0",
+				"name": "Bramble sentinel",
+				"slug": null,
+				"icon": null
+			},
+			"conditions": [],
+			"relationId": "fixture:mosswoven-coat:source:0"
+		}
+	],
+	"key": "/Invented/Items/MosswovenCoat",
+	"kind": "item",
+	"relations": [
+		{
+			"id": "fixture:mosswoven-coat:source:0",
+			"kind": "enemyDrop",
+			"direction": "incoming",
+			"entity": {
+				"kind": "creature",
+				"key": "/Invented/creature/mosswoven-coat/0",
+				"name": "Bramble sentinel",
+				"slug": null,
+				"icon": null
+			},
+			"label": "Obtained from",
+			"conditions": []
 		}
 	]
 }

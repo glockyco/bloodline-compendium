@@ -3,6 +3,8 @@
 	import SourceRow from '#lib/SourceRow.svelte';
 	import RelationTable from '#lib/RelationTable.svelte';
 	import EntityLink from '#lib/ui/EntityLink.svelte';
+	import Conditions from '#lib/Conditions.svelte';
+	import { entityPath, kindPath } from '#lib/entities.js';
 	import Count from '#lib/ui/Count.svelte';
 	import ItemTooltip from '#lib/ItemTooltip.svelte';
 	import { sourceHeadings, titleCase } from '#lib/labels.js';
@@ -13,6 +15,22 @@
 	import SeoHead from '#lib/SeoHead.svelte';
 	let { data } = $props();
 	const item = $derived(data.item);
+	const kind = $derived(data.kinds.find((entry) => entry.kind === item.kind));
+	const itemsPath = $derived(kindPath(item.kind, data.kinds)!);
+	const extraRelations = $derived(
+		item.relations.filter(
+			(relation) =>
+				!item.sources.some(
+					(source) => source.relationId === relation.id && relation.direction === 'incoming'
+				) &&
+				!item.uses.some(
+					(use) =>
+						use.relationId === relation.id &&
+						relation.direction ===
+							item.relations.find((entry) => entry.id === use.relationId)?.direction
+				)
+		)
+	);
 	const displayName = $derived(item.name + (item.qualifier ? ` (${item.qualifier})` : ''));
 	const sourceGroups = $derived(
 		(Object.keys(sourceHeadings) as SourceKind[])
@@ -71,25 +89,31 @@
 <SeoHead
 	title={displayName + ' | The Bloodline Compendium'}
 	{description}
+	entity={{ kind: item.kind, key: item.key, name: item.name, slug: item.slug, icon: item.icon }}
+	{kind}
 	breadcrumbs={[
 		{ name: 'Home', path: '/' },
-		{ name: 'Items', path: '/items/' },
-		{ name: displayName, path: `/items/${item.slug}/` }
+		{ name: 'Items', path: itemsPath },
+		{ name: displayName, path: entityPath(item, data.kinds)! }
 	]}
 />
 <nav class="breadcrumbs" aria-label="Breadcrumb">
 	<ol>
 		<li><a href={resolve('/')}>Home</a></li>
-		<li><a href={resolve('items/')}>Items</a></li>
+		<li><a href={itemsPath}>Items</a></li>
 		<li aria-current="page" data-game>{displayName}</li>
 	</ol>
 </nav>
-<article data-pagefind-body>
+<article data-pagefind-body data-pagefind-filter={`kind:${kind?.searchFilter ?? ''}`}>
 	<div class="item-heading">
 		<h1 data-pagefind-meta="title" data-game>{displayName}</h1>
 		<p class="identity">
-			<a href={resolve(`items/?category=${encodeURIComponent(item.category.slug)}`)}
-				>{titleCase(item.category.name)}</a
+			<a
+				href={kindPath(
+					item.kind,
+					data.kinds,
+					`?category=${encodeURIComponent(item.category.slug)}`
+				)!}>{titleCase(item.category.name)}</a
 			>
 			· <span data-game>{titleCase(item.type)}</span>
 		</p>
@@ -155,15 +179,36 @@
 			{#if uses.length}<section aria-labelledby="used-for">
 					<h2 id="used-for">Used for <Count value={uses.length} /></h2>
 					<RelationTable items={uses} label="Used for" headings={['Item', 'Required Quantity']}
-						>{#snippet row(use, index)}<tr id={`use-${index + 1}`}
+						>{#snippet row(use, index)}<tr
+								id={`use-${index + 1}`}
+								data-relation-id={use.relationId}
+								data-relation-direction={item.relations.find(
+									(relation) => relation.id === use.relationId
+								)?.direction}
 								><td
 									><EntityLink entity={use.item} /><small
 										>{useHeadings[use.kind] ?? sourceHeadings[use.kind]} ·
 										<span data-game>{use.name}</span></small
-									></td
+									><Conditions conditions={use.conditions} /></td
 								><td class="numeric">{formatNumber(use.quantity)}<small>items</small></td></tr
 							>{/snippet}</RelationTable
 					>
+				</section>{/if}
+			{#if extraRelations.length}<section aria-labelledby="related-entities">
+					<h2 id="related-entities">Related entities <Count value={extraRelations.length} /></h2>
+					<RelationTable
+						items={extraRelations}
+						label="Related entities"
+						headings={['Relation', 'Entity']}
+					>
+						{#snippet row(relation)}<tr
+								data-relation-id={relation.id}
+								data-relation-direction={relation.direction}
+							>
+								<td>{relation.label}<Conditions conditions={relation.conditions} /></td>
+								<td><EntityLink entity={relation.entity} /></td>
+							</tr>{/snippet}
+					</RelationTable>
 				</section>{/if}
 		</div>
 	</div>

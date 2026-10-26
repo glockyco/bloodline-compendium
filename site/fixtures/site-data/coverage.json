@@ -5,8 +5,14 @@
 			"entries": [
 				{
 					"label": "Hollow Prism",
-					"itemSlug": "hollow-prism",
-					"detail": "No acquisition source was found in the readable data."
+					"detail": "No acquisition source was found in the readable data.",
+					"entity": {
+						"kind": "item",
+						"key": "/Invented/Items/HollowPrism",
+						"name": "Hollow Prism",
+						"slug": "hollow-prism",
+						"icon": null
+					}
 				}
 			]
 		},
@@ -15,81 +21,159 @@
 			"entries": [
 				{
 					"label": "Lanternedge",
-					"itemSlug": "lanternedge",
 					"detail": "Orris the Collector",
-					"source": "currencyShop"
+					"source": "currencyShop",
+					"entity": {
+						"kind": "item",
+						"key": "/Invented/Items/Lanternedge",
+						"name": "Lanternedge",
+						"slug": "lanternedge",
+						"icon": "lanternedge"
+					}
 				},
 				{
 					"label": "Lanternedge",
-					"itemSlug": "lanternedge",
 					"detail": "Amber Lantern Trader",
-					"source": "shop"
+					"source": "shop",
+					"entity": {
+						"kind": "item",
+						"key": "/Invented/Items/Lanternedge",
+						"name": "Lanternedge",
+						"slug": "lanternedge",
+						"icon": "lanternedge"
+					}
 				},
 				{
 					"label": "Lanternedge",
-					"itemSlug": "lanternedge",
 					"detail": "Blue Glass Trader",
-					"source": "shop"
+					"source": "shop",
+					"entity": {
+						"kind": "item",
+						"key": "/Invented/Items/Lanternedge",
+						"name": "Lanternedge",
+						"slug": "lanternedge",
+						"icon": "lanternedge"
+					}
 				},
 				{
 					"label": "Lanternedge",
-					"itemSlug": "lanternedge",
 					"detail": "Copper Crescent Trader",
-					"source": "shop"
+					"source": "shop",
+					"entity": {
+						"kind": "item",
+						"key": "/Invented/Items/Lanternedge",
+						"name": "Lanternedge",
+						"slug": "lanternedge",
+						"icon": "lanternedge"
+					}
 				},
 				{
 					"label": "Lanternedge",
-					"itemSlug": "lanternedge",
 					"detail": "Dappled Star Trader",
-					"source": "shop"
+					"source": "shop",
+					"entity": {
+						"kind": "item",
+						"key": "/Invented/Items/Lanternedge",
+						"name": "Lanternedge",
+						"slug": "lanternedge",
+						"icon": "lanternedge"
+					}
 				},
 				{
 					"label": "Lanternedge",
-					"itemSlug": "lanternedge",
 					"detail": "Emerald Kite Trader",
-					"source": "shop"
+					"source": "shop",
+					"entity": {
+						"kind": "item",
+						"key": "/Invented/Items/Lanternedge",
+						"name": "Lanternedge",
+						"slug": "lanternedge",
+						"icon": "lanternedge"
+					}
 				},
 				{
 					"label": "Lanternedge",
-					"itemSlug": "lanternedge",
 					"detail": "Frosted Wheel Trader",
-					"source": "shop"
+					"source": "shop",
+					"entity": {
+						"kind": "item",
+						"key": "/Invented/Items/Lanternedge",
+						"name": "Lanternedge",
+						"slug": "lanternedge",
+						"icon": "lanternedge"
+					}
 				},
 				{
 					"label": "Lanternedge",
-					"itemSlug": "lanternedge",
 					"detail": "Golden Spiral Trader",
-					"source": "shop"
+					"source": "shop",
+					"entity": {
+						"kind": "item",
+						"key": "/Invented/Items/Lanternedge",
+						"name": "Lanternedge",
+						"slug": "lanternedge",
+						"icon": "lanternedge"
+					}
 				},
 				{
 					"label": "Lanternedge",
-					"itemSlug": "lanternedge",
 					"detail": "Hazel Comet Trader",
-					"source": "shop"
+					"source": "shop",
+					"entity": {
+						"kind": "item",
+						"key": "/Invented/Items/Lanternedge",
+						"name": "Lanternedge",
+						"slug": "lanternedge",
+						"icon": "lanternedge"
+					}
 				},
 				{
 					"label": "Lanternedge",
-					"itemSlug": "lanternedge",
 					"detail": "Indigo Prism Trader",
-					"source": "shop"
+					"source": "shop",
+					"entity": {
+						"kind": "item",
+						"key": "/Invented/Items/Lanternedge",
+						"name": "Lanternedge",
+						"slug": "lanternedge",
+						"icon": "lanternedge"
+					}
 				},
 				{
 					"label": "Lanternedge",
-					"itemSlug": "lanternedge",
 					"detail": "Jade Compass Trader",
-					"source": "shop"
+					"source": "shop",
+					"entity": {
+						"kind": "item",
+						"key": "/Invented/Items/Lanternedge",
+						"name": "Lanternedge",
+						"slug": "lanternedge",
+						"icon": "lanternedge"
+					}
 				},
 				{
 					"label": "Lanternedge",
-					"itemSlug": "lanternedge",
 					"detail": "Knotted Ribbon Trader",
-					"source": "shop"
+					"source": "shop",
+					"entity": {
+						"kind": "item",
+						"key": "/Invented/Items/Lanternedge",
+						"name": "Lanternedge",
+						"slug": "lanternedge",
+						"icon": "lanternedge"
+					}
 				},
 				{
 					"label": "Lanternedge",
-					"itemSlug": "lanternedge",
 					"detail": "Lilac Feather Trader",
-					"source": "shop"
+					"source": "shop",
+					"entity": {
+						"kind": "item",
+						"key": "/Invented/Items/Lanternedge",
+						"name": "Lanternedge",
+						"slug": "lanternedge",
+						"icon": "lanternedge"
+					}
 				}
 			]
 		},
@@ -98,8 +182,14 @@
 			"entries": [
 				{
 					"label": "Hollow Prism",
-					"itemSlug": "hollow-prism",
-					"detail": "No icon texture is known."
+					"detail": "No icon texture is known.",
+					"entity": {
+						"kind": "item",
+						"key": "/Invented/Items/HollowPrism",
+						"name": "Hollow Prism",
+						"slug": "hollow-prism",
+						"icon": null
+					}
 				}
 			]
 		},
@@ -108,13 +198,25 @@
 			"entries": [
 				{
 					"label": "Lanternedge",
-					"itemSlug": "lanternedge",
-					"detail": "Range"
+					"detail": "Range",
+					"entity": {
+						"kind": "item",
+						"key": "/Invented/Items/Lanternedge",
+						"name": "Lanternedge",
+						"slug": "lanternedge",
+						"icon": "lanternedge"
+					}
 				},
 				{
 					"label": "Hollow Prism",
-					"itemSlug": "hollow-prism",
-					"detail": "Value and weight are unknown."
+					"detail": "Value and weight are unknown.",
+					"entity": {
+						"kind": "item",
+						"key": "/Invented/Items/HollowPrism",
+						"name": "Hollow Prism",
+						"slug": "hollow-prism",
+						"icon": null
+					}
 				}
 			]
 		},
@@ -123,53 +225,53 @@
 			"entries": [
 				{
 					"label": "/Invented/Places/UnlabelledGarden",
-					"itemSlug": null,
-					"detail": "The place has no readable display name."
+					"detail": "The place has no readable display name.",
+					"entity": null
 				},
 				{
 					"label": "/Invented/Places/AmberGarden",
-					"itemSlug": null,
-					"detail": "The place has no readable display name."
+					"detail": "The place has no readable display name.",
+					"entity": null
 				},
 				{
 					"label": "/Invented/Places/BlueGarden",
-					"itemSlug": null,
-					"detail": "The place has no readable display name."
+					"detail": "The place has no readable display name.",
+					"entity": null
 				},
 				{
 					"label": "/Invented/Places/CopperGarden",
-					"itemSlug": null,
-					"detail": "The place has no readable display name."
+					"detail": "The place has no readable display name.",
+					"entity": null
 				},
 				{
 					"label": "/Invented/Places/DappledGarden",
-					"itemSlug": null,
-					"detail": "The place has no readable display name."
+					"detail": "The place has no readable display name.",
+					"entity": null
 				},
 				{
 					"label": "/Invented/Places/EmeraldGarden",
-					"itemSlug": null,
-					"detail": "The place has no readable display name."
+					"detail": "The place has no readable display name.",
+					"entity": null
 				},
 				{
 					"label": "/Invented/Places/FrostedGarden",
-					"itemSlug": null,
-					"detail": "The place has no readable display name."
+					"detail": "The place has no readable display name.",
+					"entity": null
 				},
 				{
 					"label": "/Invented/Places/GoldenGarden",
-					"itemSlug": null,
-					"detail": "The place has no readable display name."
+					"detail": "The place has no readable display name.",
+					"entity": null
 				},
 				{
 					"label": "/Invented/Places/HazelGarden",
-					"itemSlug": null,
-					"detail": "The place has no readable display name."
+					"detail": "The place has no readable display name.",
+					"entity": null
 				},
 				{
 					"label": "/Invented/Places/IndigoGarden",
-					"itemSlug": null,
-					"detail": "The place has no readable display name."
+					"detail": "The place has no readable display name.",
+					"entity": null
 				}
 			]
 		},
@@ -178,8 +280,8 @@
 			"entries": [
 				{
 					"label": "/Invented/Places/BrokenObservatory",
-					"itemSlug": null,
-					"detail": "The package could not be read. Its contents are absent."
+					"detail": "The package could not be read. Its contents are absent.",
+					"entity": null
 				}
 			]
 		}

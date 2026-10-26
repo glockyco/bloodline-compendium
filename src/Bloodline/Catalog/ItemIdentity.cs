@@ -41,7 +41,7 @@ internal static partial class ItemIdentity
         var reserved = groups.Select(group => group.Key).ToHashSet(StringComparer.Ordinal);
         foreach (var group in groups.OrderBy(group => group.Key, StringComparer.Ordinal))
         {
-            var members = group.OrderBy(item => item.Id, StringComparer.Ordinal).ToArray();
+            var members = group.OrderBy(item => item.Key, StringComparer.Ordinal).ToArray();
             for (var index = 0; index < members.Length; index++)
             {
                 var item = members[index];
@@ -77,7 +77,7 @@ internal static partial class ItemIdentity
                         slug = basis + "-" + ordinal++;
                     }
                 }
-                result.Add(item.Id, (slug, qualifier));
+                result.Add(item.Key, (slug, qualifier));
             }
         }
         return result;

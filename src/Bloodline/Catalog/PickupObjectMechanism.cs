@@ -62,7 +62,22 @@ internal sealed class PickupObjectMechanism : ISourceMechanism
                         $"The listed amount is {count} items, but whether multiple items are granted is unknown.",
                     ];
                 }
-                yield return Grant(item, amount, places, notes);
+                yield return Grant(
+                    item,
+                    amount,
+                    places,
+                    WorldSourceData.Reference(
+                        EntityKind.Resource,
+                        path,
+                        WorldSourceData.Name(properties, path)
+                    ),
+                    WorldSourceData.Conditions(
+                        context,
+                        properties,
+                        places.Count == 1 ? places[0].Key : null
+                    ),
+                    notes
+                );
             }
             foreach (var rule in Collectibles)
             {
@@ -73,7 +88,21 @@ internal sealed class PickupObjectMechanism : ISourceMechanism
                 var amount = rule.Quantity is { } quantity
                     ? new Amount(quantity, quantity)
                     : LootRecords.Quantity(context, collectible);
-                yield return Grant(collectible, amount, places);
+                yield return Grant(
+                    collectible,
+                    amount,
+                    places,
+                    WorldSourceData.Reference(
+                        EntityKind.Resource,
+                        path,
+                        WorldSourceData.Name(properties, path)
+                    ),
+                    WorldSourceData.Conditions(
+                        context,
+                        properties,
+                        places.Count == 1 ? places[0].Key : null
+                    )
+                );
             }
         }
     }
@@ -88,7 +117,9 @@ internal sealed class PickupObjectMechanism : ISourceMechanism
     private static ItemSource Grant(
         string item,
         Amount? amount,
-        IReadOnlyList<Place> places,
+        IReadOnlyList<EntityReference> places,
+        EntityReference entity,
+        IReadOnlyList<RelationCondition> conditions,
         IReadOnlyList<string>? notes = null
     ) =>
         new(
@@ -104,5 +135,9 @@ internal sealed class PickupObjectMechanism : ISourceMechanism
                 [],
                 notes ?? []
             )
+            {
+                Entity = entity,
+                Conditions = conditions,
+            }
         );
 }

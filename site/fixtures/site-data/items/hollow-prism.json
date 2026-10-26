@@ -1,5 +1,4 @@
 {
-	"id": "/Invented/Items/HollowPrism",
 	"slug": "hollow-prism",
 	"name": "Hollow Prism",
 	"type": "Curio",
@@ -28,5 +27,8 @@
 			"text": null
 		}
 	],
-	"sources": []
+	"sources": [],
+	"key": "/Invented/Items/HollowPrism",
+	"kind": "item",
+	"relations": []
 }

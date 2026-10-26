@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
 	import '@pagefind/component-ui/css';
+	import { page } from '$app/state';
+	import { kindPath } from './entities.js';
 	let {
 		variant = 'header',
 		placeholder = 'Search items'
@@ -21,7 +22,7 @@
 		hide-shortcut
 	></pagefind-searchbox>
 	<noscript
-		>Search needs JavaScript. Browse the <a href={resolve('items/')}>item list</a> instead.</noscript
+		>Search needs JavaScript. Browse the <a href={kindPath('item', page.data.kinds)!}>item list</a> instead.</noscript
 	>
 </div>
 

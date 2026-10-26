@@ -81,6 +81,23 @@ internal sealed class CurrencyShopMechanism : ISourceMechanism
                         [],
                         notes
                     )
+                    {
+                        Entity = WorldSourceData.PlacementEntity(
+                            context,
+                            placement,
+                            EntityKind.Merchant,
+                            ShopMechanism.VendorName(placement.Properties, placement.Actor.Class)
+                        ),
+                        Conditions =
+                        [
+                            .. WorldSourceData.Conditions(
+                                context,
+                                placement.Properties,
+                                placement.Level
+                            ),
+                            .. WorldSourceData.DialogueConditions(context, dialogue, instance),
+                        ],
+                    }
                 );
             }
         }

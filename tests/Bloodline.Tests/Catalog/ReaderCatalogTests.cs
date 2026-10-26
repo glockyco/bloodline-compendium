@@ -39,8 +39,8 @@ public sealed class ReaderCatalogTests
             [],
             [new Sources(ingredient.Path, currency.Path, output.Path)]
         );
-        var ore = result.Items.Single(item => item.Id == ingredient.Path);
-        var coin = result.Items.Single(item => item.Id == currency.Path);
+        var ore = result.Items.Single(item => item.Key == ingredient.Path);
+        var coin = result.Items.Single(item => item.Key == currency.Path);
         var craft = Assert.Single(ore.Uses);
         Assert.Equal(SourceKind.Crafting, craft.Kind);
         Assert.Equal(3, craft.Quantity);
@@ -78,7 +78,10 @@ public sealed class ReaderCatalogTests
                 ),
             ]
         );
-        Assert.Equal(new ItemLink(null, "Hidden Token"), context.ItemLink(item.Path));
+        Assert.Equal(
+            new EntityReference(EntityKind.Item, null, "Hidden Token", null, null),
+            context.ItemLink(item.Path)
+        );
     }
 
     private static ClassRecord Item(string id, string name, string type) =>

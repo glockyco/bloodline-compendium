@@ -141,7 +141,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
         CatalogContext context,
         string path,
         JsonObject properties,
-        IReadOnlyList<Place> places,
+        IReadOnlyList<EntityReference> places,
         bool placed,
         IReadOnlySet<string?>? placedPools = null
     )
@@ -188,6 +188,16 @@ internal sealed class GatheringMechanism : ISourceMechanism
                         ]
                     )
                     {
+                        Entity = WorldSourceData.Reference(
+                            EntityKind.Resource,
+                            path,
+                            SourceName(pool)
+                        ),
+                        Conditions = HarvestConditions(
+                            context,
+                            properties,
+                            places.Count == 1 ? places[0].Key : null
+                        ),
                         ChanceBasis = chance is null ? null : "Chance per roll",
                     }
                 );
@@ -220,10 +230,29 @@ internal sealed class GatheringMechanism : ISourceMechanism
                         [],
                         [
                             "Each listed outcome is equally likely, including repeated items and empty outcomes. Whether this gathering method is active is unknown.",
-                            .. HarvestNotes(properties, false),
+                            .. HarvestNotes(properties),
                         ]
                     )
                     {
+                        Entity = WorldSourceData.Reference(
+                            EntityKind.Resource,
+                            path,
+                            SourceName(pool)
+                        ),
+                        Conditions =
+                        [
+                            .. WorldSourceData.Conditions(
+                                context,
+                                properties,
+                                places.Count == 1 ? places[0].Key : null
+                            ),
+                            new RelationCondition(
+                                ConditionKind.Unknown,
+                                null,
+                                null,
+                                "Whether this gathering method is active is unknown."
+                            ),
+                        ],
                         ChanceBasis = "Chance per roll",
                     }
                 );
@@ -258,10 +287,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
             _ => "Gathering point",
         };
 
-    private static IEnumerable<string> HarvestNotes(
-        JsonObject properties,
-        bool includeRequiredLevel = true
-    )
+    private static IEnumerable<string> HarvestNotes(JsonObject properties)
     {
         if (
             RecordValues.Number(properties["Maximum amount of items that can be harvested"]) is
@@ -270,11 +296,36 @@ internal sealed class GatheringMechanism : ISourceMechanism
         {
             yield return FormattableString.Invariant($"Maximum harvest amount: {limit}.");
         }
-        if (includeRequiredLevel && RecordValues.Number(properties["Required level"]) is { } level)
-        {
-            yield return FormattableString.Invariant($"Requires level {level}.");
-        }
     }
+
+    private static IReadOnlyList<RelationCondition> HarvestConditions(
+        CatalogContext context,
+        JsonObject properties,
+        string? levelPath
+    ) =>
+        RecordValues.Number(properties["Required level"]) is { } level
+            ?
+            [
+                .. WorldSourceData.Conditions(context, properties, levelPath),
+                new RelationCondition(
+                    ConditionKind.GameState,
+                    null,
+                    level,
+                    FormattableString.Invariant($"Requires level {level}.")
+                ),
+            ]
+        : properties.ContainsKey("Required level")
+            ?
+            [
+                .. WorldSourceData.Conditions(context, properties, levelPath),
+                new RelationCondition(
+                    ConditionKind.Unknown,
+                    null,
+                    null,
+                    "The required gathering level could not be read."
+                ),
+            ]
+        : WorldSourceData.Conditions(context, properties, levelPath);
 
     private static IEnumerable<ItemSource> BespokeSources(CatalogContext context)
     {
@@ -307,7 +358,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
                         yield return source;
                     }
                 }
-                ItemSource? Create(JsonObject properties, IReadOnlyList<Place> places)
+                ItemSource? Create(JsonObject properties, IReadOnlyList<EntityReference> places)
                 {
                     if (RecordValues.AnyReference(properties[field]) is not { } item)
                     {
@@ -337,6 +388,18 @@ internal sealed class GatheringMechanism : ISourceMechanism
                                 "Received when harvesting. The number of harvesting actions depends on the state of the gathering point.",
                             ]
                         )
+                        {
+                            Entity = WorldSourceData.Reference(
+                                EntityKind.Resource,
+                                type.Path,
+                                className == "WheatField_Volume_C" ? "Wheat Patch" : "Warp Spike"
+                            ),
+                            Conditions = HarvestConditions(
+                                context,
+                                properties,
+                                places.Count == 1 ? places[0].Key : null
+                            ),
+                        }
                     );
                 }
             }

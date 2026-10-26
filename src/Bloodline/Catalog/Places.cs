@@ -25,18 +25,22 @@ internal sealed class Places
         "LevelName",
         "Map",
     ];
-    private readonly Dictionary<string, Place> places;
+    private readonly Dictionary<string, EntityReference> places;
     private readonly HashSet<string> named = new(StringComparer.OrdinalIgnoreCase);
-    public IReadOnlyCollection<Place> All => places.Values;
+    public IReadOnlyCollection<EntityReference> All => places.Values;
     public int NamedCount => named.Count;
 
     public bool HasName(string path) => named.Contains(path);
 
-    public Place Get(string path)
+    public EntityReference Get(string path)
     {
         if (!places.TryGetValue(path, out var place))
         {
-            place = new Place(path, ItemIdentity.Readable(ItemIdentity.ClassName(path)));
+            place = WorldSourceData.Reference(
+                EntityKind.Place,
+                path,
+                ItemIdentity.Readable(ItemIdentity.ClassName(path))
+            );
             places.Add(path, place);
         }
         return place;
@@ -46,10 +50,12 @@ internal sealed class Places
     {
         places = records.Levels.ToDictionary(
             level => level.Path,
-            level => new Place(
-                level.Path,
-                ItemIdentity.Readable(ItemIdentity.ClassName(level.Path))
-            ),
+            level =>
+                WorldSourceData.Reference(
+                    EntityKind.Place,
+                    level.Path,
+                    ItemIdentity.Readable(ItemIdentity.ClassName(level.Path))
+                ),
             StringComparer.OrdinalIgnoreCase
         );
         var byName = records
@@ -86,14 +92,18 @@ internal sealed class Places
                     }
                     if (places.TryGetValue(target, out var known))
                     {
-                        places[known.Id] = new Place(known.Id, display);
-                        named.Add(known.Id);
+                        places[target] = known with { Name = display };
+                        named.Add(target);
                         continue;
                     }
                     var matches = byName.GetValueOrDefault(ItemIdentity.ClassName(target)) ?? [];
                     foreach (var level in matches)
                     {
-                        places[level.Path] = new Place(level.Path, display);
+                        places[level.Path] = WorldSourceData.Reference(
+                            EntityKind.Place,
+                            level.Path,
+                            display
+                        );
                         named.Add(level.Path);
                     }
                 }
@@ -134,7 +144,11 @@ internal sealed class Places
                     .ToArray();
                 if (parents.Length == 1)
                 {
-                    places[level.Path] = new Place(level.Path, parents[0]);
+                    places[level.Path] = WorldSourceData.Reference(
+                        EntityKind.Place,
+                        level.Path,
+                        parents[0]
+                    );
                     named.Add(level.Path);
                     changed = true;
                 }

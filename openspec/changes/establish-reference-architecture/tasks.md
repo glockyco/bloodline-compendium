@@ -45,10 +45,10 @@
 ## 6. Entity graph contract
 
 - [ ] 6.1 Add the kind registry, keys and relation rows to the catalog, and verify keys are stable across two extractions, unique per kind and equal to the class paths a lab save stores for its inventory
-- [ ] 6.2 Convert every source mechanism and use to relation rows with references to merchants, people, creatures, places, containers, recipes and buildings and with typed conditions, and verify sample items for each mechanism and the calendar event condition of the Hallowed Eve Merchant
-- [ ] 6.3 Write references and reverse relations into site data, regenerate the schema, types and fixtures, and verify the generated-file check
-- [ ] 6.4 Add the catalog graph check for dangling keys, duplicate keys and slugs, one-way relations and links to kinds without pages, and verify each on a planted fixture
-- [ ] 6.5 Extend the built-site gate to require every relation in static HTML, and verify it fails when a relation renders only after JavaScript
+- [x] 6.2 Convert every source mechanism and use to relation rows with references to merchants, people, creatures, places, containers, recipes and buildings and with typed conditions, and verify sample items for each mechanism and the calendar event condition of the Hallowed Eve Merchant
+- [x] 6.3 Write references and reverse relations into site data, regenerate the schema, types and fixtures, and verify the generated-file check
+- [x] 6.4 Add the catalog graph check for dangling keys, duplicate keys and slugs, one-way relations and links to kinds without pages, and verify each on a planted fixture
+- [x] 6.5 Extend the built-site gate to require every relation in static HTML, and verify it fails when a relation renders only after JavaScript
 - [ ] 6.6 Render references through the entity link component, unlinked for kinds without pages, and verify an item sold by a merchant on real data
 - [ ] 6.7 Feed routes, Pagefind kind filters, the sitemap and page metadata from the kind registry, and verify a search filtered to items and the sitemap on real data
 

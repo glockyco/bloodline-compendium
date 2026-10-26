@@ -1,13 +1,18 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
-	/** A reference to anything the compendium names. Kinds without pages render their name without a link. */
-	interface EntityReference {
-		name: string;
-		slug: string | null;
-	}
-	let { entity, kind = 'item' }: { entity: EntityReference; kind?: 'item' } = $props();
-	const routes = { item: 'items' } as const;
+	import { page } from '$app/state';
+	import type { EntityReference } from '#lib/site-data.js';
+	import { entityPath } from '#lib/entities.js';
+	import type { Snippet } from 'svelte';
+	let {
+		entity,
+		class: className,
+		children
+	}: { entity: EntityReference; class?: string; children?: Snippet } = $props();
+	const path = $derived(entityPath(entity, page.data.kinds));
 </script>
 
-{#if entity.slug}<a href={resolve(`${routes[kind]}/${entity.slug}/`)} data-game>{entity.name}</a
-	>{:else}<span data-game>{entity.name}</span>{/if}
+{#if path}<a href={path} class={className} data-game
+		>{#if children}{@render children()}{:else}{entity.name}{/if}</a
+	>{:else}<span class={className} data-game
+		>{#if children}{@render children()}{:else}{entity.name}{/if}</span
+	>{/if}

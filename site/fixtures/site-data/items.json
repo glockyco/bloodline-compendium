@@ -34,7 +34,9 @@
 			"category": "food",
 			"value": 8,
 			"icon": "cinderpear",
-			"sourceKinds": ["gathering"]
+			"sourceKinds": ["gathering"],
+			"key": "/Invented/Items/Cinderpear",
+			"kind": "item"
 		},
 		{
 			"slug": "hollow-prism",
@@ -44,7 +46,9 @@
 			"category": "curio",
 			"value": null,
 			"icon": null,
-			"sourceKinds": []
+			"sourceKinds": [],
+			"key": "/Invented/Items/HollowPrism",
+			"kind": "item"
 		},
 		{
 			"slug": "lanternedge",
@@ -54,7 +58,9 @@
 			"category": "weapon",
 			"value": 45,
 			"icon": "lanternedge",
-			"sourceKinds": ["shop", "crafting", "currencyShop", "containerLoot"]
+			"sourceKinds": ["shop", "crafting", "currencyShop", "containerLoot"],
+			"key": "/Invented/Items/Lanternedge",
+			"kind": "item"
 		},
 		{
 			"slug": "mosswoven-coat",
@@ -64,7 +70,9 @@
 			"category": "armour",
 			"value": 90,
 			"icon": "mosswoven-coat",
-			"sourceKinds": ["enemyDrop"]
+			"sourceKinds": ["enemyDrop"],
+			"key": "/Invented/Items/MosswovenCoat",
+			"kind": "item"
 		}
 	]
 }

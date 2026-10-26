@@ -43,6 +43,16 @@ export const sourceNames: Record<SourceKind, string> = {
 	settlementDelivery: 'Settlements'
 };
 export const gaps: Record<GapKind, { title: string; explanation: string }> = {
+	unknownCondition: {
+		title: 'Unknown relation conditions',
+		explanation:
+			'These sources or uses depend on conditions the readable data does not determine. The conditions remain unknown rather than being treated as unrestricted.'
+	},
+	unresolvedReference: {
+		title: 'Unresolved entity references',
+		explanation:
+			'These references have a readable label but no known game identifier. They remain unlinked until their identity can be resolved.'
+	},
 	itemWithoutSource: {
 		title: 'Items without a known source',
 		explanation:

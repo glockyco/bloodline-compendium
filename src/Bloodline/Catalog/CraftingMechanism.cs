@@ -15,9 +15,9 @@ internal sealed class CraftingMechanism : ISourceMechanism
             .SelectMany(table => table.Rows)
             .ToDictionary(row => row.Name, StringComparer.OrdinalIgnoreCase);
         foreach (
-            var row in context
+            var (table, row) in context
                 .Records.Tables.Where(table => ItemIdentity.ClassName(table.Path) == "ItemRecipes")
-                .SelectMany(table => table.Rows)
+                .SelectMany(table => table.Rows.Select(row => (table, row)))
         )
         {
             if (
@@ -47,6 +47,7 @@ internal sealed class CraftingMechanism : ISourceMechanism
                 type is "Weaponsmithing" or "Armorsmithing"
                 || type is "CraftingTypes::NewEnumerator0" or "CraftingTypes::NewEnumerator1";
             var notes = new List<string>();
+            var conditions = new List<RelationCondition>();
             var typeName =
                 RecordValues.EnumDisplay(row.Values["CraftingType"])
                 ?? (
@@ -90,10 +91,26 @@ internal sealed class CraftingMechanism : ISourceMechanism
                     null => null,
                     _ => "weaponsmithing",
                 };
-                notes.Add(
-                    skill is null
-                        ? $"Required component skill level: {level}. The skill is not recorded."
-                        : $"Requires {skill} level {level}."
+                conditions.Add(
+                    new(
+                        skill is null ? ConditionKind.Unknown : ConditionKind.ProficiencyLevel,
+                        null,
+                        level,
+                        skill is null
+                            ? $"Required component skill level: {level}. The skill is not recorded."
+                            : $"Requires {skill} level {level}."
+                    )
+                );
+            }
+            else if (output.Values.ContainsKey("WeaponsmithingLevelRequired"))
+            {
+                conditions.Add(
+                    new(
+                        ConditionKind.Unknown,
+                        null,
+                        null,
+                        "The required component skill level could not be read."
+                    )
                 );
             }
             var amount = checked((int)RecordValues.Integer(row.Values["CraftAmount"])!.Value);
@@ -112,6 +129,14 @@ internal sealed class CraftingMechanism : ISourceMechanism
                         .ToArray(),
                     notes
                 )
+                {
+                    Entity = WorldSourceData.Reference(
+                        EntityKind.Recipe,
+                        table.Path + ":" + row.Name,
+                        RecordValues.Text(output.Values["ItemName"]) ?? context.ItemLink(item).Name
+                    ),
+                    Conditions = conditions,
+                }
             );
         }
     }
