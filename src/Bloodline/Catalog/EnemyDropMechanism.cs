@@ -72,7 +72,8 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
             )
         )
         {
-            var name = LootRecords.Name(properties, "Enemy Name", path);
+            var nameNotes = new List<string>();
+            var name = LootRecords.Name(properties, "Enemy Name", path, nameNotes);
             // Spawners use class defaults, not overrides of another placed enemy.
             var sourcePlaces =
                 places.Count == 0 && spawnedPlaces.TryGetValue(path, out var spawned)
@@ -86,7 +87,7 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
                     SourceKind.EnemyDrop,
                     name,
                     sourcePlaces,
-                    RollNotes(field, places.Count == 0 && sourcePlaces.Count > 0)
+                    RollNotes(field, places.Count == 0 && sourcePlaces.Count > 0, nameNotes)
                 )
             )
                 yield return source;
@@ -98,7 +99,8 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
         {
             if (!context.Classes.TryGetValue(path, out var type) || !placedClasses.Contains(path))
                 continue;
-            var name = LootRecords.Name(type.Properties, "Enemy Name", path);
+            var nameNotes = new List<string>();
+            var name = LootRecords.Name(type.Properties, "Enemy Name", path, nameNotes);
             foreach (var field in new[] { "Loot Table", "Rare Pickup Loot" })
             foreach (
                 var source in LootRecords.Pool(
@@ -107,21 +109,25 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
                     SourceKind.EnemyDrop,
                     name,
                     places,
-                    RollNotes(field, true)
+                    RollNotes(field, true, nameNotes)
                 )
             )
                 yield return source;
         }
     }
 
-    private static IReadOnlyList<string> RollNotes(string field, bool fromSpawner)
+    private static IReadOnlyList<string> RollNotes(
+        string field,
+        bool fromSpawner,
+        IReadOnlyList<string> nameNotes
+    )
     {
         var roll =
             field == "Loot Table"
                 ? "Corpse loot roll. Separate from the rare pickup roll."
                 : "Rare pickup roll. Separate from corpse loot.";
         return fromSpawner
-            ? [roll, "Spawner activation conditions have not been checked."]
-            : [roll];
+            ? [roll, .. nameNotes, "Spawner activation conditions have not been checked."]
+            : [roll, .. nameNotes];
     }
 }

@@ -28,8 +28,8 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                 continue;
             if (RecordValues.Boolean(properties["Use Entire Data Table?"]) == true)
                 continue;
-            var name = LootRecords.Name(properties, "Object Name", path);
             var notes = new List<string>();
+            var name = LootRecords.Name(properties, "Object Name", path, notes);
             if (RecordValues.Number(properties["Spawn Chance"]) is { } spawn)
                 notes.Add(
                     $"Container spawn chance: {spawn.ToString(CultureInfo.InvariantCulture)}."
@@ -54,7 +54,14 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                 if (row is null)
                     continue;
                 pool = row.Values["ContainerLootTable"];
-                name = RecordValues.Text(row.Values["ContainerName"]) ?? name;
+                if (
+                    RecordValues.Text(row.Values["ContainerName"]) is { } presetName
+                    && !string.IsNullOrWhiteSpace(presetName)
+                )
+                {
+                    name = presetName;
+                    notes.Remove(LootRecords.UnnamedNote);
+                }
                 notes.Add($"Preset loot table: {row.Name}.");
             }
             foreach (
@@ -102,7 +109,11 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                 if (row is null)
                     continue;
                 pool = row.Values["ContainerLootTable"];
-                name = RecordValues.Text(row.Values["ContainerName"]) ?? name;
+                if (
+                    RecordValues.Text(row.Values["ContainerName"]) is { } presetName
+                    && !string.IsNullOrWhiteSpace(presetName)
+                )
+                    name = presetName;
                 notes.Add($"Preset loot table: {row.Name}.");
             }
             else if (
@@ -202,6 +213,9 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
 
 internal static class LootRecords
 {
+    internal const string UnnamedNote =
+        "No display name is recorded. The source name is derived from its class.";
+
     internal static IEnumerable<(
         string Path,
         JsonObject Properties,
@@ -230,10 +244,19 @@ internal static class LootRecords
         }
     }
 
-    internal static string Name(JsonObject properties, string field, string path) =>
-        RecordValues.Text(properties[field])
-        ?? RecordValues.String(properties[field])
-        ?? ItemIdentity.Readable(ItemIdentity.ClassName(path));
+    internal static string Name(
+        JsonObject properties,
+        string field,
+        string path,
+        List<string> notes
+    )
+    {
+        var name = RecordValues.Text(properties[field]) ?? RecordValues.String(properties[field]);
+        if (!string.IsNullOrWhiteSpace(name))
+            return name;
+        notes.Add(UnnamedNote);
+        return ItemIdentity.Readable(ItemIdentity.ClassName(path));
+    }
 
     internal static IEnumerable<ItemSource> Pool(
         CatalogContext context,

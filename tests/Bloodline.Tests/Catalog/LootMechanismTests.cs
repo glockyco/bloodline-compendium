@@ -539,4 +539,20 @@ public sealed class LootMechanismTests
         Assert.Equal(new Weight(2, 8), source.Weight);
         Assert.Null(source.Chance);
     }
+
+    [Fact]
+    public void EmptyEnemyDisplayNameUsesAnExplicitlyUncertainClassName()
+    {
+        var properties = Parse("""{"Enemy Name":{"$text":""}}""");
+        properties["Loot Table"] = Pool();
+        var source = Assert
+            .Single(
+                new EnemyDropMechanism().FindSources(
+                    Context([new ClassRecord(Enemy, [], properties)])
+                )
+            )
+            .Source;
+        Assert.Equal("Beast", source.Name);
+        Assert.Contains(LootRecords.UnnamedNote, source.Notes);
+    }
 }
