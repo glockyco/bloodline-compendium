@@ -75,10 +75,6 @@
 				"min": 2,
 				"max": 4
 			},
-			"weight": null,
-			"chance": null,
-			"chanceBasis": null,
-			"picks": null,
 			"inputs": [],
 			"notes": [],
 			"entity": {
@@ -89,7 +85,8 @@
 				"icon": null
 			},
 			"conditions": [],
-			"relationId": "fixture:cinderpear:source:0"
+			"relationId": "fixture:cinderpear:source:0",
+			"odds": null
 		}
 	],
 	"key": "/Invented/Items/Cinderpear",

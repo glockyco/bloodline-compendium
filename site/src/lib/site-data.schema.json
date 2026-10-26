@@ -969,7 +969,9 @@
         "container",
         "kill",
         "delivery",
-        "use"
+        "use",
+        "catch",
+        "pick"
       ],
       "title": "OddsEvent"
     },
@@ -1287,18 +1289,6 @@
             }
           ]
         },
-        "chance": {
-          "type": [
-            "number",
-            "null"
-          ]
-        },
-        "chanceBasis": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
         "conditions": {
           "items": {
             "$ref": "#/$defs/RelationCondition"
@@ -1336,16 +1326,6 @@
             }
           ]
         },
-        "picks": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/Amount"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "places": {
           "items": {
             "$ref": "#/$defs/EntityReference"
@@ -1377,16 +1357,6 @@
         },
         "settlement": {
           "type": "boolean"
-        },
-        "weight": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/Weight"
-            },
-            {
-              "type": "null"
-            }
-          ]
         }
       },
       "required": [
@@ -1395,8 +1365,6 @@
         "places",
         "price",
         "amount",
-        "weight",
-        "chance",
         "inputs",
         "notes",
         "entity",
@@ -1523,22 +1491,6 @@
         "value"
       ],
       "title": "WeaponPart",
-      "type": "object"
-    },
-    "Weight": {
-      "properties": {
-        "total": {
-          "type": "number"
-        },
-        "value": {
-          "type": "number"
-        }
-      },
-      "required": [
-        "value",
-        "total"
-      ],
-      "title": "Weight",
       "type": "object"
     }
   },

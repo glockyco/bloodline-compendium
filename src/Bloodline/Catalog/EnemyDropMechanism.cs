@@ -13,7 +13,6 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
         "Actor To Spawn",
         "Enemy Type",
     ];
-    private static readonly string[] LootFields = ["Loot Table", "Rare Pickup Loot"];
 
     public IEnumerable<ItemSource> FindSources(CatalogContext context)
     {
@@ -83,7 +82,7 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
                 places.Count == 0 && spawnedPlaces.TryGetValue(path, out var spawned)
                     ? spawned
                     : places;
-            foreach (var field in LootFields)
+            foreach (var (field, picks) in Pools(context, path))
             foreach (
                 var source in LootRecords.Pool(
                     context,
@@ -93,7 +92,8 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
                     sourcePlaces,
                     RollNotes(field, nameNotes),
                     WorldSourceData.Reference(EntityKind.Creature, path, name),
-                    "Chance per kill",
+                    OddsEvent.Kill,
+                    picks,
                     conditions: places.Count == 0 && sourcePlaces.Count > 0
                         ?
                         [
@@ -127,7 +127,7 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
                 continue;
             var nameNotes = new List<string>();
             var name = LootRecords.Name(type.Properties, "Enemy Name", path, nameNotes);
-            foreach (var field in LootFields)
+            foreach (var (field, picks) in Pools(context, path))
             foreach (
                 var source in LootRecords.Pool(
                     context,
@@ -137,7 +137,8 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
                     places,
                     RollNotes(field, nameNotes),
                     WorldSourceData.Reference(EntityKind.Creature, path, name),
-                    "Chance per kill",
+                    OddsEvent.Kill,
+                    picks,
                     conditions:
                     [
                         .. WorldSourceData.Conditions(
@@ -158,12 +159,42 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
         }
     }
 
-    private static IReadOnlyList<string> RollNotes(string field, IReadOnlyList<string> nameNotes)
+    private static IReadOnlyList<string> RollNotes(string field, IReadOnlyList<string> nameNotes) =>
+        field == "Loot Table"
+            ? nameNotes
+            : ["Rare loot, chosen apart from the normal drop.", .. nameNotes];
+
+    // Goblin_Base:Die picks once from the normal pool for every enemy. The rare pool drops only where a death
+    // event spawns a Loot_Dropped with it, which then picks once, and these are the classes whose Drop Loot does
+    // so with the authored pool, with the chance it gates the drop by. Bandit_Cutter, LobGob, Goblin_Archer,
+    // Undead_Lancer and Herald_Emberbound also drop a rare pool, but replace it with their own weapon on
+    // construction, and Fenraen's pool is what it digs up.
+    private static readonly Dictionary<string, double> RareDrops = new(
+        StringComparer.OrdinalIgnoreCase
+    )
     {
-        var roll =
-            field == "Loot Table"
-                ? "Dropped when defeated."
-                : "Rare loot dropped when defeated. Checked separately from normal loot.";
-        return [roll, .. nameNotes];
+        ["CopperCrownBandit"] = 1,
+        ["Herald_Ashbinder"] = 0.25,
+        ["Herald_Ashwarden"] = 0.25,
+        ["Herald_Cindersworn"] = 0.25,
+    };
+
+    private static IEnumerable<(string Field, PickCount Picks)> Pools(
+        CatalogContext context,
+        string path
+    )
+    {
+        yield return ("Loot Table", PickCount.Fixed(1));
+        var classes = context.Classes.TryGetValue(path, out var type)
+            ? type.Ancestors.Prepend(path)
+            : [path];
+        foreach (var name in classes.Select(ItemIdentity.ClassName))
+        {
+            if (RareDrops.TryGetValue(name, out var chance))
+            {
+                yield return ("Rare Pickup Loot", PickCount.Sometimes(chance));
+                yield break;
+            }
+        }
     }
 }

@@ -110,8 +110,6 @@ public sealed class ReaderCatalogTests
                     [],
                     null,
                     new Amount(1, 1),
-                    null,
-                    null,
                     [new ItemAmount(context.ItemLink(ingredient), 3)],
                     []
                 )
@@ -124,8 +122,6 @@ public sealed class ReaderCatalogTests
                     [],
                     new Price(7, context.ItemLink(currency)),
                     new Amount(1, 1),
-                    null,
-                    null,
                     [],
                     []
                 )

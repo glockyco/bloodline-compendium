@@ -122,8 +122,6 @@ internal sealed class CraftingMechanism : ISourceMechanism
                     [],
                     null,
                     new Amount(amount, amount),
-                    null,
-                    null,
                     inputs
                         .Select(pair => new ItemAmount(context.ItemLink(pair.Key), pair.Value))
                         .ToArray(),

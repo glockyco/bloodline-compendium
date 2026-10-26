@@ -23,6 +23,14 @@ public sealed class LootMechanismTests
             ),
         };
 
+    // Containers pick once with these bounds, so a source's chance per container is its pool share.
+    private static JsonObject OnePick(JsonObject properties)
+    {
+        properties["Min amount of loot items"] = 0;
+        properties["Max amount of loot items"] = 0;
+        return properties;
+    }
+
     private static CatalogContext Context(
         IReadOnlyList<ClassRecord> classes,
         IReadOnlyList<ActorRecord>? actors = null,
@@ -59,7 +67,7 @@ public sealed class LootMechanismTests
     }
 
     [Fact]
-    public void ContainerUsesSelectedPoolAndKeepsEmptyOutcomesInPerPickChance()
+    public void ContainerUsesSelectedPoolAndKeepsEmptyOutcomesInItsChance()
     {
         var properties = Parse(
             """{"Object Name":{"$text":"Old box"},"Min amount of loot items":2,"Max amount of loot items":4,"Spawn Chance":0.5}"""
@@ -72,19 +80,14 @@ public sealed class LootMechanismTests
         );
         var source = Assert.Single(new ContainerLootMechanism().FindSources(context)).Source;
         Assert.Equal("Old box", source.Name);
-        Assert.Equal(new Weight(2, 8), source.Weight);
         Assert.Equal(new Amount(3, 3), source.Amount);
         Assert.Equal(Level, Assert.Single(source.Places).Key);
-        Assert.Equal(0.25, source.Chance);
-        Assert.Equal("Chance per pick", source.ChanceBasis);
-        Assert.Equal(new Amount(3, 5), source.Picks);
-        Assert.Empty(source.Inputs);
-        Assert.Contains(source.Notes, note => note.Contains("3 to 5", StringComparison.Ordinal));
-        Assert.Contains(source.Notes, note => note.Contains("50%", StringComparison.Ordinal));
-        Assert.Contains(
-            source.Notes,
-            note => note.Contains("Empty outcomes", StringComparison.Ordinal)
+        Assert.Equal(
+            LootOdds.Of(OddsEvent.Container, 0.25, PickCount.Container(2, 4)),
+            source.Odds
         );
+        Assert.Empty(source.Inputs);
+        Assert.Contains(source.Notes, note => note.Contains("50%", StringComparison.Ordinal));
         Assert.Contains(
             "The possible contents are known, but why this container uses this set of items is unknown.",
             source.Notes
@@ -99,11 +102,13 @@ public sealed class LootMechanismTests
         bool unknownName
     )
     {
-        var properties = new JsonObject
-        {
-            ["Object Name"] = new JsonObject { ["$text"] = defaultName },
-            ["Selected Loot Table"] = Pool(),
-        };
+        var properties = OnePick(
+            new JsonObject
+            {
+                ["Object Name"] = new JsonObject { ["$text"] = defaultName },
+                ["Selected Loot Table"] = Pool(),
+            }
+        );
         var placed = Parse("""{"Object Name":{"$text":"Loot"}}""");
         var source = Assert
             .Single(
@@ -119,7 +124,7 @@ public sealed class LootMechanismTests
         if (!unknownName)
             Assert.Equal(defaultName, source.Name);
         Assert.Equal(unknownName, source.Notes.Contains(LootRecords.UnnamedNote));
-        Assert.Equal(new Weight(2, 8), source.Weight);
+        Assert.Equal(0.25, source.Odds!.Chance);
         Assert.Equal(new Amount(3, 3), source.Amount);
         Assert.Equal(Level, Assert.Single(source.Places).Key);
     }
@@ -142,14 +147,14 @@ public sealed class LootMechanismTests
             .Source;
         Assert.Equal("Marsh Beast", source.Name);
         Assert.Contains(LootRecords.UnnamedNote, source.Notes);
-        Assert.Equal(new Weight(2, 8), source.Weight);
+        Assert.Equal(0.25, source.Odds!.Chance);
         Assert.Equal(new Amount(3, 3), source.Amount);
     }
 
     [Fact]
     public void PlacedOverridesReplaceDefaultPoolAndName()
     {
-        var properties = Parse("""{"Object Name":{"$text":"Default box"}}""");
+        var properties = OnePick(Parse("""{"Object Name":{"$text":"Default box"}}"""));
         properties["Selected Loot Table"] = Pool(9);
         var placed = Parse("""{"Object Name":{"$text":"Placed box"}}""");
         placed["Selected Loot Table"] = Pool(1);
@@ -164,14 +169,16 @@ public sealed class LootMechanismTests
             )
             .Source;
         Assert.Equal("Placed box", source.Name);
-        Assert.Equal(new Weight(1, 7), source.Weight);
+        Assert.Equal(1.0 / 7, source.Odds!.Chance);
     }
 
     [Fact]
     public void CustomPoolOverridesMatchingSelectedEntries()
     {
-        var properties = Parse(
-            """{"Loot Type":{"$enum":"Loot::NewEnumerator1"},"Add Custom Loot to Table":true}"""
+        var properties = OnePick(
+            Parse(
+                """{"Loot Type":{"$enum":"Loot::NewEnumerator1"},"Add Custom Loot to Table":true}"""
+            )
         );
         properties["Loot Table - Dungeon"] = Pool(9);
         properties["Custom Loot Table"] = Pool(1);
@@ -182,14 +189,14 @@ public sealed class LootMechanismTests
                 )
             )
             .Source;
-        Assert.Equal(new Weight(1, 7), source.Weight);
+        Assert.Equal(1.0 / 7, source.Odds!.Chance);
         Assert.Empty(source.Places);
     }
 
     [Fact]
     public void PoolSelectorUsesEnumNumericValueRatherThanEnumeratorSuffix()
     {
-        var properties = Parse("""{"Loot Type":{"$enum":"Loot::NewEnumerator99"}}""");
+        var properties = OnePick(Parse("""{"Loot Type":{"$enum":"Loot::NewEnumerator99"}}"""));
         properties["Loot Table - Minolurk Fort"] = Pool(4);
         properties["Selected Loot Table"] = Pool(99);
         var source = Assert
@@ -199,7 +206,7 @@ public sealed class LootMechanismTests
                 )
             )
             .Source;
-        Assert.Equal(new Weight(4, 10), source.Weight);
+        Assert.Equal(0.4, source.Odds!.Chance);
     }
 
     [Theory]
@@ -216,6 +223,7 @@ public sealed class LootMechanismTests
             $$$"""{"Loot Type":{"$enum":"Loot::Rare"},"Randomized Loot Style":{"$enum":"{{{style}}}"},"Hammer or Mace":true,"Add Custom Loot to Table":true}"""
         );
         properties["Spear"] = spear;
+        OnePick(properties);
         properties["Sword Loot Table - Dwarven Dungeon RARE"] = Pool(99);
         properties["Undead Sword Loot Table Undead Dungeon"] = Pool(99);
         properties["Custom Loot Table"] = Pool(99);
@@ -227,7 +235,7 @@ public sealed class LootMechanismTests
                 )
             )
             .Source;
-        Assert.Equal(new Weight(4, 10), source.Weight);
+        Assert.Equal(0.4, source.Odds!.Chance);
     }
 
     [Theory]
@@ -258,20 +266,9 @@ public sealed class LootMechanismTests
                 )
             )
             .Source;
-        Assert.Equal(new Weight(4, 10), source.Weight);
-        Assert.Equal(0.4, source.Chance);
-        Assert.Equal("Chance per pick", source.ChanceBasis);
-        Assert.Equal(new Amount(5, 5), source.Picks);
+        Assert.Equal(LootOdds.Of(OddsEvent.Container, 0.4, PickCount.Fixed(5)), source.Odds);
         Assert.Equal(Level, Assert.Single(source.Places).Key);
-        Assert.Contains(
-            source.Notes,
-            note => note.Contains("loose loot", StringComparison.Ordinal)
-        );
-        Assert.Contains(source.Notes, note => note.Contains("5", StringComparison.Ordinal));
-        Assert.DoesNotContain(
-            source.Notes,
-            note => note.Contains("minimum", StringComparison.Ordinal)
-        );
+        Assert.Contains(source.Notes, note => note.Contains("loose", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -307,7 +304,10 @@ public sealed class LootMechanismTests
             )
             .Source;
         Assert.Equal("Scattered fruit", source.Name);
-        Assert.Equal(new Weight(4, 10), source.Weight);
+        Assert.Equal(
+            new Odds(OddsEvent.Container, null, null, "How many items lie here is unknown."),
+            source.Odds
+        );
     }
 
     [Fact]
@@ -327,8 +327,8 @@ public sealed class LootMechanismTests
     [Fact]
     public void PresetPoolUsesRowNameAndPlayerFacingContainerName()
     {
-        var properties = Parse(
-            """{"Use Specific Loot Table?":true,"Loot Table Name":"inventedpreset"}"""
+        var properties = OnePick(
+            Parse("""{"Use Specific Loot Table?":true,"Loot Table Name":"inventedpreset"}""")
         );
         properties["Selected Loot Table"] = Pool(9);
         var row = Parse("""{"ContainerName":{"$text":"Fruit basket"}}""");
@@ -351,7 +351,7 @@ public sealed class LootMechanismTests
             )
             .Source;
         Assert.Equal("Fruit basket", source.Name);
-        Assert.Equal(new Weight(1, 7), source.Weight);
+        Assert.Equal(1.0 / 7, source.Odds!.Chance);
     }
 
     [Fact]
@@ -377,9 +377,7 @@ public sealed class LootMechanismTests
                 )
             )
             .Source;
-        Assert.Equal(new Amount(1, 1), source.Picks);
-        Assert.Equal(0.25, source.Chance);
-        Assert.Equal("Chance per pick", source.ChanceBasis);
+        Assert.Equal(new Odds(OddsEvent.Container, 0.25, 0.25, null), source.Odds);
     }
 
     [Fact]
@@ -480,10 +478,7 @@ public sealed class LootMechanismTests
         var source = Assert.Single(new RandomLootMechanism().FindSources(context)).Source;
         Assert.Equal(SourceKind.RandomLoot, source.Kind);
         Assert.Equal("General random loot", source.Name);
-        Assert.Null(source.Chance);
-        Assert.Null(source.ChanceBasis);
-        Assert.Null(source.Picks);
-        Assert.Null(source.Weight);
+        Assert.Null(source.Odds);
         Assert.Equal(new Amount(3, 3), source.Amount);
         Assert.Empty(source.Places);
         Assert.Contains(
@@ -492,39 +487,45 @@ public sealed class LootMechanismTests
         );
     }
 
-    [Fact]
-    public void EnemyPoolsAreSeparateAndSpawnerFindsClassDefaults()
+    [Theory]
+    [InlineData("Beast", null)]
+    [InlineData("CopperCrownBandit", 1.0)]
+    [InlineData("Herald_Ashbinder", 0.25)]
+    public void EnemyRarePoolDropsOnlyWhereADeathEventSpawnsIt(string className, double? gate)
     {
+        var enemy = $"/Game/Invented/{className}.{className}_C";
         var properties = Parse("""{"Enemy Name":{"$text":"Marsh beast"}}""");
         properties["Loot Table"] = Pool();
         properties["Rare Pickup Loot"] = Pool();
-        var spawner = Parse(
-            """{"spawnDataArr":[{"classNPC":{"$ref":"/Game/Invented/Beast.Beast_C"}}]}"""
-        );
+        var spawner = new JsonObject
+        {
+            ["spawnDataArr"] = new JsonArray(
+                new JsonObject { ["classNPC"] = new JsonObject { ["$ref"] = enemy } }
+            ),
+        };
         var sources = new EnemyDropMechanism()
             .FindSources(
                 Context(
-                    [new ClassRecord(Enemy, [], properties)],
+                    [new ClassRecord(enemy, [], properties)],
                     [new ActorRecord("Spawner", "/Game/Invented/Spawner.Spawner_C", spawner)]
                 )
             )
             .Select(source => source.Source)
             .ToArray();
-        Assert.Equal(2, sources.Length);
         Assert.All(
             sources,
             source =>
             {
                 Assert.Equal("Marsh beast", source.Name);
                 Assert.Equal(Level, Assert.Single(source.Places).Key);
-                Assert.Equal(new Weight(2, 8), source.Weight);
                 Assert.Equal(new Amount(3, 3), source.Amount);
-                Assert.Equal(0.25, source.Chance);
-                Assert.Equal("Chance per kill", source.ChanceBasis);
-                Assert.Null(source.Picks);
             }
         );
-        Assert.NotEqual(sources[0].Notes, sources[1].Notes);
+        // The normal drop picks once per kill, and the rare drop once in as many kills as its event gates.
+        var expected = new List<Odds> { new(OddsEvent.Kill, 0.25, 0.25, null) };
+        if (gate is { } chance)
+            expected.Add(new Odds(OddsEvent.Kill, chance * 0.25, chance * 0.25, null));
+        Assert.Equal(expected, sources.Select(source => source.Odds));
     }
 
     [Fact]
@@ -548,8 +549,8 @@ public sealed class LootMechanismTests
             )
             .ToArray();
         Assert.Equal(2, sources.Length);
-        Assert.Contains(sources, source => source.Source.Weight == new Weight(1, 7));
-        Assert.Contains(sources, source => source.Source.Weight == new Weight(2, 8));
+        Assert.Contains(sources, source => source.Source.Odds!.Chance == 1.0 / 7);
+        Assert.Contains(sources, source => source.Source.Odds!.Chance == 0.25);
     }
 
     [Theory]
@@ -631,9 +632,7 @@ public sealed class LootMechanismTests
             )
             .Source;
         Assert.Equal(expectedPlaces, source.Places.Count);
-        Assert.Equal(new Weight(2, 8), source.Weight);
-        Assert.Equal(0.25, source.Chance);
-        Assert.Equal("Chance per kill", source.ChanceBasis);
+        Assert.Equal(new Odds(OddsEvent.Kill, 0.25, 0.25, null), source.Odds);
     }
 
     [Fact]
@@ -653,7 +652,7 @@ public sealed class LootMechanismTests
     }
 
     [Fact]
-    public void ContainerWithUnknownPickCountStillHasAConditionalPerPickChance()
+    public void ContainerWithUnknownPickCountHasNoChance()
     {
         var properties = new JsonObject { ["Selected Loot Table"] = Pool() };
         var source = Assert
@@ -663,9 +662,14 @@ public sealed class LootMechanismTests
                 )
             )
             .Source;
-        Assert.Equal(0.25, source.Chance);
-        Assert.Equal("Chance per pick", source.ChanceBasis);
-        Assert.Null(source.Picks);
-        Assert.Contains(source.Notes, note => note.Contains("unknown", StringComparison.Ordinal));
+        Assert.Equal(
+            new Odds(
+                OddsEvent.Container,
+                null,
+                null,
+                "How many items this container holds is unknown."
+            ),
+            source.Odds
+        );
     }
 }

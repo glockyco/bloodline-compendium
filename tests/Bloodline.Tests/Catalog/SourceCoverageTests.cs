@@ -16,17 +16,7 @@ public sealed class SourceCoverageTests
     [InlineData((int)SourceKind.Gathering)]
     public void PlaceBoundSourcesOnlyHaveAPlaceGapWhenUnplaced(int kind)
     {
-        var source = new Source(
-            (SourceKind)kind,
-            "Invented source",
-            [],
-            null,
-            null,
-            null,
-            null,
-            [],
-            []
-        );
+        var source = new Source((SourceKind)kind, "Invented source", [], null, null, [], []);
         Assert.True(SourceCoverage.HasUnknownPlace(source));
         Assert.False(
             SourceCoverage.HasUnknownPlace(
@@ -53,7 +43,7 @@ public sealed class SourceCoverageTests
     {
         Assert.False(
             SourceCoverage.HasUnknownPlace(
-                new Source((SourceKind)kind, "Invented source", [], null, null, null, null, [], [])
+                new Source((SourceKind)kind, "Invented source", [], null, null, [], [])
             )
         );
     }

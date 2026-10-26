@@ -1,26 +1,19 @@
 import { expect, it } from 'vitest';
-import { chanceLabel, formatAmount, sortSources, sourceContext } from './acquisition.js';
+import { formatAmount, sortSources, sourceContext } from './acquisition.js';
 import fixture from '../../fixtures/site-data/items/lanternedge.json';
 import type { ItemPage } from './site-data.js';
 const item = fixture as ItemPage;
 
-it('keeps item quantities separate from a chance per pick', () => {
+it('keeps item quantities separate from the chance per container', () => {
 	const source = item.sources.find((entry) => entry.kind === 'containerLoot')!;
 	expect(formatAmount(source.amount!)).toBe('1 to 2');
-	expect(formatAmount(source.picks!)).toBe('2 to 3');
-	expect(chanceLabel(source)).toBe('Chance per pick');
-	expect(sourceContext(source)).toBe('25% chance per pick');
+	expect(sourceContext(source)).toBe('50.8% per container');
 });
 
-it('does not turn a weight or a chance without a basis into drop odds', () => {
+it('gives no chance where the selection rule is unknown', () => {
 	const source = item.sources.find((entry) => entry.kind === 'containerLoot')!;
-	expect(sourceContext({ ...source, chance: null, amount: null })).toBe(
-		'2 of 18.02 relative chance'
-	);
-	expect(sourceContext({ ...source, chanceBasis: null, amount: null })).toBe(
-		'2 of 18.02 relative chance'
-	);
-	expect(sourceContext({ ...source, chanceBasis: null, weight: null, amount: null })).toBeNull();
+	const odds = { event: 'container' as const, chance: null, expected: null, unknown: 'Unknown.' };
+	expect(sourceContext({ ...source, odds })).toBeNull();
 });
 
 it('orders comparable shop prices before selecting the answer summary', () => {

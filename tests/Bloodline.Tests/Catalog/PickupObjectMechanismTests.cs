@@ -80,7 +80,6 @@ public sealed class PickupObjectMechanismTests
         Assert.Equal(new Amount(4, 4), source.Amount);
         Assert.Equal(Level, Assert.Single(source.Places).Key);
         Assert.Empty(source.Inputs);
-        Assert.Null(source.Chance);
     }
 
     [Fact]

@@ -18,35 +18,31 @@ public sealed class ContainerSourceMergeTests
                 [new EntityReference(EntityKind.Place, level, level, null, null)],
                 null,
                 new Amount(2, 2),
-                new Weight(0.5, 18.02),
-                null,
                 [],
                 details.Notes
             )
             {
-                ChanceBasis = "Chance per pick",
-                Picks = details.Picks,
+                Odds = details.Picks is { } picks
+                    ? LootOdds.Of(OddsEvent.Container, 0.25, picks)
+                    : LootOdds.Unknown(OddsEvent.Container, "Unknown."),
             },
             details
         );
     }
 
     [Fact]
-    public void CombinesCountAndAppearanceRangesAcrossPlacesAfterExclusions()
+    public void CombinesAppearanceRangesOfContainersWithTheSameOddsAfterExclusions()
     {
         var a = Container("/Invented/A", 0.25, new Amount(1, 5));
-        var b = Container("/Invented/B", 0.75, new Amount(3, 8));
-        var excluded = Container("/Invented/Test", 0.01, new Amount(0, 100));
+        var b = Container("/Invented/B", 0.75, new Amount(1, 5));
+        var excluded = Container("/Invented/Test", 0.01, new Amount(1, 5));
         var merged = Assert.Single(
             CatalogContext.MergeSources(
                 [a, b, excluded],
                 new HashSet<string>(["/Invented/Test"], StringComparer.OrdinalIgnoreCase)
             )
         );
-        Assert.Equal(new Amount(2, 2), merged.Amount);
-        Assert.Equal(new Weight(0.5, 18.02), merged.Weight);
-        Assert.Equal(new Amount(2, 9), merged.Picks);
-        Assert.Equal("Chance per pick", merged.ChanceBasis);
+        Assert.Equal(a.Source.Odds, merged.Odds);
         Assert.Equal(
             new[] { "/Invented/A", "/Invented/B" },
             merged.Places.Select(place => place.Key)
@@ -55,14 +51,12 @@ public sealed class ContainerSourceMergeTests
             .Matches(string.Join(" ", merged.Notes), @"\d+(?:\.\d+)?")
             .Select(match => double.Parse(match.Value, CultureInfo.InvariantCulture))
             .Order();
-        Assert.Equal(new[] { 2d, 9d, 25d, 75d }, numbers);
+        Assert.Equal(new[] { 25d, 75d }, numbers);
     }
 
     [Theory]
-    [InlineData("Weight")]
-    [InlineData("Weight total")]
-    [InlineData("Chance")]
-    [InlineData("Chance basis")]
+    [InlineData("Picks")]
+    [InlineData("Unknown picks")]
     [InlineData("Amount")]
     [InlineData("Price")]
     [InlineData("Inputs")]
@@ -71,10 +65,8 @@ public sealed class ContainerSourceMergeTests
         var a = Container("/Invented/A", 1, new Amount(1, 5));
         var changed = difference switch
         {
-            "Weight" => a.Source with { Weight = new Weight(1, 18.02) },
-            "Weight total" => a.Source with { Weight = new Weight(0.5, 20) },
-            "Chance" => a.Source with { Chance = 0.2 },
-            "Chance basis" => a.Source with { ChanceBasis = "Chance per roll" },
+            "Picks" => Container("/Invented/A", 1, new Amount(2, 5)).Source,
+            "Unknown picks" => Container("/Invented/A", 1, null).Source,
             "Amount" => a.Source with { Amount = new Amount(3, 3) },
             "Price" => a.Source with { Price = new Price(5, null) },
             "Inputs" => a.Source with
@@ -102,9 +94,7 @@ public sealed class ContainerSourceMergeTests
             sources,
             source =>
                 source.Amount == changed.Amount
-                && source.Weight == changed.Weight
-                && source.Chance == changed.Chance
-                && source.ChanceBasis == changed.ChanceBasis
+                && source.Odds == changed.Odds
                 && source.Price == changed.Price
                 && source.Inputs.SequenceEqual(changed.Inputs)
         );
@@ -114,7 +104,7 @@ public sealed class ContainerSourceMergeTests
     public void RetainsOtherContainerConditionsAlongsideTheCombinedRange()
     {
         var a = Container("/Invented/A", 1, new Amount(1, 5));
-        var b = Container("/Invented/B", 1, new Amount(2, 8));
+        var b = Container("/Invented/B", 1, new Amount(1, 5));
         const string keyCondition = "Requires the silver key.";
         const string nightCondition = "Available at night.";
         a = a with { Source = a.Source with { Notes = [.. a.Source.Notes, keyCondition] } };
@@ -128,34 +118,6 @@ public sealed class ContainerSourceMergeTests
             source.Notes,
             note => note.Contains(nightCondition, StringComparison.Ordinal)
         );
-    }
-
-    [Fact]
-    public void CombinesLooseLootBoundsWithoutTurningTheNominalMinimumIntoAGuarantee()
-    {
-        ItemSource Loose(string level, int min, int max)
-        {
-            var candidate = Container(level, null, null);
-            var details = new ContainerDetails(null, new Amount(min, max), Loose: true);
-            return candidate with
-            {
-                Container = details,
-                Source = candidate.Source with { Notes = details.Notes, Picks = details.Picks },
-            };
-        }
-        var source = Assert.Single(
-            CatalogContext.MergeSources(
-                [Loose("/Invented/A", 1, 5), Loose("/Invented/B", 3, 8)],
-                new HashSet<string>()
-            )
-        );
-        var numbers = Regex
-            .Matches(string.Join(" ", source.Notes), @"\d+(?:\.\d+)?")
-            .Select(match => double.Parse(match.Value, CultureInfo.InvariantCulture))
-            .Order();
-        Assert.Equal(new[] { 5d, 8d }, numbers);
-        Assert.Equal(2, source.Places.Count);
-        Assert.Equal(new Amount(5, 8), source.Picks);
     }
 
     [Fact]
@@ -173,18 +135,5 @@ public sealed class ContainerSourceMergeTests
                 note.Contains("location", StringComparison.OrdinalIgnoreCase)
                 && note.Contains("no known", StringComparison.OrdinalIgnoreCase)
         );
-    }
-
-    [Fact]
-    public void UnknownPickCountIsNotReplacedByKnownVariantBounds()
-    {
-        var known = Container("/Invented/A", 1, new Amount(1, 5));
-        var unknown = Container("/Invented/B", 1, null);
-        var source = Assert.Single(
-            CatalogContext.MergeSources([known, unknown], new HashSet<string>())
-        );
-        Assert.Null(source.Picks);
-        Assert.Equal(2, source.Places.Count);
-        Assert.Contains(source.Notes, note => note.Contains("unknown", StringComparison.Ordinal));
     }
 }

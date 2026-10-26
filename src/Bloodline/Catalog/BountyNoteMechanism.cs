@@ -32,8 +32,6 @@ internal sealed class BountyNoteMechanism : ISourceMechanism
                     [],
                     null,
                     quantity is > 0 ? new Amount(quantity.Value, quantity.Value) : null,
-                    null,
-                    null,
                     [],
                     [
                         "Required bounty items are needed to complete the quest, not to receive the note. They are not rewards.",

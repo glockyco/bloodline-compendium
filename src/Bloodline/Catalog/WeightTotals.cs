@@ -4,6 +4,9 @@ using Bloodline.SiteData;
 
 namespace Bloodline.Catalog;
 
+/// <summary>An item's raw weight and the total weight of the pool it is drawn from.</summary>
+internal sealed record Weight(double Value, double Total);
+
 internal static class WeightTotals
 {
     public static double Sum(IEnumerable<JsonNode?> values)

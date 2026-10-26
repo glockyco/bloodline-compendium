@@ -174,8 +174,6 @@ internal sealed class ShopMechanism : ISourceMechanism
                     ? new Price(checked((int)price), null) { Rule = PriceRule.Trading, City = city }
                     : null,
                 new Amount(1, 1),
-                null,
-                null,
                 [],
                 []
             )

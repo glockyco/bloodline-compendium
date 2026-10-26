@@ -41,8 +41,6 @@ internal sealed class CookingMechanism : ISourceMechanism
                     [],
                     null,
                     new Amount(1, 1),
-                    null,
-                    null,
                     inputs,
                     notes
                 )

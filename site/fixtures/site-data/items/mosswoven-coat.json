@@ -46,13 +46,6 @@
 				"min": 1,
 				"max": 1
 			},
-			"weight": {
-				"value": 1,
-				"total": 5
-			},
-			"chance": null,
-			"chanceBasis": null,
-			"picks": null,
 			"inputs": [],
 			"notes": [],
 			"entity": {
@@ -63,7 +56,13 @@
 				"icon": null
 			},
 			"conditions": [],
-			"relationId": "fixture:mosswoven-coat:source:0"
+			"relationId": "fixture:mosswoven-coat:source:0",
+			"odds": {
+				"event": "kill",
+				"chance": 0.2,
+				"expected": 0.2,
+				"unknown": null
+			}
 		}
 	],
 	"key": "/Invented/Items/MosswovenCoat",

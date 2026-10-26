@@ -84,7 +84,7 @@ export type SourceKind =
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "OddsEvent".
  */
-export type OddsEvent = "container" | "kill" | "delivery" | "use";
+export type OddsEvent = "container" | "kill" | "delivery" | "use" | "catch" | "pick";
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "PriceRule".
@@ -351,8 +351,6 @@ export interface RelationRow {
  */
 export interface Source {
   amount: Amount | null;
-  chance: number | null;
-  chanceBasis?: string | null;
   conditions: RelationCondition[];
   entity: EntityReference;
   inputs: ItemAmount[];
@@ -360,13 +358,11 @@ export interface Source {
   name: string;
   notes: string[];
   odds?: Odds | null;
-  picks?: Amount | null;
   places: EntityReference[];
   price: Price | null;
   recipe?: Recipe | null;
   relationId: string;
   settlement?: boolean;
-  weight: Weight | null;
   [k: string]: unknown;
 }
 /**
@@ -420,15 +416,6 @@ export interface Recipe {
   level: number | null;
   output: number;
   station: EntityReference | null;
-  [k: string]: unknown;
-}
-/**
- * This interface was referenced by `SiteDataFiles`'s JSON-Schema
- * via the `definition` "Weight".
- */
-export interface Weight {
-  total: number;
-  value: number;
   [k: string]: unknown;
 }
 /**

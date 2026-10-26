@@ -40,20 +40,8 @@
 				const showAmount = sources.some(
 					(source) => source.amount && (source.amount.min !== 1 || source.amount.max !== 1)
 				);
-				const showContext = sources.some(
-					(source) =>
-						source.price ||
-						source.weight ||
-						source.picks ||
-						(source.chance !== null && source.chanceBasis)
-				);
-				const contextHeading = sources.some((source) => source.price)
-					? 'Price'
-					: sources.some((source) => source.chance !== null && source.chanceBasis)
-						? 'Chance'
-						: sources.some((source) => source.weight)
-							? 'Relative Chance'
-							: 'Chance';
+				const showContext = sources.some((source) => source.price || source.odds);
+				const contextHeading = sources.some((source) => source.price) ? 'Price' : 'Chance';
 				return {
 					kind,
 					sources,

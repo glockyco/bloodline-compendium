@@ -86,8 +86,9 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                     places,
                     notes,
                     WorldSourceData.Reference(EntityKind.Container, path, name),
-                    "Chance per pick",
+                    OddsEvent.Container,
                     details.Picks,
+                    "How many items this container holds is unknown.",
                     WorldSourceData.Conditions(
                         context,
                         properties,
@@ -111,10 +112,7 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                 continue;
             var preset = RecordValues.String(properties["Preset Table Name"]);
             var name = "Dungeon loose loot";
-            var notes = new List<string>
-            {
-                "Appears as loose loot rather than inside a container.",
-            };
+            var notes = new List<string>();
             var maximum = RecordValues.Integer(properties["Max Spawn Amount"]);
             var details = maximum is >= 0 and <= int.MaxValue
                 ? new ContainerDetails(
@@ -123,14 +121,7 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                     Loose: true
                 )
                 : null;
-            if (details is not null)
-            {
-                notes.AddRange(details.Notes);
-            }
-            else
-            {
-                notes.Add("The number of loose loot picks is unknown.");
-            }
+            notes.AddRange((details ?? new ContainerDetails(null, null, Loose: true)).Notes);
             JsonNode? pool = properties["Loot Table"];
             if (
                 preset is not null
@@ -173,8 +164,9 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                     places,
                     notes,
                     WorldSourceData.Reference(EntityKind.Container, path, name),
-                    "Chance per pick",
+                    OddsEvent.Container,
                     details?.Picks,
+                    "How many items lie here is unknown.",
                     WorldSourceData.Conditions(
                         context,
                         properties,
@@ -353,6 +345,11 @@ internal static class LootRecords
     internal static string DisplayName(string name) =>
         name.Any(char.IsWhiteSpace) ? name : ItemIdentity.Readable(name);
 
+    /// <summary>
+    /// One source per item of a weighted pool, whose picks each choose one entry, an empty one included, with
+    /// its share of the total weight. <paramref name="picks"/> null leaves the odds unknown for
+    /// <paramref name="unknownPicks"/>.
+    /// </summary>
     internal static IEnumerable<ItemSource> Pool(
         CatalogContext context,
         JsonNode? pool,
@@ -361,50 +358,32 @@ internal static class LootRecords
         IReadOnlyList<EntityReference> places,
         IReadOnlyList<string> notes,
         EntityReference entity,
-        string? chanceBasis = null,
-        Amount? picks = null,
+        OddsEvent oddsEvent,
+        PickCount? picks,
+        string unknownPicks = "",
         IReadOnlyList<RelationCondition>? conditions = null
     )
     {
         var entries = RecordValues.MapEntries(pool).ToArray();
         var total = WeightTotals.Sum(entries.Select(entry => entry.Value));
-        var noDrop = WeightTotals.Sum(
-            entries.Where(entry => entry.Key is null).Select(entry => entry.Value)
-        );
-        if (noDrop > 0)
-            notes =
-            [
-                .. notes,
-                "A pick may give nothing. Empty outcomes are included when comparing the chances.",
-            ];
         foreach (var (key, value) in entries)
         {
             if (
                 RecordValues.AnyReference(key) is not { } item
-                || RecordValues.Number(value) is not > 0
+                || RecordValues.Number(value) is not { } weight
+                || weight <= 0
                 || total <= 0
             )
                 continue;
-            var weight = new Weight(RecordValues.Number(value)!.Value, total);
-            var chance = chanceBasis is null ? null : WeightTotals.Chance(weight);
             yield return new ItemSource(
                 item,
-                new Source(
-                    kind,
-                    name,
-                    places,
-                    null,
-                    Quantity(context, item),
-                    weight,
-                    chance,
-                    [],
-                    notes
-                )
+                new Source(kind, name, places, null, Quantity(context, item), [], notes)
                 {
                     Entity = entity,
                     Conditions = conditions ?? [],
-                    ChanceBasis = chance is null ? null : chanceBasis,
-                    Picks = picks,
+                    Odds = picks is null
+                        ? LootOdds.Unknown(oddsEvent, unknownPicks)
+                        : LootOdds.Of(oddsEvent, weight / total, picks),
                 }
             );
         }

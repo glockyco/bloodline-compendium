@@ -336,9 +336,8 @@ internal enum Stat
 
 /// <summary>
 /// One way to get an item. <see cref="Name"/> names what gives it, such as a vendor, recipe, container or
-/// enemy. An empty <see cref="Places"/> means that no place is known. <see cref="Weight"/> is the raw weight
-/// in its pool, and <see cref="Chance"/> is a probability from 0 to 1, given only where the selection rule
-/// is known. <see cref="Inputs"/> lists what the source consumes, such as ingredients or a planted seed.
+/// enemy. An empty <see cref="Places"/> means that no place is known. <see cref="Inputs"/> lists what the source
+/// consumes, such as ingredients or a planted seed.
 /// </summary>
 internal sealed record Source(
     SourceKind Kind,
@@ -346,8 +345,6 @@ internal sealed record Source(
     IReadOnlyList<EntityReference> Places,
     Price? Price,
     Amount? Amount,
-    Weight? Weight,
-    double? Chance,
     IReadOnlyList<ItemAmount> Inputs,
     IReadOnlyList<string> Notes
 )
@@ -360,10 +357,8 @@ internal sealed record Source(
 
     [JsonRequired]
     public string RelationId { get; init; } = "";
-    public string? ChanceBasis { get; init; }
-    public Amount? Picks { get; init; }
 
-    /// <summary>The chance per event, replacing <see cref="Weight"/>, <see cref="Chance"/> and picks.</summary>
+    /// <summary>The chance per event, for sources that choose at random.</summary>
     public Odds? Odds { get; init; }
 
     /// <summary>What a crafted, cooked or smithed source needs and gives.</summary>
@@ -379,11 +374,15 @@ internal enum OddsEvent
     Kill,
     Delivery,
     Use,
+    Catch,
+
+    /// <summary>One pick of a source whose number of picks per action depends on the player's skill.</summary>
+    Pick,
 }
 
 /// <summary>
-/// The chance of at least one copy per <see cref="Event"/>, and the copies expected per event. Both are null when
-/// the selection rule is not read, and <see cref="Unknown"/> then says why in player terms.
+/// The chance of at least one copy per <see cref="Event"/>, and how many times the item is expected per event.
+/// Both are null when the selection rule is not read, and <see cref="Unknown"/> then says why in player terms.
 /// </summary>
 internal sealed record Odds(OddsEvent Event, double? Chance, double? Expected, string? Unknown);
 
@@ -454,9 +453,6 @@ internal sealed record Price(int Amount, EntityReference? Currency)
 
 /// <summary>How many of the item a source gives at once.</summary>
 internal sealed record Amount(int Min, int Max);
-
-/// <summary>An item's raw weight and the total weight of the pool it is drawn from.</summary>
-internal sealed record Weight(double Value, double Total);
 
 internal sealed record ItemAmount(EntityReference Item, int Quantity);
 

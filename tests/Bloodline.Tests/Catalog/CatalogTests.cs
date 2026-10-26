@@ -279,8 +279,6 @@ public sealed class CatalogTests
                     .ToArray(),
                 new Price(price, null),
                 null,
-                null,
-                null,
                 [],
                 []
             );

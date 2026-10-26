@@ -105,9 +105,8 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 		'63',
 		'Cinderpear',
 		'1 to 2',
-		'25%',
-		'Chance per pick',
-		'2 to 3 picks per container',
+		'50.8%',
+		'per container',
 		'Required items',
 		'Silverglass shard',
 		'Requires a lit forge.',
@@ -117,9 +116,8 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 	await expect(details.locator('img')).toHaveAttribute('src', /-160.webp$/);
 	await expect(page.locator('article')).not.toContainText('Selection weight');
 	await page.goto('/items/mosswoven-coat/');
-	await expect(page.locator('.source-group')).toContainText('1 of 5');
-	await expect(page.locator('.source-group')).toContainText('Relative chance');
-	await expect(page.locator('.source-group')).not.toContainText('20%');
+	await expect(page.locator('.source-group')).toContainText('20%');
+	await expect(page.locator('.source-group')).toContainText('per kill');
 	await page.goto('/items/hollow-prism/');
 	await expect(page.getByText('No known source.', { exact: false })).toBeVisible();
 	await expect(page.getByRole('link', { name: 'Read about gaps in coverage' })).toHaveAttribute(

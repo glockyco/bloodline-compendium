@@ -878,13 +878,6 @@
 					"min": 1,
 					"max": 1
 				},
-				"weight": {
-					"value": 1,
-					"total": 5
-				},
-				"chance": null,
-				"chanceBasis": null,
-				"picks": null,
 				"inputs": [],
 				"notes": [],
 				"entity": {
@@ -895,7 +888,13 @@
 					"icon": null
 				},
 				"conditions": [],
-				"relationId": "fixture:mosswoven-coat:source:0"
+				"relationId": "fixture:mosswoven-coat:source:0",
+				"odds": {
+					"event": "kill",
+					"chance": 0.2,
+					"expected": 0.2,
+					"unknown": null
+				}
 			}
 		},
 		{
@@ -945,10 +944,6 @@
 					"min": 1,
 					"max": 1
 				},
-				"weight": null,
-				"chance": null,
-				"chanceBasis": null,
-				"picks": null,
 				"inputs": [],
 				"notes": ["Stock refresh conditions are unknown."],
 				"entity": {
@@ -966,7 +961,8 @@
 						"label": "Stock refresh conditions are unknown."
 					}
 				],
-				"relationId": "fixture:lanternedge:source:0"
+				"relationId": "fixture:lanternedge:source:0",
+				"odds": null
 			}
 		},
 		{
@@ -1001,10 +997,6 @@
 					"min": 1,
 					"max": 1
 				},
-				"weight": null,
-				"chance": null,
-				"chanceBasis": null,
-				"picks": null,
 				"inputs": [],
 				"notes": [],
 				"entity": {
@@ -1015,7 +1007,8 @@
 					"icon": null
 				},
 				"conditions": [],
-				"relationId": "fixture:lanternedge:source:1"
+				"relationId": "fixture:lanternedge:source:1",
+				"odds": null
 			}
 		},
 		{
@@ -1050,10 +1043,6 @@
 					"min": 1,
 					"max": 1
 				},
-				"weight": null,
-				"chance": null,
-				"chanceBasis": null,
-				"picks": null,
 				"inputs": [],
 				"notes": [],
 				"entity": {
@@ -1064,7 +1053,8 @@
 					"icon": null
 				},
 				"conditions": [],
-				"relationId": "fixture:lanternedge:source:2"
+				"relationId": "fixture:lanternedge:source:2",
+				"odds": null
 			}
 		},
 		{
@@ -1099,10 +1089,6 @@
 					"min": 1,
 					"max": 1
 				},
-				"weight": null,
-				"chance": null,
-				"chanceBasis": null,
-				"picks": null,
 				"inputs": [],
 				"notes": [],
 				"entity": {
@@ -1113,7 +1099,8 @@
 					"icon": null
 				},
 				"conditions": [],
-				"relationId": "fixture:lanternedge:source:3"
+				"relationId": "fixture:lanternedge:source:3",
+				"odds": null
 			}
 		},
 		{
@@ -1148,10 +1135,6 @@
 					"min": 1,
 					"max": 1
 				},
-				"weight": null,
-				"chance": null,
-				"chanceBasis": null,
-				"picks": null,
 				"inputs": [],
 				"notes": [],
 				"entity": {
@@ -1162,7 +1145,8 @@
 					"icon": null
 				},
 				"conditions": [],
-				"relationId": "fixture:lanternedge:source:4"
+				"relationId": "fixture:lanternedge:source:4",
+				"odds": null
 			}
 		},
 		{
@@ -1197,10 +1181,6 @@
 					"min": 1,
 					"max": 1
 				},
-				"weight": null,
-				"chance": null,
-				"chanceBasis": null,
-				"picks": null,
 				"inputs": [],
 				"notes": [],
 				"entity": {
@@ -1211,7 +1191,8 @@
 					"icon": null
 				},
 				"conditions": [],
-				"relationId": "fixture:lanternedge:source:5"
+				"relationId": "fixture:lanternedge:source:5",
+				"odds": null
 			}
 		},
 		{
@@ -1246,10 +1227,6 @@
 					"min": 1,
 					"max": 1
 				},
-				"weight": null,
-				"chance": null,
-				"chanceBasis": null,
-				"picks": null,
 				"inputs": [],
 				"notes": [],
 				"entity": {
@@ -1260,7 +1237,8 @@
 					"icon": null
 				},
 				"conditions": [],
-				"relationId": "fixture:lanternedge:source:6"
+				"relationId": "fixture:lanternedge:source:6",
+				"odds": null
 			}
 		},
 		{
@@ -1295,10 +1273,6 @@
 					"min": 1,
 					"max": 1
 				},
-				"weight": null,
-				"chance": null,
-				"chanceBasis": null,
-				"picks": null,
 				"inputs": [],
 				"notes": [],
 				"entity": {
@@ -1309,7 +1283,8 @@
 					"icon": null
 				},
 				"conditions": [],
-				"relationId": "fixture:lanternedge:source:7"
+				"relationId": "fixture:lanternedge:source:7",
+				"odds": null
 			}
 		},
 		{
@@ -1344,10 +1319,6 @@
 					"min": 1,
 					"max": 1
 				},
-				"weight": null,
-				"chance": null,
-				"chanceBasis": null,
-				"picks": null,
 				"inputs": [],
 				"notes": [],
 				"entity": {
@@ -1358,7 +1329,8 @@
 					"icon": null
 				},
 				"conditions": [],
-				"relationId": "fixture:lanternedge:source:8"
+				"relationId": "fixture:lanternedge:source:8",
+				"odds": null
 			}
 		},
 		{
@@ -1393,10 +1365,6 @@
 					"min": 1,
 					"max": 1
 				},
-				"weight": null,
-				"chance": null,
-				"chanceBasis": null,
-				"picks": null,
 				"inputs": [],
 				"notes": [],
 				"entity": {
@@ -1407,7 +1375,8 @@
 					"icon": null
 				},
 				"conditions": [],
-				"relationId": "fixture:lanternedge:source:9"
+				"relationId": "fixture:lanternedge:source:9",
+				"odds": null
 			}
 		},
 		{
@@ -1442,10 +1411,6 @@
 					"min": 1,
 					"max": 1
 				},
-				"weight": null,
-				"chance": null,
-				"chanceBasis": null,
-				"picks": null,
 				"inputs": [],
 				"notes": [],
 				"entity": {
@@ -1456,7 +1421,8 @@
 					"icon": null
 				},
 				"conditions": [],
-				"relationId": "fixture:lanternedge:source:10"
+				"relationId": "fixture:lanternedge:source:10",
+				"odds": null
 			}
 		},
 		{
@@ -1491,10 +1457,6 @@
 					"min": 1,
 					"max": 1
 				},
-				"weight": null,
-				"chance": null,
-				"chanceBasis": null,
-				"picks": null,
 				"inputs": [],
 				"notes": [],
 				"entity": {
@@ -1505,7 +1467,8 @@
 					"icon": null
 				},
 				"conditions": [],
-				"relationId": "fixture:lanternedge:source:11"
+				"relationId": "fixture:lanternedge:source:11",
+				"odds": null
 			}
 		},
 		{
@@ -1540,10 +1503,6 @@
 					"min": 1,
 					"max": 1
 				},
-				"weight": null,
-				"chance": null,
-				"chanceBasis": null,
-				"picks": null,
 				"inputs": [],
 				"notes": [],
 				"entity": {
@@ -1554,7 +1513,8 @@
 					"icon": null
 				},
 				"conditions": [],
-				"relationId": "fixture:lanternedge:source:12"
+				"relationId": "fixture:lanternedge:source:12",
+				"odds": null
 			}
 		},
 		{
@@ -1601,10 +1561,6 @@
 					"min": 1,
 					"max": 1
 				},
-				"weight": null,
-				"chance": null,
-				"chanceBasis": null,
-				"picks": null,
 				"inputs": [
 					{
 						"item": {
@@ -1643,7 +1599,8 @@
 						"label": "Requires a lit forge."
 					}
 				],
-				"relationId": "fixture:lanternedge:source:13"
+				"relationId": "fixture:lanternedge:source:13",
+				"odds": null
 			}
 		},
 		{
@@ -1684,10 +1641,6 @@
 					"min": 1,
 					"max": 1
 				},
-				"weight": null,
-				"chance": null,
-				"chanceBasis": null,
-				"picks": null,
 				"inputs": [],
 				"notes": [],
 				"entity": {
@@ -1698,7 +1651,8 @@
 					"icon": null
 				},
 				"conditions": [],
-				"relationId": "fixture:lanternedge:source:14"
+				"relationId": "fixture:lanternedge:source:14",
+				"odds": null
 			}
 		},
 		{
@@ -1738,16 +1692,6 @@
 					"min": 1,
 					"max": 2
 				},
-				"weight": {
-					"value": 2,
-					"total": 18.020000000000028
-				},
-				"chance": 0.25,
-				"chanceBasis": "Chance per pick",
-				"picks": {
-					"min": 2,
-					"max": 3
-				},
 				"inputs": [],
 				"notes": [],
 				"entity": {
@@ -1758,7 +1702,13 @@
 					"icon": null
 				},
 				"conditions": [],
-				"relationId": "fixture:lanternedge:source:15"
+				"relationId": "fixture:lanternedge:source:15",
+				"odds": {
+					"event": "container",
+					"chance": 0.5078125,
+					"expected": 0.625,
+					"unknown": null
+				}
 			}
 		},
 		{
@@ -1798,10 +1748,6 @@
 					"min": 2,
 					"max": 4
 				},
-				"weight": null,
-				"chance": null,
-				"chanceBasis": null,
-				"picks": null,
 				"inputs": [],
 				"notes": [],
 				"entity": {
@@ -1812,7 +1758,8 @@
 					"icon": null
 				},
 				"conditions": [],
-				"relationId": "fixture:cinderpear:source:0"
+				"relationId": "fixture:cinderpear:source:0",
+				"odds": null
 			}
 		},
 		{

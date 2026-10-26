@@ -164,8 +164,6 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
                             place is null ? [] : [place],
                             null,
                             new Amount(amount, amount),
-                            null,
-                            null,
                             [],
                             generated
                                 ?

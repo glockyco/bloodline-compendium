@@ -170,7 +170,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
             );
             foreach (var (item, weight) in WorldSourceData.Pool(properties[pool]))
             {
-                var chance = WeightTotals.Chance(weight);
+                var perPick = WeightTotals.Chance(weight);
                 yield return new ItemSource(
                     item,
                     new Source(
@@ -179,13 +179,8 @@ internal sealed class GatheringMechanism : ISourceMechanism
                         places,
                         null,
                         null,
-                        weight,
-                        chance,
                         [],
-                        [
-                            .. notes,
-                            "A gathering action can make multiple loot rolls. This chance describes one roll, not the whole gathering point.",
-                        ]
+                        notes
                     )
                     {
                         Entity = WorldSourceData.Reference(
@@ -198,7 +193,10 @@ internal sealed class GatheringMechanism : ISourceMechanism
                             properties,
                             places.Count == 1 ? places[0].Key : null
                         ),
-                        ChanceBasis = chance is null ? null : "Chance per roll",
+                        // A gather picks once, and gathering bonuses can add picks.
+                        Odds = perPick is { } chance
+                            ? LootOdds.Of(OddsEvent.Pick, chance, PickCount.Fixed(1))
+                            : null,
                     }
                 );
             }
@@ -225,8 +223,6 @@ internal sealed class GatheringMechanism : ISourceMechanism
                         [],
                         null,
                         null,
-                        null,
-                        (double)group.Count() / entries.Length,
                         [],
                         [
                             "Each listed outcome is equally likely, including repeated items and empty outcomes. Whether this gathering method is active is unknown.",
@@ -253,7 +249,11 @@ internal sealed class GatheringMechanism : ISourceMechanism
                                 "Whether this gathering method is active is unknown."
                             ),
                         ],
-                        ChanceBasis = "Chance per roll",
+                        Odds = LootOdds.Of(
+                            OddsEvent.Pick,
+                            (double)group.Count() / entries.Length,
+                            PickCount.Fixed(1)
+                        ),
                     }
                 );
             }
@@ -381,8 +381,6 @@ internal sealed class GatheringMechanism : ISourceMechanism
                             places,
                             null,
                             quantity is { } count ? new Amount(count, count) : null,
-                            null,
-                            null,
                             [],
                             [
                                 "Received when harvesting. The number of harvesting actions depends on the state of the gathering point.",

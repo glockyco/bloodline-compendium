@@ -209,7 +209,6 @@ public sealed class TradeMechanismTests
         Assert.Equal("Placed name", found.Source.Name);
         Assert.Equal(17, found.Source.Price!.Amount);
         Assert.Equal("/Game/Invented/Town", Assert.Single(found.Source.Places).Key);
-        Assert.Null(found.Source.Weight);
     }
 
     [Fact]
@@ -432,8 +431,6 @@ public sealed class TradeMechanismTests
         var found = Assert.Single(new ShopMechanism().FindSources(context));
         Assert.Equal(item.Path, found.ItemClass);
         Assert.Equal("Keeper", found.Source.Name);
-        Assert.Null(found.Source.Weight);
-        Assert.Null(found.Source.Chance);
     }
 
     [Theory]
@@ -614,8 +611,6 @@ public sealed class TradeMechanismTests
         Assert.Equal("Speaker", found.Source.Name);
         Assert.Equal("/Game/Invented/Village", Assert.Single(found.Source.Places).Key);
         Assert.Null(found.Source.Price);
-        Assert.Null(found.Source.Weight);
-        Assert.Null(found.Source.Chance);
         Assert.Empty(found.Source.Inputs);
         Assert.DoesNotContain(
             found.Source.Notes,

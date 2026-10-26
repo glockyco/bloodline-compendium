@@ -238,8 +238,6 @@ public sealed class EntityGraphTests
                     [],
                     null,
                     new Amount(1, 1),
-                    null,
-                    null,
                     [new ItemAmount(CatalogGraph.Reference(input), 2)],
                     []
                 )
@@ -322,8 +320,6 @@ public sealed class EntityGraphTests
                     [],
                     null,
                     new Amount(1, 1),
-                    null,
-                    null,
                     [],
                     []
                 )

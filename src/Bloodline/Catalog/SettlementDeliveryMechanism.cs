@@ -20,12 +20,6 @@ internal sealed class SettlementDeliveryMechanism : ISourceMechanism
             {
                 continue;
             }
-            var notes = new List<string>();
-            if (RecordValues.Number(row.Values["LootDeliveryQuantity"]) is { } attempts)
-            {
-                notes.Add(FormattableString.Invariant($"Delivery attempts: {attempts}."));
-            }
-            notes.Add("Each delivery attempt randomly selects an item.");
             var building = WorldSourceData.Reference(
                 EntityKind.Building,
                 table.Path + ":" + row.Name,
@@ -45,12 +39,18 @@ internal sealed class SettlementDeliveryMechanism : ISourceMechanism
                         [],
                         null,
                         null,
-                        weight,
-                        null,
                         [],
-                        notes
+                        []
                     )
                     {
+                        // BP_PersistantGameInstance:Check Plot Data makes LootDeliveryQuantity weighted picks.
+                        Odds =
+                            count is { } picks && WeightTotals.Chance(weight) is { } chance
+                                ? LootOdds.Of(OddsEvent.Delivery, chance, PickCount.Fixed(picks))
+                                : LootOdds.Unknown(
+                                    OddsEvent.Delivery,
+                                    "How many items a delivery brings is unknown."
+                                ),
                         Entity = building,
                         Conditions = [WorldSourceData.BuildingCondition(building)],
                     }

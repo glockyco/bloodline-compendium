@@ -1,4 +1,4 @@
-import type { Amount, Price, Source, SourceKind } from './site-data.js';
+import type { Amount, Odds, OddsEvent, Price, Source, SourceKind } from './site-data.js';
 import { formatChance, formatNumber } from './format.js';
 import { buyPrice, neutralMultiplier } from './rules/price.js';
 
@@ -18,8 +18,18 @@ export function formatAmount(amount: Amount): string {
 		: `${formatNumber(amount.min)} to ${formatNumber(amount.max)}`;
 }
 
-export function chanceLabel(source: Source): string {
-	return source.chanceBasis ?? 'Chance basis unknown';
+const oddsLabels: Record<OddsEvent, string> = {
+	container: 'per container',
+	kill: 'per kill',
+	delivery: 'per delivery',
+	use: 'per use',
+	catch: 'per catch',
+	pick: 'per pick'
+};
+
+/** What a chance applies to, such as per container. */
+export function oddsLabel(odds: Odds): string {
+	return oddsLabels[odds.event];
 }
 
 export function sourceContext(source: Source): string | null {
@@ -29,14 +39,8 @@ export function sourceContext(source: Source): string | null {
 			? 'Free'
 			: `${formatNumber(amount)} ${source.price.currency?.name ?? 'gold'}`;
 	}
-	if (source.chance !== null && source.chanceBasis) {
-		return `${formatChance(source.chance)} ${source.chanceBasis.toLowerCase()}`;
-	}
-	if (source.weight) {
-		return `${formatNumber(source.weight.value)} of ${formatNumber(source.weight.total)} relative chance`;
-	}
-	if (source.amount && (source.amount.min !== 1 || source.amount.max !== 1)) {
-		return `${formatAmount(source.amount)} items`;
+	if (source.odds?.chance != null) {
+		return `${formatChance(source.odds.chance)} ${oddsLabel(source.odds)}`;
 	}
 	return null;
 }

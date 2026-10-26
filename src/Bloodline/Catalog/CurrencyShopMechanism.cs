@@ -76,8 +76,6 @@ internal sealed class CurrencyShopMechanism : ISourceMechanism
                             currency is null ? null : context.ItemLink(currency)
                         ),
                         new Amount(1, 1),
-                        null,
-                        null,
                         [],
                         notes
                     )

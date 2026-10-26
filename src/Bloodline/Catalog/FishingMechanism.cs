@@ -186,30 +186,21 @@ internal sealed class FishingMechanism : ISourceMechanism
     {
         foreach (var (item, weight) in WorldSourceData.Pool(pool))
         {
-            var chance = confirmedChoice ? WeightTotals.Chance(weight) : null;
+            var chance = WeightTotals.Chance(weight);
             yield return new ItemSource(
                 item,
-                new Source(
-                    SourceKind.Fishing,
-                    name,
-                    places,
-                    null,
-                    null,
-                    weight,
-                    chance,
-                    [],
-                    !confirmedChoice
-                        ?
-                        [
-                            .. notes,
-                            "Only relative chance is known because lava fishing's selection rule is unconfirmed.",
-                        ]
-                        : notes
-                )
+                new Source(SourceKind.Fishing, name, places, null, null, [], notes)
                 {
                     Entity = entity,
                     Conditions = conditions,
-                    ChanceBasis = chance is null ? null : "Chance per catch",
+                    // Fishing_Minigame:Catch Fish picks once from the pool for each fish caught.
+                    Odds =
+                        confirmedChoice && chance is { } perCatch
+                            ? LootOdds.Of(OddsEvent.Catch, perCatch, PickCount.Fixed(1))
+                            : LootOdds.Unknown(
+                                OddsEvent.Catch,
+                                "How lava fishing chooses its catch is unknown."
+                            ),
                 }
             );
         }

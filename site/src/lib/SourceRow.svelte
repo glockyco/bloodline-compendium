@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Source } from './site-data.js';
 	import { formatNumber, formatChance } from './format.js';
-	import { chanceLabel, formatAmount, payPrice } from './acquisition.js';
+	import { formatAmount, oddsLabel, payPrice } from './acquisition.js';
 	import EntityLink from './ui/EntityLink.svelte';
 	import Conditions from './Conditions.svelte';
 	let {
@@ -20,11 +20,8 @@
 			{#if source.places.length}{#each source.places as place, index (index)}{#if index},
 					{/if}<EntityLink entity={place} />{/each}{:else}Location unknown{/if}
 		</p>
-		{#if source.weight && !(source.chance !== null && source.chanceBasis)}<p class="source-places">
-				Compared with other possible items. The selection rule is unknown, so this is not a drop
-				chance.
-			</p>{/if}
-		{#if source.inputs.length || source.notes.length || (source.chance !== null && !source.chanceBasis)}
+		{#if source.odds?.unknown}<p class="source-places">{source.odds.unknown}</p>{/if}
+		{#if source.inputs.length || source.notes.length}
 			<details class="row-details">
 				<summary
 					>Details <span class="sr-only">for <span data-game>{source.name}</span></span></summary
@@ -37,9 +34,6 @@
 							</li>{/each}
 					</ul>
 				{/if}
-				{#if source.chance !== null && !source.chanceBasis}<p>
-						Chance: {formatChance(source.chance)}. What this chance applies to is unknown.
-					</p>{/if}
 				{#if source.notes.length}<ul data-game>
 						{#each source.notes as note, index (index)}<li>{note}</li>{/each}
 					</ul>{/if}
@@ -59,20 +53,9 @@
 							entity={source.price.currency}
 						/>{:else}gold{/if}</small
 				>
-			{:else if source.chance !== null && source.chanceBasis}
-				{formatChance(source.chance)}<small>{chanceLabel(source)}</small>
-			{:else if source.weight}
-				{formatNumber(source.weight.value)} of {formatNumber(source.weight.total)}<small
-					>Relative chance</small
-				>
+			{:else if source.odds?.chance != null}
+				{formatChance(source.odds.chance)}<small>{oddsLabel(source.odds)}</small>
 			{:else}<span class="muted">Unknown</span>{/if}
-			{#if source.picks}<small
-					>{formatAmount(source.picks)}
-					{source.picks.min === 1 && source.picks.max === 1 ? 'pick' : 'picks'} per {source.kind ===
-					'containerLoot'
-						? 'container'
-						: 'roll'}</small
-				>{/if}
 		</td>
 	{/if}
 </tr>

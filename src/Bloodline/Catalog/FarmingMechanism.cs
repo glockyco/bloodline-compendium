@@ -42,12 +42,14 @@ internal sealed class FarmingMechanism : ISourceMechanism
                         [],
                         null,
                         null,
-                        weight,
-                        null,
                         seed is null ? [] : [new ItemAmount(context.ItemLink(seed), 1)],
                         notes
                     )
                     {
+                        // FarmingPlot_Base:Harvest hands the pool to a harvestable whose every pick chooses by weight.
+                        Odds = WeightTotals.Chance(weight) is { } chance
+                            ? LootOdds.Of(OddsEvent.Pick, chance, PickCount.Fixed(1))
+                            : null,
                         Entity = WorldSourceData.Reference(
                             EntityKind.Resource,
                             table.Path + ":" + row.Name,

@@ -6,7 +6,7 @@
 
 - [ ] 2.1 Craft a potion from a treated Gildleaf and verify the applied effect matches `AllIngredientEffects`, in two runs
 - [x] 2.2 Buy and sell one item in a city shop at neutral respect and at a raised respect, buy one item in the settlement Blacksmith, and try to buy Leather Pants from the settlement Armorer, in two runs
-- [ ] 2.3 Open containers with equal pick bounds and count the items they make, and kill one enemy with a rare pool that no death event spawns and one that one does, until the pick count and the rare pools are settled
+- [x] 2.3 Open containers with equal pick bounds and count the items they make, and kill one enemy with a rare pool that no death event spawns and one that one does, until the pick count and the rare pools are settled
 - [ ] 2.4 Craft and equip D and F quality weapons and read their equipped damage and speed, in two runs
 - [ ] 2.5 Craft armor at each armorsmithing quality and read its armor, attune a rune at attunement level 1, and enchant a weapon and read its value, in two runs
 - [ ] 2.6 Record each result in design.md under Lab findings and in a check script under `tools/runtime/checks/`
@@ -15,7 +15,7 @@
 
 - [x] 3.1 Publish ingredient treatments from `AllIngredientEffects` and remove the `ReagentInfo` facts, and verify Gildleaf's chopped treatment reads Restore Health 35
 - [x] 3.2 Publish base values with each shop's price rule, add `site/src/lib/rules/price.ts` with the respect tiers checked by `rules:check` against the lab purchases, and verify the 16 zero prices follow the lab result
-- [ ] 3.3 Replace weights, chances and picks with odds per event for containers, settlement deliveries and enemy drops, publish rare pools only for death events that spawn them, and verify an Ethereal Chest and a settlement building against hand calculations
+- [x] 3.3 Replace weights, chances and picks with odds per event for containers, settlement deliveries and enemy drops, publish rare pools only for death events that spawn them, and verify an Ethereal Chest and a settlement building against hand calculations
 - [ ] 3.4 Publish item status and the displayed tooltip values, and verify Allseer's Judgement and Leather Pants
 
 ## 4. Catalog sources
@@ -25,6 +25,8 @@
 - [ ] 4.3 Publish recipe stations, levels, experience, output and learning, and verify Apple Pie and Angled Iron Blade
 - [ ] 4.4 Replace generic condition warnings with specific player conditions, translate dialogue states to actions where the dialogue shows them, and verify the Scarecrow merchant's condition
 - [ ] 4.5 Name settlement buildings as the player's settlement and name places from entrances and event maps, and verify the Mages College Main Hall and the settlement Armorer
+- [ ] 4.6 Read the weapon each enemy sets as its rare drop on construction and the finds Fenraen digs up, and verify a Bandit Cutter's weapon drop
+- [ ] 4.7 Read the settlement Blacksmith's stock drawn from its item pool, and verify the Knight's Broadsword gains the Blacksmith with its chance per restock
 
 ## 5. Catalog crafting
 

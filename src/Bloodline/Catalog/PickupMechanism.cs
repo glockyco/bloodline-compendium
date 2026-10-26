@@ -18,8 +18,6 @@ internal sealed class PickupMechanism : ISourceMechanism
                         [context.Places.Get(placement.Level)],
                         null,
                         null,
-                        null,
-                        null,
                         [],
                         []
                     )

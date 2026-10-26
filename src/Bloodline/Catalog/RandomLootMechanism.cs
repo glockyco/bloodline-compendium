@@ -27,8 +27,6 @@ internal sealed class RandomLootMechanism : ISourceMechanism
                     [],
                     null,
                     LootRecords.Quantity(context, item),
-                    null,
-                    null,
                     [],
                     [
                         "Some containers can contain this item. Not every container can drop it.",
