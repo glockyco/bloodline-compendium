@@ -139,8 +139,7 @@ public sealed class CatalogTests
             """{"PotionEffects":[{"$enum":"Effects::Mana","display":"Restore mana"}],"DurationofEffect1":15}"""
         );
         var page = Build(Records([food])).Items[0];
-        Assert.Equal("Restore mana", page.Facts.Single(fact => fact.Label == "Effect 1").Value);
-        Assert.Null(page.Facts.Single(fact => fact.Label == "Effect 1 power").Value);
+        Assert.Null(page.Facts.Single(fact => fact.Label == "Effect 1").Value);
     }
 
     [Fact]

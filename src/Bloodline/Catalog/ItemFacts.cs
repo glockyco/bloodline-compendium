@@ -48,8 +48,16 @@ internal sealed class ItemFacts(IReadOnlyList<EnumRecord> enums)
             Add("Damage", "WeaponInfo.Damage");
             // FirstPersonCharacter2 L165197 multiplies WeaponInfo.AttackSpeed for the attack montage.
             Add("Attack speed", "WeaponInfo.AttackSpeed");
-            Add("Range", "WeaponInfo.Range");
-            Add("Damage type", "WeaponInfo.DamageType");
+            var range = RecordValues.Number(RecordValues.At(properties, "WeaponInfo.Range"));
+            if (range is null || range > 0)
+            {
+                Add("Range", "WeaponInfo.Range");
+            }
+            var damageType = Display(RecordValues.At(properties, "WeaponInfo.DamageType"));
+            if (damageType != "None")
+            {
+                facts.Add(new Fact("Damage type", damageType));
+            }
             var magazine = RecordValues.Number(
                 RecordValues.At(properties, "WeaponInfo.MagazineSize")
             );
@@ -76,22 +84,16 @@ internal sealed class ItemFacts(IReadOnlyList<EnumRecord> enums)
             foreach (var treatment in new[] { "Chopped", "Cooled", "Ground", "Heated" })
             {
                 var effects = RecordValues.Elements(reagent[treatment + "Effects"]).ToArray();
-                if (effects.Length == 0)
+                if (reagent[treatment + "Effects"] is JsonArray && effects.Length == 0)
                 {
                     continue;
                 }
-                facts.Add(new Fact(treatment + " effects", JoinEffects(effects)));
-                facts.Add(
-                    new Fact(
-                        treatment + " effect power",
-                        Display(reagent[treatment + "EffectPower"])
-                    )
-                );
-                facts.Add(
-                    new Fact(
-                        treatment + " effect duration",
-                        Display(reagent[treatment + "EffectDuration"])
-                    )
+                AddEffect(
+                    facts,
+                    treatment + " effect",
+                    reagent[treatment + "Effects"] is JsonArray ? JoinEffects(effects) : null,
+                    RecordValues.Number(reagent[treatment + "EffectPower"]),
+                    RecordValues.Number(reagent[treatment + "EffectDuration"])
                 );
             }
         }
@@ -113,29 +115,20 @@ internal sealed class ItemFacts(IReadOnlyList<EnumRecord> enums)
         if (effects is not JsonArray array)
         {
             facts.Add(new Fact("Effects", null));
-            return;
         }
-        if (array.Count == 0)
+        else
         {
-            facts.Add(new Fact("Effects", "None"));
-            return;
-        }
-        for (var index = 0; index < array.Count; index++)
-        {
-            var number = (index + 1).ToString(CultureInfo.InvariantCulture);
-            facts.Add(new Fact("Effect " + number, Display(array[index])));
-            facts.Add(
-                new Fact(
-                    "Effect " + number + " power",
-                    Display(RecordValues.At(potion, "Effect" + number + "Power"))
-                )
-            );
-            facts.Add(
-                new Fact(
-                    "Effect " + number + " duration",
-                    Display(RecordValues.At(potion, "DurationofEffect" + number))
-                )
-            );
+            for (var index = 0; index < array.Count; index++)
+            {
+                var number = (index + 1).ToString(CultureInfo.InvariantCulture);
+                AddEffect(
+                    facts,
+                    "Effect " + number,
+                    Display(array[index]),
+                    RecordValues.Number(RecordValues.At(potion, "Effect" + number + "Power")),
+                    RecordValues.Number(RecordValues.At(potion, "DurationofEffect" + number))
+                );
+            }
         }
         foreach (
             var (field, label) in new[]
@@ -146,8 +139,41 @@ internal sealed class ItemFacts(IReadOnlyList<EnumRecord> enums)
             }
         )
         {
-            facts.Add(new Fact(label, Display(RecordValues.At(potion, field))));
+            var value = RecordValues.Number(RecordValues.At(potion, field));
+            if (value != 0)
+            {
+                facts.Add(new Fact(label, value?.ToString("G", CultureInfo.InvariantCulture)));
+            }
         }
+    }
+
+    private static void AddEffect(
+        List<Fact> facts,
+        string label,
+        string? name,
+        double? power,
+        double? duration
+    )
+    {
+        // Zero power leaves enum and duration defaults inactive, even when they look like a named effect.
+        if (power == 0)
+        {
+            return;
+        }
+        var value =
+            name is null || power is null || duration is null
+                ? null
+                : name
+                    + " "
+                    + power.Value.ToString("G", CultureInfo.InvariantCulture)
+                    + (
+                        duration == 0
+                            ? ""
+                            : " for "
+                                + duration.Value.ToString("G", CultureInfo.InvariantCulture)
+                                + " s"
+                    );
+        facts.Add(new Fact(label, value));
     }
 
     private string? JoinEffects(IEnumerable<JsonNode?> effects)
