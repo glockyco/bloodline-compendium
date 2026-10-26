@@ -4,8 +4,18 @@
 	import SourceRow from '#lib/SourceRow.svelte';
 	import { sourceHeadings } from '#lib/labels.js';
 	import type { SourceKind } from '#lib/site-data.js';
+	import SeoHead from '#lib/SeoHead.svelte';
 	let { data } = $props();
 	const item = $derived(data.item);
+	const description = $derived(
+		item.description?.trim() ||
+			[
+				item.name + ' (' + item.category.name + ').',
+				...item.facts
+					.filter((fact) => fact.value !== null)
+					.map((fact) => fact.label + ': ' + fact.value + '.')
+			].join(' ')
+	);
 	const sourceGroups = $derived(
 		(Object.keys(sourceHeadings) as SourceKind[])
 			.map((kind) => ({ kind, sources: item.sources.filter((source) => source.kind === kind) }))
@@ -13,12 +23,7 @@
 	);
 </script>
 
-<svelte:head
-	><title>{item.name} | The Bloodline Compendium</title><meta
-		name="description"
-		content={item.description ?? 'Facts and known sources for ' + item.name + '.'}
-	/></svelte:head
->
+<SeoHead title={item.name + ' | The Bloodline Compendium'} {description} />
 <a class="back" href={resolve('items/')}>All items</a>
 <article data-pagefind-body>
 	<div class="item-heading">

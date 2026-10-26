@@ -1,0 +1,21 @@
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Content-Security-Policy: frame-ancestors 'self' https://glockyco.com https://*.glockyco.com http://127.0.0.1:*
+  Permissions-Policy: camera=(), geolocation=(), microphone=()
+  Cache-Control: public, max-age=0, s-maxage=60
+
+# Short document caching reduces edge reads without retaining stale bundle references.
+# Unset the wildcard value before replacing it, because matching rules merge headers.
+/_app/immutable/*
+  ! Cache-Control
+  Cache-Control: public, max-age=31536000, immutable
+
+/icons/*
+  ! Cache-Control
+  Cache-Control: public, max-age=604800
+
+# Deployment checks must always revalidate the identity of the currently served build.
+/build-info.json
+  ! Cache-Control
+  Cache-Control: public, max-age=0, must-revalidate

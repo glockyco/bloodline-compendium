@@ -129,3 +129,73 @@ test('source and coverage disclosures work without JavaScript', async ({ browser
 	}
 	await context.close();
 });
+
+test('each public page has production identity, social metadata and generated browser icons', async ({
+	page,
+	request
+}) => {
+	const origin = 'https://bloodline.compendiums.org';
+	const routes = ['/', '/items/', '/items/lanternedge/', '/items/hollow-prism/', '/coverage/'];
+	for (const route of routes) {
+		await page.goto(route + '?review=1');
+		const title = await page.title();
+		const description = await page.locator('meta[name="description"]').getAttribute('content');
+		expect(description?.length).toBeGreaterThan(10);
+		await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', origin + route);
+		for (const prefix of ['og', 'twitter']) {
+			const attribute = prefix === 'og' ? 'property' : 'name';
+			await expect(page.locator(`meta[${attribute}="${prefix}:title"]`)).toHaveAttribute(
+				'content',
+				title
+			);
+			await expect(page.locator(`meta[${attribute}="${prefix}:description"]`)).toHaveAttribute(
+				'content',
+				description!
+			);
+			await expect(page.locator(`meta[${attribute}="${prefix}:image"]`)).toHaveAttribute(
+				'content',
+				origin + '/og-default.png'
+			);
+		}
+	}
+	await page.goto('/items/lanternedge/');
+	await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+		'content',
+		await page.locator('.item-heading .intro').innerText()
+	);
+	await page.goto('/items/hollow-prism/');
+	await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /Hollow Prism/);
+	for (const icon of [
+		'favicon.svg',
+		'favicon-16x16.png',
+		'favicon-32x32.png',
+		'favicon-192x192.png',
+		'favicon-512x512.png',
+		'apple-touch-icon.png',
+		'og-default.png'
+	]) {
+		const response = await request.get('/' + icon);
+		expect(response.status()).toBe(200);
+		expect(response.headers()['content-type']).toContain(
+			icon.endsWith('.svg') ? 'image/svg+xml' : 'image/png'
+		);
+	}
+	const sitemap = await (await request.get('/sitemap.xml')).text();
+	const locations = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
+	expect(locations.sort()).toEqual(
+		[
+			'/',
+			'/items/',
+			'/coverage/',
+			'/items/cinderpear/',
+			'/items/hollow-prism/',
+			'/items/lanternedge/',
+			'/items/mosswoven-coat/'
+		]
+			.map((route) => origin + route)
+			.sort()
+	);
+	expect(await (await request.get('/robots.txt')).text()).toContain(
+		'Sitemap: ' + origin + '/sitemap.xml'
+	);
+});

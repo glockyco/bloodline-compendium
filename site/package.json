@@ -16,12 +16,14 @@
 		"format:check": "prettier --check . ../scripts ../package.json ../renovate.json ../.github",
 		"test:unit": "vitest run",
 		"test:e2e": "playwright test",
-		"deploy:preview": "wrangler versions upload --preview-alias staging",
-		"deploy:production": "wrangler deploy",
+		"deploy:preview": "bun ../scripts/deploy.mjs preview",
+		"deploy:production": "bun ../scripts/deploy.mjs production",
 		"deploy:versions": "wrangler versions list",
 		"deploy:rollback": "wrangler rollback",
-		"deploy:dry-run": "wrangler deploy --dry-run",
-		"deploy:preview:dry-run": "wrangler versions upload --dry-run --preview-alias staging"
+		"deploy:dry-run": "bun ../scripts/deploy.mjs production --dry-run",
+		"deploy:preview:dry-run": "bun ../scripts/deploy.mjs preview --dry-run",
+		"deploy:smoke": "bun ../scripts/deploy.mjs smoke",
+		"review": "wrangler dev --assets build"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",

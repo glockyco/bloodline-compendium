@@ -2,6 +2,7 @@
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
 	import { selectItems } from '#lib/items.js';
+	import SeoHead from '#lib/SeoHead.svelte';
 	let { data } = $props();
 	let category = $state('');
 	onMount(() => {
@@ -11,12 +12,10 @@
 	const items = $derived(selectItems(data.index.items, category, sort));
 </script>
 
-<svelte:head
-	><title>Items | The Bloodline Compendium</title><meta
-		name="description"
-		content="Browse items by category, name and value."
-	/></svelte:head
->
+<SeoHead
+	title="Items | The Bloodline Compendium"
+	description="Browse items by category, name and value."
+/>
 <p class="eyebrow">The item reference</p>
 <h1>Items</h1>
 <p class="intro">Equipment, ingredients and curios. Unknown values stay unknown.</p>

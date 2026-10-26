@@ -7,6 +7,7 @@ node_modules
 .wrangler
 /.svelte-kit
 /build
+/.stage/
 
 # OS
 .DS_Store
@@ -25,3 +26,6 @@ vite.config.ts.timestamp-*
 test-results
 /static/icons/
 /playwright-report/
+/static/favicon-*.png
+/static/apple-touch-icon.png
+/static/og-default.png

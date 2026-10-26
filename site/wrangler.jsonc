@@ -1,10 +1,15 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
-	"name": "bloodline-compendium",
+	"name": "bloodline-compendium-site",
 	"compatibility_date": "2026-10-26",
+	// Production is served only on the custom domain, not the Worker's default hostname.
+	"workers_dev": false,
+	"routes": [{ "pattern": "bloodline.compendiums.org", "custom_domain": true }],
+	// Version URLs remain available for review even though workers_dev is disabled.
 	"preview_urls": true,
+	// There is no request-time code. Only provenance-checked production builds fill this stage.
 	"assets": {
-		"directory": "./build",
+		"directory": "./.stage/production",
 		"html_handling": "auto-trailing-slash",
 		"not_found_handling": "404-page"
 	}

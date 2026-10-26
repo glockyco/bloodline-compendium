@@ -2,15 +2,14 @@
 	import { resolve } from '$app/paths';
 	import { gaps } from '#lib/labels.js';
 	import ExpandableList from '#lib/ExpandableList.svelte';
+	import SeoHead from '#lib/SeoHead.svelte';
 	let { data } = $props();
 </script>
 
-<svelte:head
-	><title>Data coverage | The Bloodline Compendium</title><meta
-		name="description"
-		content="What is still unknown about items, sources and places in this reference."
-	/></svelte:head
->
+<SeoHead
+	title="Data coverage | The Bloodline Compendium"
+	description="What is still unknown about items, sources and places in this reference."
+/>
 <p class="eyebrow">Know the limits</p>
 <h1>Data coverage</h1>
 <p class="intro">

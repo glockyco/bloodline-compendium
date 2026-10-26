@@ -11,7 +11,7 @@ export function assertProductionBuild(build, repo) {
     cwd: repo,
     encoding: "utf8",
   }).trim();
-  if (build.dirty)
+  if (build.dirty !== false)
     throw new Error(
       "Site data was generated from a dirty working tree. Regenerate it from HEAD.",
     );

@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import SeoHead from '#lib/SeoHead.svelte';
 	let { data } = $props();
 </script>
 
-<svelte:head
-	><title>The Bloodline Compendium</title><meta
-		name="description"
-		content="Find items, their facts and their known sources in The Bloodline."
-	/></svelte:head
->
+<SeoHead
+	title="The Bloodline Compendium"
+	description="Find items, their facts and their known sources in The Bloodline."
+/>
 <section class="hero">
 	<p class="eyebrow">An adventurer's reference</p>
 	<h1>The Bloodline<br />Compendium</h1>
