@@ -11,7 +11,7 @@
 	<summary>Search items</summary>
 	<div class="search-content">
 		<pagefind-searchbox bundle-path="/pagefind/" placeholder="Start typing an item name"
-		></pagefind-searchbox><pagefind-results></pagefind-results><noscript
+		></pagefind-searchbox><noscript
 			>Search needs JavaScript. Browse the <a href={resolve('items/')}>item list</a> instead.</noscript
 		>
 	</div>

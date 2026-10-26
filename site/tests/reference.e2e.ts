@@ -49,8 +49,8 @@ test('finds items by word prefix from the shared search', async ({ page }) => {
 	await search.fill('Lanter');
 	await expect(
 		page
-			.locator('pagefind-results')
-			.getByRole('link', { name: /Lanternedge/ })
+			.locator('pagefind-searchbox')
+			.getByRole('option', { name: /Lanternedge/ })
 			.first()
 	).toBeVisible();
 });

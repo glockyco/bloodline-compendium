@@ -37,7 +37,8 @@
 			<p class="intro">{item.description ?? 'Description unknown.'}</p>
 		</div>
 	</div>
-	<section aria-labelledby="facts">
+	<!-- Search finds items by name and description, so facts and sources stay out of the index. -->
+	<section aria-labelledby="facts" data-pagefind-ignore="all">
 		<h2 id="facts">Facts</h2>
 		<dl class="facts panel">
 			{#each item.facts as fact (fact.label)}<div>
@@ -46,7 +47,7 @@
 				</div>{/each}
 		</dl>
 	</section>
-	<section aria-labelledby="sources">
+	<section aria-labelledby="sources" data-pagefind-ignore="all">
 		<h2 id="sources">Known sources <span class="count">{item.sources.length}</span></h2>
 		{#if !item.sources.length}<aside class="notice">
 				<p>No source is known for this item. It may still be obtainable in the game.</p>
