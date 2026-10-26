@@ -42,6 +42,9 @@ internal sealed class CatalogContext
     public IReadOnlySet<string> ExcludedClasses { get; }
     public IReadOnlySet<string> SharedPeopleClasses { get; }
 
+    /// <summary>Dialogues that differently named people share, such as one quartermaster conversation.</summary>
+    public IReadOnlySet<string> SharedDialogues { get; }
+
     private DialogueTags? tags;
 
     public DialogueTags Tags => tags ??= new DialogueTags(this);
@@ -88,6 +91,20 @@ internal sealed class CatalogContext
                     .Distinct(StringComparer.Ordinal)
                     .Skip(1)
                     .Any()
+            )
+            .Select(group => group.Key)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        SharedDialogues = Placements
+            .Select(placement =>
+                (
+                    Dialogue: RecordValues.AnyReference(placement.Properties["Dialogue"]),
+                    Name: WorldSourceData.Name(placement.Properties, placement.Actor.Class)
+                )
+            )
+            .Where(entry => entry.Dialogue is not null)
+            .GroupBy(entry => entry.Dialogue!, StringComparer.OrdinalIgnoreCase)
+            .Where(group =>
+                group.Select(entry => entry.Name).Distinct(StringComparer.Ordinal).Skip(1).Any()
             )
             .Select(group => group.Key)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);

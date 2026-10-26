@@ -344,4 +344,44 @@ public sealed class EntityGraphTests
             );
         }
     }
+
+    [Fact]
+    public void ContainersSharingAClassKeepTheNamesPlayersSee()
+    {
+        const string generic = "/Game/Loot/GenericLootable.GenericLootable_C";
+        Source Loot(string name) =>
+            new(SourceKind.ContainerLoot, name, [], null, new Amount(1, 1), [], [])
+            {
+                Entity = WorldSourceData.Reference(EntityKind.Container, generic, name),
+            };
+        var page = new ItemPage(
+            Item.Key!,
+            Item.Slug!,
+            Item.Name,
+            null,
+            new CategoryLink("food", "Food"),
+            null,
+            [],
+            [Loot("Cabinet"), Loot("Miner's Crate")]
+        );
+        var built = CatalogGraph.Build([page]).Items.Single();
+        Assert.Equal(
+            ["Cabinet", "Miner's Crate"],
+            built.Sources.Select(source => source.Entity.Name)
+        );
+
+        // A key that still names two things fails instead of renaming one of them.
+        var shared = page with
+        {
+            Sources = page
+                .Sources.Select(source =>
+                    source with
+                    {
+                        Entity = source.Entity with { Key = generic },
+                    }
+                )
+                .ToArray(),
+        };
+        Assert.Throws<InvalidDataException>(() => CatalogGraph.Build([shared]));
+    }
 }

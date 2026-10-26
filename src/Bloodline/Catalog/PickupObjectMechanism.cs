@@ -34,6 +34,7 @@ internal sealed class PickupObjectMechanism : ISourceMechanism
         ("/Game/Halloween_Assets/GhostgreenApple.GhostGreenApple_C", "Ghost Green Apple", 1),
     ];
 
+    // An object without its own name is the item lying there, so it takes the item's name.
     public IEnumerable<ItemSource> FindSources(CatalogContext context)
     {
         foreach (var (path, properties, places) in LootRecords.Instances(context, IsPickupObject))
@@ -69,7 +70,7 @@ internal sealed class PickupObjectMechanism : ISourceMechanism
                     WorldSourceData.Reference(
                         EntityKind.Resource,
                         path,
-                        WorldSourceData.Name(properties, path)
+                        WorldSourceData.Name(properties, path, context.ItemLink(item).Name)
                     ),
                     WorldSourceData.Conditions(
                         context,
@@ -95,7 +96,7 @@ internal sealed class PickupObjectMechanism : ISourceMechanism
                     WorldSourceData.Reference(
                         EntityKind.Resource,
                         path,
-                        WorldSourceData.Name(properties, path)
+                        WorldSourceData.Name(properties, path, context.ItemLink(collectible).Name)
                     ),
                     WorldSourceData.Conditions(
                         context,

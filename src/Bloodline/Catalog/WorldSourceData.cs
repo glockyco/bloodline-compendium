@@ -9,7 +9,21 @@ internal static class WorldSourceData
     private static readonly string[] NameFields = ["Full Name", "Name", "ItemInfo.ItemName"];
 
     public static EntityReference Reference(EntityKind kind, string? key, string name) =>
-        new(kind, key, name, null, null);
+        new(
+            kind,
+            key is not null && NamedByInstance(kind, key) ? Named(key, name) : key,
+            name,
+            null,
+            null
+        );
+
+    // Containers and gathering or pickup objects share one class across objects the player meets under different
+    // names, such as a Miner's Crate and a Cabinet, so the name the player sees is part of their identity.
+    private static bool NamedByInstance(EntityKind kind, string key) =>
+        kind is EntityKind.Container or EntityKind.Resource
+        && key.EndsWith("_C", StringComparison.Ordinal);
+
+    private static string Named(string key, string name) => key + "#" + name;
 
     /// <summary>Limits a source to a completed settlement building, naming the building so pages can link it.</summary>
     public static RelationCondition BuildingCondition(EntityReference building) =>
@@ -35,11 +49,15 @@ internal static class WorldSourceData
                 className is "ShopKeeper_Base" or "Civilian_Spawner" or "Guard_Spawner"
                 || context.SharedPeopleClasses.Contains(placement.Actor.Class)
             );
+        var display = name ?? Name(placement.Properties, placement.Actor.Class);
+        // A dialogue that differently named people share, such as several quartermasters, identifies none of them.
         var key = shared
-            ? RecordValues.AnyReference(placement.Properties["Dialogue"])
-                ?? placement.Level + ":PersistentLevel." + placement.Actor.Name
+            ? RecordValues.AnyReference(placement.Properties["Dialogue"]) is { } dialogue
+            && !context.SharedDialogues.Contains(dialogue)
+                ? dialogue
+                : placement.Level + ":PersistentLevel." + placement.Actor.Name
             : placement.Actor.Class;
-        return Reference(kind, key, name ?? Name(placement.Properties, placement.Actor.Class));
+        return Reference(kind, key, display);
     }
 
     public static EntityReference TableEntity(
@@ -367,7 +385,8 @@ internal static class WorldSourceData
             )
         );
 
-    public static string Name(JsonObject properties, string path)
+    /// <summary>The name an object shows, else <paramref name="fallback"/>, else a reading of its class.</summary>
+    public static string Name(JsonObject properties, string path, string? fallback = null)
     {
         foreach (var field in NameFields)
         {
@@ -377,6 +396,10 @@ internal static class WorldSourceData
             {
                 return name;
             }
+        }
+        if (fallback is not null)
+        {
+            return fallback;
         }
         return ItemIdentity.ClassName(path) switch
         {

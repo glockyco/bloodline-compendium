@@ -33,6 +33,13 @@ internal static class CatalogGraph
             var identity = (reference.Kind, key);
             if (entities.TryGetValue(identity, out var known))
             {
+                // Items resolve to their page's name, and any other key names exactly one thing a player meets.
+                if (reference.Kind != EntityKind.Item && known.Name != reference.Name)
+                {
+                    throw new InvalidDataException(
+                        $"The {reference.Kind} key {key} names both {known.Name} and {reference.Name}."
+                    );
+                }
                 return known;
             }
             entities.Add(identity, reference);

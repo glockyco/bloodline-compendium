@@ -80,7 +80,7 @@ A layout check loads extreme pages, such as the longest names, the most sources,
 
 ### A source names what the player meets
 
-Source rows named the wrong things: ingot pickups said Sporing Gloves, ore deposits said Abyssberry Bush, a Miner's Crate said Cabinet and Wakazashi's merchant said Jasper Thorne while the summary above said Connor Selby. Mechanisms keyed pickups, containers, gathering nodes and some merchants by their actor class, which many different objects share, and the graph kept the first name it saw for a key. A source entity's key now identifies what the player meets: a placed person by level and actor, a container or node by its class and the name the player sees, and a pickup by the item itself. The graph rejects one key with two names, so a shared key fails the catalog instead of renaming sources.
+Source rows named the wrong things: ingot pickups said Sporing Gloves, ore deposits said Abyssberry Bush, a Miner's Crate said Cabinet and Wakazashi's merchant said Jasper Thorne while the summary above said Connor Selby. Mechanisms keyed pickups, containers, gathering nodes and some merchants by their actor class, which many different objects share, and the graph kept the first name it saw for a key. A source entity's key now identifies what the player meets: a container, gathering node or pickup by its class and the name the player sees, a person whose dialogue differently named people share by their placement, and an unnamed pickup takes the name of the item lying there. The graph rejects one key with two names, so a shared key fails the catalog instead of renaming sources.
 
 ### Order of work
 

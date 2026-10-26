@@ -556,7 +556,8 @@ public sealed class WorldMechanismTests
         Assert.Equal(new Odds(OddsEvent.Pick, 0.4, 0.4, null), result.Source.Odds);
         Assert.Equal(new[] { 0d }, NoteNumbers(result.Source));
         Assert.Equal(3, Assert.Single(result.Source.Conditions).Value);
-        Assert.Equal(gatherer.Path, result.Source.Entity.Key);
+        // Every gathering node shares this class, so the node is told apart by the name it shows.
+        Assert.Equal(gatherer.Path + "#Iron Deposit", result.Source.Entity.Key);
         Assert.DoesNotContain(
             sources,
             source => source.ItemClass.Contains("Dud", StringComparison.Ordinal)

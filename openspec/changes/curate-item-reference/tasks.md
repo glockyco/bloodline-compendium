@@ -28,7 +28,7 @@
 - [ ] 4.6 Read the weapon each enemy sets as its rare drop on construction and the finds Fenraen digs up, and verify a Bandit Cutter's weapon drop
 - [ ] 4.7 Read the settlement Blacksmith's stock drawn from its item pool, and verify the Knight's Broadsword gains the Blacksmith with its chance per restock
 - [ ] 4.8 Read how a recipe becomes available to the player and publish it as the recipe's learning, and verify Apple Pie
-- [ ] 4.9 Key source entities by what the player meets and make the graph reject one key with two names, and verify Iron Ingot's pickups, Copper Ore's deposits, Astral Ore's container and Wakazashi's merchant
+- [x] 4.9 Key source entities by what the player meets and make the graph reject one key with two names, and verify Iron Ingot's pickups, Copper Ore's deposits, Astral Ore's container and Wakazashi's merchant
 - [ ] 4.10 State a level or chance in a summary only when every summarized source shares it and otherwise its range, and verify Standard Mystcopper Axe Head and Azure Lover
 - [ ] 4.11 Read ore refining and publish smelting recipes, trace recipes whose output differs from their name and recipes listed twice, and verify Iron Ore, Angled Mystcopper Blade and Steel Claymore Guard
 - [ ] 4.12 Word rare pools, secondary container chances, unresolved pickups and bounty notes as a player needs them, and verify The Copper Crown, Ethereal Archstone and A Walk in the Woods
