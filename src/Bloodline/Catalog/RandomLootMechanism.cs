@@ -28,7 +28,7 @@ internal sealed class RandomLootMechanism : ISourceMechanism
                     "General random loot",
                     [],
                     null,
-                    null,
+                    LootRecords.Quantity(context, item),
                     null,
                     null,
                     [],

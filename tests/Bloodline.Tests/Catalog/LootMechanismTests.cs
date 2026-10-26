@@ -401,6 +401,7 @@ public sealed class LootMechanismTests
         Assert.Equal("General random loot", source.Name);
         Assert.Null(source.Chance);
         Assert.Null(source.Weight);
+        Assert.Equal(new Amount(3, 3), source.Amount);
         Assert.Empty(source.Places);
         Assert.Contains(source.Notes, note => note.Contains("0.25", StringComparison.Ordinal));
     }

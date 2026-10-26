@@ -286,9 +286,6 @@ internal static class LootRecords
                 || total <= 0
             )
                 continue;
-            var quantity = context.Classes.TryGetValue(item, out var type)
-                ? RecordValues.Integer(RecordValues.At(type.Properties, "ItemInfo.Quantity"))
-                : null;
             yield return new ItemSource(
                 item,
                 new Source(
@@ -296,9 +293,7 @@ internal static class LootRecords
                     name,
                     places,
                     null,
-                    quantity is > 0 and <= int.MaxValue
-                        ? new Amount((int)quantity.Value, (int)quantity.Value)
-                        : null,
+                    Quantity(context, item),
                     new Weight(RecordValues.Number(value)!.Value, total),
                     null,
                     [],
@@ -306,5 +301,15 @@ internal static class LootRecords
                 )
             );
         }
+    }
+
+    internal static Amount? Quantity(CatalogContext context, string item)
+    {
+        var quantity = context.Classes.TryGetValue(item, out var type)
+            ? RecordValues.Integer(RecordValues.At(type.Properties, "ItemInfo.Quantity"))
+            : null;
+        return quantity is > 0 and <= int.MaxValue
+            ? new Amount((int)quantity.Value, (int)quantity.Value)
+            : null;
     }
 }
