@@ -72,10 +72,17 @@ public sealed class TradeMechanismTests
         var source = Assert.Single(found);
         Assert.Equal(output.Path, source.ItemClass);
         Assert.Equal(SourceKind.Smithing, source.Source.Kind);
+        Assert.Equal("OddOutput", source.Source.Name);
         Assert.Equal(new Amount(4, 4), source.Source.Amount);
         Assert.Equal(5, Assert.Single(source.Source.Inputs).Quantity);
-        Assert.Contains("Requires weaponsmithing level 9.", source.Source.Notes);
-        Assert.Contains("Crafting experience: 12.", source.Source.Notes);
+        Assert.Contains(
+            source.Source.Notes,
+            note => note.Contains("weaponsmithing") && note.Contains("9")
+        );
+        Assert.Contains(
+            source.Source.Notes,
+            note => note.Contains("experience") && note.Contains("12")
+        );
         Assert.Empty(source.Source.Places);
     }
 
@@ -103,7 +110,7 @@ public sealed class TradeMechanismTests
         );
         var source = Assert.Single(new CraftingMechanism().FindSources(context)).Source;
         Assert.Equal(SourceKind.Crafting, source.Kind);
-        Assert.Contains("Crafting type: Carving.", source.Notes);
+        Assert.Contains(source.Notes, note => note.Contains("Carving"));
     }
 
     [Fact]
@@ -190,8 +197,14 @@ public sealed class TradeMechanismTests
         Assert.Null(found.Source.Weight);
     }
 
-    [Fact]
-    public void CurrencyPricesAreNotQuantitiesAndEventDefaultsAreMerged()
+    [Theory]
+    [InlineData("InternalCurrencyCounter", true)]
+    [InlineData("MissingCounter", false)]
+    [InlineData(null, false)]
+    public void CurrencyPricesAreNotQuantitiesAndEventDefaultsAreMerged(
+        string? achievement,
+        bool named
+    )
     {
         var stock = Item("Traded");
         var currency = Item("Token");
@@ -206,9 +219,10 @@ public sealed class TradeMechanismTests
             "/Game/Invented/OpenCustomCurrencyShop.OpenCustomCurrencyShop_C",
             [],
             Properties(
-                $$$"""{"Currency Item Type":{"$ref":"{{{currency.Path}}}"},"Shop Contents (Items)":{"$map":[[{"$ref":"{{{stock.Path}}}"},8],[null,4]]}}"""
+                $$$"""{"Currency Item Type":{"$ref":"{{{currency.Path}}}"},"Currency Tracked Via Achievements?":true,"Currency Achievement Name":"InternalCurrencyCounter","Shop Contents (Items)":{"$map":[[{"$ref":"{{{stock.Path}}}"},8],[null,4]]}}"""
             )
         );
+        eventClass.Properties["Currency Achievement Name"] = achievement;
         var evt = new InnerObjectRecord(
             "/Game/Invented/Exchange.Exchange:Open",
             eventClass.Path,
@@ -224,6 +238,22 @@ public sealed class TradeMechanismTests
         );
         var context = Context(
             [stock, currency, vendor, eventClass],
+            tables:
+            [
+                Table(
+                    "AllAchievements_DataTable",
+                    new TableRow(
+                        "UnrelatedAchievement",
+                        Properties("""{"LocalizableDisplayName":{"$text":"Unrelated title"}}""")
+                    ),
+                    new TableRow(
+                        "CurrencyAchievement",
+                        Properties(
+                            """{"ID":"InternalCurrencyCounter","LocalizableDisplayName":{"$text":"Earned tokens"}}"""
+                        )
+                    )
+                ),
+            ],
             levels:
             [
                 new LevelRecord(
@@ -240,6 +270,15 @@ public sealed class TradeMechanismTests
         Assert.Equal("Token", found.Source.Price.Currency!.Name);
         Assert.Equal(new Amount(1, 1), found.Source.Amount);
         Assert.Empty(found.Source.Inputs);
+        Assert.Equal(named, found.Source.Notes.Any(note => note.Contains("Earned tokens")));
+        Assert.Equal(!named, found.Source.Notes.Any(note => note.Contains("unknown")));
+        Assert.DoesNotContain(
+            found.Source.Notes,
+            note =>
+                note.Contains("InternalCurrencyCounter")
+                || note.Contains("MissingCounter")
+                || note.Contains("Unrelated title")
+        );
         evt.Properties["Default Lionsmane Content?"] = true;
         Assert.Empty(new CurrencyShopMechanism().FindSources(context));
     }
@@ -280,19 +319,28 @@ public sealed class TradeMechanismTests
         Assert.Null(found.Source.Chance);
     }
 
-    [Fact]
-    public void ConstructedSettlementStockKeepsUnknownPlacementVisible()
+    [Theory]
+    [InlineData("WizardTower_Finished", "Wizard Tower (settlement)")]
+    [InlineData("Fletcher_Finished", "Fletcher (settlement)")]
+    [InlineData("Residence_02", "Residence (settlement)")]
+    public void ConstructedSettlementStockKeepsUnknownPlacementVisible(
+        string buildingClass,
+        string name
+    )
     {
         var item = Item("Wand");
         var building = new ClassRecord(
-            "/Game/Invented/Construction_Buildings/Buildings_Finished/ArcaneHouse.ArcaneHouse_C",
+            $"/Game/Invented/Construction_Buildings/Buildings_Finished/{buildingClass}.{buildingClass}_C",
             [],
             Properties($$"""{"Vendor Contents":[{"$ref":"{{item.Path}}"}]}""")
         );
         var found = Assert.Single(new ShopMechanism().FindSources(Context([item, building])));
         Assert.Equal(item.Path, found.ItemClass);
+        Assert.Equal(name, found.Source.Name);
+        Assert.Equal(new Amount(1, 1), found.Source.Amount);
+        Assert.Equal(17, found.Source.Price!.Amount);
         Assert.Empty(found.Source.Places);
-        Assert.Contains("Stock from a constructed settlement building.", found.Source.Notes);
+        Assert.Contains(found.Source.Notes, note => note.Contains("settlement"));
     }
 
     [Theory]
@@ -326,6 +374,102 @@ public sealed class TradeMechanismTests
             ]
         );
         var source = Assert.Single(new CraftingMechanism().FindSources(context)).Source;
-        Assert.Contains("Requires focus crafting level 15.", source.Notes);
+        Assert.Contains(
+            source.Notes,
+            note => note.Contains("focus crafting") && note.Contains("15")
+        );
+        Assert.DoesNotContain(source.Notes, note => note.Contains("NewEnumerator"));
+    }
+
+    [Theory]
+    [InlineData(true, true)]
+    [InlineData(true, false)]
+    [InlineData(false, false)]
+    public void DialogueGrantsKeepAmountsAndOnlyQuoteRecordedText(bool linked, bool player)
+    {
+        var item = Item("Gift");
+        var vendor = new ClassRecord(
+            "/Game/Invented/Speaker.Speaker_C",
+            [],
+            Properties(
+                """{"Full Name":{"$text":"Speaker"},"Dialogue":{"$ref":"/Game/Invented/Talk.Talk"}}"""
+            )
+        );
+        var grant = new InnerObjectRecord(
+            "/Game/Invented/Talk.Talk:Gift",
+            "/Game/Invented/AddItemDialogue.AddItemDialogue_C",
+            Properties($$"""{"Item To Add":{"$ref":"{{item.Path}}"},"Amount to Give":3}""")
+        );
+        var secondGrant = grant with { Path = "/Game/Invented/Talk.Talk:SecondGift" };
+        var money = new InnerObjectRecord(
+            "/Game/Invented/Talk.Talk:Money",
+            "/Game/Invented/PlayerHasEnoughMoney.PlayerHasEnoughMoney_C",
+            Properties("""{"Required Money":5}""")
+        );
+        var node = Properties(
+            """{"Text":{"$text":"Take this gift."},"Conditions":[{"$ref":"/Game/Invented/Talk.Talk:Money"}]}"""
+        );
+        node["isPlayer"] = player;
+        node["Events"] = linked
+            ? JsonNode.Parse(
+                """[{"$ref":"/Game/Invented/Talk.Talk:Gift"},{"$ref":"/Game/Invented/Talk.Talk:SecondGift"}]"""
+            )
+            : new JsonArray();
+        var dialogue = new AssetRecord(
+            "/Game/Invented/Talk.Talk",
+            "Dialogue",
+            new JsonObject { ["Data"] = new JsonArray(node) },
+            [grant, secondGrant, money]
+        );
+        var context = Context(
+            [item, vendor],
+            levels:
+            [
+                new LevelRecord(
+                    "/Game/Invented/Village",
+                    [],
+                    [new ActorRecord("Speaker", vendor.Path, new JsonObject())]
+                ),
+            ],
+            dialogues: [dialogue]
+        );
+        var sources = new DialogueGrantMechanism().FindSources(context).ToArray();
+        Assert.Equal(2, sources.Length);
+        Assert.Single(CatalogContext.MergeSources(sources, context.ExcludedLevels));
+        Assert.All(
+            sources,
+            source =>
+                Assert.Contains(
+                    source.Source.Notes,
+                    note => note.Contains("2") && note.Contains("3") && note.Contains("grants")
+                )
+        );
+        var found = sources[0];
+        Assert.Equal(item.Path, found.ItemClass);
+        Assert.Equal(SourceKind.Dialogue, found.Source.Kind);
+        Assert.Equal(new Amount(3, 3), found.Source.Amount);
+        Assert.Equal("Speaker", found.Source.Name);
+        Assert.Equal("/Game/Invented/Village", Assert.Single(found.Source.Places).Id);
+        Assert.Null(found.Source.Price);
+        Assert.Null(found.Source.Weight);
+        Assert.Null(found.Source.Chance);
+        Assert.Empty(found.Source.Inputs);
+        Assert.DoesNotContain(
+            found.Source.Notes,
+            note => note.Contains("/Game/") || note.Contains(":Gift")
+        );
+        Assert.Contains(
+            found.Source.Notes,
+            note => note.Contains("unknown") || note.Contains("not fully known")
+        );
+        Assert.Equal(linked, found.Source.Notes.Any(note => note.Contains("Take this gift.")));
+        Assert.Equal(
+            linked && player,
+            found.Source.Notes.Any(note => note.Contains("Dialogue choice:"))
+        );
+        Assert.Equal(
+            linked,
+            found.Source.Notes.Any(note => note.Contains("5") && note.Contains("gold"))
+        );
     }
 }

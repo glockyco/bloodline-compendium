@@ -59,7 +59,7 @@ internal sealed class PickupObjectMechanism : ISourceMechanism
                     amount = null;
                     notes =
                     [
-                        $"Multiple-item behavior is not recorded. Amount of Items setting: {count}.",
+                        $"The listed amount is {count} items, but whether multiple items are granted is unknown.",
                     ];
                 }
                 yield return Grant(item, amount, places, notes);

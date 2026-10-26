@@ -1,4 +1,6 @@
+using System.Globalization;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using Bloodline.Catalog;
 using Bloodline.Records;
 using Bloodline.SiteData;
@@ -8,6 +10,12 @@ namespace Bloodline.Tests.Catalog;
 public sealed class WorldMechanismTests
 {
     private static JsonObject Parse(string value) => JsonNode.Parse(value)!.AsObject();
+
+    private static double[] NoteNumbers(Source source) =>
+        Regex
+            .Matches(string.Join(" ", source.Notes), @"-?\d+(?:\.\d+)?")
+            .Select(match => double.Parse(match.Value, CultureInfo.InvariantCulture))
+            .ToArray();
 
     private static ClassRecord Type(
         string name,
@@ -63,9 +71,7 @@ public sealed class WorldMechanismTests
         Assert.Null(result.Source.Amount);
         Assert.Equal("Seed", Assert.Single(result.Source.Inputs).Item.Name);
         Assert.Empty(result.Source.Places);
-        Assert.Contains("Yield: 4", result.Source.Notes);
-        Assert.Contains("GrowDurationDays: 2", result.Source.Notes);
-        Assert.Contains("FarmingLevel: 7", result.Source.Notes);
+        Assert.Equal(new[] { 4d, 2d, 7d }, NoteNumbers(result.Source));
     }
 
     [Fact]
@@ -106,7 +112,7 @@ public sealed class WorldMechanismTests
         Assert.Equal(new Weight(2, 3), result.Source.Weight);
         Assert.Equal("Invented brewery", result.Source.Name);
         Assert.Null(result.Source.Amount);
-        Assert.Contains("LootDeliveryQuantity: 10", result.Source.Notes);
+        Assert.Equal(new[] { 10d }, NoteNumbers(result.Source));
         Assert.Empty(result.Source.Places);
         table.Rows[0].Values["LootDeliveryQuantity"] = 0;
         Assert.Empty(new SettlementDeliveryMechanism().FindSources(Context(tables: [table])));
@@ -210,8 +216,7 @@ public sealed class WorldMechanismTests
         var result = Assert.Single(sources, source => source.Source.Places.Count > 0);
         Assert.Equal("/Invented/Fish.Fish_C", result.ItemClass);
         Assert.Equal(new Weight(4, 5), result.Source.Weight);
-        Assert.Contains("Remaining Fish: 5", result.Source.Notes);
-        Assert.Contains("Min Difficulty: 1", result.Source.Notes);
+        Assert.Equal(new[] { 1d, 1d, 5d }, NoteNumbers(result.Source));
         Assert.DoesNotContain(
             sources,
             source => source.ItemClass.Contains("Dud", StringComparison.Ordinal)
@@ -249,7 +254,7 @@ public sealed class WorldMechanismTests
         var gatherer = Type(
             "HarvestableInteractionObject",
             """
-            {"Preset":{"$enum":"Resource::NewEnumerator99"},"Iron Deposit Loot":{"$map":[[{"$ref":"/Invented/Ore.Ore_C"},2],[null,3],[{"$ref":"/Invented/Dud.Dud_C"},0]]},"Copper Deposit Loot":{"$map":[[{"$ref":"/Invented/Other.Other_C"},1]]}}
+            {"Preset":{"$enum":"Resource::NewEnumerator99"},"Maximum amount of items that can be harvested":0,"Required level":3,"Iron Deposit Loot":{"$map":[[{"$ref":"/Invented/Ore.Ore_C"},2],[null,3],[{"$ref":"/Invented/Dud.Dud_C"},0]]},"Copper Deposit Loot":{"$map":[[{"$ref":"/Invented/Other.Other_C"},1]]}}
             """
         );
         var enumType = new EnumRecord(
@@ -261,8 +266,10 @@ public sealed class WorldMechanismTests
             .ToArray();
         var result = Assert.Single(sources, source => source.Source.Places.Count > 0);
         Assert.Equal("/Invented/Ore.Ore_C", result.ItemClass);
+        Assert.Single(sources, source => source.ItemClass == "/Invented/Ore.Ore_C");
         Assert.Equal(new Weight(2, 5), result.Source.Weight);
         Assert.Null(result.Source.Chance);
+        Assert.Equal(new[] { 0d, 3d }, NoteNumbers(result.Source));
         Assert.DoesNotContain(
             sources,
             source => source.ItemClass.Contains("Dud", StringComparison.Ordinal)
@@ -280,13 +287,13 @@ public sealed class WorldMechanismTests
         var gatherer = Type(
             "Overworld_Gatherpoint",
             """
-            {"Tree Items":[{"$ref":"/Invented/Log.Log_C"},{"$ref":"/Invented/Log.Log_C"},null],"Maximum amount of items that can be harvested":4}
+            {"Tree Items":[{"$ref":"/Invented/Log.Log_C"},{"$ref":"/Invented/Log.Log_C"},null],"Maximum amount of items that can be harvested":4,"Required level":7}
             """
         );
         var result = Assert.Single(new GatheringMechanism().FindSources(Context([gatherer])));
         Assert.Equal(2.0 / 3, result.Source.Chance);
         Assert.Null(result.Source.Weight);
-        Assert.Contains("Maximum amount of items that can be harvested: 4", result.Source.Notes);
+        Assert.Equal(new[] { 4d }, NoteNumbers(result.Source));
     }
 
     [Fact]
@@ -313,6 +320,7 @@ public sealed class WorldMechanismTests
         var placed = Assert.Single(sources, source => source.Source.Places.Count > 0);
         Assert.Equal("/Invented/Crystal.Crystal_C", placed.ItemClass);
         Assert.Equal(new Weight(2, 3), placed.Source.Weight);
+        Assert.DoesNotContain(sources, source => source.ItemClass == "/Invented/Old.Old_C");
         Assert.Empty(
             Assert
                 .Single(sources, source => source.ItemClass == "/Invented/Bone.Bone_C")

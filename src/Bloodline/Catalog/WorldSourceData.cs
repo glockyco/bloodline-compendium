@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Text.Json.Nodes;
 using Bloodline.Records;
 using Bloodline.SiteData;
@@ -29,7 +28,15 @@ internal static class WorldSourceData
                 return name;
             }
         }
-        return ItemIdentity.Readable(ItemIdentity.ClassName(path));
+        return ItemIdentity.ClassName(path) switch
+        {
+            "ShopKeeper_Base" => "Shopkeeper",
+            "Civilian_Spawner" => "Civilian",
+            "Guard_Spawner" => "Guard",
+            "CompanyOfThievesScoutSpawner" or "CompanyOfTheives_Thief_Scout" =>
+                "Company of Thieves scout",
+            var name => ItemIdentity.Readable(name),
+        };
     }
 
     public static bool IsTable(TableRecord table, string name) =>
@@ -64,7 +71,7 @@ internal static class WorldSourceData
     public static IEnumerable<(string Item, Weight Weight)> Pool(JsonNode? pool)
     {
         var entries = RecordValues.MapEntries(pool).ToArray();
-        var total = entries.Sum(pair => RecordValues.Number(pair.Value) ?? 0);
+        var total = WeightTotals.Sum(entries.Select(pair => pair.Value));
         foreach (var (key, value) in entries)
         {
             if (
@@ -76,23 +83,6 @@ internal static class WorldSourceData
             }
         }
     }
-
-    public static IReadOnlyList<string> Notes(JsonObject properties, params string[] fields) =>
-        fields
-            .Where(field => properties[field] is not null)
-            .Select(field =>
-                field
-                + ": "
-                + (
-                    RecordValues.Number(properties[field])?.ToString(CultureInfo.InvariantCulture)
-                    ?? RecordValues.Text(properties[field])
-                    ?? RecordValues.String(properties[field])
-                    ?? RecordValues.EnumDisplay(properties[field])
-                    ?? RecordValues.EnumValue(properties[field])
-                    ?? properties[field]!.ToJsonString()
-                )
-            )
-            .ToArray();
 
     public static IEnumerable<string> References(JsonNode? node)
     {

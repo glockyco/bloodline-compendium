@@ -33,8 +33,8 @@ internal sealed class RandomLootMechanism : ISourceMechanism
                     null,
                     [],
                     [
-                        $"Base spawn rate: {rate.ToString(CultureInfo.InvariantCulture)}. Player level, item level and item type modify this rate before selection.",
-                        "Used by containers with Use Entire Data Table enabled. Container item types and required tags filter the pool. This is not an unconditional drop from every container.",
+                        $"Base loot rate: {rate.ToString(CultureInfo.InvariantCulture)}. Player level, item level and item type modify this rate before an item is chosen.",
+                        "Available from containers that draw from general loot. Each container allows only certain item types and requires matching item tags. Not every container can drop this item.",
                     ]
                 )
             );

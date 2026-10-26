@@ -20,9 +20,13 @@ internal sealed class SettlementDeliveryMechanism : ISourceMechanism
             {
                 continue;
             }
-            var notes = WorldSourceData.Notes(row.Values, "LootDeliveryQuantity").ToList();
+            var notes = new List<string>();
+            if (RecordValues.Number(row.Values["LootDeliveryQuantity"]) is { } attempts)
+            {
+                notes.Add(FormattableString.Invariant($"Delivery attempts: {attempts}."));
+            }
             notes.Add(
-                "Each delivery attempt selects from the pool. Requires the constructed settlement building."
+                "Each delivery attempt randomly selects an item. Requires the completed settlement building."
             );
             foreach (var (item, weight) in WorldSourceData.Pool(row.Values["LootTable"]))
             {

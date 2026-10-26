@@ -22,6 +22,37 @@ internal sealed class CurrencyShopMechanism : ISourceMechanism
                 continue;
             }
             var currency = RecordValues.AnyReference(properties["Currency Item Type"]);
+            var notes = new List<string>();
+            if (RecordValues.Boolean(properties["Currency Tracked Via Achievements?"]) == true)
+            {
+                var achievement = RecordValues.String(properties["Currency Achievement Name"]);
+                var title = context
+                    .Records.Tables.Where(table =>
+                        WorldSourceData.IsTable(table, "AllAchievements_DataTable")
+                    )
+                    .SelectMany(table => table.Rows)
+                    .Where(row =>
+                        !string.IsNullOrWhiteSpace(achievement)
+                        && (
+                            string.Equals(row.Name, achievement, StringComparison.OrdinalIgnoreCase)
+                            || string.Equals(
+                                RecordValues.String(row.Values["ID"]),
+                                achievement,
+                                StringComparison.OrdinalIgnoreCase
+                            )
+                        )
+                    )
+                    .Select(row =>
+                        RecordValues.Text(row.Values["LocalizableDisplayName"])
+                        ?? RecordValues.String(row.Values["DisplayName"])
+                    )
+                    .FirstOrDefault(name => !string.IsNullOrWhiteSpace(name));
+                notes.Add(
+                    title is null
+                        ? "Currency is tracked through achievements. The achievement name is unknown."
+                        : $"Currency is tracked through the achievement \"{title}\"."
+                );
+            }
             foreach (
                 var (key, value) in RecordValues.MapEntries(properties["Shop Contents (Items)"])
             )
@@ -33,13 +64,6 @@ internal sealed class CurrencyShopMechanism : ISourceMechanism
                 )
                 {
                     continue;
-                }
-                var notes = new List<string>();
-                if (RecordValues.Boolean(properties["Currency Tracked Via Achievements?"]) == true)
-                {
-                    notes.Add(
-                        $"Currency tracked by achievement: {RecordValues.String(properties["Currency Achievement Name"]) ?? "unknown"}."
-                    );
                 }
                 yield return new ItemSource(
                     item,

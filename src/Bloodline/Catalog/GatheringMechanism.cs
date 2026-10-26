@@ -72,17 +72,15 @@ internal sealed class GatheringMechanism : ISourceMechanism
             var placements = context
                 .Placements.Where(placement => placement.Actor.Class == type.Path)
                 .ToArray();
-            foreach (var source in Sources(context, type.Path, type.Properties, [], false))
+            // Compare resource identifiers before converting them to display names.
+            var placedPools = placements
+                .Select(placement => SelectedPool(context, type.Path, placement.Properties))
+                .ToHashSet(StringComparer.Ordinal);
+            foreach (
+                var source in Sources(context, type.Path, type.Properties, [], false, placedPools)
+            )
             {
-                // Defaults can describe selectable pools not selected by any known placement.
-                if (
-                    !placements.Any(placement =>
-                        SelectedPool(context, type.Path, placement.Properties) == source.Source.Name
-                    )
-                )
-                {
-                    yield return source;
-                }
+                yield return source;
             }
             foreach (var placement in placements)
             {
@@ -144,7 +142,8 @@ internal sealed class GatheringMechanism : ISourceMechanism
         string path,
         JsonObject properties,
         IReadOnlyList<Place> places,
-        bool placed
+        bool placed,
+        IReadOnlySet<string?>? placedPools = null
     )
     {
         var harvest = WorldSourceData.IsClass(context, path, "HarvestableInteractionObject_C");
@@ -155,22 +154,19 @@ internal sealed class GatheringMechanism : ISourceMechanism
             : GatherPools.Values;
         foreach (var pool in pools.Distinct(StringComparer.Ordinal))
         {
-            if (placed && selected != pool)
+            if ((placed && selected != pool) || (!placed && placedPools?.Contains(pool) == true))
             {
                 continue;
             }
-            var notes = WorldSourceData
-                .Notes(
-                    properties,
-                    "Maximum amount of items that can be harvested",
-                    "Required level",
-                    "Custom Preset Name"
-                )
-                .ToList();
+            var notes = HarvestNotes(properties).ToList();
+            if (RecordValues.String(properties["Custom Preset Name"]) is { Length: > 0 } resource)
+            {
+                notes.Add($"Resource type: {resource}.");
+            }
             notes.Add(
                 placed
-                    ? "Gathering pool selected by the authored preset. Construction or preset events may replace it with a scripted pool. Harvest attempts and bonuses depend on gathering state."
-                    : "Selectable resource pool. Activation is not resolved to a placed gather point."
+                    ? "This gathering point can provide these resources. Its contents may change when it is created or updated. Harvest attempts and bonuses depend on gathering state."
+                    : "These resources can be gathered, but no active gathering point has been confirmed."
             );
             foreach (var (item, weight) in WorldSourceData.Pool(properties[pool]))
             {
@@ -178,7 +174,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
                     item,
                     new Source(
                         SourceKind.Gathering,
-                        pool,
+                        SourceName(pool),
                         places,
                         null,
                         null,
@@ -208,7 +204,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
                     group.Key,
                     new Source(
                         SourceKind.Gathering,
-                        pool,
+                        SourceName(pool),
                         [],
                         null,
                         null,
@@ -216,15 +212,57 @@ internal sealed class GatheringMechanism : ISourceMechanism
                         (double)group.Count() / entries.Length,
                         [],
                         [
-                            "Uniform selection from the resource array. Activation of this array-based path is unresolved.",
-                            .. WorldSourceData.Notes(
-                                properties,
-                                "Maximum amount of items that can be harvested"
-                            ),
+                            "Each listed outcome is equally likely, including repeated items and empty outcomes. Whether this gathering method is active is unknown.",
+                            .. HarvestNotes(properties, false),
                         ]
                     )
                 );
             }
+        }
+    }
+
+    private static string SourceName(string resource) =>
+        resource switch
+        {
+            "Iron Deposit Loot" => "Iron Deposit",
+            "Copper Deposit Loot" => "Copper Deposit",
+            "Yew Tree Loot" => "Yew Tree",
+            "Pine Tree Loot" => "Pine Tree",
+            "Stone Loot" => "Stone",
+            "Berry Bush Loot" or "Berries Bush Items" => "Berry Bush",
+            "Mushroom Patch Loot" => "Mushroom Patch",
+            "Bone Pile Loot" => "Bone Pile",
+            "Magma Stone Loot" => "Magma Stone",
+            "Hetrum Deposit Loot" => "Hetrum Deposit",
+            "Cinderberry Bush Table" or "Cinderberry Bush items" => "Cinderberry Bush",
+            "Shimmerberry Bush Table" or "Shimmerberry Bush items" => "Shimmerberry Bush",
+            "Candyberry Bush Table" or "Candyberry Bush items" => "Candyberry Bush",
+            "Abyssberry Bush Table" or "Abyssberry Bush items" => "Abyssberry Bush",
+            "TreeLootTable" or "Tree Items" => "Tree",
+            "Ore Deposit Table" or "Ore Deposit Items" => "Ore Deposit",
+            "MushroomLootTable" or "Mushroom Grove items" => "Mushroom Grove",
+            "Waterfront Mushroom Grove Table" or "WaterfrontMushroom Items" =>
+                "Waterfront Mushroom Grove",
+            "Crownberry Bush items" => "Crownberry Bush",
+            "Flower Grove items" => "Flower Grove",
+            _ => "Gathering point",
+        };
+
+    private static IEnumerable<string> HarvestNotes(
+        JsonObject properties,
+        bool includeRequiredLevel = true
+    )
+    {
+        if (
+            RecordValues.Number(properties["Maximum amount of items that can be harvested"]) is
+            { } limit
+        )
+        {
+            yield return FormattableString.Invariant($"Maximum harvest amount: {limit}.");
+        }
+        if (includeRequiredLevel && RecordValues.Number(properties["Required level"]) is { } level)
+        {
+            yield return FormattableString.Invariant($"Requires level {level}.");
         }
     }
 
@@ -278,7 +316,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
                         item,
                         new Source(
                             SourceKind.Gathering,
-                            ItemIdentity.Readable(ItemIdentity.ClassName(type.Path)),
+                            className == "WheatField_Volume_C" ? "Wheat Patch" : "Warp Spike",
                             places,
                             null,
                             quantity is { } count ? new Amount(count, count) : null,
@@ -286,7 +324,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
                             null,
                             [],
                             [
-                                "Granted by the harvesting interaction. The number of harvesting actions depends on interaction state.",
+                                "Received when harvesting. The number of harvesting actions depends on the state of the gathering point.",
                             ]
                         )
                     );

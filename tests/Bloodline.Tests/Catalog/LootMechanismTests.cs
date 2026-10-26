@@ -78,7 +78,63 @@ public sealed class LootMechanismTests
         Assert.Null(source.Chance);
         Assert.Empty(source.Inputs);
         Assert.Contains(source.Notes, note => note.Contains("2 to 4", StringComparison.Ordinal));
-        Assert.Contains(source.Notes, note => note.Contains("0.5", StringComparison.Ordinal));
+        Assert.Contains(source.Notes, note => note.Contains("50%", StringComparison.Ordinal));
+        Assert.Contains(source.Notes, note => note.Contains("6", StringComparison.Ordinal));
+    }
+
+    [Theory]
+    [InlineData("Crate", false)]
+    [InlineData("Loot", true)]
+    public void GenericLootNameUsesContainerIdentityAndRetainsUnknownNames(
+        string defaultName,
+        bool unknownName
+    )
+    {
+        var properties = new JsonObject
+        {
+            ["Object Name"] = new JsonObject { ["$text"] = defaultName },
+            ["Selected Loot Table"] = Pool(),
+        };
+        var placed = Parse("""{"Object Name":{"$text":"Loot"}}""");
+        var source = Assert
+            .Single(
+                new ContainerLootMechanism().FindSources(
+                    Context(
+                        [new ClassRecord(Container, [ContainerLootMechanism.Root], properties)],
+                        [new ActorRecord("Box1", Container, placed)]
+                    )
+                )
+            )
+            .Source;
+        Assert.NotEqual("Loot", source.Name);
+        if (!unknownName)
+            Assert.Equal(defaultName, source.Name);
+        Assert.Equal(unknownName, source.Notes.Contains(LootRecords.UnnamedNote));
+        Assert.Equal(new Weight(2, 8), source.Weight);
+        Assert.Equal(new Amount(3, 3), source.Amount);
+        Assert.Equal(Level, Assert.Single(source.Places).Id);
+    }
+
+    [Theory]
+    [InlineData("MarshBeast12")]
+    [InlineData("MarshBeast_Base")]
+    [InlineData("MarshBeast_Idle")]
+    public void UnnamedEnemyVariantUsesReadableIdentityWithoutDevelopmentSuffixes(string className)
+    {
+        var variant = $"/Game/Invented/{className}.{className}_C";
+        var properties = Parse("""{"Enemy Name":{"$text":""}}""");
+        properties["Loot Table"] = Pool();
+        var source = Assert
+            .Single(
+                new EnemyDropMechanism().FindSources(
+                    Context([new ClassRecord(variant, [], properties)])
+                )
+            )
+            .Source;
+        Assert.Equal("Marsh Beast", source.Name);
+        Assert.Contains(LootRecords.UnnamedNote, source.Notes);
+        Assert.Equal(new Weight(2, 8), source.Weight);
+        Assert.Equal(new Amount(3, 3), source.Amount);
     }
 
     [Fact]
@@ -195,7 +251,8 @@ public sealed class LootMechanismTests
             source.Notes,
             note => note.Contains("loose loot", StringComparison.Ordinal)
         );
-        Assert.Contains("Maximum spawn amount: 5.", source.Notes);
+        Assert.Contains(source.Notes, note => note.Contains("5", StringComparison.Ordinal));
+        Assert.Contains(source.Notes, note => note.Contains("2", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -483,7 +540,12 @@ public sealed class LootMechanismTests
             )
             .Source;
         Assert.Equal(Level, Assert.Single(source.Places).Id);
-        Assert.Contains("Spawner activation conditions have not been checked.", source.Notes);
+        Assert.Contains(
+            source.Notes,
+            note =>
+                note.Contains("spawner", StringComparison.OrdinalIgnoreCase)
+                && note.Contains("unknown", StringComparison.OrdinalIgnoreCase)
+        );
     }
 
     [Theory]

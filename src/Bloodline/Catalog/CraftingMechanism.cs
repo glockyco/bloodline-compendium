@@ -47,9 +47,30 @@ internal sealed class CraftingMechanism : ISourceMechanism
                 type is "Weaponsmithing" or "Armorsmithing"
                 || type is "CraftingTypes::NewEnumerator0" or "CraftingTypes::NewEnumerator1";
             var notes = new List<string>();
+            var typeName =
+                RecordValues.EnumDisplay(row.Values["CraftingType"])
+                ?? (
+                    type switch
+                    {
+                        "CraftingTypes::NewEnumerator0" => "Weaponsmithing",
+                        "CraftingTypes::NewEnumerator1" => "Armorsmithing",
+                        "CraftingTypes::NewEnumerator2" => "Bow Crafting",
+                        "CraftingTypes::NewEnumerator3" => "Runecrafting",
+                        "CraftingTypes::NewEnumerator4" => "Smelting",
+                        "CraftingTypes::NewEnumerator5" => "Engineering",
+                        "CraftingTypes::NewEnumerator6" => "Cooking",
+                        "CraftingTypes::NewEnumerator7" => "Necromancy",
+                        "CraftingTypes::NewEnumerator8" => "Alchemy",
+                        _ => null,
+                    }
+                );
             if (type is not null)
             {
-                notes.Add($"Crafting type: {type}.");
+                notes.Add(
+                    typeName is null
+                        ? "The crafting discipline is unknown."
+                        : $"Crafting discipline: {typeName}."
+                );
             }
             if (RecordValues.Number(row.Values["EXPrewardforcrafting"]) is { } experience)
             {
@@ -80,7 +101,7 @@ internal sealed class CraftingMechanism : ISourceMechanism
                 item,
                 new Source(
                     smithing ? SourceKind.Smithing : SourceKind.Crafting,
-                    RecordValues.Text(output.Values["ItemName"]) ?? row.Name,
+                    RecordValues.Text(output.Values["ItemName"]) ?? context.ItemLink(item).Name,
                     [],
                     null,
                     new Amount(amount, amount),

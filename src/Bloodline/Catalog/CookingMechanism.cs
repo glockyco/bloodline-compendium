@@ -37,7 +37,7 @@ internal sealed class CookingMechanism : ISourceMechanism
                     SourceKind.Cooking,
                     RecordValues.Text(row.Values["LocalizedName"])
                         ?? RecordValues.String(row.Values["RecipeName"])
-                        ?? row.Name,
+                        ?? context.ItemLink(item).Name,
                     [],
                     null,
                     new Amount(1, 1),

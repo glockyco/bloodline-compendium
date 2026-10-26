@@ -30,17 +30,28 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                 continue;
             var notes = new List<string>();
             var name = LootRecords.Name(properties, "Object Name", path, notes);
-            if (RecordValues.Number(properties["Spawn Chance"]) is { } spawn)
-                notes.Add(
-                    $"Container spawn chance: {spawn.ToString(CultureInfo.InvariantCulture)}."
+            if (name.Equals("Loot", StringComparison.OrdinalIgnoreCase))
+            {
+                name = LootRecords.Name(
+                    context.Classes[path].Properties,
+                    "Object Name",
+                    path,
+                    notes
                 );
-            if (
+                if (name.Equals("Loot", StringComparison.OrdinalIgnoreCase))
+                {
+                    name = "Loot container";
+                    notes.Add(LootRecords.UnnamedNote);
+                }
+            }
+            var details = new ContainerDetails(
+                RecordValues.Number(properties["Spawn Chance"]),
                 RecordValues.Integer(properties["Min amount of loot items"]) is { } min
                 && RecordValues.Integer(properties["Max amount of loot items"]) is { } max
-            )
-                notes.Add(
-                    $"Loot count settings: {min} to {max}. The consumer rolls from zero through a newly sampled inclusive bound."
-                );
+                    ? new Amount(checked((int)min), checked((int)max))
+                    : null
+            );
+            notes.AddRange(details.Notes);
             var pool = SelectPool(properties, notes, enumValues);
             if (RecordValues.Boolean(properties["Use Specific Loot Table?"]) == true)
             {
@@ -61,10 +72,10 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                     && !string.IsNullOrWhiteSpace(presetName)
                 )
                 {
-                    name = presetName;
+                    name = LootRecords.DisplayName(presetName);
                     notes.Remove(LootRecords.UnnamedNote);
                 }
-                notes.Add($"Preset loot table: {row.Name}.");
+                notes.Add($"{LootLabel(row.Name)} loot.");
             }
             foreach (
                 var source in LootRecords.Pool(
@@ -76,7 +87,10 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                     notes
                 )
             )
-                yield return source;
+                yield return source with
+                {
+                    Container = details,
+                };
         }
         foreach (
             var (path, properties, places) in LootRecords.Instances(
@@ -93,12 +107,32 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
             {
                 "Appears as loose loot rather than inside a container.",
             };
-            if (RecordValues.Integer(properties["Min Spawn Amount"]) is { } min)
-                notes.Add(
-                    $"Minimum spawn amount setting: {min}. The consumer uses the maximum setting for its loop bound."
-                );
-            if (RecordValues.Integer(properties["Max Spawn Amount"]) is { } max)
-                notes.Add($"Maximum spawn amount: {max}.");
+            var minimum = RecordValues.Integer(properties["Min Spawn Amount"]);
+            var maximum = RecordValues.Integer(properties["Max Spawn Amount"]);
+            var details =
+                minimum is { } min && maximum is { } max
+                    ? new ContainerDetails(
+                        null,
+                        new Amount(checked((int)min), checked((int)max)),
+                        Loose: true
+                    )
+                    : null;
+            if (details is not null)
+            {
+                notes.AddRange(details.Notes);
+            }
+            else
+            {
+                if (minimum is { } knownMinimum)
+                    notes.Add(
+                        $"The minimum amount is {knownMinimum}, but it does not limit how few loose items can appear."
+                    );
+                if (maximum is { } knownMaximum)
+                    notes.Add(
+                        $"Up to {knownMaximum} loose {(knownMaximum == 1 ? "item" : "items")} can appear."
+                    );
+                notes.Add("The full range of loose-item counts is unknown.");
+            }
             JsonNode? pool = properties["Loot Table"];
             if (
                 preset is not null
@@ -121,8 +155,8 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                     RecordValues.Text(row.Values["ContainerName"]) is { } presetName
                     && !string.IsNullOrWhiteSpace(presetName)
                 )
-                    name = presetName;
-                notes.Add($"Preset loot table: {row.Name}.");
+                    name = LootRecords.DisplayName(presetName);
+                notes.Add($"{LootLabel(row.Name)} loot.");
             }
             else if (
                 RecordValues.Boolean(properties["Use Preset Table?"]) == true
@@ -130,7 +164,7 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
             )
             {
                 pool = properties["Generic Loot Table"];
-                notes.Add("Uses the generic loot pool.");
+                notes.Add("General dungeon loot.");
             }
             foreach (
                 var source in LootRecords.Pool(
@@ -142,8 +176,23 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                     notes
                 )
             )
-                yield return source;
+                yield return source with
+                {
+                    Container = details,
+                };
         }
+    }
+
+    private static string LootLabel(string name)
+    {
+        var label = name switch
+        {
+            "WeaponCrateASKIL" => "Askillian weapon crate",
+            "NecroScriptPile" => "Necropolis script pile",
+            "GeneralBasicWeapons" => "Basic weapons",
+            _ => ItemIdentity.Readable(name),
+        };
+        return char.ToUpperInvariant(label[0]) + label[1..].ToLowerInvariant();
     }
 
     private static JsonNode? SelectPool(
@@ -154,7 +203,7 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
     {
         if (RecordValues.Boolean(properties["Use Custom Loot Table"]) == true)
         {
-            notes.Add("Uses the custom loot pool.");
+            notes.Add("Loot chosen specifically for this container.");
             return properties["Custom Loot Table"];
         }
         var lootType = EnumNumber(properties["Loot Type"]);
@@ -188,13 +237,29 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
         };
         var pool = field is null ? properties["Selected Loot Table"] : properties[field];
         notes.Add(
-            field is null
-                ? "Uses the stored selected loot pool. Pool selection is not recorded."
-                : $"Selected pool: {field}."
+            field switch
+            {
+                "Loot Table - Towns" => "Town loot.",
+                "Loot Table - Dungeon" => "Dungeon loot.",
+                "Loot Table - Minolurk Fort" => "Minolurk fort loot.",
+                "Loot Table - Barrel DRY" => "Dry barrel loot.",
+                "Coffin Loot" => "Coffin loot.",
+                "Urn Loot" => "Urn loot.",
+                "Bandit Loot Table" => "Bandit loot.",
+                "Spear Loot Table - DWARVEN" => "Rare dwarven spear loot.",
+                "Hammer or Mace Loot Table Dwarven Dungeon RARE" =>
+                    "Rare dwarven hammer or mace loot.",
+                "Dagger Loot Table - Dwarven Dungeon RARE" => "Rare dwarven dagger loot.",
+                "Axe Loot Table -Dwarven RARE" => "Rare dwarven axe loot.",
+                "Sword Loot Table - Dwarven Dungeon RARE" => "Rare dwarven sword loot.",
+                "Undead Mace Dungeon Loot Table" => "Undead dungeon mace loot.",
+                "Undead Sword Loot Table Undead Dungeon" => "Undead dungeon sword loot.",
+                _ => "The contents are known, but how they were chosen is unknown.",
+            }
         );
         if (lootType == 5 || RecordValues.Boolean(properties["Add Custom Loot to Table"]) != true)
             return pool;
-        notes.Add("Custom entries replace matching entries in the selected pool.");
+        notes.Add("Loot chosen specifically for this container replaces matching standard loot.");
         var entries = RecordValues.MapEntries(pool).ToList();
         foreach (var entry in RecordValues.MapEntries(properties["Custom Loot Table"]))
         {
@@ -222,7 +287,7 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
 internal static class LootRecords
 {
     internal const string UnnamedNote =
-        "No display name is recorded. The source name is derived from its class.";
+        "The exact name is unknown. A descriptive name is shown instead.";
 
     internal static IEnumerable<(
         string Path,
@@ -263,8 +328,23 @@ internal static class LootRecords
         if (!string.IsNullOrWhiteSpace(name))
             return name;
         notes.Add(UnnamedNote);
-        return ItemIdentity.Readable(ItemIdentity.ClassName(path));
+        var className = ItemIdentity.ClassName(path);
+        var length = className.Length;
+        while (length > 0 && char.IsAsciiDigit(className[length - 1]))
+            length--;
+        className = className[..length];
+        if (
+            className.EndsWith("_Base", StringComparison.Ordinal)
+            || className.EndsWith("_Idle", StringComparison.Ordinal)
+        )
+            className = className[..^5];
+        if (className.StartsWith("UneadZombie", StringComparison.Ordinal))
+            className = "UndeadZombie" + className["UneadZombie".Length..];
+        return ItemIdentity.Readable(className);
     }
+
+    internal static string DisplayName(string name) =>
+        name.Any(char.IsWhiteSpace) ? name : ItemIdentity.Readable(name);
 
     internal static IEnumerable<ItemSource> Pool(
         CatalogContext context,
@@ -276,15 +356,15 @@ internal static class LootRecords
     )
     {
         var entries = RecordValues.MapEntries(pool).ToArray();
-        var total = entries.Sum(entry => RecordValues.Number(entry.Value) ?? 0);
-        var noDrop = entries
-            .Where(entry => entry.Key is null)
-            .Sum(entry => RecordValues.Number(entry.Value) ?? 0);
+        var total = WeightTotals.Sum(entries.Select(entry => entry.Value));
+        var noDrop = WeightTotals.Sum(
+            entries.Where(entry => entry.Key is null).Select(entry => entry.Value)
+        );
         if (noDrop > 0)
             notes =
             [
                 .. notes,
-                $"No-drop outcome weight: {noDrop.ToString(CultureInfo.InvariantCulture)}.",
+                $"The chance of finding nothing has a relative weight of {noDrop.ToString(CultureInfo.InvariantCulture)}.",
             ];
         foreach (var (key, value) in entries)
         {

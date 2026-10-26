@@ -10,7 +10,11 @@ internal interface ISourceMechanism
     IEnumerable<ItemSource> FindSources(CatalogContext context);
 }
 
-internal sealed record ItemSource(string ItemClass, Source Source);
+internal sealed record ItemSource(
+    string ItemClass,
+    Source Source,
+    ContainerDetails? Container = null
+);
 
 internal sealed record Placement(string Level, ActorRecord Actor, JsonObject Properties);
 
@@ -70,22 +74,18 @@ internal sealed class CatalogContext
             : new ItemLink(null, ItemIdentity.Readable(ItemIdentity.ClassName(path)));
 
     public static IReadOnlyList<Source> MergeSources(
-        IEnumerable<Source> candidates,
+        IEnumerable<ItemSource> candidates,
         IReadOnlySet<string> excludedLevels
-    )
+    ) => MergeKnownPlaces(ContainerSourceMerge.Merge(candidates, excludedLevels));
+
+    private static IReadOnlyList<Source> MergeKnownPlaces(IEnumerable<Source> candidates)
     {
         var groups = new Dictionary<string, (Source Source, Dictionary<string, Place> Places)>(
             StringComparer.Ordinal
         );
         foreach (var source in candidates)
         {
-            var allowed = source
-                .Places.Where(place => !excludedLevels.Contains(place.Id))
-                .ToArray();
-            if (source.Places.Count > 0 && allowed.Length == 0)
-            {
-                continue;
-            }
+            var allowed = source.Places;
             var key = CanonicalJson.Serialize(source with { Places = [] });
             if (!groups.TryGetValue(key, out var group))
             {

@@ -36,7 +36,7 @@ internal sealed class BountyNoteMechanism : ISourceMechanism
                     null,
                     [],
                     [
-                        "Given when the quest is accepted. Required bounty items are completion requirements, not rewards or inputs to receiving the note.",
+                        "Received when accepting the quest. Required bounty items are needed to complete the quest, not to receive the note. They are not rewards.",
                     ]
                 )
             );

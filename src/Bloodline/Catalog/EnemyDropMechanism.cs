@@ -126,10 +126,10 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
     {
         var roll =
             field == "Loot Table"
-                ? "Corpse loot roll. Separate from the rare pickup roll."
-                : "Rare pickup roll. Separate from corpse loot.";
+                ? "Dropped when defeated."
+                : "Rare loot dropped when defeated. Checked separately from normal loot.";
         return fromSpawner
-            ? [roll, .. nameNotes, "Spawner activation conditions have not been checked."]
+            ? [roll, .. nameNotes, "Comes from a spawner whose conditions are unknown."]
             : [roll, .. nameNotes];
     }
 }

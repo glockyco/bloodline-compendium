@@ -19,10 +19,23 @@ internal sealed class FarmingMechanism : ISourceMechanism
                 continue;
             }
             var seed = RecordValues.AnyReference(values["Item"]);
-            var notes = WorldSourceData
-                .Notes(values, "Yield", "GrowDurationDays", "FarmingLevel")
-                .ToList();
-            notes.Add("Yield is the base number of harvest attempts before farming bonuses.");
+            var notes = new List<string>();
+            if (RecordValues.Number(values["Yield"]) is { } attempts)
+            {
+                notes.Add(
+                    FormattableString.Invariant(
+                        $"Base harvest attempts before farming bonuses: {attempts}."
+                    )
+                );
+            }
+            if (RecordValues.Number(values["GrowDurationDays"]) is { } days)
+            {
+                notes.Add(FormattableString.Invariant($"Growing time in days: {days}."));
+            }
+            if (RecordValues.Number(values["FarmingLevel"]) is { } level)
+            {
+                notes.Add(FormattableString.Invariant($"Requires farming level {level}."));
+            }
             foreach (var (item, weight) in WorldSourceData.Pool(values["HarvestItems"]))
             {
                 yield return new ItemSource(

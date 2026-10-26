@@ -51,11 +51,7 @@ internal static class CatalogBuilder
         var candidates = mechanisms
             .SelectMany(mechanism => mechanism.FindSources(context))
             .Where(candidate => !context.IsExcludedClass(candidate.ItemClass))
-            .ToLookup(
-                candidate => candidate.ItemClass,
-                candidate => candidate.Source,
-                StringComparer.OrdinalIgnoreCase
-            );
+            .ToLookup(candidate => candidate.ItemClass, StringComparer.OrdinalIgnoreCase);
         var textures = records.Textures.ToDictionary(
             texture => texture.Path,
             StringComparer.OrdinalIgnoreCase
@@ -150,7 +146,8 @@ internal static class CatalogBuilder
                 .OrderBy(pair => pair.Key)
                 .Select(pair => new CoverageGap(
                     pair.Key,
-                    pair.Value.OrderBy(entry => entry.Label, StringComparer.Ordinal)
+                    pair.Value.Distinct()
+                        .OrderBy(entry => entry.Label, StringComparer.Ordinal)
                         .ThenBy(entry => entry.ItemSlug, StringComparer.Ordinal)
                         .ThenBy(entry => entry.Detail, StringComparer.Ordinal)
                         .ToArray()

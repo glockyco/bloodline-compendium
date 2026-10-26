@@ -33,18 +33,28 @@ internal sealed class FishingMechanism : ISourceMechanism
             {
                 continue;
             }
-            var notes = WorldSourceData
-                .Notes(properties, "Min Difficulty", "Max Difficulty", "Remaining Fish")
-                .ToList();
-            notes.Add(
-                "One inventory addition per successful catch. Fish size is generated separately."
-            );
+            var notes = new List<string>();
+            if (RecordValues.Number(properties["Min Difficulty"]) is { } minimum)
+            {
+                notes.Add(FormattableString.Invariant($"Minimum fishing difficulty: {minimum}."));
+            }
+            if (RecordValues.Number(properties["Max Difficulty"]) is { } maximum)
+            {
+                notes.Add(FormattableString.Invariant($"Maximum fishing difficulty: {maximum}."));
+            }
+            if (RecordValues.Number(properties["Remaining Fish"]) is { } remaining)
+            {
+                notes.Add(
+                    FormattableString.Invariant($"Fish remaining at this spot: {remaining}.")
+                );
+            }
+            notes.Add("Each successful catch adds one item. Fish size is determined separately.");
             if (RecordValues.Boolean(properties["Use Specific Loot table?"]) == true)
             {
                 foreach (
                     var source in Sources(
                         properties["Specific Loot Table"],
-                        "Specific fishing pool",
+                        "Fishing spot",
                         [context.Places.Get(spot.Level)],
                         notes
                     )
@@ -68,7 +78,7 @@ internal sealed class FishingMechanism : ISourceMechanism
                         [context.Places.Get(spot.Level)],
                         [
                             .. notes,
-                            "The data defines a lava pool. Its runtime pool assignment is unresolved.",
+                            "Lava catches are listed, but whether they are available at this spot is unknown.",
                         ]
                     )
                 )
@@ -90,7 +100,7 @@ internal sealed class FishingMechanism : ISourceMechanism
                 foreach (
                     var source in Sources(
                         defaults.Properties[pool],
-                        pool,
+                        SourceName(pool),
                         [context.Places.Get(spot.Level)],
                         notes
                     )
@@ -112,10 +122,10 @@ internal sealed class FishingMechanism : ISourceMechanism
                 foreach (
                     var source in Sources(
                         defaults.Properties[pool],
-                        pool,
+                        SourceName(pool),
                         [],
                         [
-                            "Fishing pool defined by the minigame. Spot activation and difficulty determine availability.",
+                            "Possible fishing catches. Availability depends on the spot being active and its difficulty.",
                         ]
                     )
                 )
@@ -125,6 +135,17 @@ internal sealed class FishingMechanism : ISourceMechanism
             }
         }
     }
+
+    private static string SourceName(string difficulty) =>
+        difficulty switch
+        {
+            "Beginner Loot Table" => "Fishing, beginner difficulty",
+            "Easy Loot Table" => "Fishing, easy difficulty",
+            "Medium Loot Table" => "Fishing, medium difficulty",
+            "Hard Loot Table" => "Fishing, hard difficulty",
+            "Expert Loot Table" => "Fishing, expert difficulty",
+            _ => "Lava fishing",
+        };
 
     private static IEnumerable<ItemSource> Sources(
         JsonNode? pool,

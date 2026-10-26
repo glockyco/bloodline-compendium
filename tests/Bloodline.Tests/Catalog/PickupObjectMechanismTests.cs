@@ -203,7 +203,9 @@ public sealed class PickupObjectMechanismTests
         Assert.Null(source.Amount);
         Assert.Contains(
             source.Notes,
-            note => note.Contains("Amount of Items setting: 9.", StringComparison.Ordinal)
+            note =>
+                note.Contains("9", StringComparison.Ordinal)
+                && note.Contains("unknown", StringComparison.OrdinalIgnoreCase)
         );
     }
 }

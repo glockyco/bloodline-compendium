@@ -212,7 +212,12 @@ public sealed class CatalogTests
                 []
             );
         var sources = CatalogContext.MergeSources(
-            [Source(1, "/Game/Test"), Source(2, "/Game/A", "/Game/Test"), Source(3, "/Game/A")],
+            new[]
+            {
+                Source(1, "/Game/Test"),
+                Source(2, "/Game/A", "/Game/Test"),
+                Source(3, "/Game/A"),
+            }.Select(source => new ItemSource("/Invented/Item.Item_C", source)),
             new HashSet<string>(["/Game/Test"], StringComparer.OrdinalIgnoreCase)
         );
         Assert.Equal(2, sources.Count);
@@ -383,5 +388,32 @@ public sealed class CatalogTests
         Assert.Equal("Hidden Valley", place.Name);
         Assert.False(places.HasName(place.Id));
         Assert.Contains(place, places.All);
+    }
+
+    [Fact]
+    public void DeduplicatesCoverageEntriesWithoutMergingDistinctAcquisitionData()
+    {
+        var item = Item();
+        ClassRecord Enemy(string suffix, int weight) =>
+            new(
+                "/Game/Enemy" + suffix + ".Enemy" + suffix + "_C",
+                [],
+                Parse(
+                    $$$"""
+                    {"Enemy Name":{"$text":"Invented enemy"},"Loot Table":{"$map":[[{"$ref":"{{{item.Path}}}"},{{{weight}}}]]}}
+                    """
+                )
+            );
+        var gap = new GapRecord("/Game/Unread", null, "Invented error");
+        var result = CatalogBuilder.Build(
+            Records([item, Enemy("A", 1), Enemy("B", 2)], gaps: [gap, gap]),
+            exclusions: [],
+            mechanisms: [new EnemyDropMechanism()]
+        );
+        Assert.Equal(2, result.Items[0].Sources.Count);
+        Assert.Single(
+            result.Coverage.Gaps.Single(gap => gap.Kind == GapKind.SourceWithoutPlace).Entries
+        );
+        Assert.Single(result.Coverage.Gaps.Single(gap => gap.Kind == GapKind.UnreadObject).Entries);
     }
 }

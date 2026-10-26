@@ -141,7 +141,29 @@ internal sealed class ShopMechanism : ISourceMechanism
                 return name;
             }
         }
-        return ItemIdentity.Readable(ItemIdentity.ClassName(classPath));
+        if (
+            classPath.Contains(
+                "/Construction_Buildings/Buildings_Finished/",
+                StringComparison.OrdinalIgnoreCase
+            )
+        )
+        {
+            var building = ItemIdentity.ClassName(classPath);
+            var name = building switch
+            {
+                "WizardTower_Finished" => "Wizard Tower",
+                "Fletcher_Finished" => "Fletcher",
+                "Residence_02" => "Residence",
+                "EngineerWorkshop" => "Engineers Workshop",
+                _ => ItemIdentity.Readable(
+                    building.EndsWith("_Finished", StringComparison.Ordinal)
+                        ? building[..^"_Finished".Length]
+                        : building
+                ),
+            };
+            return name + " (settlement)";
+        }
+        return WorldSourceData.Name(properties, classPath);
     }
 
     internal static IEnumerable<(
