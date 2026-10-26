@@ -56,34 +56,30 @@ Comments in `ItemFacts.cs` cite bytecode by line number in a dump that the repos
 
 Read from the widget and struct assets of build 24464547 with the design harness. Not yet confirmed in the running game.
 
-- **Skill trees are widget data.** Each of 21 disciplines has a tree widget whose slots name the skill class, the required discipline level (`Required Level`, `Level To Check`) and passive buttons with their names, descriptions and required proficiency levels. Pyromancy's passive Burning Efficiency, for example, needs proficiency 85 and reduces pyromancy mana cost by 3.5% per rank.
-- **Two tree versions exist.** Every discipline has a level-based tree (`*LBSkillTree`) and an older tree with skill point prerequisites (`Skills Needed`) and skill upgrades. The skill category menus hold variables only for the level-based trees. Which version players see, and what the `Skill Points` and `Proficiency Points` texts on both mean, is unsettled.
-- **Disciplines:**
-  - Magic: Pyromancy, Cryomancy, Electromancy, Geomancy, Aeromancy, Arcane, Blood Magic, Necromancy, Druidism, Vampirism.
-  - Weapons: Dagger, One-Handed, Two-Handed, Spear, Staff, Shield, Unarmed.
-  - Other: Bow, Flintlock, Lute, Utility Gadgets.
-- **Skills:** `SkillsDataTable` holds 599 skills with mana cost, cooldown, cast time and a skill class. Its tab column groups them as Magic 371, Blades 145, Ranged 45, Gadgets 17 and Leadership 9.
-- **Attributes and proficiencies:**
-  - `PlayerStatLevels` names 12 attributes: Fortitude, Wisdom, Dexterity, Strength, Constitution, Vitality, Intelligence, Perception, Agility, Reflexes, Acrobatics and Willpower.
-  - The lab save also stores levels for Endurance, Focus Crafting, and Light, Medium and Heavy Armor with their EXP. So the armor type decides which armor proficiency a player trains.
-  - Calling the game's `Set Required EXP` matched the experience formula read from bytecode at 14 levels in an earlier spike.
-- **Equipment:** the player has 11 equipment slots. Further layers are armor runes in three tiers with an attunement table, enchantments with melee trigger types, grapple mods, mounts and companions.
-- **Saves:** the save stores inventory items by class path, such as `/Game/BloodlinesAlpha/Interactables/Crafting_Items/Apple.Apple_C`. It also stores attribute and proficiency levels, the character level, completed achievements and the rolled calendar events.
+- Skill trees are widget data. Each of 21 disciplines has a tree widget whose slots name the skill class, the required discipline level (`Required Level`, `Level To Check`) and passive buttons with their names, descriptions and required proficiency levels. Pyromancy's passive Burning Efficiency, for example, needs proficiency 85 and reduces pyromancy mana cost by 3.5% per rank.
+- Every discipline has two tree versions: a level-based tree (`*LBSkillTree`) and an older tree with skill point prerequisites (`Skills Needed`) and skill upgrades. The skill category menus hold variables only for the level-based trees. Which version players see, and what the `Skill Points` and `Proficiency Points` texts on both mean, is unsettled.
+- The disciplines are the magic schools Pyromancy, Cryomancy, Electromancy, Geomancy, Aeromancy, Arcane, Blood Magic, Necromancy, Druidism and Vampirism, the weapon disciplines Dagger, One-Handed, Two-Handed, Spear, Staff, Shield and Unarmed, and Bow, Flintlock, Lute and Utility Gadgets.
+- `SkillsDataTable` holds 599 skills with mana cost, cooldown, cast time and a skill class. Its tab column groups them as Magic 371, Blades 145, Ranged 45, Gadgets 17 and Leadership 9.
+- `PlayerStatLevels` names 12 attributes: Fortitude, Wisdom, Dexterity, Strength, Constitution, Vitality, Intelligence, Perception, Agility, Reflexes, Acrobatics and Willpower.
+- The lab save also stores levels for Endurance, Focus Crafting, and Light, Medium and Heavy Armor with their EXP. So the armor type decides which armor proficiency a player trains.
+- Calling the game's `Set Required EXP` matched the experience formula read from bytecode at 14 levels in an earlier spike.
+- The player has 11 equipment slots. Further layers are armor runes in three tiers with an attunement table, enchantments with melee trigger types, grapple mods, mounts and companions.
+- The save stores inventory items by class path, such as `/Game/BloodlinesAlpha/Interactables/Crafting_Items/Apple.Apple_C`. It also stores attribute and proficiency levels, the character level, completed achievements and the rolled calendar events.
 
 ### What the sibling projects rebuilt
 
-- **Afallon:** started on 2026-09-06.
+- Afallon started on 2026-09-06.
   - It established a strict relational catalog schema and frozen entity references on 2026-09-14 and 2026-09-18, after 182 commits.
   - It restructured its page model three times in four days. `consolidate-entity-pages` merged records that share a player-facing name, `restructure-detail-pages` gave every kind one fixed question order, and `restructure-page-model` folded product, recipe and recipe-item pages into one.
   - It then needed `complete-evidence-pipeline-architecture` because the documented pipeline was not executable end to end.
   - It later added `crawlable-relation-links` to put relations into static HTML.
   - 255 of its commits mention entities, relations, cross-links or references.
-- **Ancient Kingdoms:**
+- Ancient Kingdoms:
   - `unify-acquisition-usage-requirements` unified acquisition and usage semantics across pages after each page had grown its own.
   - Its citation lock over decompiled text changed in 182 commits.
   - It replaced its Markdown game-bug reports with a typed registry, page notes and a Known Bugs page.
   - It needed one shared number-formatting capability and an item page redesign.
-- **Erenshor:** its code-facts spec, matched against decompiled syntax, changed in 45 commits, partly from decompiler output changes.
+- Erenshor's code-facts spec, matched against decompiled syntax, changed in 45 commits, partly from decompiler output changes.
 
 ### Features the siblings built or planned
 
@@ -203,11 +199,11 @@ Screenshots are derived from the game, so they live in the build's artifacts and
 
 ### Presentation foundation
 
-- **Tokens:** one tokens file with closed scales: about nine spacing steps, six type steps, two radii and role-named colours. Stylelint rejects raw values elsewhere.
-- **Components:** shared primitives use subgrid where rows must align.
-- **Checks:** a fixture page renders each primitive with extreme content. Playwright checks overflow, row alignment, minimum size and contrast at 390, 768 and 1280 px, and axe runs on every page.
-- **Voice:** rules sit with the `site/presentation` spec and a banned-phrase list in the repository, checked on built HTML.
-- **Item tooltip:** item pages present facts in the game tooltip's order and wording, with Arbutus Slab (SIL OFL) for item names.
+- One tokens file holds closed scales: about nine spacing steps, six type steps, two radii and role-named colours. Stylelint rejects raw values elsewhere.
+- Shared primitives use subgrid where rows must align.
+- A fixture page renders each primitive with extreme content. Playwright checks overflow, row alignment, minimum size and contrast at 390, 768 and 1280 px, and axe runs on every page.
+- Voice rules sit with the `site/presentation` spec and a banned-phrase list in the repository, checked on built HTML.
+- Item pages present facts in the game tooltip's order and wording, with Arbutus Slab (SIL OFL) for item names.
 
 The emblem is a single front-facing tome illustration generated from the key art's style. It is the source of the header mark, the favicons and the link preview image.
 
@@ -246,11 +242,11 @@ It plans what the game enforces and computes only what verified rules compute:
 It does not simulate fights. A rule or condition the catalog does not know stays visible as a gap, as in Afallon's planner.
 
 Constraints that apply from the start:
-- **Build links:** versioned and refer to keys, compressed into the URL fragment, with size limits.
-- **Characters:** kept in the browser, with shared builds opening as previews.
-- **Planner data:** a route-scoped payload with its own size budget, separate from page documents.
-- **Context on pages:** reference pages prerender neutral content. The active character adds cues in the browser, such as the discipline level a skill needs against the character's level. Search engines and readers without a character see the same pages.
-- **Scope:** planning is split by domain, skills first and equipment second, each its own change, because Afallon's single planner plan had to be split.
+- Build links are versioned, refer to keys, are compressed into the URL fragment and have size limits.
+- Characters are kept in the browser, and shared builds open as previews.
+- Planner data is a route-scoped payload with its own size budget, separate from page documents.
+- Reference pages prerender neutral content. The active character adds cues in the browser, such as the discipline level a skill needs against the character's level. Search engines and readers without a character see the same pages.
+- Planning is split by domain, skills first and equipment second, each its own change, because Afallon's single planner plan had to be split.
 
 ### Where findings live
 
