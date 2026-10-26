@@ -297,7 +297,10 @@ internal sealed class GatheringMechanism : ISourceMechanism
         JsonObject properties,
         string? levelPath
     ) =>
-        RecordValues.Number(properties["Required level"]) is { } level
+        // Every character is at least level 1, so that requirement restricts nothing.
+        RecordValues.Number(properties["Required level"])
+            is > 1
+                and var level
             ?
             [
                 .. WorldSourceData.Conditions(context, properties, levelPath),
@@ -309,6 +312,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
                 ),
             ]
         : properties.ContainsKey("Required level")
+        && RecordValues.Number(properties["Required level"]) is null
             ?
             [
                 .. WorldSourceData.Conditions(context, properties, levelPath),

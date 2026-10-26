@@ -10,10 +10,23 @@ internal interface ISourceMechanism
     IEnumerable<ItemSource> FindSources(CatalogContext context);
 }
 
+/// <summary>
+/// A source of an item as a mechanism finds it. <see cref="Unresolved"/> holds requirements the catalog could not
+/// resolve into anything a player can act on, which go to the maintainer report instead of the page.
+/// </summary>
 internal sealed record ItemSource(
     string ItemClass,
     Source Source,
     ContainerDetails? Container = null
+)
+{
+    public IReadOnlyList<string> Unresolved { get; init; } = [];
+}
+
+/// <summary>Dialogue requirements a page shows, and those that only the maintainer report lists.</summary>
+internal sealed record DialogueRequirements(
+    IReadOnlyList<RelationCondition> Shown,
+    IReadOnlyList<string> Unresolved
 );
 
 internal sealed record Placement(string Level, ActorRecord Actor, JsonObject Properties);
@@ -28,6 +41,10 @@ internal sealed class CatalogContext
     public IReadOnlySet<string> ExcludedLevels { get; }
     public IReadOnlySet<string> ExcludedClasses { get; }
     public IReadOnlySet<string> SharedPeopleClasses { get; }
+
+    private DialogueTags? tags;
+
+    public DialogueTags Tags => tags ??= new DialogueTags(this);
 
     public CatalogContext(
         CatalogRecords records,

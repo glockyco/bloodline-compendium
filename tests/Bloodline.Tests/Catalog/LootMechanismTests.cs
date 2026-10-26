@@ -545,27 +545,23 @@ public sealed class LootMechanismTests
     [InlineData("Enemy To Spawn")]
     [InlineData("Actor To Spawn")]
     [InlineData("Enemy Type")]
-    public void AuthoredSpawnerClassFieldsRetainUncheckedConditions(string field)
+    public void AuthoredSpawnerClassFieldsReportTheirUncheckedConditions(string field)
     {
         var properties = Parse("""{"Enemy Name":{"$text":"Marsh beast"}}""");
         properties["Loot Table"] = Pool();
         var spawner = new JsonObject { [field] = new JsonObject { ["$ref"] = Enemy } };
-        var source = Assert
-            .Single(
-                new EnemyDropMechanism().FindSources(
-                    Context(
-                        [new ClassRecord(Enemy, [], properties)],
-                        [new ActorRecord("Spawner", "/Game/Invented/Spawner.Spawner_C", spawner)]
-                    )
+        var source = Assert.Single(
+            new EnemyDropMechanism().FindSources(
+                Context(
+                    [new ClassRecord(Enemy, [], properties)],
+                    [new ActorRecord("Spawner", "/Game/Invented/Spawner.Spawner_C", spawner)]
                 )
             )
-            .Source;
-        Assert.Equal(Level, Assert.Single(source.Places).Key);
+        );
+        Assert.Equal(Level, Assert.Single(source.Source.Places).Key);
         Assert.Contains(
-            source.Conditions,
-            condition =>
-                condition.Kind == ConditionKind.Unknown
-                && condition.Label.Contains("spawner", StringComparison.OrdinalIgnoreCase)
+            source.Unresolved,
+            label => label.Contains("spawner", StringComparison.OrdinalIgnoreCase)
         );
     }
 

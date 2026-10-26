@@ -616,10 +616,6 @@ public sealed class TradeMechanismTests
             found.Source.Notes,
             note => note.Contains("/Game/") || note.Contains(":Gift")
         );
-        Assert.Contains(
-            found.Source.Conditions,
-            condition => condition.Kind == ConditionKind.Unknown
-        );
         Assert.Equal(linked ? [new Quote("Take this gift.", player)] : [], found.Source.Quotes);
         Assert.Equal(
             linked,

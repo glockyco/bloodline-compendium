@@ -31,9 +31,13 @@ A crafted source SHALL state its station, its discipline and required level, the
 ### Requirement: Conditions in player terms
 A condition SHALL describe what a player does or waits for, in game terms, such as talking to a character, completing a quest, building a settlement building or the calendar month. A dialogue state, quest flag or other identifier SHALL be translated to the action that sets it, or left out of pages when its meaning is unknown. A condition that only says that further requirements may exist SHALL NOT be published per source. The maintainer report SHALL list the sources whose requirements are not fully read.
 
-#### Scenario: Dialogue state
-- **WHEN** a merchant's stock requires the dialogue state SpokeWithScarecrow, which the Scarecrow's greeting sets
-- **THEN** the condition reads as talking to the Scarecrow first
+#### Scenario: Dialogue state set by another conversation
+- **WHEN** a source requires a dialogue state that another character's conversation sets
+- **THEN** the condition reads as talking to that character first
+
+#### Scenario: Dialogue state set on the way
+- **WHEN** the Hallowed Eve Merchant's stock requires the dialogue state that asking what he sells sets in the same conversation
+- **THEN** the source carries no condition for it
 
 #### Scenario: Unresolved dialogue predecessor
 - **WHEN** earlier dialogue checks may gate a source and their paths are not read

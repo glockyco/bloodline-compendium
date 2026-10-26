@@ -98,6 +98,19 @@ internal static class CatalogBuilder
             {
                 icon = texture.Hash;
             }
+            foreach (var candidate in candidates[item.Key])
+            foreach (var label in candidate.Unresolved)
+                gapEntries[GapKind.UnknownCondition]
+                    .Add(
+                        new GapEntry(
+                            item.Name,
+                            CatalogGraph.Reference(item),
+                            candidate.Source.Name + ": " + label
+                        )
+                        {
+                            Source = candidate.Source.Kind,
+                        }
+                    );
             var sources = CatalogContext.MergeSources(candidates[item.Key], context.ExcludedLevels);
             item = item with
             {

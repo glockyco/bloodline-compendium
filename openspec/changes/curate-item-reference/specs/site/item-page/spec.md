@@ -11,7 +11,7 @@ The first screen SHALL show the item's tooltip and a summary of every way to get
 
 #### Scenario: Seasonal merchant
 - **WHEN** a reader opens the Dark Brown Scarecrow Hat
-- **THEN** the summary names the Hallowed Eve Merchant in Woodhurst, the price in Ghostgreen Apples, October or Truill, and talking to the Scarecrow first
+- **THEN** the summary names the Hallowed Eve Merchant in Woodhurst, the price in Ghostgreen Apples, and October or Truill
 
 ### Requirement: Recipe line
 A crafted item SHALL show its recipe as a visible line: ingredients with quantities and icons, station, discipline and level, output quantity and experience. Nothing essential to crafting SHALL sit behind a disclosure.

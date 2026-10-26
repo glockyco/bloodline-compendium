@@ -13,6 +13,7 @@ internal sealed class CurrencyShopMechanism : ISourceMechanism
             {
                 continue;
             }
+            var requirements = WorldSourceData.DialogueConditions(context, dialogue, instance);
             // These switches replace the authored map with bytecode literals outside record coverage.
             if (
                 RecordValues.Boolean(properties["Default Lionsmane Content?"]) == true
@@ -93,10 +94,13 @@ internal sealed class CurrencyShopMechanism : ISourceMechanism
                                 placement.Properties,
                                 placement.Level
                             ),
-                            .. WorldSourceData.DialogueConditions(context, dialogue, instance),
+                            .. requirements.Shown,
                         ],
                     }
-                );
+                )
+                {
+                    Unresolved = requirements.Unresolved,
+                };
             }
         }
     }

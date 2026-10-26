@@ -93,29 +93,19 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
                     WorldSourceData.Reference(EntityKind.Creature, path, name),
                     OddsEvent.Kill,
                     picks,
-                    conditions: places.Count == 0 && sourcePlaces.Count > 0
-                        ?
-                        [
-                            .. WorldSourceData.Conditions(
-                                context,
-                                properties,
-                                sourcePlaces.Count == 1 ? sourcePlaces[0].Key : null
-                            ),
-                            new RelationCondition(
-                                ConditionKind.Unknown,
-                                null,
-                                null,
-                                "Spawner requirements are unknown."
-                            ),
-                        ]
-                        : WorldSourceData.Conditions(
-                            context,
-                            properties,
-                            sourcePlaces.Count == 1 ? sourcePlaces[0].Key : null
-                        )
+                    conditions: WorldSourceData.Conditions(
+                        context,
+                        properties,
+                        sourcePlaces.Count == 1 ? sourcePlaces[0].Key : null
+                    )
                 )
             )
-                yield return source;
+                yield return places.Count == 0 && sourcePlaces.Count > 0
+                    ? source with
+                    {
+                        Unresolved = [SpawnerUnread],
+                    }
+                    : source;
         }
         var placedClasses = context
             .Placements.Select(placement => placement.Actor.Class)
@@ -137,25 +127,22 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
                     WorldSourceData.Reference(EntityKind.Creature, path, name),
                     OddsEvent.Kill,
                     picks,
-                    conditions:
-                    [
-                        .. WorldSourceData.Conditions(
-                            context,
-                            type.Properties,
-                            places.Count == 1 ? places[0].Key : null
-                        ),
-                        new RelationCondition(
-                            ConditionKind.Unknown,
-                            null,
-                            null,
-                            "Spawner requirements are unknown."
-                        ),
-                    ]
+                    conditions: WorldSourceData.Conditions(
+                        context,
+                        type.Properties,
+                        places.Count == 1 ? places[0].Key : null
+                    )
                 )
             )
-                yield return source;
+                yield return source with
+                {
+                    Unresolved = [SpawnerUnread],
+                };
         }
     }
+
+    private const string SpawnerUnread =
+        "A spawner places this enemy, and when it spawns is not read.";
 
     private static IReadOnlyList<string> RollNotes(string field) =>
         field == "Loot Table" ? [] : ["A rare drop, chosen apart from the normal drop."];

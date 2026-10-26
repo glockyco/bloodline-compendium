@@ -102,13 +102,14 @@ internal static class WorldSourceData
         return conditions;
     }
 
-    public static IReadOnlyList<RelationCondition> DialogueConditions(
+    public static DialogueRequirements DialogueConditions(
         CatalogContext context,
         AssetRecord dialogue,
         InnerObjectRecord grant
     )
     {
         var result = new List<RelationCondition>();
+        var unresolved = new List<string>();
         var data = RecordValues.Elements(dialogue.Properties["Data"]).ToArray();
         var nodes = data.Where(node =>
                 RecordValues
@@ -151,27 +152,15 @@ internal static class WorldSourceData
                     continue;
                 pending.Enqueue(parent);
                 if (RecordValues.Elements(RecordValues.At(node, "Conditions")).Any())
-                    result.Add(
-                        new(
-                            ConditionKind.Unknown,
-                            null,
-                            null,
-                            "Earlier dialogue checks may gate this source. Their path requirements are unknown."
-                        )
+                    unresolved.Add(
+                        "Earlier lines of the conversation have checks whose path is not read."
                     );
             }
         }
         foreach (var node in nodes)
         {
             if (RecordValues.At(node, "Conditions") is not null and not JsonArray)
-                result.Add(
-                    new(
-                        ConditionKind.Unknown,
-                        null,
-                        null,
-                        "The dialogue requirements could not be read."
-                    )
-                );
+                unresolved.Add("The line's checks could not be read.");
         }
         foreach (var node in nodes)
         foreach (var condition in RecordValues.Elements(RecordValues.At(node, "Conditions")))
@@ -182,14 +171,7 @@ internal static class WorldSourceData
             );
             if (instance is null)
             {
-                result.Add(
-                    new(
-                        ConditionKind.Unknown,
-                        null,
-                        null,
-                        "A dialogue requirement could not be read."
-                    )
-                );
+                unresolved.Add("A check of the line could not be read: " + reference);
                 continue;
             }
             var properties = context.Classes.TryGetValue(instance.Class, out var defaults)
@@ -199,6 +181,8 @@ internal static class WorldSourceData
             if (type == "PlayerHasEnoughMoney")
             {
                 var money = RecordValues.Number(properties["Required Money"]);
+                if (money is <= 0)
+                    continue;
                 result.Add(
                     new(
                         money is null ? ConditionKind.Unknown : ConditionKind.GameState,
@@ -243,14 +227,18 @@ internal static class WorldSourceData
             else if (type is "CheckIfDialogueTagIsValid" or "CheckIfDialogueTagIsNOTValid")
             {
                 var tag = RecordValues.String(properties["Tag to Find"]);
-                result.Add(
-                    new(
-                        tag is null ? ConditionKind.Unknown : ConditionKind.GameState,
-                        null,
-                        null,
-                        $"Requires dialogue state \"{tag ?? "unknown"}\" to be {(type == "CheckIfDialogueTagIsValid" ? "set" : "unset")}."
-                    )
+                var (resolved, shown) = TagCondition(
+                    context,
+                    dialogue,
+                    tag,
+                    type == "CheckIfDialogueTagIsValid"
                 );
+                if (shown is not null)
+                    result.Add(shown);
+                else if (!resolved)
+                    unresolved.Add(
+                        $"Dialogue tag {tag ?? "without a name"} is set by no conversation that is read."
+                    );
             }
             else if (type is "ObjectivesAreCompleted" or "ObjectivesAreNOTCompleted")
             {
@@ -326,17 +314,48 @@ internal static class WorldSourceData
             }
             else
             {
-                result.Add(
-                    new(
-                        ConditionKind.Unknown,
-                        null,
-                        null,
-                        $"Unknown dialogue requirement: {ItemIdentity.Readable(type)}."
-                    )
-                );
+                unresolved.Add("Unread dialogue check " + type + ".");
             }
         }
-        return result.Distinct().ToArray();
+        return new(result.Distinct().ToArray(), unresolved.Distinct().ToArray());
+    }
+
+    // A tag check names the conversation that sets the tag. A conversation that sets its own tag meets a check
+    // that it is set on the way, and a check that it is unset is how it gives something only once.
+    private static (bool Resolved, RelationCondition? Shown) TagCondition(
+        CatalogContext context,
+        AssetRecord dialogue,
+        string? tag,
+        bool set
+    )
+    {
+        if (tag is null)
+            return (false, null);
+        var setters = context.Tags.Setters(tag);
+        if (setters.Count == 0)
+            return (false, null);
+        if (setters.Contains(DialogueTags.Package(dialogue.Path)))
+            return set
+                ? (true, null)
+                : (true, new(ConditionKind.GameState, null, null, "Given only once."));
+        var names = setters
+            .SelectMany(context.Tags.Speakers)
+            .Distinct(StringComparer.Ordinal)
+            .Order(StringComparer.Ordinal)
+            .ToArray();
+        if (names.Length == 0)
+            return (false, null);
+        var who =
+            names.Length <= 2 ? string.Join(" or ", names) : names[0] + " or another character";
+        return (
+            true,
+            new(
+                ConditionKind.GameState,
+                null,
+                null,
+                set ? $"Requires talking to {who} first." : $"Only until you talk to {who}."
+            )
+        );
     }
 
     public static bool IsClass(CatalogContext context, string path, string name) =>

@@ -207,24 +207,18 @@ public sealed class WorldMechanismTests
                 ),
             ]
         );
-        var source = Assert
-            .Single(
-                new DialogueGrantMechanism().FindSources(
-                    Context([grant], [questTable], dialogues: [dialogue])
-                )
+        var found = Assert.Single(
+            new DialogueGrantMechanism().FindSources(
+                Context([grant], [questTable], dialogues: [dialogue])
             )
-            .Source;
-        var quest = Assert.Single(
-            source.Conditions,
-            condition => condition.Kind == ConditionKind.Quest
         );
+        var quest = Assert.Single(found.Source.Conditions);
+        Assert.Equal(ConditionKind.Quest, quest.Kind);
         Assert.Equal(questTable.Path + ":InventedRow", quest.Entity!.Key);
-        Assert.Equal(
-            3,
-            source.Conditions.Count(condition => condition.Kind == ConditionKind.Unknown)
-        );
+        // The unreadable and the missing check reach the maintainer report, not the page.
+        Assert.Equal(2, found.Unresolved.Count);
         Assert.DoesNotContain(
-            source.Notes,
+            found.Source.Notes,
             note => note.Contains("Requires", StringComparison.Ordinal)
         );
     }
@@ -258,16 +252,14 @@ public sealed class WorldMechanismTests
                 ),
             ]
         );
-        var source = Assert
-            .Single(
-                new DialogueGrantMechanism().FindSources(Context([grant], dialogues: [dialogue]))
-            )
-            .Source;
+        var source = Assert.Single(
+            new DialogueGrantMechanism().FindSources(Context([grant], dialogues: [dialogue]))
+        );
+        // An unread earlier check tells a player nothing to do, so only the maintainer report lists it.
+        Assert.Empty(source.Source.Conditions);
         Assert.Contains(
-            source.Conditions,
-            condition =>
-                condition.Kind == ConditionKind.Unknown
-                && condition.Label.Contains("Earlier dialogue checks", StringComparison.Ordinal)
+            source.Unresolved,
+            label => label.Contains("Earlier lines", StringComparison.Ordinal)
         );
     }
 
@@ -296,10 +288,128 @@ public sealed class WorldMechanismTests
             ]
         );
         var condition = Assert.Single(
-            WorldSourceData.DialogueConditions(Context(), dialogue, grant)
+            WorldSourceData.DialogueConditions(Context(), dialogue, grant).Shown
         );
         Assert.Equal(ConditionKind.Unknown, condition.Kind);
         Assert.Null(condition.Value);
+    }
+
+    [Theory]
+    [InlineData(true, false, "Requires talking to Scarecrow first.")]
+    [InlineData(false, false, "Only until you talk to Scarecrow.")]
+    [InlineData(false, true, "Given only once.")]
+    public void DialogueTagChecksNameTheConversationThatSetsTheTag(bool set, bool own, string label)
+    {
+        var grant = new InnerObjectRecord(
+            "Gift",
+            "/Invented/AddItemDialogue.AddItemDialogue_C",
+            new JsonObject()
+        );
+        var check = set ? "CheckIfDialogueTagIsValid" : "CheckIfDialogueTagIsNOTValid";
+        var setter = new InnerObjectRecord(
+            "Setter",
+            "/Invented/AddSpecialTagDialogue.AddSpecialTagDialogue_C",
+            Parse("""{"Special Tag":"SpokeWithScarecrow"}""")
+        );
+        var dialogue = new AssetRecord(
+            "/Invented/Tale.Tale",
+            "Dialogue",
+            Parse("""{"Data":[{"Events":[{"$ref":"Gift"}],"Conditions":[{"$ref":"Check"}]}]}"""),
+            [
+                grant,
+                new InnerObjectRecord(
+                    "Check",
+                    $"/Invented/{check}.{check}_C",
+                    Parse("""{"Tag to Find":"SpokeWithScarecrow"}""")
+                ),
+                .. own ? [setter] : Array.Empty<InnerObjectRecord>(),
+            ]
+        );
+        var scarecrow = new AssetRecord(
+            "/Invented/Scarecrow.Scarecrow",
+            "Dialogue",
+            new JsonObject(),
+            [setter]
+        );
+        var speaker = Type(
+            "ScarecrowNpc",
+            """{"Full Name":{"$text":"Scarecrow"},"Dialogue":{"$ref":"/Invented/Scarecrow.Scarecrow"}}"""
+        );
+        var context = Context([speaker], dialogues: own ? [dialogue] : [dialogue, scarecrow]);
+
+        var requirements = WorldSourceData.DialogueConditions(context, dialogue, grant);
+
+        Assert.Equal(label, Assert.Single(requirements.Shown).Label);
+        Assert.Empty(requirements.Unresolved);
+    }
+
+    [Fact]
+    public void ATagTheConversationSetsOnTheWayIsNoRequirement()
+    {
+        var grant = new InnerObjectRecord(
+            "Gift",
+            "/Invented/AddItemDialogue.AddItemDialogue_C",
+            new JsonObject()
+        );
+        var dialogue = new AssetRecord(
+            "/Invented/Tale.Tale",
+            "Dialogue",
+            Parse("""{"Data":[{"Events":[{"$ref":"Gift"}],"Conditions":[{"$ref":"Check"}]}]}"""),
+            [
+                grant,
+                new InnerObjectRecord(
+                    "Check",
+                    "/Invented/CheckIfDialogueTagIsValid.CheckIfDialogueTagIsValid_C",
+                    Parse("""{"Tag to Find":"AskedForWares"}""")
+                ),
+                new InnerObjectRecord(
+                    "Setter",
+                    "/Invented/AddSpecialTagDialogue.AddSpecialTagDialogue_C",
+                    Parse("""{"Special Tag":"AskedForWares"}""")
+                ),
+            ]
+        );
+
+        var requirements = WorldSourceData.DialogueConditions(
+            Context(dialogues: [dialogue]),
+            dialogue,
+            grant
+        );
+
+        Assert.Empty(requirements.Shown);
+        Assert.Empty(requirements.Unresolved);
+    }
+
+    [Fact]
+    public void DialogueTagThatNoConversationSetsGoesToTheReport()
+    {
+        var grant = new InnerObjectRecord(
+            "Gift",
+            "/Invented/AddItemDialogue.AddItemDialogue_C",
+            new JsonObject()
+        );
+        var dialogue = new AssetRecord(
+            "/Invented/Tale.Tale",
+            "Dialogue",
+            Parse("""{"Data":[{"Events":[{"$ref":"Gift"}],"Conditions":[{"$ref":"Check"}]}]}"""),
+            [
+                grant,
+                new InnerObjectRecord(
+                    "Check",
+                    "/Invented/CheckIfDialogueTagIsValid.CheckIfDialogueTagIsValid_C",
+                    Parse("""{"Tag to Find":"Nowhere"}""")
+                ),
+            ]
+        );
+
+        var requirements = WorldSourceData.DialogueConditions(Context(), dialogue, grant);
+
+        Assert.Empty(requirements.Shown);
+        Assert.Contains(
+            "Nowhere",
+            Assert.Single(requirements.Unresolved),
+            StringComparison.Ordinal
+        );
     }
 
     [Theory]
@@ -326,7 +436,7 @@ public sealed class WorldMechanismTests
             ]
         );
         var condition = Assert.Single(
-            WorldSourceData.DialogueConditions(Context(), dialogue, grant)
+            WorldSourceData.DialogueConditions(Context(), dialogue, grant).Shown
         );
         Assert.Equal(ConditionKind.CalendarEvent, condition.Kind);
         Assert.Equal(label, condition.Label);

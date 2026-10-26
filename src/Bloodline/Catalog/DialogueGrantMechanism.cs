@@ -122,6 +122,7 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
                 }
                 var notes = GrantNotes(dialogue).ToList();
                 var quotes = Quotes(dialogue, grant).Distinct().ToArray();
+                var requirements = WorldSourceData.DialogueConditions(context, dialogue, grant);
                 var matching = rewards
                     .Where(reward =>
                         reward.Amount == amount
@@ -174,18 +175,12 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
                         {
                             Entity = entity,
                             Quotes = quotes,
-                            Conditions =
-                            [
-                                .. WorldSourceData.DialogueConditions(context, dialogue, grant),
-                                new RelationCondition(
-                                    ConditionKind.Unknown,
-                                    null,
-                                    null,
-                                    "Other dialogue choices and requirements are not fully known."
-                                ),
-                            ],
+                            Conditions = requirements.Shown,
                         }
-                    );
+                    )
+                    {
+                        Unresolved = requirements.Unresolved,
+                    };
                 }
             }
         }

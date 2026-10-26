@@ -112,6 +112,7 @@ internal sealed class ShopMechanism : ISourceMechanism
             {
                 stock = properties["Shop Items"];
             }
+            var requirements = WorldSourceData.DialogueConditions(context, dialogue, instance);
             foreach (var item in Stock(stock))
             {
                 yield return Sale(
@@ -125,9 +126,12 @@ internal sealed class ShopMechanism : ISourceMechanism
                             placement.Properties,
                             placement.Level
                         ),
-                        .. WorldSourceData.DialogueConditions(context, dialogue, instance),
+                        .. requirements.Shown,
                     ]
-                );
+                ) with
+                {
+                    Unresolved = requirements.Unresolved,
+                };
             }
         }
     }
