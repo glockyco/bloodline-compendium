@@ -12,7 +12,8 @@ for (const width of [1280, 390]) {
 			'/items/hollow-prism/',
 			'/coverage/',
 			'/about/',
-			'/missing/accessibility-probe'
+			'/missing/accessibility-probe',
+			'/design/'
 		]) {
 			test(`has no axe violations on ${route}`, async ({ page }) => {
 				await page.goto(route);

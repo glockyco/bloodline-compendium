@@ -11,8 +11,8 @@
 - [x] 2.1 Finish the closed token scales and migrate app.css, the layout, Search and the home page to them, and verify `stylelint` passes on all site styles
 - [x] 2.2 Add `stylelint` to `bun run lint` and CI, and verify a planted raw padding value fails the lint
 - [x] 2.3 Mock the two palette options with a real item tooltip and the home page, decide, and record the choice in this design's Open Questions
-- [ ] 2.4 Add the shared primitives (card with subgrid rows, icon slot, section heading, count, button, relation table, entity link, issue note) and verify each renders on a fixture page with extreme content
-- [ ] 2.5 Add Playwright layout checks for overflow, cross-card row alignment, minimum text size and contrast at 390, 768 and 1280 px, and verify each fails on a planted defect in the fixture page
+- [x] 2.4 Add the shared primitives (card with subgrid rows, icon slot, section heading, count, button, relation table, entity link, issue note) and verify each renders on a fixture page with extreme content
+- [x] 2.5 Add Playwright layout checks for overflow, cross-card row alignment, minimum text size and contrast at 390, 768 and 1280 px, and verify each fails on a planted defect in the fixture page
 - [ ] 2.6 Write the voice rules and banned-phrase list beside the `site/presentation` spec and add a check over built HTML, and verify it fails on a planted phrase
 - [x] 2.7 Commit the emblem, header mark, favicons and link preview with the token work, and verify the built site serves every brand asset
 - [x] 2.8 Add the stat vocabulary and one number formatting function, move every stat label and number on the site to them, and verify that the item list and a tooltip show an item's value identically and that every item slug and qualifier stays the same

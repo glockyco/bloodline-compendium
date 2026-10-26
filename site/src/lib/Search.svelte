@@ -18,6 +18,7 @@
 		aria-label="Search items"
 		shortcut="/"
 		max-results="8"
+		hide-shortcut
 	></pagefind-searchbox>
 	<noscript
 		>Search needs JavaScript. Browse the <a href={resolve('items/')}>item list</a> instead.</noscript
