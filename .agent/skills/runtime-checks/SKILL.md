@@ -46,9 +46,9 @@ Commands that look up objects use the instances the game uses. Class defaults an
 
 - `armor.sh` and `armor-slots.sh` measure which armor values and slots reduce damage and speed.
 - `knees.sh` shows when knee armor starts to count.
-- `food.sh` samples Health every frame around meals.
+- `food.sh` samples Health every frame around meals, of four foods with known tables or of the foods whose class paths it is given.
 
-`bun tools/runtime/tooltip-sweep.mjs <build>` reads the tooltip of every published item into the current run. It resumes where earlier sweeps of the build stopped, and retries a batch that stops the game in halves on a restarted game.
+`bun tools/runtime/tooltip-sweep.mjs <build>` reads the tooltip of every published item into the current run. It resumes where earlier sweeps of the build stopped, and retries a batch that stops the game in halves on a restarted game. The next `catalog` compares each item's facts with the latest tooltip a run read for it. A difference without a known cause in `TooltipCheck.cs` appears in Coverage and needs an owner: a fix in the catalog, a known issue once a run reproduces it, or a new cause.
 
 ## Captures
 

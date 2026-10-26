@@ -12,6 +12,9 @@ internal sealed record CatalogResult(
 )
 {
     public IReadOnlyList<FactClaim> Claims { get; init; } = [];
+
+    /// <summary>The comparison with in-game tooltips, null when no lab run of the build read any.</summary>
+    public TooltipReport? Tooltips { get; init; }
 }
 
 internal static class CatalogBuilder
@@ -181,6 +184,33 @@ internal static class CatalogBuilder
                     );
             }
         }
+        var claims = resolver.Claims.Where(claim => !context.IsExcludedClass(claim.Item)).ToArray();
+        var tooltips =
+            records.Tooltips.Count == 0
+                ? null
+                : TooltipCheck.Check(
+                    records.Build.BuildId,
+                    graphResult.Items,
+                    records.Tooltips,
+                    claims
+                );
+        var pages = graphResult.Items.ToDictionary(item => item.Key, StringComparer.Ordinal);
+        // Known causes are owned elsewhere, so coverage lists only the differences that no cause explains.
+        foreach (
+            var difference in tooltips?.Differences.Where(difference => difference.Reason is null)
+                ?? []
+        )
+        {
+            var item = pages[difference.Item];
+            gapEntries[GapKind.TooltipDifference]
+                .Add(
+                    new GapEntry(
+                        item.Name,
+                        CatalogGraph.Reference(item),
+                        TooltipCheck.Describe(difference)
+                    )
+                );
+        }
         var ordered = graphResult
             .Items.OrderBy(item => item.Name, StringComparer.OrdinalIgnoreCase)
             .ThenBy(item => item.Key, StringComparer.Ordinal)
@@ -232,7 +262,8 @@ internal static class CatalogBuilder
             graphResult.Graph
         )
         {
-            Claims = resolver.Claims.Where(claim => !context.IsExcludedClass(claim.Item)).ToArray(),
+            Claims = claims,
+            Tooltips = tooltips,
         };
     }
 

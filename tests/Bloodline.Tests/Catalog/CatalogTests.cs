@@ -152,6 +152,45 @@ public sealed class CatalogTests
     }
 
     [Fact]
+    public void CoverageListsOnlyTooltipDifferencesWithoutAKnownCause()
+    {
+        var sword = Item();
+        var ore = Item("/Game/Items/Ore.Ore_C", "Iron ore", "Etc.");
+        TooltipObservation Tooltip(ClassRecord item, string name, string stat) =>
+            new(
+                item.Path,
+                "run",
+                "W_Tooltip_QualityWhite_C",
+                new Dictionary<string, string>
+                {
+                    ["TextBlock_0"] = name,
+                    ["TextBlock_2"] = "Invented description",
+                    ["TextBlock_3"] = stat,
+                },
+                ["SpeedTypeBlock"]
+            );
+        var result = Build(
+            Records([sword, ore]) with
+            {
+                Tooltips =
+                [
+                    Tooltip(sword, "Iron sword", "Damage: 900"),
+                    Tooltip(ore, "Iron ore", ": 0"),
+                ],
+            }
+        );
+
+        Assert.Equal(2, result.Tooltips!.Differences.Count);
+        var entry = Assert.Single(
+            Assert
+                .Single(result.Coverage.Gaps, gap => gap.Kind == GapKind.TooltipDifference)
+                .Entries
+        );
+        Assert.Equal(sword.Path, entry.Entity!.Key);
+        Assert.Contains("900", entry.Detail);
+    }
+
+    [Fact]
     public void ExcludedLevelPlacementsCannotBecomePickupSources()
     {
         var item = Item();

@@ -34,7 +34,8 @@ export type GapKind =
   | "placeWithoutName"
   | "unreadObject"
   | "unknownCondition"
-  | "unresolvedReference";
+  | "unresolvedReference"
+  | "tooltipDifference";
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "ConditionKind".

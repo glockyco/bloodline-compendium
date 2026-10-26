@@ -56,6 +56,14 @@ internal static class CatalogWriter
                 throw;
             }
             CanonicalJson.Write(layout.ClaimsFile, new ClaimReport(build.BuildId, catalog.Claims));
+            if (catalog.Tooltips is null)
+            {
+                File.Delete(layout.TooltipReportFile);
+            }
+            else
+            {
+                CanonicalJson.Write(layout.TooltipReportFile, catalog.Tooltips);
+            }
         }
         finally
         {

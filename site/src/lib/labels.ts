@@ -80,5 +80,10 @@ export const gaps: Record<GapKind, { title: string; explanation: string }> = {
 		title: 'Unread objects and packages',
 		explanation:
 			'These parts of the game data could not be read completely. Their contents are absent, so items, sources or places may be missing from this reference.'
+	},
+	tooltipDifference: {
+		title: 'Differences from in-game tooltips',
+		explanation:
+			"The game's own tooltip shows another value for these items than this reference, and we have not confirmed which one the game applies. Where the game's code shows the applied value, this reference shows that one."
 	}
 };

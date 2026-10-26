@@ -94,6 +94,11 @@ internal static class CatalogCommand
                 {
                     Console.WriteLine($"{gap.Kind}: {gap.Entries.Count}");
                 }
+                Console.WriteLine(
+                    catalog.Tooltips is { } tooltips
+                        ? $"Tooltip check: {tooltips.Compared} compared, {tooltips.Unread.Count} unread, {tooltips.Differences.Count} differences, {tooltips.Differences.Count(difference => difference.Reason is null)} without a known cause."
+                        : $"Tooltip check: no lab run of build {buildId} read item tooltips."
+                );
                 return 0;
             }
             catch (Exception error)

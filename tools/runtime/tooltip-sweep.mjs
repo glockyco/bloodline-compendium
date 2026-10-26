@@ -20,7 +20,7 @@ const lab = (...args) =>
 async function readItems() {
   const ids = [];
   for (const file of (await readdir(join(site, "items"))).sort())
-    ids.push(JSON.parse(await readFile(join(site, "items", file), "utf8")).id);
+    ids.push(JSON.parse(await readFile(join(site, "items", file), "utf8")).key);
   return ids;
 }
 

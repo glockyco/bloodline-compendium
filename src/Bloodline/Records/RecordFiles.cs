@@ -89,6 +89,11 @@ internal sealed class RecordLayout(string outputDirectory, long buildId)
 
     public string ClaimsFile => System.IO.Path.Combine(BuildDirectory, "item-claims.json");
 
+    public string TooltipReportFile => System.IO.Path.Combine(BuildDirectory, "tooltip-check.json");
+
+    /// <summary>The lab's runs of the build, one directory each with its <c>run.jsonl</c>.</summary>
+    public string RuntimeDirectory => System.IO.Path.Combine(BuildDirectory, "runtime");
+
     public string ClassesDirectory => System.IO.Path.Combine(RecordsDirectory, "classes");
 
     public string TablesDirectory => System.IO.Path.Combine(RecordsDirectory, "tables");

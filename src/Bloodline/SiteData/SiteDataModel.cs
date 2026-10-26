@@ -302,6 +302,7 @@ internal enum GapKind
     UnreadObject,
     UnknownCondition,
     UnresolvedReference,
+    TooltipDifference,
 }
 
 /// <summary>

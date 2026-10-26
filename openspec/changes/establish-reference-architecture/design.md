@@ -60,10 +60,12 @@ Food, measured in runs food-a, food-b, food-c, misc-1 and misc-2: eating applies
 - Druid's Stew lists "Boost Foraging EXP " with a trailing space, which matches no effect. Its foraging boost stayed at 1 after eating, in two runs.
 - Wheat Seeds lists "Heal PLayer", which the switch matches because effect names are FNames and compare without regard to case. It healed 5 in runs food-wheat-1 and food-wheat-2.
 
-The tooltip sweep (runs tooltips-all and tooltips-sweep) read 2,086 of 2,087 published items. The fetch quest item has no tooltip, and 21 more items use another tooltip widget. Against the catalog:
-- Of 398 armor tooltips, 350 show their row of `ArmorDataTable`.
-- 325 weapon tooltips show the catalog's damage, `WeaponInfo.Damage`. 55 show another value, such as Poison Pike with 40 against 25. Which value combat applies is not yet observed.
-- 1,039 tooltips of materials, ingredients and other items show an empty `: 0` line.
+The tooltip sweep (runs tooltips-all and tooltips-sweep) read 2,065 of 2,087 published items. The lab finds no inventory slot for the fetch quest item, Sack of Seeds, and hovering 21 more items, such as contracts and currencies, builds no tooltip widget. `UI_InventoryItem_2:OnMouseEnter` fills the tooltip:
+- The stat line shows `ItemInfo.Damage`. Armor shows instead the `ArmorDataTable` row whose `ArmorName` equals the item's name, as 350 of 398 armor tooltips did.
+- Crafted armor writes its armor in place of the description, through `Translate Custom Armor Description`.
+- Potions replace the description with `Translate Potion Data to Description`.
+
+The catalog compares every item's facts with the latest tooltip a run read for it, assigns each difference a cause from `TooltipCheck.cs`, writes them to `tooltip-check.json` and lists differences without a cause in Coverage. On build 24464547 it compared 2,065 tooltips and found 1,337 differences. 1,277 have a cause, and 60 have none: the 55 weapon damages and five potions below.
 
 Headless, bound text such as the character sheet's `Armor:` line is not evaluated and keeps its design-time text, so runs read the values the bindings show instead.
 
@@ -71,14 +73,16 @@ Disagreements found:
 
 - The catalog published armor from the class defaults (`ArmorInfo.DamageRating`, `ItemInfo.ArmorType`), which the game does not apply. Owner: the catalog. It now publishes what `Get Armor Slot` returns: the row's class and value, the class `Custom` with `ItemInfo.Damage` for the six crafted armor classes, and `Unarmored` with no armor when no row matches. Amulets and support items get an armor rating of 0 and no armor type.
 - Three published armor items store no `ItemInfo.ItemClass`: Curved Steel Plate Shoes, Leather Pants and Leather Bracers. `Get Armor Slot` gives no armor to an item without a valid class. `BP_BaseItemAsset`'s construction script sets the class on every item actor, so this matters only where the game adds such an item from its class defaults, which no run has shown. Open question.
-- 30 published armor pieces for body slots, not counting the six crafted armor classes, match no row of `ArmorDataTable` by the game's lookup, so the game applies no armor for them while their tooltips show the class default or a row the tooltip finds by display name. Observed for Leather Pants and Velosian Plume-helm. Owner: the game, a known issue. 13 more published items without a row are amulets and support items, which add no armor in any case.
+- 30 published armor pieces for body slots, not counting the six crafted armor classes, match no row of `ArmorDataTable` by the game's lookup, so the game applies no armor for them while their tooltips show `ItemInfo.Damage` or the row whose `ArmorName` is the item's name. Observed for Leather Pants and Velosian Plume-helm. Owner: the game, a known issue. 13 more published items without a row are amulets and support items, which add no armor in any case.
 - Knee armor counts only after another armor piece is equipped. Owner: the game, a known issue.
 - Druid's Stew's foraging boost does not apply, because its effect name has a trailing space. Owner: the game, a known issue.
-- 55 weapon tooltips show a damage other than `WeaponInfo.Damage`. Owner: open until a run measures the damage dealt.
+- 55 weapon tooltips show `ItemInfo.Damage`, which differs from the `WeaponInfo.Damage` that `BP_BaseWeapon` passes to `ApplyDamage`, such as Poison Pike with 40 against 25. Owner: open until a run measures the damage dealt. Coverage lists them.
+- The five published potions' tooltips show no description, and Base Potion's also no name. Owner: open. Coverage lists them.
 - Food tooltips show `PotionInfo`'s restoration amount, while eating applies `FoodEffectDataTable`. Owner: the game for the tooltip, a known issue. The catalog publishes the table's effects: the amount of "Heal Player" as Heals, and other effects by how the function that the food manager calls uses the value, as an amount, as seconds or not at all.
 - 74 published foods have no row of `FoodEffectDataTable` by the game's lookup, so eating them applies nothing while their tooltips show healing. Steak, Turkey Leg and Soup were eaten without any heal in runs food-norow-1 and food-norow-2, while Apple Sauce healed 75 in the same runs. Owner: the game, a known issue. The catalog publishes `Effects: None` for them.
-- 1,039 tooltips show an empty `: 0` stat line. Owner: the game, a known issue of the tooltip only.
+- 1,050 tooltips show a stat line without a label: `: 0` for materials and weapon parts, and `: ` for potions and crafted armor. Owner: the game, a known issue of the tooltip only.
 - The catalog's "Weapon type" was `WeaponInfo.AttackType`, an attack style. All 19 rifles read Crossbow, and the Lonland Pistol is typed Rifle with weapon type Crossbow. Owner: the catalog. It now publishes `ItemInfo.WeaponType`, which equipping and the ranged weapon checks read and which names the Lonland Pistol a Pistol and the Lonland Rifle a Gun. It hides the value None, which 33 weapons carry, most of them shields.
+- Six flintlock pistols, the Lonland Pistol among them, have the specific item type Rifle, which the attack input reads and pages show as their type, and the weapon type Pistol. Which of the two decides how they attack is not yet observed. Owner: open.
 - The player carries two actors for each equipped head item. Swapping helmets in a fresh save kept two, so equipping does not accumulate actors in normal play. The five Winter Warden Cuirass actors seen earlier followed repeated equips of copies of an item that was already equipped, as `capture-model` did. That case was not repeated.
 - Speed shows as a word such as `Slow`, which is the display name of `ItemInfo.Speed`, an `AttackSpeeds` enum: Slow, Below Average, Average, Above Average, Fast or Standard. All seven flintlock pistols read Slow, as their tooltips do. Owner: the catalog, which publishes the word as Speed and keeps the `WeaponInfo.AttackSpeed` multiplier of the attack montage as Attack speed.
 

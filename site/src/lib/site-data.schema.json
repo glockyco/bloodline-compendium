@@ -400,7 +400,8 @@
         "placeWithoutName",
         "unreadObject",
         "unknownCondition",
-        "unresolvedReference"
+        "unresolvedReference",
+        "tooltipDifference"
       ],
       "title": "GapKind"
     },
