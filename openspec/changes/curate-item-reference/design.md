@@ -58,7 +58,7 @@ A chance is published only where the selection code is read and a lab run confir
 
 ### Item list driven by facet and column definitions
 
-Facets and columns are declared per category in the catalog, so a new kind or update needs no site change. Counts follow Afallon's rule: each facet counts under the other facets' selections. Stat filters add sortable columns and combine with all or any, as Ancient Kingdoms does. Search records for category words are added to Pagefind as list entries.
+Facets and columns are declared per category in the catalog, so a new kind or update needs no site change. Counts follow Afallon's rule: each facet counts under the other facets' selections. Stat filters add sortable columns and combine with all or any, as Ancient Kingdoms does. Search has a page for each category and type that links to the filtered list, such as Weapons: Dagger. Its title names the plural nouns that at least three of its item names end with, compounds such as Ultrasword included, because Pagefind ranks title words far above body words, and a list must reach the eight results the search box shows.
 
 ### Item page order
 

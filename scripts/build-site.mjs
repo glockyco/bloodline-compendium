@@ -27,6 +27,42 @@ if (production) {
   await rm(stage, { recursive: true, force: true });
 }
 const started = performance.now();
+
+/** Indexes the built pages and adds a record for each category and type list, as Pagefind's CLI cannot. */
+async function indexSearch(dataDirectory) {
+  const pagefind = await import(Bun.resolveSync("pagefind", site));
+  const { listPage, listRecords } = await import(
+    join(site, "src/lib/search-lists.ts")
+  );
+  const { kindPath } = await import(join(site, "src/lib/entities.ts"));
+  const read = async (name) =>
+    JSON.parse(await readFile(join(dataDirectory, name), "utf8"));
+  const kinds = await read("kinds.json");
+  const { index, errors } = await pagefind.createIndex({});
+  if (!index) throw new Error("Pagefind failed: " + errors.join(", "));
+  const pages = await index.addDirectory({ path: join(site, "build") });
+  if (pages.errors.length)
+    throw new Error("Pagefind failed: " + pages.errors.join(", "));
+  const records = listRecords(
+    await read("items.json"),
+    kindPath("item", kinds),
+  );
+  for (const record of records) {
+    const added = await index.addHTMLFile({
+      url: record.url,
+      content: listPage(record),
+    });
+    if (added.errors.length)
+      throw new Error("Pagefind failed: " + added.errors.join(", "));
+  }
+  const written = await index.writeFiles({
+    outputPath: join(site, "build/pagefind"),
+  });
+  if (written.errors.length)
+    throw new Error("Pagefind failed: " + written.errors.join(", "));
+  await pagefind.close();
+  return `Search: ${pages.page_count} pages and ${records.length} item lists.`;
+}
 const assets = await writeSiteAssets({
   site,
   dataDirectory: directory,
@@ -43,10 +79,7 @@ await cp(assets.directory, join(site, "build"), { recursive: true });
 // The presentation fixture page serves layout checks and review, not readers.
 if (production)
   await rm(join(site, "build/design"), { recursive: true, force: true });
-execFileSync("bun", ["run", "pagefind", "--site", "build"], {
-  cwd: site,
-  stdio: "inherit",
-});
+console.log(await indexSearch(directory));
 console.log(
   (
     await assetGate(join(site, "build"), {

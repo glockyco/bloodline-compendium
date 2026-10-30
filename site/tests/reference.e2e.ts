@@ -218,6 +218,17 @@ test('finds items by word prefix from the shared search', async ({ page }) => {
 			.first()
 	).toBeVisible();
 });
+test('leads a type word from the shared search to the filtered item list', async ({ page }) => {
+	await page.goto('/');
+	await page.locator('pagefind-searchbox input').fill('swords');
+	await page
+		.locator('pagefind-searchbox')
+		.getByRole('option', { name: /Weapons: Sword/ })
+		.first()
+		.click();
+	await expect(page).toHaveURL('/items/?category=weapon&weaponType=Sword');
+	await expect(page.locator('.item-name')).toHaveText(['Lanternedge']);
+});
 test('release labels, provenance and static 404', async ({ page, request }) => {
 	for (const route of ['/', '/items/', '/items/lanternedge/', '/known-issues/', '/missing/page']) {
 		await page.goto(route);
