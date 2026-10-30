@@ -52,7 +52,7 @@
 - [ ] 8.8 Set a payload budget for item pages and the item list and check it in the build, and verify Iron Ingot and the list
 - [x] 8.9 Load the missing page's assets from the site root, open previews on a first tap and separate places with a space, and verify a nested missing address, a phone tap and Gold Coin
 - [ ] 8.10 Capture every item's tooltip in render mode with `tooltip-sweep.mjs --capture`, compare each screenshot with the lab's shown-only reading, and give every difference an owner, and verify that no published tooltip value lacks a screenshot that shows it
-- [ ] 8.11 Link a GitHub issue form for wrong facts from every page's footer, with the page's address filled in, and verify the link from Iron Ingot opens the form with its address
+- [x] 8.11 Link a GitHub issue form for wrong facts from every page's footer, with the page's address filled in, and verify the link from Iron Ingot opens the form with its address
 
 ## 10. Layout system
 
@@ -64,9 +64,9 @@
 
 ## 11. Entity readiness
 
-- [ ] 11.1 Show every kind's preview through one presenter that picks the kind's tooltip, with the item tooltip as its first kind, and verify item previews on hover, focus and tap behave as before and an invented second kind gets its own tooltip
-- [ ] 11.2 Index every kind with pages for search from the kind registry, and verify an invented second kind's page is found by a word prefix with its kind filter
-- [ ] 11.3 List entities of one kind that share a name in `report.json` with their keys and places, and verify the merchants named Shopkeeper and the levels named Elderglen are listed
+- [x] 11.1 Show every kind's preview through one presenter that picks the kind's tooltip, with the item tooltip as its first kind, and verify item previews on hover, focus and tap behave as before and an invented second kind gets its own tooltip
+- [x] 11.2 Index every kind with pages for search from the kind registry, and verify an invented second kind's page is found by a word prefix with its kind filter
+- [x] 11.3 List entities of one kind that share a name in `report.json` with their keys and places, and verify the merchants named Shopkeeper and the levels named Elderglen are listed
 
 ## 12. Integration
 

@@ -172,6 +172,24 @@ internal static class CatalogBuilder
                 .Add(new GapEntry(gap.Object ?? gap.Package, null, gap.Package + ": " + gap.Error));
         }
         var graphResult = CatalogGraph.Build(items, context.Places.All);
+        var withoutPages = EntityKinds
+            .All.Where(kind => !kind.HasPages)
+            .Select(kind => kind.Kind)
+            .ToHashSet();
+        foreach (
+            var shared in graphResult
+                .Graph.Entities.Select(document => document.Entity)
+                .Where(entity => withoutPages.Contains(entity.Kind) && entity.Key is not null)
+                .GroupBy(entity => (entity.Kind, entity.Name))
+                .Where(group => group.Count() > 1)
+        )
+        {
+            foreach (var entity in shared.OrderBy(entity => entity.Key, StringComparer.Ordinal))
+            {
+                gapEntries[GapKind.SharedName]
+                    .Add(new GapEntry(entity.Kind + ": " + entity.Name, entity, entity.Key));
+            }
+        }
         foreach (var item in graphResult.Items)
         {
             foreach (var source in item.Sources)

@@ -370,6 +370,44 @@ public sealed class CatalogTests
                 CatalogWriter.Write(
                     layout,
                     new SiteBuild(1159290, 1, [], "abc", false, TestRelease),
+    [Fact]
+    public void ReportsEntitiesOfAKindWithoutPagesThatShareAName()
+    {
+        var item = Item();
+        ActorRecord Entrance(string level) =>
+            new(
+                "Entrance",
+                "/Game/Entrance.Entrance_C",
+                Parse(
+                    $$"""{"Location Name":{"$text":"Green Valley"},"Level to Load":"{{level}}"}"""
+                )
+            );
+        var records = Records(
+            [item],
+            [
+                new LevelRecord(
+                    "/Game/Overworld",
+                    [],
+                    [Entrance("Valley_Map"), Entrance("Valley_North")]
+                ),
+                new LevelRecord(
+                    "/Game/Valley_Map",
+                    [],
+                    [new ActorRecord("Sword", item.Path, new JsonObject())]
+                ),
+                new LevelRecord("/Game/Valley_North", [], []),
+            ]
+        );
+        var entries = Build(records)
+            .Report.Gaps.Single(gap => gap.Kind == GapKind.SharedName)
+            .Entries;
+        Assert.Equal(
+            ["/Game/Valley_Map", "/Game/Valley_North"],
+            entries.Select(entry => entry.Detail)
+        );
+        Assert.All(entries, entry => Assert.Equal("Place: Green Valley", entry.Label));
+    }
+
                     Build(Records())
                 )
             );

@@ -32,6 +32,12 @@ internal enum GapKind
     UnknownCondition,
     UnresolvedReference,
     TooltipDifference,
+
+    /// <summary>
+    /// Entities of a kind without pages that share a name, which need a decision before the kind gets pages: one
+    /// thing a player meets, such as a town made of several levels, or distinct things that need telling apart.
+    /// </summary>
+    SharedName,
 }
 
 /// <summary>
