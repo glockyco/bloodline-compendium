@@ -24,6 +24,16 @@ export function publicationPage(
 		</head><body><h1>${title}</h1>${body}</body></html>`;
 }
 
+/** An item page, whose article carries the search body and filter that every entity page needs. */
+export function publicationItemPage(title, body = '', description, head) {
+	return publicationPage(
+		title,
+		`<article data-pagefind-body data-pagefind-filter="kind:Items">${body}</article>`,
+		description,
+		head
+	);
+}
+
 export function publicationSitemap(paths = publicationPaths) {
 	return `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${paths
 		.map((path) => `<url><loc>${publicationOrigin}${path}</loc></url>`)
@@ -47,11 +57,11 @@ export async function writePublication(directory) {
 			'Invented items',
 			'<a href="/items/invented/">First item</a><a href="/items/other/">Second item</a>'
 		),
-		'items/invented/index.html': publicationPage(
+		'items/invented/index.html': publicationItemPage(
 			'Invented blade',
 			'<img alt="" src="/icons/invented-160.webp" srcset="/icons/invented-48.webp 48w, /icons/invented-160.webp 160w"><a href="/known-issues/#unknown">Known issue</a>'
 		),
-		'items/other/index.html': publicationPage(
+		'items/other/index.html': publicationItemPage(
 			'Invented pebble',
 			'<a href="../invented/">Blade</a>'
 		),

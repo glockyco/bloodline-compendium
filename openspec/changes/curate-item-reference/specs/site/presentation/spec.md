@@ -44,3 +44,10 @@ Entity links SHALL show previews through one presenter that picks each kind's to
 #### Scenario: A kind without previews
 - **WHEN** a page links an entity whose kind has pages but no registered tooltip
 - **THEN** the link leads to the page and shows no preview
+
+### Requirement: Search for every kind with pages
+Every page of a kind with pages SHALL be indexed for search with its kind's filter from the kind registry, and publication SHALL fail on an entity page without it.
+
+#### Scenario: Entity page without a search body
+- **WHEN** a built entity page lacks the search body or carries another kind's filter
+- **THEN** the publication gate fails and names the page and the filter it needs

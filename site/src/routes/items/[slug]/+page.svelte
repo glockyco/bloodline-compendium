@@ -3,6 +3,7 @@
 	import SourceRow from '#lib/SourceRow.svelte';
 	import RelationTable from '#lib/RelationTable.svelte';
 	import EntityLink from '#lib/ui/EntityLink.svelte';
+	import EntityArticle from '#lib/ui/EntityArticle.svelte';
 	import Conditions from '#lib/Conditions.svelte';
 	import { entityPath, kindPath } from '#lib/entities.js';
 	import Section from '#lib/ui/Section.svelte';
@@ -30,7 +31,8 @@
 		notInNormalPlay:
 			'This item is not obtainable in normal play. Only test areas of the game hold it.'
 	};
-	const kind = $derived(data.kinds.find((entry) => entry.kind === item.kind));
+	// An item page exists only for a kind the registry gives pages.
+	const kind = $derived(data.kinds.find((entry) => entry.kind === item.kind)!);
 	const itemsPath = $derived(kindPath(item.kind, data.kinds)!);
 	const displayName = $derived(item.name + (item.qualifier ? ` (${item.qualifier})` : ''));
 	const groups = $derived(
@@ -160,7 +162,7 @@
 		<li aria-current="page" data-game>{displayName}</li>
 	</ol>
 </nav>
-<article data-pagefind-body data-pagefind-filter={`kind:${kind?.searchFilter ?? ''}`}>
+<EntityArticle {kind}>
 	<div class="item-heading">
 		<h1 data-pagefind-meta="title" data-game>{displayName}</h1>
 		<p class="identity">
@@ -305,4 +307,4 @@
 			{/each}
 		</div>
 	</div>
-</article>
+</EntityArticle>

@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { publicationGate } from '../../scripts/publication-gate.mjs';
 import {
+	publicationItemPage,
 	publicationPage,
 	publicationPaths,
 	publicationSitemap,
@@ -25,7 +26,7 @@ it('resolves rendered disclosures, relative URLs, fragments, srcsets and social 
 		const file = join(directory, 'items/other/index.html');
 		await writeFile(
 			file,
-			publicationPage(
+			publicationItemPage(
 				'Invented pebble',
 				'<a href="../invented/?review=1">Blade</a><a href="https://example.invalid/">External</a><a href="mailto:invented@example.invalid">Email</a>'
 			)
@@ -246,7 +247,7 @@ async function writeRelationFixture(directory) {
 	])
 		await writeFile(
 			join(directory, `items/${slug}/index.html`),
-			publicationPage(
+			publicationItemPage(
 				slug,
 				`<p data-relation-id="${row.id}" data-relation-direction="${direction}">Related item</p>`
 			)
@@ -356,5 +357,23 @@ it('rejects a slug on a kind without pages', async () => {
 		);
 		await writeFile(join(directory, 'graph.json'), JSON.stringify(graph));
 		await expect(publicationGate(directory)).rejects.toThrow('Invalid slug decision');
+	});
+});
+
+it.each([
+	['without a search body', '<p>Pebble</p>'],
+	[
+		"with another kind's filter",
+		'<article data-pagefind-body data-pagefind-filter="kind:Merchants"><p>Pebble</p></article>'
+	]
+])('rejects an entity page %s', async (_, body) => {
+	await publication(async (directory) => {
+		await writeFile(
+			join(directory, 'items/other/index.html'),
+			publicationPage('Invented pebble', body)
+		);
+		await expect(publicationGate(directory)).rejects.toThrow(
+			'/items/other/ lacks a search body with the filter kind:Items'
+		);
 	});
 });

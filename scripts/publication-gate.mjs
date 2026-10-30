@@ -46,6 +46,7 @@ export async function publicationGate(directory) {
       references: [],
       relations: new Set(),
       noindex: false,
+      searchFilters: null,
     };
     const titles = [];
     const descriptions = [];
@@ -54,6 +55,13 @@ export async function publicationGate(directory) {
         (node.attrs ?? []).map(({ name, value }) => [name, value]),
       );
       if (attrs.id) page.ids.add(attrs.id);
+      if ("data-pagefind-body" in attrs)
+        page.searchFilters = [
+          ...(page.searchFilters ?? []),
+          ...(attrs["data-pagefind-filter"] ?? "")
+            .split(",")
+            .map((filter) => filter.trim()),
+        ];
       if (
         attrs["data-relation-id"] &&
         !["script", "style", "template"].includes(node.tagName)
@@ -114,14 +122,15 @@ export async function publicationGate(directory) {
       .map((kind) => "/" + kind.route.replace(/^\/+|\/+$/g, "") + "/"),
   ])
     if (!pages.has(path)) throw new Error("Publication is missing " + path);
+  const entityPages = [];
   for (const kind of kinds.filter((kind) => kind.hasPages)) {
     const prefix = "/" + kind.route.replace(/^\/+|\/+$/g, "") + "/";
-    if (
-      ![...pages.keys()].some(
-        (path) => path.startsWith(prefix) && path !== prefix,
-      )
-    )
+    const ofKind = [...pages].filter(
+      ([path]) => path.startsWith(prefix) && path !== prefix,
+    );
+    if (!ofKind.length)
       throw new Error("Publication has no pages for " + kind.kind);
+    for (const [path, page] of ofKind) entityPages.push({ path, page, kind });
   }
 
   const checkedAssets = new Set();
@@ -189,6 +198,12 @@ export async function publicationGate(directory) {
     if (!page.noindex && !sitemapPaths.has(path))
       throw new Error("Sitemap is missing " + path);
   const relations = await entityGraphGate(directory, pages);
+  // Search finds every kind with pages by its registry filter, as EntityArticle marks it.
+  for (const { path, page, kind } of entityPages)
+    if (!page.searchFilters?.includes("kind:" + kind.searchFilter))
+      throw new Error(
+        path + " lacks a search body with the filter kind:" + kind.searchFilter,
+      );
   return {
     pages: pages.size,
     references,
