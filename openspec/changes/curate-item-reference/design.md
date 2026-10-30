@@ -93,6 +93,12 @@ Source rows named the wrong things: ingot pickups said Sporing Gloves, ore depos
 
 Settlement buildings stand only in the player's settlement, so their shops and deliveries are marked as the settlement's and read "in your settlement".
 
+### A recipe makes the item its row names
+
+The crafting window spawns the class of a recipe's `WeaponComponentTable` row and gives it the row's `ItemName`, as `BlacksmithingMinigame` names `Item Being Crafted` after the window's item text. 16 classes have several rows, so the Angled Steel Blade row builds an item called Angled Steel Blade on the Angled Mystcopper Blade class. Such a row is no recipe of the class's page and goes to the maintainer report. A row whose name is the class's item name with up to two letter edits makes that item, because rows and items misspell each other, as the Silver Gothic Guard row and the Silver Gothic Gaurd item do. Rows that make one item from the same inputs, level and experience under one name, such as `SteelRapierGuard` and `SteelJianGuard`, are one recipe.
+
+Recipe rows without a component row, such as ingots and food, are made through `Crafting:Get Correct Item`, which compares the item to craft with 96 classes and names a row for each. Extraction records those pairs in the code index, and the game's own function returned the same row for each of the 96 classes in run recipe-rows-1. The pair for Round Mace names the row `RoundedMace`, which the recipe table lacks, so the report lists it.
+
 ### Order of work
 
 Values come before presentation, because pages built on wrong numbers would be rebuilt twice: catalog economy first, then reader text and support pages, the item page, browsing, recovered sources, crafting and tools. Lab checks run as each value needs them, one session at a time, because the lab has one game copy.

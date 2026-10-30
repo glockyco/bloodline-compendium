@@ -1,5 +1,6 @@
 using System.Text.Json.Nodes;
 using Bloodline.Catalog;
+using Bloodline.Code;
 using Bloodline.Records;
 using Bloodline.SiteData;
 
@@ -101,6 +102,135 @@ public sealed class TradeMechanismTests
         Assert.Equal(EntityKind.Recipe, source.Source.Entity.Kind);
         Assert.Equal(recipes.Path + ":SharedKey", source.Source.Entity.Key);
         Assert.Equal(input.Path, Assert.Single(source.Source.Inputs).Item.Key);
+    }
+
+    [Fact]
+    public void ARecipeNamedAfterAnotherItemThanItsClassMakesIsNoSourceOfThatItem()
+    {
+        var blade = Item("Mystcopper Blade");
+        var ingot = Item("Ingot");
+        string Recipe() =>
+            $$"""{"Item1":{"$ref":"{{ingot.Path}}"},"QtyReqItem1":4,"CraftAmount":1,"CraftingType":{"$enum":"CraftingTypes::NewEnumerator0","display":"Weaponsmithing"},"EXPrewardforcrafting":35}""";
+        string Component(string name) =>
+            $$$"""{"Class":{"$ref":"{{{blade.Path}}}"},"ItemName":{"$text":"{{{name}}}"},"WeaponsmithingLevelRequired":9,"Part":{"$enum":"WeaponParts::NewEnumerator3"}}""";
+        var context = Context(
+            [blade, ingot],
+            [
+                Table(
+                    "ItemRecipes",
+                    new TableRow("MystcopperBlade", Properties(Recipe())),
+                    new TableRow("SteelBlade", Properties(Recipe()))
+                ),
+                Table(
+                    "WeaponComponentTable",
+                    new TableRow("MystcopperBlade", Properties(Component("Mystcopper Blade"))),
+                    new TableRow("SteelBlade", Properties(Component("Steel Blade")))
+                ),
+            ]
+        );
+        var source = Assert.Single(new CraftingMechanism().FindSources(context));
+        Assert.Equal("Mystcopper Blade", source.Source.Name);
+        Assert.Equal(
+            ("SteelBlade", "Steel Blade", blade.Path),
+            Assert.Single(CraftingMechanism.RenamedProducts(context))
+        );
+    }
+
+    [Fact]
+    public void AMisspelledRowStillMakesItsItemAndIdenticalRowsAreOneRecipe()
+    {
+        var blade = Item("Mystcopper Blade");
+        var ingot = Item("Ingot");
+        string Recipe() =>
+            $$"""{"Item1":{"$ref":"{{ingot.Path}}"},"QtyReqItem1":4,"CraftAmount":1,"CraftingType":{"$enum":"CraftingTypes::NewEnumerator0","display":"Weaponsmithing"},"EXPrewardforcrafting":35}""";
+        string Component(string name) =>
+            $$$"""{"Class":{"$ref":"{{{blade.Path}}}"},"ItemName":{"$text":"{{{name}}}"},"WeaponsmithingLevelRequired":9,"Part":{"$enum":"WeaponParts::NewEnumerator3"}}""";
+        var context = Context(
+            [blade, ingot],
+            [
+                Table(
+                    "ItemRecipes",
+                    new TableRow("MystcopperBlade", Properties(Recipe())),
+                    new TableRow("MystcopperSword", Properties(Recipe())),
+                    new TableRow("SteelBlade", Properties(Recipe()))
+                ),
+                Table(
+                    "WeaponComponentTable",
+                    new TableRow("MystcopperBlade", Properties(Component("Mystcopper Blaed"))),
+                    new TableRow("MystcopperSword", Properties(Component("Mystcopper Blaed"))),
+                    new TableRow("SteelBlade", Properties(Component("Steel Blade")))
+                ),
+            ]
+        );
+        var source = Assert.Single(new CraftingMechanism().FindSources(context));
+        Assert.Equal("Mystcopper Blaed", source.Source.Name);
+        Assert.Equal(
+            "SteelBlade",
+            Assert.Single(CraftingMechanism.RenamedProducts(context)).Recipe
+        );
+    }
+
+    [Fact]
+    public void TheCraftingWindowsHandMappedRowsMakeTheirItems()
+    {
+        var ingot = Item("Iron Ingot");
+        var ore = Item("Iron Ore");
+        var orphan = Item("Atacamite Ingot");
+        var records = new CatalogRecords(
+            new BuildRecord(1159290, 1, []),
+            [ingot, ore, orphan],
+            [
+                Table(
+                    "ItemRecipes",
+                    new TableRow(
+                        "IronIngot",
+                        Properties(
+                            $$"""{"Item1":{"$ref":"{{ore.Path}}"},"QtyReqItem1":3,"CraftAmount":1,"CraftingType":{"$enum":"CraftingTypes::NewEnumerator4","display":"Smelting"},"EXPrewardforcrafting":10}"""
+                        )
+                    )
+                ),
+            ],
+            [],
+            [],
+            [],
+            [],
+            []
+        )
+        {
+            Code = CodeIndex.Create([
+                new CodeFunction(
+                    "/Game/BloodlinesAlpha/Crafting",
+                    "/Game/BloodlinesAlpha/Crafting.Crafting_C",
+                    "Get Correct Item",
+                    true,
+                    "fingerprint",
+                    CodeParseStatus.Complete,
+                    [],
+                    [],
+                    [],
+                    []
+                )
+                {
+                    ClassNames =
+                    [
+                        new ClassName(ingot.Path, "IronIngot"),
+                        new ClassName(orphan.Path, "AtacmiteIngot"),
+                    ],
+                },
+            ]),
+        };
+        var pages = CatalogBuilder.Build(records, [], []).Items.ToDictionary(item => item.Key);
+        var context = new CatalogContext(records, pages, []);
+        var source = Assert.Single(new CraftingMechanism().FindSources(context));
+        Assert.Equal(ingot.Path, source.ItemClass);
+        Assert.Equal(
+            ("Smelting", 3),
+            (source.Source.Recipe!.Discipline, Assert.Single(source.Source.Inputs).Quantity)
+        );
+        Assert.Equal(
+            new ClassName(orphan.Path, "AtacmiteIngot"),
+            Assert.Single(CraftingMechanism.MissingRows(context))
+        );
     }
 
     [Fact]

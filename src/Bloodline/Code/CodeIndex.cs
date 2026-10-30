@@ -44,7 +44,16 @@ internal sealed record CodeFunction(
 )
 {
     public string Citation => Package + ":" + Name;
+
+    /// <summary>
+    /// Names the function assigns right after it compares a value with a class, in code order, such as the recipe
+    /// row that <c>Crafting:Get Correct Item</c> picks for each item class.
+    /// </summary>
+    public IReadOnlyList<ClassName> ClassNames { get; init; } = [];
 }
+
+/// <summary>A class the code compares a value with and the name it assigns when they are equal.</summary>
+internal sealed record ClassName(string Class, string Name);
 
 internal sealed record CodeReference(
     CodeTarget Target,

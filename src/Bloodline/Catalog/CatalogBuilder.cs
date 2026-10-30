@@ -171,6 +171,24 @@ internal static class CatalogBuilder
             gapEntries[GapKind.UnreadObject]
                 .Add(new GapEntry(gap.Object ?? gap.Package, null, gap.Package + ": " + gap.Error));
         }
+        foreach (var mapping in CraftingMechanism.MissingRows(context))
+        {
+            gapEntries[GapKind.MissingRecipeRow]
+                .Add(
+                    new GapEntry(
+                        context.ItemLink(mapping.Class).Name,
+                        null,
+                        "Recipe row " + mapping.Name
+                    )
+                );
+        }
+        foreach (var (recipe, name, item) in CraftingMechanism.RenamedProducts(context))
+        {
+            gapEntries[GapKind.RenamedRecipeProduct]
+                .Add(
+                    new GapEntry(name, null, recipe + ": built on " + context.ItemLink(item).Name)
+                );
+        }
         var graphResult = CatalogGraph.Build(items, context.Places.All);
         var withoutPages = EntityKinds
             .All.Where(kind => !kind.HasPages)

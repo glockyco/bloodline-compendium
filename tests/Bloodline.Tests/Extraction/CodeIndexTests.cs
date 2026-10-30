@@ -52,6 +52,63 @@ public sealed class CodeIndexTests
     }
 
     [Fact]
+    public void ANameAssignedAfterAClassComparisonMapsThatClassToTheName()
+    {
+        JsonObject Compare(int offset, string classPath) =>
+            Node(
+                "EX_LetBool",
+                offset,
+                (
+                    "Expression",
+                    Node(
+                        "EX_CallMath",
+                        offset + 1,
+                        (
+                            "StackNode",
+                            Object("/Script/Engine.KismetMathLibrary:EqualEqual_ClassClass")
+                        ),
+                        (
+                            "Parameters",
+                            new JsonArray(
+                                Node("EX_LocalVariable", offset + 2),
+                                new JsonObject
+                                {
+                                    ["Token"] = "EX_ObjectConst",
+                                    ["Value"] = Object(classPath),
+                                }
+                            )
+                        )
+                    )
+                )
+            );
+        JsonObject Assign(int offset, string name) =>
+            Node(
+                "EX_Let",
+                offset,
+                ("Expression", new JsonObject { ["Token"] = "EX_NameConst", ["Value"] = name })
+            );
+        var function = Function(
+            "Get Correct Item",
+            Compare(0, "/Game/Invented/IronIngot.IronIngot_C"),
+            Node("EX_JumpIfNot", 10, ("CodeOffset", 30)),
+            Assign(20, "IronIngot"),
+            Compare(30, "/Game/Invented/Moonstone.Moonstone_C"),
+            Compare(40, "/Game/Invented/Moonstone.Moonstone_C"),
+            Assign(50, "MoonstoneIngot"),
+            // A name without a comparison before it maps no class.
+            Assign(60, "Stray"),
+            Node("EX_Return", 70)
+        );
+        Assert.Equal(
+            [
+                new ClassName("/Game/Invented/IronIngot.IronIngot_C", "IronIngot"),
+                new ClassName("/Game/Invented/Moonstone.Moonstone_C", "MoonstoneIngot"),
+            ],
+            FunctionAnalysis.ClassNamesOf(function)
+        );
+    }
+
+    [Fact]
     public void EventAttributionFollowsFlowStackBranchesAndLatentResumesWithoutOtherEvents()
     {
         var graph = Function(

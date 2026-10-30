@@ -38,6 +38,14 @@ internal enum GapKind
     /// thing a player meets, such as a town made of several levels, or distinct things that need telling apart.
     /// </summary>
     SharedName,
+
+    /// <summary>
+    /// Recipes that make an item on another item's class under the recipe's own name, which no page describes.
+    /// </summary>
+    RenamedRecipeProduct,
+
+    /// <summary>Items the crafting window maps to a recipe row that the recipe table lacks.</summary>
+    MissingRecipeRow,
 }
 
 /// <summary>

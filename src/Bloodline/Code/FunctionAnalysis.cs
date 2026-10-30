@@ -50,7 +50,10 @@ internal sealed class FunctionAnalysis(
             writes.OrderBy(target => target.Path, StringComparer.Ordinal).ToArray(),
             calls.Order(StringComparer.Ordinal).ToArray(),
             errors.Order(StringComparer.Ordinal).ToArray()
-        );
+        )
+        {
+            ClassNames = ClassNamesOf(function),
+        };
 
         JsonArray Graph(ScriptFunction source, int entry)
         {
@@ -305,6 +308,47 @@ internal sealed class FunctionAnalysis(
     }
 
     public static string Citation(string path) => path.Split('.')[0] + ":" + path.Split(':')[^1];
+
+    /// <summary>
+    /// The names a function assigns after it compares a value with a class constant through
+    /// <c>EqualEqual_ClassClass</c>, as a chain of such comparisons maps classes to row names.
+    /// </summary>
+    internal static IReadOnlyList<ClassName> ClassNamesOf(ScriptFunction function)
+    {
+        var result = new List<ClassName>();
+        string? compared = null;
+        foreach (var statement in function.Statements)
+        {
+            // Field names differ between expression types, so the statement's whole tree is searched.
+            var nodes = ScriptExpressions.Walk(statement).ToArray();
+            if (
+                nodes.Any(node =>
+                    Text(node["StackNode"]?["$object"])
+                        ?.EndsWith(":EqualEqual_ClassClass", StringComparison.Ordinal) == true
+                )
+            )
+            {
+                compared =
+                    nodes
+                        .Where(node => Text(node["Token"]) == "EX_ObjectConst")
+                        .Select(node => Text(node["Value"]?["$object"]))
+                        .FirstOrDefault(path => path is not null)
+                    ?? compared;
+            }
+            else if (
+                compared is not null
+                && Text(statement["Token"]) is "EX_Let" or "EX_LetValueOnPersistentFrame"
+                && nodes.FirstOrDefault(node => Text(node["Token"]) == "EX_NameConst")
+                    is { } constant
+                && Text(constant["Value"]) is { } name
+            )
+            {
+                result.Add(new ClassName(compared, name));
+                compared = null;
+            }
+        }
+        return result;
+    }
 
     private void Scan(
         JsonNode? node,
