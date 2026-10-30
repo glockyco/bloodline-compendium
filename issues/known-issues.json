@@ -69,41 +69,21 @@
       "reportUrl": null
     },
     {
-      "id": "food-tooltip-heals",
-      "title": "Food tooltips show the wrong healing",
-      "effect": "Many foods heal a different amount than their tooltips show. Roasted Apple shows Heals: 75hp but heals 25, and Apple Sauce shows Heals: 0hp but heals 75.",
-      "workaround": "Item pages show the healing that eating applies.",
-      "steps": [
-        "Lose some Health.",
-        "Hover Roasted Apple in the inventory. The tooltip shows Heals: 75hp.",
-        "Eat it. Health rises by 25."
-      ],
-      "expected": "Health rises by the amount the tooltip shows.",
-      "observed": "Health rises by 25.",
-      "cause": "The tooltip shows the restoration amount of the food's PotionInfo. Eating applies the food's row of FoodEffectDataTable instead, whose Heal Player effect adds its own amount to Health.",
-      "citations": [
-        "/Game/BloodlinesAlpha/UI/Inventory/UI_InventoryItem_2:OnMouseEnter",
-        "/Game/BloodlinesAlpha/UI/CharacterSheet/FoodManager:Get Item",
-        "/Game/BloodlinesAlpha/UI/CharacterSheet/FoodManager:Heal Player"
-      ],
-      "builds": [24464547],
-      "report": "notReported",
-      "reportUrl": null
-    },
-    {
       "id": "food-without-row",
       "title": "Some foods do nothing when eaten",
-      "effect": "Some foods, such as Steak, Turkey Leg and Soup, are used up without any effect when eaten, although their tooltips and descriptions promise healing.",
+      "effect": "Steak, Soup, Turkey Leg, Cooked Red Wrangler, Red Wrangler Sandwich and Potato Seeds are used up without any effect when eaten, although their descriptions promise healing.",
       "workaround": "Item pages show which foods have an effect.",
       "steps": [
         "Lose some Health.",
-        "Hover Steak in the inventory. The tooltip shows Heals: 80hp.",
+        "Hover Steak in the inventory. Its description says it restores 80 health.",
         "Eat it. The Steak is gone, and Health only keeps regenerating as before."
       ],
       "expected": "Health rises by 80.",
       "observed": "The food is used up, and Health does not rise beyond its normal regeneration.",
       "cause": "Eating looks up the food's row of FoodEffectDataTable by its name without spaces and apostrophes, and then by its localized name. No row matches these foods, so eating applies no effect.",
-      "citations": ["/Game/BloodlinesAlpha/UI/CharacterSheet/FoodManager:Get Item"],
+      "citations": [
+        "/Game/BloodlinesAlpha/UI/CharacterSheet/FoodManager:Get Item"
+      ],
       "builds": [24464547],
       "report": "notReported",
       "reportUrl": null
@@ -120,21 +100,9 @@
       "expected": "Druid's Stew adds the foraging experience boost as well as Druidsight.",
       "observed": "Only Druidsight appears, and the foraging experience multiplier stays at 1.",
       "cause": "The stew's row of FoodEffectDataTable lists the effect as Boost Foraging EXP with a trailing space. The food manager applies effects by name, and no effect has that name.",
-      "citations": ["/Game/BloodlinesAlpha/UI/CharacterSheet/FoodManager:Get Item"],
-      "builds": [24464547],
-      "report": "notReported",
-      "reportUrl": null
-    },
-    {
-      "id": "empty-stat-line",
-      "title": "Tooltips show a stat line without a label",
-      "effect": "The tooltips of materials, weapon parts, potions and crafted armor show a line that reads only \": 0\" or \":\".",
-      "workaround": null,
-      "steps": ["Hover Animal Bones in the inventory. The tooltip shows a line that reads \": 0\"."],
-      "expected": "Items without a stat show no stat line.",
-      "observed": "The tooltip shows \": 0\".",
-      "cause": "The tooltip writes the item's ItemInfo.Damage into its stat line for every item and labels the line only for weapons, armor and food.",
-      "citations": ["/Game/BloodlinesAlpha/UI/Inventory/UI_InventoryItem_2:OnMouseEnter"],
+      "citations": [
+        "/Game/BloodlinesAlpha/UI/CharacterSheet/FoodManager:Get Item"
+      ],
       "builds": [24464547],
       "report": "notReported",
       "reportUrl": null

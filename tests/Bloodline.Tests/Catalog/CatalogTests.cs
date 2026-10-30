@@ -155,7 +155,13 @@ public sealed class CatalogTests
     public void CoverageListsOnlyTooltipDifferencesWithoutAKnownCause()
     {
         var sword = Item();
-        var ore = Item("/Game/Items/Ore.Ore_C", "Iron ore", "Etc.");
+        var pants = new ClassRecord(
+            "/Game/Items/Pants.Pants_C",
+            [ItemIdentity.BaseItem],
+            Parse(
+                """{"ItemInfo":{"ItemName":{"$text":"Leather pants"},"Description":{"$text":"Invented description"},"ItemType":{"$enum":"E_ItemType::Armor","display":"Armor"},"ItemSlot":{"$enum":"Slot::Torso","display":"Torso"},"ItemValue":3,"ItemImage":{"$ref":"/Game/Icons/Sword.Sword"},"Damage":4}}"""
+            )
+        );
         TooltipObservation Tooltip(ClassRecord item, string name, string stat) =>
             new(
                 item.Path,
@@ -169,17 +175,28 @@ public sealed class CatalogTests
                 },
                 ["SpeedTypeBlock"]
             );
+        // An armor table without a row for the pants makes them armor that adds none.
+        var armorTable = new TableRecord("/Game/Invented/ArmorDataTable.ArmorDataTable", null, []);
         var result = Build(
-            Records([sword, ore]) with
+            new CatalogRecords(
+                new BuildRecord(1159290, 1, []),
+                [sword, pants],
+                [armorTable],
+                [],
+                [],
+                [],
+                [new TextureRecord("/Game/Icons/Sword.Sword", "aabb", 1, 1, "BGRA")],
+                []
+            ) with
             {
                 Tooltips =
                 [
                     Tooltip(sword, "Iron sword", "Damage: 900"),
-                    Tooltip(ore, "Iron ore", ": 0"),
+                    Tooltip(pants, "Leather pants", "ARMOR: 4"),
                 ],
                 Issues = new KnownIssueRegistry([
                     new KnownIssue(
-                        "empty-stat-line",
+                        "armor-without-row",
                         "Invented issue",
                         "Invented effect.",
                         null,
@@ -354,23 +371,6 @@ public sealed class CatalogTests
     }
 
     [Fact]
-    public void FailedIconCopyLeavesPublishedSiteUntouched()
-    {
-        var directory = Path.Combine(
-            Path.GetTempPath(),
-            "bloodline-catalog-" + Guid.NewGuid().ToString("N")
-        );
-        try
-        {
-            var layout = new RecordLayout(directory, 1);
-            Directory.CreateDirectory(layout.SiteDirectory);
-            var sentinel = Path.Combine(layout.SiteDirectory, "existing.txt");
-            File.WriteAllText(sentinel, "Previous site");
-            Assert.Throws<DirectoryNotFoundException>(() =>
-                CatalogWriter.Write(
-                    layout,
-                    new SiteBuild(1159290, 1, [], "abc", false, TestRelease),
-    [Fact]
     public void ReportsEntitiesOfAKindWithoutPagesThatShareAName()
     {
         var item = Item();
@@ -408,6 +408,23 @@ public sealed class CatalogTests
         Assert.All(entries, entry => Assert.Equal("Place: Green Valley", entry.Label));
     }
 
+    [Fact]
+    public void FailedIconCopyLeavesPublishedSiteUntouched()
+    {
+        var directory = Path.Combine(
+            Path.GetTempPath(),
+            "bloodline-catalog-" + Guid.NewGuid().ToString("N")
+        );
+        try
+        {
+            var layout = new RecordLayout(directory, 1);
+            Directory.CreateDirectory(layout.SiteDirectory);
+            var sentinel = Path.Combine(layout.SiteDirectory, "existing.txt");
+            File.WriteAllText(sentinel, "Previous site");
+            Assert.Throws<DirectoryNotFoundException>(() =>
+                CatalogWriter.Write(
+                    layout,
+                    new SiteBuild(1159290, 1, [], "abc", false, TestRelease),
                     Build(Records())
                 )
             );

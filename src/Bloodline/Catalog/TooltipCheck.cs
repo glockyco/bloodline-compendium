@@ -82,23 +82,23 @@ internal static partial class TooltipCheck
             "Crafted armor tooltips show the armor that Translate Custom Armor Description writes in place of the description, and no armor class."
         ),
         new(
-            "food-tooltip-heals",
+            "unlabeled-stat-line",
             "game",
-            true,
-            "Food tooltips show PotionInfo's restoration amount, while eating applies the food's FoodEffectDataTable row."
+            false,
+            "Potion and crafted armor tooltips show a lone colon where other tooltips label a stat, as hovering with the real cursor showed in run hover-check-2."
         ),
         new(
-            "food-without-row",
+            "potion-tooltip-text",
             "game",
-            true,
-            "Eating finds no FoodEffectDataTable row for the food, so it has no effect, while its tooltip shows healing."
+            false,
+            "Potion tooltips show no description, and Base Potion's tooltip shows nothing, as hovering with the real cursor showed in run hover-check-2."
         ),
-        new("empty-stat-line", "game", true, "The tooltip shows a stat line without a label."),
     ];
 
     /// <summary>
     /// The latest tooltip of each item that a tooltip batch read in the build's lab runs. Run directories start
-    /// with their start time, so a later run's reading replaces an earlier one.
+    /// with their start time, so a later run's reading replaces an earlier one. Only batches marked
+    /// <c>shownOnly</c> count, because they leave out text that the tooltip keeps in collapsed boxes.
     /// </summary>
     public static IReadOnlyList<TooltipObservation> Load(string runtimeDirectory)
     {
@@ -124,6 +124,7 @@ internal static partial class TooltipCheck
                 if (
                     entry?["command"]?.GetValue<string>() != "tooltip-batch"
                     || entry["ok"]?.GetValue<bool>() != true
+                    || entry["result"]?["shownOnly"]?.GetValue<bool>() != true
                 )
                 {
                     continue;
@@ -308,13 +309,11 @@ internal static partial class TooltipCheck
             : armorType?.Text == "Unarmored" ? "armor-without-row"
             : slotWithoutArmor ? "armor-slot-adds-none"
             : null;
-        var foodReason =
-            Find(Stat.Effects)?.Text == "None" ? "food-without-row" : "food-tooltip-heals";
 
-        void Number(string field, string shown, Stat stat, string? reason, double? fallback = null)
+        void Number(string field, string shown, Stat stat, string? reason)
         {
             var fact = Find(stat);
-            var published = fact?.Number ?? fallback;
+            var published = fact?.Number;
             var number = double.TryParse(
                 shown.Replace(",", "", StringComparison.Ordinal),
                 NumberStyles.Float,
@@ -336,9 +335,10 @@ internal static partial class TooltipCheck
             }
         }
 
+        var potion = item.Category.Name == "Potion";
         if (Shown("TextBlock_0") is { } name && name != item.Name)
         {
-            add("Name", name, item.Name, null);
+            add("Name", name, item.Name, potion ? "potion-tooltip-text" : null);
         }
         if (Shown("TextBlock_2") is { } description && description != (item.Description ?? ""))
         {
@@ -350,7 +350,12 @@ internal static partial class TooltipCheck
             }
             else
             {
-                add("Description", description, item.Description, null);
+                add(
+                    "Description",
+                    description,
+                    item.Description,
+                    potion && description == "" ? "potion-tooltip-text" : null
+                );
             }
         }
         if (Shown("TextBlock_3") is { } line && StatLine().Match(line) is { Success: true } stat)
@@ -358,24 +363,15 @@ internal static partial class TooltipCheck
             var value = stat.Groups["value"].Value;
             switch (stat.Groups["label"].Value)
             {
-                case "":
-                    add("Stat line", line, null, "empty-stat-line");
-                    break;
                 case "Damage":
                     Number("Damage", value, Stat.Damage, null);
                     break;
                 case "ARMOR":
                     Number("Armor rating", value, Stat.ArmorRating, armorReason);
                     break;
-                case "Heals" when value.EndsWith("hp", StringComparison.Ordinal):
-                    // A food that heals nothing publishes no amount, so the tooltip's amount differs from zero.
-                    Number(
-                        "Restoration amount",
-                        value[..^2],
-                        Stat.RestorationAmount,
-                        foodReason,
-                        0
-                    );
+                // Materials and weapon parts keep this line in a collapsed box, which `read-tooltips` leaves out.
+                case "" when value.Trim() == "":
+                    add("Stat line", line, null, "unlabeled-stat-line");
                     break;
                 default:
                     add("Stat line", line, null, null);

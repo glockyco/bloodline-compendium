@@ -79,13 +79,13 @@ public sealed class KnownIssueTests
             [],
             [
                 Difference("Armor rating", "0", "armor-without-row"),
-                Difference("Stat line", null, "empty-stat-line"),
+                Difference("Armor type", null, "armor-slot-adds-none"),
                 Difference("Description", "Text", "crafted-armor-tooltip"),
             ]
         );
         var registry = new KnownIssueRegistry([
             Issue("armor-without-row"),
-            Issue("empty-stat-line"),
+            Issue("armor-slot-adds-none"),
             Issue(KnownIssues.KneeArmor),
         ]);
 
@@ -95,7 +95,7 @@ public sealed class KnownIssueTests
             ["armor-without-row", KnownIssues.KneeArmor],
             Assert.Single(pages).Notes.Select(note => note.Issue)
         );
-        Assert.Empty(issues.Single(issue => issue.Issue.Id == "empty-stat-line").Affected);
+        Assert.Empty(issues.Single(issue => issue.Issue.Id == "armor-slot-adds-none").Affected);
         var missing = Assert.Throws<InvalidDataException>(() =>
             KnownIssues.Attach(
                 [page],
@@ -104,7 +104,7 @@ public sealed class KnownIssueTests
                 new HashSet<string>()
             )
         );
-        Assert.Contains("empty-stat-line", missing.Message);
+        Assert.Contains("armor-slot-adds-none", missing.Message);
     }
 
     [Theory]

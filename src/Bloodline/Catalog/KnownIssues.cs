@@ -16,6 +16,24 @@ internal static partial class KnownIssues
     /// <summary>A food lists an effect that the food manager's switch does not name.</summary>
     public const string IgnoredFoodEffect = "food-effect-not-applied";
 
+    /// <summary>A food that eating ignores entirely, because the food effect table has no row for it.</summary>
+    public const string FoodWithoutRow = "food-without-row";
+
+    /// <summary>
+    /// The foods whose descriptions promise healing and that lab runs showed doing nothing when eaten, with
+    /// <c>tools/runtime/checks/issues.sh</c>. Other foods without an effect promise none, or promise something the
+    /// runs could not observe.
+    /// </summary>
+    private static readonly HashSet<string> UneatenFoods = new(StringComparer.Ordinal)
+    {
+        "/Game/BloodlinesAlpha/Interactables/Steak.Steak_C",
+        "/Game/BloodlinesAlpha/Interactables/Soup.Soup_C",
+        "/Game/BloodlinesAlpha/Interactables/TukeyLeg.TukeyLeg_C",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/CookedWrangler.CookedWrangler_C",
+        "/Game/BloodlinesAlpha/Interactables/WranglerSandwich.WranglerSandwich_C",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/PotatoSeeds.PotatoSeeds_C",
+    };
+
     public static KnownIssueRegistry Load(string path)
     {
         var registry = CanonicalJson.Read<KnownIssueRegistry>(path);
@@ -46,7 +64,8 @@ internal static partial class KnownIssues
 
     /// <summary>
     /// Adds a note to each item page that shows a value an issue affects: values that a tooltip difference with an
-    /// issue as its cause concerns, knee armor, and foods with an effect that eating ignores.
+    /// issue as its cause concerns, knee armor, foods that eating ignores and foods with an effect that eating
+    /// ignores.
     /// </summary>
     public static (IReadOnlyList<ItemPage> Items, IReadOnlyList<PublishedIssue> Issues) Attach(
         IReadOnlyList<ItemPage> items,
@@ -90,6 +109,14 @@ internal static partial class KnownIssues
             if (ignoredFoodEffects.Contains(item.Key))
             {
                 notes[item.Key].Add(IgnoredFoodEffect);
+            }
+            // A later build that gives such a food an effect drops the note, because Effects is then not None.
+            if (
+                UneatenFoods.Contains(item.Key)
+                && item.Facts.Any(fact => fact.Stat == Stat.Effects && fact.Text == "None")
+            )
+            {
+                notes[item.Key].Add(FoodWithoutRow);
             }
         }
         var pages = items
