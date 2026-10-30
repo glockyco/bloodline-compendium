@@ -90,7 +90,7 @@
 					"text": null
 				},
 				"speed": {
-					"number": null,
+					"number": 3,
 					"text": "Average"
 				}
 			}

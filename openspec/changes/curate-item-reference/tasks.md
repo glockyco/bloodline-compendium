@@ -38,7 +38,7 @@
 - [x] 7.3 Make name search match every item with its status and keep the hidden-by-default count visible, and verify Coconut
 - [ ] 7.4 Add Pagefind list entries for category and type words, and verify searching swords
 - [ ] 7.5 Scope the place filter to the selected ways to get an item, offer only the selected category's stats, order filter groups by use with a skip link to the results, keep counts whole, keep the name column visible in wide tables and keep focus on the availability toggle, and verify Materials with Merchants and Elderglen Woods, Armor at 1440 px and Weapons at 768 px
-- [ ] 7.6 Give weapons one type vocabulary across list, filters and pages, sort Speed by speed, give Range its unit and mark absent values, and verify Lonland Pistol, Musket Sniper and the Speed sort
+- [x] 7.6 Give weapons one type vocabulary across list, filters and pages, sort Speed by speed, drop Range, which is no distance, and mark unknown values, and verify Lonland Pistol, Musket Sniper and the Speed sort
 
 ## 8. Item page
 

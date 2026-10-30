@@ -194,11 +194,10 @@ public sealed class ItemFactsTests
             "Weapon",
             weapon: Parse(
                 """
-                {"Range":350,"MagazineSize":5,"DamageType":{"$enum":"Damage::Pierce","display":"Pierce"}}
+                {"MagazineSize":5,"DamageType":{"$enum":"Damage::Pierce","display":"Pierce"}}
                 """
             )
         );
-        Assert.Equal("350", facts.Single(fact => fact.Label == "Range").Value);
         Assert.Equal("5", facts.Single(fact => fact.Label == "Magazine size").Value);
         Assert.Equal("Pierce", facts.Single(fact => fact.Label == "Damage type").Value);
     }
@@ -207,7 +206,7 @@ public sealed class ItemFactsTests
     public void MissingWeaponOptionsRemainUnknown()
     {
         var facts = Facts("Weapon", weapon: new JsonObject());
-        foreach (var label in new[] { "Range", "Magazine size", "Damage type" })
+        foreach (var label in new[] { "Magazine size", "Damage type" })
         {
             Assert.Null(facts.Single(fact => fact.Label == label).Value);
         }
@@ -660,38 +659,38 @@ public sealed class ItemFactsTests
         Assert.DoesNotContain(facts, fact => fact.Stat is Stat.RestorationAmount or Stat.Effect);
     }
 
-    [Fact]
-    public void WeaponTypeAndSpeedWordFollowTheItemInfoThatEquippingAndTooltipsRead()
+    [Theory]
+    [InlineData("Pistol", "Pistol")]
+    [InlineData("None", "Rifle")]
+    [InlineData(null, "Rifle")]
+    public void AWeaponsTypeIsItsAttackTypeAndElseItsItemType(string? attack, string type)
     {
         var item = Item("Weapon");
-        item.Properties["ItemInfo"]!["WeaponType"] = Parse(
-            """{"$enum":"E_AttackType::Pistol","display":"Pistol"}"""
+        item.Properties["ItemInfo"]!["SpecificItemType"] = Parse(
+            """{"$enum":"E_SpecificItemType::Rifle","display":"Rifle"}"""
         );
+        if (attack is not null)
+        {
+            item.Properties["ItemInfo"]!["WeaponType"] = Parse(
+                $$"""{"$enum":"E_AttackType::{{attack}}","display":"{{attack}}"}"""
+            );
+        }
+        Assert.Equal(type, new ItemFacts([]).Resolve(item, "invented").Type);
+    }
+
+    [Fact]
+    public void SpeedWordFollowsTheItemInfoThatTooltipsRead()
+    {
+        var item = Item("Weapon");
         item.Properties["ItemInfo"]!["Speed"] = Parse(
             """{"$enum":"AttackSpeeds::Slow","display":"Slow"}"""
         );
-        item.Properties["WeaponInfo"] = Parse(
-            """{"AttackType":{"$enum":"E_AttackType::Crossbow","display":"Crossbow"},"AttackSpeed":1.5}"""
-        );
+        item.Properties["WeaponInfo"] = Parse("""{"AttackSpeed":1.5}""");
         var facts = new ItemFacts([]).Resolve(item, "invented").Facts;
 
-        Assert.Equal("Pistol", Value(facts, Stat.WeaponType));
         var speed = facts.Single(fact => fact.Stat == Stat.Speed);
         Assert.Equal(("Slow", "Speed"), (speed.Value, speed.TooltipLabel));
         var multiplier = facts.Single(fact => fact.Stat == Stat.AttackSpeed);
         Assert.Equal(("1.5", (string?)null), (multiplier.Value, multiplier.TooltipLabel));
-    }
-
-    [Fact]
-    public void AShieldsNoneWeaponTypeIsHidden()
-    {
-        var item = Item("Weapon");
-        item.Properties["ItemInfo"]!["WeaponType"] = Parse(
-            """{"$enum":"E_AttackType::None","display":"None"}"""
-        );
-        Assert.DoesNotContain(
-            new ItemFacts([]).Resolve(item, "invented").Facts,
-            fact => fact.Stat == Stat.WeaponType
-        );
     }
 }

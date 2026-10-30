@@ -40,7 +40,7 @@ internal static class ItemList
     private static readonly FacetRule[] Facets =
     [
         new("category", "Category", [], item => [item.Category.Slug]),
-        new("weaponType", "Weapon Type", ["weapon"], item => Text(item, Stat.WeaponType)),
+        new("weaponType", "Weapon Type", ["weapon"], item => [item.Type]),
         new("armorSlot", "Armor Slot", ["armor"], item => [item.Type]),
         new("armorClass", "Armor Class", ["armor"], item => Text(item, Stat.ArmorType)),
         new("weaponPart", "Weapon Part", ["weapon-part"], item => [item.Type]),
@@ -70,9 +70,8 @@ internal static class ItemList
     private static readonly ColumnRule[] Columns =
     [
         new("damage", "Damage", ["weapon"], true, null, item => Number(item, Stat.Damage)),
-        new("speed", "Speed", ["weapon"], false, null, item => Word(item, Stat.Speed)),
+        new("speed", "Speed", ["weapon"], false, null, Speed),
         new("attackSpeed", "Attack Speed", [], true, null, item => Number(item, Stat.AttackSpeed)),
-        new("range", "Range", [], true, null, item => Number(item, Stat.Range)),
         new(
             "magazineSize",
             "Magazine Size",
@@ -220,13 +219,37 @@ internal static class ItemList
             .Facts.Where(fact => fact.Stat == stat && fact.Text is not null)
             .Select(fact => fact.Text!);
 
+    // A cell with neither number nor text is a fact the build does not tell, which the list shows as unknown.
     private static ListCell? Number(ItemPage item, Stat stat) =>
-        item.Facts.FirstOrDefault(fact => fact.Stat == stat && fact.Number is not null) is { } fact
-            ? new ListCell(fact.Number, null)
+        item.Facts.FirstOrDefault(fact => fact.Stat == stat) is { } fact
+            ? new ListCell(fact.Number, fact.Number is null ? fact.Text : null)
             : null;
 
     private static ListCell? Word(ItemPage item, Stat stat) =>
-        item.Facts.FirstOrDefault(fact => fact.Stat == stat && fact.Text is not null) is { } fact
+        item.Facts.FirstOrDefault(fact => fact.Stat == stat) is { } fact
             ? new ListCell(null, fact.Text)
+            : null;
+
+    /// <summary>The speed words from slowest to fastest, by their meaning, with Standard beside Average.</summary>
+    private static readonly Dictionary<string, double> SpeedRanks = new()
+    {
+        ["Slow"] = 1,
+        ["Below Average"] = 2,
+        ["Average"] = 3,
+        ["Standard"] = 3,
+        ["Above Average"] = 4,
+        ["Fast"] = 5,
+    };
+
+    // The cell's number orders the words by speed, and its text is what the list shows.
+    private static ListCell? Speed(ItemPage item) =>
+        Word(item, Stat.Speed) is { } cell
+            ? cell with
+            {
+                Number =
+                    cell.Text is { } word && SpeedRanks.TryGetValue(word, out var rank)
+                        ? rank
+                        : null,
+            }
             : null;
 }

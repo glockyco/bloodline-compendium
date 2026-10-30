@@ -73,3 +73,28 @@ it('writes only what differs from the defaults and reads it back', () => {
 	expect(read('sort=not-a-column').sort).toEqual({ column: 'name', direction: 'asc' });
 	expect(read('category=not-a-category').facets).toEqual({});
 });
+
+it('sorts words by their rank and keeps words of equal rank together', () => {
+	const sword = index.items.find((item) => item.slug === 'lanternedge')!;
+	const speed = (name: string, number: number, text: string): ItemSummary => ({
+		...sword,
+		name,
+		cells: { speed: { number, text } }
+	});
+	const items = [
+		speed('A', 3, 'Standard'),
+		speed('B', 3, 'Average'),
+		speed('C', 5, 'Fast'),
+		speed('D', 3, 'Standard'),
+		speed('E', 1, 'Slow'),
+		speed('F', 3, 'Average')
+	];
+	expect(names(sortItems(items, { column: 'speed', direction: 'asc' }))).toEqual([
+		'E',
+		'B',
+		'F',
+		'A',
+		'D',
+		'C'
+	]);
+});

@@ -128,8 +128,11 @@
 	}
 	function cellText(item: ItemSummary, column: string): string {
 		const cell = item.cells[column];
+		// A cell's text is what it shows when it has one, such as a speed word that sorts by its number. A cell
+		// without either is a fact the game does not tell, and a missing cell is a stat the item lacks.
 		if (!cell) return '';
-		return cell.number != null ? formatNumber(cell.number) : (cell.text ?? '');
+		if (cell.text != null) return cell.text;
+		return cell.number != null ? formatNumber(cell.number) : 'Unknown';
 	}
 	const statusNote: Record<string, string> = {
 		noKnownSource: 'No known way to get it',

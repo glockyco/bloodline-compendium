@@ -99,6 +99,12 @@ The crafting window spawns the class of a recipe's `WeaponComponentTable` row an
 
 Recipe rows without a component row, such as ingots and food, are made through `Crafting:Get Correct Item`, which compares the item to craft with 96 classes and names a row for each. Extraction records those pairs in the code index, and the game's own function returned the same row for each of the 96 classes in run recipe-rows-1. The pair for Round Mace names the row `RoundedMace`, which the recipe table lacks, so the report lists it.
 
+### A weapon has one type
+
+Weapons carry two type fields. `ItemInfo.WeaponType` is the attack type: equipping, proficiency experience and the enchantment stances read it, and the player's attack fires a gun only for the attack types Gun and Pistol. `ItemInfo.SpecificItemType` picks between firing branches inside that attack, and the inventory search matches both. Neither appears in a tooltip. A weapon's type is its attack type, so Lonland Pistol is a Pistol, and a weapon without one, such as a shield, takes its item type. Title, list and filter use this one value.
+
+The speed word sorts by its meaning from Slow to Fast, with Standard beside Average, because the words do not follow the attack speed multiplier. `WeaponInfo.Range` is not published, because no reader uses it as a distance. Crossbow bolts compare it with accuracy thresholds that every crossbow passes, the player's gun attack only tests whether it is zero, and the weapon traces that read it end near the world origin instead of in front of the player. A list cell is empty when the item lacks the stat and reads Unknown when the build does not tell it.
+
 ### Wording a player can act on
 
 A rare pool's drop says it comes from a separate roll in addition to the normal drop, since its chance can be 100%. A container's own appearance chance says that the container is there only part of the time, apart from the chance per container. An item lying where no source names the place says it lies in an unknown place. A bounty note reads "Receive when accepting the quest" and names no place or condition, because the quest is the source.

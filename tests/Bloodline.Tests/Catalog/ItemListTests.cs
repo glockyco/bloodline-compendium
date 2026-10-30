@@ -41,4 +41,29 @@ public sealed class ItemListTests
         Assert.False(ItemList.FacetsOf(apple).ContainsKey("armorSlot"));
         Assert.False(ItemList.FacetsOf(helm).ContainsKey("weaponPart"));
     }
+
+    [Fact]
+    public void SpeedWordsSortBySpeedAndAnUnknownFactIsAnUnknownCell()
+    {
+        ListCell Speed(string word) =>
+            ItemList.CellsOf(
+                Page("Sword", "weapon", "Sword") with
+                {
+                    Facts = [StatVocabulary.Text(Stat.Speed, word)],
+                }
+            )["speed"];
+        string[] words = ["Fast", "Slow", "Above Average", "Standard", "Below Average"];
+        Assert.Equal(
+            ["Slow", "Below Average", "Standard", "Above Average", "Fast"],
+            words.OrderBy(word => Speed(word).Number).ToArray()
+        );
+        Assert.Equal(Speed("Average").Number, Speed("Standard").Number);
+        Assert.Equal("Slow", Speed("Slow").Text);
+
+        var part = Page("Blade", "weapon-part", "Blade") with
+        {
+            Facts = [StatVocabulary.Unknown(Stat.DamageContribution)],
+        };
+        Assert.Equal(new ListCell(null, null), ItemList.CellsOf(part)["damageContribution"]);
+    }
 }

@@ -158,7 +158,12 @@ export function sortItems(items: ItemSummary[], sort: ListState['sort']): ItemSu
 					: String(left).localeCompare(String(right), 'en');
 			if (difference) return sign * difference;
 		}
-		return a.name.localeCompare(b.name, 'en');
+		// Words that rank alike, such as Average and Standard speed, stay grouped.
+		const words = (a.cells[sort.column]?.text ?? '').localeCompare(
+			b.cells[sort.column]?.text ?? '',
+			'en'
+		);
+		return words || a.name.localeCompare(b.name, 'en');
 	});
 }
 

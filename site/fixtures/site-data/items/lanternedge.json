@@ -44,9 +44,9 @@
 		},
 		{
 			"effect": null,
-			"label": "Range",
+			"label": "Magazine size",
 			"number": null,
-			"stat": "range",
+			"stat": "magazineSize",
 			"text": null
 		}
 	],

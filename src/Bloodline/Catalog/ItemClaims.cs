@@ -94,7 +94,7 @@ internal sealed class ItemClaims(CodeIndex? code, long build)
             page.Type == "Unknown" ? null : page.Type,
             page.Category.Name switch
             {
-                "Weapon" => ["ItemInfo.SpecificItemType"],
+                "Weapon" => ["ItemInfo.WeaponType", "ItemInfo.SpecificItemType"],
                 "Armor" => ["ItemInfo.ItemSlot"],
                 "Weapon Part" => ["WeaponComponentTable.Part"],
                 _ => categoryInputs,
@@ -219,11 +219,9 @@ internal sealed class ItemClaims(CodeIndex? code, long build)
             Stat.Category => ["ItemInfo.ItemType"],
             Stat.DamageContribution => ["WeaponComponentTable.Damage"],
             Stat.SpeedContribution => ["WeaponComponentTable.Speed"],
-            Stat.WeaponType => ["ItemInfo.WeaponType"],
             Stat.Damage => ["WeaponInfo.Damage"],
             Stat.AttackSpeed => ["WeaponInfo.AttackSpeed"],
             Stat.Speed => ["ItemInfo.Speed"],
-            Stat.Range => ["WeaponInfo.Range"],
             Stat.DamageType => ["WeaponInfo.DamageType"],
             Stat.MagazineSize => ["WeaponInfo.MagazineSize"],
             Stat.ArmorType => ["ArmorDataTable.ArmorClass"],

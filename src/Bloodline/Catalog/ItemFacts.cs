@@ -120,6 +120,15 @@ internal sealed class ItemFacts(
         ("Boost Stamina Regeneration", FoodValue.Seconds, null),
     }.ToDictionary(effect => effect.Item1, StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// A weapon's attack type, which equipping, proficiency experience and enchantments read, or else its item type for
+    /// weapons without one, such as shields. Lonland Pistol's item type says Rifle while it attacks as a pistol.
+    /// </summary>
+    private string? WeaponType(JsonObject properties) =>
+        Display(RecordValues.At(properties, "ItemInfo.WeaponType")) is { } attack and not "None"
+            ? attack
+            : Display(RecordValues.At(properties, "ItemInfo.SpecificItemType"));
+
     public string? Display(JsonNode? value) =>
         RecordValues.Text(value)
         ?? RecordValues.EnumDisplay(value)
@@ -149,7 +158,7 @@ internal sealed class ItemFacts(
             : component is not null ? componentPart
             : category switch
             {
-                "Weapon" => Display(RecordValues.At(properties, "ItemInfo.SpecificItemType")),
+                "Weapon" => WeaponType(properties),
                 "Armor" => Display(RecordValues.At(properties, "ItemInfo.ItemSlot")),
                 _ => readerCategory?.Name,
             };
@@ -181,22 +190,11 @@ internal sealed class ItemFacts(
         }
         else if (category == "Weapon")
         {
-            // Equipping and the ranged weapon checks read this attack type. A shield's None is no weapon type.
-            var weaponType = Display(RecordValues.At(properties, "ItemInfo.WeaponType"));
-            if (weaponType != "None")
-            {
-                facts.Add(StatVocabulary.Text(Stat.WeaponType, weaponType));
-            }
             // Equipped damage comes from WeaponInfo, not the inventory display's ItemInfo.Damage.
             Add(Stat.Damage, "WeaponInfo.Damage");
             // Tooltips show this speed word, and the equipped attack montage plays at the multiplier.
             Add(Stat.Speed, "ItemInfo.Speed");
             Add(Stat.AttackSpeed, "WeaponInfo.AttackSpeed");
-            var range = RecordValues.Number(RecordValues.At(properties, "WeaponInfo.Range"));
-            if (range is null || range > 0)
-            {
-                Add(Stat.Range, "WeaponInfo.Range");
-            }
             var damageType = Display(RecordValues.At(properties, "WeaponInfo.DamageType"));
             if (damageType != "None")
             {
