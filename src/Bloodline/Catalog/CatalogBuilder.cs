@@ -293,8 +293,7 @@ internal static class CatalogBuilder
                 item.Name,
                 item.Category.Slug,
                 ReadValue(item),
-                item.Icon,
-                item.Sources.Select(source => source.Kind).Distinct().Order().ToArray()
+                item.Icon
             )
             {
                 Key = item.Key,

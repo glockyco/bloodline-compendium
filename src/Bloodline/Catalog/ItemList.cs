@@ -197,23 +197,22 @@ internal static class ItemList
             ? rule.Values(item)
             : [];
 
-    public static IReadOnlyDictionary<string, IReadOnlyList<string>> PlaceSourcesOf(
-        ItemPage item
-    ) =>
-        item
-            .Sources.SelectMany(source =>
-                source.Places.Select(place =>
-                    (Place: place.Name, Kind: Camel(source.Kind.ToString()))
-                )
-            )
-            .GroupBy(pair => pair.Place, StringComparer.Ordinal)
-            .ToDictionary(
-                group => group.Key,
-                group =>
+    /// <summary>The ways to get the item at each value of its place facet, in that facet's order.</summary>
+    public static IReadOnlyList<IReadOnlyList<string>> PlaceSourcesOf(ItemPage item) =>
+        FacetsOf(item).TryGetValue("place", out var places)
+            ? places
+                .Select(place =>
                     (IReadOnlyList<string>)
-                        group.Select(pair => pair.Kind).Distinct(StringComparer.Ordinal).ToArray(),
-                StringComparer.Ordinal
-            );
+                        item
+                            .Sources.Where(source =>
+                                source.Places.Any(entry => entry.Name == place)
+                            )
+                            .Select(source => Camel(source.Kind.ToString()))
+                            .Distinct(StringComparer.Ordinal)
+                            .ToArray()
+                )
+                .ToArray()
+            : [];
 
     public static IReadOnlyDictionary<string, IReadOnlyList<string>> FacetsOf(ItemPage item) =>
         Facets

@@ -34,7 +34,6 @@
 			"category": "food",
 			"value": 8,
 			"icon": "cinderpear",
-			"sourceKinds": ["gathering"],
 			"key": "/Invented/Items/Cinderpear",
 			"kind": "item",
 			"status": "obtainable",
@@ -45,9 +44,7 @@
 				"place": ["Glass Reach"]
 			},
 			"cells": {},
-			"placeSources": {
-				"Glass Reach": ["gathering"]
-			}
+			"placeSources": [["gathering"]]
 		},
 		{
 			"slug": "hollow-prism",
@@ -57,7 +54,6 @@
 			"category": "curio",
 			"value": null,
 			"icon": null,
-			"sourceKinds": [],
 			"key": "/Invented/Items/HollowPrism",
 			"kind": "item",
 			"status": "noKnownSource",
@@ -67,7 +63,7 @@
 				"availability": ["noKnownSource"]
 			},
 			"cells": {},
-			"placeSources": {}
+			"placeSources": []
 		},
 		{
 			"slug": "lanternedge",
@@ -77,7 +73,6 @@
 			"category": "weapon",
 			"value": 45,
 			"icon": "lanternedge",
-			"sourceKinds": ["shop", "crafting", "currencyShop", "containerLoot"],
 			"key": "/Invented/Items/Lanternedge",
 			"kind": "item",
 			"status": "obtainable",
@@ -98,9 +93,7 @@
 					"text": "Average"
 				}
 			},
-			"placeSources": {
-				"Glass Reach": ["shop", "crafting", "containerLoot"]
-			}
+			"placeSources": [["shop", "crafting", "containerLoot"]]
 		},
 		{
 			"slug": "mosswoven-coat",
@@ -110,7 +103,6 @@
 			"category": "armour",
 			"value": 90,
 			"icon": "mosswoven-coat",
-			"sourceKinds": ["enemyDrop"],
 			"key": "/Invented/Items/MosswovenCoat",
 			"kind": "item",
 			"status": "obtainable",
@@ -126,9 +118,7 @@
 					"text": null
 				}
 			},
-			"placeSources": {
-				"Glass Reach": ["enemyDrop"]
-			}
+			"placeSources": [["enemyDrop"]]
 		}
 	],
 	"facets": [

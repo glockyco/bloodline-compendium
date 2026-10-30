@@ -116,7 +116,7 @@ it('keeps a place filter to the selected ways to get an item and counts places t
 			source: [...new Set(Object.values(placeSources).flat())],
 			place: Object.keys(placeSources)
 		},
-		placeSources
+		placeSources: Object.values(placeSources)
 	});
 	const items = [
 		item('Sold here', { Town: ['shop'] }),

@@ -106,7 +106,9 @@ function statMatches(item: ItemSummary, filter: StatFilter): boolean {
  */
 export function facetValues(item: ItemSummary, facet: string, state: ListState): string[] {
 	const values = item.facets[facet] ?? [];
-	const places = Object.entries(item.placeSources);
+	const places = (item.facets.place ?? []).map(
+		(place, index) => [place, item.placeSources[index] ?? []] as const
+	);
 	if (facet === 'place' && state.facets.source?.length) {
 		const sources = state.facets.source;
 		return places

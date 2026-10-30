@@ -170,8 +170,7 @@ internal sealed record ItemSummary(
     string Name,
     string Category,
     int? Value,
-    string? Icon,
-    IReadOnlyList<SourceKind> SourceKinds
+    string? Icon
 )
 {
     [JsonRequired]
@@ -198,12 +197,11 @@ internal sealed record ItemSummary(
         new Dictionary<string, ListCell>();
 
     /// <summary>
-    /// The ways to get the item at each of its places, as values of the place and source facets, so that a place
-    /// filter can keep to the selected ways to get it.
+    /// The ways to get the item at each value of its place facet, in that facet's order, as source facet values, so
+    /// that a place filter can keep to the selected ways to get it.
     /// </summary>
     [JsonRequired]
-    public IReadOnlyDictionary<string, IReadOnlyList<string>> PlaceSources { get; init; } =
-        new Dictionary<string, IReadOnlyList<string>>();
+    public IReadOnlyList<IReadOnlyList<string>> PlaceSources { get; init; } = [];
 }
 
 /// <summary>

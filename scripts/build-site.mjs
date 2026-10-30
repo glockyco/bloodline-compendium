@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { readFile, rm, cp, mkdir } from "node:fs/promises";
 import { resolve, join } from "node:path";
 import { assetGate } from "./asset-gate.mjs";
+import { payloadGate } from "./payload-gate.mjs";
 import { assertProductionBuild } from "./provenance.mjs";
 import { publicationGate } from "./publication-gate.mjs";
 import { writeSiteAssets } from "./site-assets.mjs";
@@ -88,6 +89,7 @@ console.log(
     })
   ).report,
 );
+console.log((await payloadGate(join(site, "build"))).report);
 console.log((await publicationGate(join(site, "build"))).report);
 console.log((await voiceGate(join(site, "build"))).report);
 if (production) {

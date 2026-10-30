@@ -113,12 +113,15 @@ function describe(category: CategorySummary, items: ItemSummary[]): string {
 	return wordList.format(types);
 }
 
+/** The ways to get an item, as its How to Get filter values. */
+const sourcesOf = (item: ItemSummary) => (item.facets.source ?? []) as SourceKind[];
+
 /** The home page's browse entries and source overview, derived from the published site data. */
 export function homeData(index: ItemIndex, pages: ItemPage[]): HomeData {
 	const items = index.items;
 	// The item list hides items without a known source until asked, so counts that link to it count the same.
 	const listed = (category: string) =>
-		items.filter((item) => item.category === category && item.sourceKinds.length > 0).length;
+		items.filter((item) => item.category === category && sourcesOf(item).length > 0).length;
 	const ordered = [
 		...majorOrder
 			.map((slug) => index.categories.find((category) => category.slug === slug))
@@ -181,7 +184,7 @@ export function homeData(index: ItemIndex, pages: ItemPage[]): HomeData {
 	const ways = candidates
 		.map((way) => {
 			const members = items.filter((item) =>
-				item.sourceKinds.some((kind) => way.kinds.includes(kind))
+				sourcesOf(item).some((kind) => way.kinds.includes(kind))
 			);
 			return {
 				...way,
@@ -194,7 +197,7 @@ export function homeData(index: ItemIndex, pages: ItemPage[]): HomeData {
 
 	return {
 		count: items.length,
-		known: items.filter((item) => item.sourceKinds.length > 0).length,
+		known: items.filter((item) => sourcesOf(item).length > 0).length,
 		example: (items.find((item) => item.slug === 'yew-shortbow') ?? items[0])?.name ?? '',
 		groups,
 		minor: ordered

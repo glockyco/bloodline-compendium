@@ -585,13 +585,13 @@
           "type": "string"
         },
         "placeSources": {
-          "additionalProperties": {
+          "items": {
             "items": {
               "type": "string"
             },
             "type": "array"
           },
-          "type": "object"
+          "type": "array"
         },
         "qualifier": {
           "type": [
@@ -601,12 +601,6 @@
         },
         "slug": {
           "type": "string"
-        },
-        "sourceKinds": {
-          "items": {
-            "$ref": "#/$defs/SourceKind"
-          },
-          "type": "array"
         },
         "status": {
           "$ref": "#/$defs/ItemStatus"
@@ -627,7 +621,6 @@
         "category",
         "value",
         "icon",
-        "sourceKinds",
         "key",
         "kind",
         "type",
