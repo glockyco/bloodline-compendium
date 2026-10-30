@@ -46,7 +46,7 @@
 	const extra = $derived(item.facts.filter((fact) => !native.has(fact)));
 	const misstated = $derived(item.facts.filter((fact) => fact.gameShows));
 	// The game shrinks a long name to keep its ribbon on one line. Here it shrinks to body size at most, and a
-	// name still too long wraps.
+	// name still too wide for the card wraps instead of running under the notches.
 	const nameFit = $derived(26 / Math.max(item.name.length, 1));
 	const nameScale = $derived(Math.max(0.8, Math.min(1, nameFit)));
 </script>
@@ -57,7 +57,6 @@
 			this={heading}
 			class="name"
 			data-game
-			class:wraps={nameFit < 0.8}
 			style:font-size={nameScale < 1 ? `${nameScale * 1.25}rem` : undefined}
 			>{item.name}</svelte:element
 		>
@@ -107,10 +106,10 @@
 		font-family: var(--font-game);
 		overflow: hidden;
 	}
-	/* The cream ribbon across the top, with dark notches at both ends, holds the name on one line. */
+	/* The cream ribbon across the top, with dark notches at both ends, holds the name clear of the notches. */
 	.name {
 		margin: 0;
-		padding: var(--inset-line) var(--inset-loose);
+		padding: var(--inset-line) var(--inset-ribbon);
 		background: var(--tooltip-ribbon);
 		color: var(--tooltip-ink);
 		font-family: var(--font-game);
@@ -118,8 +117,7 @@
 		font-weight: var(--weight-regular);
 		line-height: var(--leading-snug);
 		text-align: center;
-		white-space: nowrap;
-		overflow: hidden;
+		text-wrap: balance;
 		clip-path: polygon(
 			0 0,
 			100% 0,
@@ -128,10 +126,6 @@
 			0 100%,
 			var(--size-ribbon-notch) 50%
 		);
-	}
-	.name.wraps {
-		white-space: normal;
-		text-wrap: balance;
 	}
 	.body {
 		display: grid;

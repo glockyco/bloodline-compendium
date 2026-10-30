@@ -235,6 +235,18 @@ small {
 	list-style: none;
 	padding: 0;
 }
+.acquisition-routes .more-ways {
+	display: none;
+}
+.acquisition-routes .more-ways button {
+	width: 100%;
+	min-height: var(--size-control);
+	padding: var(--inset-cell) var(--inset);
+	text-align: left;
+	border: 0;
+	background: none;
+	color: var(--accent);
+}
 .acquisition-routes li + li {
 	border-top: var(--border-width) solid var(--border);
 }
@@ -353,6 +365,26 @@ details[open] > summary .show-less {
 	border: 0;
 }
 
+/* A sparse page keeps its tooltip and notes under its answer in one reading column. */
+.detail-layout.sparse {
+	grid-template-columns: minmax(0, var(--size-reading));
+}
+.detail-layout.sparse .item-side {
+	grid-column: 1;
+	grid-row: auto;
+	position: static;
+}
+.detail-layout.sparse .item-side > [data-ui='tooltip'] {
+	max-width: var(--size-item-side);
+}
+@media (width < 40rem) {
+	.acquisition-routes.capped .later {
+		display: none;
+	}
+	.acquisition-routes.capped .more-ways {
+		display: block;
+	}
+}
 @media (width < 64rem) {
 	.detail-layout {
 		grid-template-columns: minmax(0, 1fr);

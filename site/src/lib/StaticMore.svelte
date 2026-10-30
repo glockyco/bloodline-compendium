@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, type Snippet } from 'svelte';
+	import { onMount, tick, type Snippet } from 'svelte';
 	import { isHydrated } from './hydration.js';
 	/**
 	 * Entries past a preview. The static page keeps them in a native disclosure, so they stay readable without
@@ -14,18 +14,27 @@
 	}: { more: string; less: string; label: string; children: Snippet } = $props();
 	let enhanced = $state(isHydrated());
 	let expanded = $state(false);
+	let revealed = $state<HTMLElement>();
 	onMount(() => {
 		enhanced = true;
 	});
+	// Revealed entries render before the button, so focus moves to the first of them, where reading continues.
+	async function toggle() {
+		expanded = !expanded;
+		if (!expanded) return;
+		await tick();
+		const target =
+			revealed?.querySelector<HTMLElement>('a[href], button, input, select, [tabindex]') ??
+			revealed;
+		target?.focus();
+	}
 </script>
 
 {#if enhanced}
-	{#if expanded}{@render children()}{/if}
-	<button
-		type="button"
-		class="more-toggle"
-		aria-expanded={expanded}
-		onclick={() => (expanded = !expanded)}
+	{#if expanded}<div class="revealed" bind:this={revealed} tabindex="-1">
+			{@render children()}
+		</div>{/if}
+	<button type="button" class="more-toggle" aria-expanded={expanded} onclick={toggle}
 		>{expanded ? less : more}<span class="sr-only"> in {label}</span></button
 	>
 {:else}
@@ -42,6 +51,9 @@
 {/if}
 
 <style>
+	.revealed:focus {
+		outline: none;
+	}
 	.more-toggle {
 		min-height: var(--size-control);
 		padding: var(--inset);

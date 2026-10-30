@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount, tick } from 'svelte';
 	import { resolve } from '$app/paths';
 	import SourceRow from '#lib/SourceRow.svelte';
 	import RelationTable from '#lib/RelationTable.svelte';
@@ -27,7 +28,8 @@
 	const item = $derived(data.item);
 	const statusSentence: Record<ItemStatus, string> = {
 		obtainable: '',
-		noKnownSource: 'No way to get this item is known in this game version.',
+		noKnownSource:
+			'No way to get this item is known in this game version. A quest or event may still give it.',
 		notInNormalPlay:
 			'This item is not obtainable in normal play. Only test areas of the game hold it.'
 	};
@@ -97,8 +99,23 @@
 		groups.filter((group) => group.recipe).flatMap((group) => group.sources)
 	);
 	const sourceGroups = $derived(groups.filter((group) => !group.recipe));
-	// A long summary pushes the tooltip off a phone's first screen, so the tooltip leads there instead.
+	// A long summary pushes the tooltip off a phone's first screen, so the tooltip leads there instead, and a phone
+	// shows its first ways to get the item until the reader asks for the rest.
 	const longSummary = $derived(groups.length > 3);
+	const firstWays = 3;
+	let mounted = $state(false);
+	let allWays = $state(false);
+	let routes = $state<HTMLElement>();
+	onMount(() => {
+		mounted = true;
+	});
+	async function showAllWays() {
+		allWays = true;
+		await tick();
+		routes?.querySelectorAll<HTMLElement>('li > a')[firstWays]?.focus();
+	}
+	// A page with nothing beyond its answer and tooltip reads as one column instead of a sparse main column.
+	const sparse = $derived(!recipes.length && !uses.length && !sourceGroups.length);
 	// The skill level a use needs shows in its own column, so the condition that states it does not repeat.
 	const levelOf = (use: (typeof uses)[number]) =>
 		use.conditions.find((condition) => condition.kind === 'proficiencyLevel')?.value ?? null;
@@ -186,18 +203,26 @@
 				<span data-game>{titleCase(item.type)}</span>{/if}
 		</p>
 	</div>
-	<div class="detail-layout" class:long-summary={longSummary}>
+	<div class="detail-layout" class:long-summary={longSummary} class:sparse>
 		<div class="answer" data-pagefind-ignore="all">
 			<Section id="how-to-get-it" title="How to Get It">
 				{#snippet action()}{#if uses.length}<a href="#used-for"
 							>Used for {formatNumber(uses.length)}</a
 						>{/if}{/snippet}
 				{#if !groups.length}
-					<p class="surface">{statusSentence[item.status]}</p>
+					<p class="surface">
+						{statusSentence[item.status]}
+						{#if item.status === 'noKnownSource'}<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- the resolved page with its section. -->
+							<a href={resolve('about/') + '#limits'}>What item pages cannot tell you</a>{/if}
+					</p>
 				{:else}
-					<ul class="surface acquisition-routes">
-						{#each groups as group (group.kind)}{@const summary = group.summary!}
-							<li>
+					<ul
+						class="surface acquisition-routes"
+						class:capped={mounted && !allWays && groups.length > firstWays + 1}
+						bind:this={routes}
+					>
+						{#each groups as group, index (group.kind)}{@const summary = group.summary!}
+							<li class:later={index >= firstWays}>
 								<a href={group.recipe ? '#recipes' : '#source-' + group.kind}
 									><span class="route-line"
 										><span class="verb">{summary.verb}</span>{#if summary.names}<strong data-game
@@ -214,6 +239,11 @@
 								>
 							</li>
 						{/each}
+						{#if mounted && !allWays && groups.length > firstWays + 1}<li class="more-ways">
+								<button type="button" onclick={showAllWays}
+									>Show {groups.length - firstWays} more ways to get it</button
+								>
+							</li>{/if}
 					</ul>
 				{/if}
 			</Section>

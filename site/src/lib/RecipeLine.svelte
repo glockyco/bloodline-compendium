@@ -20,14 +20,11 @@
 				data-relation-id={input.relationId}
 				data-relation-direction={input.relationId ? 'incoming' : undefined}
 			>
-				{#if input.item.icon}<img
-						src="/icons/{input.item.icon}-48.webp"
-						alt=""
-						width="32"
-						height="32"
-						loading="lazy"
-					/>{/if}<span class="quantity">{formatNumber(input.quantity)}</span>
-				<EntityLink entity={input.item} />
+				<!-- The icon, quantity and name are one target, as a thumb aims at the whole ingredient. -->
+				<EntityLink entity={input.item} icon
+					><span class="quantity">{formatNumber(input.quantity)}</span>
+					<span>{input.item.name}</span></EntityLink
+				>
 			</li>{/each}
 	</ul>
 	<dl class="recipe-facts">
@@ -78,7 +75,10 @@
 		align-items: center;
 		gap: var(--gap-inline);
 	}
-	.ingredients img {
+	.ingredients :global(a) {
+		min-height: var(--size-control-compact);
+	}
+	.ingredients :global(.entity-icon) {
 		width: var(--size-icon-row);
 		height: var(--size-icon-row);
 		border-radius: var(--radius-1);

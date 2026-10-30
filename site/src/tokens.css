@@ -148,6 +148,7 @@
 	--size-number-input: 5rem;
 	/* A row's note lines up with the name beside its icon. */
 	--inset-note: calc(var(--size-icon-row) + var(--gap-inline));
+	--inset-ribbon: calc(var(--size-ribbon-notch) + var(--inset));
 	--position-below: 100%;
 
 	--duration-hover: 0.15s;

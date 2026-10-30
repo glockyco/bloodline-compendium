@@ -62,7 +62,7 @@ Facets and columns are declared per category in the catalog, so a new kind or up
 
 ### Item page order
 
-Title and identity, then the tooltip with any displayed-value notes and issue notes beside the first-screen answer, then recipe, uses, detailed sources grouped by method and place, and nothing else. The Related entities section goes, because sources, recipes and uses already render every relation. The page renders only sections with content.
+Title and identity, then the tooltip with any displayed-value notes and issue notes beside the first-screen answer, then recipe, uses, detailed sources grouped by method and place, and nothing else. The Related entities section goes, because sources, recipes and uses already render every relation. The page renders only sections with content. A phone shows the first three ways to get an item until the reader asks for the rest, and a page with no recipe, use or source table reads as one column.
 
 ### Coverage becomes a maintainer report
 
