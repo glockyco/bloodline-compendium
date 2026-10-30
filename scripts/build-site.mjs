@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { readFile, rm, cp } from "node:fs/promises";
+import { readFile, rm, cp, mkdir } from "node:fs/promises";
 import { resolve, join } from "node:path";
 import { assetGate } from "./asset-gate.mjs";
 import { assertProductionBuild } from "./provenance.mjs";
