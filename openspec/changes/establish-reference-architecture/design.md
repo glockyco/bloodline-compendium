@@ -346,7 +346,7 @@ It plans what the game enforces and computes only what verified rules compute:
 It does not simulate fights. A rule or condition the catalog does not know stays visible as a gap, as in Afallon's planner.
 
 Constraints that apply from the start:
-- Build links are versioned, refer to keys, are compressed into the URL fragment and have size limits.
+- Build links are versioned, refer to keys, are compressed into the address's query, so that link previews can show the build, and have size limits.
 - Characters are kept in the browser, and shared builds open as previews.
 - Planner data is a route-scoped payload with its own size budget, separate from page documents.
 - Reference pages prerender neutral content. The active character adds cues in the browser, such as the discipline level a skill needs against the character's level. Search engines and readers without a character see the same pages.

@@ -73,19 +73,34 @@ Add progression entry points to the home hub and navigation only when their rout
 
 ### Route-scoped payload and explicit budgets
 
-Generate planner inputs separately from entity page documents. Load them only on the planner route. Set an initial uncompressed JSON budget of 512 KiB for that payload, an 8 KiB encoded fragment budget and a 64 KiB expanded build budget. These are delivery limits, not claims about game content. Enforce them before publication or decoding. Measure the real payload before changing a limit and record the reason here rather than removing a gate.
+Generate planner inputs separately from entity page documents. Load them only on the planner route. Set an initial uncompressed JSON budget of 512 KiB for that payload, a build link budget of 1,500 characters for the whole address and a 64 KiB expanded build budget. These are delivery limits, not claims about game content. Enforce them before publication or decoding. Measure the real payload before changing a limit and record the reason here rather than removing a gate.
 
 The planner payload contains version and game-build identity, stable entity and slot keys, level domains, costs, ranks, conditions and rule inputs. It excludes prose page bodies, icon binaries and unrelated item documents. Active-character cues use a small page-specific context projection and the shared evaluator, not a download of every tree.
 
 ### Build links and local characters are separate
 
-Encode only explicit progression state in a versioned compressed URL fragment. Do not embed local character IDs or local names by default. Use a bounded decoder that rejects malformed input, unsupported versions, duplicate or invalid allocations and expansion beyond its limit before allocating unbounded output. Never silently remap removed keys to similarly named content.
+Encode only explicit progression state, versioned and compressed, in the address's query, such as `/planner/?build=v1.<code>`. Do not embed local character IDs or local names by default. Use a bounded decoder that rejects malformed input, unsupported versions, duplicate or invalid allocations and expansion beyond its limit before allocating unbounded output. Never silently remap removed keys to similarly named content.
+
+Refer to entities by a short digest of their catalog key instead of the key itself, because keys are long game paths. Publication fails when two published keys share a digest, and the digest stays the same as long as the key does.
 
 Decode to a preview. A preview cannot overwrite, select or save a browser character implicitly. Cross-build links retain their source build label and are revalidated against the current catalog. Missing keys remain unresolved with a corrective action. The site does not fetch historical game data.
 
 Use a versioned browser store with independent character IDs and an explicit active ID. Support create, rename, edit, duplicate, select and delete. Save atomically so a failed write cannot destroy the last readable state. Report storage failure while preserving the in-memory plan and the option to copy a build link. Migrate only understood store versions. Preserve recoverable entries and report unsupported or corrupt data rather than treating it as an empty collection.
 
 Personal cues are an opt-in browser layer over complete neutral HTML. They show current versus required levels, affordability and unresolved conditions. They never alter canonical facts, metadata or Pagefind content. Clearing the active character returns the neutral view.
+
+### Sharing builds where players discuss them
+
+Players share builds on Steam and Reddit as prose: how they split attributes, which weapons and schools they combine, and the skills on their hotbar with what each does, as in [Meta Build?](https://steamcommunity.com/app/1159290/discussions/0/4040356333293170223) and [What skills/build for your first character?](https://steamcommunity.com/app/1159290/discussions/0/4360121479831850670). Players asked for a Discord channel for build discussion. No planner, calculator or spreadsheet for the game turned up. Afallon's planner shares builds only as a link.
+
+- The query carries the build because Discord builds a link's preview from the HTML that the server returns ([Discord link previews](https://docs.discord.com/developers/link-previews/overview)), and browsers never send the part after `#` ([MDN](https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Fragment)). A Worker in front of the static site answers the planner route: it validates the build with the same decoder, writes the build's title, summary and image into the page's preview tags, and serves the static planner otherwise unchanged. The image is generated from the build by the Worker and cached by its address. An invalid build gets the planner's generic preview.
+- A link fits in a Discord message of 2,000 characters ([message content](https://discord.com/developers/docs/resources/message#create-message)) with room for a comment, which the 1,500 character budget keeps.
+- A build can place its skills on the game's five hotbar slots, because players describe builds by their hotbar.
+- "Copy as text" writes the build in the form players already post: the game build, the attribute split, the disciplines with their levels, and the hotbar skills in order, each named with its page link, then the build link.
+- Each shared build shows the game build it was made for, and the preview and text name it too.
+- A Discord bot is not planned. Link previews need none, and a bot would need the developer's agreement.
+
+Skill and discipline pages carry their own preview tags, with the skill's tooltip facts and, once renders exist, an image, so a linked skill reads in Discord without opening it.
 
 ## Risks / Trade-offs
 

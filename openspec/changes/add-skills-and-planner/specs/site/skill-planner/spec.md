@@ -67,15 +67,40 @@ Experience displays SHALL distinguish character and discipline progression and r
 - **THEN** the planner shows an unknown requirement and its coverage gap rather than extrapolating
 
 ### Requirement: Build links
-Build links SHALL encode a versioned, compressed fragment containing the source game build and keyed progression state. Decoding SHALL enforce encoded and expanded size limits and validate types, levels, ranks and keys. Unsupported versions, malformed payloads and missing current-build keys SHALL show actionable errors or unresolved entries without silently substituting identities.
+Build links SHALL carry a versioned, compressed build in the address's query, containing the source game build and keyed progression state. A whole build link SHALL stay within 1,500 characters. Decoding SHALL enforce encoded and expanded size limits and validate types, levels, ranks and keys. Unsupported versions, malformed payloads and missing current-build keys SHALL show actionable errors or unresolved entries without silently substituting identities.
 
 #### Scenario: Renamed entity
 - **WHEN** a shared build refers to an entity whose name changed but whose key remains
 - **THEN** the preview uses its current name and preserves the allocation
 
-#### Scenario: Oversized fragment
+#### Scenario: Oversized build
 - **WHEN** an encoded or expanded build exceeds its configured limit
 - **THEN** decoding stops with a size error and existing stored characters remain unchanged
+
+### Requirement: Build link previews
+A build link SHALL return HTML whose link preview names the build's game build, attribute split, disciplines and hotbar skills, with an image of the build, so that chat apps show the build without running scripts. An invalid build link SHALL return the planner's generic preview.
+
+#### Scenario: Link pasted into a chat app
+- **WHEN** a crawler without scripts fetches a valid build link
+- **THEN** the returned HTML carries that build's title, summary and image in its preview tags
+
+#### Scenario: Invalid build link
+- **WHEN** a crawler fetches a build link whose build fails to decode
+- **THEN** the returned HTML carries the planner's generic preview
+
+### Requirement: Hotbar
+A build SHALL place its skills on the game's hotbar slots, in the order the game numbers them.
+
+#### Scenario: Skill on a slot
+- **WHEN** a reader places a chosen skill on the third hotbar slot
+- **THEN** the build lists it third in its hotbar, and its link restores it there
+
+### Requirement: Builds as text
+The planner SHALL copy a build as text with its game build, attribute split, disciplines and levels, hotbar skills in order with their page links, and the build link.
+
+#### Scenario: Build copied as text
+- **WHEN** a reader copies a build with three hotbar skills as text
+- **THEN** the text lists the game build, the attribute split, the disciplines with levels and the three skills in hotbar order with their page links, followed by the build link
 
 ### Requirement: Shared previews
 Opening a build link SHALL create a preview without changing the active or stored characters. Saving a preview SHALL require an explicit action. Builds from another game build SHALL identify that difference and revalidate against the current catalog before being represented as valid.
