@@ -122,6 +122,7 @@ public sealed class WorldMechanismTests
         Assert.Equal("Invented brewery", result.Source.Name);
         Assert.Null(result.Source.Amount);
         Assert.Empty(result.Source.Places);
+        Assert.True(result.Source.Settlement);
         Assert.Equal(EntityKind.Building, result.Source.Entity.Kind);
         Assert.Equal(result.Source.Entity, Assert.Single(result.Source.Conditions).Entity);
         table.Rows[0].Values["LootDeliveryQuantity"] = 0;

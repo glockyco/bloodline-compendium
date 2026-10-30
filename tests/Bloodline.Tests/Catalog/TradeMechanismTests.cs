@@ -485,10 +485,10 @@ public sealed class TradeMechanismTests
     }
 
     [Theory]
-    [InlineData("WizardTower_Finished", "Wizard Tower (settlement)")]
-    [InlineData("Fletcher_Finished", "Fletcher (settlement)")]
-    [InlineData("Residence_02", "Residence (settlement)")]
-    public void ConstructedSettlementStockKeepsUnknownPlacementAndDropsUnnamedItems(
+    [InlineData("WizardTower_Finished", "Wizard Tower")]
+    [InlineData("Fletcher_Finished", "Fletcher")]
+    [InlineData("Residence_02", "Residence")]
+    public void ConstructedSettlementStockLiesInThePlayersSettlementAndDropsUnnamedItems(
         string buildingClass,
         string name
     )
@@ -513,7 +513,9 @@ public sealed class TradeMechanismTests
             (17, PriceRule.Trading, null),
             (found.Source.Price!.Amount, found.Source.Price.Rule, found.Source.Price.City)
         );
+        // The building stands in the player's settlement, which no level holds.
         Assert.Empty(found.Source.Places);
+        Assert.True(found.Source.Settlement);
         var condition = Assert.Single(found.Source.Conditions);
         Assert.Equal(ConditionKind.Building, condition.Kind);
         Assert.Equal(building.Path, condition.Entity!.Key);

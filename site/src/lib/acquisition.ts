@@ -175,7 +175,15 @@ export function summarize(kind: SourceKind, sources: Source[]): SourceSummary {
 	const shown = recipe || unnamed ? [] : names.slice(0, 2);
 	const placed = recipe || kind === 'randomLoot' ? [] : unnamed ? sources : sources.slice(0, 2);
 	const places = [
-		...new Set(placed.flatMap((source) => source.places.slice(0, 1).map((place) => place.name)))
+		...new Set(
+			placed.flatMap((source) =>
+				source.places.length
+					? [source.places[0].name]
+					: source.settlement
+						? ['your settlement']
+						: []
+			)
+		)
 	].slice(0, 2);
 	return {
 		verb: recipe?.station

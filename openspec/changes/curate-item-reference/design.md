@@ -84,6 +84,15 @@ A layout check loads extreme pages, such as the longest names, the most sources,
 
 Source rows named the wrong things: ingot pickups said Sporing Gloves, ore deposits said Abyssberry Bush, a Miner's Crate said Cabinet and Wakazashi's merchant said Jasper Thorne while the summary above said Connor Selby. Mechanisms keyed pickups, containers, gathering nodes and some merchants by their actor class, which many different objects share, and the graph kept the first name it saw for a key. A source entity's key now identifies what the player meets: a container, gathering node or pickup by its class and the name the player sees, a person whose dialogue differently named people share by their placement, and an unnamed pickup takes the name of the item lying there. The graph rejects one key with two names, so a shared key fails the catalog instead of renaming sources.
 
+### A place takes the name a player knows
+
+41 levels that sources use had no name from the game's entrances, so pages showed internal level names such as "Generic Autumn Birch Area". Three rules now name them:
+- The 22 `Generic_*` levels in `Small_Event_Areas` are the maps the game opens when the player makes camp on the world map. `TopDownCharacter_Working:Get Location Tag Maps` picks one by the terrain tag nearest the camp, such as "Pine Forest" or "Autumnal Birch Forest", so each is named after its tag, as "Pine Forest camp". The tag "Hostile Logging Camp" opens `Generic_Birch_LumberMill_01`. No tag opens `Generic_SnowPineArea_02`, which keeps a name read from its level name.
+- A level whose name is another level's name and an underscore is part of that place, such as `TheMagesCollege_MainHall`, named "The Mage's College, Main Hall".
+- Other levels without a name read their level name, without "Generic" or numbering and with small words in lower case, such as "Cathedral of Arema".
+
+Settlement buildings stand only in the player's settlement, so their shops and deliveries are marked as the settlement's and read "in your settlement".
+
 ### Order of work
 
 Values come before presentation, because pages built on wrong numbers would be rebuilt twice: catalog economy first, then reader text and support pages, the item page, browsing, recovered sources, crafting and tools. Lab checks run as each value needs them, one session at a time, because the lab has one game copy.

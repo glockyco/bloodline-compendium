@@ -125,7 +125,7 @@
 		item.type.toLocaleLowerCase('en') !== item.category.name.toLocaleLowerCase('en')
 	);
 	function placeOf(source: Source): string {
-		return source.places[0]?.name ?? 'Location unknown';
+		return source.places[0]?.name ?? (source.settlement ? 'Your settlement' : 'Location unknown');
 	}
 	function useLabel(kind: SourceKind): string {
 		return useHeadings[kind] ?? sourceHeadings[kind];

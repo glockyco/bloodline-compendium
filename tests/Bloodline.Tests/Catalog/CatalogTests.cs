@@ -371,6 +371,44 @@ public sealed class CatalogTests
     }
 
     [Fact]
+    public void NamesCampMapsPartsOfPlacesAndUnnamedLevelsAsPlayersKnowThem()
+    {
+        var entrance = new ActorRecord(
+            "Entrance",
+            "/Game/Entrance.Entrance_C",
+            Parse(
+                """{"Location Name":{"$text":"The Mage's College"},"Level to Load":"TheMagesCollege"}"""
+            )
+        );
+        string[] levels =
+        [
+            "/Game/TheMagesCollege",
+            "/Game/TheMagesCollege_MainHall",
+            "/Game/Small_Event_Areas/Generic_GrassyPlains_02",
+            "/Game/Small_Event_Areas/Generic_SnowPineArea_02",
+            "/Game/CathedralOfArema",
+        ];
+        var records = Records(
+            [Item()],
+            [
+                new LevelRecord("/Game/Overworld", [], [entrance]),
+                .. levels.Select(level => new LevelRecord(level, [], [])),
+            ]
+        );
+        var places = new Places(records, new HashSet<string>());
+        Assert.Equal(
+            [
+                "The Mage's College",
+                "The Mage's College, Main Hall",
+                "Grassy Plains camp",
+                "Snow Pine Area",
+                "Cathedral of Arema",
+            ],
+            levels.Select(level => places.Get(level).Name)
+        );
+    }
+
+    [Fact]
     public void ReportsEntitiesOfAKindWithoutPagesThatShareAName()
     {
         var item = Item();

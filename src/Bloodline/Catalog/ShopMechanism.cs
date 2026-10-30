@@ -86,7 +86,11 @@ internal sealed class ShopMechanism : ISourceMechanism
                         [],
                         [WorldSourceData.BuildingCondition(vendor)]
                     );
-                    yield return sale;
+                    // Finished buildings stand only in the player's settlement.
+                    yield return sale with
+                    {
+                        Source = sale.Source with { Settlement = true },
+                    };
                 }
             }
         }
@@ -233,7 +237,7 @@ internal sealed class ShopMechanism : ISourceMechanism
                         : building
                 ),
             };
-            return name + " (settlement)";
+            return name;
         }
         return WorldSourceData.Name(properties, classPath);
     }

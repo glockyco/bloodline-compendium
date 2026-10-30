@@ -30,7 +30,8 @@
 		{#if showPlaces}<p class="source-places">
 				{#if source.places.length}{#each source.places as place, index (index)}{index
 							? ', '
-							: ''}<EntityLink entity={place} />{/each}{:else}Location unknown{/if}
+							: ''}<EntityLink entity={place} />{/each}{:else if source.settlement}Your settlement{:else}Location
+					unknown{/if}
 			</p>{/if}
 		{#if source.inputs.length || source.notes.length || source.quotes?.length}
 			<details class="row-details">

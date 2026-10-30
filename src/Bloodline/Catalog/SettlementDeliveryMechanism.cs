@@ -53,6 +53,7 @@ internal sealed class SettlementDeliveryMechanism : ISourceMechanism
                                 ),
                         Entity = building,
                         Conditions = [WorldSourceData.BuildingCondition(building)],
+                        Settlement = true,
                     }
                 );
             }
