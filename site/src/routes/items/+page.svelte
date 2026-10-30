@@ -53,15 +53,17 @@
 	const groups = $derived(facetGroups(index.items, items, list, index, valueLabel));
 	const columns = $derived(shownColumns(items, list, index));
 	const selectedCategories = $derived(list.facets.category ?? []);
-	// The stat picker offers the stats of the selected categories, or every stat while none is selected.
+	// The stat picker offers the stats that items of the selected categories have, or every stat while none is
+	// selected.
 	const statColumns = $derived(
 		index.columns.filter(
 			(column) =>
 				column.numeric &&
 				!list.stats.some((filter) => filter.column === column.id) &&
 				(!selectedCategories.length ||
-					!column.categories.length ||
-					column.categories.some((category) => selectedCategories.includes(category)))
+					index.items.some(
+						(item) => selectedCategories.includes(item.category) && item.cells[column.id]
+					))
 		)
 	);
 	const sortColumns = $derived([
@@ -527,7 +529,10 @@
 		color: var(--text-muted);
 		text-decoration-style: dotted;
 	}
+	/* A grid item grows to its content by default, which would let a wide table widen the page instead of
+	   scrolling inside its frame. */
 	.list {
+		min-width: 0;
 		padding: var(--inset-line) var(--inset-cell) var(--inset-cell);
 		border: var(--border-width) solid var(--border);
 		border-radius: var(--radius-1);
@@ -806,6 +811,25 @@
 	@media (width >= 64rem) {
 		.sheet {
 			display: none;
+		}
+	}
+	/* The name stays in view while a wide table scrolls sideways. A striped row's translucent tint lies over the
+	   panel colour, so the sticky cell hides what scrolls beneath it. */
+	@media (width >= 40rem) {
+		thead th:first-child,
+		tbody td.name {
+			position: sticky;
+			left: 0;
+		}
+		tbody td.name {
+			z-index: var(--layer-table-heading);
+			background: var(--surface-panel);
+		}
+		tbody tr:nth-child(even) td.name {
+			background: linear-gradient(var(--surface-stripe), var(--surface-stripe)) var(--surface-panel);
+		}
+		tbody tr:hover td.name {
+			background: var(--surface-hover);
 		}
 	}
 	/* A phone reads each item as a card: its name, then each column as a labelled line. */

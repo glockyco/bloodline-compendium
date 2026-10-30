@@ -101,6 +101,28 @@ function statMatches(item: ItemSummary, filter: StatFilter): boolean {
 }
 
 /**
+ * An item's values for a facet under the selection of the facets it depends on: with ways to get it selected, only the
+ * places where it is got those ways, and with places selected, only the ways to get it there.
+ */
+export function facetValues(item: ItemSummary, facet: string, state: ListState): string[] {
+	const values = item.facets[facet] ?? [];
+	const places = Object.entries(item.placeSources);
+	if (facet === 'place' && state.facets.source?.length) {
+		const sources = state.facets.source;
+		return places
+			.filter(([, kinds]) => kinds.some((kind) => sources.includes(kind)))
+			.map(([place]) => place);
+	}
+	if (facet === 'source' && state.facets.place?.length) {
+		const selected = state.facets.place;
+		return [
+			...new Set(places.filter(([place]) => selected.includes(place)).flatMap(([, kinds]) => kinds))
+		];
+	}
+	return values;
+}
+
+/**
  * Whether an item passes the list's state. `skip` leaves one facet out, so that facet's counts show what each of its
  * values would add.
  */
@@ -113,11 +135,14 @@ export function matches(
 	const needle = state.name.trim().toLocaleLowerCase('en');
 	if (needle && !`${item.name} ${item.qualifier ?? ''}`.toLocaleLowerCase('en').includes(needle))
 		return false;
+	// A skipped facet's selection neither filters nor scopes the facets that depend on it.
+	const scoping = skip ? { ...state, facets: { ...state.facets, [skip]: [] } } : state;
 	for (const facet of index.facets) {
 		if (facet.id === skip) continue;
 		const selected = state.facets[facet.id] ?? [];
-		if (selected.length && !selected.some((value) => item.facets[facet.id]?.includes(value)))
-			return false;
+		if (!selected.length) continue;
+		const values = facetValues(item, facet.id, scoping);
+		if (!selected.some((value) => values.includes(value))) return false;
 	}
 	// Browsing shows items with a known way to get them first, and a name search finds every item.
 	if (
@@ -192,9 +217,11 @@ export function facetGroups(
 		})
 		.map((facet) => {
 			const counts: Record<string, number> = {};
+			const scoping = { ...state, facets: { ...state.facets, [facet.id]: [] } };
 			for (const item of items) {
 				if (!matches(item, state, index, facet.id)) continue;
-				for (const value of item.facets[facet.id] ?? []) counts[value] = (counts[value] ?? 0) + 1;
+				for (const value of facetValues(item, facet.id, scoping))
+					counts[value] = (counts[value] ?? 0) + 1;
 			}
 			const selected = state.facets[facet.id] ?? [];
 			return {

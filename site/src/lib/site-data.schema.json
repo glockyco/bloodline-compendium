@@ -584,6 +584,15 @@
         "name": {
           "type": "string"
         },
+        "placeSources": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "type": "object"
+        },
         "qualifier": {
           "type": [
             "string",
@@ -624,7 +633,8 @@
         "type",
         "status",
         "facets",
-        "cells"
+        "cells",
+        "placeSources"
       ],
       "title": "ItemSummary",
       "type": "object"

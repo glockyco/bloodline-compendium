@@ -196,6 +196,14 @@ internal sealed record ItemSummary(
     [JsonRequired]
     public IReadOnlyDictionary<string, ListCell> Cells { get; init; } =
         new Dictionary<string, ListCell>();
+
+    /// <summary>
+    /// The ways to get the item at each of its places, as values of the place and source facets, so that a place
+    /// filter can keep to the selected ways to get it.
+    /// </summary>
+    [JsonRequired]
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> PlaceSources { get; init; } =
+        new Dictionary<string, IReadOnlyList<string>>();
 }
 
 /// <summary>

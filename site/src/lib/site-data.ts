@@ -536,6 +536,9 @@ export interface ItemSummary {
   key: string;
   kind: EntityKind;
   name: string;
+  placeSources: {
+    [k: string]: string[];
+  };
   qualifier?: string | null;
   slug: string;
   sourceKinds: SourceKind[];

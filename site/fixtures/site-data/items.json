@@ -44,7 +44,10 @@
 				"availability": ["obtainable"],
 				"place": ["Glass Reach"]
 			},
-			"cells": {}
+			"cells": {},
+			"placeSources": {
+				"Glass Reach": ["gathering"]
+			}
 		},
 		{
 			"slug": "hollow-prism",
@@ -63,7 +66,8 @@
 				"source": [],
 				"availability": ["noKnownSource"]
 			},
-			"cells": {}
+			"cells": {},
+			"placeSources": {}
 		},
 		{
 			"slug": "lanternedge",
@@ -93,6 +97,9 @@
 					"number": 3,
 					"text": "Average"
 				}
+			},
+			"placeSources": {
+				"Glass Reach": ["shop", "crafting", "containerLoot"]
 			}
 		},
 		{
@@ -118,6 +125,9 @@
 					"number": 0,
 					"text": null
 				}
+			},
+			"placeSources": {
+				"Glass Reach": ["enemyDrop"]
 			}
 		}
 	],

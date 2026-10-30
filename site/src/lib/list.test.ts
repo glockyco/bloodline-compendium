@@ -98,3 +98,44 @@ it('sorts words by their rank and keeps words of equal rank together', () => {
 		'C'
 	]);
 });
+
+it('keeps a place filter to the selected ways to get an item and counts places the same way', () => {
+	const sword = index.items.find((item) => item.slug === 'lanternedge')!;
+	const towns = {
+		...index,
+		facets: index.facets.map((facet) =>
+			facet.id === 'place' ? { ...facet, values: ['Port', 'Town'] } : facet
+		)
+	};
+	const item = (name: string, placeSources: Record<string, string[]>): ItemSummary => ({
+		...sword,
+		name,
+		status: 'obtainable',
+		facets: {
+			category: ['weapon'],
+			source: [...new Set(Object.values(placeSources).flat())],
+			place: Object.keys(placeSources)
+		},
+		placeSources
+	});
+	const items = [
+		item('Sold here', { Town: ['shop'] }),
+		item('Looted here, sold elsewhere', { Town: ['containerLoot'], Port: ['shop'] })
+	];
+	const state = readState(new URLSearchParams('source=shop&place=Town'), towns);
+	expect(names(items.filter((entry) => matches(entry, state, towns)))).toEqual(['Sold here']);
+	const groups = facetGroups(items, items, state, towns, (_, value) => value);
+	// Places count where items are sold, and ways to get count those in the selected place.
+	const count = (facet: string) =>
+		groups
+			.find((group) => group.facet.id === facet)!
+			.options.map((option) => [option.value, option.count]);
+	expect(count('place')).toEqual([
+		['Port', 1],
+		['Town', 1]
+	]);
+	expect(count('source')).toEqual([
+		['shop', 1],
+		['containerLoot', 1]
+	]);
+});

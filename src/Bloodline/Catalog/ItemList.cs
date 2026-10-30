@@ -197,6 +197,24 @@ internal static class ItemList
             ? rule.Values(item)
             : [];
 
+    public static IReadOnlyDictionary<string, IReadOnlyList<string>> PlaceSourcesOf(
+        ItemPage item
+    ) =>
+        item
+            .Sources.SelectMany(source =>
+                source.Places.Select(place =>
+                    (Place: place.Name, Kind: Camel(source.Kind.ToString()))
+                )
+            )
+            .GroupBy(pair => pair.Place, StringComparer.Ordinal)
+            .ToDictionary(
+                group => group.Key,
+                group =>
+                    (IReadOnlyList<string>)
+                        group.Select(pair => pair.Kind).Distinct(StringComparer.Ordinal).ToArray(),
+                StringComparer.Ordinal
+            );
+
     public static IReadOnlyDictionary<string, IReadOnlyList<string>> FacetsOf(ItemPage item) =>
         Facets
             .Select(rule =>

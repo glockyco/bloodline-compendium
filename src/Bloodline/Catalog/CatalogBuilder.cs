@@ -303,6 +303,7 @@ internal static class CatalogBuilder
                 Status = item.Status,
                 Facets = ItemList.FacetsOf(item),
                 Cells = ItemList.CellsOf(item),
+                PlaceSources = ItemList.PlaceSourcesOf(item),
             })
             .ToArray();
         var categories = ordered
