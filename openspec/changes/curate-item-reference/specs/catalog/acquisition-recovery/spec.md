@@ -2,27 +2,12 @@
 
 ## Purpose
 
-Defines the ways to get items that the catalog must read beyond placed actors and data tables, the context a recipe needs, and how conditions and places are named for players.
+Defines the context a recipe needs and how conditions and places are named for players.
 
 ## ADDED Requirements
 
-### Requirement: Sources from hardcoded and runtime mechanisms
-The catalog SHALL publish sources from the hardcoded crafting mappings in `Crafting:Get Correct Item`, the default stock of faction currency shops, stables, contract scroll pools, seasonal gift placements, archaeology rewards and level reward variables, each with the requirements the code establishes. A mapping whose recipe row does not exist SHALL be listed in the maintainer report, not published.
-
-#### Scenario: Hardcoded weapon recipe
-- **WHEN** `Crafting:Get Correct Item` maps Copper Claymore to a recipe row with positive quantities
-- **THEN** Copper Claymore lists that recipe as a source with its ingredients
-
-#### Scenario: Faction shop default stock
-- **WHEN** the Lionsmane shop's default content sells the Lionsmane Cuirass for 350 Iuba
-- **THEN** the cuirass lists that shop as a source with a price of 350 Iuba
-
-#### Scenario: Missing recipe row
-- **WHEN** the code maps Atacamite Ingot to a row name the recipe table lacks
-- **THEN** no source is published and the maintainer report lists the mapping
-
 ### Requirement: Recipe context
-A crafted source SHALL state its station, its discipline and required level, the experience it grants, its output quantity and how the recipe is learned, as far as the game's code and data establish them.
+A crafted source SHALL state its station, its discipline and required level, the experience it grants and its output quantity, as far as the game's code and data establish them.
 
 #### Scenario: Cooked food
 - **WHEN** Apple Pie is cooked from 3 Apples and 1 Bread at a cooking fire for 35 cooking experience
