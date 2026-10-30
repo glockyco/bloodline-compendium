@@ -371,39 +371,7 @@ A session that learns something writes it to its home before it ends.
 
 ### Order of later changes
 
-Each item below is its own change with its own specs. Each publishes into the graph, so references to its kind already exist and become links on publication.
-
-1. `curate-item-reference`: correct prices, odds and treatments, recover missing sources, and rebuild item browsing and item pages around player questions. It replaces the item page rebuild that this change first planned.
-2. Finish `publish-item-reference` on this contract:
-   - verified armor, food and weapon facts,
-   - CI, preview and production deploys.
-3. Disciplines, skills and the skill planner:
-   - pages for disciplines, skills, passives and spellsongs,
-   - the planner's first part: discipline and attribute levels, unlocked skills and passive ranks, points, build links, characters in the browser, and the active character's context on pages.
-4. Crafting and equipment:
-   - smithing with weapon parts, quality and a weapon builder,
-   - crafting, cooking with ingredient treatments, and farming,
-   - the planner's second part: equipment, crafted weapons, runes and enchantments with armor and mobility totals.
-5. Places and people:
-   - levels as places with their merchants and trainers,
-   - conversation givers,
-   - containers and settlement buildings,
-   - placements for the map.
-6. Creatures and loot, with drop tables and spawn odds.
-7. Quests, achievements and guilds with their ranks.
-8. The interactive map from level captures and placements, with links both ways between map and pages.
-9. Mounts, companions, diseases, calendar events and the arena.
-10. Mechanics guides with calculators on the shared rules: experience, armor, crafting quality, settlement income and farming.
-11. A page per update listing changed facts, linked to the patch notes. It needs the project context line "The site describes only the current game build" revised.
-12. Reading a save in the browser to show progress and to start a planned character from it.
-13. 3D model renders of items, creatures and people, from the `capture-model` command and the presentation in "Presenting item models":
-    - renders on both bodies where the female meshes differ,
-    - bows and shields, whose views are not settled,
-    - a review step before renders are published.
-
-Skills and the planner come before places and people. The planner offers what the official wiki cannot, and it exercises the rules module early. Item sources keep naming merchants and places as unlinked references until change 5 publishes them.
-
-Not planned: a combat simulator, and mods for players. Mods need UE4SS installed and break with Early Access updates.
+`openspec/plan.md` holds the order of later changes and what crosses them. Each later change publishes into the graph, so references to its kind already exist and become links on publication.
 
 ## Risks / Trade-offs
 
