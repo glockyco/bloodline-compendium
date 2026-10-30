@@ -8,7 +8,7 @@
 	import '@fontsource-variable/figtree';
 	import '../app.css';
 	import Search from '#lib/Search.svelte';
-	import ItemPreviews from '#lib/ItemPreviews.svelte';
+	import EntityPreviews from '#lib/EntityPreviews.svelte';
 	import { markHydrated } from '#lib/hydration.js';
 	import ReleaseInfo from '#lib/ReleaseInfo.svelte';
 	import { kindPath } from '#lib/entities.js';
@@ -74,7 +74,7 @@
 	</div>
 </header>
 <main id="main" tabindex="-1" class:shell={!home}>{@render children()}</main>
-<ItemPreviews />
+<EntityPreviews />
 <footer class="site-footer">
 	<div class="footer-inner">
 		<nav aria-label="Footer">

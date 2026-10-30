@@ -37,3 +37,10 @@ A layout check SHALL load the fixture pages and a set of extreme real-data pages
 #### Scenario: Separator without a space
 - **WHEN** a place list renders "Ancient Mines,Elderglen"
 - **THEN** the layout check fails and names the page and the list
+
+### Requirement: One preview presenter
+Entity links SHALL show previews through one presenter that picks each kind's tooltip, and a kind SHALL get previews only by registering its tooltip and its preview data, so that pages that already link the kind need no change.
+
+#### Scenario: A kind without previews
+- **WHEN** a page links an entity whose kind has pages but no registered tooltip
+- **THEN** the link leads to the page and shows no preview

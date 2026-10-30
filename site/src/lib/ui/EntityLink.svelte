@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import type { EntityReference } from '#lib/site-data.js';
 	import { entityPath } from '#lib/entities.js';
+	import { previewKinds, previewPath } from '#lib/previews.js';
 	import type { Snippet } from 'svelte';
 	let {
 		entity,
@@ -32,8 +33,9 @@
 		href={path}
 		class={[className, shownIcon && 'with-icon']}
 		data-game
-		data-preview={entity.kind === 'item' && entity.slug ? entity.slug : undefined}
-		>{@render content()}</a
+		data-preview={previewKinds.has(entity.kind) && entity.slug
+			? previewPath(entity.kind, entity.slug)
+			: undefined}>{@render content()}</a
 	>{:else}<span class={[className, shownIcon && 'with-icon']} data-game>{@render content()}</span
 	>{/if}
 

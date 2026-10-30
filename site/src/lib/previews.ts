@@ -1,7 +1,8 @@
-import type { Fact } from './site-data.js';
+import type { EntityKind, Fact } from './site-data.js';
 
 /** What an item link's preview shows: the item's tooltip. */
 export interface ItemPreview {
+	kind: 'item';
 	name: string;
 	icon: string | null;
 	description: string | null;
@@ -10,16 +11,30 @@ export interface ItemPreview {
 	route: string | null;
 }
 
-const loaded = new Map<string, Promise<ItemPreview | null>>();
+/**
+ * Every kind's preview. A kind gets previews by adding its type here, its kind to `previewKinds`, its tooltip to
+ * `TooltipPresenter.svelte` and its data to `previewSources` in `server/previews.ts`.
+ */
+export type Preview = ItemPreview;
 
-/** Loads an item's tooltip once per page, and null when it cannot be loaded. */
-export function loadPreview(slug: string): Promise<ItemPreview | null> {
-	let preview = loaded.get(slug);
+/** The kinds whose links show a preview. Links to other kinds lead straight to their page. */
+export const previewKinds: ReadonlySet<EntityKind> = new Set<Preview['kind']>(['item']);
+
+/** The address of a kind's preview data, which `routes/tooltips/[kind]/[slug].json` prerenders. */
+export function previewPath(kind: EntityKind, slug: string): string {
+	return `/tooltips/${kind}/${encodeURIComponent(slug)}.json`;
+}
+
+const loaded = new Map<string, Promise<Preview | null>>();
+
+/** Loads a preview once per page, and null when it cannot be loaded. */
+export function loadPreview(path: string): Promise<Preview | null> {
+	let preview = loaded.get(path);
 	if (!preview) {
-		preview = fetch(`/tooltips/${encodeURIComponent(slug)}.json`)
-			.then((response) => (response.ok ? (response.json() as Promise<ItemPreview>) : null))
+		preview = fetch(path)
+			.then((response) => (response.ok ? (response.json() as Promise<Preview>) : null))
 			.catch(() => null);
-		loaded.set(slug, preview);
+		loaded.set(path, preview);
 	}
 	return preview;
 }

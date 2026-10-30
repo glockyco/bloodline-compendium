@@ -1,16 +1,17 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { beforeNavigate } from '$app/navigation';
-	import ItemTooltip from './ItemTooltip.svelte';
-	import { loadPreview, type ItemPreview } from './previews.js';
+	import TooltipPresenter from './TooltipPresenter.svelte';
+	import { loadPreview, type Preview } from './previews.js';
 	import { linkLine, placeBeside } from './floating.js';
 
 	/**
 	 * Shows the tooltip of every link marked data-preview on hover after a short intent, on keyboard focus and on a
 	 * first tap, and a second tap follows the link. One listener serves the page, so a list of a thousand links does
-	 * no work until a reader points at one. Without JavaScript the links lead straight to the item's page.
+	 * no work until a reader points at one. Without JavaScript the links lead straight to the entity's page. The
+	 * attribute holds the address of the preview's data, and `TooltipPresenter` shows it in its kind's tooltip.
 	 */
-	let preview = $state<ItemPreview | null>(null);
+	let preview = $state<Preview | null>(null);
 	let failed = $state(false);
 	let panel = $state<HTMLElement | undefined>();
 	let anchor: HTMLAnchorElement | null = null;
@@ -20,7 +21,7 @@
 	let pointer: { x: number; y: number } | null = null;
 	let intent: ReturnType<typeof setTimeout> | undefined;
 	let stopPlacing: (() => void) | undefined;
-	const id = 'item-preview';
+	const id = 'entity-preview';
 
 	function linkOf(target: EventTarget | null): HTMLAnchorElement | null {
 		return target instanceof Element ? target.closest<HTMLAnchorElement>('a[data-preview]') : null;
@@ -130,15 +131,13 @@
 	});
 </script>
 
-{#if preview || failed}<div class="item-preview" {id} role="tooltip" bind:this={panel}>
-		{#if preview}<ItemTooltip item={preview} heading="p" />
-			{#if preview.route}<p class="route">{preview.route}</p>{/if}
-		{:else}<p class="route">The item's details could not be loaded.</p>{/if}
+{#if preview || failed}<div class="entity-preview" {id} role="tooltip" bind:this={panel}>
+		{#if preview}<TooltipPresenter {preview} />{:else}<p>The details could not be loaded.</p>{/if}
 	</div>{/if}
 
 <style>
 	/* Hidden until placed, so it never flashes at the corner of the page. */
-	.item-preview {
+	.entity-preview {
 		position: fixed;
 		z-index: var(--layer-tooltip);
 		top: 0;
@@ -153,15 +152,9 @@
 		overflow: auto;
 		pointer-events: none;
 	}
-	.route {
-		margin: var(--gap-block) 0 0;
-		padding-top: var(--inset);
-		border-top: var(--border-width) solid var(--border);
-		color: var(--text-soft);
-	}
 	/* Phones dock the tooltip at the bottom, where it covers no link the reader is reading. */
 	@media (width < 40rem) {
-		.item-preview {
+		.entity-preview {
 			inset: auto var(--gap-block) var(--gap-block) !important;
 			width: auto;
 			max-height: var(--size-preview-phone) !important;

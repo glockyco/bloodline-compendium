@@ -95,9 +95,9 @@ test('an item link covers its icon and name, not the rest of its cell', async ({
 	expect(linkBox.width).toBeLessThan(cellBox.width - 40);
 	await page.mouse.move(cellBox.x + cellBox.width - 10, cellBox.y + cellBox.height / 2);
 	await page.waitForTimeout(400);
-	await expect(page.locator('#item-preview')).toHaveCount(0);
+	await expect(page.locator('#entity-preview')).toHaveCount(0);
 	await page.mouse.move(linkBox.x + linkBox.width / 2, linkBox.y + linkBox.height / 2);
-	await expect(page.locator('#item-preview')).toContainText('Lanternedge');
+	await expect(page.locator('#entity-preview')).toContainText('Lanternedge');
 });
 
 test('phone filters open as a keyboard-accessible sheet and apply without navigation', async ({
@@ -169,9 +169,9 @@ test('previews an item link on keyboard focus and hover', async ({ page }) => {
 	await page.goto('/items/lanternedge/');
 	const ingredient = page.locator('.recipe').getByRole('link', { name: 'Cinderpear' });
 	await ingredient.focus();
-	const preview = page.locator('#item-preview');
+	const preview = page.locator('#entity-preview');
 	await expect(preview).toContainText('Cinderpear');
-	await expect(ingredient).toHaveAttribute('aria-describedby', 'item-preview');
+	await expect(ingredient).toHaveAttribute('aria-describedby', 'entity-preview');
 	await page.keyboard.press('Escape');
 	await expect(preview).toBeHidden();
 	await ingredient.hover();
@@ -199,7 +199,7 @@ test('a first tap previews an item link and a second tap follows it', async ({
 		await page.waitForLoadState('networkidle');
 		const ingredient = page.locator('.recipe').getByRole('link', { name: 'Cinderpear' });
 		await ingredient.tap();
-		await expect(page.locator('#item-preview')).toContainText('Cinderpear');
+		await expect(page.locator('#entity-preview')).toContainText('Cinderpear');
 		await expect(page).toHaveURL('/items/lanternedge/');
 		await ingredient.tap();
 		await expect(page).toHaveURL('/items/cinderpear/');
