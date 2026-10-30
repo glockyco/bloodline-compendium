@@ -1,5 +1,11 @@
 import { expect, it } from 'vitest';
-import { formatAmount, sortSources, sourceContext } from './acquisition.js';
+import {
+	formatAmount,
+	sortSources,
+	sourceContext,
+	summaryConditions,
+	summaryContext
+} from './acquisition.js';
 import fixture from '../../fixtures/site-data/items/lanternedge.json';
 import type { ItemPage } from './site-data.js';
 const item = fixture as ItemPage;
@@ -21,4 +27,35 @@ it('orders comparable shop prices before selecting the answer summary', () => {
 	expect(sources[0].price?.amount).toBe(45);
 	// The base value 45 at neutral respect's multiplier of 1.4 costs 63.
 	expect(sourceContext(sources[0])).toBe('63 gold');
+});
+
+const container = item.sources.find((entry) => entry.kind === 'containerLoot')!;
+const withChance = (chance: number) => ({ ...container, odds: { ...container.odds!, chance } });
+
+it('states a chance in a summary only when every source shares it, and otherwise its range', () => {
+	expect(summaryContext([withChance(0.5), withChance(0.5)])).toBe('50% per container');
+	expect(summaryContext([withChance(0.017), withChance(0.385)])).toBe(
+		'1.7% to 38.5% per container'
+	);
+	// A source without a known chance leaves the summary without one.
+	expect(summaryContext([withChance(0.5), { ...container, odds: null }])).toBeNull();
+});
+
+it('states the range of levels when the summarized recipes need different levels of one skill', () => {
+	const level = (value: number) => ({
+		...container,
+		conditions: [
+			{
+				entity: null,
+				kind: 'proficiencyLevel' as const,
+				label: `Requires weaponsmithing level ${value}.`,
+				value
+			}
+		]
+	});
+	expect(summaryConditions([level(10), level(14), level(40)])).toEqual([
+		'Requires weaponsmithing level 10 to 40.'
+	]);
+	expect(summaryConditions([level(12), level(12)])).toEqual(['Requires weaponsmithing level 12.']);
+	expect(summaryConditions([level(12), { ...container, conditions: [] }])).toEqual([]);
 });

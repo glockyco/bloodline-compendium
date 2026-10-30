@@ -1,5 +1,5 @@
 import type { Amount, Odds, OddsEvent, Price, Source, SourceKind } from './site-data.js';
-import { formatChance, formatNumber } from './format.js';
+import { formatChance, formatChanceRange, formatNumber } from './format.js';
 import { buyPrice, neutralMultiplier } from './rules/price.js';
 
 /**
@@ -110,6 +110,62 @@ export interface SourceSummary {
 	conditions: string[];
 }
 
+/** A range of numbers as one value when they agree and as "from to" otherwise. */
+function span(values: number[], format: (value: number) => string): string {
+	const min = Math.min(...values);
+	const max = Math.max(...values);
+	return min === max ? format(min) : `${format(min)} to ${format(max)}`;
+}
+
+/**
+ * The price or chance that holds for every summarized source: one value when they agree, a range in one currency or
+ * per one event otherwise, and nothing when the sources cannot be compared.
+ */
+export function summaryContext(sources: Source[]): string | null {
+	const priced = sources.filter((source) => source.price);
+	if (priced.length === sources.length) {
+		const currency = priced[0].price!.currency;
+		if (!priced.every((source) => source.price!.currency?.key === currency?.key)) return null;
+		const amounts = priced.map((source) => payPrice(source.price!));
+		if (amounts.every((amount) => amount === 0)) return 'Free';
+		return `${span(amounts, formatNumber)} ${currency?.name ?? 'gold'}`;
+	}
+	const chances = sources.filter((source) => source.odds?.chance != null);
+	if (chances.length !== sources.length) return null;
+	const label = oddsLabel(chances[0].odds!, chances[0].kind);
+	if (!chances.every((source) => oddsLabel(source.odds!, source.kind) === label)) return null;
+	const values = chances.map((source) => source.odds!.chance!);
+	return `${formatChanceRange(Math.min(...values), Math.max(...values))} ${label}`;
+}
+
+/**
+ * The conditions that hold for every summarized source. A level that every source requires of the same skill is
+ * one condition with the range of levels, such as weaponsmithing level 10 to 40.
+ */
+export function summaryConditions(sources: Source[]): string[] {
+	const [first, ...rest] = sources;
+	const shared = first.conditions
+		.filter((condition) => condition.kind !== 'proficiencyLevel')
+		.map((condition) => condition.label)
+		.filter((label) => rest.every((source) => source.conditions.some((c) => c.label === label)));
+	const levels = sources.map((source) =>
+		source.conditions.filter((condition) => condition.kind === 'proficiencyLevel')
+	);
+	// The label names the skill around its level, so labels that differ only in the number require one skill.
+	const template = (label: string) => label.replace(/\d+/, '#');
+	for (const condition of levels[0]) {
+		const matching = levels.map((own) =>
+			own.find(
+				(other) => template(other.label) === template(condition.label) && other.value != null
+			)
+		);
+		if (condition.value == null || matching.some((match) => !match)) continue;
+		const values = matching.map((match) => match!.value!);
+		shared.push(template(condition.label).replace('#', span(values, String)));
+	}
+	return [...new Set(shared)];
+}
+
 export function summarize(kind: SourceKind, sources: Source[]): SourceSummary {
 	const first = sources[0];
 	const recipe = recipeKinds.has(kind) ? first.recipe : null;
@@ -134,8 +190,8 @@ export function summarize(kind: SourceKind, sources: Source[]): SourceSummary {
 				: shown.join(', '),
 		more: recipe ? sources.length - 1 : unnamed ? 0 : Math.max(0, names.length - shown.length),
 		places,
-		context: recipe ? null : sourceContext(first),
-		conditions: [...new Set(first.conditions.map((condition) => condition.label))]
+		context: recipe ? null : summaryContext(sources),
+		conditions: summaryConditions(sources)
 	};
 }
 

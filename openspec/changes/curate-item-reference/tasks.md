@@ -20,7 +20,7 @@
 - [x] 4.4 Replace generic condition warnings with specific player conditions, translate dialogue states to actions where the dialogue shows them, and verify the Scarecrow merchant's condition
 - [ ] 4.5 Name settlement buildings as the player's settlement, name places from entrances and event maps, and map internal area levels such as Generic Autumn Birch Area to the places players know, and verify the Mages College Main Hall, the settlement Armorer and Raw Leather
 - [x] 4.9 Key source entities by what the player meets and make the graph reject one key with two names, and verify Iron Ingot's pickups, Copper Ore's deposits, Astral Ore's container and Wakazashi's merchant
-- [ ] 4.10 State a level or chance in a summary only when every summarized source shares it and otherwise its range, and verify Standard Mystcopper Axe Head and Azure Lover
+- [x] 4.10 State a level or chance in a summary only when every summarized source shares it and otherwise its range, and verify Standard Mystcopper Axe Head and Azure Lover
 - [ ] 4.11 Read ore refining and publish smelting recipes, trace recipes whose output differs from their name and recipes listed twice, and verify Iron Ore, Angled Mystcopper Blade and Steel Claymore Guard
 - [ ] 4.12 Word rare pools, secondary container chances, unresolved pickups and bounty notes as a player needs them, and verify The Copper Crown, Ethereal Archstone and A Walk in the Woods
 
