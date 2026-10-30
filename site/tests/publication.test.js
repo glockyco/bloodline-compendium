@@ -145,7 +145,7 @@ it.each([
 	[
 		'external origin',
 		publicationSitemap().replace(
-			'https://bloodline.compendiums.org/items/other/',
+			'https://the-bloodline.compendiums.org/items/other/',
 			'https://example.invalid/items/other/'
 		),
 		'non-production origin'

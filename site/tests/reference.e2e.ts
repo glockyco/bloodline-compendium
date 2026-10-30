@@ -303,7 +303,7 @@ test('each public page has production identity, social metadata and generated br
 	page,
 	request
 }) => {
-	const origin = 'https://bloodline.compendiums.org';
+	const origin = 'https://the-bloodline.compendiums.org';
 	const routes = [
 		'/',
 		'/items/',

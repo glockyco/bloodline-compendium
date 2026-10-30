@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import type { EntityReference, EntityKindDefinition } from './site-data.js';
+	import { SITE_ORIGIN } from './seo.js';
 	let {
 		title,
 		description,
@@ -18,9 +19,8 @@
 		entity?: EntityReference;
 		kind?: EntityKindDefinition;
 	} = $props();
-	// Review hosts retain production identity instead of creating duplicate indexed pages.
-	const canonical = $derived('https://bloodline.compendiums.org' + page.url.pathname);
-	const image = 'https://bloodline.compendiums.org/og-default.png';
+	const canonical = $derived(SITE_ORIGIN + page.url.pathname);
+	const image = SITE_ORIGIN + '/og-default.png';
 	const structuredData = $derived([
 		...(entity && kind?.structuredDataType
 			? [
@@ -39,7 +39,7 @@
 						'@context': 'https://schema.org',
 						'@type': 'WebSite',
 						name: 'The Bloodline Compendium',
-						url: 'https://bloodline.compendiums.org/'
+						url: SITE_ORIGIN + '/'
 					}
 				]
 			: []),
@@ -52,7 +52,7 @@
 							'@type': 'ListItem',
 							position: index + 1,
 							name: entry.name,
-							item: 'https://bloodline.compendiums.org' + entry.path
+							item: SITE_ORIGIN + entry.path
 						}))
 					}
 				]

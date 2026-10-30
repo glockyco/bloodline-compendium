@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { parse } from "parse5";
 import { entityGraphGate } from "./entity-graph-gate.mjs";
 
-const origin = "https://bloodline.compendiums.org";
+const origin = "https://the-bloodline.compendiums.org";
 
 function walk(node, visit) {
   visit(node);

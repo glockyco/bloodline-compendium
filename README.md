@@ -2,7 +2,7 @@
 
 A searchable item reference for players of [The Bloodline](https://store.steampowered.com/app/1159290/The_Bloodline/), built from the game's own data. This unofficial fan project is not affiliated with Shieldbearer Studios or 505 Games.
 
-[Open the compendium](https://bloodline.compendiums.org/) · [Support on Ko-fi](https://ko-fi.com/wowmuch)
+[Open the compendium](https://the-bloodline.compendiums.org/) · [Support on Ko-fi](https://ko-fi.com/wowmuch)
 
 ## Use the compendium
 
@@ -81,6 +81,12 @@ To roll back:
 ```sh
 bun run --cwd site deploy:versions
 bun run --cwd site deploy:rollback -- <version-ID> --message "<reason>"
+```
+
+`bloodline.compendiums.org` redirects every path to the site's address through its own Worker, which changes only with `site/src/redirect-worker.ts`:
+
+```sh
+bun run --cwd site deploy:redirect
 ```
 
 ## Observe the running game

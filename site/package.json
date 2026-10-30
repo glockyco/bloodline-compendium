@@ -23,6 +23,8 @@
 		"deploy:dry-run": "bun ../scripts/deploy.mjs production --dry-run",
 		"deploy:preview:dry-run": "bun ../scripts/deploy.mjs preview --dry-run",
 		"deploy:smoke": "bun ../scripts/deploy.mjs smoke",
+		"deploy:redirect": "wrangler deploy --config wrangler.redirect.jsonc",
+		"deploy:redirect:dry-run": "wrangler deploy --config wrangler.redirect.jsonc --dry-run --outdir .stage/redirect",
 		"review": "wrangler dev --assets build",
 		"layout:check": "bun scripts/layout-check.mjs"
 	},

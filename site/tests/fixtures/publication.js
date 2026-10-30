@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
-export const publicationOrigin = 'https://bloodline.compendiums.org';
+export const publicationOrigin = 'https://the-bloodline.compendiums.org';
 export const publicationPaths = [
 	'/',
 	'/items/',

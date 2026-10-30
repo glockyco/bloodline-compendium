@@ -1,0 +1,9 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	// Redirects every path of the shorter address to the site's address, which wrangler.jsonc serves.
+	"name": "bloodline-compendium-redirect",
+	"main": "src/redirect-worker.ts",
+	"compatibility_date": "2026-10-26",
+	"workers_dev": false,
+	"routes": [{ "pattern": "bloodline.compendiums.org", "custom_domain": true }]
+}

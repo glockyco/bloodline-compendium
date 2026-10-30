@@ -170,4 +170,4 @@ Keep producer corrections, behavioral regression coverage, real-data browser rev
 
 ## Migration Plan
 
-The first deployment goes to a preview URL. The custom domain `bloodline.compendiums.org` is attached after review. Rollback redeploys the previous version with Wrangler.
+The first deployment goes to a preview URL. The custom domain `the-bloodline.compendiums.org` is attached after review, and a redirect-only Worker on `bloodline.compendiums.org` sends every path there. Rollback redeploys the previous version with Wrangler.

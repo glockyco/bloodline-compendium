@@ -180,7 +180,7 @@ async function main() {
   if (option === "--dry-run") return;
   const origin =
     mode === "production"
-      ? "https://bloodline.compendiums.org"
+      ? "https://the-bloodline.compendiums.org"
       : result.stdout.match(
           /https:\/\/staging-[a-z0-9.-]+\.workers\.dev\b/i,
         )?.[0];

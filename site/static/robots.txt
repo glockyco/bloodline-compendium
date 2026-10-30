@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://bloodline.compendiums.org/sitemap.xml
+Sitemap: https://the-bloodline.compendiums.org/sitemap.xml
