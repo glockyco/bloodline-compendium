@@ -88,7 +88,7 @@ Source rows named the wrong things: ingot pickups said Sporing Gloves, ore depos
 
 41 levels that sources use had no name from the game's entrances, so pages showed internal level names such as "Generic Autumn Birch Area". Three rules now name them:
 - The 22 `Generic_*` levels in `Small_Event_Areas` are the maps the game opens when the player makes camp on the world map. `TopDownCharacter_Working:Get Location Tag Maps` picks one by the terrain tag nearest the camp, such as "Pine Forest" or "Autumnal Birch Forest", so each is named after its tag, as "Pine Forest camp". The tag "Hostile Logging Camp" opens `Generic_Birch_LumberMill_01`. No tag opens `Generic_SnowPineArea_02`, which keeps a name read from its level name.
-- A level whose name is another level's name and an underscore is part of that place, such as `TheMagesCollege_MainHall`, named "The Mage's College, Main Hall".
+- A level whose name is another level's name and an underscore is part of that place, such as `TheMagesCollege_MainHall`, named "The Mage's College: Main Hall", with a colon because pages list places with commas.
 - Other levels without a name read their level name, without "Generic" or numbering and with small words in lower case, such as "Cathedral of Arema".
 
 Settlement buildings stand only in the player's settlement, so their shops and deliveries are marked as the settlement's and read "in your settlement".

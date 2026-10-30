@@ -224,7 +224,8 @@ internal sealed partial class Places
             }
         }
         // A part of a place carries the place's level name and an underscore before its own, such as
-        // TheMagesCollege_MainHall in TheMagesCollege, and is named after the place and then the part.
+        // TheMagesCollege_MainHall in TheMagesCollege, and is named after the place and then the part. A colon joins
+        // them, because pages list places with commas.
         var byClass = records
             .Levels.GroupBy(
                 level => ItemIdentity.ClassName(level.Path),
@@ -254,7 +255,7 @@ internal sealed partial class Places
             places[level.Path] = WorldSourceData.Reference(
                 EntityKind.Place,
                 level.Path,
-                places[byClass[parent]].Name + ", " + part
+                places[byClass[parent]].Name + ": " + part
             );
             named.Add(level.Path);
         }

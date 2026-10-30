@@ -399,7 +399,7 @@ public sealed class CatalogTests
         Assert.Equal(
             [
                 "The Mage's College",
-                "The Mage's College, Main Hall",
+                "The Mage's College: Main Hall",
                 "Grassy Plains camp",
                 "Snow Pine Area",
                 "Cathedral of Arema",
