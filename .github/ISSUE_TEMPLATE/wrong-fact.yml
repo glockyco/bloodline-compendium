@@ -1,0 +1,31 @@
+name: Wrong fact
+description: Something on the compendium differs from what the game shows or does.
+title: "Wrong fact: "
+labels: ["wrong fact"]
+body:
+  - type: input
+    id: page
+    attributes:
+      label: Page
+      description: The compendium page with the wrong fact. The link in the page's footer fills this in.
+      placeholder: https://the-bloodline.compendiums.org/items/iron-ingot/
+    validations:
+      required: true
+  - type: textarea
+    id: wrong
+    attributes:
+      label: What the page says
+    validations:
+      required: true
+  - type: textarea
+    id: game
+    attributes:
+      label: What the game shows or does
+      description: How you saw it, step by step. A screenshot helps.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Game version
+      description: The version on the game's main menu, if you know it.

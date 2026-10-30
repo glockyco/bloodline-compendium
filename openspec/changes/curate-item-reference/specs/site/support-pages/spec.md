@@ -26,3 +26,10 @@ The home page SHALL lead to the item list, the tools and the most asked-for item
 #### Scenario: Unknown URL
 - **WHEN** a reader opens a URL that does not exist
 - **THEN** the page says the page does not exist and offers search and the item list
+
+### Requirement: Reporting a wrong fact
+Every page SHALL link a form for reporting a wrong fact from its footer, with the page's address filled in, so that a report names the page it is about.
+
+#### Scenario: Report from an item page
+- **WHEN** a reader follows the report link on Iron Ingot
+- **THEN** the form opens with Iron Ingot's address in its Page field
