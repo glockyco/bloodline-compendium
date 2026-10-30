@@ -33,9 +33,7 @@ internal sealed class BountyNoteMechanism : ISourceMechanism
                     null,
                     quantity is > 0 ? new Amount(quantity.Value, quantity.Value) : null,
                     [],
-                    [
-                        "Required bounty items are needed to complete the quest, not to receive the note. They are not rewards.",
-                    ]
+                    []
                 )
                 {
                     Entity = WorldSourceData.Reference(
@@ -44,20 +42,6 @@ internal sealed class BountyNoteMechanism : ISourceMechanism
                         RecordValues.Text(row.Values["DisplayName"])
                             ?? ItemIdentity.Readable(row.Name)
                     ),
-                    Conditions =
-                    [
-                        new RelationCondition(
-                            ConditionKind.Quest,
-                            WorldSourceData.Reference(
-                                EntityKind.Quest,
-                                table.Path + ":" + row.Name,
-                                RecordValues.Text(row.Values["DisplayName"])
-                                    ?? ItemIdentity.Readable(row.Name)
-                            ),
-                            null,
-                            "Received when accepting the quest."
-                        ),
-                    ],
                 }
             );
         }

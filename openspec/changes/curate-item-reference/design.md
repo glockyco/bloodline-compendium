@@ -99,6 +99,10 @@ The crafting window spawns the class of a recipe's `WeaponComponentTable` row an
 
 Recipe rows without a component row, such as ingots and food, are made through `Crafting:Get Correct Item`, which compares the item to craft with 96 classes and names a row for each. Extraction records those pairs in the code index, and the game's own function returned the same row for each of the 96 classes in run recipe-rows-1. The pair for Round Mace names the row `RoundedMace`, which the recipe table lacks, so the report lists it.
 
+### Wording a player can act on
+
+A rare pool's drop says it comes from a separate roll in addition to the normal drop, since its chance can be 100%. A container's own appearance chance says that the container is there only part of the time, apart from the chance per container. An item lying where no source names the place says it lies in an unknown place. A bounty note reads "Receive when accepting the quest" and names no place or condition, because the quest is the source.
+
 ### Order of work
 
 Values come before presentation, because pages built on wrong numbers would be rebuilt twice: catalog economy first, then reader text and support pages, the item page, browsing, recovered sources, crafting and tools. Lab checks run as each value needs them, one session at a time, because the lab has one game copy.

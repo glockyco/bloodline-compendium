@@ -89,7 +89,7 @@ export const sourceVerbs: Record<SourceKind, string> = {
 	fishing: 'Catch by',
 	gathering: 'Gather from',
 	farming: 'Grow',
-	bountyNote: 'Receive from',
+	bountyNote: 'Receive when accepting the quest',
 	settlementDelivery: 'Receive from',
 	contract: 'Receive from',
 	seasonalGift: 'Receive from',
@@ -185,6 +185,8 @@ export function summarize(kind: SourceKind, sources: Source[]): SourceSummary {
 			)
 		)
 	].slice(0, 2);
+	// Find lying names where, so an item lying in a place no source records still says that the place is unknown.
+	if (kind === 'pickup' && places.length === 0) places.push('an unknown place');
 	return {
 		verb: recipe?.station
 			? `${sourceVerbs[kind]} at the`

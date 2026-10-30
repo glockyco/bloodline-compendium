@@ -145,7 +145,9 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
         "A spawner places this enemy, and when it spawns is not read.";
 
     private static IReadOnlyList<string> RollNotes(string field) =>
-        field == "Loot Table" ? [] : ["A rare drop, chosen apart from the normal drop."];
+        field == "Loot Table"
+            ? []
+            : ["Comes from a separate roll, in addition to the normal drop."];
 
     // Goblin_Base:Die picks once from the normal pool for every enemy. The rare pool drops only where a death
     // event spawns a Loot_Dropped with it, which then picks once, and these are the classes whose Drop Loot does

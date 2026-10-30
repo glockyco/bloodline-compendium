@@ -39,8 +39,8 @@ internal sealed record ContainerDetails(
             var maximum = Percent(chances[^1]);
             notes.Add(
                 chances.Length > 1
-                    ? $"Appears {minimum}% to {maximum}% of the time, depending on the container."
-                    : $"Appears {minimum}% of the time."
+                    ? $"The container is there only {minimum}% to {maximum}% of the time, depending on the container."
+                    : $"The container is there only {minimum}% of the time."
             );
         }
         if (variants.Any(variant => variant.Loose))

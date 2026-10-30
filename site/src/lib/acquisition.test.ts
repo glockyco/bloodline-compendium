@@ -3,6 +3,7 @@ import {
 	formatAmount,
 	sortSources,
 	sourceContext,
+	summarize,
 	summaryConditions,
 	summaryContext
 } from './acquisition.js';
@@ -58,4 +59,12 @@ it('states the range of levels when the summarized recipes need different levels
 	]);
 	expect(summaryConditions([level(12), level(12)])).toEqual(['Requires weaponsmithing level 12.']);
 	expect(summaryConditions([level(12), { ...container, conditions: [] }])).toEqual([]);
+});
+
+it('says that a lying item lies in an unknown place when no place is recorded', () => {
+	const pickup = { ...container, kind: 'pickup' as const, places: [], odds: null };
+	expect(summarize('pickup', [pickup])).toMatchObject({
+		verb: 'Find lying',
+		places: ['an unknown place']
+	});
 });

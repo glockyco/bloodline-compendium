@@ -22,7 +22,7 @@
 - [x] 4.9 Key source entities by what the player meets and make the graph reject one key with two names, and verify Iron Ingot's pickups, Copper Ore's deposits, Astral Ore's container and Wakazashi's merchant
 - [x] 4.10 State a level or chance in a summary only when every summarized source shares it and otherwise its range, and verify Standard Mystcopper Axe Head and Azure Lover
 - [x] 4.11 Read ore refining and publish smelting recipes, trace recipes whose output differs from their name and recipes listed twice, and verify Iron Ore, Angled Mystcopper Blade and Steel Claymore Guard
-- [ ] 4.12 Word rare pools, secondary container chances, unresolved pickups and bounty notes as a player needs them, and verify The Copper Crown, Ethereal Archstone and A Walk in the Woods
+- [x] 4.12 Word rare pools, secondary container chances, unresolved pickups and bounty notes as a player needs them, and verify The Copper Crown, Ethereal Archstone and A Walk in the Woods
 
 ## 6. Reader text and support pages
 

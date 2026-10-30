@@ -53,6 +53,8 @@
 					(source) => source.amount && (source.amount.min !== 1 || source.amount.max !== 1)
 				);
 				const showContext = sources.some((source) => source.price || source.odds);
+				// A note comes from accepting its quest, which has no place of its own, so such rows name none.
+				const showPlaces = kind !== 'bountyNote';
 				// A chance names its event once in the heading when every row shares it.
 				const events = [
 					...new Set(
@@ -71,6 +73,7 @@
 					kind,
 					sources,
 					byPlace,
+					showPlaces,
 					recipe: recipeKinds.has(kind),
 					summary: sources.length ? summarize(kind, sources) : null,
 					showAmount,
@@ -299,7 +302,7 @@
 								showAmount={group.showAmount}
 								showContext={group.showContext}
 								showUnit={!group.sharedUnit}
-								showPlaces={!group.byPlace}
+								showPlaces={!group.byPlace && group.showPlaces}
 								id={`source-${group.kind}-${index + 1}`}
 							/>{/snippet}</RelationTable
 					>
