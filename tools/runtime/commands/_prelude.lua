@@ -156,7 +156,19 @@ local function inventorySlot(path)
   error("No inventory slot shows " .. path .. ". Give the item and open the sheet first.")
 end
 
---- The text of every text block a widget class declares, by variable name, and the names of hidden ones.
+--- Whether a widget is off screen: it or a panel that holds it is collapsed or hidden, the ESlateVisibility values
+--- 1 and 2. A tooltip keeps its unused lines filled in and collapses the box around them.
+local function offScreen(widget)
+  while widget and widget:IsValid() do
+    local visibility = widget:GetVisibility()
+    if visibility == 1 or visibility == 2 then return true end
+    widget = widget:GetParent()
+  end
+  return false
+end
+
+--- The text of every text block a widget class declares that the widget shows, by variable name, and the names of
+--- the ones it keeps off screen.
 local function texts(widget)
   local shown, hidden = {}, {}
   widget:GetClass():ForEachProperty(function(property)
@@ -164,9 +176,7 @@ local function texts(widget)
     local name = property:GetFName():ToString()
     local value = widget[name]
     if value and value:IsValid() and value:GetClass():GetFName():ToString():find("TextBlock", 1, true) then
-      -- ESlateVisibility: 1 Collapsed and 2 Hidden take a text block off screen.
-      local visibility = value:GetVisibility()
-      if visibility == 1 or visibility == 2 then hidden[#hidden + 1] = name else shown[name] = text(value) end
+      if offScreen(value) then hidden[#hidden + 1] = name else shown[name] = text(value) end
     end
   end)
   return shown, hidden

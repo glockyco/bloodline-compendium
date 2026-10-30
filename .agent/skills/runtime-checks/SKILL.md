@@ -17,6 +17,7 @@ Run `prepare` again after a game update or after changing `tools/runtime/bridge/
 
 - `launch` starts the game headless, with `-nullrhi`. Blueprints, widgets, tooltips and per-frame sampling work, and the machine stays free to use.
 - `launch render` draws off screen with `-RenderOffScreen` for screenshots and model renders. The game registers as a background app without a window, so it never takes focus.
+- `launch window` shows a game window, for checks that need the real cursor. Hovering raises a tooltip only on an operating system mouse-move event, not when the player controller moves the cursor. `swift tools/runtime/desktop.swift` lists the game's windows, brings the game to the front and moves the mouse, and `screencapture -l <window id>` captures only the game's window. The window takes the front and the mouse, so ask before using it while someone works at the machine.
 - `quit` ends the session through the game's own `QuitGame` and stops only the process the session started.
 - `begin <label>` opens a new run in the same session. Repeated measurements go to separate runs.
 
@@ -31,7 +32,8 @@ Commands in `tools/runtime/commands/` change state only through the game's own f
 - Buttons are pressed by calling the function that the widget class binds to the button's click, which `press` reads from the class's `ComponentDelegateBindings`. A CommonUI button's handler takes the button as its argument. Never click by screen position.
 - `give` builds each item as an actor, so its construction script fills its item info as for an item lying in the world, and passes that to the player's `AddItemsToInventory`.
 - `equip` and `use` click the item's inventory slot, which needs `open-sheet` first. Only slots the sheet shows count: the sheet leaves replaced slots alive, and pressing them does nothing.
-- `read-tooltips` calls each shown slot's own `OnMouseEnter`, which builds the tooltip as hovering does, and reads its text blocks. `tooltip-batch` gives a batch of items, reads their tooltips and empties the inventory again.
+- `read-tooltips` calls each shown slot's own `OnMouseEnter`, which builds the tooltip as hovering does, and reads the text blocks the tooltip shows. Text in a collapsed or hidden box counts as hidden, because tooltips keep unused lines filled in and collapse the box around them. `tooltip-batch` gives a batch of items, reads their tooltips and empties the inventory again, and marks its result `shownOnly`.
+- `place-tooltips` shows the tooltips of all inventory slots at once, four to a row, and `clear-tooltips` removes them and empties the inventory. A screenshot then shows the tooltips as the game draws them. Run hover-check compared this placement with hovering by the real cursor in a game window and found them the same.
 - `take-damage` deals damage through the player's own `TakeDamage`, by an amount or down to a Health value.
 - `player` reads player values by dotted path, such as `PlayerPassiveLevelStatComponent.Total Armor`, with the items held and equipped. `read-widget` reads a widget's text blocks.
 - `call` sets inputs on a live object, calls a function and reads outputs, for checking a rule against the game's own result. `params` lists a function's parameters.
@@ -48,7 +50,7 @@ Commands that look up objects use the instances the game uses. Class defaults an
 - `knees.sh` shows when knee armor starts to count.
 - `food.sh` samples Health every frame around meals, of four foods with known tables or of the foods whose class paths it is given.
 
-`bun tools/runtime/tooltip-sweep.mjs <build>` reads the tooltip of every published item into the current run. It resumes where earlier sweeps of the build stopped, and retries a batch that stops the game in halves on a restarted game. The next `catalog` compares each item's facts with the latest tooltip a run read for it. A difference without a known cause in `TooltipCheck.cs` appears in Coverage and needs an owner: a fix in the catalog, a known issue once a run reproduces it, or a new cause.
+`bun tools/runtime/tooltip-sweep.mjs <build> [--capture]` reads the tooltip of every published item into the current run, and with `--capture`, in `launch render`, also takes a screenshot of every batch of eight. It resumes where earlier sweeps of the build stopped, and retries a batch that stops the game in halves on a restarted game. The next `catalog` compares each item's facts with the latest shown-only tooltip a run read for it. A difference without a known cause in `TooltipCheck.cs` appears in Coverage and needs an owner: a fix in the catalog, a known issue once a run reproduces it, or a new cause.
 
 ## Captures
 

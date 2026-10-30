@@ -45,6 +45,8 @@ const modes = {
   headless: ["-nullrhi"],
   // Draws into an off-screen buffer without showing a window, for screenshots and model captures.
   render: ["-RenderOffScreen", "-windowed", "-ResX=1600", "-ResY=900"],
+  // Shows a window that takes the real cursor, for checks of what hovering shows. It comes to the front.
+  window: ["-windowed", "-ResX=1600", "-ResY=900"],
 };
 
 // --- Configuration -----------------------------------------------------------------------------------------
