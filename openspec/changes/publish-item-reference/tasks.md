@@ -45,6 +45,7 @@
 
 - [x] 5.1 Add Wrangler configuration for an assets-only Worker with a prerendered 404 page, and verify `wrangler deploy --dry-run` accepts the build
 - [ ] 5.2 Add the preview, production and rollback commands and document the update workflow in README.md, and verify a preview deployment serves an item page, after approval to deploy
+- [ ] 5.3 Serve the site at `the-bloodline.compendiums.org`, with canonical links, the sitemap, robots and link previews on that address, and redirect every path of `bloodline.compendiums.org` to it with a redirect-only Worker as Ancient Kingdoms does, and list the site on compendiums.org, and verify a redirected item address keeps its path and query, after approval to deploy
 
 ## 6. End-to-end check
 
