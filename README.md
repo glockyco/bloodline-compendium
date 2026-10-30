@@ -7,8 +7,7 @@ A searchable item reference for players of [The Bloodline](https://store.steampo
 ## Use the compendium
 
 - Browse or search items and follow their acquisition routes and uses.
-- Check the release information and Coverage page before relying on incomplete information.
-- Read About for the extraction method and the distinction between the game release and the data update.
+- Read About for how the compendium reads the game, what its pages cannot tell you, and the difference between the game release and the data update.
 
 You do not need the game to use the published site. This checkout is for changing the project or rebuilding its data.
 
