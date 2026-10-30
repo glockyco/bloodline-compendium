@@ -468,6 +468,7 @@ export interface ItemUse {
   kind: SourceKind;
   name: string;
   outputCategory?: string | null;
+  outputType?: string | null;
   quantity: number;
   relationId: string;
   [k: string]: unknown;

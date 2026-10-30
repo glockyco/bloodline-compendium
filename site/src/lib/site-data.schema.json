@@ -668,6 +668,12 @@
             "null"
           ]
         },
+        "outputType": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "quantity": {
           "type": "integer"
         },

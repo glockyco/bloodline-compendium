@@ -145,6 +145,7 @@
 	--size-preview-phone: 60vh;
 	--size-facet-values: 15rem;
 	--size-item-type: 8rem;
+	--size-number-input: 5rem;
 	/* A row's note lines up with the name beside its icon. */
 	--inset-note: calc(var(--size-icon-row) + var(--gap-inline));
 	--position-below: 100%;

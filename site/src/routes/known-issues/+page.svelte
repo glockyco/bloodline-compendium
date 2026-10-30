@@ -45,7 +45,7 @@
 				{#if affected.length}
 					<h3>Affected items <Count value={affected.length} /></h3>
 					<ExpandableList items={affected} initial={8} noun="items" className="affected-list">
-						{#snippet row(entity)}<EntityLink {entity} />{/snippet}
+						{#snippet row(entity)}<EntityLink {entity} icon />{/snippet}
 					</ExpandableList>
 				{/if}
 				<h3>Steps to See It</h3>

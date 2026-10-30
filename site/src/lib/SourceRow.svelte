@@ -45,7 +45,7 @@
 								data-relation-id={input.relationId}
 								data-relation-direction={input.relationId ? 'incoming' : undefined}
 							>
-								{formatNumber(input.quantity)} × <EntityLink entity={input.item} />
+								{formatNumber(input.quantity)} × <EntityLink entity={input.item} icon />
 							</li>{/each}
 					</ul>
 				{/if}

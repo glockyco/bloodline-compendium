@@ -277,6 +277,9 @@ small {
 	align-items: center;
 	gap: var(--gap-inline);
 }
+.use-filters .level {
+	width: var(--size-number-input);
+}
 .item-relations {
 	display: grid;
 	gap: var(--gap-section);

@@ -19,11 +19,7 @@ internal static class CatalogGraph
         {
             entities.Add((EntityKind.Item, item.Key), Reference(item));
         }
-        var categories = items.ToDictionary(
-            item => item.Key,
-            item => item.Category.Name,
-            StringComparer.Ordinal
-        );
+        var outputs = items.ToDictionary(item => item.Key, StringComparer.Ordinal);
         EntityReference Resolve(EntityReference reference)
         {
             if (reference.Key is not { } key)
@@ -174,9 +170,12 @@ internal static class CatalogGraph
                         Conditions = source.Conditions,
                         Discipline = source.Recipe?.Discipline,
                         OutputCategory =
-                            target.Key is { } output
-                            && categories.TryGetValue(output, out var category)
-                                ? category
+                            target.Key is { } output && outputs.TryGetValue(output, out var made)
+                                ? made.Category.Name
+                                : null,
+                        OutputType =
+                            target.Key is { } typed && outputs.TryGetValue(typed, out var product)
+                                ? product.Type
                                 : null,
                     }
                 );

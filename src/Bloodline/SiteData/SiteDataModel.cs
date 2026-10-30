@@ -297,6 +297,9 @@ internal sealed record ItemUse(SourceKind Kind, string Name, EntityReference Ite
 
     /// <summary>The category of what the use makes, such as Weapon Part.</summary>
     public string? OutputCategory { get; init; }
+
+    /// <summary>The type of what the use makes, such as Blade.</summary>
+    public string? OutputType { get; init; }
 }
 
 internal sealed record CategoryLink(string Slug, string Name);

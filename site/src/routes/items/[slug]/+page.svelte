@@ -99,30 +99,37 @@
 	const sourceGroups = $derived(groups.filter((group) => !group.recipe));
 	// A long summary pushes the tooltip off a phone's first screen, so the tooltip leads there instead.
 	const longSummary = $derived(groups.length > 3);
-	const useFilters = $derived(
-		uses.length > 10
-			? {
-					disciplines: [...new Set(uses.map((use) => use.discipline ?? useLabel(use.kind)))].sort(),
-					categories: [
-						...new Set(uses.map((use) => use.outputCategory).filter((value) => value != null))
-					].sort()
-				}
-			: null
-	);
-	let useDiscipline = $state('');
-	let useCategory = $state('');
-	const shownUses = $derived(
-		uses.filter(
-			(use) =>
-				(!useDiscipline || (use.discipline ?? useLabel(use.kind)) === useDiscipline) &&
-				(!useCategory || use.outputCategory === useCategory)
-		)
-	);
 	// The skill level a use needs shows in its own column, so the condition that states it does not repeat.
 	const levelOf = (use: (typeof uses)[number]) =>
 		use.conditions.find((condition) => condition.kind === 'proficiencyLevel')?.value ?? null;
 	const otherConditions = (use: (typeof uses)[number]) =>
 		use.conditions.filter((condition) => condition.kind !== 'proficiencyLevel');
+	// A long list of uses filters by product name, skill, product type and the level a player has.
+	const useFilters = $derived(
+		uses.length > 10
+			? {
+					disciplines: [...new Set(uses.map((use) => use.discipline ?? useLabel(use.kind)))].sort(),
+					types: [
+						...new Set(uses.map((use) => use.outputType).filter((value) => value != null))
+					].sort(),
+					leveled: uses.some((use) => levelOf(use) != null)
+				}
+			: null
+	);
+	let useName = $state('');
+	let useDiscipline = $state('');
+	let useType = $state('');
+	let useLevel = $state<number | null>(null);
+	const shownUses = $derived.by(() => {
+		const needle = useName.trim().toLocaleLowerCase('en');
+		return uses.filter(
+			(use) =>
+				(!needle || use.item.name.toLocaleLowerCase('en').includes(needle)) &&
+				(!useDiscipline || (use.discipline ?? useLabel(use.kind)) === useDiscipline) &&
+				(!useType || use.outputType === useType) &&
+				(useLevel == null || (levelOf(use) ?? 0) <= useLevel)
+		);
+	});
 	// The type adds nothing when it only repeats the category, as for most materials.
 	const showType = $derived(
 		item.type.toLocaleLowerCase('en') !== item.category.name.toLocaleLowerCase('en')
@@ -241,20 +248,35 @@
 			{#if uses.length}<Section id="used-for" title="Used For" count={uses.length}>
 					{#if useFilters}<div class="use-filters">
 							<label
-								>Skill <select bind:value={useDiscipline}
-									><option value="">All</option
-									>{#each useFilters.disciplines as discipline (discipline)}<option
-											value={discipline}>{discipline}</option
-										>{/each}</select
-								></label
+								>Name <input
+									type="search"
+									bind:value={useName}
+									placeholder="Find what it makes"
+								/></label
 							>
-							{#if useFilters.categories.length > 1}<label
-									>Makes <select bind:value={useCategory}
+							{#if useFilters.disciplines.length > 1}<label
+									>Skill <select bind:value={useDiscipline}
 										><option value="">All</option
-										>{#each useFilters.categories as category (category)}<option value={category}
-												>{category}</option
+										>{#each useFilters.disciplines as discipline (discipline)}<option
+												value={discipline}>{discipline}</option
 											>{/each}</select
 									></label
+								>{/if}
+							{#if useFilters.types.length > 1}<label
+									>Type <select bind:value={useType}
+										><option value="">All</option>{#each useFilters.types as type (type)}<option
+												value={type}>{type}</option
+											>{/each}</select
+									></label
+								>{/if}
+							{#if useFilters.leveled}<label
+									>Up to level <input
+										class="level"
+										type="number"
+										inputmode="numeric"
+										min="0"
+										bind:value={useLevel}
+									/></label
 								>{/if}
 						</div>{/if}
 					<RelationTable
