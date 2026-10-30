@@ -1,6 +1,6 @@
 <script lang="ts">
 	import EntityLink from '#lib/ui/EntityLink.svelte';
-	import Count from '#lib/ui/Count.svelte';
+	import Section from '#lib/ui/Section.svelte';
 	import ExpandableList from '#lib/ExpandableList.svelte';
 	import SeoHead from '#lib/SeoHead.svelte';
 	import { formatNumber } from '#lib/format.js';
@@ -26,133 +26,164 @@
 			and link the issues that affect them.
 		</p>
 	</header>
-	{#if data.issues.length}<nav class="issue-index panel" aria-label="Issues">
+	{#if data.issues.length}<nav class="issue-index surface" aria-label="Issues">
 			<ol>
 				{#each data.issues as { issue, affected } (issue.id)}<li>
-						<a href={'#' + issue.id}>{issue.title}</a>{#if affected.length}<small
+						<a href={'#' + issue.id}>{issue.title}</a>{#if affected.length}<span class="muted"
 								>{formatNumber(affected.length)}
-								{affected.length === 1 ? 'item' : 'items'}</small
+								{affected.length === 1 ? 'item' : 'items'}</span
 							>{/if}
 					</li>{/each}
 			</ol>
 		</nav>{/if}
-	<div class="issue-stack">
-		{#each data.issues as { issue, affected } (issue.id)}
-			<section class="panel issue" id={issue.id} aria-labelledby={issue.id + '-title'}>
-				<h2 id={issue.id + '-title'}>{issue.title}</h2>
-				<p>{issue.effect}</p>
-				{#if issue.workaround}<p>Workaround: {issue.workaround}</p>{/if}
-				{#if affected.length}
-					<h3>Affected items <Count value={affected.length} /></h3>
-					<ExpandableList items={affected} initial={8} noun="items" className="affected-list">
-						{#snippet row(entity)}<EntityLink {entity} icon />{/snippet}
-					</ExpandableList>
-				{/if}
-				<h3>Steps to See It</h3>
-				<ol>
-					{#each issue.steps as step, index (index)}<li>{step}</li>{/each}
-				</ol>
-				<dl>
-					<div>
-						<dt>Expected</dt>
-						<dd>{issue.expected}</dd>
+	{#each data.issues as { issue, affected } (issue.id)}
+		<!-- Item pages link the whole issue, so the anchor holds its heading and its surface. -->
+		<div class="issue-anchor" id={issue.id}>
+			<Section id={issue.id + '-title'} title={issue.title}>
+				<div class="surface issue">
+					<p class="effect">{issue.effect}</p>
+					{#if issue.workaround}<div class="field">
+							<h3 class="field-label">Workaround</h3>
+							<p>{issue.workaround}</p>
+						</div>{/if}
+					{#if affected.length}<div class="field">
+							<h3 class="field-label">
+								Affected items <span class="muted">{formatNumber(affected.length)}</span>
+							</h3>
+							<ExpandableList items={affected} initial={9} noun="items" className="affected-list">
+								{#snippet row(entity)}<EntityLink {entity} icon />{/snippet}
+							</ExpandableList>
+						</div>{/if}
+					<div class="field">
+						<h3 class="field-label">Steps to see it</h3>
+						<ol class="steps">
+							{#each issue.steps as step, index (index)}<li>{step}</li>{/each}
+						</ol>
 					</div>
-					<div>
-						<dt>Observed in the game</dt>
-						<dd>{issue.observed}</dd>
-					</div>
-				</dl>
-				<details class="developer" data-developer>
-					<summary>For Developers</summary>
-					<dl>
-						<div>
-							<dt>Cause, derived from the game's code</dt>
-							<dd>{issue.cause}</dd>
+					<dl class="outcome">
+						<div class="field">
+							<dt class="field-label">Expected</dt>
+							<dd>{issue.expected}</dd>
 						</div>
-						<div>
-							<dt>Functions</dt>
-							<dd>
-								<ul class="citations">
-									{#each issue.citations as citation (citation)}<li>
-											<code>{citation}</code>
-										</li>{/each}
-								</ul>
-							</dd>
-						</div>
-						<div>
-							<dt>Confirmed on</dt>
-							<dd>{builds(issue.builds)}</dd>
-						</div>
-						<div>
-							<dt>Report</dt>
-							<dd>
-								{#if issue.reportUrl}<a href={issue.reportUrl}>Reported to the developer</a
-									>{:else}Not reported to the developer yet.{/if}
-							</dd>
+						<div class="field">
+							<dt class="field-label">Observed in the game</dt>
+							<dd>{issue.observed}</dd>
 						</div>
 					</dl>
-				</details>
-			</section>
-		{:else}
-			<p>No known issues are recorded for this game release.</p>
-		{/each}
-	</div>
+					<details class="developer">
+						<summary>For developers</summary>
+						<dl>
+							<div class="field">
+								<dt class="field-label">Cause, derived from the game's code</dt>
+								<dd>{issue.cause}</dd>
+							</div>
+							<div class="field">
+								<dt class="field-label">Functions</dt>
+								<dd>
+									<ul class="citations">
+										{#each issue.citations as citation (citation)}<li>
+												<code>{citation}</code>
+											</li>{/each}
+									</ul>
+								</dd>
+							</div>
+							<div class="field">
+								<dt class="field-label">Confirmed on</dt>
+								<dd>{builds(issue.builds)}</dd>
+							</div>
+							<div class="field">
+								<dt class="field-label">Report</dt>
+								<dd>
+									{#if issue.reportUrl}<a href={issue.reportUrl}>Reported to the developer</a
+										>{:else}Not reported to the developer yet.{/if}
+								</dd>
+							</div>
+						</dl>
+					</details>
+				</div>
+			</Section>
+		</div>
+	{:else}
+		<p>No known issues are recorded for this game release.</p>
+	{/each}
 </div>
 
 <style>
+	/* Issues read as prose, so the page keeps a reading width. Each issue is one surface whose parts are labelled
+	   fields, spaced apart more than a label is from its content. */
+	.sections {
+		max-width: var(--size-reading);
+	}
 	.issue-index ol {
 		display: grid;
 		gap: var(--gap-inline);
 		margin: 0;
-		padding-left: var(--inset-loose);
+		padding: 0;
+		list-style: none;
 	}
-	.issue-index small {
-		margin-left: var(--gap-inline);
-		color: var(--text-soft);
+	.issue-index li {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: var(--gap-inline);
 	}
-	.issue-index {
-		margin-top: var(--gap-groups);
-	}
-	.developer {
-		display: grid;
-		gap: var(--gap-block);
-	}
-	.developer summary {
-		cursor: pointer;
-		font-weight: var(--weight-strong);
-	}
-	.developer dl {
-		margin-top: var(--gap-block);
-	}
-	.issue-stack {
-		display: grid;
-		gap: var(--gap-section);
-		margin-top: var(--gap-section);
+	.issue-index span {
+		font-size: var(--type-0);
 	}
 	.issue {
 		display: grid;
-		gap: var(--gap-block);
+		gap: var(--gap-groups);
 	}
-	h2,
-	h3,
-	p,
-	ol,
-	dl {
+	.field {
+		display: grid;
+		align-content: start;
+		gap: var(--gap-line);
+	}
+	.field :is(p, dd, ol, ul) {
 		margin: 0;
 	}
-	dl {
-		display: grid;
-		gap: var(--gap-block);
+	.effect {
+		margin: 0;
 	}
-	dt {
-		font-weight: var(--weight-strong);
+	.steps {
+		padding-left: var(--inset-loose);
+	}
+	/* Items sit in columns without bullets, each icon beside its name. */
+	.issue :global(.affected-list) {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(var(--size-card-narrow), 1fr));
+		gap: var(--gap-line) var(--gap-block);
+		padding: 0;
+		list-style: none;
+	}
+	.issue :global(.more-toggle) {
+		display: block;
+		padding-inline: 0;
+	}
+	.outcome {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(var(--size-card-narrow), 1fr));
+		gap: var(--gap-groups);
+		margin: 0;
 	}
 	dd {
-		margin: 0;
 		color: var(--text-soft);
 	}
+	.developer {
+		padding-top: var(--gap-block);
+		border-top: var(--border-width) solid var(--border);
+	}
+	.developer summary {
+		cursor: pointer;
+		color: var(--text-soft);
+		font-weight: var(--weight-strong);
+	}
+	.developer dl {
+		display: grid;
+		gap: var(--gap-block);
+		margin: var(--gap-block) 0 0;
+	}
 	.citations {
-		margin: 0;
 		padding-left: var(--inset);
 		overflow-wrap: anywhere;
 	}

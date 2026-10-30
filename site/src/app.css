@@ -183,9 +183,10 @@ small {
 	margin: 0;
 	padding: 0;
 }
-.breadcrumbs li + li::before {
+/* A separator ends the line of the entry before it, so a wrapped breadcrumb never starts a line with one. */
+.breadcrumbs li:not(:last-child)::after {
 	content: '/';
-	margin-right: var(--gap-block);
+	margin-left: var(--gap-block);
 	color: var(--text-muted);
 }
 .breadcrumbs a {
@@ -334,6 +335,15 @@ small {
 }
 .detail-label {
 	font-weight: var(--weight-strong);
+}
+/* The label of one part of a surface, such as Workaround or Expected: small, strong and quieter than its content. */
+.field-label {
+	margin: 0;
+	color: var(--text-muted);
+	font-family: var(--font-body);
+	font-size: var(--type-0);
+	font-weight: var(--weight-strong);
+	line-height: var(--leading-snug);
 }
 .more-entries summary {
 	padding: var(--inset-cell) var(--inset);

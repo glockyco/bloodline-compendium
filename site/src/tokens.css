@@ -125,6 +125,7 @@
 	--size-header-search: 22rem;
 	--size-hero-search: 40rem;
 	--size-card: 20rem;
+	--size-card-narrow: 13rem;
 	--size-way: 30rem;
 	--size-filters: 15.5rem;
 	/* Compact controls of lists and filters, after Afallon's: an option row, a chip and a control in a sheet. */

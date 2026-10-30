@@ -203,14 +203,12 @@
 	.footer-inner p {
 		margin: 0;
 	}
+	/* A tablet keeps the brand, the navigation and Support on one row above the search. A phone gives the
+	   navigation its own row. */
 	@media (width < 64rem) {
 		.bar {
 			flex-wrap: wrap;
-			gap: 0 var(--gap-block);
-		}
-		nav {
-			order: 3;
-			width: 100%;
+			gap: var(--gap-block) var(--gap-section);
 		}
 		.over-art nav {
 			display: none;
@@ -219,7 +217,18 @@
 			order: 4;
 			flex-basis: 100%;
 			max-width: none;
-			padding-bottom: var(--inset-line);
+		}
+		.header-search + .support {
+			margin-left: auto;
+		}
+	}
+	@media (width < 40rem) {
+		.bar {
+			gap: var(--gap-line) var(--gap-block);
+		}
+		nav {
+			order: 3;
+			width: 100%;
 		}
 	}
 </style>

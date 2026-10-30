@@ -478,7 +478,7 @@ test('notes a known issue on the affected item and explains it on a linked, sear
 		'/items/mosswoven-coat/'
 	);
 	await expect(entry.getByText('Not reported to the developer yet.')).toBeHidden();
-	await entry.getByText('For Developers').click();
+	await entry.getByText('For developers').click();
 	await expect(entry.getByText('Not reported to the developer yet.')).toBeVisible();
 	await page.goto('/known-issues/');
 	await page.getByRole('navigation', { name: 'Issues' }).getByRole('link').first().click();

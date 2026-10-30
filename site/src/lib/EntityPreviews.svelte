@@ -103,10 +103,26 @@
 			void show(link);
 			tapped = link;
 		};
+		// A tooltip taller than the window scrolls by the arrow and page keys while its link keeps focus, as zoomed
+		// keyboard readers cannot move into it without closing it.
+		const steps: Record<string, number> = { ArrowDown: 1, ArrowUp: -1, PageDown: 8, PageUp: -8 };
 		const key = (event: KeyboardEvent) => {
-			if (event.key !== 'Escape' || !anchor) return;
-			event.preventDefault();
-			close();
+			if (!anchor) return;
+			if (event.key === 'Escape') {
+				event.preventDefault();
+				close();
+				return;
+			}
+			const step = steps[event.key];
+			if (
+				step &&
+				panel &&
+				document.activeElement === anchor &&
+				panel.scrollHeight > panel.clientHeight
+			) {
+				event.preventDefault();
+				panel.scrollBy({ top: step * 40 });
+			}
 		};
 		document.addEventListener('pointerover', over);
 		document.addEventListener('pointermove', move, { passive: true });

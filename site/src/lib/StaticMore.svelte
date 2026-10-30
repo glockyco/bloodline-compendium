@@ -55,6 +55,7 @@
 		outline: none;
 	}
 	.more-toggle {
+		justify-self: start;
 		min-height: var(--size-control);
 		padding: var(--inset);
 		border: 0;

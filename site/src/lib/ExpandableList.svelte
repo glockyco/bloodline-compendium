@@ -28,3 +28,10 @@
 		</ul>
 	</StaticMore>
 {/if}
+
+<style>
+	/* The revealed entries continue the preview's list without a gap. */
+	ul {
+		margin: 0;
+	}
+</style>
