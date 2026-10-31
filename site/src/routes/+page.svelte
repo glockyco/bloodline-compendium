@@ -57,7 +57,7 @@
 		<SectionHeading
 			id="items-heading"
 			title="Items"
-			link={{ href: itemsPath, label: `All ${formatNumber(data.known)} items` }}
+			link={{ href: itemsPath, label: `${formatNumber(data.known)} items with a known source` }}
 		/>
 		<CardGrid rows={3}>
 			{#each data.groups as group (group.slug)}

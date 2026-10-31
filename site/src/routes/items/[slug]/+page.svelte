@@ -178,7 +178,9 @@
 				.map((fact) => `${fact.label}: ${factValue(fact)}.`),
 			item.sources.length
 				? `${sourceHeadings[item.sources[0].kind]}: ${item.sources[0].name}${sourceContext(item.sources[0]) ? ` (${sourceContext(item.sources[0])})` : ''}.`
-				: 'How to obtain it is unknown.'
+				: item.status === 'notInNormalPlay'
+					? 'Not obtainable in normal play.'
+					: 'No known way to get it.'
 		].join(' ')
 	);
 </script>
