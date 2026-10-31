@@ -1,13 +1,13 @@
 <script lang="ts">
 	/**
 	 * A value that is not known, which reads Unknown and shows why on hover, on keyboard focus and on tap, since
-	 * a tap focuses the element. It needs no JavaScript.
+	 * a tap focuses the element. It needs no JavaScript. A value that differs from case to case reads Varies.
 	 */
-	let { reason, id }: { reason: string; id: string } = $props();
+	let { reason, id, label = 'Unknown' }: { reason: string; id: string; label?: string } = $props();
 </script>
 
 <span class="unknown-value" tabindex="0" role="button" aria-describedby={id}
-	>Unknown<span class="reason" role="tooltip" {id}>{reason}</span></span
+	>{label}<span class="reason" role="tooltip" {id}>{reason}</span></span
 >
 
 <style>

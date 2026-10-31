@@ -172,7 +172,7 @@
 		return cell.number != null ? formatNumber(cell.number) : 'Unknown';
 	}
 	const statusNote: Record<string, string> = {
-		noKnownSource: 'No known way to get it',
+		noKnownSource: 'No known source',
 		notInNormalPlay: 'Not in normal play'
 	};
 </script>

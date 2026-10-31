@@ -31,7 +31,7 @@ internal static class ItemList
     >
     {
         [ItemStatus.Obtainable] = "A way to get it is known",
-        [ItemStatus.NoKnownSource] = "No known way to get it",
+        [ItemStatus.NoKnownSource] = "No known source",
         [ItemStatus.NotInNormalPlay] = "Not in normal play",
     };
 

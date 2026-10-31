@@ -29,7 +29,7 @@ export const previewSources: {
 					firstRoute(item.sources, Object.keys(sourceHeadings) as SourceKind[]) ??
 					(item.status === 'notInNormalPlay'
 						? 'Not obtainable in normal play.'
-						: 'No known way to get it.')
+						: 'No known source.')
 			};
 		}
 	}

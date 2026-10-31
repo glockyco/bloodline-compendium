@@ -30,7 +30,7 @@
 	const statusSentence: Record<ItemStatus, string> = {
 		obtainable: '',
 		noKnownSource:
-			'No way to get this item is known in this game version. A quest or event may still give it.',
+			'No known source. It may come from a quest or event.',
 		notInNormalPlay:
 			'This item is not obtainable in normal play. Only test areas of the game hold it.'
 	};
@@ -181,7 +181,7 @@
 			firstRoute(confirmedSources, Object.keys(sourceHeadings) as SourceKind[]) ??
 				(item.status === 'notInNormalPlay'
 					? 'Not obtainable in normal play.'
-					: 'No known way to get it.')
+					: 'No known source.')
 		].join(' ')
 	);
 </script>
@@ -232,7 +232,7 @@
 					<p class="surface">
 						{statusSentence[item.status]}
 						{#if item.status === 'noKnownSource'}<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- the resolved page with its section. -->
-							<a href={resolve('about/') + '#limits'}>What item pages cannot tell you</a>{/if}
+							<a href={resolve('about/') + '#limits'}>Why some sources are missing</a>{/if}
 					</p>
 				{:else}
 					<ul

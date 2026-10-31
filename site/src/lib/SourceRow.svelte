@@ -108,6 +108,7 @@
 			{:else if source.odds?.unknown}<UnknownValue
 					reason={source.odds.unknown}
 					id={id + '-odds'}
+					label={source.kind === 'randomLoot' ? 'Varies' : 'Unknown'}
 				/>{:else}<span class="muted">Unknown</span>{/if}
 		</td>
 	{/if}

@@ -32,7 +32,7 @@ test('filters items with counted facets, preserves URL state and sorts numeric v
 	await page.getByRole('button', { name: 'Show 1 more without a known way to get them' }).click();
 	await expect(page.locator('.item-name').last()).toHaveText('Hollow Prism');
 	await expect(page.locator('tr', { hasText: 'Hollow Prism' })).toContainText(
-		'No known way to get it'
+		'No known source'
 	);
 	await expect(page.locator('.item-name img').first()).toHaveAttribute('src', /-48.webp$/);
 	await page.getByRole('button', { name: 'Item', exact: true }).click();
@@ -90,7 +90,7 @@ test('name search finds items without a known way to get them', async ({ page })
 	await page.goto('/items/?name=prism');
 	await expect(page.locator('.item-name')).toHaveText(['Hollow Prism']);
 	await expect(page.locator('tr', { hasText: 'Hollow Prism' })).toContainText(
-		'No known way to get it'
+		'No known source'
 	);
 });
 
@@ -173,7 +173,7 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 	await expect(page.getByRole('tooltip')).toHaveText('How often the orchard yields it is unknown.');
 	await page.goto('/items/hollow-prism/');
 	await expect(
-		page.getByText('No way to get this item is known in this game version.')
+		page.getByText('No known source. It may come from a quest or event.')
 	).toBeVisible();
 	await expect(page.getByText('No icon is known for this item.')).toBeVisible();
 });
@@ -185,7 +185,7 @@ test('keeps unconfirmed sources at the end without advertising a way to get the 
 		await page.setViewportSize({ width, height: 900 });
 		await page.goto('/items/hollow-prism/');
 		await expect(page.locator('.answer')).toContainText(
-			'No way to get this item is known in this game version.'
+			'No known source. It may come from a quest or event.'
 		);
 		await expect(page.locator('.answer')).not.toContainText('The Silent Curator');
 		await expect(page.locator('.answer')).not.toContainText('Unplaced prism');
@@ -206,7 +206,7 @@ test('keeps unconfirmed sources at the end without advertising a way to get the 
 		).toBeVisible();
 		await expect(page.locator('meta[name="description"]')).toHaveAttribute(
 			'content',
-			/No known way to get it\./
+			/No known source\./
 		);
 		await expect(page.locator('meta[name="description"]')).not.toHaveAttribute(
 			'content',
@@ -216,7 +216,7 @@ test('keeps unconfirmed sources at the end without advertising a way to get the 
 	await page.goto('/items/?name=prism');
 	await page.locator('.item-name', { hasText: 'Hollow Prism' }).focus();
 	const preview = page.locator('#entity-preview');
-	await expect(preview).toContainText('No known way to get it.');
+	await expect(preview).toContainText('No known source.');
 	await expect(preview).not.toContainText('The Silent Curator');
 	await expect(preview).not.toContainText('Unplaced prism');
 	await page.keyboard.press('Escape');
