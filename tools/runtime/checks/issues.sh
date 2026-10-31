@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Walks the steps of the entries in issues/known-issues.json as a player would and takes a screenshot after each
 # step, next to the game's own values, so a recheck shows what the player sees. Run it inside `nix develop` with the
-# lab game launched with `launch render` on a fresh save, twice, in separate runs.
+# lab game launched with `launch render` on a new save.
 # Pass `staff` to repeat only the staff checks.
 set -euo pipefail
 lab() { bun "$(dirname "$0")/../lab.mjs" "$@"; }

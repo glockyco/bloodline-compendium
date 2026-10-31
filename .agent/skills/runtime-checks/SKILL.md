@@ -42,9 +42,18 @@ Commands in `tools/runtime/commands/` change state only through the game's own f
 
 Commands that look up objects use the instances the game uses. Class defaults and the templates inside a class, whose outer chain reaches a class, are skipped. Fields of the game's own structs carry GUID suffixes in this build, so commands read them through `field`, which takes plain names. Headless, bound text such as the character sheet's lines keeps its design-time value, so read the values behind it.
 
+## What an observation must show
+
+A published fact or a known issue rests on the running game, because code is easy to misread. What counts depends on the claim:
+
+- What the game shows, such as a tooltip line, rests on what the screen draws. A shown-only tooltip read counts as that, because it leaves out the text that collapsed boxes keep, as the screen does. Other interface text needs a screenshot.
+- What the game does, such as damage dealt, armor applied or health restored, rests on the game's own values during the run. A screenshot adds nothing to them.
+- Observations already made on the same build count. Name their runs instead of repeating them.
+- A second run on a new save is needed only when the result can vary with position, timing, equip order or chance. A value the game reads from its data gives the same result every time.
+
 ## Checks
 
-`tools/runtime/checks/` holds the measurements that settle published facts and known issues, each run on a fresh save. Run each twice, in separate runs, and again after every game update:
+`tools/runtime/checks/` holds the measurements that settle published facts and known issues, each run on a new save. Run them again after every game update:
 
 - `armor.sh` and `armor-slots.sh` measure which armor values and slots reduce damage and speed.
 - `knees.sh` shows when knee armor starts to count.

@@ -1,6 +1,6 @@
 // Equips every armor item that the catalog notes with an armor issue and reads the armor the game applies, with a
 // screenshot of the character sheet each time, so each noted page rests on its own observation. Run it inside
-// `nix develop` with the lab game launched with `launch render` on a fresh save, twice, in separate runs:
+// `nix develop` with the lab game launched with `launch render` on a new save:
 //   bun tools/runtime/checks/noted-armor.mjs <build-id>
 // Pieces other than knee armor count without another piece, so from a bare character each item that adds no armor
 // leaves Total Armor at 0, and one that replaces it in its slot leaves it there too. Each knee item is equipped next,

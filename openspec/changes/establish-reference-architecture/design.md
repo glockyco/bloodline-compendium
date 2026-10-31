@@ -290,7 +290,7 @@ Alternatives:
 
 ### Settling disagreements
 
-The order is: trace both code paths through the cross-reference, form a hypothesis, then observe through the game's own functions, repeating each measurement. The ownership table in `verification/game-claims` decides where the result goes.
+The order is: trace both code paths through the cross-reference, form a hypothesis, then observe through the game's own functions, repeating a measurement whose result can vary. The ownership table in `verification/game-claims` decides where the result goes.
 
 The armor case runs first: equip two items whose class default and table values differ in opposite directions and read `Total Armor` and mobility. Food runs second: an in-game sampler records Health every frame while a meal is eaten, against a natural regeneration baseline.
 

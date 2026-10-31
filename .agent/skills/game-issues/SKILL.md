@@ -23,15 +23,15 @@ Item pages always show the value the game applies. A tooltip that shows another 
 
 ## Add an entry
 
-1. Reproduce the defect twice, in separate runs on fresh saves, with the [runtime-checks skill](../runtime-checks/SKILL.md), in `launch render`. Each run needs a screenshot of what a player sees at every step, such as the tooltip, the character sheet's Armor line, the Health bar or the status effects, and the game's own values next to it. Look at every screenshot. A claim about a tooltip line needs a screenshot that shows the line, because the widget may keep it hidden. Add the steps to `tools/runtime/checks/issues.sh`, so a recheck repeats them.
+1. Observe every claim the entry makes in the running game on the build it names, as the [runtime-checks skill](../runtime-checks/SKILL.md) describes under "What an observation must show". Every item the entry notes needs its own observation, because a condition in the data can include items that behave correctly. A script that checks them all in one run, such as `tools/runtime/checks/noted-armor.mjs`, keeps that cheap. Add the steps to `tools/runtime/checks/issues.sh`, so a recheck repeats them.
 2. Write the entry. `effect` and `workaround` speak to players and come first. `steps` are what a player can do without mods, each with what they should see. `observed` states what the runs showed. `cause` is derived from the game's code and data, and `citations` name the functions as `package:function`, as `records/code/index.json` lists them. `builds` lists the Steam builds the runs used. A new entry has `"report": "notReported"` and `"reportUrl": null`.
-3. Make the catalog note the affected pages. A tooltip cause in `src/Bloodline/Catalog/TooltipCheck.cs` marked as an issue notes every page where its difference concerns a shown value. Other defects need a detector in `src/Bloodline/Catalog/KnownIssues.cs`. Every page a note reaches needs its own observation: `tools/runtime/checks/noted-armor.mjs` covers the armor issues, and a detector for other items lists only items that a run showed.
+3. Make the catalog note the affected pages. A tooltip cause in `src/Bloodline/Catalog/TooltipCheck.cs` marked as an issue notes every page where its difference concerns a shown value. Other defects need a detector in `src/Bloodline/Catalog/KnownIssues.cs` that lists only items a run observed.
 4. Run `catalog` and check the notes on the Known Issues page and on an affected item. The catalog fails when a note or tooltip cause names an entry that does not exist, and when an entry cites a function that the build's code index lacks or did not parse completely.
 5. Name the runs that reproduced the defect in the commit body, not in the entry.
 
 ## Recheck after a game update
 
-After extracting and cataloging a new build, repeat every entry's steps in the lab on the new build, twice. If the defect still reproduces, add the build to the entry's `builds`. If it no longer does, remove the entry together with its tooltip cause or detector. Coverage then lists any tooltip difference that is left.
+After extracting and cataloging a new build, run the tooltip sweep and every check in `tools/runtime/checks/` once on the new build. Add the build to the `builds` of each entry whose result did not change. Look into every result that changed: remove the entry together with its tooltip cause or detector when the defect is gone, and repeat the check when its result can vary. Coverage then lists any tooltip difference that is left.
 
 ## Report to the developer
 

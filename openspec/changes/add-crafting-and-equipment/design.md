@@ -49,7 +49,7 @@ Item sources stay with the source mechanisms. Crafting rules do not enter the so
 
 ### Lab first
 
-Each rule ships only after a check under `tools/runtime/checks/` reproduces it twice on fresh saves, with screenshots of what the player sees, as for known issues. Where two tables disagree, the run decides which one the game applies.
+Each rule ships only after a check under `tools/runtime/checks/` observes it in the running game, as the runtime-checks skill describes under "What an observation must show". Where two tables disagree, the run decides which one the game applies.
 
 ### Builds share one link format
 
