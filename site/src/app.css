@@ -401,9 +401,10 @@ details[open] > summary .show-less {
 		display: block;
 	}
 }
-/* A tablet keeps the game card beside the answer in a narrower column, and a phone reads one column in one
-   order: the answer, the game card, then the details. */
-@media (width < 40rem) {
+/* Below desktop width a page reads as one column, because a side column narrows descriptions below a phone's
+   measure. A tablet keeps the answer first and the game card below it at a readable width. A phone shows the game
+   card first, so the item's purpose is on the first screen, then the answer and the details. */
+@media (width < 64rem) {
 	.detail-layout {
 		grid-template-columns: minmax(0, 1fr);
 	}
@@ -411,8 +412,18 @@ details[open] > summary .show-less {
 		grid-column: 1;
 		grid-row: auto;
 		position: static;
+		max-width: var(--size-item-side);
 	}
 	.item-relations {
 		grid-row: 3;
+	}
+}
+@media (width < 40rem) {
+	.item-side {
+		grid-row: 1;
+		max-width: none;
+	}
+	.answer {
+		grid-row: 2;
 	}
 }

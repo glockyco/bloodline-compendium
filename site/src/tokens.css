@@ -180,7 +180,7 @@
 
 @media (width < 64rem) {
 	:root {
-		--size-item-side: 15rem;
+		--size-item-side: 24rem;
 	}
 }
 @media (width < 40rem) {
