@@ -298,6 +298,7 @@ export interface Source {
   recipe?: Recipe | null;
   relationId: string;
   settlement?: boolean;
+  spawn?: ChanceRange | null;
   [k: string]: unknown;
 }
 /**
@@ -327,6 +328,7 @@ export interface Odds {
   chance: number | null;
   event: OddsEvent;
   expected: number | null;
+  highestChance?: number | null;
   unknown: string | null;
   [k: string]: unknown;
 }
@@ -362,6 +364,15 @@ export interface Recipe {
   level: number | null;
   output: number;
   station: EntityReference | null;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "ChanceRange".
+ */
+export interface ChanceRange {
+  max: number;
+  min: number;
   [k: string]: unknown;
 }
 /**

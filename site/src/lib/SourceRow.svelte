@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Source } from './site-data.js';
-	import { formatNumber, formatChance } from './format.js';
+	import { formatNumber, formatChanceRange } from './format.js';
 	import { formatAmount, oddsLabel, payPrice } from './acquisition.js';
 	import EntityLink from './ui/EntityLink.svelte';
 	import Conditions from './Conditions.svelte';
@@ -8,6 +8,7 @@
 	let {
 		source,
 		showAmount = false,
+		showSpawn = false,
 		showContext = false,
 		showPlaces = true,
 		showUnit = true,
@@ -15,6 +16,7 @@
 	}: {
 		source: Source;
 		showAmount?: boolean;
+		showSpawn?: boolean;
 		showContext?: boolean;
 		showPlaces?: boolean;
 		/** Whether the chance names its event, which the heading names instead when every row shares it. */
@@ -29,7 +31,13 @@
 	);
 </script>
 
-<tr class="source-row" {id} data-relation-id={source.relationId} data-relation-direction="incoming">
+<tr
+	class="source-row"
+	class:with-spawn={showSpawn}
+	{id}
+	data-relation-id={source.relationId}
+	data-relation-direction="incoming"
+>
 	<td class="source-identity">
 		<span class="relation-name"><EntityLink entity={source.entity} /></span>
 		<Conditions conditions={source.conditions} />
@@ -69,6 +77,13 @@
 				>{source.amount?.max === 1 ? 'item' : 'items'}</small
 			></td
 		>{/if}
+	{#if showSpawn}
+		<td class="numeric spawn-value">
+			{!source.spawn || (source.spawn.min === 1 && source.spawn.max === 1)
+				? 'Always'
+				: formatChanceRange(source.spawn.min, source.spawn.max)}
+		</td>
+	{/if}
 	{#if showContext}
 		<td class="numeric context-value">
 			{#if source.price && payPrice(source.price) === 0}
@@ -86,9 +101,10 @@
 					></span
 				>
 			{:else if source.odds?.chance != null}
-				{formatChance(source.odds.chance)}{#if showUnit}<small
-						>{oddsLabel(source.odds, source.kind)}</small
-					>{/if}
+				{formatChanceRange(
+					source.odds.chance,
+					source.odds.highestChance ?? source.odds.chance
+				)}{#if showUnit}<small>{oddsLabel(source.odds, source.kind)}</small>{/if}
 			{:else if source.odds?.unknown}<UnknownValue
 					reason={source.odds.unknown}
 					id={id + '-odds'}
@@ -100,5 +116,12 @@
 <style>
 	.currency-price {
 		white-space: normal;
+	}
+	@media (width < 40rem) {
+		.source-row.with-spawn :is(.spawn-value, .context-value) {
+			display: flex;
+			flex: 1 0 100%;
+			justify-content: space-between;
+		}
 	}
 </style>

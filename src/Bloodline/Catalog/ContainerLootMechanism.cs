@@ -106,14 +106,14 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
             var name = "Dungeon loose loot";
             var notes = new List<string>();
             var maximum = RecordValues.Integer(properties["Max Spawn Amount"]);
-            var details = maximum is >= 0 and <= int.MaxValue
-                ? new ContainerDetails(
-                    null,
-                    new Amount((int)maximum.Value, (int)maximum.Value),
-                    Loose: true
-                )
-                : null;
-            notes.AddRange((details ?? new ContainerDetails(null, null, Loose: true)).Notes);
+            var details = new ContainerDetails(
+                null,
+                maximum is >= 0 and <= int.MaxValue
+                    ? new Amount((int)maximum.Value, (int)maximum.Value)
+                    : null,
+                Loose: true
+            );
+            notes.AddRange(details.Notes);
             JsonNode? pool = properties["Loot Table"];
             if (
                 preset is not null
@@ -155,7 +155,7 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                     notes,
                     WorldSourceData.Reference(EntityKind.Container, path, name),
                     OddsEvent.Container,
-                    details?.Picks,
+                    details.Picks,
                     "How many items lie here is unknown.",
                     WorldSourceData.Conditions(
                         context,

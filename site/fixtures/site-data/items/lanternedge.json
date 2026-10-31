@@ -523,9 +523,14 @@
 			},
 			"conditions": [],
 			"relationId": "fixture:lanternedge:source:15",
+			"spawn": {
+				"min": 0.25,
+				"max": 1
+			},
 			"odds": {
 				"event": "container",
 				"chance": 0.5078125,
+				"highestChance": 0.866,
 				"expected": 0.625,
 				"unknown": null
 			}

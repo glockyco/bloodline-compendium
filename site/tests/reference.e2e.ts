@@ -148,7 +148,7 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 		'63',
 		'Cinderpear',
 		'1 to 2',
-		'50.8%',
+		'50.8% to 86.6%',
 		'per container',
 		'Makes',
 		'Silverglass shard',
@@ -176,6 +176,43 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 		page.getByText('No way to get this item is known in this game version.')
 	).toBeVisible();
 	await expect(page.getByText('No icon is known for this item.')).toBeVisible();
+});
+
+test('separates container spawns from loot chances on desktop and labelled phone cards', async ({
+	page
+}) => {
+	for (const width of [1280, 390]) {
+		await page.setViewportSize({ width, height: 900 });
+		await page.goto('/items/lanternedge/');
+		const containers = page.locator('section[aria-labelledby="source-containerLoot"]');
+		const table = containers.getByRole('table');
+		await expect(table.getByRole('columnheader', { includeHidden: true })).toHaveText([
+			'Container',
+			'Quantity',
+			'Spawns',
+			'Chance per container'
+		]);
+		const row = table.locator('.source-row').filter({ hasText: 'Stargazer cache' });
+		await expect(row.locator('.spawn-value')).toHaveText('25% to 100%');
+		await expect(row.locator('.context-value')).toHaveText('50.8% to 86.6%');
+		await expect(page.locator('.acquisition-routes')).toContainText('50.8% to 86.6% per container');
+		if (width === 390) {
+			await expect(table).toHaveClass(/stacked/);
+			await expect(row.locator('.spawn-value')).toBeVisible();
+			expect(
+				await row
+					.locator('.spawn-value')
+					.evaluate((cell) => getComputedStyle(cell, '::before').content)
+			).toBe('"Spawns"');
+			expect(
+				await row
+					.locator('.context-value')
+					.evaluate((cell) => getComputedStyle(cell, '::before').content)
+			).toBe('"Chance per container"');
+		}
+	}
+	await page.goto('/items/mosswoven-coat/');
+	await expect(page.getByRole('columnheader', { name: 'Spawns', exact: true })).toHaveCount(0);
 });
 test('previews an item link on keyboard focus and hover', async ({ page }) => {
 	await page.goto('/items/lanternedge/');

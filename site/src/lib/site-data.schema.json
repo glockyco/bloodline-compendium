@@ -79,6 +79,22 @@
       "title": "CategorySummary",
       "type": "object"
     },
+    "ChanceRange": {
+      "properties": {
+        "max": {
+          "type": "number"
+        },
+        "min": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "min",
+        "max"
+      ],
+      "title": "ChanceRange",
+      "type": "object"
+    },
     "ConditionKind": {
       "enum": [
         "calendarEvent",
@@ -867,6 +883,12 @@
             "null"
           ]
         },
+        "highestChance": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
         "unknown": {
           "type": [
             "string",
@@ -1304,6 +1326,16 @@
         },
         "settlement": {
           "type": "boolean"
+        },
+        "spawn": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ChanceRange"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [

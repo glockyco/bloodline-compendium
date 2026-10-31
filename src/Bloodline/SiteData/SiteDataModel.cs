@@ -374,6 +374,12 @@ internal sealed record Source(
     /// <summary>The chance per event, for sources that choose at random.</summary>
     public Odds? Odds { get; init; }
 
+    /// <summary>
+    /// The lowest and highest chance, as fractions from zero to one, that a loot container is present.
+    /// Set only for container loot when at least one container can be absent. Null means always present.
+    /// </summary>
+    public ChanceRange? Spawn { get; init; }
+
     /// <summary>What a crafted, cooked or smithed source needs and gives.</summary>
     public Recipe? Recipe { get; init; }
 
@@ -403,7 +409,17 @@ internal enum OddsEvent
 /// The chance of at least one copy per <see cref="Event"/>, and how many times the item is expected per event.
 /// Both are null when the selection rule is not read, and <see cref="Unknown"/> then says why in player terms.
 /// </summary>
-internal sealed record Odds(OddsEvent Event, double? Chance, double? Expected, string? Unknown);
+internal sealed record Odds(OddsEvent Event, double? Chance, double? Expected, string? Unknown)
+{
+    /// <summary>
+    /// The highest chance of at least one copy per event, as a fraction from zero to one.
+    /// When set, <see cref="Chance"/> is the lowest chance. Null means there is no chance range.
+    /// </summary>
+    public double? HighestChance { get; init; }
+}
+
+/// <summary>The lowest and highest probabilities, as fractions from zero to one.</summary>
+internal sealed record ChanceRange(double Min, double Max);
 
 /// <summary>
 /// A recipe's context. <see cref="Station"/> names where it is made, <see cref="Level"/> the discipline level it

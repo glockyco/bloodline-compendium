@@ -14,7 +14,7 @@ const item = fixture as ItemPage;
 it('keeps item quantities separate from the chance per container', () => {
 	const source = item.sources.find((entry) => entry.kind === 'containerLoot')!;
 	expect(formatAmount(source.amount!)).toBe('1 to 2');
-	expect(sourceContext(source)).toBe('50.8% per container');
+	expect(sourceContext(source)).toBe('50.8% to 86.6% per container');
 });
 
 it('gives no chance where the selection rule is unknown', () => {
@@ -31,7 +31,10 @@ it('orders comparable shop prices before selecting the answer summary', () => {
 });
 
 const container = item.sources.find((entry) => entry.kind === 'containerLoot')!;
-const withChance = (chance: number) => ({ ...container, odds: { ...container.odds!, chance } });
+const withChance = (chance: number, highestChance?: number | null) => ({
+	...container,
+	odds: { ...container.odds!, chance, highestChance }
+});
 
 it('states a chance in a summary only when every source shares it, and otherwise its range', () => {
 	expect(summaryContext([withChance(0.5), withChance(0.5)])).toBe('50% per container');
@@ -40,6 +43,37 @@ it('states a chance in a summary only when every source shares it, and otherwise
 	);
 	// A source without a known chance leaves the summary without one.
 	expect(summaryContext([withChance(0.5), { ...container, odds: null }])).toBeNull();
+});
+
+it('formats a source chance range and falls back to its lower bound when no upper bound is set', () => {
+	expect(sourceContext(withChance(0.125, 0.375))).toBe('12.5% to 37.5% per container');
+	expect(sourceContext(withChance(0.125))).toBe('12.5% per container');
+	expect(sourceContext(withChance(0.125, null))).toBe('12.5% per container');
+	expect(sourceContext(withChance(0.0001, 0.0005))).toBe(
+		'about 1 in 10,000 to 1 in 2,000 per container'
+	);
+});
+
+it('summarizes both bounds across ranged and fixed source chances', () => {
+	expect(summaryContext([withChance(0.125, 0.75)])).toBe('12.5% to 75% per container');
+	expect(summaryContext([withChance(0.125, 0.75), withChance(0.25, 0.5)])).toBe(
+		'12.5% to 75% per container'
+	);
+	expect(summaryContext([withChance(0.125, 0.375), withChance(0.75)])).toBe(
+		'12.5% to 75% per container'
+	);
+	expect(summaryContext([withChance(0.5, null)])).toBe('50% per container');
+});
+
+it('orders sources by their highest chance without mutating the input', () => {
+	const ranged = { ...withChance(0.125, 0.75), name: 'Ranged' };
+	const fixed = { ...withChance(0.5), name: 'Fixed' };
+	const nullable = { ...withChance(0.25, null), name: 'Nullable' };
+	const zero = { ...withChance(0, 0), name: 'Zero' };
+	const unknown = { ...container, name: 'Unknown', odds: null };
+	const sources = [unknown, nullable, fixed, zero, ranged];
+	expect(sortSources(sources)).toEqual([ranged, fixed, nullable, zero, unknown]);
+	expect(sources).toEqual([unknown, nullable, fixed, zero, ranged]);
 });
 
 it('states the range of levels when the summarized recipes need different levels of one skill', () => {

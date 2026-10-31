@@ -58,6 +58,9 @@
 					(source) => source.amount && (source.amount.min !== 1 || source.amount.max !== 1)
 				);
 				const showContext = sources.some((source) => source.price || source.odds);
+				const showSpawn =
+					kind === 'containerLoot' &&
+					sources.some((source) => source.spawn && source.spawn.min < 1);
 				// A note comes from accepting its quest, which has no place of its own, so such rows name none.
 				const showPlaces = kind !== 'bountyNote';
 				// A chance names its event once in the heading when every row shares it.
@@ -82,11 +85,13 @@
 					recipe: recipeKinds.has(kind),
 					summary: sources.length ? summarize(kind, sources) : null,
 					showAmount,
+					showSpawn,
 					showContext,
 					sharedUnit,
 					headings: [
 						sourceColumns[kind],
 						...(showAmount ? ['Quantity'] : []),
+						...(showSpawn ? ['Spawns'] : []),
 						...(showContext ? [contextHeading] : [])
 					]
 				};
@@ -395,6 +400,7 @@
 								>{/if}<SourceRow
 								{source}
 								showAmount={group.showAmount}
+								showSpawn={group.showSpawn}
 								showContext={group.showContext}
 								showUnit={!group.sharedUnit}
 								showPlaces={!group.byPlace && group.showPlaces}

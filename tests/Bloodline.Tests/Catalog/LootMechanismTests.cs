@@ -78,7 +78,8 @@ public sealed class LootMechanismTests
             [new ClassRecord(Container, [ContainerLootMechanism.Root], properties)],
             [new ActorRecord("Box1", Container, new JsonObject())]
         );
-        var source = Assert.Single(new ContainerLootMechanism().FindSources(context)).Source;
+        var candidate = Assert.Single(new ContainerLootMechanism().FindSources(context));
+        var source = candidate.Source;
         Assert.Equal("Old box", source.Name);
         Assert.Equal(new Amount(3, 3), source.Amount);
         Assert.Equal(Level, Assert.Single(source.Places).Key);
@@ -87,7 +88,8 @@ public sealed class LootMechanismTests
             source.Odds
         );
         Assert.Empty(source.Inputs);
-        Assert.Contains(source.Notes, note => note.Contains("50%", StringComparison.Ordinal));
+        Assert.Empty(source.Notes);
+        Assert.Equal(0.5, candidate.Container!.AppearanceChance);
     }
 
     [Theory]

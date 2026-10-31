@@ -1,5 +1,5 @@
 import type { Amount, Odds, OddsEvent, Price, Source, SourceKind } from './site-data.js';
-import { formatChance, formatChanceRange, formatNumber } from './format.js';
+import { formatChanceRange, formatNumber } from './format.js';
 import { buyPrice, neutralMultiplier } from './rules/price.js';
 
 /**
@@ -47,7 +47,7 @@ export function sourceContext(source: Source): string | null {
 		return amount === 0 ? 'Free' : pricePhrase(formatNumber(amount), source.price.currency);
 	}
 	if (source.odds?.chance != null) {
-		return `${formatChance(source.odds.chance)} ${oddsLabel(source.odds, source.kind)}`;
+		return `${formatChanceRange(source.odds.chance, source.odds.highestChance ?? source.odds.chance)} ${oddsLabel(source.odds, source.kind)}`;
 	}
 	return null;
 }
@@ -68,7 +68,9 @@ export function sortSources(sources: Source[]): Source[] {
 			const difference = payPrice(a.price) - payPrice(b.price);
 			if (difference) return difference;
 		}
-		const chance = (b.odds?.chance ?? -1) - (a.odds?.chance ?? -1);
+		const chance =
+			(b.odds?.highestChance ?? b.odds?.chance ?? -1) -
+			(a.odds?.highestChance ?? a.odds?.chance ?? -1);
 		if (chance) return chance;
 		return a.name.localeCompare(b.name, 'en');
 	});
@@ -154,8 +156,11 @@ export function summaryContext(sources: Source[]): string | null {
 	if (chances.length !== sources.length) return null;
 	const label = oddsLabel(chances[0].odds!, chances[0].kind);
 	if (!chances.every((source) => oddsLabel(source.odds!, source.kind) === label)) return null;
-	const values = chances.map((source) => source.odds!.chance!);
-	return `${formatChanceRange(Math.min(...values), Math.max(...values))} ${label}`;
+	const minimum = Math.min(...chances.map((source) => source.odds!.chance!));
+	const maximum = Math.max(
+		...chances.map((source) => source.odds!.highestChance ?? source.odds!.chance!)
+	);
+	return `${formatChanceRange(minimum, maximum)} ${label}`;
 }
 
 /**
@@ -194,10 +199,16 @@ function placeName(source: Source): string | null {
  * The first two names, each with the place it stands in. Names that share one place name it once, and a name whose
  * place is unknown beside a located one says so. One name in several places names two of them.
  */
-function pairedEntries(sources: Source[]): { entries: SummaryEntry[]; joiner: ', ' | ' and '; more: number } {
+function pairedEntries(sources: Source[]): {
+	entries: SummaryEntry[];
+	joiner: ', ' | ' and ';
+	more: number;
+} {
 	const names = [...new Set(sources.map((source) => source.name))];
 	if (names.length === 1) {
-		const places = [...new Set(sources.map(placeName).filter((place): place is string => place !== null))];
+		const places = [
+			...new Set(sources.map(placeName).filter((place): place is string => place !== null))
+		];
 		return {
 			entries: [{ name: names[0], place: places.length ? places.slice(0, 2).join(' and ') : null }],
 			joiner: ', ',
@@ -211,7 +222,10 @@ function pairedEntries(sources: Source[]): { entries: SummaryEntry[]; joiner: ',
 	const more = names.length - shown.length;
 	if (shown.every((entry) => entry.place === shown[0].place)) {
 		return {
-			entries: shown.map((entry, index) => ({ name: entry.name, place: index === shown.length - 1 ? entry.place : null })),
+			entries: shown.map((entry, index) => ({
+				name: entry.name,
+				place: index === shown.length - 1 ? entry.place : null
+			})),
 			joiner: ' and ',
 			more
 		};
@@ -226,7 +240,10 @@ function pairedEntries(sources: Source[]): { entries: SummaryEntry[]; joiner: ',
 export function summarize(kind: SourceKind, sources: Source[]): SourceSummary {
 	const first = sources[0];
 	const recipe = recipeKinds.has(kind) ? first.recipe : null;
-	const base = { context: recipe ? null : summaryContext(sources), conditions: summaryConditions(sources) };
+	const base = {
+		context: recipe ? null : summaryContext(sources),
+		conditions: summaryConditions(sources)
+	};
 	if (recipe) {
 		return {
 			...base,
@@ -238,22 +255,43 @@ export function summarize(kind: SourceKind, sources: Source[]): SourceSummary {
 		};
 	}
 	if (kind === 'randomLoot') {
-		return { ...base, verb: sourceVerbs[kind], entries: [{ name: 'random container loot', place: null }], joiner: ', ', more: 0, places: [] };
+		return {
+			...base,
+			verb: sourceVerbs[kind],
+			entries: [{ name: 'random container loot', place: null }],
+			joiner: ', ',
+			more: 0,
+			places: []
+		};
 	}
 	if (kind === 'pickup') {
 		// An item lying in a place no source records still says that the place is unknown.
-		const places = [...new Set(sources.flatMap((source) => (source.places.length ? [source.places[0].name] : [])))].slice(0, 2);
-		return { ...base, verb: sourceVerbs[kind], entries: [], joiner: ', ', more: 0, places: places.length ? places : ['an unknown place'] };
+		const places = [
+			...new Set(sources.flatMap((source) => (source.places.length ? [source.places[0].name] : [])))
+		].slice(0, 2);
+		return {
+			...base,
+			verb: sourceVerbs[kind],
+			entries: [],
+			joiner: ', ',
+			more: 0,
+			places: places.length ? places : ['an unknown place']
+		};
 	}
 	return { ...base, verb: sourceVerbs[kind], ...pairedEntries(sources), places: [] };
 }
 
 /** A summary line as plain text, for previews and search descriptions. */
 export function summaryText(summary: SourceSummary): string {
-	const entries = summary.entries.map((entry) => (entry.place ? `${entry.name} in ${entry.place}` : entry.name));
+	const entries = summary.entries.map((entry) =>
+		entry.place ? `${entry.name} in ${entry.place}` : entry.name
+	);
 	const line = [
 		summary.verb,
-		entries.join(summary.joiner) + (summary.more ? `${summary.joiner === ' and ' ? ',' : ''} and ${formatNumber(summary.more)} more` : ''),
+		entries.join(summary.joiner) +
+			(summary.more
+				? `${summary.joiner === ' and ' ? ',' : ''} and ${formatNumber(summary.more)} more`
+				: ''),
 		summary.places.join(' and ')
 	]
 		.filter(Boolean)

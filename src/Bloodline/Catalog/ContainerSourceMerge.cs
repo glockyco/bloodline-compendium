@@ -1,4 +1,3 @@
-using System.Globalization;
 using Bloodline.Output;
 using Bloodline.SiteData;
 
@@ -20,38 +19,8 @@ internal sealed record ContainerDetails(
             ? PickCount.Container(limits.Min, limits.Max)
         : null;
 
-    public IReadOnlyList<string> Notes => Describe([this]);
-
-    public static IReadOnlyList<string> Describe(IReadOnlyList<ContainerDetails> variants)
-    {
-        var notes = new List<string>();
-        var containers = variants.Where(variant => !variant.Loose).ToArray();
-        // Only classes that declare Spawn Chance roll it in their BeginPlay, so a container without one always
-        // appears.
-        var chances = containers
-            .Select(variant => variant.AppearanceChance ?? 1)
-            .Distinct()
-            .Order()
-            .ToArray();
-        if (chances.Length > 0 && chances[0] < 1)
-        {
-            var minimum = Percent(chances[0]);
-            var maximum = Percent(chances[^1]);
-            notes.Add(
-                chances.Length > 1
-                    ? $"The container is there only {minimum}% to {maximum}% of the time, depending on the container."
-                    : $"The container is there only {minimum}% of the time."
-            );
-        }
-        if (variants.Any(variant => variant.Loose))
-        {
-            notes.Add("Lies loose on the ground instead of in a container.");
-        }
-        return notes;
-    }
-
-    private static string Percent(double chance) =>
-        (chance * 100).ToString("G", CultureInfo.InvariantCulture);
+    public IReadOnlyList<string> Notes =>
+        Loose ? ["Lies loose on the ground instead of in a container."] : [];
 }
 
 internal static class ContainerSourceMerge
@@ -78,52 +47,70 @@ internal static class ContainerSourceMerge
                 yield return source;
                 continue;
             }
-            var key = CanonicalJson.Serialize(
-                new { candidate.ItemClass, Source = source with { Places = [], Notes = [] } }
-            );
-            if (!groups.TryGetValue(key, out var group))
+            // Ranges describe the containers at one place, not variants in unrelated places.
+            foreach (var place in places.Length == 0 ? new EntityReference?[] { null } : places)
             {
-                group = [];
-                groups.Add(key, group);
+                var located = source with { Places = place is null ? [] : [place] };
+                var key = CanonicalJson.Serialize(
+                    new
+                    {
+                        candidate.ItemClass,
+                        Loose = candidate.Container?.Loose ?? false,
+                        Source = located with
+                        {
+                            Entity = located.Entity with { Key = null },
+                            Odds = null,
+                            Spawn = null,
+                            Amount = null,
+                            Notes = [],
+                        },
+                    }
+                );
+                if (!groups.TryGetValue(key, out var group))
+                {
+                    group = [];
+                    groups.Add(key, group);
+                }
+                group.Add(candidate with { Source = located });
             }
-            group.Add(candidate with { Source = source });
         }
+        var merged = groups
+            .OrderBy(pair => pair.Key, StringComparer.Ordinal)
+            .Select(pair => MergePlace(pair.Value));
         foreach (
-            var group in groups
-                .OrderBy(pair => pair.Key, StringComparer.Ordinal)
-                .Select(pair => pair.Value)
+            var group in merged.GroupBy(candidate =>
+                CanonicalJson.Serialize(
+                    new
+                    {
+                        candidate.ItemClass,
+                        Loose = candidate.Container?.Loose ?? false,
+                        Source = candidate.Source with
+                        {
+                            Entity = candidate.Source.Entity with { Key = null },
+                            Places = [],
+                            Notes = [],
+                        },
+                    }
+                )
+            )
         )
         {
-            var details = group
-                .Select(candidate => candidate.Container)
-                .OfType<ContainerDetails>()
-                .ToArray();
-            var variableNotes = details
-                .SelectMany(detail => detail.Notes)
-                .ToHashSet(StringComparer.Ordinal);
-            var notes = group
-                .SelectMany(candidate => candidate.Source.Notes)
-                .Where(note => !variableNotes.Contains(note))
-                .Distinct(StringComparer.Ordinal)
-                .Select(note =>
-                    group.All(candidate =>
-                        candidate.Source.Notes.Contains(note, StringComparer.Ordinal)
-                    )
-                        ? note
-                        : "Some containers: " + note
-                )
-                .ToList();
-            notes.AddRange(ContainerDetails.Describe(details));
+            var variants = group.ToArray();
+            var notes = MergeNotes(variants);
             if (
-                group.Any(candidate => candidate.Source.Places.Count == 0)
-                && group.Any(candidate => candidate.Source.Places.Count > 0)
+                variants.Any(candidate => candidate.Source.Places.Count == 0)
+                && variants.Any(candidate => candidate.Source.Places.Count > 0)
             )
             {
                 notes.Add("Some containers have no known location.");
             }
-            yield return group[0].Source with
+            yield return variants[0].Source with
             {
-                Places = group
+                Entity = variants
+                    .Select(candidate => candidate.Source.Entity)
+                    .OrderBy(entity => entity.Key, StringComparer.Ordinal)
+                    .First(),
+                Places = variants
                     .SelectMany(candidate => candidate.Source.Places)
                     .DistinctBy(place => place.Key, StringComparer.OrdinalIgnoreCase)
                     .ToArray(),
@@ -131,4 +118,72 @@ internal static class ContainerSourceMerge
             };
         }
     }
+
+    private static ItemSource MergePlace(IReadOnlyList<ItemSource> group)
+    {
+        // Same-named containers are indistinguishable in play, even when their Blueprint classes differ.
+        var first = group.MinBy(candidate => candidate.Source.Entity.Key, StringComparer.Ordinal)!;
+        var amounts = group.Select(candidate => candidate.Source.Amount).ToArray();
+        var chances = group
+            .Select(candidate => candidate.Container?.AppearanceChance ?? 1)
+            .ToArray();
+        var minimumSpawn = chances.Min();
+        return first with
+        {
+            Source = first.Source with
+            {
+                Amount = amounts.Any(amount => amount is null)
+                    ? null
+                    : new Amount(
+                        amounts.Min(amount => amount!.Min),
+                        amounts.Max(amount => amount!.Max)
+                    ),
+                Odds = MergeOdds(group),
+                Spawn =
+                    first.Container?.Loose != true && minimumSpawn < 1
+                        ? new ChanceRange(minimumSpawn, chances.Max())
+                        : null,
+                Notes = MergeNotes(group),
+            },
+        };
+    }
+
+    private static Odds? MergeOdds(IReadOnlyList<ItemSource> group)
+    {
+        var odds = group.Select(candidate => candidate.Source.Odds).ToArray();
+        if (odds.All(value => value is null))
+        {
+            return null;
+        }
+        var first = odds.First(value => value is not null)!;
+        var unknown = odds.Any(value => value?.Chance is null);
+        var minimum = unknown ? (double?)null : odds.Min(value => value!.Chance!.Value);
+        var maximum = unknown
+            ? (double?)null
+            : odds.Max(value => value!.HighestChance ?? value.Chance!.Value);
+        var reasons = odds.Select(value => value?.Unknown)
+            .OfType<string>()
+            .Distinct(StringComparer.Ordinal);
+        return first with
+        {
+            Chance = minimum,
+            HighestChance = maximum > minimum ? maximum : null,
+            Expected = odds.Max(value => value?.Expected),
+            Unknown = unknown ? string.Join(" ", reasons) : null,
+        };
+    }
+
+    private static List<string> MergeNotes(IReadOnlyList<ItemSource> group) =>
+        group
+            .SelectMany(candidate => candidate.Source.Notes)
+            .Distinct(StringComparer.Ordinal)
+            .Select(note =>
+                note.StartsWith("Some containers: ", StringComparison.Ordinal)
+                || group.All(candidate =>
+                    candidate.Source.Notes.Contains(note, StringComparer.Ordinal)
+                )
+                    ? note
+                    : "Some containers: " + note
+            )
+            .ToList();
 }
