@@ -6,7 +6,8 @@
 - [x] 1.2 Add the .NET solution with `global.json`, central package management, locked restore, nullable analyzers with warnings as errors, CSharpier and an xUnit v3 test project, and verify that CUE4Parse restores under NuGet audit and that build, test and format checks pass
 - [x] 1.3 Add the SvelteKit site with the static adapter, TypeScript, ESLint, Prettier, svelte-check, Vitest and Playwright, and verify each check runs clean
 - [x] 1.4 Add the check that fails when a game file or extracted output is tracked by Git, and verify it fails on a planted file and passes otherwise
-- [ ] 1.5 Add the GitHub Actions workflow that runs every check inside the Nix shell on invented fixtures, with SHA-pinned actions and no secrets, plus Renovate configuration with grouped updates and manual review for CUE4Parse, and verify the workflow passes on a pushed branch after approval to push
+- [x] 1.5 Add the GitHub Actions workflow that runs every check inside the Nix shell on invented fixtures, with SHA-pinned actions and no secrets, plus Renovate configuration with grouped updates and manual review for CUE4Parse, and verify the workflow passes on a pushed branch after approval to push
+- [ ] 1.6 Enable the Renovate GitHub app for this repository after approval, and verify its dependency dashboard lists CUE4Parse as awaiting approval
 
 ## 2. Extraction
 
