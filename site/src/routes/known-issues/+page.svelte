@@ -70,7 +70,7 @@
 							<dd>{issue.observed}</dd>
 						</div>
 					</dl>
-					<details class="developer">
+					<details class="developer" data-developer>
 						<summary>For developers</summary>
 						<dl>
 							<div class="field">
