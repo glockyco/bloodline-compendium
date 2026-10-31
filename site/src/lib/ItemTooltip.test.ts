@@ -4,7 +4,7 @@ import ItemTooltip from './ItemTooltip.svelte';
 import fixture from '../../fixtures/site-data/items/mosswoven-coat.json';
 import type { Fact, ItemPage } from './site-data.js';
 
-it('links each tooltip difference only to the issue that explains that fact', () => {
+it('shows applied values without tooltip differences or issue links', () => {
 	const damage: Fact = {
 		stat: 'damage',
 		label: 'Damage',
@@ -15,22 +15,19 @@ it('links each tooltip difference only to the issue that explains that fact', ()
 	};
 	const item = { ...fixture, facts: [...(fixture as ItemPage).facts, damage] };
 	const { body } = render(ItemTooltip, { props: { item } });
-	const links = body.match(/<a\b[^>]*>[\s\S]*?<\/a>/g) ?? [];
-
-	expect(links).toHaveLength(1);
-	expect(links[0]).toContain('/known-issues/#invented-coat-armor');
-	expect(links[0]).toContain('Armor 8');
-	expect(links[0]).not.toContain('Damage');
-	expect(body).toContain("The game's tooltip shows Damage");
+	expect(body).toContain('Damage: 10');
+	expect(body).not.toContain("The game's tooltip shows");
+	expect(body).not.toContain('known-issues/');
 });
 
-it('keeps a tooltip difference unlinked when no known issue explains it', () => {
+it('omits unexplained tooltip differences from previews', () => {
 	const item = {
 		...fixture,
 		facts: (fixture as ItemPage).facts.map((fact) => ({ ...fact, gameShowsIssue: null }))
 	};
 	const { body } = render(ItemTooltip, { props: { item } });
+	expect(body).toContain('ARMOR: 0');
 
-	expect(body).toContain("The game's tooltip shows Armor");
+	expect(body).not.toContain("The game's tooltip shows");
 	expect(body).not.toContain('<a ');
 });

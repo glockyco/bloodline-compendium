@@ -249,7 +249,7 @@ public sealed class KnownIssueTests
             Assert.Single(pages).Notes.Select(note => note.Issue)
         );
         Assert.Equal(
-            "Wearing Knee guards adds no armor, although the game's tooltip shows Armor 4.",
+            "Wearing Knee guards adds no armor.",
             Assert.Single(pages).Notes.Single(note => note.Issue == "armor-without-row").Effect
         );
         Assert.Empty(issues.Single(issue => issue.Issue.Id == "armor-slot-adds-none").Affected);

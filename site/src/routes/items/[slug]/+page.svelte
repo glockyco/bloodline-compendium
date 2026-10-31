@@ -7,6 +7,7 @@
 	import EntityArticle from '#lib/ui/EntityArticle.svelte';
 	import Conditions from '#lib/Conditions.svelte';
 	import { entityPath, kindPath } from '#lib/entities.js';
+	import { bugRows } from '#lib/bugs.js';
 	import Section from '#lib/ui/Section.svelte';
 	import ItemTooltip from '#lib/ItemTooltip.svelte';
 	import { sourceColumns, sourceHeadings, sourceIntros, titleCase } from '#lib/labels.js';
@@ -37,6 +38,7 @@
 	const displayName = $derived(item.name + (item.qualifier ? ` (${item.qualifier})` : ''));
 	const confirmedSources = $derived(item.sources.filter((source) => !source.unconfirmed));
 	const unconfirmedSources = $derived(item.sources.filter((source) => source.unconfirmed));
+	const bugs = $derived(bugRows(item));
 	const groups = $derived(
 		(Object.keys(sourceHeadings) as SourceKind[])
 			.map((kind) => {
@@ -424,16 +426,33 @@
 							>{/snippet}</RelationTable
 					>
 				</Section>{/if}
-			{#if item.notes.length}
-				<Section id="bugs" title="Bugs">
-					<ul>
-						{#each item.notes as note (note.issue)}
+			{#if bugs.length}
+				<Section id="bugs" title="Bugs" count={bugs.length}>
+					<ul class="surface bug-rows">
+						{#each bugs as row (row.kind === 'issue' ? row.issue : row.fact.stat)}
 							<li>
-								{#each note.effect.split(item.name) as part, index (index)}{#if index}<span
-											data-game>{item.name}</span
-										>{/if}{part}{/each}
-								<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- the resolved issue page with its section. -->
-								<a href={resolve('known-issues/') + '#' + note.issue}>Read about this issue</a>
+								{#if row.kind === 'issue'}<span
+										>{#each row.sentence.split(item.name) as part, index (index)}{#if index}<span
+													data-game>{item.name}</span
+												>{/if}{part}{/each}</span
+									>{#each row.differences as fact (fact.stat)}<small
+											>The game's tooltip shows {fact.tooltipLabel ?? fact.label}
+											{fact.gameShows}</small
+										>{/each}<small
+										><!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- the resolved issue page with its section. -->
+										<a href={resolve('known-issues/') + '#' + row.issue}>Read about this issue</a
+										></small
+									>
+								{:else}<span
+										>The game's tooltip shows {row.fact.tooltipLabel ?? row.fact.label}
+										{row.fact.gameShows}</span
+									>{#if row.fact.gameShowsIssue}<small
+											><!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- the resolved issue page with its section. -->
+											<a href={resolve('known-issues/') + '#' + row.fact.gameShowsIssue}
+												>Read about this issue</a
+											></small
+										>{/if}
+								{/if}
 							</li>
 						{/each}
 					</ul>

@@ -56,19 +56,24 @@ Detailed sources SHALL be grouped by how they are obtained, then by place where 
 - **THEN** the containers are grouped by place and each shows its chance per container
 
 ### Requirement: Applied and displayed values
-Where the game's tooltip shows another value than the game applies, the page SHALL show the applied value in the tooltip and the displayed value beside it with a link to the known issue.
+Where the game's tooltip shows another value than the game applies, the game card SHALL show the applied value and the page's Bugs section SHALL state the value the tooltip shows. The side column and link previews SHALL show only applied values.
 
 #### Scenario: Leather Pants
 - **WHEN** a reader opens Leather Pants
-- **THEN** the tooltip shows Armor 0 and notes that the game's tooltip shows 4, linking the issue
+- **THEN** the game card shows Armor 0
+- **AND** the Bugs section says that the game's tooltip shows Armor 4, with a link to the known issue
 
-### Requirement: Bug notes about this item
-An item that a known game issue affects SHALL show a Bugs section at the end of the page using the Section primitive, with one bullet per issue containing its sentence about this item followed by the "Read about this issue" link to the issue's entry on Known Issues. It SHALL NOT repeat the issue's title or its list of affected items. The side column SHALL keep the game card and its displayed-value lines unchanged and SHALL NOT contain an issue note box.
+### Requirement: Bugs section
+An item with a known game issue or a tooltip difference SHALL end with a Bugs section whose rows look like the page's other lists. A known issue SHALL take one row with its sentence about this item, the tooltip values it explains and a link to its entry on Known Issues, without the issue's title or its list of affected items. A tooltip difference that no known issue explains SHALL take a row of its own.
 
 #### Scenario: Walking Stick
 - **WHEN** a reader opens Walking Stick
-- **THEN** a bullet in the Bugs section at the end of the page says that its projectile deals 100 damage instead of 12 if it hits an enemy as it leaves the staff
-- **AND** the note links the point-blank entry on Known Issues without naming the other staves
+- **THEN** one row says that its projectile deals 100 damage instead of 12 if it hits an enemy as it leaves the staff, and links the point-blank entry without naming the other staves
+- **AND** another row says that the game's tooltip shows Damage 2
+
+#### Scenario: Velosian Plume-helm
+- **WHEN** a reader opens Velosian Plume-helm
+- **THEN** one row says that wearing it adds no armor and that the game's tooltip shows Armor 9 and Type Medium, with a link to the known issue
 
 ### Requirement: Status without a known source
 An item without a known source SHALL state its status, either that it cannot be obtained in normal play or that it has no known source and may come from a quest or event, and SHALL still show its uses and facts.

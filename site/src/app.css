@@ -253,8 +253,9 @@ small {
 .unknown {
 	color: var(--text-warning);
 }
-/* The routes' dividers span the surface, so each entry carries the inset instead of the list. */
-.acquisition-routes {
+/* Row dividers span the surface, so each entry carries the inset instead of the list. */
+.acquisition-routes,
+.bug-rows {
 	list-style: none;
 	padding: 0;
 }
@@ -270,10 +271,12 @@ small {
 	background: none;
 	color: var(--accent);
 }
-.acquisition-routes li + li {
+.acquisition-routes li + li,
+.bug-rows li + li {
 	border-top: var(--border-width) solid var(--border);
 }
-.acquisition-routes a {
+.acquisition-routes a,
+.bug-rows li {
 	display: grid;
 	gap: var(--gap-line);
 	padding: var(--inset-cell) var(--inset);
@@ -285,7 +288,8 @@ small {
 .acquisition-routes strong {
 	font-weight: var(--weight-strong);
 }
-.acquisition-routes small {
+.acquisition-routes small,
+.bug-rows small {
 	margin: 0;
 }
 .route-line {

@@ -583,19 +583,26 @@ test('notes a known issue on the affected item and explains it on a linked, sear
 	page
 }) => {
 	await page.goto('/items/mosswoven-coat/');
-	const note = page.getByRole('region', { name: 'Bugs', exact: true });
-	await expect(note.getByRole('heading', { name: 'Bugs' })).toBeVisible();
-	await expect(note.locator('li')).toHaveText(
-		'The Mosswoven Coat adds no armor when worn, although its tooltip shows armor. Read about this issue'
+	const note = page.getByRole('region', { name: 'Bugs 1', exact: true });
+	await expect(note.getByRole('heading', { name: 'Bugs 1' })).toBeVisible();
+	await expect(note.locator('ul.surface > li')).toHaveCount(1);
+	await expect(note.locator('li > span')).toHaveText(
+		'The Mosswoven Coat adds no armor when worn, although its tooltip shows armor.'
 	);
+	await expect(note.locator('li > small')).toHaveText([
+		"The game's tooltip shows Armor 8",
+		'Read about this issue'
+	]);
 	const details = page.getByRole('complementary', { name: 'Item details' });
 	await expect(details.locator('#bugs')).toHaveCount(0);
 	await expect(page.getByRole('complementary', { name: 'Known game issue' })).toHaveCount(0);
 	await expect(page.locator('article section').last()).toHaveAttribute('aria-labelledby', 'bugs');
 	await expect(details).toContainText('ARMOR: 0');
-	await expect(
-		details.getByRole('link', { name: "The game's tooltip shows Armor 8" })
-	).toHaveAttribute('href', '/known-issues/#invented-coat-armor');
+	await expect(details).not.toContainText("The game's tooltip shows");
+	await expect(note.getByRole('link', { name: 'Read about this issue' })).toHaveAttribute(
+		'href',
+		'/known-issues/#invented-coat-armor'
+	);
 	await note.getByRole('link', { name: 'Read about this issue' }).click();
 	await expect(page).toHaveURL(/\/known-issues\/#invented-coat-armor$/);
 	const entry = page.locator('#invented-coat-armor');

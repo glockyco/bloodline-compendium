@@ -82,7 +82,7 @@ export async function layoutProblems(page: Page): Promise<string[]> {
 		const inset = parseFloat(root.getPropertyValue('--inset')) * parseFloat(root.fontSize);
 		for (const element of document.querySelectorAll(
 			// A list surface passes its inset to its entries, so its dividers span the surface.
-			'.surface:not(.acquisition-routes), .relation-panel td, .relation-panel th, .acquisition-routes a'
+			'.surface:not(.acquisition-routes):not(.bug-rows), .relation-panel td, .relation-panel th, .acquisition-routes a, .bug-rows > li'
 		)) {
 			if (!visible(element)) continue;
 			const padding = parseFloat(getComputedStyle(element).paddingLeft);

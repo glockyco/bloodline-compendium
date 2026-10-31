@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
 	import type { Fact } from './site-data.js';
 	import { titleCase } from './labels.js';
 	import { factValue } from './stats.js';
@@ -42,7 +41,6 @@
 	const native = $derived(new Set([lines.first?.fact, lines.second?.fact]));
 	// Facts the game's tooltip does not print follow the game card, in the site's own type.
 	const extra = $derived(item.facts.filter((fact) => !native.has(fact)));
-	const misstated = $derived(item.facts.filter((fact) => fact.gameShows));
 	// The game shrinks a long name to keep its ribbon on one line. Here it shrinks to body size at most, and a
 	// name still too wide for the card wraps instead of running under the notches.
 	const nameFit = $derived(26 / Math.max(item.name.length, 1));
@@ -70,14 +68,6 @@
 		</div>
 		{#if item.description}<p class="description" data-game>{item.description}</p>{/if}
 	</div>
-	{#if misstated.length}<p class="game-shows">
-			{#each misstated as fact (fact.stat)}<span
-					>{#if fact.gameShowsIssue}<a href={resolve(`known-issues/#${fact.gameShowsIssue}`)}
-							>The game's tooltip shows {fact.tooltipLabel ?? fact.label} {fact.gameShows}</a
-						>{:else}The game's tooltip shows {fact.tooltipLabel ?? fact.label}
-						{fact.gameShows}{/if}</span
-				>{/each}
-		</p>{/if}
 	{#if extra.length}<dl class="extra">
 			{#each extra as fact (fact.stat + fact.label)}<div class:prose={fact.number == null}>
 					<dt>{titleCase(fact.label)}</dt>
@@ -161,12 +151,6 @@
 		padding: 0 var(--inset-loose);
 		font-size: var(--type-2);
 		line-height: var(--leading-snug);
-	}
-	.game-shows {
-		display: grid;
-		gap: var(--gap-line);
-		margin: 0;
-		color: var(--text-soft);
 	}
 	.extra {
 		display: grid;

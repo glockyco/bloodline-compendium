@@ -62,11 +62,11 @@ Facets and columns are declared per category in the catalog, so a new kind or up
 
 ### Item page order
 
-Title and identity, then the tooltip with any displayed-value notes beside the first-screen answer, then recipe, uses, detailed sources grouped by method and place, and Bugs. The Related entities section goes, because sources, recipes and uses already render every relation. The page renders only sections with content. A phone shows the first three ways to get an item until the reader asks for the rest, and a page with no recipe, use or source table reads as one column.
+Title and identity, then the game card with the values the game applies and the facts below it beside the first-screen answer, then recipe, uses, detailed sources grouped by method and place, and Bugs. The Related entities section goes, because sources, recipes and uses already render every relation. The page renders only sections with content. A phone shows the first three ways to get an item until the reader asks for the rest, and a page with no recipe, use or source table reads as one column.
 
 Below 1024 px the page reads as one column, because a side column narrowed descriptions below a phone's measure at 768 px. A tablet keeps the answer first and the game card below it, at most 24rem wide. A phone shows the game card first, so what the item is for is on the first screen, and How to Get It follows. Both choices came from a review of rendered options on Apple, Iron Ore and two tablet pages.
 
-A known game issue shows in a Bugs section at the end of an item page, using the Section primitive with one bullet per issue. Each bullet gives the sentence about this item followed by the existing "Read about this issue" link to its entry on Known Issues. The entry keeps the title, the full list of affected items and the steps. The side column keeps the game card and its displayed-value lines unchanged, without an issue note box.
+Game bugs and the values that the game's tooltip shows instead of the applied ones go to the Bugs section at the end of the page, in rows like How to Get It's. A known issue's row holds its sentence about this item, the tooltip values it explains and a link to its entry on Known Issues, which keeps the title, the affected items and the steps. A tooltip value that no issue explains takes a row of its own. The side column and link previews show only applied values, so the side column stays light for later tools such as a character planner's equip and compare actions.
 
 ### Coverage becomes a maintainer report
 
@@ -166,7 +166,6 @@ Findings left open, each with its owner:
 - Weapon part pages do not explain assembly, compatibility or finished weapon stats, and the part list cannot shortlist by crafting level or ingredient cost. Both belong to `add-crafting-and-equipment`.
 - A bounty note does not say where its quest is accepted, because quest givers are not read yet. Places and people in `openspec/plan.md` own it.
 - The list's name filter now also matches a name the game misspells by one letter, such as Steel Rapier Gaurd, and a source row names each camp place once, since the camp maps of one terrain share their terrain's name.
-- Task 10.8 still holds the staff's Halberd explanation. Settlement delivery now names the weekly trigger and collection screen, and only the game's Speed word is published.
 
 ## Reader text
 

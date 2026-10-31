@@ -55,7 +55,8 @@
 				unit: null,
 				number: 12345.678,
 				text: null,
-				effect: null
+				effect: null,
+				gameShows: '23456.789'
 			},
 			{
 				stat: 'speed',
