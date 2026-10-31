@@ -131,7 +131,7 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 }) => {
 	await page.goto('/items/lanternedge/');
 	await expect(page.getByRole('heading', { name: 'How to Get It', exact: true })).toBeVisible();
-	await expect(page.locator('.acquisition-routes')).toContainText('Buy from');
+	await expect(page.locator('.acquisition-routes')).toContainText('Sold by');
 	const details = page.getByRole('complementary', { name: 'Item details' });
 	await expect(details).toContainText('Damage: 12');
 	await expect(details.locator('.first')).toHaveText('Average');

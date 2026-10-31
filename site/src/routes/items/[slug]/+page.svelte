@@ -236,12 +236,19 @@
 							<li class:later={index >= firstWays}>
 								<a href={group.recipe ? '#recipes' : '#source-' + group.kind}
 									><span class="route-line"
-										><span class="verb">{summary.verb}</span>{#if summary.names}<strong data-game
-												>{summary.names}</strong
-											>{/if}{#if summary.more}<span class="more"
+										><span class="verb">{summary.verb}</span
+										>{#each summary.entries as entry, position (entry.name)}{@const last =
+												position ===
+												summary.entries.length - 1}{#if position && summary.joiner === ' and '}<span
+													class="more">and</span
+												>{/if}<span class="entry"
+												><strong data-game>{entry.name}</strong>{#if entry.place}&nbsp;<span
+														class="where">in <span data-game>{entry.place}</span></span
+													>{/if}{#if (!last && summary.joiner === ', ') || (last && summary.more && summary.joiner === ' and ')},{/if}</span
+											>{/each}{#if summary.more}<span class="more"
 												>and {formatNumber(summary.more)} more</span
-											>{/if}{#if summary.places.length}<span class="where"
-												>in <span data-game>{summary.places.join(', ')}</span></span
+											>{/if}{#if summary.places.length}<span data-game class="where-only"
+												>{summary.places.join(' and ')}</span
 											>{/if}</span
 									>{#if summary.context}<small>{summary.context}</small
 										>{/if}{#each summary.conditions as condition (condition)}<small class="when"

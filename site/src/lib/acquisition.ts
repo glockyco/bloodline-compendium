@@ -81,38 +81,50 @@ export const useHeadings: Partial<Record<SourceKind, string>> = {
 	farming: 'Farming'
 };
 
-/** The verb a first-screen summary leads with for each way of getting an item. */
+/**
+ * The words a first-screen summary leads with for each way of getting an item. They follow the headings of the
+ * sections the summary links to, so "Dropped by" names a creature and "Found in" a container.
+ */
 export const sourceVerbs: Record<SourceKind, string> = {
-	shop: 'Buy from',
-	currencyShop: 'Buy from',
-	stable: 'Buy from',
-	smithing: 'Smith',
-	crafting: 'Craft',
-	cooking: 'Cook',
-	containerLoot: 'Loot from',
-	randomLoot: 'Find in',
-	enemyDrop: 'Loot from',
-	pickup: 'Find',
-	dialogue: 'Receive from',
-	fishing: 'Catch by',
-	gathering: 'Gather from',
-	farming: 'Grow',
-	bountyNote: 'Receive when accepting the quest',
-	settlementDelivery: 'Receive from',
-	contract: 'Receive from',
-	seasonalGift: 'Receive from',
-	archaeology: 'Dig up from',
-	reward: 'Receive from'
+	shop: 'Sold by',
+	currencyShop: 'Sold by',
+	stable: 'Sold by',
+	smithing: 'Smithed',
+	crafting: 'Crafted',
+	cooking: 'Cooked',
+	containerLoot: 'Found in',
+	randomLoot: 'Found in',
+	enemyDrop: 'Dropped by',
+	pickup: 'Found on the ground in',
+	dialogue: 'Given by',
+	fishing: 'Caught by',
+	gathering: 'Gathered from',
+	farming: 'Grown from',
+	bountyNote: 'Received when accepting the quest',
+	settlementDelivery: 'Delivered by',
+	contract: 'Given by',
+	seasonalGift: 'Given by',
+	archaeology: 'Dug up from',
+	reward: 'Given by'
 };
 
 /** The ways of getting an item that a recipe line shows in full instead of a source table. */
 export const recipeKinds: ReadonlySet<SourceKind> = new Set(['smithing', 'crafting', 'cooking']);
 
+/** A name in a summary line with the place it stands in, or with no place when the next entry shares it. */
+export interface SummaryEntry {
+	name: string;
+	place: string | null;
+}
+
 /** One line of the first-screen summary for the sources of one kind. */
 export interface SourceSummary {
 	verb: string;
-	names: string;
+	/** The named sources, each with its own place, joined by `joiner`. */
+	entries: SummaryEntry[];
+	joiner: ', ' | ' and ';
 	more: number;
+	/** Places named without a source, for items lying on the ground. */
 	places: string[];
 	context: string | null;
 	conditions: string[];
@@ -174,64 +186,86 @@ export function summaryConditions(sources: Source[]): string[] {
 	return [...new Set(shared)];
 }
 
+function placeName(source: Source): string | null {
+	return source.places[0]?.name ?? (source.settlement ? 'your settlement' : null);
+}
+
+/**
+ * The first two names, each with the place it stands in. Names that share one place name it once, and a name whose
+ * place is unknown beside a located one says so. One name in several places names two of them.
+ */
+function pairedEntries(sources: Source[]): { entries: SummaryEntry[]; joiner: ', ' | ' and '; more: number } {
+	const names = [...new Set(sources.map((source) => source.name))];
+	if (names.length === 1) {
+		const places = [...new Set(sources.map(placeName).filter((place): place is string => place !== null))];
+		return {
+			entries: [{ name: names[0], place: places.length ? places.slice(0, 2).join(' and ') : null }],
+			joiner: ', ',
+			more: 0
+		};
+	}
+	const shown = names.slice(0, 2).map((name) => ({
+		name,
+		place: placeName(sources.find((source) => source.name === name)!)
+	}));
+	const more = names.length - shown.length;
+	if (shown.every((entry) => entry.place === shown[0].place)) {
+		return {
+			entries: shown.map((entry, index) => ({ name: entry.name, place: index === shown.length - 1 ? entry.place : null })),
+			joiner: ' and ',
+			more
+		};
+	}
+	return {
+		entries: shown.map((entry) => ({ name: entry.name, place: entry.place ?? 'an unknown place' })),
+		joiner: ', ',
+		more
+	};
+}
+
 export function summarize(kind: SourceKind, sources: Source[]): SourceSummary {
 	const first = sources[0];
 	const recipe = recipeKinds.has(kind) ? first.recipe : null;
-	// A pickup is named by where it lies, and random loot by the containers it can fill.
-	const unnamed = kind === 'pickup' || kind === 'randomLoot';
-	const names = [...new Set(sources.map((source) => source.name))];
-	const shown = recipe || unnamed ? [] : names.slice(0, 2);
-	const placed = recipe || kind === 'randomLoot' ? [] : unnamed ? sources : sources.slice(0, 2);
-	const places = [
-		...new Set(
-			placed.flatMap((source) =>
-				source.places.length
-					? [source.places[0].name]
-					: source.settlement
-						? ['your settlement']
-						: []
-			)
-		)
-	].slice(0, 2);
-	// Find lying names where, so an item lying in a place no source records still says that the place is unknown.
-	if (kind === 'pickup' && places.length === 0) places.push('an unknown place');
-	return {
-		verb: recipe?.station
-			? `${sourceVerbs[kind]} at the`
-			: kind === 'pickup'
-				? 'Find lying'
-				: sourceVerbs[kind],
-		names: recipe
-			? (recipe.station?.name ?? first.name)
-			: kind === 'randomLoot'
-				? 'random container loot'
-				: shown.join(', '),
-		more: recipe ? sources.length - 1 : unnamed ? 0 : Math.max(0, names.length - shown.length),
-		places,
-		context: recipe ? null : summaryContext(sources),
-		conditions: summaryConditions(sources)
-	};
+	const base = { context: recipe ? null : summaryContext(sources), conditions: summaryConditions(sources) };
+	if (recipe) {
+		return {
+			...base,
+			verb: recipe.station ? `${sourceVerbs[kind]} at the` : sourceVerbs[kind],
+			entries: [{ name: recipe.station?.name ?? first.name, place: null }],
+			joiner: ', ',
+			more: sources.length - 1,
+			places: []
+		};
+	}
+	if (kind === 'randomLoot') {
+		return { ...base, verb: sourceVerbs[kind], entries: [{ name: 'random container loot', place: null }], joiner: ', ', more: 0, places: [] };
+	}
+	if (kind === 'pickup') {
+		// An item lying in a place no source records still says that the place is unknown.
+		const places = [...new Set(sources.flatMap((source) => (source.places.length ? [source.places[0].name] : [])))].slice(0, 2);
+		return { ...base, verb: sourceVerbs[kind], entries: [], joiner: ', ', more: 0, places: places.length ? places : ['an unknown place'] };
+	}
+	return { ...base, verb: sourceVerbs[kind], ...pairedEntries(sources), places: [] };
+}
+
+/** A summary line as plain text, for previews and search descriptions. */
+export function summaryText(summary: SourceSummary): string {
+	const entries = summary.entries.map((entry) => (entry.place ? `${entry.name} in ${entry.place}` : entry.name));
+	const line = [
+		summary.verb,
+		entries.join(summary.joiner) + (summary.more ? `${summary.joiner === ' and ' ? ',' : ''} and ${formatNumber(summary.more)} more` : ''),
+		summary.places.join(' and ')
+	]
+		.filter(Boolean)
+		.join(' ');
+	return [line, summary.context].filter(Boolean).join(', ');
 }
 
 /** The first way to get an item as one sentence, for previews, or null when no way is known. */
 export function firstRoute(sources: Source[], order: SourceKind[]): string | null {
 	for (const kind of order) {
 		const group = sortSources(sources.filter((source) => source.kind === kind));
-		if (!group.length) continue;
-		const summary = summarize(kind, group);
-		return [
-			[
-				summary.verb,
-				summary.names,
-				summary.more ? `and ${formatNumber(summary.more)} more` : '',
-				summary.places.length ? `in ${summary.places.join(', ')}` : ''
-			]
-				.filter(Boolean)
-				.join(' '),
-			summary.context
-		]
-			.filter(Boolean)
-			.join(', ');
+		if (group.length) return summaryText(summarize(kind, group));
 	}
 	return null;
 }

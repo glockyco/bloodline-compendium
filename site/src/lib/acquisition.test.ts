@@ -64,7 +64,7 @@ it('states the range of levels when the summarized recipes need different levels
 it('says that a lying item lies in an unknown place when no place is recorded', () => {
 	const pickup = { ...container, kind: 'pickup' as const, places: [], odds: null };
 	expect(summarize('pickup', [pickup])).toMatchObject({
-		verb: 'Find lying',
+		verb: 'Found on the ground in',
 		places: ['an unknown place']
 	});
 });
