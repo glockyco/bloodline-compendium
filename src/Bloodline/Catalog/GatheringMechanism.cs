@@ -287,7 +287,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
         )
         {
             yield return FormattableString.Invariant(
-                $"Gives up to {limit} items before it regrows."
+                $"Gives up to {limit} {(limit == 1 ? "item" : "items")} before it regrows."
             );
         }
     }

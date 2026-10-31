@@ -102,7 +102,9 @@
 							{#each way.icons as icon (icon)}<IconSlot {icon} size="stack" />{/each}
 						</span>
 						<span class="way-text"><b>{way.label}</b><span>{way.text}</span></span>
-						<span class="way-count">{formatNumber(way.count)}<small>items</small></span>
+						<span class="way-count"
+							>{formatNumber(way.count)}<small>{way.count === 1 ? 'item' : 'items'}</small></span
+						>
 					</a>
 				</li>
 			{/each}

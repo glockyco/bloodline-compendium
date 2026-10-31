@@ -65,7 +65,9 @@
 		{/if}
 	</td>
 	{#if showAmount}<td class="numeric"
-			>{source.amount ? formatAmount(source.amount) : 'Unknown'}<small>items</small></td
+			>{source.amount ? formatAmount(source.amount) : 'Unknown'}<small
+				>{source.amount?.max === 1 ? 'item' : 'items'}</small
+			></td
 		>{/if}
 	{#if showContext}
 		<td class="numeric context-value">

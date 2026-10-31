@@ -18,6 +18,14 @@ export function formatAmount(amount: Amount): string {
 		: `${formatNumber(amount.min)} to ${formatNumber(amount.max)}`;
 }
 
+/**
+ * A price in gold, or a count of the item a merchant takes as currency, such as 3 × Cinderpear. The sign keeps the
+ * item's name as the game spells it, since the game gives no plural.
+ */
+export function pricePhrase(amount: string, currency: Price['currency']): string {
+	return currency ? `${amount} × ${currency.name}` : `${amount} gold`;
+}
+
 const oddsLabels: Record<OddsEvent, string> = {
 	container: 'per container',
 	kill: 'per kill',
@@ -36,9 +44,7 @@ export function oddsLabel(odds: Odds, kind: SourceKind): string {
 export function sourceContext(source: Source): string | null {
 	if (source.price) {
 		const amount = payPrice(source.price);
-		return amount === 0
-			? 'Free'
-			: `${formatNumber(amount)} ${source.price.currency?.name ?? 'gold'}`;
+		return amount === 0 ? 'Free' : pricePhrase(formatNumber(amount), source.price.currency);
 	}
 	if (source.odds?.chance != null) {
 		return `${formatChance(source.odds.chance)} ${oddsLabel(source.odds, source.kind)}`;
@@ -131,7 +137,7 @@ export function summaryContext(sources: Source[]): string | null {
 		if (!priced.every((source) => source.price!.currency?.key === currency?.key)) return null;
 		const amounts = priced.map((source) => payPrice(source.price!));
 		if (amounts.every((amount) => amount === 0)) return 'Free';
-		return `${span(amounts, formatNumber)} ${currency?.name ?? 'gold'}`;
+		return pricePhrase(span(amounts, formatNumber), currency);
 	}
 	const chances = sources.filter((source) => source.odds?.chance != null);
 	if (chances.length !== sources.length) return null;

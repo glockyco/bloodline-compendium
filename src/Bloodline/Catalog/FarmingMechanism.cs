@@ -24,7 +24,7 @@ internal sealed class FarmingMechanism : ISourceMechanism
             {
                 notes.Add(
                     FormattableString.Invariant(
-                        $"Gives {attempts} items per harvest before farming bonuses."
+                        $"Gives {attempts} {(attempts == 1 ? "item" : "items")} per harvest before farming bonuses."
                     )
                 );
             }

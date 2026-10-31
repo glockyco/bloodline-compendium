@@ -60,7 +60,7 @@ internal sealed class PickupObjectMechanism : ISourceMechanism
                     amount = null;
                     notes =
                     [
-                        $"The listed amount is {count} items, but whether multiple items are granted is unknown.",
+                        $"The listed amount is {count} {(count == 1 ? "item" : "items")}, but whether multiple items are granted is unknown.",
                     ];
                 }
                 yield return Grant(

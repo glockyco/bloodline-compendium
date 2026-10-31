@@ -68,3 +68,9 @@ it('says that a lying item lies in an unknown place when no place is recorded', 
 		places: ['an unknown place']
 	});
 });
+
+it('counts an item currency instead of pluralizing its name', () => {
+	const source = item.sources.find((entry) => entry.kind === 'currencyShop')!;
+	expect(sourceContext(source)).toBe('3 × Cinderpear');
+	expect(summaryContext([source, source])).toBe('3 × Cinderpear');
+});
