@@ -94,9 +94,9 @@ internal static partial class TooltipCheck
             "Potion tooltips show no description, and Base Potion's tooltip shows nothing, as hovering with the real cursor showed in run hover-check-2."
         ),
         new(
-            "staff-applied-damage",
+            "staff-tooltip-damage",
             "game",
-            false,
+            true,
             "Staff tooltips show ItemInfo.Damage, while normal hits use the projectile's initialized damage or the halberd-style staff's melee damage."
         ),
     ];
@@ -228,6 +228,7 @@ internal static partial class TooltipCheck
 
     private static readonly Dictionary<string, Stat> FactFields = new(StringComparer.Ordinal)
     {
+        ["Damage"] = Stat.Damage,
         ["Armor rating"] = Stat.ArmorRating,
         ["Armor type"] = Stat.ArmorType,
         ["Restoration amount"] = Stat.RestorationAmount,
@@ -376,17 +377,20 @@ internal static partial class TooltipCheck
             var value = stat.Groups["value"].Value;
             switch (stat.Groups["label"].Value)
             {
-                // A staff with a separate projectile, such as Staff of Minor Flames, shows that projectile's damage.
+                // A staff with a separate projectile, such as Staff of Minor Flames, shows that projectile's damage,
+                // and a staff whose applied damage is unknown contradicts nothing.
                 case "Damage"
                     when Find(Stat.ProjectileDamage)?.Number is { } projectile
                         && Parse(value) == projectile:
+                    break;
+                case "Damage" when item.Type == "Staff" && Find(Stat.Damage)?.Number is null:
                     break;
                 case "Damage":
                     Number(
                         "Damage",
                         value,
                         Stat.Damage,
-                        item.Type == "Staff" ? "staff-applied-damage" : null
+                        item.Type == "Staff" ? "staff-tooltip-damage" : null
                     );
                     break;
                 case "ARMOR":

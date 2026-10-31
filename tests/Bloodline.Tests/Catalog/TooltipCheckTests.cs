@@ -145,7 +145,7 @@ public sealed class TooltipCheckTests
             return;
         }
         var difference = Assert.Single(differences);
-        Assert.Equal(("Damage", "staff-applied-damage"), (difference.Field, difference.Reason));
+        Assert.Equal(("Damage", "staff-tooltip-damage"), (difference.Field, difference.Reason));
     }
 
     [Fact]

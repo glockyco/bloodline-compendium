@@ -106,3 +106,13 @@ for staff in "${staves[@]}"; do
     lab capture-screen "$name-${range%% *}-after"
   done
 done
+
+# staff-tooltip-damage: one hit on a fresh Goblin Brute from range, after the tooltip sweep has read each tooltip. The
+# swinging staves need melee range, the others range for their projectile.
+for staff in "Halberds/WalkingStick 600" "Staves/AdeptCryomancerStaff 600" "Staves/MoonstoneStaff 600" \
+  "Staves/ChristmasStaff 600" "Halberds/PintoStaff 130" "Halberds/FairyStaff 130" "Halberds/NecroStaff 130"; do
+  path=${staff%% *}
+  staff_check "{\"action\":\"equip\",\"item\":\"$item/Weapons/$path.${path##*/}_C\"}"
+  staff_check "{\"action\":\"target\",\"distance\":${staff#* }}"
+  staff_check '{"action":"attack","pauseOnHit":true,"seconds":3}'
+done

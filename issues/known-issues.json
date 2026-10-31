@@ -183,6 +183,40 @@
       "builds": [24464547],
       "report": "notReported",
       "reportUrl": null
+    },
+    {
+      "id": "staff-tooltip-damage",
+      "title": "Seven staves deal different damage than their tooltips show",
+      "effect": "Walking Stick, Adept Cryomancer Staff, Moonstone Staff and Winter's Whisper deal 12, 20, 35 and 35 damage per hit, while their tooltips show 2, 15, 30 and 20. Pinto Staff, Fairy Staff and Gripclaw Staff deal 10 per hit, while their tooltips show 20.",
+      "itemNotes": {
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/WalkingStick.WalkingStick_C": "Walking Stick deals 12 damage per hit.",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/AdeptCryomancerStaff.AdeptCryomancerStaff_C": "Adept Cryomancer Staff deals 20 damage per hit.",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/MoonstoneStaff.MoonstoneStaff_C": "Moonstone Staff deals 35 damage per hit.",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/ChristmasStaff.ChristmasStaff_C": "Winter's Whisper deals 35 damage per hit.",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/PintoStaff.PintoStaff_C": "Pinto Staff deals 10 damage per hit.",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/FairyStaff.FairyStaff_C": "Fairy Staff deals 10 damage per hit.",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/NecroStaff.NecroStaff_C": "Gripclaw Staff deals 10 damage per hit."
+      },
+      "workaround": null,
+      "steps": [
+        "Hover Walking Stick in the inventory. Its tooltip shows Damage: 2.",
+        "Equip Walking Stick and hit an enemy from a few steps away, so the projectile travels before it hits. The damage number shows 12.",
+        "Repeat with the other staves. Pinto Staff, Fairy Staff and Gripclaw Staff hit with their swing and show 10."
+      ],
+      "expected": "A hit deals the damage the tooltip shows.",
+      "observed": "Hits from range dealt 12 with Walking Stick, 20 with Adept Cryomancer Staff and 35 with Moonstone Staff and Winter's Whisper. Swings of Pinto Staff, Fairy Staff and Gripclaw Staff dealt 10. Their tooltips showed 2, 15, 30, 20 and 20.",
+      "cause": "The tooltip's stat line shows ItemInfo.Damage. A staff whose Weapon Class is Staff deals the damage that its Staff Attack gives the projectile it spawns, and a staff that swings like a halberd deals WeaponInfo.Damage when its hit box overlaps an enemy. These seven staves have other values there than in ItemInfo.Damage.",
+      "citations": [
+        "/Game/BloodlinesAlpha/UI/Inventory/UI_InventoryItem_2:OnMouseEnter",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/WalkingStick:Staff Attack",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/AdeptCryomancerStaff:Staff Attack",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/MoonstoneStaff:Staff Attack",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/ChristmasStaff:Staff Attack",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/BP_BaseWeapon:BndEvt__BP_BaseWeapon_HitBox_K2Node_ComponentBoundEvent_2_ComponentBeginOverlapSignature__DelegateSignature"
+      ],
+      "builds": [24464547],
+      "report": "notReported",
+      "reportUrl": null
     }
   ]
 }
