@@ -1,84 +1,97 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import SeoHead from '#lib/SeoHead.svelte';
-	import ReleaseInfo from '#lib/ReleaseInfo.svelte';
 	let { data } = $props();
+	const dateFormat = new Intl.DateTimeFormat('en', { dateStyle: 'long', timeZone: 'UTC' });
+	const date = (value: string) => dateFormat.format(new Date(value));
+	const steam = 'https://store.steampowered.com/app/1159290/The_Bloodline/';
 </script>
 
 <SeoHead
 	title="About | The Bloodline Compendium"
-	description="How this unofficial The Bloodline item reference reads the game, what it cannot tell you and which game release it describes."
+	description="What The Bloodline Compendium is and how it is made."
 />
-<div class="sections">
-	<header class="page-heading">
-		<h1>About</h1>
-		<p class="intro">
-			The Bloodline Compendium is an unofficial item reference for players of <a
-				href="https://store.steampowered.com/app/1159290/The_Bloodline/">The Bloodline</a
-			>, a single-player sandbox adventure RPG with exploration, crafting, weapons and magic.
-		</p>
-	</header>
-	<section aria-labelledby="how-made">
-		<h2 id="how-made">How This Reference Is Made</h2>
-		<p>
-			Item names, descriptions, stats, icons and the ways to get each item are read from the game's
-			files. Where the game's code decides a value, such as a price, a drop chance or the armor a
-			piece adds, item pages show the value the game applies, and runs of the game confirm it.
-		</p>
-		<p>
-			Where the game's own tooltip disagrees with what the game does, item pages show what the game
-			applies beside what the tooltip says. <a href={resolve('known-issues/')}>Known Issues</a> lists
-			these defects with steps to see them yourself.
-		</p>
-	</section>
-	<section aria-labelledby="limits">
-		<h2 id="limits">What It Cannot Tell You</h2>
+<header class="page-heading">
+	<h1>About The Bloodline Compendium</h1>
+	<p class="intro">
+		The Bloodline Compendium is a fan-made wiki for The Bloodline, generated from the game's files.
+	</p>
+</header>
+<div class="about-layout">
+	<div class="sections">
+		<section aria-labelledby="game">
+			<h2 id="game">About The Bloodline</h2>
+			<p>
+				The Bloodline is a single-player sandbox RPG. You explore an open world, join guilds, craft
+				and fight with weapons or magic. Shieldbearer Studios makes the game, and 505 Pulse and 505
+				Games publish it. It has been in Steam Early Access since October 5, 2023.
+			</p>
+			<p><a href={steam} rel="external">Play The Bloodline on Steam</a></p>
+		</section>
+		<section aria-labelledby="how-made">
+			<h2 id="how-made">How the Compendium Is Made</h2>
+			<p>
+				The Compendium is updated after each patch. This version covers the {data.release.title} from
+				<time datetime={data.release.patchDate}>{date(data.release.patchDate)}</time>, and its data
+				was read on <time datetime={data.release.dataDate}>{date(data.release.dataDate)}</time>.
+				Quest and event rewards are not listed yet.
+			</p>
+		</section>
+		<section aria-labelledby="fan-project">
+			<h2 id="fan-project">Unofficial Fan Project</h2>
+			<p>
+				The Bloodline Compendium is an unofficial fan project and is not affiliated with
+				Shieldbearer Studios, 505 Pulse or 505 Games. The Bloodline and its names, artwork and
+				assets belong to their owners.
+			</p>
+		</section>
+	</div>
+	<aside class="panel" aria-labelledby="more-links">
+		<h2 id="more-links">More Links</h2>
 		<ul>
+			<li><a href={steam} rel="external">The Bloodline on Steam</a></li>
+			<li><a href={data.release.patchNotesUrl} rel="external">Patch Notes</a></li>
+			<li><a href={resolve('known-issues/')}>Known Issues</a></li>
+			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- an address on GitHub, not on this site. -->
 			<li>
-				Some items are given by quests and events this reference does not read yet. Their pages say
-				that no way to get them is known, which does not mean they cannot be obtained.
+				<a
+					href="https://github.com/glockyco/bloodline-compendium/issues/new?template=wrong-fact.yml"
+					>Report a wrong fact</a
+				>
 			</li>
-			<li>
-				Only in the game files lists sources whose conversation is unused, gathering spot gives
-				nothing or has no known placement, or pickup has no known place. These are not confirmed
-				ways to get the item.
-			</li>
-			<li>
-				A place on an item page is where the game puts a merchant, container or enemy. Quests and
-				your progress decide when you can reach it.
-			</li>
-			<li>
-				Prices change with your respect in the merchant's city. Pages show the price at neutral
-				respect.
-			</li>
-			<li>
-				A drop chance appears only where the game's code that chooses the item is read. Elsewhere
-				the chance reads Unknown with the reason.
-			</li>
+			<li><a href="https://ko-fi.com/wowmuch">Support on Ko-fi</a></li>
 		</ul>
-	</section>
-	<section aria-labelledby="game-release">
-		<h2 id="game-release">Game Release and Data</h2>
-		<ReleaseInfo release={data.release} />
-		<p>
-			The reference describes this game release. A later game update may change an item's properties
-			or sources. Read the linked patch notes for the game's changes.
-		</p>
-	</section>
-	<section aria-labelledby="support">
-		<h2 id="support">Support</h2>
-		<p>
-			If this reference helps you, you can <a href="https://ko-fi.com/wowmuch"
-				>support it on Ko-fi</a
-			>.
-		</p>
-	</section>
-	<section aria-labelledby="disclaimer">
-		<h2 id="disclaimer">Disclaimer</h2>
-		<p>
-			The Bloodline Compendium is an unofficial fan project. It is not affiliated with, endorsed by
-			or sponsored by Shieldbearer Studios, 505 Pulse or 505 Games. The Bloodline and its names,
-			artwork, trademarks and game assets belong to their respective rights holders.
-		</p>
-	</section>
+	</aside>
 </div>
+
+<style>
+	/* The text at a reading measure with the links beside it, as on Afallon's About page. */
+	.about-layout {
+		display: grid;
+		grid-template-columns: minmax(0, var(--size-measure)) var(--size-item-side);
+		justify-content: space-between;
+		align-items: start;
+		gap: var(--gap-section);
+		margin-top: var(--gap-section);
+	}
+	aside {
+		display: grid;
+		gap: var(--gap-block);
+	}
+	aside h2 {
+		margin: 0;
+		font-size: var(--type-sub);
+	}
+	ul {
+		display: grid;
+		gap: var(--gap-inline);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	@media (width < 64rem) {
+		.about-layout {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+</style>

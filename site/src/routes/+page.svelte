@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
 	import SeoHead from '#lib/SeoHead.svelte';
 	import Search from '#lib/Search.svelte';
 	import ReleaseInfo from '#lib/ReleaseInfo.svelte';
@@ -13,12 +12,11 @@
 	import { kindPath } from '#lib/entities.js';
 	let { data } = $props();
 	const itemsPath = $derived(kindPath('item', data.kinds)!);
-	const unknown = $derived(data.count - data.known);
 </script>
 
 <SeoHead
-	title="The Bloodline Compendium | Item Wiki and Reference"
-	description="Every item in The Bloodline with its sources, recipes and uses, read from the game's own files. An unofficial reference."
+	title="The Bloodline Compendium | Wiki and Reference"
+	description="Where to get every item in The Bloodline, what it is used for and its stats. A fan-made wiki generated from the game's files."
 	website
 />
 
@@ -109,42 +107,6 @@
 				</li>
 			{/each}
 		</ul>
-	</section>
-
-	<section class="edition" aria-labelledby="edition-heading">
-		<div>
-			<h2 id="edition-heading">{data.release.title}</h2>
-			<p>
-				This edition describes the game as patched on {new Intl.DateTimeFormat('en', {
-					dateStyle: 'long',
-					timeZone: 'UTC'
-				}).format(new Date(data.release.patchDate))}. Items, sources and facts are read from the
-				game's files.
-			</p>
-			<p class="links">
-				<a href={data.release.patchNotesUrl} rel="external">Patch Notes</a>
-				<a href={resolve('about/')}>How the Compendium Is Made</a>
-			</p>
-		</div>
-		<div>
-			<p>
-				<strong>{formatNumber(data.known)}</strong> of {formatNumber(data.count)} items have a known source.
-			</p>
-			<div
-				class="meter"
-				role="img"
-				aria-label="{formatNumber(data.known)} of {formatNumber(
-					data.count
-				)} items have a known source"
-			>
-				<span style:width="{(data.known / Math.max(data.count, 1)) * 100}%"></span>
-			</div>
-			{#if unknown}<p>
-					<a href={kindPath('item', data.kinds, '?unknown=1')!}
-						>{formatNumber(unknown)} {unknown === 1 ? 'item' : 'items'} without a known source</a
-					>
-				</p>{/if}
-		</div>
 	</section>
 </div>
 
@@ -304,42 +266,6 @@
 		color: var(--text-muted);
 	}
 
-	.edition {
-		display: grid;
-		grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-		gap: var(--gap-page);
-		padding: var(--inset-loose);
-		border: var(--border-width) solid var(--border);
-		border-radius: var(--radius-2);
-		background: var(--surface-panel);
-	}
-	.edition h2 {
-		font-size: var(--type-sub);
-		margin-bottom: var(--gap-block);
-	}
-	.edition p {
-		margin: 0 0 var(--gap-block);
-		color: var(--text-soft);
-	}
-	.links {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--gap-inline) var(--gap-groups);
-	}
-	.meter {
-		height: var(--size-meter);
-		margin: var(--gap-line) 0 var(--gap-block);
-		border-radius: var(--radius-round);
-		background: var(--surface-slot);
-		overflow: hidden;
-	}
-	.meter span {
-		display: block;
-		height: 100%;
-		border-radius: var(--radius-round);
-		background: var(--known);
-	}
-
 	@media (width < 64rem) {
 		.art {
 			aspect-ratio: auto;
@@ -350,11 +276,6 @@
 		}
 		.hero-body {
 			margin-top: calc(-1 * var(--gap-page));
-		}
-		.edition {
-			grid-template-columns: minmax(0, 1fr);
-			gap: var(--gap-block);
-			padding: var(--inset);
 		}
 	}
 </style>

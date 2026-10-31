@@ -27,7 +27,6 @@
 	--brand: #c93a4b;
 	--brand-hover: #d94b5c;
 	--gold: #e6bb72;
-	--known: #4fbf9f;
 	--border: #322a44;
 	--border-control: #4a3f63;
 	--slot-edge: rgb(255 255 255 / 4%);
@@ -130,7 +129,6 @@
 	--size-icon-inline: 1.5rem;
 	--size-icon-stack: 2.5rem;
 	--size-icon-title: 5rem;
-	--size-meter: 0.5rem;
 	--size-page: 75rem;
 	--size-reading: 48rem;
 	/* Prose keeps a reading measure, and an introduction a shorter one. */

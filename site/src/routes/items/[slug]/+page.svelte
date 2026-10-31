@@ -223,8 +223,6 @@
 				{#if !groups.length}
 					<p class="surface">
 						{statusSentence[item.status]}
-						{#if item.status === 'noKnownSource'}<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- the resolved page with its section. -->
-							<a href={resolve('about/') + '#limits'}>Why some sources are missing</a>{/if}
 					</p>
 				{:else}
 					<ul

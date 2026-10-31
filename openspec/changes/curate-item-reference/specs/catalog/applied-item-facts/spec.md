@@ -11,7 +11,7 @@ The catalog SHALL publish an item's base value and, for each shop source, the ru
 
 #### Scenario: City shop at neutral respect
 - **WHEN** an item with base value 100 is sold in a city shop and the player's respect there is between 0 and 249
-- **THEN** the page shows a purchase price of 140 gold and a sale price of 10 gold, and names respect as what changes them
+- **THEN** the page shows a purchase price of 140 gold and a sale price of 10 gold
 
 #### Scenario: Settlement shop
 - **WHEN** the settlement Blacksmith sells an item with base value 100

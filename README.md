@@ -1,13 +1,13 @@
 # The Bloodline Compendium
 
-A searchable item reference for players of [The Bloodline](https://store.steampowered.com/app/1159290/The_Bloodline/), built from the game's own data. This unofficial fan project is not affiliated with Shieldbearer Studios or 505 Games.
+A searchable wiki for players of [The Bloodline](https://store.steampowered.com/app/1159290/The_Bloodline/), generated from the game's files. This unofficial fan project is not affiliated with Shieldbearer Studios or 505 Games.
 
 [Open the compendium](https://the-bloodline.compendiums.org/) · [Support on Ko-fi](https://ko-fi.com/wowmuch)
 
 ## Use the compendium
 
 - Browse or search items and follow their acquisition routes and uses.
-- Read About for how the compendium reads the game, what its pages cannot tell you, and the difference between the game release and the data update.
+- Read About for what the compendium is, how it is made and which game release it covers.
 
 You do not need the game to use the published site. This checkout is for changing the project or rebuilding its data.
 

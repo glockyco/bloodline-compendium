@@ -32,7 +32,7 @@ Missing facts, sources and icons SHALL remain explicit without blank decorative 
 
 #### Scenario: Item without a known source
 - **WHEN** a reader opens the page of an item without a known source
-- **THEN** the page states that no source is known and links to the coverage page
+- **THEN** the page states that no source is known and that the item may come from a quest or event
 
 ### Requirement: Relation tables limit numeric columns
 Relation tables SHALL show at most two numeric columns with interpretable units.
@@ -88,7 +88,7 @@ The site SHALL be fully prerendered static files. The build SHALL fail when the 
 - **THEN** the build fails and reports the count by directory
 
 ### Requirement: Reference hub
-The home page SHALL introduce the item reference, provide search and category entry points, and expose release and coverage information without repeating the complete item list.
+The home page SHALL say what a visitor can look up, provide search and category entry points, and show release information without repeating the complete item list.
 
 #### Scenario: Starting a lookup
 - **WHEN** a reader opens the home page
