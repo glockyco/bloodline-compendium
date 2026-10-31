@@ -15,15 +15,15 @@
 
 <SeoHead
 	title="Known Issues | The Bloodline Compendium"
-	description="Defects in The Bloodline, each reproduced in the game, with their effect on players, workarounds and steps to see them yourself."
+	description="This page lists bugs in The Bloodline that affect items. Each bug was confirmed in the game and comes with steps to reproduce it."
 />
 <div class="sections" data-pagefind-body>
 	<header class="page-heading">
 		<p class="eyebrow">Problems in the game itself</p>
 		<h1 data-pagefind-meta="title">Known Issues</h1>
 		<p class="intro">
-			Defects in The Bloodline, each reproduced in the game. Item pages show what the game applies
-			and link the issues that affect them.
+			This page lists bugs in The Bloodline that affect items. Each bug was confirmed in the game and comes
+			with steps to reproduce it.
 		</p>
 	</header>
 	{#if data.issues.length}<nav class="issue-index surface" aria-label="Issues">
