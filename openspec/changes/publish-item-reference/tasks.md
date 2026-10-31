@@ -7,7 +7,6 @@
 - [x] 1.3 Add the SvelteKit site with the static adapter, TypeScript, ESLint, Prettier, svelte-check, Vitest and Playwright, and verify each check runs clean
 - [x] 1.4 Add the check that fails when a game file or extracted output is tracked by Git, and verify it fails on a planted file and passes otherwise
 - [x] 1.5 Add the GitHub Actions workflow that runs every check inside the Nix shell on invented fixtures, with SHA-pinned actions and no secrets, plus Renovate configuration with grouped updates and manual review for CUE4Parse, and verify the workflow passes on a pushed branch after approval to push
-- [ ] 1.6 Enable the Renovate GitHub app for this repository after approval, and verify its dependency dashboard lists CUE4Parse as awaiting approval
 
 ## 2. Extraction
 
@@ -50,7 +49,7 @@
 
 ## 6. End-to-end check
 
-- [ ] 6.1 Run extract, catalog, site build and preview from a clean checkout on macOS, and verify the documented workflow produces a working preview
+- [x] 6.1 Run extract, catalog, site build and preview from a clean checkout on macOS, and verify the documented workflow produces a working preview
 
 ## 7. Reader redesign decisions 1-11
 
