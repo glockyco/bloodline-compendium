@@ -333,6 +333,7 @@ internal enum Stat
     Speed,
     DamageType,
     MagazineSize,
+    WeaponBehavior,
     ArmorType,
     ArmorRating,
     Effects,

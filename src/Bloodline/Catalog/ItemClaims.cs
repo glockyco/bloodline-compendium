@@ -94,7 +94,14 @@ internal sealed class ItemClaims(CodeIndex? code, long build)
             page.Type == "Unknown" ? null : page.Type,
             page.Category.Name switch
             {
-                "Weapon" => ["ItemInfo.WeaponType", "ItemInfo.SpecificItemType"],
+                "Weapon" =>
+                [
+                    "ItemInfo.WeaponType",
+                    "ItemInfo.SpecificItemType",
+                    "Weapon Class",
+                    "Class",
+                    "ItemInfo.ItemName",
+                ],
                 "Armor" => ["ItemInfo.ItemSlot"],
                 "Weapon Part" => ["WeaponComponentTable.Part"],
                 _ => categoryInputs,
@@ -144,7 +151,9 @@ internal sealed class ItemClaims(CodeIndex? code, long build)
                 new FactClaim(
                     item,
                     fact,
-                    known ? ClaimType.Extracted : ClaimType.Unknown,
+                    !known ? ClaimType.Unknown
+                        : fact == "Weapon behavior" ? ClaimType.Observed
+                        : ClaimType.Extracted,
                     build,
                     inputs,
                     citations
@@ -222,6 +231,7 @@ internal sealed class ItemClaims(CodeIndex? code, long build)
             Stat.Speed => ["ItemInfo.Speed"],
             Stat.DamageType => ["WeaponInfo.DamageType"],
             Stat.MagazineSize => ["WeaponInfo.MagazineSize"],
+            Stat.WeaponBehavior => ["artifacts/design/game/task-10-8.md"],
             Stat.ArmorType => ["ArmorDataTable.ArmorClass"],
             Stat.ArmorRating => ["ArmorDataTable.ArmorValue", "ItemInfo.Damage"],
             Stat.Effects => ["PotionInfo.PotionEffects"],

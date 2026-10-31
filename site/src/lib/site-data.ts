@@ -94,6 +94,7 @@ export type Stat =
   | "speed"
   | "damageType"
   | "magazineSize"
+  | "weaponBehavior"
   | "armorType"
   | "armorRating"
   | "effects"

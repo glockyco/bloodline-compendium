@@ -1393,6 +1393,7 @@
         "speed",
         "damageType",
         "magazineSize",
+        "weaponBehavior",
         "armorType",
         "armorRating",
         "effects",

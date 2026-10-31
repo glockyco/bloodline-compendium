@@ -20,6 +20,7 @@ internal static class StatVocabulary
         [Stat.Speed] = new("Speed", "Speed"),
         [Stat.DamageType] = new("Damage type"),
         [Stat.MagazineSize] = new("Magazine size"),
+        [Stat.WeaponBehavior] = new("Weapon behavior"),
         [Stat.ArmorType] = new("Armor type", "Type"),
         [Stat.ArmorRating] = new("Armor rating", "Armor"),
         [Stat.Effects] = new("Effects"),

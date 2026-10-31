@@ -121,13 +121,30 @@ internal sealed class ItemFacts(
     }.ToDictionary(effect => effect.Item1, StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
-    /// A weapon's attack type, which equipping, proficiency experience and enchantments read, or else its item type for
-    /// weapons without one, such as shields. Lonland Pistol's item type says Rifle while it attacks as a pistol.
+    /// Staves retain their own type within the shared Halberd attack family. Other weapons use their
+    /// attack type, or their item type when no attack type is set.
     /// </summary>
-    private string? WeaponType(JsonObject properties) =>
-        Display(RecordValues.At(properties, "ItemInfo.WeaponType")) is { } attack and not "None"
+    private string? WeaponType(ClassRecord item) =>
+        IsStaff(item) ? "Staff"
+        : Display(RecordValues.At(item.Properties, "ItemInfo.WeaponType"))
+            is { } attack
+                and not "None"
             ? attack
-            : Display(RecordValues.At(properties, "ItemInfo.SpecificItemType"));
+        : Display(RecordValues.At(item.Properties, "ItemInfo.SpecificItemType"));
+
+    private bool IsStaff(ClassRecord item) =>
+        Display(item.Properties["Weapon Class"]) == "Staff"
+        || (
+            Display(RecordValues.At(item.Properties, "ItemInfo.WeaponType")) == "Halberd"
+            && (
+                item.Path.Contains("/Weapons/Staves/", StringComparison.Ordinal)
+                || (
+                    RecordValues
+                        .Text(RecordValues.At(item.Properties, "ItemInfo.ItemName"))
+                        ?.Contains("staff", StringComparison.OrdinalIgnoreCase) == true
+                )
+            )
+        );
 
     public string? Display(JsonNode? value) =>
         RecordValues.Text(value)
@@ -158,7 +175,7 @@ internal sealed class ItemFacts(
             : component is not null ? componentPart
             : category switch
             {
-                "Weapon" => WeaponType(properties),
+                "Weapon" => WeaponType(item),
                 "Armor" => Display(RecordValues.At(properties, "ItemInfo.ItemSlot")),
                 _ => readerCategory?.Name,
             };
@@ -205,6 +222,19 @@ internal sealed class ItemFacts(
             if (magazine is null || magazine > 0)
             {
                 Add(Stat.MagazineSize, "WeaponInfo.MagazineSize");
+            }
+            if (type == "Staff" && Display(properties["Weapon Class"]) != "Staff")
+            {
+                facts.Add(
+                    StatVocabulary.Text(
+                        Stat.WeaponBehavior,
+                        ItemIdentity.ClassName(item.Path)
+                            is "StaffOfMinorFlames"
+                                or "StaffOfMinorRot"
+                            ? "Swings like a halberd, launches a projectile for 5 mana and trains no weapon proficiency."
+                            : "Swings like a halberd and trains no weapon proficiency."
+                    )
+                );
             }
         }
         if (category == "Armor")

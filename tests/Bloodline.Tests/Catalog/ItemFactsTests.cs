@@ -678,6 +678,97 @@ public sealed class ItemFactsTests
         Assert.Equal(type, new ItemFacts([]).Resolve(item, "invented").Type);
     }
 
+    [Theory]
+    [InlineData(
+        "Walking Stick",
+        "Staff",
+        "Halberd",
+        "/Game/Invented/WalkingStick.WalkingStick_C",
+        "Staff",
+        null
+    )]
+    [InlineData(
+        "Fairy Staff",
+        "Shortsword",
+        "Halberd",
+        "/Game/Invented/FairyStaff.FairyStaff_C",
+        "Staff",
+        "Swings like a halberd and trains no weapon proficiency."
+    )]
+    [InlineData(
+        "STAFF",
+        "Shortsword",
+        "Halberd",
+        "/Game/Invented/Other.Other_C",
+        "Staff",
+        "Swings like a halberd and trains no weapon proficiency."
+    )]
+    [InlineData(
+        "Nameless",
+        "Shortsword",
+        "Halberd",
+        "/Game/Weapons/Staves/Other.Other_C",
+        "Staff",
+        "Swings like a halberd and trains no weapon proficiency."
+    )]
+    [InlineData(
+        "Staff of Minor Flames",
+        "Shortsword",
+        "Halberd",
+        "/Game/Invented/StaffOfMinorFlames.StaffOfMinorFlames_C",
+        "Staff",
+        "Swings like a halberd, launches a projectile for 5 mana and trains no weapon proficiency."
+    )]
+    [InlineData(
+        "Staff of Minor Rot",
+        "Shortsword",
+        "Halberd",
+        "/Game/Invented/StaffOfMinorRot.StaffOfMinorRot_C",
+        "Staff",
+        "Swings like a halberd, launches a projectile for 5 mana and trains no weapon proficiency."
+    )]
+    [InlineData(
+        "Halberd",
+        "Shortsword",
+        "Halberd",
+        "/Game/Invented/Other.Other_C",
+        "Halberd",
+        null
+    )]
+    [InlineData(
+        "Staff-shaped Sword",
+        "Shortsword",
+        "Sword",
+        "/Game/Invented/Other.Other_C",
+        "Sword",
+        null
+    )]
+    public void StaffIdentityAndBehaviorFollowClassAttackFamilyAndName(
+        string name,
+        string weaponClass,
+        string attack,
+        string path,
+        string type,
+        string? behavior
+    )
+    {
+        var item = Item("Weapon");
+        item = item with { Path = path };
+        item.Properties["ItemInfo"]!["ItemName"] = new JsonObject { ["$text"] = name };
+        item.Properties["ItemInfo"]!["WeaponType"] = Parse(
+            $$"""{"$enum":"E_AttackType::{{attack}}","display":"{{attack}}"}"""
+        );
+        item.Properties["Weapon Class"] = Parse(
+            $$"""{"$enum":"WeaponTypes::{{weaponClass}}","display":"{{weaponClass}}"}"""
+        );
+        var page = new ItemFacts([]).Resolve(item, "invented");
+        Assert.Equal(type, page.Type);
+        Assert.Equal(
+            behavior,
+            page.Facts.SingleOrDefault(fact => fact.Stat == Stat.WeaponBehavior)?.Text
+        );
+    }
+
     [Fact]
     public void SpeedWordFollowsTheItemInfoThatTooltipsRead()
     {
