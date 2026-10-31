@@ -98,6 +98,7 @@ public sealed class ItemListTests
         );
         Assert.Equal(Speed("Average").Number, Speed("Standard").Number);
         Assert.Equal("Slow", Speed("Slow").Text);
+        Assert.DoesNotContain("attackSpeed", ItemList.CellsOf(Page("Sword", "weapon", "Sword")).Keys);
 
         var part = Page("Blade", "weapon-part", "Blade") with
         {

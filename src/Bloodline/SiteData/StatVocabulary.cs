@@ -17,7 +17,6 @@ internal static class StatVocabulary
         [Stat.DamageContribution] = new("Damage contribution"),
         [Stat.SpeedContribution] = new("Speed contribution"),
         [Stat.Damage] = new("Damage", "Damage"),
-        [Stat.AttackSpeed] = new("Attack speed"),
         [Stat.Speed] = new("Speed", "Speed"),
         [Stat.DamageType] = new("Damage type"),
         [Stat.MagazineSize] = new("Magazine size"),

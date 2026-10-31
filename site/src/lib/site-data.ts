@@ -91,7 +91,6 @@ export type Stat =
   | "damageContribution"
   | "speedContribution"
   | "damage"
-  | "attackSpeed"
   | "speed"
   | "damageType"
   | "magazineSize"

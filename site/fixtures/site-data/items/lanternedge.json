@@ -37,13 +37,6 @@
 		},
 		{
 			"effect": null,
-			"label": "Attack speed",
-			"number": 1.2,
-			"stat": "attackSpeed",
-			"text": null
-		},
-		{
-			"effect": null,
 			"label": "Magazine size",
 			"number": null,
 			"stat": "magazineSize",
@@ -617,11 +610,46 @@
 			"notes": [],
 			"odds": null,
 			"relationId": "fixture:lanternedge:source:17"
+		},
+		{
+			"kind": "settlementDelivery",
+			"unconfirmed": false,
+			"name": "Stargazer Workshop",
+			"entity": {
+				"kind": "activity",
+				"key": "/Invented/Buildings/StargazerWorkshop",
+				"name": "Stargazer Workshop",
+				"slug": null,
+				"icon": null
+			},
+			"places": [],
+			"settlement": true,
+			"price": null,
+			"amount": { "min": 1, "max": 1 },
+			"inputs": [],
+			"conditions": [],
+			"notes": [],
+			"odds": { "event": "delivery", "chance": 0.1, "expected": 0.1, "unknown": null },
+			"relationId": "fixture:lanternedge:source:18"
 		}
 	],
 	"key": "/Invented/Items/Lanternedge",
 	"kind": "item",
 	"relations": [
+		{
+			"id": "fixture:lanternedge:source:18",
+			"kind": "settlementDelivery",
+			"direction": "incoming",
+			"entity": {
+				"kind": "activity",
+				"key": "/Invented/Buildings/StargazerWorkshop",
+				"name": "Stargazer Workshop",
+				"slug": null,
+				"icon": null
+			},
+			"label": "Obtained from",
+			"conditions": []
+		},
 		{
 			"id": "fixture:lanternedge:source:16",
 			"kind": "pickup",

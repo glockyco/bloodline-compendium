@@ -126,10 +126,7 @@ public sealed class ClaimTests
             new CodeCitation(function.Citation, function.Fingerprint),
             Assert.Single(damage.Citations)
         );
-        Assert.Contains(
-            resolver.Claims,
-            claim => claim.Fact == "Attack speed" && claim.Type == ClaimType.Unknown
-        );
+        Assert.DoesNotContain(resolver.Claims, claim => claim.Fact == "Attack speed");
     }
 
     private static ClassRecord Item() =>

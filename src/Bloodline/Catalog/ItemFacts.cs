@@ -192,9 +192,8 @@ internal sealed class ItemFacts(
         {
             // Equipped damage comes from WeaponInfo, not the inventory display's ItemInfo.Damage.
             Add(Stat.Damage, "WeaponInfo.Damage");
-            // Tooltips show this speed word, and the equipped attack montage plays at the multiplier.
+            // Tooltips show the authored speed word, not a universal attack-rate number.
             Add(Stat.Speed, "ItemInfo.Speed");
-            Add(Stat.AttackSpeed, "WeaponInfo.AttackSpeed");
             var damageType = Display(RecordValues.At(properties, "WeaponInfo.DamageType"));
             if (damageType != "None")
             {

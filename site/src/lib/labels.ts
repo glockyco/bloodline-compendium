@@ -31,6 +31,11 @@ export const sourceHeadings: Record<SourceKind, string> = {
 	// Random loot names no place or chance, so it follows the ways that do.
 	randomLoot: 'Found as Random Loot'
 };
+
+export const sourceIntros: Partial<Record<SourceKind, string>> = {
+	settlementDelivery:
+		'Completed buildings in your settlement add resources every game week. Collect them under Resources Ready in the settlement overview.'
+};
 /** What a source table's first column lists for each way of getting an item. */
 export const sourceColumns: Record<SourceKind, string> = {
 	shop: 'Merchant',

@@ -132,7 +132,6 @@ internal sealed class ItemClaims(CodeIndex? code, long build)
                 && inputs.Any(input =>
                     input
                         is "WeaponInfo.Damage"
-                            or "WeaponInfo.AttackSpeed"
                             or "ArmorDataTable.ArmorValue"
                             or "FoodEffectDataTable.FoodEffects"
                     || input.StartsWith("WeaponComponentTable.", StringComparison.Ordinal)
@@ -220,7 +219,6 @@ internal sealed class ItemClaims(CodeIndex? code, long build)
             Stat.DamageContribution => ["WeaponComponentTable.Damage"],
             Stat.SpeedContribution => ["WeaponComponentTable.Speed"],
             Stat.Damage => ["WeaponInfo.Damage"],
-            Stat.AttackSpeed => ["WeaponInfo.AttackSpeed"],
             Stat.Speed => ["ItemInfo.Speed"],
             Stat.DamageType => ["WeaponInfo.DamageType"],
             Stat.MagazineSize => ["WeaponInfo.MagazineSize"],

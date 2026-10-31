@@ -690,7 +690,6 @@ public sealed class ItemFactsTests
 
         var speed = facts.Single(fact => fact.Stat == Stat.Speed);
         Assert.Equal(("Slow", "Speed"), (speed.Value, speed.TooltipLabel));
-        var multiplier = facts.Single(fact => fact.Stat == Stat.AttackSpeed);
-        Assert.Equal(("1.5", (string?)null), (multiplier.Value, multiplier.TooltipLabel));
+        Assert.DoesNotContain(facts, fact => fact.Label == "Attack speed");
     }
 }

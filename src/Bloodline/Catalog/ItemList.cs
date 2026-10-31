@@ -76,7 +76,6 @@ internal static class ItemList
     [
         new("damage", "Damage", ["weapon"], true, null, item => Number(item, Stat.Damage)),
         new("speed", "Speed", ["weapon"], false, null, Speed),
-        new("attackSpeed", "Attack Speed", [], true, null, item => Number(item, Stat.AttackSpeed)),
         new(
             "magazineSize",
             "Magazine Size",

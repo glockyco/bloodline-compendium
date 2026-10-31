@@ -101,6 +101,8 @@ Source rows named the wrong things: ingot pickups said Sporing Gloves, ore depos
 
 Settlement buildings stand only in the player's settlement, so their shops and deliveries are marked as the settlement's and read "in your settlement".
 
+The Delivered by Settlements section explains that completed buildings add resources each game week and that Resources Ready in the settlement overview is where to collect them.
+
 ### A recipe makes the item its row names
 
 The crafting window spawns the class of a recipe's `WeaponComponentTable` row and gives it the row's `ItemName`, as `BlacksmithingMinigame` names `Item Being Crafted` after the window's item text. 16 classes have several rows, so the Angled Steel Blade row builds an item called Angled Steel Blade on the Angled Mystcopper Blade class. Such a row is no recipe of the class's page and goes to the maintainer report. A row whose name is the class's item name with up to two letter edits makes that item, because rows and items misspell each other, as the Silver Gothic Guard row and the Silver Gothic Gaurd item do. Rows that make one item from the same inputs, level and experience under one name, such as `SteelRapierGuard` and `SteelJianGuard`, are one recipe.
@@ -111,7 +113,7 @@ Recipe rows without a component row, such as ingots and food, are made through `
 
 Weapons carry two type fields. `ItemInfo.WeaponType` is the attack type: equipping, proficiency experience and the enchantment stances read it, and the player's attack fires a gun only for the attack types Gun and Pistol. `ItemInfo.SpecificItemType` picks between firing branches inside that attack, and the inventory search matches both. Neither appears in a tooltip. A weapon's type is its attack type, so Lonland Pistol is a Pistol, and a weapon without one, such as a shield, takes its item type. Title, list and filter use this one value.
 
-The speed word sorts by its meaning from Slow to Fast, with Standard beside Average, because the words do not follow the attack speed multiplier. `WeaponInfo.Range` is not published, because no reader uses it as a distance. Crossbow bolts compare it with accuracy thresholds that every crossbow passes, the player's gun attack only tests whether it is zero, and the weapon traces that read it end near the world origin instead of in front of the player. A list cell is empty when the item lacks the stat and reads Unknown when the build does not tell it.
+The speed word sorts by its meaning from Slow to Fast, with Standard beside Average. It is the game's authored label, not a conversion from `WeaponInfo.AttackSpeed`. The Attack Speed number is not published on pages, previews or the list, because weapon-specific animation and firing paths do not make it a universal attack-rate comparison. `WeaponInfo.Range` is not published, because no reader uses it as a distance. Crossbow bolts compare it with accuracy thresholds that every crossbow passes, the player's gun attack only tests whether it is zero, and the weapon traces that read it end near the world origin instead of in front of the player. A list cell is empty when the item lacks the stat and reads Unknown when the build does not tell it.
 
 ### Wording a player can act on
 
@@ -162,7 +164,7 @@ Findings left open, each with its owner:
 - Weapon part pages do not explain assembly, compatibility or finished weapon stats, and the part list cannot shortlist by crafting level or ingredient cost. Both belong to `add-crafting-and-equipment`.
 - A bounty note does not say where its quest is accepted, because quest givers are not read yet. Places and people in `openspec/plan.md` own it.
 - The list's name filter now also matches a name the game misspells by one letter, such as Steel Rapier Gaurd, and a source row names each camp place once, since the camp maps of one terrain share their terrain's name.
-- Task 10.8 holds the rest: settlement deliveries do not say what a delivery is, the Speed word and the Attack Speed number rank weapons differently without saying why, and staves are typed Halberd without a hint.
+- Task 10.8 still holds the staff's Halberd explanation. Settlement delivery now names the weekly trigger and collection screen, and only the game's Speed word is published.
 
 ## Reader text
 

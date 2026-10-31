@@ -10,7 +10,7 @@
 	import Section from '#lib/ui/Section.svelte';
 	import ItemTooltip from '#lib/ItemTooltip.svelte';
 	import IssueNote from '#lib/ui/IssueNote.svelte';
-	import { sourceColumns, sourceHeadings, titleCase } from '#lib/labels.js';
+	import { sourceColumns, sourceHeadings, sourceIntros, titleCase } from '#lib/labels.js';
 	import {
 		oddsLabel,
 		recipeKinds,
@@ -387,6 +387,7 @@
 					id={'source-' + group.kind}
 					title={sourceHeadings[group.kind]}
 					count={group.sources.length}
+					line={sourceIntros[group.kind]}
 				>
 					<RelationTable
 						items={group.sources}

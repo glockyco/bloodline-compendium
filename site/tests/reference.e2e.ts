@@ -105,6 +105,7 @@ test('an item link covers its icon and name, not the rest of its cell', async ({
 	await expect(page.locator('#entity-preview')).toHaveCount(0);
 	await page.mouse.move(linkBox.x + linkBox.width / 2, linkBox.y + linkBox.height / 2);
 	await expect(page.locator('#entity-preview')).toContainText('Lanternedge');
+	await expect(page.locator('#entity-preview')).not.toContainText(/Attack Speed/i);
 });
 
 test('phone filters open as a keyboard-accessible sheet and apply without navigation', async ({
@@ -135,12 +136,18 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 	const details = page.getByRole('complementary', { name: 'Item details' });
 	await expect(details).toContainText('Damage: 12');
 	await expect(details.locator('.first')).toHaveText('Average');
-	await expect(details).toContainText(/Attack Speed\s*1.2/);
+	await expect(details).not.toContainText(/Attack Speed/i);
 	await expect(details).toContainText(/Magazine Size\s*Unknown/);
 	const shopLink = page.locator('.acquisition-routes a[href="#source-shop"]');
 	await shopLink.click();
 	await expect(page).toHaveURL(/#source-shop$/);
 	await expect(page.locator('#source-shop')).toBeInViewport();
+	const delivery = page.locator('section').filter({
+		has: page.getByRole('heading', { name: 'Delivered by Settlements' })
+	});
+	await expect(delivery.locator('header .line')).toHaveText(
+		'Completed buildings in your settlement add resources every game week. Collect them under Resources Ready in the settlement overview.'
+	);
 	for (const summary of await page.locator('.item-relations details > summary').all())
 		await summary.click();
 	for (const text of [
