@@ -117,9 +117,10 @@ internal static class CatalogBuilder
             {
                 Icon = icon,
                 Sources = sources,
-                Status = sources.Count > 0 && confirmedSources == 0
-                    ? ItemStatus.NoKnownSource
-                    : statuses.Of(item.Key, confirmedSources),
+                Status =
+                    sources.Count > 0 && confirmedSources == 0
+                        ? ItemStatus.NoKnownSource
+                        : statuses.Of(item.Key, confirmedSources),
             };
             items.Add(item);
             void Gap(GapKind kind, string label, string? detail = null) =>

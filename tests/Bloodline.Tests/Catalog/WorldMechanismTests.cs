@@ -202,11 +202,13 @@ public sealed class WorldMechanismTests
                 ),
             ]
         );
-        var source = Assert.Single(
-            new DialogueGrantMechanism().FindSources(
-                Context([grant, npc], levels: [Level(npc)], dialogues: [dialogue])
+        var source = Assert
+            .Single(
+                new DialogueGrantMechanism().FindSources(
+                    Context([grant, npc], levels: [Level(npc)], dialogues: [dialogue])
+                )
             )
-        ).Source;
+            .Source;
         Assert.Equal(unconfirmed, source.Unconfirmed);
         Assert.Equal("/Invented/Coast", Assert.Single(source.Places).Key);
         Assert.Equal(
@@ -604,10 +606,9 @@ public sealed class WorldMechanismTests
             sources,
             source => source.ItemClass.Contains("Dud", StringComparison.Ordinal)
         );
-        var unused = Assert.Single(
-            sources,
-            source => source.ItemClass == "/Invented/Other.Other_C"
-        ).Source;
+        var unused = Assert
+            .Single(sources, source => source.ItemClass == "/Invented/Other.Other_C")
+            .Source;
         Assert.Empty(unused.Places);
         Assert.True(unused.Unconfirmed);
         Assert.Contains("No gathering spot in the world is known to give it.", unused.Notes);

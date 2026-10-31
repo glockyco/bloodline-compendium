@@ -31,9 +31,7 @@ test('filters items with counted facets, preserves URL state and sorts numeric v
 	]);
 	await page.getByRole('button', { name: 'Show 1 more without a known way to get them' }).click();
 	await expect(page.locator('.item-name').last()).toHaveText('Hollow Prism');
-	await expect(page.locator('tr', { hasText: 'Hollow Prism' })).toContainText(
-		'No known source'
-	);
+	await expect(page.locator('tr', { hasText: 'Hollow Prism' })).toContainText('No known source');
 	await expect(page.locator('.item-name img').first()).toHaveAttribute('src', /-48.webp$/);
 	await page.getByRole('button', { name: 'Item', exact: true }).click();
 	await page.getByRole('button', { name: 'Item', exact: true }).click();
@@ -89,9 +87,7 @@ test('combines filters, restores them from a shared URL and adds stat columns', 
 test('name search finds items without a known way to get them', async ({ page }) => {
 	await page.goto('/items/?name=prism');
 	await expect(page.locator('.item-name')).toHaveText(['Hollow Prism']);
-	await expect(page.locator('tr', { hasText: 'Hollow Prism' })).toContainText(
-		'No known source'
-	);
+	await expect(page.locator('tr', { hasText: 'Hollow Prism' })).toContainText('No known source');
 });
 
 test('an item link covers its icon and name, not the rest of its cell', async ({ page }) => {
@@ -179,9 +175,7 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 	await unknown.focus();
 	await expect(page.getByRole('tooltip')).toHaveText('How often the orchard yields it is unknown.');
 	await page.goto('/items/hollow-prism/');
-	await expect(
-		page.getByText('No known source. It may come from a quest or event.')
-	).toBeVisible();
+	await expect(page.getByText('No known source. It may come from a quest or event.')).toBeVisible();
 	await expect(page.getByText('No icon is known for this item.')).toBeVisible();
 });
 
@@ -208,9 +202,7 @@ test('keeps unconfirmed sources at the end without advertising a way to get the 
 		await expect(
 			dialogue.getByText('This dialogue is marked unused in the game files.')
 		).toBeVisible();
-		await expect(
-			files.getByText('No placed instance was found for this pickup.')
-		).toBeVisible();
+		await expect(files.getByText('No placed instance was found for this pickup.')).toBeVisible();
 		await expect(page.locator('meta[name="description"]')).toHaveAttribute(
 			'content',
 			/No known source\./
@@ -249,12 +241,12 @@ test('shows loose-loot chances beside ordinary pickups without calling them cont
 		);
 		await expect(table.getByRole('row').filter({ hasText: 'Watchtower blade' })).toBeVisible();
 		await expect(pickups).not.toContainText('Loose items lying on the ground');
-		await expect(
-			page.locator('.acquisition-routes a[href="#source-pickup"]')
-		).toContainText('Found on the ground in Glass Reach');
-		await expect(
-			page.locator('section[aria-labelledby="source-containerLoot"]')
-		).not.toContainText('Stargazer loose loot');
+		await expect(page.locator('.acquisition-routes a[href="#source-pickup"]')).toContainText(
+			'Found on the ground in Glass Reach'
+		);
+		await expect(page.locator('section[aria-labelledby="source-containerLoot"]')).not.toContainText(
+			'Stargazer loose loot'
+		);
 	}
 });
 

@@ -45,28 +45,18 @@ public sealed class ItemListTests
     [Fact]
     public void AcquisitionFiltersAndPlaceSummariesOmitFileOnlySources()
     {
-        var place = new EntityReference(
-            EntityKind.Place,
-            "/Invented/Coast",
-            "Coast",
-            null,
-            null
-        );
-        var pickup = new Source(
-            SourceKind.Pickup,
-            "World pickup",
-            [place],
-            null,
-            null,
-            [],
-            []
-        );
+        var place = new EntityReference(EntityKind.Place, "/Invented/Coast", "Coast", null, null);
+        var pickup = new Source(SourceKind.Pickup, "World pickup", [place], null, null, [], []);
         var page = Page("Apple", "food", "Fruit") with
         {
             Sources =
             [
                 pickup,
-                pickup with { Kind = SourceKind.Gathering, Unconfirmed = true },
+                pickup with
+                {
+                    Kind = SourceKind.Gathering,
+                    Unconfirmed = true,
+                },
                 pickup with
                 {
                     Kind = SourceKind.Dialogue,
@@ -98,7 +88,10 @@ public sealed class ItemListTests
         );
         Assert.Equal(Speed("Average").Number, Speed("Standard").Number);
         Assert.Equal("Slow", Speed("Slow").Text);
-        Assert.DoesNotContain("attackSpeed", ItemList.CellsOf(Page("Sword", "weapon", "Sword")).Keys);
+        Assert.DoesNotContain(
+            "attackSpeed",
+            ItemList.CellsOf(Page("Sword", "weapon", "Sword")).Keys
+        );
 
         var part = Page("Blade", "weapon-part", "Blade") with
         {

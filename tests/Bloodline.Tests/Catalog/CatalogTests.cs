@@ -126,8 +126,7 @@ public sealed class CatalogTests
             }
             else
             {
-                path =
-                    "/Invented/HarvestableInteractionObject.HarvestableInteractionObject_C";
+                path = "/Invented/HarvestableInteractionObject.HarvestableInteractionObject_C";
                 properties["Preset"] = 1;
                 properties[
                     sourceCase == "unusedGatheringDefinition"
@@ -142,8 +141,8 @@ public sealed class CatalogTests
             }
             classes.Add(new ClassRecord(path, ancestors, properties));
             if (
-                sourceCase is
-                "unusedGatheringDefinition"
+                sourceCase
+                is "unusedGatheringDefinition"
                     or "zeroGatheringYield"
                     or "zeroBespokeYield"
             )
@@ -173,8 +172,7 @@ public sealed class CatalogTests
         Assert.NotEmpty(unconfirmed.Notes);
         Assert.Contains(
             result.Graph.Relations,
-            relation =>
-                relation.Id == unconfirmed.RelationId && relation.Attributes!.Unconfirmed
+            relation => relation.Id == unconfirmed.RelationId && relation.Attributes!.Unconfirmed
         );
         var expected = hasConfirmedPickup ? ItemStatus.Obtainable : ItemStatus.NoKnownSource;
         Assert.Equal(expected, page.Status);

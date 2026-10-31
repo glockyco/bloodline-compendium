@@ -145,7 +145,15 @@
 			"id": "source",
 			"label": "How to Get",
 			"categories": [],
-			"values": ["shop", "currencyShop", "crafting", "containerLoot", "pickup", "enemyDrop", "gathering"],
+			"values": [
+				"shop",
+				"currencyShop",
+				"crafting",
+				"containerLoot",
+				"pickup",
+				"enemyDrop",
+				"gathering"
+			],
 			"labels": {}
 		},
 		{

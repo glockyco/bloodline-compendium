@@ -132,7 +132,14 @@ internal static class CatalogGraph
                 {
                     foreach (var input in source.Inputs)
                     {
-                        AddUse("Input", input.Item, input.Quantity, input.RelationId!, source, target);
+                        AddUse(
+                            "Input",
+                            input.Item,
+                            input.Quantity,
+                            input.RelationId!,
+                            source,
+                            target
+                        );
                     }
                     if (source.Price is { Currency: { } payment, RelationId: { } paymentId })
                     {

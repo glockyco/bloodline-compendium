@@ -29,10 +29,8 @@
 	const item = $derived(data.item);
 	const statusSentence: Record<ItemStatus, string> = {
 		obtainable: '',
-		noKnownSource:
-			'No known source. It may come from a quest or event.',
-		notInNormalPlay:
-			'This item cannot be obtained in normal play. It only appears in test areas.'
+		noKnownSource: 'No known source. It may come from a quest or event.',
+		notInNormalPlay: 'This item cannot be obtained in normal play. It only appears in test areas.'
 	};
 	// An item page exists only for a kind the registry gives pages.
 	const kind = $derived(data.kinds.find((entry) => entry.kind === item.kind)!);
@@ -435,7 +433,9 @@
 													entity={place}
 												/>{/each}
 										</p>{/if}</td
-								><td>{#each source.notes as note, index (index)}<p>{note}</p>{/each}</td></tr
+								><td
+									>{#each source.notes as note, index (index)}<p>{note}</p>{/each}</td
+								></tr
 							>{/snippet}</RelationTable
 					>
 				</Section>{/if}

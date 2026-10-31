@@ -182,7 +182,8 @@ internal sealed class GatheringMechanism : ISourceMechanism
                             !placed
                             || RecordValues.Number(
                                 properties["Maximum amount of items that can be harvested"]
-                            ) is <= 0,
+                            )
+                                is <= 0,
                         Entity = WorldSourceData.Reference(
                             EntityKind.Resource,
                             path,
@@ -388,7 +389,10 @@ internal sealed class GatheringMechanism : ISourceMechanism
                             [
                                 .. HarvestNotes(properties),
                                 .. places.Count == 0
-                                    ? new[] { "No gathering spot in the world is known to give it." }
+                                    ? new[]
+                                    {
+                                        "No gathering spot in the world is known to give it.",
+                                    }
                                     : [],
                                 .. quantity is <= 0
                                     ? new[]
@@ -405,7 +409,8 @@ internal sealed class GatheringMechanism : ISourceMechanism
                                 || quantity is <= 0
                                 || RecordValues.Number(
                                     properties["Maximum amount of items that can be harvested"]
-                                ) is <= 0,
+                                )
+                                    is <= 0,
                             Entity = WorldSourceData.Reference(
                                 EntityKind.Resource,
                                 type.Path,

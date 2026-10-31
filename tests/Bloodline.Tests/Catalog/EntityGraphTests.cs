@@ -309,9 +309,7 @@ public sealed class EntityGraphTests
             Sources = [source],
         };
         var result = CatalogGraph.Build([input, output]);
-        var published = Assert.Single(
-            result.Items.Single(page => page.Key == output.Key).Sources
-        );
+        var published = Assert.Single(result.Items.Single(page => page.Key == output.Key).Sources);
         var acquisition = Assert.Single(
             result.Graph.Relations,
             relation => relation.Kind == "Cooking"
