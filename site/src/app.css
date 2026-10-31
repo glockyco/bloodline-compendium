@@ -146,6 +146,15 @@ label {
 .sections > section > h2 {
 	margin-bottom: var(--gap-line);
 }
+/* Prose ends without a stranded last word, and a list of separate thoughts spaces its items apart. */
+.sections p,
+.intro {
+	text-wrap: pretty;
+}
+.sections > section > :is(ul, ol) {
+	display: grid;
+	gap: var(--gap-inline);
+}
 .panel,
 .surface {
 	margin: 0;
@@ -157,6 +166,9 @@ label {
 .muted,
 small {
 	color: var(--text-muted);
+}
+small {
+	line-height: var(--leading-meta);
 }
 /* Release and data dates are metadata, quieter than the content around them. */
 .release-info {
@@ -293,7 +305,7 @@ small {
 /* Filters above a table: one row of labelled controls of one height, each label above its control. */
 .use-filters {
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(var(--size-filter-control), 1fr));
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--size-filter-control)), 1fr));
 	gap: var(--gap-block);
 }
 .use-filters label {
@@ -324,7 +336,8 @@ small {
 }
 .source-places {
 	color: var(--text-muted);
-	font-size: var(--type-0);
+	font-size: var(--type-meta);
+	line-height: var(--leading-meta);
 	margin: var(--gap-line) 0 0;
 }
 .row-details summary {
@@ -344,12 +357,11 @@ small {
 }
 /* The label of one part of a surface, such as Workaround or Expected: small, strong and quieter than its content. */
 .field-label {
-	margin: 0;
 	color: var(--text-muted);
 	font-family: var(--font-body);
-	font-size: var(--type-0);
+	font-size: var(--type-meta);
 	font-weight: var(--weight-strong);
-	line-height: var(--leading-snug);
+	line-height: var(--leading-meta);
 }
 .more-entries summary {
 	padding: var(--inset-cell) var(--inset);
@@ -389,9 +401,9 @@ details[open] > summary .show-less {
 		display: block;
 	}
 }
-/* Narrow screens read one column in one order: the answer, the game card, then the details. A tablet keeps the
-   card at its desktop width, and a phone lets it fill the column like the surfaces around it. */
-@media (width < 64rem) {
+/* A tablet keeps the game card beside the answer in a narrower column, and a phone reads one column in one
+   order: the answer, the game card, then the details. */
+@media (width < 40rem) {
 	.detail-layout {
 		grid-template-columns: minmax(0, 1fr);
 	}
@@ -402,10 +414,5 @@ details[open] > summary .show-less {
 	}
 	.item-relations {
 		grid-row: 3;
-	}
-}
-@media (width >= 40rem) and (width < 64rem) {
-	.item-side {
-		max-width: var(--size-item-side);
 	}
 }

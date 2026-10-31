@@ -81,7 +81,7 @@
 				>{/each}
 		</p>{/if}
 	{#if extra.length}<dl class="extra">
-			{#each extra as fact (fact.stat + fact.label)}<div>
+			{#each extra as fact (fact.stat + fact.label)}<div class:prose={fact.number == null}>
 					<dt>{titleCase(fact.label)}</dt>
 					<dd>{factValue(fact) ?? 'Unknown'}</dd>
 				</div>{/each}
@@ -190,5 +190,9 @@
 		margin: 0;
 		text-align: right;
 		font-variant-numeric: tabular-nums;
+	}
+	/* A worded value, such as an effect, reads left to right from its own edge instead of hugging the right. */
+	.extra .prose dd {
+		text-align: left;
 	}
 </style>

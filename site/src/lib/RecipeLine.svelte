@@ -87,21 +87,26 @@
 	.quantity {
 		font-weight: var(--weight-strong);
 	}
+	/* Each fact is a field, its label above its value, in columns of one width. */
 	.recipe-facts {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--gap-inline) var(--gap-groups);
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(var(--size-filter-control), 1fr));
+		gap: var(--gap-block) var(--gap-groups);
 		margin: 0;
 	}
 	.recipe-facts div {
-		display: flex;
-		gap: var(--gap-inline);
+		display: grid;
+		align-content: start;
+		gap: var(--gap-line);
 	}
 	.recipe-facts dt {
-		color: var(--text-soft);
+		color: var(--text-muted);
+		font-size: var(--type-meta);
+		font-weight: var(--weight-strong);
+		line-height: var(--leading-meta);
 	}
 	.recipe-facts dd {
-		margin: 0;
+		line-height: var(--leading-data);
 	}
 	.recipe-notes {
 		margin: 0;

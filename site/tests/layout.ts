@@ -7,7 +7,7 @@ import type { Page } from '@playwright/test';
  * - the rows of cards that share a line do not start at the same height,
  * - visible text is smaller than step 0 of the type scale,
  * - a surface or table cell is padded off the shared inset,
- * - a numeric cell or heading is not right-aligned,
+ * - a numeric cell or heading in a column of a table is not right-aligned,
  * - a comma in site text has no space after it.
  */
 export async function layoutProblems(page: Page): Promise<string[]> {
@@ -89,7 +89,10 @@ export async function layoutProblems(page: Page): Promise<string[]> {
 			if (Math.abs(padding - inset) > tolerance)
 				problems.push(`${describe(element)} is inset ${padding}px instead of ${inset}px`);
 		}
+		// A phone shows some tables as rows of labelled values, where a number follows its label instead of a column.
 		for (const cell of document.querySelectorAll('td.numeric, th.numeric')) {
+			const row = cell.parentElement;
+			if (!row || getComputedStyle(row).display !== 'table-row') continue;
 			if (visible(cell) && getComputedStyle(cell).textAlign !== 'right')
 				problems.push(`${describe(cell)} is a number that is not right-aligned`);
 		}

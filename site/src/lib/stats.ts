@@ -13,7 +13,7 @@ export function factValue(fact: Fact): string | null {
 		return (
 			fact.effect.name +
 			(fact.effect.power === null ? '' : ' ' + formatNumber(fact.effect.power)) +
-			(fact.effect.seconds ? ' for ' + formatNumber(fact.effect.seconds) + ' s' : '')
+			(fact.effect.seconds ? ' for ' + formatNumber(fact.effect.seconds) + '\u00a0s' : '')
 		);
 	return null;
 }

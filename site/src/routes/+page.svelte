@@ -207,7 +207,7 @@
 	.content {
 		max-width: var(--size-page);
 		margin: 0 auto;
-		padding: 0 var(--gutter);
+		padding: 0 var(--gutter) var(--gap-page);
 	}
 	.content > section {
 		margin: var(--gap-section) 0 0;
@@ -248,8 +248,15 @@
 
 	.ways {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--size-way)), 1fr));
+		/* At most two columns, so a row keeps room for its label beside its samples and count. */
+		grid-template-columns: repeat(
+			auto-fill,
+			minmax(max(min(100%, var(--size-way)), calc((100% - var(--gap-section)) / 2)), 1fr)
+		);
 		column-gap: var(--gap-section);
+	}
+	.ways > li {
+		display: grid;
 	}
 	.way {
 		display: grid;

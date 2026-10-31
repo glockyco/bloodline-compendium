@@ -111,9 +111,6 @@
 <style>
 	/* Issues read as prose, so the page keeps a reading width. Each issue is one surface whose parts are labelled
 	   fields, spaced apart more than a label is from its content. */
-	.sections {
-		max-width: var(--size-reading);
-	}
 	.issue-index ol {
 		display: grid;
 		gap: var(--gap-inline);

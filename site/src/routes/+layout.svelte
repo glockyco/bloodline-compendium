@@ -17,6 +17,9 @@
 	const itemsPath = $derived(kindPath('item', data.kinds)!);
 	// Home opens with the game's art, so its header sits on the art and its search sits in the hero.
 	const home = $derived(page.url.pathname === '/');
+	// The item list has its own name search, so below desktop width it drops the header's search to reach its
+	// results sooner.
+	const list = $derived(page.url.pathname === itemsPath);
 	const current = (path: string) => (page.url.pathname.startsWith(path) ? 'page' : undefined);
 	// The issue form's Page field takes its value from the query, so a report names the page it came from.
 	const reportHref = $derived(
@@ -69,7 +72,7 @@
 			<a href={itemsPath} aria-current={current(itemsPath)}>Items</a>
 			<a href={resolve('about/')} aria-current={current('/about/')}>About</a>
 		</nav>
-		{#if !home}<div class="header-search"><Search /></div>{/if}
+		{#if !home}<div class="header-search" class:on-list={list}><Search /></div>{/if}
 		<a class="support" href="https://ko-fi.com/wowmuch">Support</a>
 	</div>
 </header>
@@ -208,7 +211,7 @@
 		text-decoration: underline;
 	}
 	.footer-inner p {
-		margin: 0;
+		line-height: inherit;
 	}
 	/* Below desktop width the search takes a row of its own under the brand and navigation. */
 	@media (width < 64rem) {
@@ -223,6 +226,9 @@
 		}
 		.header-search + .support {
 			margin-left: auto;
+		}
+		.header-search.on-list {
+			display: none;
 		}
 	}
 	/* A phone keeps the brand and navigation on one row above the search. Support stays in the footer. */

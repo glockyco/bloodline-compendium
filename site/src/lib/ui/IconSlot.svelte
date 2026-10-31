@@ -27,9 +27,6 @@
 		place-items: center;
 		aspect-ratio: 1;
 		min-width: 0;
-		border-radius: var(--radius-1);
-		background: var(--surface-slot);
-		box-shadow: inset 0 0 0 var(--border-width) var(--slot-edge);
 		overflow: hidden;
 	}
 	.stack {

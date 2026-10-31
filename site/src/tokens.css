@@ -134,15 +134,15 @@
 	--size-page: 75rem;
 	--size-reading: 48rem;
 	/* Prose keeps a reading measure, and an introduction a shorter one. */
-	--size-measure: 70ch;
-	--size-measure-intro: 60ch;
+	--size-measure: 60ch;
+	--size-measure-intro: 52ch;
 	--size-lede: 38ch;
 	--size-name-search: 32rem;
 	--size-header-search: 22rem;
 	--size-hero-search: 40rem;
 	--size-card: 20rem;
 	--size-card-narrow: 13rem;
-	--size-way: 22rem;
+	--size-way: 20rem;
 	--size-filters: 15.5rem;
 	/* Compact controls of lists and filters, after Afallon's: an option row, a chip and a control in a sheet. */
 	--size-option: 1.85rem;
@@ -162,8 +162,8 @@
 	--size-preview-phone: 60vh;
 	--size-facet-values: 15rem;
 	--size-item-type: 8rem;
-	--size-name-column: 13rem;
-	--size-filter-control: 9rem;
+	--size-name-column: 10rem;
+	--size-filter-control: 8rem;
 	/* A row's note lines up with the name beside its icon. */
 	--inset-note: calc(var(--size-icon-row) + var(--gap-inline));
 	--inset-ribbon: calc(var(--size-ribbon-notch) + var(--inset));
@@ -177,6 +177,11 @@
 	--layer-search: 100;
 }
 
+@media (width < 64rem) {
+	:root {
+		--size-item-side: 15rem;
+	}
+}
 @media (width < 40rem) {
 	:root {
 		--gutter: var(--space-4);

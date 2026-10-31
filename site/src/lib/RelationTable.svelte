@@ -16,10 +16,23 @@
 		row: Snippet<[T, number]>;
 	} = $props();
 	const preview = $derived(items.length > 10 ? 8 : items.length);
+	// A phone stacks a table of three or more columns into rows, where each value after the name carries its
+	// column's heading as a label.
+	const labels = $derived(
+		headings
+			.slice(1, 4)
+			.map((heading, index) => `--label-${index + 2}: ${JSON.stringify(heading)}`)
+			.join('; ')
+	);
 </script>
 
 {#snippet table(entries: T[], offset: number)}
-	<table class="relation-table" aria-label={label + (offset ? ' continued' : '')}>
+	<table
+		class="relation-table"
+		class:stacked={headings.length > 2}
+		aria-label={label + (offset ? ' continued' : '')}
+		style={labels}
+	>
 		<thead
 			><tr
 				>{#each headings as heading, index (index)}<th
@@ -95,33 +108,59 @@
 		color: var(--text-muted);
 		font-size: var(--type-0);
 	}
-	/* A phone gives each row's name the full width and puts the other columns on a line below it, so a long skill
-	   or currency name never squeezes the name. Headings follow the same layout. */
+	.relation-panel :global(td) {
+		line-height: var(--leading-data);
+	}
+	/* A phone gives each row's name the full width of a table with three or more columns and puts the other
+	   values on a line below it, each labelled by its heading, so a long skill name never squeezes the name. A
+	   two-column table keeps its columns side by side. */
 	@media (width < 40rem) {
-		.relation-panel :global(:is(table, thead, tbody)) {
+		.relation-panel :global(.stacked) {
 			display: block;
 		}
-		.relation-panel :global(tr) {
+		.relation-panel :global(.stacked thead) {
+			position: absolute;
+			width: var(--size-hairline);
+			height: var(--size-hairline);
+			overflow: hidden;
+			clip-path: inset(50%);
+		}
+		.relation-panel :global(.stacked tbody) {
+			display: block;
+		}
+		.relation-panel :global(.stacked tr) {
 			display: flex;
 			flex-wrap: wrap;
+			align-items: baseline;
 			gap: var(--gap-line) 0;
 			padding: var(--inset-cell) 0;
 		}
-		.relation-panel :global(tbody tr + tr) {
+		.relation-panel :global(.stacked tbody tr + tr) {
 			border-top: var(--border-width) solid var(--border);
 		}
-		.relation-panel :global(tr > :is(th, td)) {
+		.relation-panel :global(.stacked tr > :is(th, td)) {
 			padding: 0 var(--inset);
 			border: 0;
 		}
-		.relation-panel :global(tr > :first-child) {
+		.relation-panel :global(.stacked tr > :first-child) {
 			flex-basis: 100%;
 		}
-		.relation-panel :global(tr > :nth-child(2)) {
+		.relation-panel :global(.stacked td:nth-child(2)) {
 			flex: 1;
 		}
-		.relation-panel :global(thead tr) {
-			border-bottom: var(--border-width) solid var(--border);
+		.relation-panel :global(.stacked td:nth-child(n + 2)::before) {
+			margin-right: var(--gap-inline);
+			color: var(--text-muted);
+			font-size: var(--type-meta);
+		}
+		.relation-panel :global(.stacked td:nth-child(2)::before) {
+			content: var(--label-2);
+		}
+		.relation-panel :global(.stacked td:nth-child(3)::before) {
+			content: var(--label-3);
+		}
+		.relation-panel :global(.stacked td:nth-child(4)::before) {
+			content: var(--label-4);
 		}
 	}
 	/* A place that several rows share heads them, so their rows do not repeat it. */

@@ -308,8 +308,10 @@
 											>{statusNote[item.status]}</small
 										>{/if}</td
 								>
-								{#if showType}<td class="type" data-label="Type"
-										><span data-game>{item.type}</span></td
+								{#if showType}<td
+										class="type"
+										class:short={item.type.length <= 16}
+										data-label="Type"><span data-game>{item.type}</span></td
 									>{/if}
 								{#each columns as column (column.id)}<td
 										class:numeric={column.numeric}
@@ -550,13 +552,20 @@
 	   item it would grow to its content, so it keeps a zero minimum width and its table scrolls inside it. */
 	.list {
 		min-width: 0;
-		overflow: hidden;
+		overflow: clip;
 		border: var(--border-width) solid var(--border);
 		border-radius: var(--radius-1);
 		background: var(--surface-panel);
 	}
+	/* Below desktop width a wide table scrolls sideways inside its frame. On desktop the columns fit, and the frame
+	   does not scroll, so the column headings stick to the top of the window while the list scrolls. */
 	.table-scroll {
 		overflow-x: auto;
+	}
+	@media (width >= 64rem) {
+		.table-scroll {
+			overflow-x: visible;
+		}
 	}
 	table {
 		width: 100%;
@@ -601,7 +610,7 @@
 	}
 	/* Types and short words such as Above Average stay on one line, so names and long lists wrap instead. */
 	@media (width >= 40rem) {
-		td:is(.type, .short) {
+		td.short {
 			white-space: nowrap;
 		}
 	}
@@ -889,11 +898,13 @@
 		tbody {
 			display: block;
 		}
+		/* The name spans the row, the type and value share the next line at its two edges, and labelled stats
+		   follow in two columns, so values line up from row to row. */
 		tbody tr {
-			display: flex;
-			flex-wrap: wrap;
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 			align-items: baseline;
-			gap: var(--gap-line) var(--gap-inline);
+			gap: var(--gap-line) var(--gap-block);
 			padding: var(--inset-cell) var(--inset);
 		}
 		tbody tr + tr {
@@ -904,13 +915,34 @@
 			border: 0;
 		}
 		tbody td.name {
-			flex-basis: 100%;
+			grid-column: 1 / -1;
+			min-width: 0;
 		}
 		tbody td.type {
+			grid-row: 2;
+			grid-column: 1;
 			color: var(--text-muted);
 		}
 		tbody td.value {
-			margin-left: auto;
+			grid-row: 2;
+			grid-column: 2;
+			text-align: right;
+		}
+		td[data-label]:not(.type, .value)::before {
+			content: attr(data-label) ' ';
+			color: var(--text-muted);
+			font-size: var(--type-meta);
+		}
+		/* A stat reads from its label, an empty one takes no place, and a long one such as a list of effects takes
+		   the whole line. */
+		tbody td:not(.name, .type, .value) {
+			text-align: left;
+		}
+		tbody td:empty {
+			display: none;
+		}
+		tbody td:not(.name, .type, .value, .short) {
+			grid-column: 1 / -1;
 		}
 		.reveal {
 			margin-left: 0;
@@ -921,6 +953,17 @@
 			content: attr(data-label) ' ';
 			color: var(--text-muted);
 			font-size: var(--type-meta);
+		}
+		/* A stat reads from its label, an empty one takes no place, and a long one such as a list of effects takes
+		   the whole line. */
+		tbody td:not(.name, .type, .value) {
+			text-align: left;
+		}
+		tbody td:empty {
+			display: none;
+		}
+		tbody td:not(.name, .type, .value, .short) {
+			grid-column: 1 / -1;
 		}
 	}
 </style>

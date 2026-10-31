@@ -68,6 +68,7 @@
 		color: var(--text-muted);
 		font-family: var(--font-body);
 		font-size: var(--type-meta);
+		line-height: var(--leading-meta);
 		font-variant-numeric: tabular-nums;
 	}
 	.action {
