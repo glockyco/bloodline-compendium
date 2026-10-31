@@ -132,7 +132,7 @@
       "id": "staff-point-blank-damage",
       "title": "Three staves can deal 100 projectile damage at point-blank range",
       "effect": "Walking Stick, Acolyte Geomancer Staff and Moonstone Staff can deal 100 projectile damage at point-blank range instead of their normal 12, 20 and 35.",
-      "workaround": "Keep enough distance for the projectile to travel before hitting the enemy.",
+      "workaround": null,
       "steps": [
         "Equip and draw Acolyte Geomancer Staff with enough mana to attack and no damage-changing effects active. The staff is visible in hand.",
         "Attack a goblin from a distance where the projectile visibly travels before impact. A normal projectile hit shows 20 damage.",
