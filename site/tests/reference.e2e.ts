@@ -489,9 +489,11 @@ test('notes a known issue on the affected item and explains it on a linked, sear
 		'href',
 		'/items/mosswoven-coat/'
 	);
-	await expect(entry.getByText('Not reported to the developer yet.')).toBeHidden();
+	await expect(entry.getByText('Confirmed on')).toBeHidden();
 	await entry.getByText('For developers').click();
-	await expect(entry.getByText('Not reported to the developer yet.')).toBeVisible();
+	await expect(entry.getByText('Confirmed on')).toBeVisible();
+	// An issue nobody has reported says nothing about reporting.
+	await expect(entry).not.toContainText('Report');
 	await page.goto('/known-issues/');
 	await page.getByRole('navigation', { name: 'Issues' }).getByRole('link').first().click();
 	await expect(page).toHaveURL(/\/known-issues\/#invented-coat-armor$/);

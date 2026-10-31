@@ -91,13 +91,10 @@
 								<dt class="field-label">Confirmed on</dt>
 								<dd>{builds(issue.builds)}</dd>
 							</div>
-							<div class="field">
-								<dt class="field-label">Report</dt>
-								<dd>
-									{#if issue.reportUrl}<a href={issue.reportUrl}>Reported to the developer</a
-										>{:else}Not reported to the developer yet.{/if}
-								</dd>
-							</div>
+							{#if issue.reportUrl}<div class="field">
+									<dt class="field-label">Report</dt>
+									<dd><a href={issue.reportUrl}>Bug report</a></dd>
+								</div>{/if}
 						</dl>
 					</details>
 				</div>
