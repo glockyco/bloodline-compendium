@@ -38,8 +38,16 @@ Copy [bloodline.example.json](bloodline.example.json) to `bloodline.local.json` 
 
 ```sh
 dotnet run --project src/Bloodline -- extract
+bun tools/runtime/lab.mjs prepare
+bun tools/runtime/lab.mjs launch
+bun tools/runtime/lab.mjs new-save <name>
+bun tools/runtime/lab.mjs close-tutorials
+bun tools/runtime/tooltip-sweep.mjs <build>
+bun tools/runtime/lab.mjs quit
 dotnet run --project src/Bloodline -- catalog
 ```
+
+The tooltip sweep reads every item's tooltip in the running game, and cataloging uses those readings to name the items each known issue affects. A site build stops when a known issue affects no item, which means the sweep did not run for the build. Save names are at most 20 characters.
 
 After a game update, review and add the build's entry in [releases.json](releases.json), repeat extraction and cataloging, compare the new output with the previous build, recheck every known issue as the [game-issues skill](.agent/skills/game-issues/SKILL.md) describes, and review the catalog's `report.json` beside the site data before publishing.
 

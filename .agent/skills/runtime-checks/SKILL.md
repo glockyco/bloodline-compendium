@@ -52,7 +52,7 @@ Commands that look up objects use the instances the game uses. Class defaults an
 - `issues.sh` walks the steps of every entry in `issues/known-issues.json` with a screenshot after each step, in `launch render`.
 - `noted-armor.mjs <build>` equips every armor item that the catalog notes with an armor issue and reads the armor the game applies, with a screenshot each, in `launch render`.
 
-`bun tools/runtime/tooltip-sweep.mjs <build> [--capture]` reads the tooltip of every published item into the current run, and with `--capture`, in `launch render`, also takes a screenshot of every batch of eight. It resumes where earlier sweeps of the build stopped, and retries a batch that stops the game in halves on a restarted game. The next `catalog` compares each item's facts with the latest shown-only tooltip a run read for it. A difference without a known cause in `TooltipCheck.cs` appears in Coverage and needs an owner: a fix in the catalog, a known issue once a run reproduces it, or a new cause.
+`bun tools/runtime/tooltip-sweep.mjs <build> [--capture]` reads the tooltip of every published item into the current run, and with `--capture`, in `launch render`, also takes a screenshot of every batch of eight. It resumes where earlier sweeps of the build stopped, and retries a batch that stops the game in halves on a restarted game. The next `catalog` compares each item's facts with the latest shown-only tooltip a run read for it. A difference without a known cause in `TooltipCheck.cs` appears in the catalog's `report.json` and needs an owner: a fix in the catalog, a known issue once a run reproduces it, or a new cause.
 
 ## Captures
 

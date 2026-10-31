@@ -22,6 +22,17 @@ if (!input)
   );
 const directory = resolve(input);
 const build = JSON.parse(await readFile(join(directory, "build.json"), "utf8"));
+// A known issue names the items it affects from the lab's tooltip readings of the build, so an issue without any
+// was cataloged without those runs and would describe items that no page notes.
+const unaffected = JSON.parse(
+  await readFile(join(directory, "issues.json"), "utf8"),
+).filter((entry) => entry.affected.length === 0);
+if (unaffected.length)
+  throw new Error(
+    "Known issues affect no item: " +
+      unaffected.map((entry) => entry.issue.id).join(", ") +
+      ". Run the lab's tooltip sweep of this build and catalog again, as README.md describes.",
+  );
 if (production) {
   assertProductionBuild(build, root);
   // A failed production rebuild must not leave an older stage available to publish.
