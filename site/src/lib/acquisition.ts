@@ -78,8 +78,7 @@ export const useHeadings: Partial<Record<SourceKind, string>> = {
 	crafting: 'Crafting',
 	smithing: 'Smithing',
 	cooking: 'Cooking',
-	farming: 'Farming',
-	currencyShop: 'Currency payments'
+	farming: 'Farming'
 };
 
 /** The verb a first-screen summary leads with for each way of getting an item. */

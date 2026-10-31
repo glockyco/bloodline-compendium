@@ -17,7 +17,8 @@
 		sortSources,
 		sourceContext,
 		summarize,
-		useHeadings
+		useHeadings,
+		pricePhrase
 	} from '#lib/acquisition.js';
 	import RecipeLine from '#lib/RecipeLine.svelte';
 	import { formatNumber } from '#lib/format.js';
@@ -92,11 +93,15 @@
 			})
 			.filter((group) => group.sources.length)
 	);
-	const uses = $derived(
+	const sortedUses = $derived(
 		[...item.uses].sort(
 			(a, b) => a.item.name.localeCompare(b.item.name, 'en') || a.name.localeCompare(b.name, 'en')
 		)
 	);
+	// A merchant that takes the item as payment sells something for it, which is not a recipe, so payments get their
+	// own table with the merchant and the price.
+	const uses = $derived(sortedUses.filter((use) => use.kind !== 'currencyShop'));
+	const payments = $derived(sortedUses.filter((use) => use.kind === 'currencyShop'));
 	const recipes = $derived(
 		groups.filter((group) => group.recipe).flatMap((group) => group.sources)
 	);
@@ -117,7 +122,7 @@
 	}
 	// A page with nothing beyond its answer keeps its issue notes beside the answer, so neither column is a lone
 	// strip.
-	const sparse = $derived(!recipes.length && !uses.length && !sourceGroups.length);
+	const sparse = $derived(!recipes.length && !sortedUses.length && !sourceGroups.length);
 	// The skill level a use needs shows in its own column, so the condition that states it does not repeat.
 	const levelOf = (use: (typeof uses)[number]) =>
 		use.conditions.find((condition) => condition.kind === 'proficiencyLevel')?.value ?? null;
@@ -212,8 +217,8 @@
 	<div class="detail-layout">
 		<div class="answer" data-pagefind-ignore="all">
 			<Section id="how-to-get-it" title="How to Get It">
-				{#snippet action()}{#if uses.length}<a href="#used-for"
-							>Used for {formatNumber(uses.length)}</a
+				{#snippet action()}{#if sortedUses.length}<a href={uses.length ? '#used-for' : '#buys'}
+							>Used for {formatNumber(sortedUses.length)}</a
 						>{/if}{/snippet}
 				{#if !groups.length}
 					<p class="surface">
@@ -340,6 +345,26 @@
 									><td class="numeric">{formatNumber(use.quantity)}</td></tr
 								>{/snippet}</RelationTable
 						>{/if}
+				</Section>{/if}
+			{#if payments.length}<Section id="buys" title="Buys" count={payments.length}>
+					<RelationTable
+						items={payments}
+						label="Buys"
+						headings={['Item', 'Merchant', 'Price']}
+						numeric={[false, true]}
+						>{#snippet row(use, index)}<tr
+								id={`buys-${index + 1}`}
+								data-relation-id={use.relationId}
+								data-relation-direction="outgoing"
+								><td
+									><EntityLink entity={use.item} icon /><Conditions
+										conditions={use.conditions}
+									/></td
+								><td>{use.name}</td><td class="numeric"
+									>{pricePhrase(formatNumber(use.quantity), item)}</td
+								></tr
+							>{/snippet}</RelationTable
+					>
 				</Section>{/if}
 			{#each sourceGroups as group (group.kind)}
 				<Section

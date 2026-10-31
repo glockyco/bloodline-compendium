@@ -162,6 +162,11 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 	await expect(page.locator('.source-group')).toContainText('20%');
 	await expect(page.locator('.source-group')).toContainText('per kill');
 	await page.goto('/items/cinderpear/');
+	// A merchant that takes the item as payment is listed apart from the recipes that use it.
+	await expect(page.getByRole('table', { name: 'Used for' })).not.toContainText('Orris');
+	await expect(page.getByRole('table', { name: 'Buys' }).getByRole('row').nth(1)).toContainText(
+		/Lanternedge\s*Orris the Collector\s*3 × Cinderpear/
+	);
 	const unknown = page.locator('.source-group').getByRole('button', { name: 'Unknown' });
 	await expect(page.getByRole('tooltip')).toBeHidden();
 	await unknown.focus();
