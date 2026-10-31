@@ -1,5 +1,6 @@
 using System.Text.Json.Nodes;
 using Bloodline.Catalog;
+using Bloodline.Code;
 using Bloodline.Output;
 using Bloodline.Records;
 using Bloodline.SiteData;
@@ -233,6 +234,144 @@ public sealed class CatalogTests
             result.Report.Gaps.Single(gap => gap.Kind == GapKind.UnknownFact).Entries,
             entry => entry.Entity?.Slug == result.Items[0].Slug && entry.Detail == "Damage"
         );
+    }
+
+    [Theory]
+    [InlineData(20.0, false, false)]
+    [InlineData(35.0, false, false)]
+    [InlineData(20.0, true, false)]
+    [InlineData(null, false, false)]
+    [InlineData(20.0, false, true)]
+    public void StaffDamageComesFromItsNormalProjectile(
+        double? damage,
+        bool useDefault,
+        bool partial
+    )
+    {
+        var item = Item("/Game/Staff.Staff_C", "Invented staff");
+        item.Properties["Weapon Class"] = Parse("""{"$enum":"Weapon::Staff","display":"Staff"}""");
+        var projectile = new ClassRecord(
+            "/Game/Projectile.Projectile_C",
+            [],
+            Parse("""{"Damage":20}""")
+        );
+        var function = new CodeFunction(
+            "/Game/Staff",
+            item.Path,
+            "Staff Attack",
+            false,
+            "fingerprint",
+            partial ? CodeParseStatus.Partial : CodeParseStatus.Complete,
+            [],
+            [],
+            [],
+            []
+        )
+        {
+            SpawnedDamage = [new SpawnedDamage(projectile.Path, !useDefault, damage)],
+        };
+        var resolver = new ItemFacts([], code: CodeIndex.Create([function]), classes: [projectile]);
+        var page = resolver.Resolve(item, "staff");
+        var fact = Assert.Single(page.Facts, fact => fact.Stat == Stat.Damage);
+        Assert.Equal(partial ? null : damage, fact.Number);
+        Assert.Equal("900", fact.GameShows);
+        var claim = Assert.Single(resolver.Claims, claim => claim.Fact == "Damage");
+        Assert.Equal(
+            partial || damage is null ? ClaimType.Unknown : ClaimType.Extracted,
+            claim.Type
+        );
+        Assert.DoesNotContain("WeaponInfo.Damage", claim.Inputs);
+        if (partial || damage is null)
+            Assert.Contains(
+                page.Facts,
+                fact =>
+                    fact.Stat == Stat.WeaponBehavior
+                    && fact.Text!.Contains("could not be read", StringComparison.Ordinal)
+            );
+    }
+
+    [Fact]
+    public void StaffWithoutANormalProjectileDoesNotPublishItsSpecialAttackOrMeleeDefaults()
+    {
+        var item = Item("/Game/Soulstaff.Soulstaff_C", "Soulstaff");
+        item.Properties["Weapon Class"] = Parse("""{"$enum":"Weapon::Staff","display":"Staff"}""");
+        var function = new CodeFunction(
+            "/Game/Soulstaff",
+            item.Path,
+            "Staff Attack",
+            false,
+            "fingerprint",
+            CodeParseStatus.Complete,
+            [],
+            [],
+            [],
+            []
+        )
+        {
+            SpawnedDamage = [],
+        };
+        var page = new ItemFacts([], code: CodeIndex.Create([function])).Resolve(item, "soulstaff");
+        Assert.Null(Assert.Single(page.Facts, fact => fact.Stat == Stat.Damage).Number);
+        Assert.Contains(
+            page.Facts,
+            fact =>
+                fact.Stat == Stat.WeaponBehavior
+                && fact.Text!.Contains("no normal projectile", StringComparison.Ordinal)
+        );
+    }
+
+    [Theory]
+    [InlineData("StaffOfMinorFlames")]
+    [InlineData("StaffOfMinorRot")]
+    public void HalberdStyleManaStavesKeepMeleeAndProjectileDamageSeparate(string asset)
+    {
+        var item = Item($"/Game/Weapons/Staves/{asset}.{asset}_C", "Invented staff");
+        item.Properties["ItemInfo"]!["WeaponType"] = Parse(
+            """{"$enum":"Attack::Halberd","display":"Halberd"}"""
+        );
+        var projectile = new ClassRecord(
+            "/Game/Projectile.Projectile_C",
+            [],
+            Parse("""{"Damage":20}""")
+        );
+        var attack = new CodeFunction(
+            item.Path.Split('.')[0],
+            item.Path,
+            "Swing Event",
+            false,
+            "fingerprint",
+            CodeParseStatus.Complete,
+            [],
+            [],
+            [],
+            []
+        )
+        {
+            SpawnedDamage = [new SpawnedDamage(projectile.Path, false, null)],
+        };
+        var consumer = new CodeFunction(
+            "/Game/BloodlinesAlpha/Interactables/Weapons/BP_BaseWeapon",
+            "/Game/Base.Base_C",
+            "Hit",
+            false,
+            "consumer",
+            CodeParseStatus.Complete,
+            [new CodeTarget(CodeTargetKind.StructField, "/Game/F_WeaponINfo.F_WeaponINfo:Damage")],
+            [],
+            [],
+            []
+        );
+        var page = new ItemFacts(
+            [],
+            code: CodeIndex.Create([attack, consumer]),
+            classes: [projectile]
+        ).Resolve(item, "staff");
+        Assert.Equal(10, Assert.Single(page.Facts, fact => fact.Stat == Stat.Damage).Number);
+        Assert.Equal(
+            20,
+            Assert.Single(page.Facts, fact => fact.Stat == Stat.ProjectileDamage).Number
+        );
+        Assert.Equal("900", Assert.Single(page.Facts, fact => fact.Stat == Stat.Damage).GameShows);
     }
 
     [Fact]

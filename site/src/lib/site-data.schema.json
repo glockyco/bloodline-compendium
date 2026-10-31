@@ -1390,6 +1390,7 @@
         "damageContribution",
         "speedContribution",
         "damage",
+        "projectileDamage",
         "speed",
         "damageType",
         "magazineSize",

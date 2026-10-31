@@ -74,7 +74,12 @@ internal sealed class ItemClaims(CodeIndex? code, long build)
     ).ToDictionary(function => function.Citation, StringComparer.Ordinal);
     public IReadOnlyList<FactClaim> Claims => claims;
 
-    public void Record(string item, ItemPage page)
+    public void Record(
+        string item,
+        ItemPage page,
+        CodeFunction? projectileFunction = null,
+        bool projectileDamage = false
+    )
     {
         Add("Name", page.Name, ["ItemInfo.ItemName"]);
         Add("Description", page.Description, ["ItemInfo.Description"]);
@@ -109,6 +114,28 @@ internal sealed class ItemClaims(CodeIndex? code, long build)
         );
         foreach (var fact in page.Facts)
         {
+            if (fact.Stat == Stat.ProjectileDamage || fact.Stat == Stat.Damage && projectileDamage)
+            {
+                claims.Add(
+                    new FactClaim(
+                        item,
+                        fact.Label,
+                        fact.Number is null ? ClaimType.Unknown : ClaimType.Extracted,
+                        build,
+                        ["Normal attack.SpawnedProjectile.Damage"],
+                        projectileFunction?.ParseStatus == CodeParseStatus.Complete
+                            ?
+                            [
+                                new CodeCitation(
+                                    projectileFunction.Citation,
+                                    projectileFunction.Fingerprint
+                                ),
+                            ]
+                            : []
+                    )
+                );
+                continue;
+            }
             var inputs = Inputs(fact, page.Category.Name);
             Add(fact.Label, StatVocabulary.Display(fact), inputs);
         }

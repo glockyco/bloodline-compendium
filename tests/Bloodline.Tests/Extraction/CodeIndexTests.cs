@@ -51,6 +51,101 @@ public sealed class CodeIndexTests
         ).Analyze(function);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void NormalProjectileDamageFollowsTheReachableSpawnAndItsAliases(bool namedWrite)
+    {
+        JsonObject Local(string name) =>
+            new()
+            {
+                ["Token"] = "EX_LocalVariable",
+                ["Variable"] = Field(Owner + ":Event:" + name),
+            };
+        var spawn = Node(
+            "EX_LetObj",
+            0,
+            ("Variable", Local("spawn")),
+            (
+                "Assignment",
+                new JsonObject
+                {
+                    ["Token"] = "EX_CallMath",
+                    ["StackNode"] = Object(
+                        "/Script/Engine.GameplayStatics:BeginDeferredActorSpawnFromClass"
+                    ),
+                    ["Parameters"] = new JsonArray(
+                        new JsonObject { ["Token"] = "EX_Self" },
+                        new JsonObject
+                        {
+                            ["Token"] = "EX_ObjectConst",
+                            ["Value"] = Object("/Game/Projectile.Projectile_C"),
+                        }
+                    ),
+                }
+            )
+        );
+        var finish = Node(
+            "EX_LetObj",
+            10,
+            ("Variable", Local("finished")),
+            (
+                "Assignment",
+                new JsonObject
+                {
+                    ["Token"] = "EX_CallMath",
+                    ["StackNode"] = Object("/Script/Engine.GameplayStatics:FinishSpawningActor"),
+                    ["Parameters"] = new JsonArray(Local("spawn")),
+                }
+            )
+        );
+        var write = namedWrite
+            ? Node(
+                "EX_CallMath",
+                20,
+                ("StackNode", Object("/Script/Engine.KismetSystemLibrary:SetFloatPropertyByName")),
+                (
+                    "Parameters",
+                    new JsonArray(
+                        Local("spawn"),
+                        new JsonObject { ["Token"] = "EX_NameConst", ["Value"] = "Damage" },
+                        Constant(20)
+                    )
+                )
+            )
+            : Node(
+                "EX_Let",
+                20,
+                (
+                    "Variable",
+                    new JsonObject
+                    {
+                        ["Token"] = "EX_Context",
+                        ["ObjectExpression"] = Local("finished"),
+                        ["ContextExpression"] = new JsonObject
+                        {
+                            ["Token"] = "EX_InstanceVariable",
+                            ["Variable"] = Field("/Game/Projectile.Projectile_C:Damage"),
+                        },
+                    }
+                ),
+                ("Assignment", Constant(20))
+            );
+        var function = Function(
+            "Staff Attack",
+            spawn,
+            finish,
+            write,
+            Node("EX_Return", 30),
+            Node("EX_Let", 40, ("Assignment", Constant(250))),
+            Node("EX_Return", 50)
+        );
+        Assert.Equal(
+            new SpawnedDamage("/Game/Projectile.Projectile_C", true, 20),
+            Assert.Single(Analyze(function).SpawnedDamage!)
+        );
+    }
+
     [Fact]
     public void ANameAssignedAfterAClassComparisonMapsThatClassToTheName()
     {

@@ -93,6 +93,12 @@ internal static partial class TooltipCheck
             false,
             "Potion tooltips show no description, and Base Potion's tooltip shows nothing, as hovering with the real cursor showed in run hover-check-2."
         ),
+        new(
+            "staff-applied-damage",
+            "game",
+            false,
+            "Staff tooltips show ItemInfo.Damage, while normal hits use the projectile's initialized damage or the halberd-style staff's melee damage."
+        ),
     ];
 
     /// <summary>
@@ -364,7 +370,12 @@ internal static partial class TooltipCheck
             switch (stat.Groups["label"].Value)
             {
                 case "Damage":
-                    Number("Damage", value, Stat.Damage, null);
+                    Number(
+                        "Damage",
+                        value,
+                        Stat.Damage,
+                        item.Type == "Staff" ? "staff-applied-damage" : null
+                    );
                     break;
                 case "ARMOR":
                     Number("Armor rating", value, Stat.ArmorRating, armorReason);

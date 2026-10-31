@@ -330,6 +330,7 @@ internal enum Stat
     DamageContribution,
     SpeedContribution,
     Damage,
+    ProjectileDamage,
     Speed,
     DamageType,
     MagazineSize,

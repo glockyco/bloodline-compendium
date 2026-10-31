@@ -53,7 +53,8 @@ internal static class CatalogBuilder
             records.Enums,
             records.Tables,
             records.Code,
-            records.Build.BuildId
+            records.Build.BuildId,
+            records.Classes
         );
         var selected = records.Classes.Where(ItemIdentity.IsInventoryItem).ToArray();
         var initial = selected.ToDictionary(

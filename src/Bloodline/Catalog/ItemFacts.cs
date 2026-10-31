@@ -10,7 +10,8 @@ internal sealed class ItemFacts(
     IReadOnlyList<EnumRecord> enums,
     IReadOnlyList<TableRecord>? tables = null,
     CodeIndex? code = null,
-    long build = 0
+    long build = 0,
+    IReadOnlyList<ClassRecord>? classes = null
 )
 {
     private readonly ItemClaims claims = new(code, build);
@@ -180,6 +181,8 @@ internal sealed class ItemFacts(
                 _ => readerCategory?.Name,
             };
         var facts = new List<Fact>();
+        CodeFunction? projectileFunction = null;
+        var projectileDamage = false;
         void Add(Stat stat, string path)
         {
             var value = RecordValues.At(properties, path);
@@ -207,8 +210,67 @@ internal sealed class ItemFacts(
         }
         else if (category == "Weapon")
         {
-            // Equipped damage comes from WeaponInfo, not the inventory display's ItemInfo.Damage.
-            Add(Stat.Damage, "WeaponInfo.Damage");
+            projectileDamage = type == "Staff" && Display(properties["Weapon Class"]) == "Staff";
+            var hasSeparateProjectile =
+                type == "Staff"
+                && ItemIdentity.ClassName(item.Path) is "StaffOfMinorFlames" or "StaffOfMinorRot";
+            if (
+                (projectileDamage || hasSeparateProjectile)
+                && code is not null
+                && code.Functions.Any(function => function.Package == item.Path.Split('.')[0])
+                && !code.Gaps.Any(gap => gap.Package == item.Path.Split('.')[0])
+            )
+            {
+                projectileFunction = new[] { item.Path }
+                    .Concat(item.Ancestors)
+                    .Select(path =>
+                        code?.Functions.SingleOrDefault(function =>
+                            function.Package == path.Split('.')[0]
+                            && function.Name == (projectileDamage ? "Staff Attack" : "Swing Event")
+                        )
+                    )
+                    .FirstOrDefault(function => function is not null);
+            }
+            if (projectileDamage)
+            {
+                facts.Add(
+                    StatVocabulary.Number(Stat.Damage, NormalProjectileDamage(projectileFunction))
+                );
+                if (facts[^1].Number is null)
+                {
+                    facts.Add(
+                        StatVocabulary.Text(
+                            Stat.WeaponBehavior,
+                            projectileFunction
+                                is { ParseStatus: CodeParseStatus.Complete, SpawnedDamage.Count: 0 }
+                                ? "Normal-hit damage is unknown because this staff has no normal projectile."
+                                : "Normal-hit damage is unknown because its normal projectile's damage could not be read."
+                        )
+                    );
+                }
+            }
+            else
+            {
+                Add(Stat.Damage, "WeaponInfo.Damage");
+            }
+            var damageIndex = facts.FindIndex(fact => fact.Stat == Stat.Damage);
+            var shownDamage = RecordValues.Number(RecordValues.At(properties, "ItemInfo.Damage"));
+            if (type == "Staff" && shownDamage is { } shown && facts[damageIndex].Number != shown)
+            {
+                facts[damageIndex] = facts[damageIndex] with
+                {
+                    GameShows = shown.ToString("G", CultureInfo.InvariantCulture),
+                };
+            }
+            if (hasSeparateProjectile)
+            {
+                facts.Add(
+                    StatVocabulary.Number(
+                        Stat.ProjectileDamage,
+                        NormalProjectileDamage(projectileFunction)
+                    )
+                );
+            }
             // Tooltips show the authored speed word, not a universal attack-rate number.
             Add(Stat.Speed, "ItemInfo.Speed");
             var damageType = Display(RecordValues.At(properties, "WeaponInfo.DamageType"));
@@ -228,11 +290,18 @@ internal sealed class ItemFacts(
                 facts.Add(
                     StatVocabulary.Text(
                         Stat.WeaponBehavior,
-                        ItemIdentity.ClassName(item.Path)
-                            is "StaffOfMinorFlames"
-                                or "StaffOfMinorRot"
-                            ? "Swings like a halberd, launches a projectile for 5 mana and trains no weapon proficiency."
-                            : "Swings like a halberd and trains no weapon proficiency."
+                        (
+                            hasSeparateProjectile
+                                ? "Swings like a halberd, launches a projectile for 5 mana and trains no weapon proficiency."
+                                : "Swings like a halberd and trains no weapon proficiency."
+                        )
+                            + (
+                                hasSeparateProjectile
+                                && facts.Single(fact => fact.Stat == Stat.ProjectileDamage).Number
+                                    is null
+                                    ? " Projectile damage is unknown because its normal projectile's damage could not be read."
+                                    : ""
+                            )
                     )
                 );
             }
@@ -296,8 +365,30 @@ internal sealed class ItemFacts(
         {
             Type = type ?? "Unknown",
         };
-        claims.Record(item.Path, page);
+        claims.Record(item.Path, page, projectileFunction, projectileDamage);
         return page;
+    }
+
+    private double? NormalProjectileDamage(CodeFunction? function)
+    {
+        if (
+            function?.ParseStatus != CodeParseStatus.Complete
+            || function.SpawnedDamage is not { Count: > 0 } spawned
+        )
+            return null;
+        var values = spawned
+            .Select(actor =>
+                actor.Assigned
+                    ? actor.Damage
+                    : RecordValues.Number(
+                        classes
+                            ?.FirstOrDefault(type => type.Path == actor.Class)
+                            ?.Properties["Damage"]
+                    )
+            )
+            .Distinct()
+            .ToArray();
+        return values is [{ } damage] ? damage : null;
     }
 
     /// <summary>

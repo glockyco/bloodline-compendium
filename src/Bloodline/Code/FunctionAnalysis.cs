@@ -53,6 +53,9 @@ internal sealed class FunctionAnalysis(
         )
         {
             ClassNames = ClassNamesOf(function),
+            SpawnedDamage = function.Name is "Staff Attack" or "Swing Event"
+                ? SpawnDamage(body)
+                : null,
         };
 
         JsonArray Graph(ScriptFunction source, int entry)
@@ -287,6 +290,76 @@ internal sealed class FunctionAnalysis(
             {
                 active.Remove(key);
             }
+        }
+    }
+
+    private static IReadOnlyList<SpawnedDamage> SpawnDamage(JsonNode body)
+    {
+        var actors = new List<SpawnedDamage>();
+        var aliases = new Dictionary<string, int>(StringComparer.Ordinal);
+        static string? Field(JsonNode? node) => Text(node?["Variable"]?["$field"]);
+        static double? Literal(JsonNode? node) =>
+            Text(node?["Token"]) is "EX_FloatConst" or "EX_DoubleConst" or "EX_IntConst"
+                ? Bloodline.Records.RecordValues.Number(node?["Value"])
+                : null;
+        foreach (var node in Walk(body))
+        {
+            var call = node["Assignment"];
+            var called = Text(call?["StackNode"]?["$object"]);
+            var parameters = call?["Parameters"] as JsonArray;
+            var variable = Field(node["Variable"]);
+            if (
+                called?.EndsWith(":BeginDeferredActorSpawnFromClass", StringComparison.Ordinal)
+                    == true
+                && variable is not null
+                && Text(parameters?.ElementAtOrDefault(1)?["Value"]?["$object"]) is { } actor
+            )
+            {
+                aliases[variable] = actors.Count;
+                actors.Add(new SpawnedDamage(actor, false, null));
+            }
+            else if (
+                called?.EndsWith(":FinishSpawningActor", StringComparison.Ordinal) == true
+                && variable is not null
+                && Field(parameters?.FirstOrDefault()) is { } source
+                && aliases.TryGetValue(source, out var index)
+            )
+            {
+                aliases[variable] = index;
+            }
+            if (
+                Text(node["Token"]) == "EX_Let"
+                && Text(node["Variable"]?["Token"]) == "EX_Context"
+                && Text(node["Variable"]?["ContextExpression"]?["Variable"]?["$field"])
+                    ?.EndsWith(":Damage", StringComparison.Ordinal) == true
+                && Field(node["Variable"]?["ObjectExpression"]) is { } destination
+                && aliases.TryGetValue(destination, out var target)
+            )
+            {
+                Assign(target, Literal(node["Assignment"]));
+            }
+            if (
+                Text(node["StackNode"]?["$object"])
+                    ?.EndsWith(":SetFloatPropertyByName", StringComparison.Ordinal) == true
+                && node["Parameters"] is JsonArray arguments
+                && Text(arguments.ElementAtOrDefault(1)?["Value"]) == "Damage"
+                && Field(arguments.FirstOrDefault()) is { } receiver
+                && aliases.TryGetValue(receiver, out var namedTarget)
+            )
+            {
+                Assign(namedTarget, Literal(arguments.ElementAtOrDefault(2)));
+            }
+        }
+        return actors;
+
+        void Assign(int index, double? value)
+        {
+            var actor = actors[index];
+            actors[index] = actor with
+            {
+                Assigned = true,
+                Damage = !actor.Assigned || actor.Damage == value ? value : null,
+            };
         }
     }
 

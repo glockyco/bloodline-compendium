@@ -685,7 +685,7 @@ public sealed class ItemFactsTests
         "Halberd",
         "/Game/Invented/WalkingStick.WalkingStick_C",
         "Staff",
-        null
+        "Normal-hit damage is unknown because its normal projectile's damage could not be read."
     )]
     [InlineData(
         "Fairy Staff",
@@ -717,7 +717,7 @@ public sealed class ItemFactsTests
         "Halberd",
         "/Game/Invented/StaffOfMinorFlames.StaffOfMinorFlames_C",
         "Staff",
-        "Swings like a halberd, launches a projectile for 5 mana and trains no weapon proficiency."
+        "Swings like a halberd, launches a projectile for 5 mana and trains no weapon proficiency. Projectile damage is unknown because its normal projectile's damage could not be read."
     )]
     [InlineData(
         "Staff of Minor Rot",
@@ -725,7 +725,7 @@ public sealed class ItemFactsTests
         "Halberd",
         "/Game/Invented/StaffOfMinorRot.StaffOfMinorRot_C",
         "Staff",
-        "Swings like a halberd, launches a projectile for 5 mana and trains no weapon proficiency."
+        "Swings like a halberd, launches a projectile for 5 mana and trains no weapon proficiency. Projectile damage is unknown because its normal projectile's damage could not be read."
     )]
     [InlineData(
         "Halberd",
