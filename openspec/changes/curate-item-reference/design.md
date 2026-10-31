@@ -178,16 +178,18 @@ Findings:
 - Model reviewers cannot judge the voice. The same-model reviewer of machine-written text found no basis to attribute the text to a model, the reviewers' own rewrites repeat phrases such as "is not established here", and model judges favor longer text (Saito et al. 2023). Frequent users of language models detect such text reliably (Russell et al. 2025), so a person judges the voice, and models check facts and find defects.
 - The first sample rewrites were drafted from these findings and still read as machine-written: convoluted, stiff, and with an unnamed speaker on About. The measurements did not prevent this, because they describe symptoms and do not point to a better sentence, and a second model still preferred the drafts in 11 of 20 pairs. The second drafts started from how large game wikis handle each situation, read on their pages and checked with page counts on the OSRS, Minecraft and Terraria wikis, such as "chance to spawn" on 70, 187 and 92 pages against none for the site's "is there only". They came closer to what the review asked for, and one round of review is the only evidence for that so far. The counts can settle a single phrasing but not the register: "does not" appears on 2,943, 2,564 and 917 pages and "doesn't" on 927, 1,395 and 77, and OSRS writes "you can" on 3,861 pages and "players can" on 4,209. The counts are in `artifacts/design/writing/research/wiki-phrases.md`.
 
-Decided in the review of 2026-10-31, open to change like everything else here:
+Decided in reviews on 2026-10-31, open to change like everything else here:
 
 - Text about the site's own process goes, wherever it appears: what was read, run, reported or confirmed, unless it changes what a player does. A bug report link stays because a player can follow it, and a note that a bug is not reported yet goes.
 - The site has no unnamed first-person speaker, such as the "I" of the first drafts, which reads as out of place on a wiki-style reference.
+- A person chooses each reader text from a comparison of two to four options that start from how large game wikis handle the same situation, with one option recommended and every fact checked against the game. The writing personas run again on the result, and the voice gate keeps checking mechanical defects.
+- Facts that a table can carry go into the table, such as a container's spawn chance in its Spawns column. A chance that depends on several factors reads Varies, with its reason on hover, focus and tap.
+- Summary lines use the words of the section headings and keep each name with its place. Records that nothing in the world confirms stay out of the summary, in their own section.
 
-Proposed for the sample review and not decided:
+Proposed and not decided:
 
 - Reader text starts from the player's question and uses the players' words, not the data model's. A sentence names the thing and what it does, keeps a condition next to the fact it limits, and connects facts with but, so and because. It is as long as its meaning needs. Words that carry a fact, a relation, a condition, an example or a next step stay, and announcements, assurances and repeated facts go.
-- An unknown is stated once, where it changes a decision, with its reason. A chance that depends on several factors reads Varies with those factors. The site's method is described once, on About.
-- Labels stay terse. One term names one thing on every page. Facts that a table can carry, such as a container's spawn chance, go into the table instead of a sentence.
-- Drafts start from how large game wikis word the same situation, in the present tense with the item or mechanic as the subject. Whether the site contracts and whether it addresses the player as you or as the player stays open, because the wikis do both.
-- Each source kind gets its own template that is grammatical for every count, keeps each name with its place, and keeps unconfirmed records out of the summary. A notice on an item page is about that item, and the full list of affected items stays on Known Issues.
-- A person reviews a sample of rewrites before the full pass, a second model checks only that each rewrite keeps its facts, and the same personas run again on the result. The voice gate keeps checking mechanical defects.
+- An unknown is stated once, where it changes a decision, with its reason. The site's method is described once, on About.
+- Labels stay terse. One term names one thing on every page.
+- Sentences use the present tense with the item or mechanic as the subject. Whether the site contracts and whether it addresses the player as you or as the player stays open, because the wikis do both.
+- Each source kind's template is grammatical for every count. A notice on an item page is about that item, and the full list of affected items stays on Known Issues.
