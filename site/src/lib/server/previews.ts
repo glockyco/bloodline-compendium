@@ -24,6 +24,7 @@ export const previewSources: {
 				icon: item.icon,
 				description: item.description,
 				facts: item.facts,
+				issues: item.notes.map((note) => note.title),
 				route:
 					firstRoute(item.sources, Object.keys(sourceHeadings) as SourceKind[]) ??
 					(item.status === 'notInNormalPlay'

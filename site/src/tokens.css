@@ -172,7 +172,8 @@
 	--duration-hover: 0.15s;
 
 	--layer-table-heading: 1;
-	--layer-tooltip: 2;
+	--layer-table-corner: 2;
+	--layer-tooltip: 3;
 	--layer-skip: 10;
 	--layer-search: 100;
 }

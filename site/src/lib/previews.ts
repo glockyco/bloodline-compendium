@@ -9,6 +9,8 @@ export interface ItemPreview {
 	facts: Fact[];
 	/** The first way to get the item, or the reason none is known. */
 	route: string | null;
+	/** The titles of the known game issues that affect the item, which change what its numbers mean. */
+	issues: string[];
 }
 
 /**

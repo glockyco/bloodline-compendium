@@ -69,12 +69,14 @@
 			{:else if source.price && !source.price.currency}
 				{`${formatNumber(payPrice(source.price))} gold`}
 			{:else if source.price}
-				{formatNumber(payPrice(source.price))}<small
-					><span
+				<!-- The amount and its currency read as one phrase, wrapping only inside the currency's name. -->
+				<span class="currency-price"
+					>{formatNumber(payPrice(source.price))} ×
+					<span
 						data-relation-id={source.price.relationId}
 						data-relation-direction={source.price.relationId ? 'incoming' : undefined}
 						><EntityLink entity={source.price.currency!} icon /></span
-					></small
+					></span
 				>
 			{:else if source.odds?.chance != null}
 				{formatChance(source.odds.chance)}{#if showUnit}<small
@@ -87,3 +89,9 @@
 		</td>
 	{/if}
 </tr>
+
+<style>
+	.currency-price {
+		white-space: normal;
+	}
+</style>

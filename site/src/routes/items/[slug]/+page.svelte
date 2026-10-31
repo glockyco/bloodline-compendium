@@ -48,8 +48,10 @@
 					listed.every((source) => source.places.length <= 1) &&
 					new Set(places).size > 1 &&
 					places.some((place, index) => places.indexOf(place) !== index);
+				// Places follow the order of their best source, so the likeliest place leads as the likeliest row would.
+				const order = [...new Set(listed.map(placeOf))];
 				const sources = byPlace
-					? [...listed].sort((a, b) => placeOf(a).localeCompare(placeOf(b), 'en'))
+					? [...listed].sort((a, b) => order.indexOf(placeOf(a)) - order.indexOf(placeOf(b)))
 					: listed;
 				const showAmount = sources.some(
 					(source) => source.amount && (source.amount.min !== 1 || source.amount.max !== 1)
@@ -276,7 +278,14 @@
 							/>{/each}
 					</Section>
 				</div>{/if}
-			{#if uses.length}<Section id="used-for" title="Used For" count={uses.length}>
+			{#if uses.length}<Section
+					id="used-for"
+					title="Used For"
+					count={shownUses.length}
+					line={shownUses.length < uses.length
+						? `${formatNumber(shownUses.length)} of ${formatNumber(uses.length)} uses match the filters.`
+						: undefined}
+				>
 					{#if useFilters}<div class="use-filters">
 							<label
 								><span class="field-label">Name</span><input
@@ -309,26 +318,28 @@
 									/></label
 								>{/if}
 						</div>{/if}
-					<RelationTable
-						items={shownUses}
-						label="Used for"
-						headings={['Makes', 'Skill', 'Needed']}
-						numeric={[false, true]}
-						>{#snippet row(use, index)}<tr
-								id={`use-${index + 1}`}
-								data-relation-id={use.relationId}
-								data-relation-direction="outgoing"
-								><td
-									><EntityLink entity={use.item} icon /><Conditions
-										conditions={otherConditions(use)}
-									/></td
-								><td
-									>{use.discipline ?? useLabel(use.kind)}{#if levelOf(use) != null}<span
-											class="muted">{` ${formatNumber(levelOf(use)!)}`}</span
-										>{/if}</td
-								><td class="numeric">{formatNumber(use.quantity)}</td></tr
-							>{/snippet}</RelationTable
-					>
+					{#if !shownUses.length}<p class="surface muted">
+							No use matches these filters. Change or clear a filter to see more.
+						</p>{:else}<RelationTable
+							items={shownUses}
+							label="Used for"
+							headings={['Makes', 'Skill', 'Needed']}
+							numeric={[false, true]}
+							>{#snippet row(use, index)}<tr
+									id={`use-${index + 1}`}
+									data-relation-id={use.relationId}
+									data-relation-direction="outgoing"
+									><td
+										><EntityLink entity={use.item} icon /><Conditions
+											conditions={otherConditions(use)}
+										/></td
+									><td
+										>{use.discipline ?? useLabel(use.kind)}{#if levelOf(use) != null}<span
+												class="muted">{` ${formatNumber(levelOf(use)!)}`}</span
+											>{/if}</td
+									><td class="numeric">{formatNumber(use.quantity)}</td></tr
+								>{/snippet}</RelationTable
+						>{/if}
 				</Section>{/if}
 			{#each sourceGroups as group (group.kind)}
 				<Section

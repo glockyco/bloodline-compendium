@@ -57,6 +57,7 @@
 			this={heading}
 			class="name"
 			data-game
+			data-pagefind-ignore
 			style:font-size={nameScale < 1 ? `${nameScale * 1.25}rem` : undefined}
 			>{item.name}</svelte:element
 		>

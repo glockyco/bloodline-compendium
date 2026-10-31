@@ -14,6 +14,8 @@
 	let preview = $state<Preview | null>(null);
 	let failed = $state(false);
 	let panel = $state<HTMLElement | undefined>();
+	// A phone docks the preview at the edge away from the link, so it never covers what the reader tapped.
+	let dockTop = $state(false);
 	let anchor: HTMLAnchorElement | null = null;
 	let tapped: HTMLAnchorElement | null = null;
 	let touch = false;
@@ -29,6 +31,7 @@
 	async function show(link: HTMLAnchorElement) {
 		if (anchor !== link) close();
 		anchor = link;
+		dockTop = link.getBoundingClientRect().top > window.innerHeight / 2;
 		link.setAttribute('aria-describedby', id);
 		const loaded = await loadPreview(link.dataset.preview!);
 		// A navigation can remove the link while its details load.
@@ -147,7 +150,13 @@
 	});
 </script>
 
-{#if preview || failed}<div class="entity-preview" {id} role="tooltip" bind:this={panel}>
+{#if preview || failed}<div
+		class="entity-preview"
+		class:dock-top={dockTop}
+		{id}
+		role="tooltip"
+		bind:this={panel}
+	>
 		{#if preview}<TooltipPresenter {preview} />{:else}<p>The details could not be loaded.</p>{/if}
 	</div>{/if}
 
@@ -182,6 +191,9 @@
 			width: auto;
 			max-height: var(--size-preview-phone) !important;
 			visibility: visible;
+		}
+		.entity-preview.dock-top {
+			inset: var(--gap-block) var(--gap-block) auto !important;
 		}
 	}
 </style>

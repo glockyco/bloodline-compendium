@@ -56,11 +56,14 @@ export function sortSources(sources: Source[]): Source[] {
 				source.price.currency?.slug === firstPrice.currency?.slug &&
 				source.price.currency?.name === firstPrice.currency?.name
 		);
+	// The cheapest price leads when prices compare, and otherwise the best chance, so the likeliest source is first.
 	return [...sources].sort((a, b) => {
 		if (comparablePrices && a.price && b.price) {
 			const difference = payPrice(a.price) - payPrice(b.price);
 			if (difference) return difference;
 		}
+		const chance = (b.odds?.chance ?? -1) - (a.odds?.chance ?? -1);
+		if (chance) return chance;
 		return a.name.localeCompare(b.name, 'en');
 	});
 }

@@ -6,9 +6,16 @@
 </script>
 
 {#if preview.kind === 'item'}<ItemTooltip item={preview} heading="p" />
+	{#each preview.issues as issue (issue)}<p class="issue">Known game issue: {issue}</p>{/each}
 	{#if preview.route}<p class="route">{preview.route}</p>{/if}{/if}
 
 <style>
+	.issue {
+		margin: var(--gap-block) var(--inset) 0;
+		color: var(--text-warning);
+		font-size: var(--type-meta);
+		line-height: var(--leading-meta);
+	}
 	.route {
 		margin: var(--gap-block) var(--inset) 0;
 		padding-top: var(--inset);

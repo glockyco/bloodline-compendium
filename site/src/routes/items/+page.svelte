@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import {
@@ -28,8 +28,12 @@
 	// mount. Hydrating straight into a filtered list keeps the prerendered rows' image sources, which Svelte does not
 	// repair, so rows would show other items' icons.
 	let mounted = $state(false);
+	// A list opened with a category chosen starts with the category group closed, so that category's own filters
+	// come into view. Choosing a category later leaves the group as it is, where the reader is working.
+	let categoryStartsClosed = $state(false);
 	onMount(() => {
 		mounted = true;
+		categoryStartsClosed = currentUrl.searchParams.has('category');
 	});
 	const list = $derived(
 		readState(mounted ? currentUrl.searchParams : new URLSearchParams(), index)
@@ -110,9 +114,31 @@
 	}
 	function apply(next: ListState) {
 		const search = writeState(next, index).toString();
-		goto(kindPath('item', data.kinds, (search ? '?' + search : '') + currentUrl.hash)!, {
+		return goto(kindPath('item', data.kinds, (search ? '?' + search : '') + currentUrl.hash)!, {
 			shallow: true
 		});
+	}
+	// A removed filter takes its control with it, so focus moves to a control that stays: the next active filter,
+	// or the name search once none is left.
+	async function remove(next: ListState) {
+		await apply(next);
+		await tick();
+		(
+			document.querySelector<HTMLElement>('.chips .chip') ??
+			document.querySelector<HTMLElement>('.search-row input')
+		)?.focus();
+	}
+	// A new stat filter's bounds follow the picker, so focus moves into its lower bound.
+	async function addStat(column: string, picker: HTMLSelectElement) {
+		const group = picker.closest('details');
+		await apply({
+			...list,
+			stats: [...list.stats, { column, min: '', max: '' }],
+			sort: { column, direction: 'desc' }
+		});
+		await tick();
+		const bounds = group?.querySelectorAll<HTMLInputElement>('.bounds input');
+		bounds?.[bounds.length - 2]?.focus();
 	}
 	function toggle(facet: string, value: string, checked: boolean) {
 		const values = (list.facets[facet] ?? []).filter((entry) => entry !== value);
@@ -195,7 +221,7 @@
 			</p>
 			{#if activeCount}<ul class="chips" aria-label="Active filters">
 					{#if list.name}<li>
-							<button type="button" class="chip" onclick={() => apply({ ...list, name: '' })}
+							<button type="button" class="chip" onclick={() => remove({ ...list, name: '' })}
 								>Name: {list.name} <span aria-hidden="true">×</span><span class="sr-only"
 									>Remove name filter</span
 								></button
@@ -203,7 +229,17 @@
 						</li>{/if}
 					{#each index.facets as facet (facet.id)}{#each list.facets[facet.id] ?? [] as value (value)}<li
 							>
-								<button type="button" class="chip" onclick={() => toggle(facet.id, value, false)}
+								<button
+									type="button"
+									class="chip"
+									onclick={() =>
+										remove({
+											...list,
+											facets: {
+												...list.facets,
+												[facet.id]: (list.facets[facet.id] ?? []).filter((entry) => entry !== value)
+											}
+										})}
 									>{valueLabel(facet, value)} <span aria-hidden="true">×</span><span class="sr-only"
 										>Remove {facet.label} filter</span
 									></button
@@ -214,7 +250,7 @@
 								type="button"
 								class="chip"
 								onclick={() =>
-									apply({ ...list, stats: list.stats.filter((_, other) => other !== position) })}
+									remove({ ...list, stats: list.stats.filter((_, other) => other !== position) })}
 								>{index.columns.find((column) => column.id === filter.column)?.label}{filter.min
 									? ` from ${filter.min}`
 									: ''}{filter.max ? ` to ${filter.max}` : ''}
@@ -316,8 +352,9 @@
 								{#each columns as column (column.id)}<td
 										class:numeric={column.numeric}
 										class:short={cellText(item, column.id).length <= 16}
+										class:absent={!item.cells[column.id]}
 										data-label={cellText(item, column.id) ? column.label : undefined}
-										>{cellText(item, column.id)}</td
+										>{cellText(item, column.id) || 'None'}</td
 									>{/each}
 								<td class="numeric value" data-label="Value"
 									>{item.value === null ? 'Unknown' : formatNumber(item.value) + ' gold'}</td
@@ -343,13 +380,19 @@
 	{@const selected = list.facets[group.facet.id] ?? []}
 	{@const needle = (narrowing[group.facet.id] ?? '').toLocaleLowerCase('en')}
 	<!-- Places are many, so their group starts closed unless it holds a choice. -->
-	<details class="group" open={group.facet.id !== 'place' || selected.length > 0}>
+	<details
+		class="group"
+		open={group.facet.id === 'category'
+			? !categoryStartsClosed
+			: group.facet.id !== 'place' || selected.length > 0}
+	>
 		<summary
 			><span class="title">{group.facet.label}</span>{#if selected.length}<span class="picked"
 					>{selected.length}</span
 				>{/if}<span class="chevron" aria-hidden="true"></span></summary
 		>
-		{#if group.options.length > 10}<input
+		<!-- The field stays while it holds text, so a narrowing that hides every value can always be cleared. -->
+		{#if group.options.length > 10 || needle}<input
 				class="narrow"
 				type="search"
 				aria-label={`Find ${group.facet.label.toLowerCase()} values`}
@@ -398,9 +441,17 @@
 						type="button"
 						class="remove"
 						aria-label={`Remove the ${label} filter`}
-						onclick={() =>
-							apply({ ...list, stats: list.stats.filter((_, other) => other !== position) })}
-						>×</button
+						onclick={async (event) => {
+							const group = event.currentTarget.closest('details');
+							await apply({ ...list, stats: list.stats.filter((_, other) => other !== position) });
+							await tick();
+							// The removed filter's button is gone, so focus returns to the stat picker, or to the group's
+							// heading once the last filter closes the group.
+							const picker = group?.querySelector<HTMLElement>(
+								'select[aria-label="Add a stat filter"]'
+							);
+							(picker?.checkVisibility() ? picker : group?.querySelector('summary'))?.focus();
+						}}>×</button
 					>
 					<div class="bounds">
 						<input
@@ -448,14 +499,10 @@
 					aria-label="Add a stat filter"
 					value=""
 					onchange={(event) => {
-						const column = event.currentTarget.value;
-						event.currentTarget.value = '';
-						if (column)
-							apply({
-								...list,
-								stats: [...list.stats, { column, min: '', max: '' }],
-								sort: { column, direction: 'desc' }
-							});
+						const picker = event.currentTarget;
+						const column = picker.value;
+						picker.value = '';
+						if (column) void addStat(column, picker);
 					}}
 					><option value="">Add a stat</option>{#each statColumns as column (column.id)}<option
 							value={column.id}
@@ -872,6 +919,9 @@
 			position: sticky;
 			left: 0;
 		}
+		thead th:first-child {
+			z-index: var(--layer-table-corner);
+		}
 		tbody td.name {
 			z-index: var(--layer-table-heading);
 			background: var(--surface-panel);
@@ -881,6 +931,14 @@
 		}
 		tbody tr:hover td.name {
 			background: var(--surface-hover);
+		}
+	}
+	/* Below desktop width the table can scroll under the pinned column, which then draws an edge, so a cell scrolled
+	   under it reads as covered, not as a shorter value. */
+	@media (width >= 40rem) and (width < 64rem) {
+		thead th:first-child,
+		tbody td.name {
+			box-shadow: inset calc(-1 * var(--border-width)) 0 0 var(--border-control);
 		}
 	}
 	/* A phone reads each item as a compact row of the same surface: its name on the first line, then its type, its
@@ -938,32 +996,29 @@
 		tbody td:not(.name, .type, .value) {
 			text-align: left;
 		}
-		tbody td:empty {
+		tbody td.absent {
 			display: none;
 		}
-		tbody td:not(.name, .type, .value, .short) {
+		/* Without a type, the value shares the name's line, and stats take whole lines below. */
+		tbody tr:not(:has(td.type)) {
+			grid-template-columns: minmax(0, 1fr) auto;
+		}
+		tbody tr:not(:has(td.type)) td.name {
+			grid-column: 1;
+		}
+		tbody tr:not(:has(td.type)) td.value {
+			grid-row: 1;
+		}
+		tbody tr:not(:has(td.type)) td:not(.name, .value) {
+			grid-column: 1 / -1;
+		}
+		tbody td:not(.name, .type, .value, .short, .absent) {
 			grid-column: 1 / -1;
 		}
 		.reveal {
 			margin-left: 0;
 			padding-inline: 0;
 			text-align: left;
-		}
-		td[data-label]:not(.type, .value)::before {
-			content: attr(data-label) ' ';
-			color: var(--text-muted);
-			font-size: var(--type-meta);
-		}
-		/* A stat reads from its label, an empty one takes no place, and a long one such as a list of effects takes
-		   the whole line. */
-		tbody td:not(.name, .type, .value) {
-			text-align: left;
-		}
-		tbody td:empty {
-			display: none;
-		}
-		tbody td:not(.name, .type, .value, .short) {
-			grid-column: 1 / -1;
 		}
 	}
 </style>

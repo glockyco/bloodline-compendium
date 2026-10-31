@@ -146,3 +146,18 @@ Six reviewers used the real-data preview as a phone newcomer, a weaponsmith, a g
 - Wording misleads: a guaranteed drop is called rare, a container row adds an unexplained second percentage, an unresolved pickup reads "Find lying", and a bounty note is received from its own quest.
 - The missing page lost its styles at nested addresses, a first tap followed links instead of previewing them, and places ran together without spaces. All three are fixed.
 - Interaction gaps: filter counts break inside numbers, the desktop filters put 100 controls before the results, the availability toggle drops focus, Show more leaves focus behind the revealed rows, wide tables lose the item name when scrolled, tall tooltips clip at 200% zoom and long tooltip names run under the ribbon's notch.
+
+The same six personas reviewed the real-data preview again after groups 4, 7, 8 and 10, with reports in `artifacts/design/ux-review/personas-2/`. Most first-review findings were fixed. The new findings changed the following:
+
+- A pinned item name covered the leading digits of a damage value scrolled under it at 768 px, so the pinned column draws an edge there, and its heading stays above the other headings.
+- An item preview left out the known issue that changes its numbers, such as knee armor that counts only after another piece is equipped, so previews name the issues that affect the item.
+- Sources sort by best chance, place groups follow their best source, and gathering, fishing and farming lead the ways found in the world, while random loot, which names no place or chance, comes last.
+- Used For counts the uses its filters show and says so when none match, a filter's search field stays while it holds text, focus stays on a control after a filter is added or removed, and a list opened with a category starts with that group closed.
+- Phone previews dock away from the tapped link, a list cell without a value reads None, a currency price reads as one phrase, and search excerpts no longer repeat the item name from the game card.
+
+Findings left open, each with its owner:
+
+- Weapon part pages do not explain assembly, compatibility or finished weapon stats, and the part list cannot shortlist by crafting level or ingredient cost. Both belong to `add-crafting-and-equipment`.
+- A bounty note does not say where its quest is accepted, because quest givers are not read yet. Places and people in `openspec/plan.md` own it.
+- Task 10.7 holds the rest: the list's name filter misses names the game misspells, such as Steel Rapier Gaurd, hunting places repeat camp names that read alike, settlement deliveries do not say what a delivery is, the Speed word and the Attack Speed number rank weapons differently without saying why, and staves are typed Halberd without a hint.
+

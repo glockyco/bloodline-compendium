@@ -10,6 +10,12 @@ test('filters items with counted facets, preserves URL state and sorts numeric v
 	await expect(page.locator('.item-name')).toHaveText(['Lanternedge']);
 	await expect(page).toHaveURL(/category=weapon/);
 	await page.reload();
+	// A list opened with a category starts with that group closed, so its own filters come into view.
+	await expect(categories.locator('details', { hasText: 'Category' })).not.toHaveAttribute(
+		'open',
+		''
+	);
+	await categories.locator('summary', { hasText: 'Category' }).click();
 	await expect(weapons).toBeChecked();
 	await expect(page.locator('.item-name')).toHaveText(['Lanternedge']);
 	await weapons.uncheck();
@@ -58,6 +64,7 @@ test('combines filters, restores them from a shared URL and adds stat columns', 
 }) => {
 	await page.goto('/items/?category=weapon&category=food&weaponType=Sword');
 	const facets = page.getByRole('complementary', { name: 'Item filters' });
+	await facets.locator('summary', { hasText: 'Category' }).click();
 	await expect(facets.getByRole('checkbox', { name: /^Weapons\s/ })).toBeChecked();
 	await expect(facets.getByRole('checkbox', { name: /^Food\s/ })).toBeChecked();
 	await expect(facets.getByRole('checkbox', { name: /^Sword\s/ })).toBeChecked();

@@ -13,21 +13,23 @@ export const sourceHeadings: Record<SourceKind, string> = {
 	smithing: 'Made by Smithing',
 	crafting: 'Crafted',
 	cooking: 'Cooked',
+	// Gathering, fishing and farming give an item again and again, so they lead the ways found in the world.
+	gathering: 'Gathered',
+	fishing: 'Fished',
+	farming: 'Grown',
 	containerLoot: 'Found in Containers',
-	randomLoot: 'Found as Random Loot',
 	enemyDrop: 'Dropped by',
 	pickup: 'Picked Up',
 	dialogue: 'Given in Dialogue',
-	fishing: 'Fished',
-	gathering: 'Gathered',
-	farming: 'Grown',
 	bountyNote: 'Obtained from Bounty Notes',
 	settlementDelivery: 'Delivered by Settlements',
 	stable: 'Sold at Stables',
 	contract: 'From Contracts',
 	seasonalGift: 'Seasonal Gifts',
 	archaeology: 'Dug Up',
-	reward: 'Rewarded'
+	reward: 'Rewarded',
+	// Random loot names no place or chance, so it follows the ways that do.
+	randomLoot: 'Found as Random Loot'
 };
 /** What a source table's first column lists for each way of getting an item. */
 export const sourceColumns: Record<SourceKind, string> = {
