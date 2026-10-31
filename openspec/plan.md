@@ -80,4 +80,4 @@ Each route has a payload budget that its change sets and a check enforces. Plann
 
 ### Known issues
 
-A defect is published or reported only after a lab run in the rendered game shows it, by a screenshot of what the player sees and by its measured effect, in two runs. Reporting to the developer needs a request.
+A defect is published or reported only after the running game shows it, observed as the runtime-checks skill describes under "What an observation must show". Reporting to the developer needs a request.

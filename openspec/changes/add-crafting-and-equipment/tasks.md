@@ -1,9 +1,9 @@
 ## 1. Evidence
 
 - [ ] 1.1 Locate the quality tables, the crafted armor classes and the functions that apply weapon assembly, quality, armorsmithing, attunement, enchanting and recipe learning, and record them in design.md
-- [ ] 1.2 Craft and equip D and F quality weapons and read their equipped damage and speed, in two runs with screenshots
-- [ ] 1.3 Craft armor at each armorsmithing quality and read its armor, attune a rune at attunement level 1, and enchant a weapon and read its value, in two runs with screenshots
-- [ ] 1.4 Craft a potion from a treated Gildleaf and verify the applied effect matches `AllIngredientEffects`, in two runs
+- [ ] 1.2 Craft and equip D and F quality weapons and read their equipped damage and speed in the running game
+- [ ] 1.3 Craft armor at each armorsmithing quality and read its armor, attune a rune at attunement level 1, and enchant a weapon and read its value in the running game, repeating a result that a random roll can change
+- [ ] 1.4 Craft a potion from a treated Gildleaf and verify in the running game that the applied effect matches `AllIngredientEffects`
 - [ ] 1.5 Record each result in design.md and as a check script under `tools/runtime/checks/`
 
 ## 2. Catalog
