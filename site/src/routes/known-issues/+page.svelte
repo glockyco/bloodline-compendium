@@ -22,8 +22,8 @@
 		<p class="eyebrow">Problems in the game itself</p>
 		<h1 data-pagefind-meta="title">Known Issues</h1>
 		<p class="intro">
-			This page lists bugs in The Bloodline that affect items. Each bug was confirmed in the game and comes
-			with steps to reproduce it.
+			This page lists bugs in The Bloodline that affect items. Each bug was confirmed in the game
+			and comes with steps to reproduce it.
 		</p>
 	</header>
 	{#if data.issues.length}<nav class="issue-index surface" aria-label="Issues">
