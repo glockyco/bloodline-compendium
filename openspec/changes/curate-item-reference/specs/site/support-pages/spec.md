@@ -14,7 +14,7 @@ The site SHALL NOT publish a Coverage page. The catalog SHALL write the gaps it 
 - **THEN** they reach the missing-page view, and no page of the site links there
 
 ### Requirement: Known Issues for players first
-The Known Issues page SHALL open with a list of its issues, and each issue SHALL show its title, its effect on players, its workaround and the affected items before its steps. The cause, functions and report status SHALL sit in a collapsed section for developers.
+The Known Issues page SHALL open with a list of its issues, and each issue SHALL show its title, its effect on players, any workaround and the affected items before its steps. The cause, functions and any bug report link SHALL sit in a collapsed section for developers.
 
 #### Scenario: Phone reader
 - **WHEN** a reader opens Known Issues on a phone

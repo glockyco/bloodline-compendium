@@ -240,8 +240,8 @@ internal sealed record ItemPage(
     public ItemStatus Status { get; init; } = ItemStatus.Obtainable;
 }
 
-/// <summary>A page's note about a known issue, with the issue's title and its effect on players.</summary>
-internal sealed record IssueNote(string Issue, string Title, string Effect);
+/// <summary>A page's item-specific note about a known issue, falling back to the issue's effect.</summary>
+internal sealed record IssueNote(string Issue, string Effect);
 
 internal enum ReportStatus
 {
@@ -269,7 +269,11 @@ internal sealed record KnownIssue(
     IReadOnlyList<long> Builds,
     ReportStatus Report,
     string? ReportUrl
-);
+)
+{
+    /// <summary>Optional item-specific sentences keyed by the class paths of items that note this issue.</summary>
+    public IReadOnlyDictionary<string, string>? ItemNotes { get; init; }
+}
 
 /// <summary>The registry of reproduced game defects, <c>issues/known-issues.json</c>.</summary>
 [JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]

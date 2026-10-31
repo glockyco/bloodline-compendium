@@ -397,6 +397,9 @@ export interface KnownIssue {
   effect: string;
   expected: string;
   id: string;
+  itemNotes?: {
+    [k: string]: string;
+  } | null;
   observed: string;
   report: ReportStatus;
   reportUrl: string | null;
@@ -468,7 +471,6 @@ export interface Effect {
 export interface IssueNote {
   effect: string;
   issue: string;
-  title: string;
   [k: string]: unknown;
 }
 /**

@@ -145,7 +145,7 @@
 			]}
 		/>
 	</div>
-	<IssueNote title="An issue title that runs long enough to wrap">
+	<IssueNote>
 		The game shows one value in its tooltip and applies another when the item is equipped. This body
 		runs over several lines.
 	</IssueNote>

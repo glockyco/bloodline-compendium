@@ -203,7 +203,6 @@
 	</ol>
 </nav>
 {#snippet notes()}{#each item.notes as note (note.issue)}<IssueNote
-			title={note.title}
 			href={resolve('known-issues/') + '#' + note.issue}>{note.effect}</IssueNote
 		>{/each}{/snippet}
 <EntityArticle {kind}>

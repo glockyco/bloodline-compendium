@@ -27,6 +27,15 @@
         "id": {
           "type": "string"
         },
+        "itemNotes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
         "observed": {
           "type": "string"
         },

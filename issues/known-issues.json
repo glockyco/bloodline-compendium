@@ -109,9 +109,9 @@
     },
     {
       "id": "fairy-staff-no-fireballs",
-      "title": "Fairy Staff does not launch the fireballs its description lists",
-      "effect": "Fairy Staff's normal swings launch no fireballs and consume no mana, although its description says each swing launches small fireballs for 5 mana.",
-      "workaround": "Use Staff of Minor Flames for fireballs on normal swings.",
+      "title": "Fairy Staff launches no fireballs",
+      "effect": "Despite its description, Fairy Staff launches no fireballs and uses no mana.",
+      "workaround": null,
       "steps": [
         "Hover Fairy Staff in the inventory. Its description says it launches small fireballs each time it is swung and each swing consumes 5 mana.",
         "Equip and draw Fairy Staff with at least 5 mana available. The staff is visible in hand.",
@@ -130,8 +130,13 @@
     },
     {
       "id": "staff-point-blank-damage",
-      "title": "Three staves can deal 100 projectile damage at point-blank range",
-      "effect": "Walking Stick, Acolyte Geomancer Staff and Moonstone Staff can deal 100 projectile damage at point-blank range instead of their normal 12, 20 and 35.",
+      "title": "Three staves deal 100 damage at point-blank range",
+      "effect": "The projectiles of Walking Stick, Acolyte Geomancer Staff and Moonstone Staff deal 100 damage instead of 12, 20 and 35 if they hit an enemy as they leave the staff. Attacking from close range can make this happen.",
+      "itemNotes": {
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/WalkingStick.WalkingStick_C": "Walking Stick's projectile deals 100 damage instead of 12 if it hits an enemy as it leaves the staff. Attacking from close range can make this happen.",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/AcolyteGeomancerStaff.AcolyteGeomancerStaff_C": "Acolyte Geomancer Staff's projectile deals 100 damage instead of 20 if it hits an enemy as it leaves the staff. Attacking from close range can make this happen.",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/MoonstoneStaff.MoonstoneStaff_C": "Moonstone Staff's projectile deals 100 damage instead of 35 if it hits an enemy as it leaves the staff. Attacking from close range can make this happen."
+      },
       "workaround": null,
       "steps": [
         "Equip and draw Acolyte Geomancer Staff with enough mana to attack and no damage-changing effects active. The staff is visible in hand.",

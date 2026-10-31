@@ -58,8 +58,46 @@ public sealed class KnownIssueTests
         var result = CatalogBuilder.Build(Records(Issue(KnownIssues.KneeArmor)), []);
 
         var note = Assert.Single(Assert.Single(result.Items).Notes);
-        Assert.Equal((KnownIssues.KneeArmor, "Invented issue"), (note.Issue, note.Title));
+        Assert.Equal((KnownIssues.KneeArmor, "Invented effect."), (note.Issue, note.Effect));
         Assert.Equal("Knee guards", Assert.Single(Assert.Single(result.Issues).Affected).Name);
+    }
+
+    [Fact]
+    public void ItemNotesOverrideOnlyTheMatchingItemsEffect()
+    {
+        var issue = Issue(KnownIssues.KneeArmor) with
+        {
+            ItemNotes = new Dictionary<string, string>
+            {
+                [KneeGuards().Path] = "Invented item-specific effect.",
+            },
+        };
+        var result = CatalogBuilder.Build(Records(issue), []);
+
+        Assert.Equal(
+            "Invented item-specific effect.",
+            Assert.Single(Assert.Single(result.Items).Notes).Effect
+        );
+        Assert.Equal("Invented effect.", Assert.Single(result.Issues).Issue.Effect);
+    }
+
+    [Theory]
+    [InlineData("/Game/Invented/Missing.Missing_C")]
+    [InlineData("/Game/Invented/KneeGuards.KneeGuards_C")]
+    public void AnItemNoteForAnItemThatDoesNotNoteTheIssueFailsTheCatalog(string key)
+    {
+        var issue = Issue("unrelated-issue") with
+        {
+            ItemNotes = new Dictionary<string, string> { [key] = "Invented item-specific effect." },
+        };
+
+        var error = Assert.Throws<InvalidDataException>(() =>
+            CatalogBuilder.Build(Records(Issue(KnownIssues.KneeArmor), issue), [])
+        );
+
+        Assert.Contains(issue.Id, error.Message);
+        Assert.Contains(key, error.Message);
+        Assert.Contains("does not note this issue", error.Message);
     }
 
     [Fact]

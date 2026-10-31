@@ -7,6 +7,7 @@ namespace Bloodline.Catalog;
 /// <summary>
 /// Reads <c>issues/known-issues.json</c> and notes its issues on the item pages whose shown values they affect.
 /// A note or tooltip cause that names an issue the registry lacks fails the catalog.
+/// An item-specific sentence for an item that does not note its issue also fails the catalog.
 /// </summary>
 internal static partial class KnownIssues
 {
@@ -143,13 +144,28 @@ internal static partial class KnownIssues
                 notes[item.Key].Add(StaffPointBlankDamage);
             }
         }
+        foreach (var issue in registry.Issues)
+        {
+            foreach (var key in issue.ItemNotes?.Keys ?? [])
+            {
+                if (!notes.TryGetValue(key, out var itemNotes) || !itemNotes.Contains(issue.Id))
+                {
+                    throw new InvalidDataException(
+                        $"Known issue {issue.Id} has an itemNotes entry for {key}, which does not note this issue."
+                    );
+                }
+            }
+        }
         var pages = items
             .Select(item =>
                 item with
                 {
                     Notes = notes[item.Key]
                         .Select(id => Find(id, "The page of " + item.Name))
-                        .Select(issue => new IssueNote(issue.Id, issue.Title, issue.Effect))
+                        .Select(issue => new IssueNote(
+                            issue.Id,
+                            issue.ItemNotes?.GetValueOrDefault(item.Key) ?? issue.Effect
+                        ))
                         .ToArray(),
                 }
             )

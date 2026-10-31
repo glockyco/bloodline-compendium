@@ -584,7 +584,10 @@ test('notes a known issue on the affected item and explains it on a linked, sear
 }) => {
 	await page.goto('/items/mosswoven-coat/');
 	const note = page.getByRole('complementary', { name: 'Known game issue' });
-	await expect(note).toContainText('The Mosswoven Coat adds no armor');
+	await expect(note.locator('.body')).toHaveText(
+		'The Mosswoven Coat adds no armor when worn, although its tooltip shows armor.'
+	);
+	await expect(note.locator('p')).toHaveText(['Known game issue']);
 	const details = page.getByRole('complementary', { name: 'Item details' });
 	await expect(details).toContainText('ARMOR: 0');
 	await expect(

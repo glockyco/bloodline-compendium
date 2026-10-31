@@ -1,11 +1,10 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	let { title, href, children }: { title: string; href?: string; children: Snippet } = $props();
+	let { href, children }: { href?: string; children: Snippet } = $props();
 </script>
 
 <aside class="note" aria-label="Known game issue">
 	<p class="label">Known game issue</p>
-	<p class="title">{title}</p>
 	<div class="body">{@render children()}</div>
 	{#if href}
 		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- callers pass hrefs they resolved. -->
@@ -28,9 +27,6 @@
 	}
 	.label {
 		color: var(--text-warning);
-		font-weight: var(--weight-strong);
-	}
-	.title {
 		font-weight: var(--weight-strong);
 	}
 	.body {
