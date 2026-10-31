@@ -23,15 +23,19 @@ const executableName = "TheBloodline-Win64-Shipping.exe";
 const cxstart =
   "/Applications/CrossOver.app/Contents/SharedSupport/CrossOver/bin/cxstart";
 
-// UE4SS is pinned by the SHA-256 of its release archive and of the loader it installs. The experimental-latest
-// release replaces its files, so prepare keeps the archive in the artifacts cache once downloaded.
+// UE4SS is pinned by the SHA-256 of its release archive and of the loader it installs. The stable v3.0.1 stops
+// during startup on this game, so the pin is an experimental build. Its release replaces old builds, so prepare
+// keeps the archive in the artifacts cache once downloaded, and a fresh checkout pins the current build once the
+// pinned one is gone. `root` is where the release unpacks its loader, settings and mods inside the game's binaries.
 const ue4ss = {
-  file: "UE4SS_v3.0.1-1183-gcdbc0b66.zip",
-  url: "https://github.com/UE4SS-RE/RE-UE4SS/releases/download/experimental-latest/UE4SS_v3.0.1-1183-gcdbc0b66.zip",
-  sha256: "e4a47e23e2eeb8379c4fc388d1b1686f01c6c5930d84a2ee4a6a9574b274e681",
+  file: "UE4SS_v3.0.1-1188-gf885e8d2.zip",
+  url: "https://github.com/UE4SS-RE/RE-UE4SS/releases/download/experimental-latest/UE4SS_v3.0.1-1188-gf885e8d2.zip",
+  sha256: "4a594fb5c6e1aa794b06a770730e072c53fb92b741f95a5f0601080d80f4a6c1",
   loaderSha256:
-    "c273e7228687b647226fd63d7ca65888d313ece6be18996ec1320d00a5efe1f8",
+    "743b56dab254e2282b43c3d4ed11b3e5e769f3699e92249aa28fe5833891703e",
+  root: "ue4ss",
 };
+const ue4ssPath = (binaries, ...parts) => join(binaries, ue4ss.root, ...parts);
 
 // Every launch keeps saves and logs inside the lab copy and stays silent and free of dialogs.
 const commonArguments = [
@@ -144,7 +148,7 @@ async function labCopy(config) {
       `${join(config.copy, "lab.json")} names an executable outside the lab copy.`,
     );
   const binaries = dirname(executable);
-  const loader = await sha256(join(binaries, "ue4ss/UE4SS.dll"));
+  const loader = await sha256(ue4ssPath(binaries, "UE4SS.dll"));
   if (loader !== ue4ss.loaderSha256)
     throw new Error(
       `The lab copy's UE4SS.dll has SHA-256 ${loader}, not the pinned ${ue4ss.loaderSha256}. Run prepare again.`,
@@ -226,38 +230,46 @@ async function prepare(config) {
   const binaries = dirname(executables[0]);
   // The game restarts itself through Steam unless it finds its app ID beside it.
   await writeFile(join(binaries, "steam_appid.txt"), String(appId));
-  execFileSync("unzip", [
-    "-o",
-    "-q",
-    await ue4ssArchive(config),
-    "-d",
-    binaries,
-  ]);
-  if ((await sha256(join(binaries, "ue4ss/UE4SS.dll"))) !== ue4ss.loaderSha256)
+  // An earlier UE4SS, in this release's layout or in the ue4ss folder of later builds, goes first, so only the
+  // pinned loader can start.
+  const archive = await ue4ssArchive(config);
+  const entries = execFileSync("unzip", ["-Z1", archive], { encoding: "utf8" })
+    .split("\n")
+    .map((entry) => entry.split("/")[0])
+    .filter(Boolean);
+  for (const entry of new Set([...entries, "ue4ss"]))
+    await rm(join(binaries, entry), { recursive: true, force: true });
+  execFileSync("unzip", ["-o", "-q", archive, "-d", binaries]);
+  if ((await sha256(ue4ssPath(binaries, "UE4SS.dll"))) !== ue4ss.loaderSha256)
     throw new Error(`${ue4ss.file} installed an unexpected UE4SS.dll.`);
   // UE4SS needs the engine version set for UE 4.27 games.
-  const settingsFile = join(binaries, "ue4ss/UE4SS-settings.ini");
+  const settingsFile = ue4ssPath(binaries, "UE4SS-settings.ini");
   const settings = (await readFile(settingsFile, "utf8"))
     .replace(/^MajorVersion =.*$/m, "MajorVersion = 4")
     .replace(/^MinorVersion =.*$/m, "MinorVersion = 27");
   await writeFile(settingsFile, settings);
   // Only the bridge runs, so the lab game differs from the shipped game as little as possible.
-  const mods = join(binaries, "ue4ss/Mods");
+  const mods = ue4ssPath(binaries, "Mods");
+  // The release writes mods.txt with a byte order mark, which would hide its first mod from the pattern below.
   const list = (await readFile(join(mods, "mods.txt"), "utf8"))
+    .replace(/^\uFEFF/, "")
     .replace(/^(\w+)[ \t]*:[ \t]*\d[ \t]*$/gm, "$1 : 0")
     .replace(
       /^; Built-in keybinds/m,
       "BloodlineBridge : 1\n\n; Built-in keybinds",
     );
   await writeFile(join(mods, "mods.txt"), list);
-  const enabled = JSON.parse(await readFile(join(mods, "mods.json"), "utf8"))
-    .filter((mod) => mod.mod_name !== "BloodlineBridge")
-    .map((mod) => ({ ...mod, mod_enabled: false }));
-  enabled.push({ mod_name: "BloodlineBridge", mod_enabled: true });
-  await writeFile(
-    join(mods, "mods.json"),
-    JSON.stringify(enabled, null, 4) + "\n",
-  );
+  // Later UE4SS builds also read mods.json, which this release lacks.
+  if (await exists(join(mods, "mods.json"))) {
+    const enabled = JSON.parse(await readFile(join(mods, "mods.json"), "utf8"))
+      .filter((mod) => mod.mod_name !== "BloodlineBridge")
+      .map((mod) => ({ ...mod, mod_enabled: false }));
+    enabled.push({ mod_name: "BloodlineBridge", mod_enabled: true });
+    await writeFile(
+      join(mods, "mods.json"),
+      JSON.stringify(enabled, null, 4) + "\n",
+    );
+  }
   const bridge = join(config.copy, "bridge");
   for (const directory of [
     join(bridge, "inbox"),
