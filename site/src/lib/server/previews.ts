@@ -1,4 +1,4 @@
-import { readItem, readIssues } from './data.js';
+import { readItem } from './data.js';
 import { entries as itemEntries } from '../../routes/items/[slug]/+page.server.js';
 import { firstRoute } from '../acquisition.js';
 import { sourceHeadings } from '../labels.js';
@@ -18,18 +18,14 @@ export const previewSources: {
 		},
 		async build(slug) {
 			const item = await readItem(slug);
-			const issues = await readIssues();
 			return {
 				kind: 'item',
 				name: item.name + (item.qualifier ? ` (${item.qualifier})` : ''),
 				icon: item.icon,
 				description: item.description,
 				facts: item.facts,
-				issues: item.notes.map((note) => {
-					const issue = issues.find((entry) => entry.issue.id === note.issue);
-					if (!issue) throw new Error(`Missing known issue ${note.issue}`);
-					return issue.issue.title;
-				}),
+				// The item's own sentence, as its Bugs section shows it. Issue titles describe every affected item.
+				issues: item.notes.map((note) => note.effect),
 				route:
 					firstRoute(item.sources, Object.keys(sourceHeadings) as SourceKind[]) ??
 					(item.status === 'notInNormalPlay'
