@@ -176,6 +176,10 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
                             Entity = entity,
                             Quotes = quotes,
                             Conditions = requirements.Shown,
+                            Unconfirmed = dialogue.Path.Contains(
+                                "/Dialogue_Unused/",
+                                StringComparison.OrdinalIgnoreCase
+                            ),
                         }
                     )
                     {

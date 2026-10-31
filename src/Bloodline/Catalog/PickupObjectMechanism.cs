@@ -125,10 +125,21 @@ internal sealed class PickupObjectMechanism : ISourceMechanism
     ) =>
         new(
             item,
-            new Source(SourceKind.Pickup, "World pickup", places, null, amount, [], notes ?? [])
+            new Source(
+                SourceKind.Pickup,
+                "World pickup",
+                places,
+                null,
+                amount,
+                [],
+                places.Count == 0
+                    ? [.. notes ?? [], "No pickup location in the world is known."]
+                    : notes ?? []
+            )
             {
                 Entity = entity,
                 Conditions = conditions,
+                Unconfirmed = places.Count == 0,
             }
         );
 }

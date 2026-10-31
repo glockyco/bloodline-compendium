@@ -178,6 +178,79 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 	await expect(page.getByText('No icon is known for this item.')).toBeVisible();
 });
 
+test('keeps unconfirmed sources at the end without advertising a way to get the item', async ({
+	page
+}) => {
+	for (const width of [1280, 390]) {
+		await page.setViewportSize({ width, height: 900 });
+		await page.goto('/items/hollow-prism/');
+		await expect(page.locator('.answer')).toContainText(
+			'No way to get this item is known in this game version.'
+		);
+		await expect(page.locator('.answer')).not.toContainText('The Silent Curator');
+		await expect(page.locator('.answer')).not.toContainText('Unplaced prism');
+		await expect(page.locator('#source-dialogue, #source-pickup')).toHaveCount(0);
+		await expect(page.locator('.item-relations > section').last()).toHaveAttribute(
+			'aria-labelledby',
+			'only-in-game-files'
+		);
+		const files = page.getByRole('table', { name: 'Only in the game files' });
+		await expect(files.getByRole('columnheader')).toHaveText(['Source', 'Missing evidence']);
+		const dialogue = files.getByRole('row').filter({ hasText: 'The Silent Curator' });
+		await expect(dialogue).toContainText('Glass Reach');
+		await expect(
+			dialogue.getByText('This dialogue is marked unused in the game files.')
+		).toBeVisible();
+		await expect(
+			files.getByText('No placed instance was found for this pickup.')
+		).toBeVisible();
+		await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+			'content',
+			/No known way to get it\./
+		);
+		await expect(page.locator('meta[name="description"]')).not.toHaveAttribute(
+			'content',
+			/Silent Curator|Unplaced prism|Found on the ground/
+		);
+	}
+	await page.goto('/items/?name=prism');
+	await page.locator('.item-name', { hasText: 'Hollow Prism' }).focus();
+	const preview = page.locator('#entity-preview');
+	await expect(preview).toContainText('No known way to get it.');
+	await expect(preview).not.toContainText('The Silent Curator');
+	await expect(preview).not.toContainText('Unplaced prism');
+	await page.keyboard.press('Escape');
+	await page.goto('/');
+	await page.locator('pagefind-searchbox input').fill('Hollow');
+	const result = page.locator('pagefind-searchbox').getByRole('option', { name: /Hollow Prism/ });
+	await expect(result).toBeVisible();
+	await expect(result).not.toContainText('The Silent Curator');
+	await expect(result).not.toContainText('Unplaced prism');
+});
+
+test('shows loose-loot chances beside ordinary pickups without calling them containers', async ({
+	page
+}) => {
+	for (const width of [1280, 390]) {
+		await page.setViewportSize({ width, height: 900 });
+		await page.goto('/items/lanternedge/');
+		const pickups = page.locator('section[aria-labelledby="source-pickup"]');
+		const table = pickups.getByRole('table');
+		await expect(table.getByRole('columnheader')).toHaveText(['Item', 'Chance per loot spot']);
+		await expect(table.getByRole('row').filter({ hasText: 'Stargazer loose loot' })).toContainText(
+			'25%'
+		);
+		await expect(table.getByRole('row').filter({ hasText: 'Watchtower blade' })).toBeVisible();
+		await expect(pickups).not.toContainText('Loose items lying on the ground');
+		await expect(
+			page.locator('.acquisition-routes a[href="#source-pickup"]')
+		).toContainText('Found on the ground in Glass Reach');
+		await expect(
+			page.locator('section[aria-labelledby="source-containerLoot"]')
+		).not.toContainText('Stargazer loose loot');
+	}
+});
+
 test('separates container spawns from loot chances on desktop and labelled phone cards', async ({
 	page
 }) => {

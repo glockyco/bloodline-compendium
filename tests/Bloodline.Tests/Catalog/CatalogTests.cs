@@ -54,6 +54,138 @@ public sealed class CatalogTests
         IReadOnlyList<Exclusion>? exclusions = null
     ) => CatalogBuilder.Build(records, exclusions ?? []);
 
+    [Theory]
+    [InlineData("unusedDialogue", false)]
+    [InlineData("unusedGatheringDefinition", false)]
+    [InlineData("zeroGatheringYield", false)]
+    [InlineData("unplacedGathering", false)]
+    [InlineData("unplacedGatheringMethod", false)]
+    [InlineData("zeroBespokeYield", false)]
+    [InlineData("unplacedPickup", false)]
+    [InlineData("unplacedLoosePickup", false)]
+    [InlineData("unplacedPickup", true)]
+    public void FileOnlySourcesRemainPublishedWithoutClaimingAvailability(
+        string sourceCase,
+        bool hasConfirmedPickup
+    )
+    {
+        var item = Item();
+        var reference = new JsonObject { ["$ref"] = item.Path };
+        var classes = new List<ClassRecord> { item };
+        var levels = new List<LevelRecord>();
+        var dialogues = new List<AssetRecord>();
+        if (sourceCase == "unusedDialogue")
+        {
+            var grant = "/Invented/AddItemDialogue.AddItemDialogue_C";
+            classes.Add(new ClassRecord(grant, [], new JsonObject()));
+            dialogues.Add(
+                new AssetRecord(
+                    "/Invented/Dialogue_Unused/Tale.Tale",
+                    "Dialogue",
+                    new JsonObject(),
+                    [
+                        new InnerObjectRecord(
+                            "Gift",
+                            grant,
+                            new JsonObject { ["Item To Add"] = reference }
+                        ),
+                    ]
+                )
+            );
+        }
+        else
+        {
+            var properties = new JsonObject();
+            string path;
+            IReadOnlyList<string> ancestors = [];
+            if (sourceCase == "unplacedPickup")
+            {
+                path = "/Invented/Bundle.Bundle_C";
+                ancestors = [ItemIdentity.Interactable];
+                properties["Item"] = reference;
+            }
+            else if (sourceCase == "unplacedLoosePickup")
+            {
+                path = ContainerLootMechanism.LooseRoot;
+                properties["Loot Table"] = new JsonObject
+                {
+                    ["$map"] = new JsonArray(new JsonArray(reference, JsonValue.Create(1))),
+                };
+                properties["Max Spawn Amount"] = 1;
+            }
+            else if (sourceCase == "zeroBespokeYield")
+            {
+                path = "/Invented/WarpSpike.WarpSpike_C";
+                properties["Warpshards"] = reference;
+                item.Properties["ItemInfo"]!["Quantity"] = 0;
+            }
+            else if (sourceCase == "unplacedGatheringMethod")
+            {
+                path = "/Invented/Overworld_Gatherpoint.Overworld_Gatherpoint_C";
+                properties["Tree Items"] = new JsonArray(reference);
+            }
+            else
+            {
+                path =
+                    "/Invented/HarvestableInteractionObject.HarvestableInteractionObject_C";
+                properties["Preset"] = 1;
+                properties[
+                    sourceCase == "unusedGatheringDefinition"
+                        ? "Copper Deposit Loot"
+                        : "Iron Deposit Loot"
+                ] = new JsonObject
+                {
+                    ["$map"] = new JsonArray(new JsonArray(reference, JsonValue.Create(1))),
+                };
+                properties["Maximum amount of items that can be harvested"] =
+                    sourceCase == "zeroGatheringYield" ? 0 : 3;
+            }
+            classes.Add(new ClassRecord(path, ancestors, properties));
+            if (
+                sourceCase is
+                "unusedGatheringDefinition"
+                    or "zeroGatheringYield"
+                    or "zeroBespokeYield"
+            )
+            {
+                levels.Add(
+                    new LevelRecord(
+                        "/Invented/Meadow",
+                        [],
+                        [new ActorRecord("Resource", path, new JsonObject())]
+                    )
+                );
+            }
+        }
+        if (hasConfirmedPickup)
+        {
+            levels.Add(
+                new LevelRecord(
+                    "/Invented/Coast",
+                    [],
+                    [new ActorRecord("Pickup", item.Path, new JsonObject())]
+                )
+            );
+        }
+        var result = Build(Records(classes, levels) with { Dialogues = dialogues });
+        var page = Assert.Single(result.Items);
+        var unconfirmed = Assert.Single(page.Sources, source => source.Unconfirmed);
+        Assert.NotEmpty(unconfirmed.Notes);
+        Assert.Contains(
+            result.Graph.Relations,
+            relation =>
+                relation.Id == unconfirmed.RelationId && relation.Attributes!.Unconfirmed
+        );
+        var expected = hasConfirmedPickup ? ItemStatus.Obtainable : ItemStatus.NoKnownSource;
+        Assert.Equal(expected, page.Status);
+        Assert.Equal(expected, Assert.Single(result.Index.Items).Status);
+        if (!hasConfirmedPickup)
+        {
+            Assert.False(Assert.Single(result.Index.Items).Facets.ContainsKey("source"));
+            Assert.False(Assert.Single(result.Index.Items).Facets.ContainsKey("place"));
+        }
+    }
+
     [Fact]
     public void SelectsNamedInventoryItemsButNotPlacedInteractables()
     {

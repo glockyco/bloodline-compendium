@@ -39,6 +39,11 @@
 				that no way to get them is known, which does not mean they cannot be obtained.
 			</li>
 			<li>
+				Only in the game files lists sources whose conversation is unused, gathering spot gives
+				nothing or has no known placement, or pickup has no known place. These are not confirmed
+				ways to get the item.
+			</li>
+			<li>
 				A place on an item page is where the game puts a merchant, container or enemy. Quests and
 				your progress decide when you can reach it.
 			</li>

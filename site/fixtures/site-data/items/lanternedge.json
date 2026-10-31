@@ -53,6 +53,7 @@
 	"sources": [
 		{
 			"kind": "shop",
+			"unconfirmed": false,
 			"name": "Mira at the Glass Market",
 			"places": [
 				{
@@ -94,6 +95,7 @@
 		},
 		{
 			"kind": "shop",
+			"unconfirmed": false,
 			"name": "Amber Lantern Trader",
 			"places": [],
 			"price": {
@@ -120,6 +122,7 @@
 		},
 		{
 			"kind": "shop",
+			"unconfirmed": false,
 			"name": "Blue Glass Trader",
 			"places": [],
 			"price": {
@@ -146,6 +149,7 @@
 		},
 		{
 			"kind": "shop",
+			"unconfirmed": false,
 			"name": "Copper Crescent Trader",
 			"places": [],
 			"price": {
@@ -172,6 +176,7 @@
 		},
 		{
 			"kind": "shop",
+			"unconfirmed": false,
 			"name": "Dappled Star Trader",
 			"places": [],
 			"price": {
@@ -198,6 +203,7 @@
 		},
 		{
 			"kind": "shop",
+			"unconfirmed": false,
 			"name": "Emerald Kite Trader",
 			"places": [],
 			"price": {
@@ -224,6 +230,7 @@
 		},
 		{
 			"kind": "shop",
+			"unconfirmed": false,
 			"name": "Frosted Wheel Trader",
 			"places": [],
 			"price": {
@@ -250,6 +257,7 @@
 		},
 		{
 			"kind": "shop",
+			"unconfirmed": false,
 			"name": "Golden Spiral Trader",
 			"places": [],
 			"price": {
@@ -276,6 +284,7 @@
 		},
 		{
 			"kind": "shop",
+			"unconfirmed": false,
 			"name": "Hazel Comet Trader",
 			"places": [],
 			"price": {
@@ -302,6 +311,7 @@
 		},
 		{
 			"kind": "shop",
+			"unconfirmed": false,
 			"name": "Indigo Prism Trader",
 			"places": [],
 			"price": {
@@ -328,6 +338,7 @@
 		},
 		{
 			"kind": "shop",
+			"unconfirmed": false,
 			"name": "Jade Compass Trader",
 			"places": [],
 			"price": {
@@ -354,6 +365,7 @@
 		},
 		{
 			"kind": "shop",
+			"unconfirmed": false,
 			"name": "Knotted Ribbon Trader",
 			"places": [],
 			"price": {
@@ -380,6 +392,7 @@
 		},
 		{
 			"kind": "shop",
+			"unconfirmed": false,
 			"name": "Lilac Feather Trader",
 			"places": [],
 			"price": {
@@ -406,6 +419,7 @@
 		},
 		{
 			"kind": "crafting",
+			"unconfirmed": false,
 			"name": "Star-forged blade recipe",
 			"places": [
 				{
@@ -465,6 +479,7 @@
 		},
 		{
 			"kind": "currencyShop",
+			"unconfirmed": false,
 			"name": "Orris the Collector",
 			"places": [],
 			"price": {
@@ -497,6 +512,7 @@
 		},
 		{
 			"kind": "containerLoot",
+			"unconfirmed": false,
 			"name": "Stargazer cache",
 			"places": [
 				{
@@ -534,11 +550,106 @@
 				"expected": 0.625,
 				"unknown": null
 			}
+		},
+		{
+			"kind": "pickup",
+			"unconfirmed": false,
+			"name": "Stargazer loose loot",
+			"entity": {
+				"kind": "activity",
+				"key": "/Invented/Pickups/StargazerLooseLoot",
+				"name": "Stargazer loose loot",
+				"slug": null,
+				"icon": null
+			},
+			"places": [
+				{
+					"kind": "place",
+					"key": "/Invented/Places/GlassReach",
+					"name": "Glass Reach",
+					"slug": null,
+					"icon": null
+				}
+			],
+			"amount": {
+				"min": 1,
+				"max": 1
+			},
+			"price": null,
+			"inputs": [],
+			"conditions": [],
+			"notes": [],
+			"odds": {
+				"event": "lootSpot",
+				"chance": 0.25,
+				"expected": 0.25,
+				"unknown": null
+			},
+			"relationId": "fixture:lanternedge:source:16"
+		},
+		{
+			"kind": "pickup",
+			"unconfirmed": false,
+			"name": "Watchtower blade",
+			"entity": {
+				"kind": "activity",
+				"key": "/Invented/Pickups/WatchtowerBlade",
+				"name": "Watchtower blade",
+				"slug": null,
+				"icon": null
+			},
+			"places": [
+				{
+					"kind": "place",
+					"key": "/Invented/Places/GlassReach",
+					"name": "Glass Reach",
+					"slug": null,
+					"icon": null
+				}
+			],
+			"amount": {
+				"min": 1,
+				"max": 1
+			},
+			"price": null,
+			"inputs": [],
+			"conditions": [],
+			"notes": [],
+			"odds": null,
+			"relationId": "fixture:lanternedge:source:17"
 		}
 	],
 	"key": "/Invented/Items/Lanternedge",
 	"kind": "item",
 	"relations": [
+		{
+			"id": "fixture:lanternedge:source:16",
+			"kind": "pickup",
+			"direction": "incoming",
+			"entity": {
+				"kind": "activity",
+				"key": "/Invented/Pickups/StargazerLooseLoot",
+				"name": "Stargazer loose loot",
+				"slug": null,
+				"icon": null
+			},
+			"label": "Obtained from",
+			"conditions": []
+		},
+		{
+			"id": "fixture:lanternedge:source:17",
+			"kind": "pickup",
+			"direction": "incoming",
+			"entity": {
+				"kind": "activity",
+				"key": "/Invented/Pickups/WatchtowerBlade",
+				"name": "Watchtower blade",
+				"slug": null,
+				"icon": null
+			},
+			"label": "Obtained from",
+			"conditions": []
+		},
 		{
 			"id": "fixture:lanternedge:source:0",
 			"kind": "shop",

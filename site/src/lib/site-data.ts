@@ -70,7 +70,7 @@ export type SourceKind =
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "OddsEvent".
  */
-export type OddsEvent = "container" | "kill" | "delivery" | "use" | "catch" | "pick";
+export type OddsEvent = "container" | "lootSpot" | "kill" | "delivery" | "use" | "catch" | "pick";
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "PriceRule".
@@ -299,6 +299,7 @@ export interface Source {
   relationId: string;
   settlement?: boolean;
   spawn?: ChanceRange | null;
+  unconfirmed: boolean;
   [k: string]: unknown;
 }
 /**

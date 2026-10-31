@@ -15,7 +15,7 @@
 		oddsLabel,
 		recipeKinds,
 		sortSources,
-		sourceContext,
+		firstRoute,
 		summarize,
 		useHeadings,
 		pricePhrase
@@ -38,10 +38,12 @@
 	const kind = $derived(data.kinds.find((entry) => entry.kind === item.kind)!);
 	const itemsPath = $derived(kindPath(item.kind, data.kinds)!);
 	const displayName = $derived(item.name + (item.qualifier ? ` (${item.qualifier})` : ''));
+	const confirmedSources = $derived(item.sources.filter((source) => !source.unconfirmed));
+	const unconfirmedSources = $derived(item.sources.filter((source) => source.unconfirmed));
 	const groups = $derived(
 		(Object.keys(sourceHeadings) as SourceKind[])
 			.map((kind) => {
-				const listed = sortSources(item.sources.filter((source) => source.kind === kind));
+				const listed = sortSources(confirmedSources.filter((source) => source.kind === kind));
 				// Sources share a place heading where several stand in the same place. A source in several places
 				// would sit under one of them while naming the others, so such groups list places in their rows.
 				const places = listed.map(placeOf);
@@ -176,11 +178,10 @@
 				.filter((fact) => factValue(fact) !== null)
 				.slice(0, 2)
 				.map((fact) => `${fact.label}: ${factValue(fact)}.`),
-			item.sources.length
-				? `${sourceHeadings[item.sources[0].kind]}: ${item.sources[0].name}${sourceContext(item.sources[0]) ? ` (${sourceContext(item.sources[0])})` : ''}.`
-				: item.status === 'notInNormalPlay'
+			firstRoute(confirmedSources, Object.keys(sourceHeadings) as SourceKind[]) ??
+				(item.status === 'notInNormalPlay'
 					? 'Not obtainable in normal play.'
-					: 'No known way to get it.'
+					: 'No known way to get it.')
 		].join(' ')
 	);
 </script>
@@ -255,7 +256,7 @@
 											>{/each}{#if summary.more}<span class="more"
 												>and {formatNumber(summary.more)} more</span
 											>{/if}{#if summary.places.length}<span data-game class="where-only"
-												>{summary.places.join(' and ')}</span
+												>{' ' + summary.places.join(' and ')}</span
 											>{/if}</span
 									>{#if summary.context}<small>{summary.context}</small
 										>{/if}{#each summary.conditions as condition (condition)}<small class="when"
@@ -411,6 +412,32 @@
 					>
 				</Section>
 			{/each}
+			{#if unconfirmedSources.length}<Section
+					id="only-in-game-files"
+					title="Only in the game files"
+					count={unconfirmedSources.length}
+				>
+					<RelationTable
+						items={unconfirmedSources}
+						label="Only in the game files"
+						headings={['Source', 'Missing evidence']}
+						numeric={false}
+						>{#snippet row(source, index)}<tr
+								id={`unconfirmed-source-${index + 1}`}
+								data-relation-id={source.relationId}
+								data-relation-direction="incoming"
+								><td
+									><span class="relation-name"
+										><EntityLink entity={source.entity}>{source.name}</EntityLink></span
+									>{#if source.places.length}<p class="source-places">
+											{#each source.places as place, index (index)}{index ? ', ' : ''}<EntityLink
+													entity={place}
+												/>{/each}
+										</p>{/if}</td
+								><td>{#each source.notes as note, index (index)}<p>{note}</p>{/each}</td></tr
+							>{/snippet}</RelationTable
+					>
+				</Section>{/if}
 		</div>
 	</div>
 </EntityArticle>

@@ -2,6 +2,106 @@
 	"entities": [
 		{
 			"entity": {
+				"kind": "activity",
+				"key": "/Invented/Pickups/StargazerLooseLoot",
+				"name": "Stargazer loose loot",
+				"slug": null,
+				"icon": null
+			},
+			"relations": [
+				{
+					"id": "fixture:lanternedge:source:16",
+					"kind": "pickup",
+					"direction": "outgoing",
+					"entity": {
+						"kind": "item",
+						"key": "/Invented/Items/Lanternedge",
+						"name": "Lanternedge",
+						"slug": "lanternedge",
+						"icon": "lanternedge"
+					},
+					"label": "Provides",
+					"conditions": []
+				}
+			]
+		},
+		{
+			"entity": {
+				"kind": "activity",
+				"key": "/Invented/Pickups/WatchtowerBlade",
+				"name": "Watchtower blade",
+				"slug": null,
+				"icon": null
+			},
+			"relations": [
+				{
+					"id": "fixture:lanternedge:source:17",
+					"kind": "pickup",
+					"direction": "outgoing",
+					"entity": {
+						"kind": "item",
+						"key": "/Invented/Items/Lanternedge",
+						"name": "Lanternedge",
+						"slug": "lanternedge",
+						"icon": "lanternedge"
+					},
+					"label": "Provides",
+					"conditions": []
+				}
+			]
+		},
+		{
+			"entity": {
+				"kind": "person",
+				"key": "/Invented/Characters/SilentCurator",
+				"name": "The Silent Curator",
+				"slug": null,
+				"icon": null
+			},
+			"relations": [
+				{
+					"id": "fixture:hollow-prism:source:0",
+					"kind": "dialogue",
+					"direction": "outgoing",
+					"entity": {
+						"kind": "item",
+						"key": "/Invented/Items/HollowPrism",
+						"name": "Hollow Prism",
+						"slug": "hollow-prism",
+						"icon": null
+					},
+					"label": "Provides",
+					"conditions": []
+				}
+			]
+		},
+		{
+			"entity": {
+				"kind": "activity",
+				"key": "/Invented/Pickups/UnplacedPrism",
+				"name": "Unplaced prism",
+				"slug": null,
+				"icon": null
+			},
+			"relations": [
+				{
+					"id": "fixture:hollow-prism:source:1",
+					"kind": "pickup",
+					"direction": "outgoing",
+					"entity": {
+						"kind": "item",
+						"key": "/Invented/Items/HollowPrism",
+						"name": "Hollow Prism",
+						"slug": "hollow-prism",
+						"icon": null
+					},
+					"label": "Provides",
+					"conditions": []
+				}
+			]
+		},
+		{
+			"entity": {
 				"kind": "item",
 				"key": "/Invented/Items/MosswovenCoat",
 				"name": "Mosswoven Coat",
@@ -34,6 +134,34 @@
 				"icon": "lanternedge"
 			},
 			"relations": [
+				{
+					"id": "fixture:lanternedge:source:16",
+					"kind": "pickup",
+					"direction": "incoming",
+					"entity": {
+						"kind": "activity",
+						"key": "/Invented/Pickups/StargazerLooseLoot",
+						"name": "Stargazer loose loot",
+						"slug": null,
+						"icon": null
+					},
+					"label": "Obtained from",
+					"conditions": []
+				},
+				{
+					"id": "fixture:lanternedge:source:17",
+					"kind": "pickup",
+					"direction": "incoming",
+					"entity": {
+						"kind": "activity",
+						"key": "/Invented/Pickups/WatchtowerBlade",
+						"name": "Watchtower blade",
+						"slug": null,
+						"icon": null
+					},
+					"label": "Obtained from",
+					"conditions": []
+				},
 				{
 					"id": "fixture:lanternedge:source:0",
 					"kind": "shop",
@@ -363,7 +491,36 @@
 				"slug": "hollow-prism",
 				"icon": null
 			},
-			"relations": []
+			"relations": [
+				{
+					"id": "fixture:hollow-prism:source:0",
+					"kind": "dialogue",
+					"direction": "incoming",
+					"entity": {
+						"kind": "person",
+						"key": "/Invented/Characters/SilentCurator",
+						"name": "The Silent Curator",
+						"slug": null,
+						"icon": null
+					},
+					"label": "Obtained from",
+					"conditions": []
+				},
+				{
+					"id": "fixture:hollow-prism:source:1",
+					"kind": "pickup",
+					"direction": "incoming",
+					"entity": {
+						"kind": "activity",
+						"key": "/Invented/Pickups/UnplacedPrism",
+						"name": "Unplaced prism",
+						"slug": null,
+						"icon": null
+					},
+					"label": "Obtained from",
+					"conditions": []
+				}
+			]
 		},
 		{
 			"entity": {
@@ -842,6 +999,209 @@
 	],
 	"relations": [
 		{
+			"id": "fixture:lanternedge:source:16",
+			"kind": "pickup",
+			"source": {
+				"kind": "activity",
+				"key": "/Invented/Pickups/StargazerLooseLoot",
+				"name": "Stargazer loose loot",
+				"slug": null,
+				"icon": null
+			},
+			"target": {
+				"kind": "item",
+				"key": "/Invented/Items/Lanternedge",
+				"name": "Lanternedge",
+				"slug": "lanternedge",
+				"icon": "lanternedge"
+			},
+			"forwardLabel": "Provides",
+			"reverseLabel": "Obtained from",
+			"conditions": [],
+			"attributes": {
+				"kind": "pickup",
+				"unconfirmed": false,
+				"name": "Stargazer loose loot",
+				"entity": {
+					"kind": "activity",
+					"key": "/Invented/Pickups/StargazerLooseLoot",
+					"name": "Stargazer loose loot",
+					"slug": null,
+					"icon": null
+				},
+				"places": [
+					{
+						"kind": "place",
+						"key": "/Invented/Places/GlassReach",
+						"name": "Glass Reach",
+						"slug": null,
+						"icon": null
+					}
+				],
+				"amount": {
+					"min": 1,
+					"max": 1
+				},
+				"price": null,
+				"inputs": [],
+				"conditions": [],
+				"notes": [],
+				"odds": {
+					"event": "lootSpot",
+					"chance": 0.25,
+					"expected": 0.25,
+					"unknown": null
+				},
+				"relationId": "fixture:lanternedge:source:16"
+			}
+		},
+		{
+			"id": "fixture:lanternedge:source:17",
+			"kind": "pickup",
+			"source": {
+				"kind": "activity",
+				"key": "/Invented/Pickups/WatchtowerBlade",
+				"name": "Watchtower blade",
+				"slug": null,
+				"icon": null
+			},
+			"target": {
+				"kind": "item",
+				"key": "/Invented/Items/Lanternedge",
+				"name": "Lanternedge",
+				"slug": "lanternedge",
+				"icon": "lanternedge"
+			},
+			"forwardLabel": "Provides",
+			"reverseLabel": "Obtained from",
+			"conditions": [],
+			"attributes": {
+				"kind": "pickup",
+				"unconfirmed": false,
+				"name": "Watchtower blade",
+				"entity": {
+					"kind": "activity",
+					"key": "/Invented/Pickups/WatchtowerBlade",
+					"name": "Watchtower blade",
+					"slug": null,
+					"icon": null
+				},
+				"places": [
+					{
+						"kind": "place",
+						"key": "/Invented/Places/GlassReach",
+						"name": "Glass Reach",
+						"slug": null,
+						"icon": null
+					}
+				],
+				"amount": {
+					"min": 1,
+					"max": 1
+				},
+				"price": null,
+				"inputs": [],
+				"conditions": [],
+				"notes": [],
+				"odds": null,
+				"relationId": "fixture:lanternedge:source:17"
+			}
+		},
+		{
+			"id": "fixture:hollow-prism:source:0",
+			"kind": "dialogue",
+			"source": {
+				"kind": "person",
+				"key": "/Invented/Characters/SilentCurator",
+				"name": "The Silent Curator",
+				"slug": null,
+				"icon": null
+			},
+			"target": {
+				"kind": "item",
+				"key": "/Invented/Items/HollowPrism",
+				"name": "Hollow Prism",
+				"slug": "hollow-prism",
+				"icon": null
+			},
+			"forwardLabel": "Provides",
+			"reverseLabel": "Obtained from",
+			"conditions": [],
+			"attributes": {
+				"kind": "dialogue",
+				"unconfirmed": true,
+				"name": "The Silent Curator",
+				"entity": {
+					"kind": "person",
+					"key": "/Invented/Characters/SilentCurator",
+					"name": "The Silent Curator",
+					"slug": null,
+					"icon": null
+				},
+				"places": [
+					{
+						"kind": "place",
+						"key": "/Invented/Places/GlassReach",
+						"name": "Glass Reach",
+						"slug": null,
+						"icon": null
+					}
+				],
+				"amount": {
+					"min": 1,
+					"max": 1
+				},
+				"price": null,
+				"inputs": [],
+				"conditions": [],
+				"notes": ["This dialogue is marked unused in the game files."],
+				"relationId": "fixture:hollow-prism:source:0"
+			}
+		},
+		{
+			"id": "fixture:hollow-prism:source:1",
+			"kind": "pickup",
+			"source": {
+				"kind": "activity",
+				"key": "/Invented/Pickups/UnplacedPrism",
+				"name": "Unplaced prism",
+				"slug": null,
+				"icon": null
+			},
+			"target": {
+				"kind": "item",
+				"key": "/Invented/Items/HollowPrism",
+				"name": "Hollow Prism",
+				"slug": "hollow-prism",
+				"icon": null
+			},
+			"forwardLabel": "Provides",
+			"reverseLabel": "Obtained from",
+			"conditions": [],
+			"attributes": {
+				"kind": "pickup",
+				"unconfirmed": true,
+				"name": "Unplaced prism",
+				"entity": {
+					"kind": "activity",
+					"key": "/Invented/Pickups/UnplacedPrism",
+					"name": "Unplaced prism",
+					"slug": null,
+					"icon": null
+				},
+				"places": [],
+				"amount": {
+					"min": 1,
+					"max": 1
+				},
+				"price": null,
+				"inputs": [],
+				"conditions": [],
+				"notes": ["No placed instance was found for this pickup."],
+				"relationId": "fixture:hollow-prism:source:1"
+			}
+		},
+		{
 			"id": "fixture:mosswoven-coat:source:0",
 			"kind": "enemyDrop",
 			"source": {
@@ -862,6 +1222,7 @@
 			"reverseLabel": "Obtained from",
 			"conditions": [],
 			"attributes": {
+				"unconfirmed": false,
 				"kind": "enemyDrop",
 				"name": "Bramble sentinel",
 				"places": [
@@ -925,6 +1286,7 @@
 				}
 			],
 			"attributes": {
+				"unconfirmed": false,
 				"kind": "shop",
 				"name": "Mira at the Glass Market",
 				"places": [
@@ -987,6 +1349,7 @@
 			"reverseLabel": "Obtained from",
 			"conditions": [],
 			"attributes": {
+				"unconfirmed": false,
 				"kind": "shop",
 				"name": "Amber Lantern Trader",
 				"places": [],
@@ -1034,6 +1397,7 @@
 			"reverseLabel": "Obtained from",
 			"conditions": [],
 			"attributes": {
+				"unconfirmed": false,
 				"kind": "shop",
 				"name": "Blue Glass Trader",
 				"places": [],
@@ -1081,6 +1445,7 @@
 			"reverseLabel": "Obtained from",
 			"conditions": [],
 			"attributes": {
+				"unconfirmed": false,
 				"kind": "shop",
 				"name": "Copper Crescent Trader",
 				"places": [],
@@ -1128,6 +1493,7 @@
 			"reverseLabel": "Obtained from",
 			"conditions": [],
 			"attributes": {
+				"unconfirmed": false,
 				"kind": "shop",
 				"name": "Dappled Star Trader",
 				"places": [],
@@ -1175,6 +1541,7 @@
 			"reverseLabel": "Obtained from",
 			"conditions": [],
 			"attributes": {
+				"unconfirmed": false,
 				"kind": "shop",
 				"name": "Emerald Kite Trader",
 				"places": [],
@@ -1222,6 +1589,7 @@
 			"reverseLabel": "Obtained from",
 			"conditions": [],
 			"attributes": {
+				"unconfirmed": false,
 				"kind": "shop",
 				"name": "Frosted Wheel Trader",
 				"places": [],
@@ -1269,6 +1637,7 @@
 			"reverseLabel": "Obtained from",
 			"conditions": [],
 			"attributes": {
+				"unconfirmed": false,
 				"kind": "shop",
 				"name": "Golden Spiral Trader",
 				"places": [],
@@ -1316,6 +1685,7 @@
 			"reverseLabel": "Obtained from",
 			"conditions": [],
 			"attributes": {
+				"unconfirmed": false,
 				"kind": "shop",
 				"name": "Hazel Comet Trader",
 				"places": [],
@@ -1363,6 +1733,7 @@
 			"reverseLabel": "Obtained from",
 			"conditions": [],
 			"attributes": {
+				"unconfirmed": false,
 				"kind": "shop",
 				"name": "Indigo Prism Trader",
 				"places": [],
@@ -1410,6 +1781,7 @@
 			"reverseLabel": "Obtained from",
 			"conditions": [],
 			"attributes": {
+				"unconfirmed": false,
 				"kind": "shop",
 				"name": "Jade Compass Trader",
 				"places": [],
@@ -1457,6 +1829,7 @@
 			"reverseLabel": "Obtained from",
 			"conditions": [],
 			"attributes": {
+				"unconfirmed": false,
 				"kind": "shop",
 				"name": "Knotted Ribbon Trader",
 				"places": [],
@@ -1504,6 +1877,7 @@
 			"reverseLabel": "Obtained from",
 			"conditions": [],
 			"attributes": {
+				"unconfirmed": false,
 				"kind": "shop",
 				"name": "Lilac Feather Trader",
 				"places": [],
@@ -1558,6 +1932,7 @@
 				}
 			],
 			"attributes": {
+				"unconfirmed": false,
 				"kind": "crafting",
 				"name": "Star-forged blade recipe",
 				"places": [
@@ -1638,6 +2013,7 @@
 			"reverseLabel": "Obtained from",
 			"conditions": [],
 			"attributes": {
+				"unconfirmed": false,
 				"kind": "currencyShop",
 				"name": "Orris the Collector",
 				"places": [],
@@ -1691,6 +2067,7 @@
 			"reverseLabel": "Obtained from",
 			"conditions": [],
 			"attributes": {
+				"unconfirmed": false,
 				"kind": "containerLoot",
 				"name": "Stargazer cache",
 				"places": [
@@ -1752,6 +2129,7 @@
 			"reverseLabel": "Obtained from",
 			"conditions": [],
 			"attributes": {
+				"unconfirmed": false,
 				"kind": "gathering",
 				"name": "Ember orchard",
 				"places": [

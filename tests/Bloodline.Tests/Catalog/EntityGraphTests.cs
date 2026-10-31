@@ -271,6 +271,65 @@ public sealed class EntityGraphTests
         );
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void FileOnlyAcquisitionRetainsItsRelationWithoutClaimingInputsOrPaymentsAreUsed(
+        bool unconfirmed
+    )
+    {
+        var input = new ItemPage(
+            "/Game/Items/Grain.Grain_C",
+            "grain",
+            "Grain",
+            null,
+            new CategoryLink("materials", "Material"),
+            null,
+            [],
+            []
+        );
+        var source = new Source(
+            SourceKind.Cooking,
+            "Apple recipe",
+            [],
+            new Price(3, CatalogGraph.Reference(input)),
+            new Amount(1, 1),
+            [new ItemAmount(CatalogGraph.Reference(input), 2)],
+            []
+        )
+        {
+            Entity = Merchant,
+            Unconfirmed = unconfirmed,
+        };
+        var output = input with
+        {
+            Key = Item.Key!,
+            Slug = Item.Slug!,
+            Name = Item.Name,
+            Sources = [source],
+        };
+        var result = CatalogGraph.Build([input, output]);
+        var published = Assert.Single(
+            result.Items.Single(page => page.Key == output.Key).Sources
+        );
+        var acquisition = Assert.Single(
+            result.Graph.Relations,
+            relation => relation.Kind == "Cooking"
+        );
+        Assert.Equal(published.RelationId, acquisition.Id);
+        Assert.Equal(unconfirmed, acquisition.Attributes!.Unconfirmed);
+        Assert.Equal(
+            unconfirmed ? 0 : 2,
+            result.Items.Single(page => page.Key == input.Key).Uses.Count
+        );
+        Assert.Equal(
+            unconfirmed ? 0 : 2,
+            result.Graph.Relations.Count(relation => relation.Kind is "Input" or "Payment")
+        );
+        Assert.Equal(unconfirmed, published.Inputs[0].RelationId is null);
+        Assert.Equal(unconfirmed, published.Price!.RelationId is null);
+    }
+
     [Fact]
     public void PublishesUnreadableConditionsAndUnresolvedReferencesInCoverage()
     {

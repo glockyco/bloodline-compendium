@@ -78,7 +78,7 @@
 			"status": "obtainable",
 			"facets": {
 				"category": ["weapon"],
-				"source": ["shop", "currencyShop", "crafting", "containerLoot"],
+				"source": ["shop", "currencyShop", "crafting", "containerLoot", "pickup"],
 				"availability": ["obtainable"],
 				"weaponType": ["Sword"],
 				"place": ["Glass Reach"]
@@ -93,7 +93,7 @@
 					"text": "Average"
 				}
 			},
-			"placeSources": [["shop", "crafting", "containerLoot"]]
+			"placeSources": [["shop", "crafting", "containerLoot", "pickup"]]
 		},
 		{
 			"slug": "mosswoven-coat",
@@ -145,7 +145,7 @@
 			"id": "source",
 			"label": "How to Get",
 			"categories": [],
-			"values": ["shop", "currencyShop", "crafting", "containerLoot", "enemyDrop", "gathering"],
+			"values": ["shop", "currencyShop", "crafting", "containerLoot", "pickup", "enemyDrop", "gathering"],
 			"labels": {}
 		},
 		{

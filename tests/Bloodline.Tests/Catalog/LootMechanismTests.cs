@@ -259,9 +259,11 @@ public sealed class LootMechanismTests
                 )
             )
             .Source;
-        Assert.Equal(LootOdds.Of(OddsEvent.Container, 0.4, PickCount.Fixed(5)), source.Odds);
+        Assert.Equal(SourceKind.Pickup, source.Kind);
+        Assert.Equal(LootOdds.Of(OddsEvent.LootSpot, 0.4, PickCount.Fixed(5)), source.Odds);
         Assert.Equal(Level, Assert.Single(source.Places).Key);
-        Assert.Contains(source.Notes, note => note.Contains("loose", StringComparison.Ordinal));
+        Assert.False(source.Unconfirmed);
+        Assert.Empty(source.Notes);
     }
 
     [Fact]
@@ -298,7 +300,7 @@ public sealed class LootMechanismTests
             .Source;
         Assert.Equal("Scattered fruit", source.Name);
         Assert.Equal(
-            new Odds(OddsEvent.Container, null, null, "How many items lie here is unknown."),
+            new Odds(OddsEvent.LootSpot, null, null, "How many items lie here is unknown."),
             source.Odds
         );
     }

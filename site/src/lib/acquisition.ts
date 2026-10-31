@@ -28,6 +28,7 @@ export function pricePhrase(amount: string, currency: Price['currency']): string
 
 const oddsLabels: Record<OddsEvent, string> = {
 	container: 'per container',
+	lootSpot: 'per loot spot',
 	kill: 'per kill',
 	delivery: 'per delivery',
 	use: 'per use',
@@ -302,7 +303,9 @@ export function summaryText(summary: SourceSummary): string {
 /** The first way to get an item as one sentence, for previews, or null when no way is known. */
 export function firstRoute(sources: Source[], order: SourceKind[]): string | null {
 	for (const kind of order) {
-		const group = sortSources(sources.filter((source) => source.kind === kind));
+		const group = sortSources(
+			sources.filter((source) => !source.unconfirmed && source.kind === kind)
+		);
 		if (group.length) return summaryText(summarize(kind, group));
 	}
 	return null;

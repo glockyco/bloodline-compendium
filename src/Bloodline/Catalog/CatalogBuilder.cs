@@ -112,16 +112,19 @@ internal static class CatalogBuilder
                         }
                     );
             var sources = CatalogContext.MergeSources(candidates[item.Key], context.ExcludedLevels);
+            var confirmedSources = sources.Count(source => !source.Unconfirmed);
             item = item with
             {
                 Icon = icon,
                 Sources = sources,
-                Status = statuses.Of(item.Key, sources.Count),
+                Status = sources.Count > 0 && confirmedSources == 0
+                    ? ItemStatus.NoKnownSource
+                    : statuses.Of(item.Key, confirmedSources),
             };
             items.Add(item);
             void Gap(GapKind kind, string label, string? detail = null) =>
                 gapEntries[kind].Add(new GapEntry(label, CatalogGraph.Reference(item), detail));
-            if (sources.Count == 0)
+            if (confirmedSources == 0)
             {
                 Gap(GapKind.ItemWithoutSource, item.Name);
             }

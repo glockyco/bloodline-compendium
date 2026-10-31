@@ -60,6 +60,7 @@
 	"sources": [
 		{
 			"kind": "gathering",
+			"unconfirmed": false,
 			"name": "Ember orchard",
 			"places": [
 				{

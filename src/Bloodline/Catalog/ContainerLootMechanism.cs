@@ -28,7 +28,6 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                 continue;
             if (RecordValues.Boolean(properties["Use Entire Data Table?"]) == true)
                 continue;
-            var notes = new List<string>();
             var name = LootRecords.Name(properties, "Object Name", path);
             if (name.Equals("Loot", StringComparison.OrdinalIgnoreCase))
             {
@@ -45,7 +44,6 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                     ? new Amount(checked((int)min), checked((int)max))
                     : null
             );
-            notes.AddRange(details.Notes);
             var pool = SelectPool(properties, enumValues);
             if (RecordValues.Boolean(properties["Use Specific Loot Table?"]) == true)
             {
@@ -76,7 +74,7 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                     SourceKind.ContainerLoot,
                     name,
                     places,
-                    notes,
+                    [],
                     WorldSourceData.Reference(EntityKind.Container, path, name),
                     OddsEvent.Container,
                     details.Picks,
@@ -104,7 +102,6 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                 continue;
             var preset = RecordValues.String(properties["Preset Table Name"]);
             var name = "Dungeon loose loot";
-            var notes = new List<string>();
             var maximum = RecordValues.Integer(properties["Max Spawn Amount"]);
             var details = new ContainerDetails(
                 null,
@@ -113,7 +110,6 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                     : null,
                 Loose: true
             );
-            notes.AddRange(details.Notes);
             JsonNode? pool = properties["Loot Table"];
             if (
                 preset is not null
@@ -149,12 +145,12 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                 var source in LootRecords.Pool(
                     context,
                     pool,
-                    SourceKind.ContainerLoot,
+                    SourceKind.Pickup,
                     name,
                     places,
-                    notes,
+                    [],
                     WorldSourceData.Reference(EntityKind.Container, path, name),
-                    OddsEvent.Container,
+                    OddsEvent.LootSpot,
                     details.Picks,
                     "How many items lie here is unknown.",
                     WorldSourceData.Conditions(
@@ -322,10 +318,21 @@ internal static class LootRecords
                 continue;
             yield return new ItemSource(
                 item,
-                new Source(kind, name, places, null, Quantity(context, item), [], notes)
+                new Source(
+                    kind,
+                    name,
+                    places,
+                    null,
+                    Quantity(context, item),
+                    [],
+                    kind == SourceKind.Pickup && places.Count == 0
+                        ? [.. notes, "No pickup location in the world is known."]
+                        : notes
+                )
                 {
                     Entity = entity,
                     Conditions = conditions ?? [],
+                    Unconfirmed = kind == SourceKind.Pickup && places.Count == 0,
                     Odds = picks is null
                         ? LootOdds.Unknown(oddsEvent, unknownPicks)
                         : LootOdds.Of(oddsEvent, weight / total, picks),

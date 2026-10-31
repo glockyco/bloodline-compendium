@@ -18,9 +18,6 @@ internal sealed record ContainerDetails(
         : limits.Min >= 0 && limits.Max >= limits.Min && limits.Max < int.MaxValue
             ? PickCount.Container(limits.Min, limits.Max)
         : null;
-
-    public IReadOnlyList<string> Notes =>
-        Loose ? ["Lies loose on the ground instead of in a container."] : [];
 }
 
 internal static class ContainerSourceMerge
@@ -42,7 +39,7 @@ internal static class ContainerSourceMerge
                 continue;
             }
             source = source with { Places = places };
-            if (source.Kind != SourceKind.ContainerLoot)
+            if (source.Kind != SourceKind.ContainerLoot && candidate.Container?.Loose != true)
             {
                 yield return source;
                 continue;

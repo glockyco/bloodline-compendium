@@ -145,6 +145,7 @@ export function homeData(index: ItemIndex, pages: ItemPage[]): HomeData {
 	const currencies = new Map<string, number>();
 	for (const page of pages)
 		for (const source of page.sources) {
+			if (source.unconfirmed) continue;
 			if (!givers.has(source.kind)) givers.set(source.kind, new Set());
 			givers.get(source.kind)!.add(source.name);
 			if (source.kind === 'currencyShop' && source.price?.currency)

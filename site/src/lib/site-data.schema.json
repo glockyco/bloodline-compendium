@@ -908,6 +908,7 @@
     "OddsEvent": {
       "enum": [
         "container",
+        "lootSpot",
         "kill",
         "delivery",
         "use",
@@ -1336,6 +1337,9 @@
               "type": "null"
             }
           ]
+        },
+        "unconfirmed": {
+          "type": "boolean"
         }
       },
       "required": [
@@ -1348,7 +1352,8 @@
         "notes",
         "entity",
         "conditions",
-        "relationId"
+        "relationId",
+        "unconfirmed"
       ],
       "title": "Source",
       "type": "object"

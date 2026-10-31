@@ -56,13 +56,18 @@ internal static class ItemList
             "source",
             "How to Get",
             [],
-            item => item.Sources.Select(source => Camel(source.Kind.ToString()))
+            item =>
+                item.Sources.Where(source => !source.Unconfirmed)
+                    .Select(source => Camel(source.Kind.ToString()))
         ),
         new(
             "place",
             "Where to Get",
             [],
-            item => item.Sources.SelectMany(source => source.Places).Select(place => place.Name)
+            item =>
+                item.Sources.Where(source => !source.Unconfirmed)
+                    .SelectMany(source => source.Places)
+                    .Select(place => place.Name)
         ),
         new("availability", "Availability", [], item => [Camel(item.Status.ToString())]),
     ];
@@ -205,7 +210,8 @@ internal static class ItemList
                     (IReadOnlyList<string>)
                         item
                             .Sources.Where(source =>
-                                source.Places.Any(entry => entry.Name == place)
+                                !source.Unconfirmed
+                                && source.Places.Any(entry => entry.Name == place)
                             )
                             .Select(source => Camel(source.Kind.ToString()))
                             .Distinct(StringComparer.Ordinal)

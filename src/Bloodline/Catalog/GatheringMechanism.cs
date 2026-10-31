@@ -178,6 +178,11 @@ internal sealed class GatheringMechanism : ISourceMechanism
                         notes
                     )
                     {
+                        Unconfirmed =
+                            !placed
+                            || RecordValues.Number(
+                                properties["Maximum amount of items that can be harvested"]
+                            ) is <= 0,
                         Entity = WorldSourceData.Reference(
                             EntityKind.Resource,
                             path,
@@ -219,9 +224,13 @@ internal sealed class GatheringMechanism : ISourceMechanism
                         null,
                         null,
                         [],
-                        [.. HarvestNotes(properties)]
+                        [
+                            .. HarvestNotes(properties),
+                            "No gathering spot in the world is known to use this gathering method.",
+                        ]
                     )
                     {
+                        Unconfirmed = true,
                         Entity = WorldSourceData.Reference(
                             EntityKind.Resource,
                             path,
@@ -367,10 +376,6 @@ internal sealed class GatheringMechanism : ISourceMechanism
                             RecordValues.At(output.Properties, "ItemInfo.Quantity")
                         )
                         : null;
-                    if (quantity is <= 0)
-                    {
-                        return null;
-                    }
                     return new ItemSource(
                         item,
                         new Source(
@@ -381,10 +386,26 @@ internal sealed class GatheringMechanism : ISourceMechanism
                             quantity is { } count ? new Amount(count, count) : null,
                             [],
                             [
+                                .. HarvestNotes(properties),
+                                .. places.Count == 0
+                                    ? new[] { "No gathering spot in the world is known to give it." }
+                                    : [],
+                                .. quantity is <= 0
+                                    ? new[]
+                                    {
+                                        "The harvested item's quantity is not positive, so it gives no items.",
+                                    }
+                                    : [],
                                 "Received when harvesting. The number of harvesting actions depends on the state of the gathering point.",
                             ]
                         )
                         {
+                            Unconfirmed =
+                                places.Count == 0
+                                || quantity is <= 0
+                                || RecordValues.Number(
+                                    properties["Maximum amount of items that can be harvested"]
+                                ) is <= 0,
                             Entity = WorldSourceData.Reference(
                                 EntityKind.Resource,
                                 type.Path,

@@ -43,6 +43,45 @@ public sealed class ItemListTests
     }
 
     [Fact]
+    public void AcquisitionFiltersAndPlaceSummariesOmitFileOnlySources()
+    {
+        var place = new EntityReference(
+            EntityKind.Place,
+            "/Invented/Coast",
+            "Coast",
+            null,
+            null
+        );
+        var pickup = new Source(
+            SourceKind.Pickup,
+            "World pickup",
+            [place],
+            null,
+            null,
+            [],
+            []
+        );
+        var page = Page("Apple", "food", "Fruit") with
+        {
+            Sources =
+            [
+                pickup,
+                pickup with { Kind = SourceKind.Gathering, Unconfirmed = true },
+                pickup with
+                {
+                    Kind = SourceKind.Dialogue,
+                    Places = [place with { Key = "/Invented/Hidden", Name = "Hidden" }],
+                    Unconfirmed = true,
+                },
+            ],
+        };
+        var facets = ItemList.FacetsOf(page);
+        Assert.Equal(["pickup"], facets["source"]);
+        Assert.Equal(["Coast"], facets["place"]);
+        Assert.Equal(["pickup"], Assert.Single(ItemList.PlaceSourcesOf(page)));
+    }
+
+    [Fact]
     public void SpeedWordsSortBySpeedAndAnUnknownFactIsAnUnknownCell()
     {
         ListCell Speed(string word) =>

@@ -99,14 +99,18 @@ internal static class CatalogGraph
                         .Inputs.Select(input =>
                             input with
                             {
-                                RelationId = UseId("Input", input.Item, input.Quantity),
+                                RelationId = source.Unconfirmed
+                                    ? null
+                                    : UseId("Input", input.Item, input.Quantity),
                             }
                         )
                         .ToArray(),
                     Price = source.Price is { Currency: { } paid } cost
                         ? cost with
                         {
-                            RelationId = UseId("Payment", paid, cost.Amount),
+                            RelationId = source.Unconfirmed
+                                ? null
+                                : UseId("Payment", paid, cost.Amount),
                         }
                         : source.Price,
                 };
@@ -124,13 +128,16 @@ internal static class CatalogGraph
                     )
                 );
                 sources.TryAdd(id, source);
-                foreach (var input in source.Inputs)
+                if (!source.Unconfirmed)
                 {
-                    AddUse("Input", input.Item, input.Quantity, input.RelationId!, source, target);
-                }
-                if (source.Price is { Currency: { } payment, RelationId: { } paymentId })
-                {
-                    AddUse("Payment", payment, source.Price.Amount, paymentId, source, target);
+                    foreach (var input in source.Inputs)
+                    {
+                        AddUse("Input", input.Item, input.Quantity, input.RelationId!, source, target);
+                    }
+                    if (source.Price is { Currency: { } payment, RelationId: { } paymentId })
+                    {
+                        AddUse("Payment", payment, source.Price.Amount, paymentId, source, target);
+                    }
                 }
 
                 string UseId(string kind, EntityReference input, int quantity) =>

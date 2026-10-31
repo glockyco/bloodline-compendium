@@ -80,6 +80,7 @@ public sealed class PickupObjectMechanismTests
         Assert.Equal(new Amount(4, 4), source.Amount);
         Assert.Equal(Level, Assert.Single(source.Places).Key);
         Assert.Empty(source.Inputs);
+        Assert.False(source.Unconfirmed);
     }
 
     [Fact]
@@ -164,6 +165,7 @@ public sealed class PickupObjectMechanismTests
             .Single(new PickupObjectMechanism().FindSources(Context(defaults, excluded: true)))
             .Source;
         Assert.Empty(source.Places);
+        Assert.True(source.Unconfirmed);
         Assert.True(SourceCoverage.HasUnknownPlace(source));
     }
 
@@ -171,11 +173,12 @@ public sealed class PickupObjectMechanismTests
     public void UnplacedDefaultRetainsAnUnknownPlace()
     {
         var defaults = Parse("""{"Item":{"$ref":"/Game/Invented/Leaf.Leaf_C"}}""");
-        Assert.Empty(
-            Assert
-                .Single(new PickupObjectMechanism().FindSources(Context(defaults, placed: false)))
-                .Source.Places
-        );
+        var source = Assert
+            .Single(new PickupObjectMechanism().FindSources(Context(defaults, placed: false)))
+            .Source;
+        Assert.Empty(source.Places);
+        Assert.True(source.Unconfirmed);
+        Assert.Contains("No pickup location in the world is known.", source.Notes);
     }
 
     [Fact]

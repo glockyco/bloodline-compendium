@@ -27,10 +27,92 @@
 			"text": null
 		}
 	],
-	"sources": [],
+	"sources": [
+		{
+			"kind": "dialogue",
+			"unconfirmed": true,
+			"name": "The Silent Curator",
+			"entity": {
+				"kind": "person",
+				"key": "/Invented/Characters/SilentCurator",
+				"name": "The Silent Curator",
+				"slug": null,
+				"icon": null
+			},
+			"places": [
+				{
+					"kind": "place",
+					"key": "/Invented/Places/GlassReach",
+					"name": "Glass Reach",
+					"slug": null,
+					"icon": null
+				}
+			],
+			"amount": {
+				"min": 1,
+				"max": 1
+			},
+			"price": null,
+			"inputs": [],
+			"conditions": [],
+			"notes": ["This dialogue is marked unused in the game files."],
+			"relationId": "fixture:hollow-prism:source:0"
+		},
+		{
+			"kind": "pickup",
+			"unconfirmed": true,
+			"name": "Unplaced prism",
+			"entity": {
+				"kind": "activity",
+				"key": "/Invented/Pickups/UnplacedPrism",
+				"name": "Unplaced prism",
+				"slug": null,
+				"icon": null
+			},
+			"places": [],
+			"amount": {
+				"min": 1,
+				"max": 1
+			},
+			"price": null,
+			"inputs": [],
+			"conditions": [],
+			"notes": ["No placed instance was found for this pickup."],
+			"relationId": "fixture:hollow-prism:source:1"
+		}
+	],
 	"key": "/Invented/Items/HollowPrism",
 	"kind": "item",
-	"relations": [],
+	"relations": [
+		{
+			"id": "fixture:hollow-prism:source:0",
+			"kind": "dialogue",
+			"direction": "incoming",
+			"entity": {
+				"kind": "person",
+				"key": "/Invented/Characters/SilentCurator",
+				"name": "The Silent Curator",
+				"slug": null,
+				"icon": null
+			},
+			"label": "Obtained from",
+			"conditions": []
+		},
+		{
+			"id": "fixture:hollow-prism:source:1",
+			"kind": "pickup",
+			"direction": "incoming",
+			"entity": {
+				"kind": "activity",
+				"key": "/Invented/Pickups/UnplacedPrism",
+				"name": "Unplaced prism",
+				"slug": null,
+				"icon": null
+			},
+			"label": "Obtained from",
+			"conditions": []
+		}
+	],
 	"notes": [],
 	"status": "noKnownSource"
 }

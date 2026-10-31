@@ -16,16 +16,21 @@ public sealed class ContainerSourceMergeTests
         return new ItemSource(
             "/Invented/Item.Item_C",
             new Source(
-                SourceKind.ContainerLoot,
+                loose ? SourceKind.Pickup : SourceKind.ContainerLoot,
                 "Filled Barrels",
                 [new EntityReference(EntityKind.Place, level, level, null, null)],
                 null,
                 new Amount(2, 2),
                 [],
-                details.Notes
+                []
             )
             {
-                Odds = new Odds(OddsEvent.Container, chance, chance * 2, null),
+                Odds = new Odds(
+                    loose ? OddsEvent.LootSpot : OddsEvent.Container,
+                    chance,
+                    chance * 2,
+                    null
+                ),
             },
             details
         );
@@ -152,16 +157,36 @@ public sealed class ContainerSourceMergeTests
         var loose = Container("/Invented/A", null, loose: true);
         var sources = CatalogContext.MergeSources([container, loose], new HashSet<string>());
         Assert.Equal(2, sources.Count);
-        var looseSource = Assert.Single(sources, source => source.Notes.Count > 0);
-        Assert.Equal(
-            "Lies loose on the ground instead of in a container.",
-            Assert.Single(looseSource.Notes)
-        );
+        var looseSource = Assert.Single(sources, source => source.Kind == SourceKind.Pickup);
+        Assert.Empty(looseSource.Notes);
         Assert.Null(looseSource.Spawn);
         Assert.Equal(
             new ChanceRange(0.25, 0.25),
-            Assert.Single(sources, source => source.Notes.Count == 0).Spawn
+            Assert.Single(sources, source => source.Kind == SourceKind.ContainerLoot).Spawn
         );
+    }
+
+    [Fact]
+    public void CombinesEquivalentLoosePickupsWithoutLosingTheirOddsOrPlaces()
+    {
+        var a = Container("/Invented/A", chance: 0.4, loose: true);
+        var b = Container("/Invented/A", chance: 0.8, loose: true);
+        var atB = Container("/Invented/B", chance: 0.4, loose: true);
+        var otherAtB = Container("/Invented/B", chance: 0.8, loose: true);
+        var merged = Assert.Single(
+            CatalogContext.MergeSources([a, b, atB, otherAtB], new HashSet<string>())
+        );
+        Assert.Equal(SourceKind.Pickup, merged.Kind);
+        Assert.Equal(OddsEvent.LootSpot, merged.Odds!.Event);
+        Assert.Equal(0.4, merged.Odds.Chance);
+        Assert.Equal(0.8, merged.Odds.HighestChance);
+        Assert.Equal(1.6, merged.Odds.Expected);
+        Assert.Equal(
+            new[] { "/Invented/A", "/Invented/B" },
+            merged.Places.Select(place => place.Key)
+        );
+        Assert.Empty(merged.Notes);
+        Assert.Null(merged.Spawn);
     }
 
     [Fact]

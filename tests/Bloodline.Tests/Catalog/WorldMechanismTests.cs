@@ -167,14 +167,54 @@ public sealed class WorldMechanismTests
         Assert.Equal(new Amount(3, 3), result.Source.Amount);
         Assert.Equal("Invented storyteller", result.Source.Name);
         Assert.Equal("/Invented/Coast", Assert.Single(result.Source.Places).Key);
+        Assert.False(result.Source.Unconfirmed);
         var unplaced = Assert.Single(
             new DialogueGrantMechanism().FindSources(Context([grant], dialogues: [dialogue]))
         );
         Assert.Empty(unplaced.Source.Places);
+        Assert.False(unplaced.Source.Unconfirmed);
         Assert.Equal(new Amount(3, 3), unplaced.Source.Amount);
         Assert.Equal(EntityKind.Person, result.Source.Entity.Kind);
         Assert.Equal(npc.Path, result.Source.Entity.Key);
         Assert.Equal(dialogue.Path, unplaced.Source.Entity.Key);
+    }
+
+    [Theory]
+    [InlineData("/Invented/Dialogue_Unused/Tale.Tale", true)]
+    [InlineData("/Invented/Tale.Tale", false)]
+    public void DialogueMarkedUnusedRetainsItsRewardPlaceAndExplanation(
+        string path,
+        bool unconfirmed
+    )
+    {
+        var grant = Type("AddItemDialogue");
+        var npc = Type("Storyteller");
+        npc.Properties["Dialogue"] = new JsonObject { ["$ref"] = path };
+        var dialogue = new AssetRecord(
+            path,
+            "Dialogue",
+            new JsonObject(),
+            [
+                new InnerObjectRecord(
+                    path + ":Grant",
+                    grant.Path,
+                    Parse("""{"Item To Add":{"$ref":"/Invented/Gift.Gift_C"}}""")
+                ),
+            ]
+        );
+        var source = Assert.Single(
+            new DialogueGrantMechanism().FindSources(
+                Context([grant, npc], levels: [Level(npc)], dialogues: [dialogue])
+            )
+        ).Source;
+        Assert.Equal(unconfirmed, source.Unconfirmed);
+        Assert.Equal("/Invented/Coast", Assert.Single(source.Places).Key);
+        Assert.Equal(
+            unconfirmed,
+            source.Notes.Contains(
+                "The game files mark this conversation unused, so it may never take place."
+            )
+        );
     }
 
     [Fact]
@@ -556,6 +596,7 @@ public sealed class WorldMechanismTests
         Assert.Single(sources, source => source.ItemClass == "/Invented/Ore.Ore_C");
         Assert.Equal(new Odds(OddsEvent.Pick, 0.4, 0.4, null), result.Source.Odds);
         Assert.Equal(new[] { 0d }, NoteNumbers(result.Source));
+        Assert.True(result.Source.Unconfirmed);
         Assert.Equal(3, Assert.Single(result.Source.Conditions).Value);
         // Every gathering node shares this class, so the node is told apart by the name it shows.
         Assert.Equal(gatherer.Path + "#Iron Deposit", result.Source.Entity.Key);
@@ -563,11 +604,13 @@ public sealed class WorldMechanismTests
             sources,
             source => source.ItemClass.Contains("Dud", StringComparison.Ordinal)
         );
-        Assert.Empty(
-            Assert
-                .Single(sources, source => source.ItemClass == "/Invented/Other.Other_C")
-                .Source.Places
-        );
+        var unused = Assert.Single(
+            sources,
+            source => source.ItemClass == "/Invented/Other.Other_C"
+        ).Source;
+        Assert.Empty(unused.Places);
+        Assert.True(unused.Unconfirmed);
+        Assert.Contains("No gathering spot in the world is known to give it.", unused.Notes);
     }
 
     [Fact]
@@ -582,6 +625,11 @@ public sealed class WorldMechanismTests
         var result = Assert.Single(new GatheringMechanism().FindSources(Context([gatherer])));
         Assert.Equal(new Odds(OddsEvent.Pick, 2.0 / 3, 2.0 / 3, null), result.Source.Odds);
         Assert.Equal(new[] { 4d }, NoteNumbers(result.Source));
+        Assert.True(result.Source.Unconfirmed);
+        Assert.Contains(
+            "No gathering spot in the world is known to use this gathering method.",
+            result.Source.Notes
+        );
     }
 
     [Fact]
@@ -608,6 +656,7 @@ public sealed class WorldMechanismTests
         var placed = Assert.Single(sources, source => source.Source.Places.Count > 0);
         Assert.Equal("/Invented/Crystal.Crystal_C", placed.ItemClass);
         Assert.Equal(2.0 / 3, placed.Source.Odds!.Chance);
+        Assert.False(placed.Source.Unconfirmed);
         Assert.DoesNotContain(sources, source => source.ItemClass == "/Invented/Old.Old_C");
         Assert.Empty(
             Assert
@@ -739,10 +788,16 @@ public sealed class WorldMechanismTests
         Assert.Equal(output.Path, source.ItemClass);
         Assert.Equal(new Amount(3, 3), source.Source.Amount);
         Assert.Equal("/Invented/Coast", Assert.Single(source.Source.Places).Key);
+        Assert.False(source.Source.Unconfirmed);
         var unplaced = Assert.Single(
             new GatheringMechanism().FindSources(Context([gatherer, output]))
         );
         Assert.Empty(unplaced.Source.Places);
+        Assert.True(unplaced.Source.Unconfirmed);
+        Assert.Contains(
+            "No gathering spot in the world is known to give it.",
+            unplaced.Source.Notes
+        );
         gatherer.Properties[field] = null;
         Assert.Empty(new GatheringMechanism().FindSources(Context([gatherer, output])));
     }

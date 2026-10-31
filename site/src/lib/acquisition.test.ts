@@ -1,9 +1,9 @@
 import { expect, it } from 'vitest';
 import {
 	formatAmount,
+	firstRoute,
 	sortSources,
 	sourceContext,
-	summarize,
 	summaryConditions,
 	summaryContext
 } from './acquisition.js';
@@ -95,12 +95,31 @@ it('states the range of levels when the summarized recipes need different levels
 	expect(summaryConditions([level(12), { ...container, conditions: [] }])).toEqual([]);
 });
 
-it('says that a lying item lies in an unknown place when no place is recorded', () => {
-	const pickup = { ...container, kind: 'pickup' as const, places: [], odds: null };
-	expect(summarize('pickup', [pickup])).toMatchObject({
-		verb: 'Found on the ground in',
-		places: ['an unknown place']
-	});
+it('omits unconfirmed routes from previews and search descriptions', () => {
+	const unconfirmed = { ...container, kind: 'dialogue' as const, unconfirmed: true };
+	const confirmed = { ...container, unconfirmed: false };
+	expect(firstRoute([unconfirmed], ['dialogue'])).toBeNull();
+	expect(firstRoute([unconfirmed, confirmed], ['dialogue', 'containerLoot'])).toBe(
+		'Found in Stargazer cache in Glass Reach, 50.8% to 86.6% per container'
+	);
+	expect(
+		firstRoute(
+			[{ ...unconfirmed, kind: 'containerLoot', name: 'Unused cache' }, confirmed],
+			['containerLoot']
+		)
+	).toBe('Found in Stargazer cache in Glass Reach, 50.8% to 86.6% per container');
+});
+
+it('describes loose loot as found on the ground with its known place and odds', () => {
+	const pickup = {
+		...container,
+		kind: 'pickup' as const,
+		unconfirmed: false,
+		odds: { ...container.odds!, event: 'lootSpot' as const }
+	};
+	expect(firstRoute([pickup], ['pickup'])).toBe(
+		'Found on the ground in Glass Reach, 50.8% to 86.6% per loot spot'
+	);
 });
 
 it('counts an item currency instead of pluralizing its name', () => {
