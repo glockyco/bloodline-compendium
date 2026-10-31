@@ -1,5 +1,13 @@
 import { expect, it } from 'vitest';
-import { facetGroups, matches, readState, shownColumns, sortItems, writeState } from './list.js';
+import {
+	facetGroups,
+	matches,
+	nameMatches,
+	readState,
+	shownColumns,
+	sortItems,
+	writeState
+} from './list.js';
 import fixture from '../../fixtures/site-data/items.json';
 import type { ItemIndex, ItemSummary } from './site-data.js';
 const index = fixture as unknown as ItemIndex;
@@ -138,4 +146,14 @@ it('keeps a place filter to the selected ways to get an item and counts places t
 		['shop', 1],
 		['containerLoot', 1]
 	]);
+});
+
+it('finds names the game misspells by one letter and words in any order', () => {
+	expect(nameMatches('Steel Rapier Gaurd', 'steel rapier guard')).toBe(true);
+	expect(nameMatches('Steel Rapier Gaurd', 'rapier steel')).toBe(true);
+	expect(nameMatches('Iron Ingot', 'iron ignot')).toBe(true);
+	expect(nameMatches('Iron Ingot', 'ingots')).toBe(true);
+	// Short words need an exact start, so a search does not drift to unrelated names.
+	expect(nameMatches('Iron Ingot', 'irn')).toBe(false);
+	expect(nameMatches('Copper Ore', 'iron')).toBe(false);
 });

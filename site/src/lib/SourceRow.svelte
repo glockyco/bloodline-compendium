@@ -21,6 +21,12 @@
 		showUnit?: boolean;
 		id: string;
 	} = $props();
+	// The camp maps of one terrain share their terrain's name, so a list names each place once.
+	const places = $derived(
+		source.places.filter(
+			(place, index) => source.places.findIndex((other) => other.name === place.name) === index
+		)
+	);
 </script>
 
 <tr class="source-row" {id} data-relation-id={source.relationId} data-relation-direction="incoming">
@@ -28,10 +34,9 @@
 		<span class="relation-name"><EntityLink entity={source.entity} /></span>
 		<Conditions conditions={source.conditions} />
 		{#if showPlaces}<p class="source-places">
-				{#if source.places.length}{#each source.places as place, index (index)}{index
-							? ', '
-							: ''}<EntityLink entity={place} />{/each}{:else if source.settlement}Your settlement{:else}Location
-					unknown{/if}
+				{#if places.length}{#each places as place, index (index)}{index ? ', ' : ''}<EntityLink
+							entity={place}
+						/>{/each}{:else if source.settlement}Your settlement{:else}Location unknown{/if}
 			</p>{/if}
 		{#if source.inputs.length || source.notes.length || source.quotes?.length}
 			<details class="row-details">

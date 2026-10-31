@@ -101,6 +101,38 @@ function statMatches(item: ItemSummary, filter: StatFilter): boolean {
 }
 
 /**
+ * Whether a name holds the search text, or each searched word starts a word of the name or is one letter edit
+ * away from one, because the game misspells some names, such as Steel Rapier Gaurd.
+ */
+export function nameMatches(name: string, needle: string): boolean {
+	const text = name.toLocaleLowerCase('en');
+	if (text.includes(needle)) return true;
+	const words = text.split(/[^\p{L}\p{N}']+/u).filter(Boolean);
+	return needle
+		.split(/\s+/)
+		.every(
+			(part) =>
+				words.some((word) => word.startsWith(part)) ||
+				(part.length >= 4 && words.some((word) => oneEditApart(word, part)))
+		);
+}
+
+/** Whether two words differ by one inserted, removed or changed letter, or two swapped neighbours. */
+function oneEditApart(a: string, b: string): boolean {
+	if (Math.abs(a.length - b.length) > 1 || a === b) return a === b;
+	let i = 0;
+	while (i < a.length && i < b.length && a[i] === b[i]) i++;
+	const restA = a.slice(i);
+	const restB = b.slice(i);
+	if (a.length === b.length)
+		return (
+			restA.slice(1) === restB.slice(1) ||
+			(restA[0] === restB[1] && restA[1] === restB[0] && restA.slice(2) === restB.slice(2))
+		);
+	return a.length > b.length ? restA.slice(1) === restB : restA === restB.slice(1);
+}
+
+/**
  * An item's values for a facet under the selection of the facets it depends on: with ways to get it selected, only the
  * places where it is got those ways, and with places selected, only the ways to get it there.
  */
@@ -135,8 +167,7 @@ export function matches(
 	skip?: string
 ): boolean {
 	const needle = state.name.trim().toLocaleLowerCase('en');
-	if (needle && !`${item.name} ${item.qualifier ?? ''}`.toLocaleLowerCase('en').includes(needle))
-		return false;
+	if (needle && !nameMatches(`${item.name} ${item.qualifier ?? ''}`, needle)) return false;
 	// A skipped facet's selection neither filters nor scopes the facets that depend on it.
 	const scoping = skip ? { ...state, facets: { ...state.facets, [skip]: [] } } : state;
 	for (const facet of index.facets) {

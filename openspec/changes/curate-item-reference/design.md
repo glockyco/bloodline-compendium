@@ -159,5 +159,6 @@ Findings left open, each with its owner:
 
 - Weapon part pages do not explain assembly, compatibility or finished weapon stats, and the part list cannot shortlist by crafting level or ingredient cost. Both belong to `add-crafting-and-equipment`.
 - A bounty note does not say where its quest is accepted, because quest givers are not read yet. Places and people in `openspec/plan.md` own it.
-- Task 10.7 holds the rest: the list's name filter misses names the game misspells, such as Steel Rapier Gaurd, hunting places repeat camp names that read alike, settlement deliveries do not say what a delivery is, the Speed word and the Attack Speed number rank weapons differently without saying why, and staves are typed Halberd without a hint.
+- The list's name filter now also matches a name the game misspells by one letter, such as Steel Rapier Gaurd, and a source row names each camp place once, since the camp maps of one terrain share their terrain's name.
+- Task 10.8 holds the rest: settlement deliveries do not say what a delivery is, the Speed word and the Attack Speed number rank weapons differently without saying why, and staves are typed Halberd without a hint.
 

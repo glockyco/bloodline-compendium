@@ -62,7 +62,8 @@
 - [x] 10.4 Fix the remaining presentation findings: the header at 768 px, breadcrumb separators at line starts, count badges apart from their headings, the Known Issues expansion gap and tall tooltips at 200% zoom
 - [x] 10.5 Repeat the persona review on the real-data preview after groups 4, 7, 8 and 10, and record it in design.md
 - [x] 10.6 Apply type roles, parent-owned spacing, a prose measure and phone layouts for relation tables, item list rows, the header, the footer and the filter sheet, and verify every page kind at 1440, 1024, 768 and 390 px
-- [ ] 10.7 Match misspelled game names in the list's name filter, tell apart hunting places that share a camp name, say what a settlement delivery is, read in the game what the Attack Speed number does and explain it beside the Speed word, and say where staves are typed Halberd, and verify Steel Rapier Gaurd, Deer, Azure Lover, Lonland Pistol and Acolyte Cryomancer Staff
+- [x] 10.7 Match misspelled game names in the list's name filter and name each place once in a source row, and verify Steel Rapier Gaurd and Deer
+- [ ] 10.8 Say what a settlement delivery is, read in the game what the Attack Speed number does and explain it beside the Speed word, and say where staves are typed Halberd, and verify Azure Lover, Lonland Pistol and Acolyte Cryomancer Staff
 
 ## 11. Entity readiness
 
