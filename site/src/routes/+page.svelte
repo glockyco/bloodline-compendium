@@ -139,7 +139,7 @@
 			</div>
 			{#if unknown}<p>
 					<a href={kindPath('item', data.kinds, '?unknown=1')!}
-						>{formatNumber(unknown)} items without a known source</a
+						>{formatNumber(unknown)} {unknown === 1 ? 'item' : 'items'} without a known source</a
 					>
 				</p>{/if}
 		</div>
