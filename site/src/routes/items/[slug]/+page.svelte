@@ -32,7 +32,7 @@
 		noKnownSource:
 			'No known source. It may come from a quest or event.',
 		notInNormalPlay:
-			'This item is not obtainable in normal play. Only test areas of the game hold it.'
+			'This item cannot be obtained in normal play. It only appears in test areas.'
 	};
 	// An item page exists only for a kind the registry gives pages.
 	const kind = $derived(data.kinds.find((entry) => entry.kind === item.kind)!);
@@ -180,7 +180,7 @@
 				.map((fact) => `${fact.label}: ${factValue(fact)}.`),
 			firstRoute(confirmedSources, Object.keys(sourceHeadings) as SourceKind[]) ??
 				(item.status === 'notInNormalPlay'
-					? 'Not obtainable in normal play.'
+					? 'Cannot be obtained in normal play.'
 					: 'No known source.')
 		].join(' ')
 	);

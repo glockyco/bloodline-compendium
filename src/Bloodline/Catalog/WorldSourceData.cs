@@ -31,7 +31,10 @@ internal static class WorldSourceData
             ConditionKind.Building,
             building,
             null,
-            "Requires the completed " + building.Name + "."
+            "Available once you build "
+                + ("AEIOU".Contains(building.Name[0]) ? "an " : "a ")
+                + building.Name
+                + " in your settlement"
         );
 
     public static EntityReference PlacementEntity(
