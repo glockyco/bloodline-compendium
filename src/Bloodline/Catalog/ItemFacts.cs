@@ -254,8 +254,19 @@ internal sealed class ItemFacts(
                 Add(Stat.Damage, "WeaponInfo.Damage");
             }
             var damageIndex = facts.FindIndex(fact => fact.Stat == Stat.Damage);
+            var separateDamage = hasSeparateProjectile
+                ? NormalProjectileDamage(projectileFunction)
+                : null;
             var shownDamage = RecordValues.Number(RecordValues.At(properties, "ItemInfo.Damage"));
-            if (type == "Staff" && shownDamage is { } shown && facts[damageIndex].Number != shown)
+            // The tooltip contradicts the game only where its damage matches no damage that a normal attack applies,
+            // so an unknown applied damage and a separate projectile's damage are no difference.
+            if (
+                type == "Staff"
+                && shownDamage is { } shown
+                && facts[damageIndex].Number is { } applied
+                && applied != shown
+                && separateDamage != shown
+            )
             {
                 facts[damageIndex] = facts[damageIndex] with
                 {
@@ -264,12 +275,7 @@ internal sealed class ItemFacts(
             }
             if (hasSeparateProjectile)
             {
-                facts.Add(
-                    StatVocabulary.Number(
-                        Stat.ProjectileDamage,
-                        NormalProjectileDamage(projectileFunction)
-                    )
-                );
+                facts.Add(StatVocabulary.Number(Stat.ProjectileDamage, separateDamage));
             }
             // Tooltips show the authored speed word, not a universal attack-rate number.
             Add(Stat.Speed, "ItemInfo.Speed");

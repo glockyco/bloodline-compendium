@@ -274,7 +274,8 @@ public sealed class CatalogTests
         var page = resolver.Resolve(item, "staff");
         var fact = Assert.Single(page.Facts, fact => fact.Stat == Stat.Damage);
         Assert.Equal(partial ? null : damage, fact.Number);
-        Assert.Equal("900", fact.GameShows);
+        // An unknown applied damage contradicts no tooltip, so only a known value shows the tooltip's 900.
+        Assert.Equal(partial || damage is null ? null : "900", fact.GameShows);
         var claim = Assert.Single(resolver.Claims, claim => claim.Fact == "Damage");
         Assert.Equal(
             partial || damage is null ? ClaimType.Unknown : ClaimType.Extracted,
@@ -321,14 +322,21 @@ public sealed class CatalogTests
     }
 
     [Theory]
-    [InlineData("StaffOfMinorFlames")]
-    [InlineData("StaffOfMinorRot")]
-    public void HalberdStyleManaStavesKeepMeleeAndProjectileDamageSeparate(string asset)
+    [InlineData("StaffOfMinorFlames", 900, "900")]
+    [InlineData("StaffOfMinorRot", 900, "900")]
+    [InlineData("StaffOfMinorFlames", 20, null)]
+    [InlineData("StaffOfMinorFlames", 10, null)]
+    public void HalberdStyleManaStavesKeepMeleeAndProjectileDamageSeparate(
+        string asset,
+        double tooltip,
+        string? gameShows
+    )
     {
         var item = Item($"/Game/Weapons/Staves/{asset}.{asset}_C", "Invented staff");
         item.Properties["ItemInfo"]!["WeaponType"] = Parse(
             """{"$enum":"Attack::Halberd","display":"Halberd"}"""
         );
+        item.Properties["ItemInfo"]!["Damage"] = tooltip;
         var projectile = new ClassRecord(
             "/Game/Projectile.Projectile_C",
             [],
@@ -371,7 +379,11 @@ public sealed class CatalogTests
             20,
             Assert.Single(page.Facts, fact => fact.Stat == Stat.ProjectileDamage).Number
         );
-        Assert.Equal("900", Assert.Single(page.Facts, fact => fact.Stat == Stat.Damage).GameShows);
+        // A tooltip that shows the melee damage or the projectile's damage agrees with the game.
+        Assert.Equal(
+            gameShows,
+            Assert.Single(page.Facts, fact => fact.Stat == Stat.Damage).GameShows
+        );
     }
 
     [Fact]

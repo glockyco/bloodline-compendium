@@ -123,6 +123,31 @@ public sealed class TooltipCheckTests
         Assert.Equal((field, reason), (difference.Field, difference.Reason));
     }
 
+    [Theory]
+    [InlineData("Damage: 10", false)]
+    [InlineData("Damage: 20", false)]
+    [InlineData("Damage: 30", true)]
+    public void AStaffTooltipMayShowItsSeparateProjectilesDamage(string stat, bool differs)
+    {
+        var staff = Sword with
+        {
+            Type = "Staff",
+            Facts =
+            [
+                StatVocabulary.Number(Stat.Damage, 10),
+                StatVocabulary.Number(Stat.ProjectileDamage, 20),
+            ],
+        };
+        var differences = Differences(staff, Tooltip(staff, stat));
+        if (!differs)
+        {
+            Assert.Empty(differences);
+            return;
+        }
+        var difference = Assert.Single(differences);
+        Assert.Equal(("Damage", "staff-applied-damage"), (difference.Field, difference.Reason));
+    }
+
     [Fact]
     public void ArmorDifferencesNameTheirCause()
     {

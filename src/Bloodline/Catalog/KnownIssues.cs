@@ -20,8 +20,8 @@ internal static partial class KnownIssues
     /// <summary>A food that eating ignores entirely, because the food effect table has no row for it.</summary>
     public const string FoodWithoutRow = "food-without-row";
 
-    /// <summary>Fairy Staff does not fire the fireballs its description promises.</summary>
-    public const string FairyStaffNoFireballs = "fairy-staff-no-fireballs";
+    /// <summary>Staves whose description promises fireballs that their swings never launch.</summary>
+    public const string NoFireballs = "staves-without-fireballs";
 
     /// <summary>Reproduced staves can deal default projectile damage at point-blank range.</summary>
     public const string StaffPointBlankDamage = "staff-point-blank-damage";
@@ -32,6 +32,18 @@ internal static partial class KnownIssues
         "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/AcolyteGeomancerStaff.AcolyteGeomancerStaff_C",
         "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/WalkingStick.WalkingStick_C",
         "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/MoonstoneStaff.MoonstoneStaff_C",
+    };
+
+    /// <summary>
+    /// The staves with Staff of Minor Flames' fireball description whose normal swings lab runs showed launching
+    /// no projectile and spending no mana.
+    /// </summary>
+    private static readonly HashSet<string> FirelessStaves = new(StringComparer.Ordinal)
+    {
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/FairyStaff.FairyStaff_C",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/NecroStaff.NecroStaff_C",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/DeathsGrasp_Soulstaff.DeathsGrasp_Soulstaff_C",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/PriestsSoulStaff.PriestsSoulStaff_C",
     };
 
     /// <summary>
@@ -79,7 +91,7 @@ internal static partial class KnownIssues
 
     /// <summary>
     /// Adds notes for tooltip differences concerning shown values, knee armor, ignored food effects,
-    /// foods that eating ignores, Fairy Staff's missing fireballs and reproduced point-blank staff damage.
+    /// foods that eating ignores, staves without their promised fireballs and reproduced point-blank staff damage.
     /// </summary>
     public static (IReadOnlyList<ItemPage> Items, IReadOnlyList<PublishedIssue> Issues) Attach(
         IReadOnlyList<ItemPage> items,
@@ -132,12 +144,9 @@ internal static partial class KnownIssues
             {
                 notes[item.Key].Add(FoodWithoutRow);
             }
-            if (
-                item.Key
-                == "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/FairyStaff.FairyStaff_C"
-            )
+            if (FirelessStaves.Contains(item.Key))
             {
-                notes[item.Key].Add(FairyStaffNoFireballs);
+                notes[item.Key].Add(NoFireballs);
             }
             if (PointBlankStaves.Contains(item.Key))
             {

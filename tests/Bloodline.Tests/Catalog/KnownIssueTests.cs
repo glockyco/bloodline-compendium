@@ -110,7 +110,23 @@ public sealed class KnownIssueTests
         [
             (
                 "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/FairyStaff.FairyStaff_C",
-                KnownIssues.FairyStaffNoFireballs
+                KnownIssues.NoFireballs
+            ),
+            (
+                "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/NecroStaff.NecroStaff_C",
+                KnownIssues.NoFireballs
+            ),
+            (
+                "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/DeathsGrasp_Soulstaff.DeathsGrasp_Soulstaff_C",
+                KnownIssues.NoFireballs
+            ),
+            (
+                "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/PriestsSoulStaff.PriestsSoulStaff_C",
+                KnownIssues.NoFireballs
+            ),
+            (
+                "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/StaffOfMinorFlames.StaffOfMinorFlames_C",
+                null
             ),
             (
                 "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/AcolyteGeomancerStaff.AcolyteGeomancerStaff_C",
@@ -142,7 +158,7 @@ public sealed class KnownIssueTests
             .Select(test => template with { Key = test.Key, Name = test.Key, Type = "Staff" })
             .ToArray();
         var registry = new KnownIssueRegistry([
-            Issue(KnownIssues.FairyStaffNoFireballs),
+            Issue(KnownIssues.NoFireballs),
             Issue(KnownIssues.StaffPointBlankDamage),
         ]);
 
@@ -171,8 +187,8 @@ public sealed class KnownIssueTests
 
     [Theory]
     [InlineData(
-        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/FairyStaff.FairyStaff_C",
-        KnownIssues.FairyStaffNoFireballs
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/NecroStaff.NecroStaff_C",
+        KnownIssues.NoFireballs
     )]
     [InlineData(
         "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/AcolyteGeomancerStaff.AcolyteGeomancerStaff_C",

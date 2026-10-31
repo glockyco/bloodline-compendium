@@ -69,7 +69,7 @@ fi
 item=/Game/BloodlinesAlpha/Interactables
 staff_check() { lab eval "$(dirname "$0")/staff-issues.lua" "$1"; }
 fairy=$item/Weapons/Halberds/FairyStaff.FairyStaff_C
-# fairy-staff-no-fireballs: the actual tooltip, then the HUD before, during and after a normal swing.
+# staves-without-fireballs: Fairy Staff's tooltip, then the HUD before, during and after a normal swing.
 staff_check "{\"action\":\"equip\",\"item\":\"$fairy\"}"
 staff_check "{\"action\":\"tooltip\",\"item\":\"$fairy\"}"
 lab close-tutorials
@@ -81,6 +81,11 @@ staff_check '{"action":"attack","pauseDuring":true}'
 lab capture-screen fairy-during-swing
 staff_check '{"action":"observe","seconds":2}'
 lab capture-screen fairy-after-swing
+# The other staves with the same description: each swing's spawned projectiles and mana are in the run's log.
+for staff in NecroStaff DeathsGrasp_Soulstaff PriestsSoulStaff; do
+  staff_check "{\"action\":\"equip\",\"item\":\"$item/Weapons/Halberds/$staff.${staff}_C\"}"
+  staff_check '{"action":"attack","seconds":2}'
+done
 
 # staff-point-blank-damage: each fresh Goblin Brute has enough health for both its health bar and the damage
 # number to remain visible. The second normal combo is reached with empty-space swings, not a counter edit.

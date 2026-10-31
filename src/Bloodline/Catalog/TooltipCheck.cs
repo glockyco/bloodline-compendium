@@ -320,18 +320,21 @@ internal static partial class TooltipCheck
             : slotWithoutArmor ? "armor-slot-adds-none"
             : null;
 
-        void Number(string field, string shown, Stat stat, string? reason)
-        {
-            var fact = Find(stat);
-            var published = fact?.Number;
-            var number = double.TryParse(
+        static double? Parse(string shown) =>
+            double.TryParse(
                 shown.Replace(",", "", StringComparison.Ordinal),
                 NumberStyles.Float,
                 CultureInfo.InvariantCulture,
                 out var parsed
             )
                 ? parsed
-                : (double?)null;
+                : null;
+
+        void Number(string field, string shown, Stat stat, string? reason)
+        {
+            var fact = Find(stat);
+            var published = fact?.Number;
+            var number = Parse(shown);
             if (number is null || number != published)
             {
                 add(
@@ -373,6 +376,11 @@ internal static partial class TooltipCheck
             var value = stat.Groups["value"].Value;
             switch (stat.Groups["label"].Value)
             {
+                // A staff with a separate projectile, such as Staff of Minor Flames, shows that projectile's damage.
+                case "Damage"
+                    when Find(Stat.ProjectileDamage)?.Number is { } projectile
+                        && Parse(value) == projectile:
+                    break;
                 case "Damage":
                     Number(
                         "Damage",

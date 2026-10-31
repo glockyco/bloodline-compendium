@@ -123,21 +123,32 @@
       "reportUrl": null
     },
     {
-      "id": "fairy-staff-no-fireballs",
-      "title": "Fairy Staff launches no fireballs",
-      "effect": "Despite its description, Fairy Staff launches no fireballs and uses no mana.",
+      "id": "staves-without-fireballs",
+      "title": "Four staves launch no fireballs",
+      "effect": "Despite their descriptions, Fairy Staff, Gripclaw Staff and the two staves named Soulstaff launch no fireballs and use no mana.",
+      "itemNotes": {
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/FairyStaff.FairyStaff_C": "Despite its description, Fairy Staff launches no fireballs and uses no mana.",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/NecroStaff.NecroStaff_C": "Despite its description, Gripclaw Staff launches no fireballs and uses no mana.",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/DeathsGrasp_Soulstaff.DeathsGrasp_Soulstaff_C": "Despite its description, Soulstaff launches no fireballs and uses no mana.",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/PriestsSoulStaff.PriestsSoulStaff_C": "Despite its description, Soulstaff launches no fireballs and uses no mana."
+      },
       "workaround": null,
       "steps": [
         "Hover Fairy Staff in the inventory. Its description says it launches small fireballs each time it is swung and each swing consumes 5 mana.",
         "Equip and draw Fairy Staff with at least 5 mana available. The staff is visible in hand.",
-        "Use normal attacks while aiming into open space. The staff swings, but no fireball appears and the mana bar does not drop."
+        "Use normal attacks while aiming into open space. The staff swings, but no fireball appears and the mana bar does not drop.",
+        "Repeat with Gripclaw Staff or a staff named Soulstaff. They show the same description, and their swings launch no fireball either."
       ],
       "expected": "Each normal swing launches a small fireball and consumes 5 mana, as the description says.",
-      "observed": "Normal swings create no projectile and consume no mana. Charged attacks, blocking and attacks while blocking also produced no fireball in either first-person or third-person view.",
-      "cause": "The inventory tooltip displays Fairy Staff's ItemInfo.Description, which lists fireballs costing 5 mana per swing. Fairy Staff's Swing Event returns immediately without spawning a projectile or spending mana.",
+      "observed": "Normal swings of Fairy Staff, Gripclaw Staff and both staves named Soulstaff create no projectile and consume no mana. Fairy Staff's charged attacks, blocking and attacks while blocking also produced no fireball in either first-person or third-person view.",
+      "cause": "The inventory tooltip displays each staff's ItemInfo.Description. Fairy Staff, Gripclaw Staff and both Soulstaff classes have the same description as Staff of Minor Flames, whose Swing Event spends 5 mana and spawns a fireball. Their own Swing Events spawn no projectile and spend no mana.",
       "citations": [
         "/Game/BloodlinesAlpha/UI/Inventory/UI_InventoryItem_2:OnMouseEnter",
-        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/FairyStaff:Swing Event"
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/StaffOfMinorFlames:Swing Event",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/FairyStaff:Swing Event",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/NecroStaff:Swing Event",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/DeathsGrasp_Soulstaff:Swing Event",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/PriestsSoulStaff:Swing Event"
       ],
       "builds": [24464547],
       "report": "notReported",
