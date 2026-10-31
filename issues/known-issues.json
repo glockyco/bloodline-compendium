@@ -106,6 +106,52 @@
       "builds": [24464547],
       "report": "notReported",
       "reportUrl": null
+    },
+    {
+      "id": "fairy-staff-no-fireballs",
+      "title": "Fairy Staff does not launch the fireballs its description lists",
+      "effect": "Fairy Staff's normal swings launch no fireballs and consume no mana, although its description says each swing launches small fireballs for 5 mana.",
+      "workaround": "Use Staff of Minor Flames for fireballs on normal swings.",
+      "steps": [
+        "Hover Fairy Staff in the inventory. Its description says it launches small fireballs each time it is swung and each swing consumes 5 mana.",
+        "Equip and draw Fairy Staff with at least 5 mana available. The staff is visible in hand.",
+        "Use normal attacks while aiming into open space. The staff swings, but no fireball appears and the mana bar does not drop."
+      ],
+      "expected": "Each normal swing launches a small fireball and consumes 5 mana, as the description says.",
+      "observed": "Normal swings create no projectile and consume no mana. Charged attacks, blocking and attacks while blocking also produced no fireball in either first-person or third-person view.",
+      "cause": "The inventory tooltip displays Fairy Staff's ItemInfo.Description, which lists fireballs costing 5 mana per swing. Fairy Staff's Swing Event returns immediately without spawning a projectile or spending mana.",
+      "citations": [
+        "/Game/BloodlinesAlpha/UI/Inventory/UI_InventoryItem_2:OnMouseEnter",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/FairyStaff:Swing Event"
+      ],
+      "builds": [24464547],
+      "report": "notReported",
+      "reportUrl": null
+    },
+    {
+      "id": "staff-point-blank-damage",
+      "title": "Three staves can deal 100 projectile damage at point-blank range",
+      "effect": "Walking Stick, Acolyte Geomancer Staff and Moonstone Staff can deal 100 projectile damage at point-blank range instead of their normal 12, 20 and 35.",
+      "workaround": "Keep enough distance for the projectile to travel before hitting the enemy.",
+      "steps": [
+        "Equip and draw Acolyte Geomancer Staff with enough mana to attack and no damage-changing effects active. The staff is visible in hand.",
+        "Attack a goblin from a distance where the projectile visibly travels before impact. A normal projectile hit shows 20 damage.",
+        "Face a goblin at close melee range and use normal attacks through the second swing of the combo. A projectile that hits as it appears can show 100 damage.",
+        "Repeat with Walking Stick and Moonstone Staff. Their distant projectile hits show 12 and 35 damage respectively, while point-blank hits can show 100."
+      ],
+      "expected": "Normal projectile hits use the same base damage at both ranges: 12 for Walking Stick, 20 for Acolyte Geomancer Staff and 35 for Moonstone Staff.",
+      "observed": "All three staves dealt 100 projectile damage when the projectile overlapped the goblin during creation. At longer range, Walking Stick dealt 12, Acolyte Geomancer Staff dealt 20 and Moonstone Staff dealt 35.",
+      "cause": "GenericStaffProjectile starts with Damage 100. These three staves call FinishSpawningActor before assigning their literal projectile Damage values of 12, 20 and 35. If the projectile overlaps an enemy during that call, the overlap applies the default 100 before the staff writes its normal value. Whether this happens depends on the projectile's spawn position and the enemy's collision, not a fixed distance.",
+      "citations": [
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/WalkingStick:Staff Attack",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/AcolyteGeomancerStaff:Staff Attack",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/MoonstoneStaff:Staff Attack",
+        "/Game/GabrielAguiarProd/ToonProjectilesVol1/Blueprints/GenericStaffProjectile:ReceiveActorBeginOverlap",
+        "/Game/GabrielAguiarProd/ToonProjectilesVol1/Blueprints/BP_GAP_UnrealProjectile:ReceiveActorBeginOverlap"
+      ],
+      "builds": [24464547],
+      "report": "notReported",
+      "reportUrl": null
     }
   ]
 }

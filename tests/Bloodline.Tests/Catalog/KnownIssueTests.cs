@@ -63,6 +63,107 @@ public sealed class KnownIssueTests
     }
 
     [Fact]
+    public void StaffIssuesNoteOnlyTheReproducedItemKeys()
+    {
+        var template = Assert.Single(
+            CatalogBuilder.Build(Records(Issue(KnownIssues.KneeArmor)), []).Items
+        );
+        (string Key, string? Issue)[] cases =
+        [
+            (
+                "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/FairyStaff.FairyStaff_C",
+                KnownIssues.FairyStaffNoFireballs
+            ),
+            (
+                "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/AcolyteGeomancerStaff.AcolyteGeomancerStaff_C",
+                KnownIssues.StaffPointBlankDamage
+            ),
+            (
+                "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/WalkingStick.WalkingStick_C",
+                KnownIssues.StaffPointBlankDamage
+            ),
+            (
+                "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/MoonstoneStaff.MoonstoneStaff_C",
+                KnownIssues.StaffPointBlankDamage
+            ),
+            (
+                "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/AcolyteCryomancerStaff.AcolyteCryomancerStaff_C",
+                null
+            ),
+            (
+                "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/AdeptCryomancerStaff.AdeptCryomancerStaff_C",
+                null
+            ),
+            ("/Game/Invented/FairyStaff.FairyStaff_C", null),
+            (
+                "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/WalkingStick.WalkingStick_C",
+                null
+            ),
+        ];
+        var items = cases
+            .Select(test => template with { Key = test.Key, Name = test.Key, Type = "Staff" })
+            .ToArray();
+        var registry = new KnownIssueRegistry([
+            Issue(KnownIssues.FairyStaffNoFireballs),
+            Issue(KnownIssues.StaffPointBlankDamage),
+        ]);
+
+        var (pages, issues) = KnownIssues.Attach(items, registry, null, new HashSet<string>());
+
+        foreach (var test in cases)
+        {
+            var notes = pages.Single(page => page.Key == test.Key).Notes;
+            if (test.Issue is null)
+            {
+                Assert.Empty(notes);
+            }
+            else
+            {
+                Assert.Equal(test.Issue, Assert.Single(notes).Issue);
+            }
+        }
+        foreach (var issue in issues)
+        {
+            Assert.Equal(
+                cases.Where(test => test.Issue == issue.Issue.Id).Select(test => test.Key).Order(),
+                issue.Affected.Select(item => item.Key).Order()
+            );
+        }
+    }
+
+    [Theory]
+    [InlineData(
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/FairyStaff.FairyStaff_C",
+        KnownIssues.FairyStaffNoFireballs
+    )]
+    [InlineData(
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/AcolyteGeomancerStaff.AcolyteGeomancerStaff_C",
+        KnownIssues.StaffPointBlankDamage
+    )]
+    [InlineData(
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/WalkingStick.WalkingStick_C",
+        KnownIssues.StaffPointBlankDamage
+    )]
+    [InlineData(
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/MoonstoneStaff.MoonstoneStaff_C",
+        KnownIssues.StaffPointBlankDamage
+    )]
+    public void AStaffNoteNamingAMissingIssueFailsTheCatalog(string key, string issue)
+    {
+        var template = Assert.Single(
+            CatalogBuilder.Build(Records(Issue(KnownIssues.KneeArmor)), []).Items
+        );
+        var page = template with { Key = key, Name = "Invented staff", Type = "Staff" };
+
+        var error = Assert.Throws<InvalidDataException>(() =>
+            KnownIssues.Attach([page], new KnownIssueRegistry([]), null, new HashSet<string>())
+        );
+
+        Assert.Contains(issue, error.Message);
+        Assert.Contains(page.Name, error.Message);
+    }
+
+    [Fact]
     public void TooltipCausesNoteOnlyValuesThatThePageShows()
     {
         var page = Assert.Single(

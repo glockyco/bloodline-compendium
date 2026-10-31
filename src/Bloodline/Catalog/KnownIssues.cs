@@ -19,6 +19,20 @@ internal static partial class KnownIssues
     /// <summary>A food that eating ignores entirely, because the food effect table has no row for it.</summary>
     public const string FoodWithoutRow = "food-without-row";
 
+    /// <summary>Fairy Staff does not fire the fireballs its description promises.</summary>
+    public const string FairyStaffNoFireballs = "fairy-staff-no-fireballs";
+
+    /// <summary>Reproduced staves can deal default projectile damage at point-blank range.</summary>
+    public const string StaffPointBlankDamage = "staff-point-blank-damage";
+
+    // Only staves whose point-blank damage was reproduced receive this note, not every late damage write.
+    private static readonly HashSet<string> PointBlankStaves = new(StringComparer.Ordinal)
+    {
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/AcolyteGeomancerStaff.AcolyteGeomancerStaff_C",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/WalkingStick.WalkingStick_C",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/MoonstoneStaff.MoonstoneStaff_C",
+    };
+
     /// <summary>
     /// The foods whose descriptions promise healing and that lab runs showed doing nothing when eaten, with
     /// <c>tools/runtime/checks/issues.sh</c>. Other foods without an effect promise none, or promise something the
@@ -63,9 +77,8 @@ internal static partial class KnownIssues
     }
 
     /// <summary>
-    /// Adds a note to each item page that shows a value an issue affects: values that a tooltip difference with an
-    /// issue as its cause concerns, knee armor, foods that eating ignores and foods with an effect that eating
-    /// ignores.
+    /// Adds notes for tooltip differences concerning shown values, knee armor, ignored food effects,
+    /// foods that eating ignores, Fairy Staff's missing fireballs and reproduced point-blank staff damage.
     /// </summary>
     public static (IReadOnlyList<ItemPage> Items, IReadOnlyList<PublishedIssue> Issues) Attach(
         IReadOnlyList<ItemPage> items,
@@ -117,6 +130,17 @@ internal static partial class KnownIssues
             )
             {
                 notes[item.Key].Add(FoodWithoutRow);
+            }
+            if (
+                item.Key
+                == "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/FairyStaff.FairyStaff_C"
+            )
+            {
+                notes[item.Key].Add(FairyStaffNoFireballs);
+            }
+            if (PointBlankStaves.Contains(item.Key))
+            {
+                notes[item.Key].Add(StaffPointBlankDamage);
             }
         }
         var pages = items
