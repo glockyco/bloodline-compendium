@@ -117,7 +117,7 @@ The speed word sorts by its meaning from Slow to Fast, with Standard beside Aver
 
 ### Wording a player can act on
 
-A rare pool's drop says it comes from a separate roll in addition to the normal drop, since its chance can be 100%. A container's own appearance chance says that the container is there only part of the time, apart from the chance per container. An item lying where no source names the place says it lies in an unknown place. A bounty note reads "Receive when accepting the quest" and names no place or condition, because the quest is the source.
+A rare pool's drop says it comes from a separate roll in addition to the normal drop, since its chance can be 100%. A container that does not always appear shows its chance in a Spawns column, apart from the chance per container. A source that the game files define but nothing in the world places, such as an item lying where no source names the place, is listed under "Only in the game files" with the evidence it lacks and stays out of the summary. A bounty note reads "Received when accepting the quest" and names no place or condition, because the quest is the source.
 
 ### Order of work
 

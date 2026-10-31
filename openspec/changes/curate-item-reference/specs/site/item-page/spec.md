@@ -63,11 +63,11 @@ Where the game's tooltip shows another value than the game applies, the page SHA
 - **THEN** the tooltip shows Armor 0 and notes that the game's tooltip shows 4, linking the issue
 
 ### Requirement: Status without a known source
-An item without a known source SHALL state its status in one sentence that says what is known, such as not obtainable in normal play, or that no way to get it is known yet and a quest or event may give it, and SHALL still show its uses and facts.
+An item without a known source SHALL state its status, either that it cannot be obtained in normal play or that it has no known source and may come from a quest or event, and SHALL still show its uses and facts.
 
 #### Scenario: Test-only armor
 - **WHEN** a reader opens Allseer's Judgement
-- **THEN** the page says it is not obtainable in normal play
+- **THEN** the page says it cannot be obtained in normal play
 
 ### Requirement: Previews on links
 Every link to an item SHALL show the item's tooltip on hover, keyboard focus and first touch, loading it on demand, and SHALL lead to the item's page without JavaScript.
