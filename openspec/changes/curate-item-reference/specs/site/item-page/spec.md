@@ -63,11 +63,11 @@ Where the game's tooltip shows another value than the game applies, the page SHA
 - **THEN** the tooltip shows Armor 0 and notes that the game's tooltip shows 4, linking the issue
 
 ### Requirement: Bug notes about this item
-An item that a known game issue affects SHALL show one sentence about this item beside the game card, with a link to the issue's entry on Known Issues, and SHALL NOT repeat the issue's title or its list of affected items.
+An item that a known game issue affects SHALL show a Bugs section at the end of the page using the Section primitive, with one bullet per issue containing its sentence about this item followed by the "Read about this issue" link to the issue's entry on Known Issues. It SHALL NOT repeat the issue's title or its list of affected items. The side column SHALL keep the game card and its displayed-value lines unchanged and SHALL NOT contain an issue note box.
 
 #### Scenario: Walking Stick
 - **WHEN** a reader opens Walking Stick
-- **THEN** a note beside the game card says that its projectile deals 100 damage instead of 12 if it hits an enemy as it leaves the staff
+- **THEN** a bullet in the Bugs section at the end of the page says that its projectile deals 100 damage instead of 12 if it hits an enemy as it leaves the staff
 - **AND** the note links the point-blank entry on Known Issues without naming the other staves
 
 ### Requirement: Status without a known source

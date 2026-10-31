@@ -207,6 +207,20 @@ public sealed class KnownIssueTests
         var page = Assert.Single(
             CatalogBuilder.Build(Records(Issue(KnownIssues.KneeArmor)), []).Items
         );
+        page = page with
+        {
+            Facts = page
+                .Facts.Select(fact =>
+                    fact.Stat == Stat.ArmorRating
+                        ? fact with
+                        {
+                            GameShows = "4",
+                            GameShowsIssue = "armor-without-row",
+                        }
+                        : fact
+                )
+                .ToArray(),
+        };
         TooltipDifference Difference(string field, string? catalog, string reason) =>
             new(page.Key, page.Name, field, "4", catalog, reason, []);
         var report = new TooltipReport(
@@ -233,6 +247,10 @@ public sealed class KnownIssueTests
         Assert.Equal(
             ["armor-without-row", KnownIssues.KneeArmor],
             Assert.Single(pages).Notes.Select(note => note.Issue)
+        );
+        Assert.Equal(
+            "Wearing Knee guards adds no armor, although the game's tooltip shows Armor 4.",
+            Assert.Single(pages).Notes.Single(note => note.Issue == "armor-without-row").Effect
         );
         Assert.Empty(issues.Single(issue => issue.Issue.Id == "armor-slot-adds-none").Affected);
         var missing = Assert.Throws<InvalidDataException>(() =>

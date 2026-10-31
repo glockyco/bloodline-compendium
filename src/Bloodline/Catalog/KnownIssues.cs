@@ -164,7 +164,9 @@ internal static partial class KnownIssues
                         .Select(id => Find(id, "The page of " + item.Name))
                         .Select(issue => new IssueNote(
                             issue.Id,
-                            issue.ItemNotes?.GetValueOrDefault(item.Key) ?? issue.Effect
+                            issue.Id is "armor-without-row" or "armor-slot-adds-none"
+                                ? $"Wearing {item.Name} adds no armor, although the game's tooltip shows Armor {item.Facts.Single(fact => fact.Stat == Stat.ArmorRating && fact.GameShowsIssue == issue.Id).GameShows}."
+                                : issue.ItemNotes?.GetValueOrDefault(item.Key) ?? issue.Effect
                         ))
                         .ToArray(),
                 }

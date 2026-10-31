@@ -9,7 +9,6 @@
 	import { entityPath, kindPath } from '#lib/entities.js';
 	import Section from '#lib/ui/Section.svelte';
 	import ItemTooltip from '#lib/ItemTooltip.svelte';
-	import IssueNote from '#lib/ui/IssueNote.svelte';
 	import { sourceColumns, sourceHeadings, sourceIntros, titleCase } from '#lib/labels.js';
 	import {
 		oddsLabel,
@@ -125,9 +124,6 @@
 		await tick();
 		routes?.querySelectorAll<HTMLElement>('li > a')[firstWays]?.focus();
 	}
-	// A page with nothing beyond its answer keeps its issue notes beside the answer, so neither column is a lone
-	// strip.
-	const sparse = $derived(!recipes.length && !sortedUses.length && !sourceGroups.length);
 	// The skill level a use needs shows in its own column, so the condition that states it does not repeat.
 	const levelOf = (use: (typeof uses)[number]) =>
 		use.conditions.find((condition) => condition.kind === 'proficiencyLevel')?.value ?? null;
@@ -202,9 +198,6 @@
 		<li aria-current="page" data-game>{displayName}</li>
 	</ol>
 </nav>
-{#snippet notes()}{#each item.notes as note (note.issue)}<IssueNote
-			href={resolve('known-issues/') + '#' + note.issue}>{note.effect}</IssueNote
-		>{/each}{/snippet}
 <EntityArticle {kind}>
 	<div class="item-heading">
 		<h1 data-pagefind-meta="title" data-game>{displayName}</h1>
@@ -270,12 +263,10 @@
 					</ul>
 				{/if}
 			</Section>
-			{#if sparse}{@render notes()}{/if}
 		</div>
 		<aside class="item-side" aria-label="Item details">
 			<ItemTooltip item={{ ...item, name: displayName }} />
 			{#if !item.icon}<p class="muted">No icon is known for this item.</p>{/if}
-			{#if !sparse}{@render notes()}{/if}
 		</aside>
 		<div class="item-relations" data-pagefind-ignore="all">
 			{#if recipes.length}<div class="recipes">
@@ -433,6 +424,21 @@
 							>{/snippet}</RelationTable
 					>
 				</Section>{/if}
+			{#if item.notes.length}
+				<Section id="bugs" title="Bugs">
+					<ul>
+						{#each item.notes as note (note.issue)}
+							<li>
+								{#each note.effect.split(item.name) as part, index (index)}{#if index}<span
+											data-game>{item.name}</span
+										>{/if}{part}{/each}
+								<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- the resolved issue page with its section. -->
+								<a href={resolve('known-issues/') + '#' + note.issue}>Read about this issue</a>
+							</li>
+						{/each}
+					</ul>
+				</Section>
+			{/if}
 		</div>
 	</div>
 </EntityArticle>

@@ -5,7 +5,7 @@
       "id": "armor-without-row",
       "title": "Some armor adds no armor when worn",
       "effect": "Some armor pieces, such as Leather Pants and the Velosian Plume-helm, add no armor when worn and do not lower the damage you take, although their tooltips show an armor value.",
-      "workaround": "Wear another piece in that slot. Item pages show the armor each piece adds.",
+      "workaround": null,
       "steps": [
         "Take off all armor and open the character sheet. Armor shows 0.",
         "Hover Leather Pants in the inventory. The tooltip shows ARMOR: 4.",
@@ -49,6 +49,10 @@
       "id": "knee-armor-not-counted",
       "title": "Knee armor counts only after another piece is equipped",
       "effect": "Knee armor, such as Broad Knee Guards, adds no armor when it is the last armor you equip. It counts once you equip another armor piece.",
+      "itemNotes": {
+        "/Game/BloodlinesAlpha/Interactables/Armor/Knees/Knee_Armor_01.Knee_Armor_01_C": "Broad Knee Guards' 7 armor counts only after you equip another piece of armor.",
+        "/Game/BloodlinesAlpha/Interactables/Armor/Knees/Knee_Armor_StandardCaps.Knee_Armor_StandardCaps_C": "Standard Cap Guards' 6 armor counts only after you equip another piece of armor."
+      },
       "workaround": "Equip another armor piece after the knee armor.",
       "steps": [
         "Take off all armor. Armor on the character sheet shows 0.",
@@ -72,7 +76,15 @@
       "id": "food-without-row",
       "title": "Some foods do nothing when eaten",
       "effect": "Steak, Soup, Turkey Leg, Cooked Red Wrangler, Red Wrangler Sandwich and Potato Seeds are used up without any effect when eaten, although their descriptions promise healing.",
-      "workaround": "Item pages show which foods have an effect.",
+      "itemNotes": {
+        "/Game/BloodlinesAlpha/Interactables/Steak.Steak_C": "Despite its description, Steak restores no health when eaten.",
+        "/Game/BloodlinesAlpha/Interactables/Soup.Soup_C": "Despite its description, Soup restores no health when eaten.",
+        "/Game/BloodlinesAlpha/Interactables/TukeyLeg.TukeyLeg_C": "Despite its description, Turkey Leg restores no health when eaten.",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/CookedWrangler.CookedWrangler_C": "Despite its description, Cooked Red Wrangler restores no stamina or health when eaten.",
+        "/Game/BloodlinesAlpha/Interactables/WranglerSandwich.WranglerSandwich_C": "Despite its description, Red Wrangler Sandwich restores no stamina, health or mana when eaten.",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/PotatoSeeds.PotatoSeeds_C": "Despite their description, Potato Seeds restore no health when eaten."
+      },
+      "workaround": null,
       "steps": [
         "Lose some Health.",
         "Hover Steak in the inventory. Its description says it restores 80 health.",
@@ -92,7 +104,10 @@
       "id": "food-effect-not-applied",
       "title": "Druid's Stew does not boost foraging",
       "effect": "Druid's Stew grants Druidsight but not the foraging experience boost it lists.",
-      "workaround": "Eat Carrot Cake or Forager's Feast for the foraging experience boost.",
+      "itemNotes": {
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/GeneralFoodItems/DruidsStew.DruidsStew_C": "Despite its description, Druid's Stew does not boost foraging experience. It still gives Druidsight."
+      },
+      "workaround": null,
       "steps": [
         "Eat Druid's Stew. The status effects show Druidsight but no foraging experience boost.",
         "Eat Carrot Cake. The foraging experience boost appears."

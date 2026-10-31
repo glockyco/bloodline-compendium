@@ -62,11 +62,11 @@ Facets and columns are declared per category in the catalog, so a new kind or up
 
 ### Item page order
 
-Title and identity, then the tooltip with any displayed-value notes and issue notes beside the first-screen answer, then recipe, uses, detailed sources grouped by method and place, and nothing else. The Related entities section goes, because sources, recipes and uses already render every relation. The page renders only sections with content. A phone shows the first three ways to get an item until the reader asks for the rest, and a page with no recipe, use or source table reads as one column.
+Title and identity, then the tooltip with any displayed-value notes beside the first-screen answer, then recipe, uses, detailed sources grouped by method and place, and Bugs. The Related entities section goes, because sources, recipes and uses already render every relation. The page renders only sections with content. A phone shows the first three ways to get an item until the reader asks for the rest, and a page with no recipe, use or source table reads as one column.
 
 Below 1024 px the page reads as one column, because a side column narrowed descriptions below a phone's measure at 768 px. A tablet keeps the answer first and the game card below it, at most 24rem wide. A phone shows the game card first, so what the item is for is on the first screen, and How to Get It follows. Both choices came from a review of rendered options on Apple, Iron Ore and two tablet pages.
 
-A known game issue shows on an item page as one sentence about this item, beside the game card, with a link to its entry on Known Issues. The entry keeps the title, the full list of affected items and the steps. The side column stays light, because later tools such as a character planner's equip and compare actions need its space, and a review chose the short sentence over the entry's title and group sentence for that reason.
+A known game issue shows in a Bugs section at the end of an item page, using the Section primitive with one bullet per issue. Each bullet gives the sentence about this item followed by the existing "Read about this issue" link to its entry on Known Issues. The entry keeps the title, the full list of affected items and the steps. The side column keeps the game card and its displayed-value lines unchanged, without an issue note box.
 
 ### Coverage becomes a maintainer report
 
