@@ -25,7 +25,7 @@
 		"deploy:smoke": "bun ../scripts/deploy.mjs smoke",
 		"deploy:redirect": "wrangler deploy --config wrangler.redirect.jsonc",
 		"deploy:redirect:dry-run": "wrangler deploy --config wrangler.redirect.jsonc --dry-run --outdir .stage/redirect",
-		"review": "wrangler dev --assets build",
+		"review": "bun ../scripts/review-server.mjs build",
 		"layout:check": "bun scripts/layout-check.mjs"
 	},
 	"devDependencies": {
