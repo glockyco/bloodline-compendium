@@ -156,7 +156,7 @@ Six reviewers used the real-data preview as a phone newcomer, a weaponsmith, a g
 The same six personas reviewed the real-data preview again after groups 4, 7, 8 and 10, with reports in `artifacts/design/ux-review/personas-2/`. Most first-review findings were fixed. The new findings changed the following:
 
 - A pinned item name covered the leading digits of a damage value scrolled under it at 768 px, so the pinned column draws an edge there, and its heading stays above the other headings.
-- An item preview left out the known issue that changes its numbers, such as knee armor that counts only after another piece is equipped, so previews name the issues that affect the item.
+- A persona missed the knee armor issue in an item's preview. Previews name no known issues all the same, because someone hovering a link wants to know what the item is, and the item's Bugs section explains its bugs.
 - Sources sort by best chance, place groups follow their best source, and gathering, fishing and farming lead the ways found in the world, while random loot, which names no place or chance, comes last.
 - Used For counts the uses its filters show and says so when none match, a filter's search field stays while it holds text, focus stays on a control after a filter is added or removed, and a list opened with a category starts with that group closed.
 - Phone previews dock away from the tapped link, a list cell without a value reads None, a currency price reads as one phrase, and search excerpts no longer repeat the item name from the game card.

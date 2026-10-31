@@ -24,8 +24,6 @@ export const previewSources: {
 				icon: item.icon,
 				description: item.description,
 				facts: item.facts,
-				// The item's own sentence, as its Bugs section shows it. Issue titles describe every affected item.
-				issues: item.notes.map((note) => note.effect),
 				route:
 					firstRoute(item.sources, Object.keys(sourceHeadings) as SourceKind[]) ??
 					(item.status === 'notInNormalPlay'

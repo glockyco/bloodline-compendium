@@ -14,7 +14,7 @@ Site styles SHALL take colours, spacing, type sizes, weights, line heights, radi
 - **THEN** stylelint fails and names the file and declaration
 
 ### Requirement: Shared primitives
-Repeated elements such as cards, icon slots, section headings, counts, buttons, tables, entity links and issue notes SHALL come from shared components. Cards in a row SHALL align their inner rows regardless of text length, and content SHALL stay inside its padding.
+Repeated elements such as cards, icon slots, section headings, counts, buttons, tables and entity links SHALL come from shared components. Cards in a row SHALL align their inner rows regardless of text length, and content SHALL stay inside its padding.
 
 #### Scenario: Descriptions of different length
 - **WHEN** one card's description wraps to two lines and its neighbour's fits on one

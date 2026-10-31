@@ -28,7 +28,7 @@ The site SHALL provide counted browsing for all four progression kinds with name
 - **THEN** the result identifies its kind and leads to its page without loading the planner
 
 ### Requirement: Shared reference presentation
-Progression pages SHALL use shared tokens, primitives, entity links, issue notes, stat vocabulary and number formatting. Tooltips SHALL work on hover and keyboard focus without loading target pages. Site-authored text SHALL pass the existing voice gate. Game text SHALL retain its wording and be marked for exclusion from that gate.
+Progression pages SHALL use shared tokens, primitives, entity links, Bugs sections, stat vocabulary and number formatting. Tooltips SHALL work on hover and keyboard focus without loading target pages. Site-authored text SHALL pass the existing voice gate. Game text SHALL retain its wording and be marked for exclusion from that gate.
 
 #### Scenario: Cooldown in several views
 - **WHEN** a skill's cooldown appears in its tooltip, page and planner

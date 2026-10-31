@@ -67,7 +67,7 @@ Keep character experience and discipline experience separate. Reuse the existing
 
 ### Reference pages stay static
 
-Use the shared entity header, links, relation tables, issue notes, tokens and per-kind tooltips. Follow the architecture's fixed page question order. Apply the existing compact-table disclosure behavior and publication graph checks so all relations remain crawlable. Shared vocabulary entries own labels, units and formatting for attributes, levels, costs, ranks, cooldowns, cast times and experience. Game text is marked separately from site-authored voice.
+Use the shared entity header, links, relation tables, Bugs sections, tokens and per-kind tooltips. Follow the architecture's fixed page question order. Apply the existing compact-table disclosure behavior and publication graph checks so all relations remain crawlable. Shared vocabulary entries own labels, units and formatting for attributes, levels, costs, ranks, cooldowns, cast times and experience. Game text is marked separately from site-authored voice.
 
 Add progression entry points to the home hub and navigation only when their routes exist. The registry drives search, sitemap and metadata. Item URLs, facts and browsing behavior stay unchanged.
 

@@ -10,7 +10,6 @@
 	import Count from '#lib/ui/Count.svelte';
 	import EntityLink from '#lib/ui/EntityLink.svelte';
 	import IconSlot from '#lib/ui/IconSlot.svelte';
-	import IssueNote from '#lib/ui/IssueNote.svelte';
 	import SectionHeading from '#lib/ui/SectionHeading.svelte';
 	import { formatNumber } from '#lib/format.js';
 	let { data } = $props();
@@ -146,10 +145,6 @@
 			]}
 		/>
 	</div>
-	<IssueNote>
-		The game shows one value in its tooltip and applies another when the item is equipped. This body
-		runs over several lines.
-	</IssueNote>
 </section>
 
 <section aria-labelledby="tables">

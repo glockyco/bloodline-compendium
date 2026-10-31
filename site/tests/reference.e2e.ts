@@ -595,7 +595,6 @@ test('notes a known issue on the affected item and explains it on a linked, sear
 	]);
 	const details = page.getByRole('complementary', { name: 'Item details' });
 	await expect(details.locator('#bugs')).toHaveCount(0);
-	await expect(page.getByRole('complementary', { name: 'Known game issue' })).toHaveCount(0);
 	await expect(page.locator('article section').last()).toHaveAttribute('aria-labelledby', 'bugs');
 	await expect(details).toContainText('ARMOR: 0');
 	await expect(details).not.toContainText("The game's tooltip shows");

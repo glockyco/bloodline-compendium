@@ -213,7 +213,7 @@ Every kind's page answers its questions in a fixed order:
 5. the rules that govern it,
 6. its gaps.
 
-Pages use the shared entity header, entity link, relation table and issue note components. Relations render into static HTML, so search engines and Pagefind see them.
+Pages use the shared entity header, entity link and relation table components, and end with a Bugs section where known game issues affect the entity. Relations render into static HTML, so search engines and Pagefind see them.
 
 ### Claims and citations by function fingerprint
 
@@ -298,7 +298,7 @@ The armor case runs first: equip two items whose class default and table values 
 
 Entries live in `issues/known-issues.json`. Its JSON Schema, `issues/known-issues.schema.json`, is generated from the C# `KnownIssue` type like the site-data schema, and the catalog reads the file with the same type, so an unknown or missing field fails. The catalog also rejects duplicate IDs, entries without steps, citations or a confirmed build, and citations of functions that the build's code index lacks or did not parse completely.
 
-Notes reach pages in two ways. Tooltip causes in `TooltipCheck.cs` that are game defects name their entry, and a difference of such a cause notes its page when it concerns a value the page shows, so an empty stat line notes nothing. Defects that no tooltip shows, such as knee armor and ignored food effects, have detectors in `KnownIssues.cs`. A note or cause naming a missing entry fails the catalog. The catalog publishes `issues.json` with the pages that note each entry, and the site renders the notes with the shared issue note and lists every entry on the Known Issues page.
+Notes reach pages in two ways. Tooltip causes in `TooltipCheck.cs` that are game defects name their entry, and a difference of such a cause notes its page when it concerns a value the page shows, so an empty stat line notes nothing. Defects that no tooltip shows, such as knee armor and ignored food effects, have detectors in `KnownIssues.cs`. A note or cause naming a missing entry fails the catalog. The catalog publishes `issues.json` with the pages that note each entry, and the site renders each page's notes in its Bugs section and lists every entry on the Known Issues page.
 
 How an entry was verified goes in the commit body, not in the entry. `scripts/issue-report.mjs` drafts a developer report for the game's Discord from an entry, so a draft cannot drift from its entry.
 
