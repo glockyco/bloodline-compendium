@@ -26,7 +26,8 @@
 			"stat": "armorRating",
 			"text": null,
 			"tooltipLabel": "Armor",
-			"gameShows": "8"
+			"gameShows": "8",
+			"gameShowsIssue": "invented-coat-armor"
 		}
 	],
 	"sources": [

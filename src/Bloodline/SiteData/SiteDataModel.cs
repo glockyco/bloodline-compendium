@@ -315,6 +315,9 @@ internal sealed record Fact(Stat Stat, string Label, double? Number, string? Tex
 
     /// <summary>The value the game's tooltip shows where it differs from the applied value for a known reason.</summary>
     public string? GameShows { get; init; }
+
+    /// <summary>The known issue that explains this tooltip difference, when one has been reproduced.</summary>
+    public string? GameShowsIssue { get; init; }
 }
 
 /// <summary>

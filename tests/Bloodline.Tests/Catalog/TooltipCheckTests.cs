@@ -199,14 +199,16 @@ public sealed class TooltipCheckTests
             .ToDictionary(item => item.Name);
         Fact Fact(string item, Stat stat) => shown[item].Facts.Single(fact => fact.Stat == stat);
         Assert.Equal(
-            (0d, "4"),
+            (0d, "4", "armor-without-row"),
             (
                 Fact("Leather Pants", Stat.ArmorRating).Number!.Value,
-                Fact("Leather Pants", Stat.ArmorRating).GameShows
+                Fact("Leather Pants", Stat.ArmorRating).GameShows,
+                Fact("Leather Pants", Stat.ArmorRating).GameShowsIssue
             )
         );
         // A difference without a known cause is a catalog question, not a value the page shows.
         Assert.Null(Fact("Sword", Stat.Damage).GameShows);
+        Assert.Null(Fact("Sword", Stat.Damage).GameShowsIssue);
     }
 
     [Fact]

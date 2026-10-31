@@ -442,6 +442,7 @@ export interface CategoryLink {
 export interface Fact {
   effect: Effect | null;
   gameShows?: string | null;
+  gameShowsIssue?: string | null;
   label: string;
   number: number | null;
   stat: Stat;

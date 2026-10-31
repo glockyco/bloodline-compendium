@@ -253,10 +253,13 @@ internal static partial class TooltipCheck
             .ToDictionary(
                 difference => (difference.Item, FactFields[difference.Field]),
                 difference =>
-                    difference.Field == "Armor type"
-                    && difference.Tooltip!.StartsWith("Type: ", StringComparison.Ordinal)
-                        ? difference.Tooltip["Type: ".Length..].Trim()
-                        : difference.Tooltip!.Trim()
+                    (
+                        Value: difference.Field == "Armor type"
+                        && difference.Tooltip!.StartsWith("Type: ", StringComparison.Ordinal)
+                            ? difference.Tooltip["Type: ".Length..].Trim()
+                            : difference.Tooltip!.Trim(),
+                        Issue: difference.Reason!
+                    )
             );
         return items
             .Select(item =>
@@ -267,7 +270,8 @@ internal static partial class TooltipCheck
                             shown.TryGetValue((item.Key, fact.Stat), out var value)
                                 ? fact with
                                 {
-                                    GameShows = value,
+                                    GameShows = value.Value,
+                                    GameShowsIssue = value.Issue,
                                 }
                                 : fact
                         )

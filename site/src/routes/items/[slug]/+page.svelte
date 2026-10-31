@@ -274,12 +274,7 @@
 			{#if sparse}{@render notes()}{/if}
 		</div>
 		<aside class="item-side" aria-label="Item details">
-			<ItemTooltip
-				item={{ ...item, name: displayName }}
-				issueHref={item.notes.length
-					? resolve('known-issues/') + '#' + item.notes[0].issue
-					: undefined}
-			/>
+			<ItemTooltip item={{ ...item, name: displayName }} />
 			{#if !item.icon}<p class="muted">No icon is known for this item.</p>{/if}
 			{#if !sparse}{@render notes()}{/if}
 		</aside>

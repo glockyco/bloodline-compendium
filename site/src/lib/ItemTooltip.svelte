@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import type { Fact } from './site-data.js';
 	import { titleCase } from './labels.js';
 	import { factValue } from './stats.js';
@@ -11,13 +12,10 @@
 	}
 	let {
 		item,
-		heading = 'h2',
-		issueHref
+		heading = 'h2'
 	}: {
 		item: TooltipItem;
 		heading?: 'h2' | 'p';
-		/** The known issue that explains a value the game's own tooltip misstates. */
-		issueHref?: string;
 	} = $props();
 
 	const find = (stat: string) => item.facts.find((fact) => fact.stat === stat);
@@ -74,8 +72,7 @@
 	</div>
 	{#if misstated.length}<p class="game-shows">
 			{#each misstated as fact (fact.stat)}<span
-					>{#if issueHref}<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- callers pass hrefs they resolved. --><a
-							href={issueHref}
+					>{#if fact.gameShowsIssue}<a href={resolve(`known-issues/#${fact.gameShowsIssue}`)}
 							>The game's tooltip shows {fact.tooltipLabel ?? fact.label} {fact.gameShows}</a
 						>{:else}The game's tooltip shows {fact.tooltipLabel ?? fact.label}
 						{fact.gameShows}{/if}</span
