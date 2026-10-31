@@ -162,3 +162,30 @@ Findings left open, each with its owner:
 - The list's name filter now also matches a name the game misspells by one letter, such as Steel Rapier Gaurd, and a source row names each camp place once, since the camp maps of one terrain share their terrain's name.
 - Task 10.8 holds the rest: settlement deliveries do not say what a delivery is, the Speed word and the Attack Speed number rank weapons differently without saying why, and staves are typed Halberd without a hint.
 
+## Reader text
+
+The site's own text reads as machine-written. Four research reviews, twelve player and reviewer personas from two model families, and a comparison with human-written references looked for the cause. The reports, the extracted text, the measurements and sample rewrites are in `artifacts/design/writing/`.
+
+Findings:
+
+- The cause is not chatbot vocabulary, which the voice gate already keeps out. The site has no participle tails and fewer nominalizations and passives than the wikis it was compared with. Instead it narrates what is known, talks about itself and its method, and turns records into sentences. Per 1000 words of the site's full sentences, "known" or "unknown" occurs 7.4 times against at most 0.2 on OSRS, Terraria and bg3.wiki item pages and in Bloodline players' Steam posts. Words for the page or site occur 10.4 times against at most 0.8, "the game" 11.2 times against at most 1.6 and "only" 8.9 times against at most 2.9. Modals such as can and may occur 3.0 times against 9.9 to 21.1. Sentences average 9.1 words with a standard deviation of 5.0, against 11.1 to 17.0 words and 7.6 to 9.4, and 44% open with one of five word pairs, against 8% to 17%.
+- Both model families found the same defects. Ten of the twelve reviewers named Home calling the 1,844 items with a known source "All", and nine named unconfirmed records such as zero yields, unlocated gathering and unused dialogue that read as ordinary sources. Eight named summaries that join names and places without pairing them, and eight the passive method prose on About. Six or seven named container spawn notes that do not say how they relate to the chance, item notices that describe a group of items instead of the item, and search descriptions that paste table headings into sentences. Four or five named the building requirement "Requires the completed Smithy.", Currency payments listed as a skill, and quantities such as "1 items".
+- Bans on surface signs cannot fix this. Wikipedia's guide to AI writing says the signs are not the problem itself, syntactic templates survive word bans (Shaib et al. 2024), and no study supports banning a list of words as a cure. The voice rules and the agent rules this project inherits are all bans, and two of them favor the signs above. Short factual sentences without hedging gave short uniform sentences whose hedging moved into "is known". Describing the system without describing a person gave passives such as "the game's code that chooses the item is read".
+- Model reviewers cannot judge the voice. The same-model reviewer of machine-written text found no basis to attribute the text to a model, the reviewers' own rewrites repeat phrases such as "is not established here", and model judges favor longer text (Saito et al. 2023). Frequent users of language models detect such text reliably (Russell et al. 2025), so a person judges the voice, and models check facts and find defects.
+
+Decisions:
+
+- Reader text starts from the player's question and uses the players' words, not the data model's. A sentence names the thing and what it does, keeps a condition next to the fact it limits, and connects facts with but, so and because. It is as long as its meaning needs. Words that carry a fact, a relation, a condition, an example or a next step stay, and announcements, assurances and repeated facts go.
+- An unknown is stated once, where it changes a decision, with its reason. A chance that depends on several factors reads Varies with those factors. The site's method is described once, on About.
+- Labels stay terse, and instructions and warnings speak to the player as you. One term names one thing on every page. Whether the site uses contractions and a first-person speaker on About is decided with the sample review.
+- Each source kind gets its own template that is grammatical for every count, keeps each name with its place, and keeps unconfirmed records out of the summary. A notice on an item page is about that item, and the full list of affected items stays on Known Issues.
+- The voice gate keeps checking mechanical defects. A person reviews a sample of rewrites before the full pass, a second model checks that each rewrite keeps its facts, and the same personas run again on the result.
+
+| Current | Rewrite |
+| --- | --- |
+| Requires the completed Smithy. | Needs a finished Smithy in your settlement. |
+| Buy from Herbalist, Lithuen Tust in Wolfdover Timberland, Ravens Reach | Buy from the Herbalist in Wolfdover Timberland or Lithuen Tust in Ravens Reach |
+| The container is there only 25% of the time. | This container only spawns 25% of the time. The chance above is for when it does. |
+| Knee armor, such as Broad Knee Guards, adds no armor when it is the last armor you equip. It counts once you equip another armor piece. | Putting on Broad Knee Guards doesn't update your armor. Their 7 armor only counts after you next equip armor in another slot, so put the knee guards on first. |
+| This item is not obtainable in normal play. Only test areas of the game hold it. | You can't get this item in normal play. It only appears in the developers' test areas. |
+

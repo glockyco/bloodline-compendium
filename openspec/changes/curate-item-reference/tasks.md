@@ -64,7 +64,8 @@
 - [x] 10.6 Apply type roles, parent-owned spacing, a prose measure and phone layouts for relation tables, item list rows, the header, the footer and the filter sheet, and verify every page kind at 1440, 1024, 768 and 390 px
 - [x] 10.7 Match misspelled game names in the list's name filter and name each place once in a source row, and verify Steel Rapier Gaurd and Deer
 - [ ] 10.8 Say what a settlement delivery is, read in the game what the Attack Speed number does and explain it beside the Speed word, and say where staves are typed Halberd, and verify Azure Lover, Lonland Pistol and Acolyte Cryomancer Staff
-- [ ] 10.9 Rewrite every reader string in the site, the catalog and the known issues in the players' own words: talk about the game rather than the page or its method, state each unknown once, use one term per thing, and agree on a sample of rewrites before the full pass
+- [ ] 10.9 Rewrite every reader string in the site, the catalog and the known issues as Reader text in design.md decides, after a person agrees on the sample rewrites in `artifacts/design/writing/samples.md`, with a second model checking each rewrite's facts, and run the writing personas in `artifacts/design/writing/personas.md` again on the result
+- [ ] 10.10 Fix the defects the writing audit confirmed: Home calls the 1,844 items with a known source "All", quantities read "1 items", currency amounts read "2 Hearthsong Ember", source summaries join names and places without pairing them, zero yields, unlocated gathering and unused dialogue read as ordinary sources, Currency payments is listed as a skill, same-named containers cannot be told apart, and Test Mesh Torso 2's search description calls its source unknown, and verify Home, Apple, Azure Lover, Lonland Pistol, Iron Ore, Steak and Test Mesh Torso 2
 
 ## 11. Entity readiness
 
