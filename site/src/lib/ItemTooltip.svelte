@@ -175,17 +175,19 @@
 		gap: var(--gap-line);
 		margin: 0;
 	}
+	/* A label and its value share a row, and a long value wraps in its own track on the right instead of under
+	   the label. */
 	.extra div {
-		display: flex;
-		flex-wrap: wrap;
-		justify-content: space-between;
-		gap: 0 var(--gap-block);
+		display: grid;
+		grid-template-columns: max-content minmax(0, 1fr);
+		align-items: baseline;
+		gap: var(--gap-block);
 	}
 	.extra dt {
 		color: var(--text-soft);
 	}
 	.extra dd {
-		margin: 0 0 0 auto;
+		margin: 0;
 		text-align: right;
 		font-variant-numeric: tabular-nums;
 	}

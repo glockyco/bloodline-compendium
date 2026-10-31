@@ -66,9 +66,18 @@
 					))
 		)
 	);
+	// The type column adds nothing when every shown item's type only repeats its category, as for food.
+	const categoryNames = $derived(
+		new Map(
+			index.categories.map((category) => [category.slug, category.name.toLocaleLowerCase('en')])
+		)
+	);
+	const showType = $derived(
+		items.some((item) => item.type.toLocaleLowerCase('en') !== categoryNames.get(item.category))
+	);
 	const sortColumns = $derived([
 		{ id: 'name', label: 'Item', numeric: false },
-		{ id: 'type', label: 'Type', numeric: false },
+		...(showType ? [{ id: 'type', label: 'Type', numeric: false }] : []),
 		...columns,
 		{ id: 'value', label: 'Value', numeric: true }
 	]);
@@ -146,7 +155,7 @@
 	title="Items | The Bloodline Compendium"
 	description="Find The Bloodline items by name, category, type and stats. Compare values and open known shops, recipes, drops and gathering sources."
 />
-<h1>Items</h1>
+<h1 class="list-title">Items</h1>
 <div class="layout">
 	<aside class="sidebar" aria-label="Item filters">
 		<a class="skip-results" href="#results">Skip to results</a>
@@ -299,13 +308,16 @@
 											>{statusNote[item.status]}</small
 										>{/if}</td
 								>
-								<td data-label="Type"><span data-game>{item.type}</span></td>
+								{#if showType}<td class="type" data-label="Type"
+										><span data-game>{item.type}</span></td
+									>{/if}
 								{#each columns as column (column.id)}<td
 										class:numeric={column.numeric}
+										class:short={cellText(item, column.id).length <= 16}
 										data-label={cellText(item, column.id) ? column.label : undefined}
 										>{cellText(item, column.id)}</td
 									>{/each}
-								<td class="numeric" data-label="Value"
+								<td class="numeric value" data-label="Value"
 									>{item.value === null ? 'Unknown' : formatNumber(item.value) + ' gold'}</td
 								>
 							</tr>{/each}</tbody
@@ -460,6 +472,9 @@
 <style>
 	/* The list follows Afallon's: filters beside the results, a name search above them, the count, chips and the
 	   reveal on one line, and a compact striped table in one surface. */
+	.list-title {
+		margin-bottom: var(--gap-groups);
+	}
 	.layout {
 		display: grid;
 		grid-template-columns: var(--size-filters) minmax(0, 1fr);
@@ -481,8 +496,10 @@
 		gap: var(--gap-block);
 		min-width: 0;
 	}
+	/* The name field and the filter button share one height, and the button never wraps its label. */
 	.search-row {
 		display: flex;
+		align-items: center;
 		gap: var(--gap-inline);
 	}
 	.bar {
@@ -529,11 +546,11 @@
 		color: var(--text-muted);
 		text-decoration-style: dotted;
 	}
-	/* A grid item grows to its content by default, which would let a wide table widen the page instead of
-	   scrolling inside its frame. */
+	/* One surface whose cells carry the only inset, so text lines up with the surfaces on item pages. As a grid
+	   item it would grow to its content, so it keeps a zero minimum width and its table scrolls inside it. */
 	.list {
 		min-width: 0;
-		padding: var(--inset-line) var(--inset-cell) var(--inset-cell);
+		overflow: hidden;
 		border: var(--border-width) solid var(--border);
 		border-radius: var(--radius-1);
 		background: var(--surface-panel);
@@ -548,6 +565,7 @@
 	th,
 	td {
 		padding: var(--inset-cell) var(--inset);
+		line-height: var(--leading-data);
 		text-align: left;
 		vertical-align: middle;
 		border: 0;
@@ -576,6 +594,16 @@
 		text-align: right;
 		font-variant-numeric: tabular-nums;
 		white-space: nowrap;
+	}
+	/* A name keeps room for a few words before other columns take the width. */
+	td.name {
+		min-width: var(--size-name-column);
+	}
+	/* Types and short words such as Above Average stay on one line, so names and long lists wrap instead. */
+	@media (width >= 40rem) {
+		td:is(.type, .short) {
+			white-space: nowrap;
+		}
 	}
 	.sort {
 		display: inline-flex;
@@ -775,17 +803,29 @@
 		border-bottom: var(--border-width) solid var(--border);
 	}
 	.sheet-head h2 {
-		font-size: var(--type-2);
+		font-size: var(--type-sub);
 	}
 	.close {
-		width: var(--size-control-compact);
-		min-height: var(--size-control-compact);
+		width: var(--size-control);
+		min-height: var(--size-control);
 		padding: 0;
+	}
+	.sheet-head,
+	.sheet-foot,
+	.sheet-body {
+		padding-inline: var(--gutter);
 	}
 	.sheet-body {
 		flex: 1 1 auto;
 		overflow-y: auto;
-		padding: var(--inset);
+		padding-block: var(--inset);
+	}
+	/* The sheet is for touch, so its rows, summaries and fields are full touch targets. */
+	.sheet :is(summary, .options label) {
+		min-height: var(--size-control);
+	}
+	.sheet :is(.narrow, .group select, .bounds input) {
+		min-height: var(--size-control);
 	}
 	.sheet-foot {
 		border-top: var(--border-width) solid var(--border);
@@ -805,7 +845,9 @@
 		}
 		.filters-button {
 			display: inline-flex;
+			flex: none;
 			align-items: center;
+			white-space: nowrap;
 		}
 	}
 	@media (width >= 64rem) {
@@ -832,52 +874,53 @@
 			background: var(--surface-hover);
 		}
 	}
-	/* A phone reads each item as a card: its name, then each column as a labelled line. */
+	/* A phone reads each item as a compact row of the same surface: its name on the first line, then its type, its
+	   labelled stats and its value on the next. */
 	@media (width < 40rem) {
 		.phone-sort {
 			display: flex;
 			align-items: center;
 			gap: var(--gap-inline);
 		}
-		.list {
-			padding: 0;
-			border: 0;
-			background: none;
-		}
 		thead {
 			display: none;
 		}
 		table,
-		tbody,
-		tr,
-		td {
+		tbody {
 			display: block;
 		}
-		tbody {
-			display: grid;
-			gap: var(--gap-inline);
-		}
-		tbody tr,
-		tbody tr:nth-child(even) {
+		tbody tr {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: baseline;
+			gap: var(--gap-line) var(--gap-inline);
 			padding: var(--inset-cell) var(--inset);
-			border: var(--border-width) solid var(--border);
-			border-radius: var(--radius-1);
-			background: var(--surface-panel);
+		}
+		tbody tr + tr {
+			border-top: var(--border-width) solid var(--border);
 		}
 		tbody td {
-			display: flex;
-			justify-content: space-between;
-			gap: var(--gap-block);
-			padding: var(--inset-line) 0;
+			padding: 0;
 			border: 0;
 		}
 		tbody td.name {
-			display: block;
+			flex-basis: 100%;
 		}
-		td[data-label]::before {
-			content: attr(data-label);
+		tbody td.type {
 			color: var(--text-muted);
-			font-size: var(--type-0);
+		}
+		tbody td.value {
+			margin-left: auto;
+		}
+		.reveal {
+			margin-left: 0;
+			padding-inline: 0;
+			text-align: left;
+		}
+		td[data-label]:not(.type, .value)::before {
+			content: attr(data-label) ' ';
+			color: var(--text-muted);
+			font-size: var(--type-meta);
 		}
 	}
 </style>

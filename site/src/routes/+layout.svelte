@@ -172,30 +172,37 @@
 	.header-search + .support {
 		margin-left: 0;
 	}
+	/* The page fills the window, and the main region takes the room the footer leaves. */
+	main {
+		flex: 1 0 auto;
+	}
 	main.shell {
+		width: 100%;
 		max-width: var(--size-page);
-		min-height: var(--size-page-min-height);
 		margin: 0 auto;
 		padding: var(--inset-loose) var(--gutter) var(--gap-page);
 	}
 	.site-footer {
-		margin-top: var(--gap-section);
 		border-top: var(--border-width) solid var(--border);
 		color: var(--text-muted);
 	}
+	/* The footer is quieter than the page: its links keep body size, and its notes are metadata. */
 	.footer-inner {
 		display: grid;
-		gap: var(--gap-block);
+		gap: var(--gap-inline);
 		max-width: var(--size-page);
 		margin: 0 auto;
-		padding: var(--inset-loose) var(--gutter) var(--gap-page);
+		padding: var(--inset-loose) var(--gutter) var(--gap-groups);
+		font-size: var(--type-meta);
+		line-height: var(--leading-meta);
 	}
 	.footer-inner nav {
 		flex-wrap: wrap;
 		gap: var(--gap-inline) var(--gap-groups);
 	}
 	.footer-inner nav a {
-		min-height: 0;
+		min-height: var(--size-chip);
+		font-size: var(--type-1);
 		color: var(--accent);
 		font-weight: var(--weight-regular);
 		text-decoration: underline;
@@ -203,15 +210,11 @@
 	.footer-inner p {
 		margin: 0;
 	}
-	/* A tablet keeps the brand, the navigation and Support on one row above the search. A phone gives the
-	   navigation its own row. */
+	/* Below desktop width the search takes a row of its own under the brand and navigation. */
 	@media (width < 64rem) {
 		.bar {
 			flex-wrap: wrap;
 			gap: var(--gap-block) var(--gap-section);
-		}
-		.over-art nav {
-			display: none;
 		}
 		.header-search {
 			order: 4;
@@ -222,13 +225,19 @@
 			margin-left: auto;
 		}
 	}
+	/* A phone keeps the brand and navigation on one row above the search. Support stays in the footer. */
 	@media (width < 40rem) {
-		.bar {
-			gap: var(--gap-line) var(--gap-block);
+		.footer-inner nav a {
+			min-height: var(--size-control);
 		}
-		nav {
-			order: 3;
-			width: 100%;
+		.bar {
+			gap: var(--gap-line) var(--gap-groups);
+		}
+		.bar > nav {
+			margin-left: auto;
+		}
+		.support {
+			display: none;
 		}
 	}
 </style>

@@ -12,6 +12,9 @@
 	box-sizing: border-box;
 }
 body {
+	display: flex;
+	flex-direction: column;
+	min-height: var(--size-screen);
 	margin: 0;
 	font-size: var(--type-1);
 }
@@ -26,20 +29,25 @@ a:hover {
 	outline: var(--focus-width) solid var(--focus);
 	outline-offset: var(--focus-offset);
 }
+/* Parents own the space between their children, so text elements carry no outer margins. */
 p,
-h3 {
-	margin-bottom: var(--gap-block);
-}
-ul,
-ol {
-	margin-block: var(--gap-block);
-	padding-inline-start: var(--inset-loose);
-}
 h1,
 h2,
 h3,
-p {
-	margin-top: 0;
+ul,
+ol,
+dl,
+dd,
+figure {
+	margin: 0;
+}
+ul,
+ol {
+	padding-inline-start: var(--inset-loose);
+}
+strong,
+b {
+	font-weight: var(--weight-strong);
 }
 h1,
 h2,
@@ -51,16 +59,14 @@ h3 {
 h1 {
 	font-size: var(--type-5);
 	line-height: var(--leading-title);
-	margin-bottom: var(--gap-block);
 }
 h2 {
-	font-size: var(--type-2);
-	line-height: var(--leading-title);
-	margin-bottom: var(--gap-block);
+	font-size: var(--type-section);
+	line-height: var(--leading-heading);
 }
 h3 {
-	font-size: var(--type-2);
-	line-height: var(--leading-title);
+	font-size: var(--type-sub);
+	line-height: var(--leading-heading);
 }
 p,
 li {
@@ -84,21 +90,19 @@ button {
 	border-radius: var(--radius-1);
 	padding: var(--inset-cell) var(--inset);
 }
-select {
+/* Every text field and select has one height, padding and surface, so controls side by side line up. */
+select,
+input[type='search'],
+input[type='number'] {
 	min-height: var(--size-control);
+	min-width: 0;
 	padding: var(--inset-cell) var(--inset);
 	border: var(--border-width) solid var(--border-control);
 	border-radius: var(--radius-1);
 	background: var(--surface-panel);
 }
 input[type='search'] {
-	min-height: var(--size-control);
 	width: 100%;
-	min-width: 0;
-	padding: var(--inset);
-	border: var(--border-width) solid var(--border-control);
-	background: var(--surface-panel);
-	border-radius: var(--radius-1);
 }
 input[type='checkbox'] {
 	width: var(--size-checkbox);
@@ -111,14 +115,15 @@ label {
 	gap: var(--gap-inline);
 }
 .intro {
-	font-size: var(--type-2);
+	max-width: var(--size-measure-intro);
 	color: var(--text-muted);
-	max-width: var(--size-reading);
+	font-size: var(--type-intro);
+	line-height: var(--leading-intro);
 }
 .eyebrow {
 	color: var(--text-muted);
-	font-size: var(--type-1);
-	margin-bottom: var(--gap-block);
+	font-size: var(--type-meta);
+	line-height: var(--leading-meta);
 }
 /* A page's title with its eyebrow and introduction. */
 .page-heading {
@@ -128,17 +133,18 @@ label {
 .page-heading > * {
 	margin: 0;
 }
-/* The sections of a text page, one below the other, as Afallon's detail sections. */
+/* The sections of a text page, one below the other, as Afallon's detail sections, at a reading measure. */
 .sections {
 	display: grid;
 	gap: var(--gap-section);
+	max-width: var(--size-measure);
 }
 .sections > section {
 	display: grid;
 	gap: var(--gap-block);
 }
-.sections > section > :is(h2, p, ul) {
-	margin: 0;
+.sections > section > h2 {
+	margin-bottom: var(--gap-line);
 }
 .panel,
 .surface {
@@ -152,11 +158,14 @@ label {
 small {
 	color: var(--text-muted);
 }
+/* Release and data dates are metadata, quieter than the content around them. */
 .release-info {
 	display: flex;
 	flex-wrap: wrap;
-	gap: var(--gap-inline) var(--gap-block);
+	gap: var(--gap-line) var(--gap-block);
 	color: var(--text-muted);
+	font-size: var(--type-meta);
+	line-height: var(--leading-meta);
 }
 .release-info > span:first-child {
 	font-weight: var(--weight-strong);
@@ -215,8 +224,9 @@ small {
 	gap: var(--gap-section);
 }
 .answer {
+	display: grid;
+	gap: var(--gap-groups);
 	grid-column: 1;
-	margin: 0;
 }
 .item-side {
 	display: grid;
@@ -280,18 +290,14 @@ small {
 .acquisition-routes .when {
 	color: var(--text-soft);
 }
+/* Filters above a table: one row of labelled controls of one height, each label above its control. */
 .use-filters {
-	display: flex;
-	flex-wrap: wrap;
-	gap: var(--gap-block) var(--gap-groups);
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(var(--size-filter-control), 1fr));
+	gap: var(--gap-block);
 }
 .use-filters label {
-	display: flex;
-	align-items: center;
-	gap: var(--gap-inline);
-}
-.use-filters .level {
-	width: var(--size-number-input);
+	gap: var(--gap-line);
 }
 .item-relations {
 	display: grid;
@@ -375,18 +381,6 @@ details[open] > summary .show-less {
 	border: 0;
 }
 
-/* A sparse page keeps its tooltip and notes under its answer in one reading column. */
-.detail-layout.sparse {
-	grid-template-columns: minmax(0, var(--size-reading));
-}
-.detail-layout.sparse .item-side {
-	grid-column: 1;
-	grid-row: auto;
-	position: static;
-}
-.detail-layout.sparse .item-side > [data-ui='tooltip'] {
-	max-width: var(--size-item-side);
-}
 @media (width < 40rem) {
 	.acquisition-routes.capped .later {
 		display: none;
@@ -395,10 +389,11 @@ details[open] > summary .show-less {
 		display: block;
 	}
 }
+/* Narrow screens read one column in one order: the answer, the game card, then the details. A tablet keeps the
+   card at its desktop width, and a phone lets it fill the column like the surfaces around it. */
 @media (width < 64rem) {
 	.detail-layout {
 		grid-template-columns: minmax(0, 1fr);
-		gap: var(--gap-groups);
 	}
 	.item-side {
 		grid-column: 1;
@@ -408,10 +403,9 @@ details[open] > summary .show-less {
 	.item-relations {
 		grid-row: 3;
 	}
-	.long-summary .item-side {
-		grid-row: 1;
-	}
-	.long-summary .answer {
-		grid-row: 2;
+}
+@media (width >= 40rem) and (width < 64rem) {
+	.item-side {
+		max-width: var(--size-item-side);
 	}
 }

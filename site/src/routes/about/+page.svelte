@@ -9,13 +9,15 @@
 	title="About | The Bloodline Compendium"
 	description="How this unofficial The Bloodline item reference reads the game, what it cannot tell you and which game release it describes."
 />
-<h1>About</h1>
 <div class="sections">
-	<p class="intro">
-		The Bloodline Compendium is an unofficial item reference for players of <a
-			href="https://store.steampowered.com/app/1159290/The_Bloodline/">The Bloodline</a
-		>, a single-player sandbox adventure RPG with exploration, crafting, weapons and magic.
-	</p>
+	<header class="page-heading">
+		<h1>About</h1>
+		<p class="intro">
+			The Bloodline Compendium is an unofficial item reference for players of <a
+				href="https://store.steampowered.com/app/1159290/The_Bloodline/">The Bloodline</a
+			>, a single-player sandbox adventure RPG with exploration, crafting, weapons and magic.
+		</p>
+	</header>
 	<section aria-labelledby="how-made">
 		<h2 id="how-made">How This Reference Is Made</h2>
 		<p>

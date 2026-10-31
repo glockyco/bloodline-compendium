@@ -160,13 +160,20 @@
 		left: 0;
 		visibility: hidden;
 		width: var(--size-tooltip);
-		padding: var(--inset);
-		border: var(--border-width) solid var(--border-control);
-		border-radius: var(--radius-2);
+		padding: 0;
+		border-radius: var(--radius-1);
 		background: var(--surface-panel);
 		box-shadow: var(--shadow-raised);
 		overflow: auto;
 		pointer-events: none;
+	}
+	/* The game card is the popover's top edge, with no second frame around it, and the site's facts below it share
+	   one inset. */
+	.entity-preview :global([data-ui='tooltip'] > :not(.card)) {
+		padding-inline: var(--inset);
+	}
+	.entity-preview :global(:is([data-ui='tooltip'], .route):last-child) {
+		padding-bottom: var(--inset);
 	}
 	/* Phones dock the tooltip at the bottom, where it covers no link the reader is reading. */
 	@media (width < 40rem) {

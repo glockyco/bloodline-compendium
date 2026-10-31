@@ -10,7 +10,7 @@
 
 <style>
 	.route {
-		margin: var(--gap-block) 0 0;
+		margin: var(--gap-block) var(--inset) 0;
 		padding-top: var(--inset);
 		border-top: var(--border-width) solid var(--border);
 		color: var(--text-soft);

@@ -41,7 +41,7 @@
 <style>
 	.section {
 		display: grid;
-		gap: var(--gap-block);
+		gap: var(--gap-heading);
 		min-width: 0;
 		margin: 0;
 	}
@@ -61,13 +61,13 @@
 		align-items: baseline;
 		gap: var(--gap-inline);
 		margin: 0;
-		font-size: var(--type-2);
-		line-height: var(--leading-title);
+		font-size: var(--type-section);
+		line-height: var(--leading-heading);
 	}
 	.count {
 		color: var(--text-muted);
 		font-family: var(--font-body);
-		font-size: var(--type-0);
+		font-size: var(--type-meta);
 		font-variant-numeric: tabular-nums;
 	}
 	.action {

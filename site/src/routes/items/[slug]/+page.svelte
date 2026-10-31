@@ -99,9 +99,8 @@
 		groups.filter((group) => group.recipe).flatMap((group) => group.sources)
 	);
 	const sourceGroups = $derived(groups.filter((group) => !group.recipe));
-	// A long summary pushes the tooltip off a phone's first screen, so the tooltip leads there instead, and a phone
-	// shows its first ways to get the item until the reader asks for the rest.
-	const longSummary = $derived(groups.length > 3);
+	// A phone shows the first ways to get the item until the reader asks for the rest, so the answer stays short
+	// enough to lead the page with the game card right below it.
 	const firstWays = 3;
 	let mounted = $state(false);
 	let allWays = $state(false);
@@ -114,7 +113,8 @@
 		await tick();
 		routes?.querySelectorAll<HTMLElement>('li > a')[firstWays]?.focus();
 	}
-	// A page with nothing beyond its answer and tooltip reads as one column instead of a sparse main column.
+	// A page with nothing beyond its answer keeps its issue notes beside the answer, so neither column is a lone
+	// strip.
 	const sparse = $derived(!recipes.length && !uses.length && !sourceGroups.length);
 	// The skill level a use needs shows in its own column, so the condition that states it does not repeat.
 	const levelOf = (use: (typeof uses)[number]) =>
@@ -189,6 +189,10 @@
 		<li aria-current="page" data-game>{displayName}</li>
 	</ol>
 </nav>
+{#snippet notes()}{#each item.notes as note (note.issue)}<IssueNote
+			title={note.title}
+			href={resolve('known-issues/') + '#' + note.issue}>{note.effect}</IssueNote
+		>{/each}{/snippet}
 <EntityArticle {kind}>
 	<div class="item-heading">
 		<h1 data-pagefind-meta="title" data-game>{displayName}</h1>
@@ -203,7 +207,7 @@
 				<span data-game>{titleCase(item.type)}</span>{/if}
 		</p>
 	</div>
-	<div class="detail-layout" class:long-summary={longSummary} class:sparse>
+	<div class="detail-layout">
 		<div class="answer" data-pagefind-ignore="all">
 			<Section id="how-to-get-it" title="How to Get It">
 				{#snippet action()}{#if uses.length}<a href="#used-for"
@@ -247,6 +251,7 @@
 					</ul>
 				{/if}
 			</Section>
+			{#if sparse}{@render notes()}{/if}
 		</div>
 		<aside class="item-side" aria-label="Item details">
 			<ItemTooltip
@@ -256,11 +261,7 @@
 					: undefined}
 			/>
 			{#if !item.icon}<p class="muted">No icon is known for this item.</p>{/if}
-			{#each item.notes as note (note.issue)}
-				<IssueNote title={note.title} href={resolve('known-issues/') + '#' + note.issue}
-					>{note.effect}</IssueNote
-				>
-			{/each}
+			{#if !sparse}{@render notes()}{/if}
 		</aside>
 		<div class="item-relations" data-pagefind-ignore="all">
 			{#if recipes.length}<div class="recipes">
@@ -278,14 +279,14 @@
 			{#if uses.length}<Section id="used-for" title="Used For" count={uses.length}>
 					{#if useFilters}<div class="use-filters">
 							<label
-								>Name <input
+								><span class="field-label">Name</span><input
 									type="search"
 									bind:value={useName}
 									placeholder="Find what it makes"
 								/></label
 							>
 							{#if useFilters.disciplines.length > 1}<label
-									>Skill <select bind:value={useDiscipline}
+									><span class="field-label">Skill</span><select bind:value={useDiscipline}
 										><option value="">All</option
 										>{#each useFilters.disciplines as discipline (discipline)}<option
 												value={discipline}>{discipline}</option
@@ -293,15 +294,14 @@
 									></label
 								>{/if}
 							{#if useFilters.types.length > 1}<label
-									>Type <select bind:value={useType}
+									><span class="field-label">Type</span><select bind:value={useType}
 										><option value="">All</option>{#each useFilters.types as type (type)}<option
 												value={type}>{type}</option
 											>{/each}</select
 									></label
 								>{/if}
 							{#if useFilters.leveled}<label
-									>Up to level <input
-										class="level"
+									><span class="field-label">Up to level</span><input
 										type="number"
 										inputmode="numeric"
 										min="0"

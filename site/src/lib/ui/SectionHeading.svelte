@@ -32,12 +32,12 @@
 		align-items: baseline;
 		justify-content: space-between;
 		gap: var(--gap-inline) var(--gap-block);
-		margin-bottom: var(--gap-groups);
+		margin-bottom: var(--gap-heading);
 	}
 	h2 {
 		margin: 0;
-		font-size: var(--type-4);
-		line-height: var(--leading-title);
+		font-size: var(--type-section);
+		line-height: var(--leading-heading);
 		text-wrap: balance;
 	}
 </style>

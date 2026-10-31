@@ -121,11 +121,12 @@
 		padding: 0;
 		list-style: none;
 	}
+	/* Each entry keeps its count in a column of its own, so a wrapped title never strands it. */
 	.issue-index li {
-		display: flex;
-		flex-wrap: wrap;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) max-content;
 		align-items: baseline;
-		gap: var(--gap-inline);
+		gap: var(--gap-block);
 	}
 	.issue-index span {
 		font-size: var(--type-0);

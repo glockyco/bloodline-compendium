@@ -65,6 +65,18 @@
 	--leading-title: 1.25;
 	--leading-display: 1.05;
 
+	/* Type roles. A page has one title, sections under it, subsections or card titles under those, body text, and
+	   metadata such as labels, counts, table headings and secondary lines. Each role has one size everywhere. */
+	--type-meta: var(--type-0);
+	--leading-meta: 1.43;
+	--type-intro: 1.125rem;
+	--leading-intro: 1.55;
+	--type-section: var(--type-3);
+	--type-sub: var(--type-2);
+	--leading-heading: 1.3;
+	/* Rows of data read tighter than prose. */
+	--leading-data: 1.4;
+
 	/* Space, in 4 px multiples. */
 	--space-1: 0.25rem;
 	--space-2: 0.5rem;
@@ -92,7 +104,9 @@
 	--gap-inline: var(--space-2);
 	--gap-block: var(--space-3);
 	--gap-groups: var(--space-5);
-	--gap-section: 1.75rem;
+	--gap-section: var(--space-6);
+	/* From a section heading to its body, more than the blocks inside the body are from each other. */
+	--gap-heading: var(--space-4);
 	--gap-page: var(--space-7);
 	/* The page's distance from the screen edge. */
 	--gutter: var(--space-6);
@@ -112,21 +126,23 @@
 	--size-header: 4.5rem;
 	--size-checkbox: 1.125rem;
 	--size-emblem: 3rem;
-	--size-icon-row: 2rem;
+	--size-icon-row: 1.75rem;
 	--size-icon-inline: 1.5rem;
 	--size-icon-stack: 2.5rem;
 	--size-icon-title: 5rem;
 	--size-meter: 0.5rem;
 	--size-page: 75rem;
-	--size-page-min-height: 72vh;
 	--size-reading: 48rem;
+	/* Prose keeps a reading measure, and an introduction a shorter one. */
+	--size-measure: 70ch;
+	--size-measure-intro: 60ch;
 	--size-lede: 38ch;
 	--size-name-search: 32rem;
 	--size-header-search: 22rem;
 	--size-hero-search: 40rem;
 	--size-card: 20rem;
 	--size-card-narrow: 13rem;
-	--size-way: 30rem;
+	--size-way: 22rem;
 	--size-filters: 15.5rem;
 	/* Compact controls of lists and filters, after Afallon's: an option row, a chip and a control in a sheet. */
 	--size-option: 1.85rem;
@@ -146,7 +162,8 @@
 	--size-preview-phone: 60vh;
 	--size-facet-values: 15rem;
 	--size-item-type: 8rem;
-	--size-number-input: 5rem;
+	--size-name-column: 13rem;
+	--size-filter-control: 9rem;
 	/* A row's note lines up with the name beside its icon. */
 	--inset-note: calc(var(--size-icon-row) + var(--gap-inline));
 	--inset-ribbon: calc(var(--size-ribbon-notch) + var(--inset));
@@ -165,7 +182,7 @@
 		--gutter: var(--space-4);
 		--gap-page: var(--space-6);
 		--size-icon-title: 3.5rem;
-		--size-icon-row: 1.75rem;
+		--size-icon-stack: 1.75rem;
 		--size-relation-number: 5.5rem;
 	}
 }

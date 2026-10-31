@@ -189,8 +189,8 @@
 	.lede {
 		max-width: var(--size-lede);
 		margin: var(--gap-block) 0 var(--gap-section);
-		font-size: var(--type-2);
-		line-height: var(--leading-snug);
+		font-size: var(--type-intro);
+		line-height: var(--leading-intro);
 		color: var(--text-soft);
 	}
 	.hero-search {
@@ -200,7 +200,7 @@
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
-		gap: var(--gap-block) var(--gap-groups);
+		gap: var(--gap-block);
 		margin: var(--gap-groups) 0;
 	}
 
@@ -225,8 +225,8 @@
 	}
 	h3 {
 		margin: 0;
-		font-size: var(--type-3);
-		line-height: var(--leading-title);
+		font-size: var(--type-sub);
+		line-height: var(--leading-heading);
 	}
 	.group-text {
 		color: var(--text-muted);
@@ -249,7 +249,7 @@
 	.ways {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--size-way)), 1fr));
-		column-gap: var(--gap-page);
+		column-gap: var(--gap-section);
 	}
 	.way {
 		display: grid;
@@ -277,10 +277,12 @@
 	}
 	.way-text span {
 		color: var(--text-muted);
+		font-size: var(--type-meta);
+		line-height: var(--leading-meta);
 	}
 	.way-count {
 		font-family: var(--font-heading);
-		font-size: var(--type-3);
+		font-size: var(--type-sub);
 		line-height: var(--leading-display);
 		text-align: right;
 		font-variant-numeric: tabular-nums;
@@ -289,7 +291,7 @@
 		display: block;
 		margin-top: var(--gap-line);
 		font-family: var(--font-body);
-		font-size: var(--type-1);
+		font-size: var(--type-meta);
 		color: var(--text-muted);
 	}
 
@@ -303,7 +305,7 @@
 		background: var(--surface-panel);
 	}
 	.edition h2 {
-		font-size: var(--type-3);
+		font-size: var(--type-sub);
 		margin-bottom: var(--gap-block);
 	}
 	.edition p {

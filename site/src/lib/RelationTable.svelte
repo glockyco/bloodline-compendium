@@ -95,6 +95,35 @@
 		color: var(--text-muted);
 		font-size: var(--type-0);
 	}
+	/* A phone gives each row's name the full width and puts the other columns on a line below it, so a long skill
+	   or currency name never squeezes the name. Headings follow the same layout. */
+	@media (width < 40rem) {
+		.relation-panel :global(:is(table, thead, tbody)) {
+			display: block;
+		}
+		.relation-panel :global(tr) {
+			display: flex;
+			flex-wrap: wrap;
+			gap: var(--gap-line) 0;
+			padding: var(--inset-cell) 0;
+		}
+		.relation-panel :global(tbody tr + tr) {
+			border-top: var(--border-width) solid var(--border);
+		}
+		.relation-panel :global(tr > :is(th, td)) {
+			padding: 0 var(--inset);
+			border: 0;
+		}
+		.relation-panel :global(tr > :first-child) {
+			flex-basis: 100%;
+		}
+		.relation-panel :global(tr > :nth-child(2)) {
+			flex: 1;
+		}
+		.relation-panel :global(thead tr) {
+			border-bottom: var(--border-width) solid var(--border);
+		}
+	}
 	/* A place that several rows share heads them, so their rows do not repeat it. */
 	.relation-panel :global(.place-heading th) {
 		background: var(--surface-raised);
