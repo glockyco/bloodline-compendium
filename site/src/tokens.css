@@ -134,7 +134,8 @@
 	/* Prose keeps a reading measure, and an introduction a shorter one. */
 	--size-measure: 60ch;
 	--size-measure-intro: 52ch;
-	--size-lede: 38ch;
+	/* Wide enough for the Home line to stay on one line where the screen allows. */
+	--size-lede: 72ch;
 	--size-name-search: 32rem;
 	--size-header-search: 22rem;
 	--size-hero-search: 40rem;
