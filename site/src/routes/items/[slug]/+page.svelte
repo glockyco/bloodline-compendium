@@ -146,9 +146,9 @@
 </EntityArticle>
 
 <style>
+	/* Slots shrink rather than wrap, so three versions stay on one row on a phone. */
 	.version-tabs {
 		display: flex;
-		flex-wrap: wrap;
 		gap: var(--gap-block);
 		margin-top: var(--gap-groups);
 	}
@@ -158,7 +158,8 @@
 		align-items: center;
 		justify-content: center;
 		gap: var(--gap-inline);
-		width: var(--size-version-slot);
+		flex: 0 1 var(--size-version-slot);
+		min-width: 0;
 		padding: var(--inset-cell);
 		border: var(--marker-width) solid var(--slot-edge);
 		border-radius: var(--radius-1);
