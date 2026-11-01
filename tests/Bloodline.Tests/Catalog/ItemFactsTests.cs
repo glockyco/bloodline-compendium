@@ -41,13 +41,13 @@ public sealed class ItemFactsTests
             "Potion",
             potion: Parse(
                 """
-                {"PotionEffects":[{"$enum":"Effects::Health","display":"Restore health"},{"$enum":"Effects::Drunk","display":"Drunk"}],
+                {"PotionEffects":[{"$enum":"Effects::Mana","display":"Restore Magic"},{"$enum":"Effects::Drunk","display":"Drunk"}],
                  "Effect1Power":50,"DurationofEffect1":0,"Effect2Power":10,"DurationofEffect2":60,
                  "AmountofHealthorManatorestore":50,"Amountofdamagetodealtohealth":0,"Amountofdamagetodealtomana":0}
                 """
             )
         );
-        Assert.Equal("Restore health 50", facts.Single(fact => fact.Label == "Effect 1").Value);
+        Assert.Equal("Restore Mana 50", facts.Single(fact => fact.Label == "Effect 1").Value);
         Assert.Equal("Drunk 10 for 60 s", facts.Single(fact => fact.Label == "Effect 2").Value);
         Assert.DoesNotContain(
             facts,
@@ -607,12 +607,18 @@ public sealed class ItemFactsTests
             FoodRow(
                 "ApplePie",
                 "Apple Pie",
-                """[["Heal Player",200],["Boost Health Regeneration",120],["Restore Mana",15],["Cure Sunburn",0]]"""
+                """[["Restore Mana",200],["Heal Player",200],["Boost Health Regeneration",120],["Cure Sunburn",0]]"""
             )
         );
         Assert.Equal("200", Value(facts, Stat.RestorationAmount));
+        // Healing stays an effect of its own beside a mana effect of the same amount.
         Assert.Equal(
-            ["Boost Health Regeneration for 120 s", "Restore Mana 15", "Cure Sunburn"],
+            [
+                "Restore Mana 200",
+                "Restore Health 200",
+                "Boost Health Regeneration for 120 s",
+                "Cure Sunburn",
+            ],
             facts.Where(fact => fact.Stat == Stat.Effect).Select(fact => fact.Value)
         );
         Assert.DoesNotContain(
@@ -646,8 +652,8 @@ public sealed class ItemFactsTests
         );
         Assert.Equal("50", Value(facts, Stat.RestorationAmount));
         Assert.Equal(
-            "Boost Foraging EXP 1.25 for 60 s",
-            Assert.Single(facts, fact => fact.Stat == Stat.Effect).Value
+            ["Restore Health 50", "Boost Foraging EXP 1.25 for 60 s"],
+            facts.Where(fact => fact.Stat == Stat.Effect).Select(fact => fact.Value)
         );
     }
 

@@ -41,28 +41,15 @@
 	const native = $derived(new Set([lines.first?.fact, lines.second?.fact]));
 	// Facts the game's tooltip does not print follow the game card, in the site's own type. A food's or potion's
 	// effects share one Effects row where the first of them stands, because the numbers of the game's effect slots
-	// mean nothing to a player. A food's restoration amount is the health it heals, so it reads as Restore Health.
-	// A potion repeats the amount of its Restore Health or Restore Magic effect as its restoration amount, which
-	// the row then leaves out.
-	const effectStats = new Set(['effect', 'effects', 'restorationAmount']);
-	const potionRestores = new Set(['Restore Health', 'Restore Magic']);
+	// mean nothing to a player. Its restoration amount, which the item list's Heals column reads, is already the
+	// amount of a Restore Health or Restore Mana effect.
+	const effectStats = new Set(['effect', 'effects']);
 	const rows = $derived.by(() => {
-		const facts = item.facts.filter((fact) => !native.has(fact));
-		const effects = facts.filter((fact) => effectStats.has(fact.stat));
-		const repeated = (amount: Fact) =>
-			effects.some(
-				(fact) =>
-					fact.effect != null &&
-					potionRestores.has(fact.effect.name) &&
-					fact.effect.power === amount.number
-			);
-		const values = effects.flatMap((fact) =>
-			fact.stat !== 'restorationAmount'
-				? [factValue(fact) ?? 'Unknown']
-				: repeated(fact)
-					? []
-					: [`Restore Health ${factValue(fact) ?? 'Unknown'}`]
+		const facts = item.facts.filter(
+			(fact) => !native.has(fact) && fact.stat !== 'restorationAmount'
 		);
+		const effects = facts.filter((fact) => effectStats.has(fact.stat));
+		const values = effects.map((fact) => factValue(fact) ?? 'Unknown');
 		return facts.flatMap((fact) =>
 			!effectStats.has(fact.stat)
 				? [

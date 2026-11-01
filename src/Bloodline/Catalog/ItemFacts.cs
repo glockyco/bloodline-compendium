@@ -460,7 +460,6 @@ internal sealed class ItemFacts(
                 RecordValues.Text(row.Values["LocalizedFoodName"]) == name
             );
         var count = 0;
-        var heals = false;
         foreach (var (key, value) in RecordValues.MapEntries(row?.Values["FoodEffects"]))
         {
             if (
@@ -472,13 +471,13 @@ internal sealed class ItemFacts(
                 continue;
             }
             var amount = RecordValues.Number(value);
+            count++;
+            // Healing keeps its restoration amount for the list's Heals column, and reads as Restore Health among
+            // the effects, as potions and ingredients name it.
             if (effect.Value == FoodValue.Heal)
             {
                 facts.Add(StatVocabulary.Number(Stat.RestorationAmount, amount));
-                heals = true;
-                continue;
             }
-            count++;
             facts.Add(
                 StatVocabulary.Effect(
                     Stat.Effect,
@@ -486,6 +485,7 @@ internal sealed class ItemFacts(
                     {
                         FoodValue.Unused => new Effect(effect.Name, null, 0),
                         _ when amount is null => null,
+                        FoodValue.Heal => new Effect("Restore Health", amount, 0),
                         FoodValue.Amount => new Effect(effect.Name, amount, 0),
                         _ => new Effect(effect.Name, effect.Power, amount.Value),
                     },
@@ -493,7 +493,7 @@ internal sealed class ItemFacts(
                 )
             );
         }
-        if (count == 0 && !heals)
+        if (count == 0)
         {
             facts.Add(StatVocabulary.Text(Stat.Effects, "None"));
         }
@@ -575,11 +575,14 @@ internal sealed class ItemFacts(
             for (var index = 0; index < array.Count; index++)
             {
                 var number = (index + 1).ToString(CultureInfo.InvariantCulture);
+                // The potion data names its mana effect Restore Magic, which no tooltip shows. Foods, ingredients and
+                // Detailed Stats call it mana, so pages do too.
+                var name = Display(array[index]);
                 AddEffect(
                     facts,
                     Stat.Effect,
                     "Effect " + number,
-                    Display(array[index]),
+                    name == "Restore Magic" ? "Restore Mana" : name,
                     RecordValues.Number(RecordValues.At(potion, "Effect" + number + "Power")),
                     RecordValues.Number(RecordValues.At(potion, "DurationofEffect" + number))
                 );
