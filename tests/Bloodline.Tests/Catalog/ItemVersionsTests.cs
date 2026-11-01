@@ -63,14 +63,14 @@ public sealed class ItemVersionsTests
     }
 
     [Fact]
-    public void SharedPageKeepsRootFirstByKeyAndDoesNotNestVersions()
+    public void SharedPageKeepsStableKeyOrderWithinACategoryAndDoesNotNestVersions()
     {
         var grouped = ItemVersions.Group([
             Item("B", StatVocabulary.Number(Stat.Damage, 24)),
             Item("A", StatVocabulary.Number(Stat.Damage, 12)),
         ]);
         Assert.Equal(2, grouped.Items.Count);
-        var page = Assert.Single(ItemVersions.Pages(grouped.Items));
+        var page = Assert.Single(ItemVersions.Pages(grouped.Items, []));
         Assert.Equal("a", page.VersionId);
         Assert.Equal("12 Damage", page.VersionLabel);
         Assert.Equal("b", Assert.Single(page.Versions).VersionId);
@@ -80,6 +80,34 @@ public sealed class ItemVersionsTests
             reference => Assert.Equal("shared-name", reference.Slug)
         );
         Assert.Equal("a", grouped.References[page.Key].Fragment);
+    }
+
+    [Fact]
+    public void SharedPageOrdersWeaponsThenArmorThenListCategoriesWithNotesLast()
+    {
+        var categories = new[]
+        {
+            new CategorySummary("note", "Note", "Notes", 1),
+            new CategorySummary("material", "Material", "Materials", 1),
+            new CategorySummary("food", "Food", "Food", 1),
+            new CategorySummary("armor", "Armor", "Armor", 1),
+            new CategorySummary("weapon", "Weapon", "Weapons", 1),
+        };
+        var items = categories
+            .Select(
+                (category, index) =>
+                    Item(index.ToString()) with
+                    {
+                        Category = new CategoryLink(category.Slug, category.Name),
+                    }
+            )
+            .Reverse()
+            .ToArray();
+        var page = Assert.Single(ItemVersions.Pages(items, categories));
+        Assert.Equal(
+            ["weapon", "armor", "material", "food", "note"],
+            new[] { page }.Concat(page.Versions).Select(item => item.Category.Slug)
+        );
     }
 
     [Theory]

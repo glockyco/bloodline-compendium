@@ -57,14 +57,33 @@ internal static class ItemVersions
         return new VersionedItems(result, references);
     }
 
-    public static IEnumerable<ItemPage> Pages(IEnumerable<ItemPage> items) =>
-        items
+    public static IEnumerable<ItemPage> Pages(
+        IEnumerable<ItemPage> items,
+        IReadOnlyList<CategorySummary> categories
+    )
+    {
+        var categoryOrder = categories
+            .Select((category, index) => (category.Slug, index))
+            .ToDictionary(entry => entry.Slug, entry => entry.index, StringComparer.Ordinal);
+        return items
             .GroupBy(item => item.Slug, StringComparer.Ordinal)
             .Select(group =>
             {
-                var versions = group.OrderBy(item => item.Key, StringComparer.Ordinal).ToArray();
+                var versions = group
+                    .OrderBy(item =>
+                        item.Category.Slug switch
+                        {
+                            "weapon" => -2,
+                            "armor" => -1,
+                            "note" => int.MaxValue,
+                            _ => categoryOrder[item.Category.Slug],
+                        }
+                    )
+                    .ThenBy(item => item.Key, StringComparer.Ordinal)
+                    .ToArray();
                 return versions[0] with { Versions = versions.Skip(1).ToArray() };
             });
+    }
 
     private static string Identity(ItemPage item) =>
         CanonicalJson.Serialize(

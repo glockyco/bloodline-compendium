@@ -100,6 +100,17 @@ A shared name with distinguishable versions SHALL offer item-slot tabs under the
 - **WHEN** versions differ by their icons
 - **THEN** their tabs show the icons without visible labels and each tab has a distinct accessible name
 
+### Requirement: Version order follows category
+A page's initial version and tab order SHALL put Weapons first and Armor second, followed by other categories in the item list's category order, with Notes last. Versions in the same category SHALL retain stable class-key order.
+
+#### Scenario: Shield before its note
+- **WHEN** a reader opens Shield of Burnsley without a fragment
+- **THEN** the shield version is selected and its tab precedes the note
+
+#### Scenario: Versions share a category
+- **WHEN** the versions belong to the same category
+- **THEN** their class-key order remains unchanged
+
 ### Requirement: Whole-version content
 Choosing a tab SHALL switch the whole version, including identity, game card, Details, recipes, sources, uses and Bugs. Every version's content SHALL be server rendered, with the first version usable without JavaScript.
 
