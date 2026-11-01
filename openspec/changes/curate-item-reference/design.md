@@ -179,13 +179,18 @@ Findings:
 - Model reviewers cannot judge the voice. The same-model reviewer of machine-written text found no basis to attribute the text to a model, the reviewers' own rewrites repeat phrases such as "is not established here", and model judges favor longer text (Saito et al. 2023). Frequent users of language models detect such text reliably (Russell et al. 2025), so a person judges the voice, and models check facts and find defects.
 - The first sample rewrites were drafted from these findings and still read as machine-written: convoluted, stiff, and with an unnamed speaker on About. The measurements did not prevent this, because they describe symptoms and do not point to a better sentence, and a second model still preferred the drafts in 11 of 20 pairs. The second drafts started from how large game wikis handle each situation, read on their pages and checked with page counts on the OSRS, Minecraft and Terraria wikis, such as "chance to spawn" on 70, 187 and 92 pages against none for the site's "is there only". They came closer to what the review asked for, and one round of review is the only evidence for that so far. The counts can settle a single phrasing but not the register: "does not" appears on 2,943, 2,564 and 917 pages and "doesn't" on 927, 1,395 and 77, and OSRS writes "you can" on 3,861 pages and "players can" on 4,209. The counts are in `artifacts/design/writing/research/wiki-phrases.md`.
 
-Decided in reviews on 2026-10-31, open to change like everything else here:
+Decided in reviews on 2026-10-31 and 2026-11-01, open to change like everything else here:
 
 - Text about the site's own process goes, wherever it appears: what was read, run, reported or confirmed, unless it changes what a player does. A bug report link stays because a player can follow it, and a note that a bug is not reported yet goes.
 - The site has no unnamed first-person speaker, such as the "I" of the first drafts, which reads as out of place on a wiki-style reference.
 - A person chooses each reader text from a comparison of two to four options that start from how large game wikis handle the same situation, with one option recommended and every fact checked against the game. The writing personas run again on the result, and the voice gate keeps checking mechanical defects.
 - Facts that a table can carry go into the table, such as a container's spawn chance in its Spawns column. A chance that depends on several factors reads Varies, with its reason on hover, focus and tap.
 - Summary lines use the words of the section headings and keep each name with its place. Records that nothing in the world confirms stay out of the summary, in their own section.
+- Every sentence serves the visitor on the page where it stands. Home says what a visitor can look up and leads to Browse Items. About, which a visitor opens on purpose, says what the game and the site are, how the site is made, that it is an unofficial fan project, and links elsewhere, Ko-fi among them.
+- A search description says what the item is, its damage or armor, and the first way to get it with the first seller's price. A shared link shows the item's icon on its slot color.
+- The side column holds the game card and its numbers. What an item fails to do is a known issue in its Bugs section, such as a staff that trains no weapon proficiency.
+- A food's or potion's effects share one Effects row, healing among them as Restore Health, because the game's numbered effect slots mean nothing to a player.
+- Section headings use title case. A condition ends without a period and names a skill as the game writes it, such as "Requires Weaponsmithing level 4".
 
 Proposed and not decided:
 
