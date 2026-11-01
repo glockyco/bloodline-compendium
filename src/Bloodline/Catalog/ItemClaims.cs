@@ -235,7 +235,11 @@ internal sealed class ItemClaims(CodeIndex? code, long build)
             "ArmorDataTable" => stats,
             "FoodEffectDataTable" => package
                 == "/Game/BloodlinesAlpha/UI/CharacterSheet/FoodManager",
-            "PotionInfo" => tooltip || player,
+            "PotionInfo" => tooltip
+                || player
+                || package == "/Game/BloodlinesAlpha/UI/CharacterSheet/FoodManager",
+            "PotionEffectTranslatorTable" => package
+                == "/Game/BloodlinesAlpha/UI/Inventory/Potioncrafting_Ingredient_Slot",
             "AllIngredientEffects" => package
                 == "/Game/BloodlinesAlpha/UI/Inventory/Potioncrafting_Ingredient_Slot",
             "WeaponComponentTable" => package == "/Game/BloodlinesAlpha/Crafting",
@@ -261,16 +265,13 @@ internal sealed class ItemClaims(CodeIndex? code, long build)
             Stat.WeaponBehavior => ["artifacts/design/game/task-10-8.md"],
             Stat.ArmorType => ["ArmorDataTable.ArmorClass"],
             Stat.ArmorRating => ["ArmorDataTable.ArmorValue", "ItemInfo.Damage"],
-            Stat.Effects => ["PotionInfo.PotionEffects"],
+            Stat.Effects => ["PotionInfo.Effect1Power"],
             Stat.Effect =>
             [
-                "PotionInfo.PotionEffects",
                 "PotionInfo.Effect" + fact.Label.Split(' ')[^1] + "Power",
                 "PotionInfo.DurationofEffect" + fact.Label.Split(' ')[^1],
+                "PotionEffectTranslatorTable.EffectInt",
             ],
-            Stat.RestorationAmount => ["PotionInfo.AmountofHealthorManatorestore"],
-            Stat.HealthDamage => ["PotionInfo.Amountofdamagetodealtohealth"],
-            Stat.ManaDamage => ["PotionInfo.Amountofdamagetodealtomana"],
             Stat.ChoppedEffect => ["AllIngredientEffects.ChoppedEffect"],
             Stat.CooledEffect => ["AllIngredientEffects.CooledEffect"],
             Stat.GroundEffect => ["AllIngredientEffects.GroundEffect"],

@@ -50,6 +50,37 @@ internal sealed class ItemFacts(
     // Null when the records hold no such table, so that its facts stay unknown instead of empty.
     private readonly RowLookup? armorRows = RowLookup.Find(tables, "ArmorDataTable");
     private readonly RowLookup? foodRows = RowLookup.Find(tables, "FoodEffectDataTable");
+    private readonly RowLookup? potionEffectNames = RowLookup.Find(
+        tables,
+        "PotionEffectTranslatorTable"
+    );
+
+    /// <summary>
+    /// The effect numbers that FoodManager:Find Any Apply Potion Effects applies, with how it uses the amount it is
+    /// given. Its other numbers, such as Relaxed and Poison, apply nothing. The two EXP boosts pass a fixed
+    /// multiplier of 1.25.
+    /// </summary>
+    private static readonly Dictionary<int, (FoodValue Value, double? Power)> PotionDispatch = new()
+    {
+        [1] = (FoodValue.Amount, null),
+        [2] = (FoodValue.Amount, null),
+        [3] = (FoodValue.Seconds, null),
+        [4] = (FoodValue.Seconds, null),
+        [5] = (FoodValue.Amount, null),
+        [6] = (FoodValue.Seconds, null),
+        [7] = (FoodValue.Seconds, null),
+        [8] = (FoodValue.Seconds, null),
+        [9] = (FoodValue.Seconds, null),
+        [11] = (FoodValue.Seconds, null),
+        [15] = (FoodValue.Seconds, 1.25),
+        [18] = (FoodValue.Seconds, null),
+        [19] = (FoodValue.Seconds, null),
+        [20] = (FoodValue.Seconds, null),
+        [22] = (FoodValue.Seconds, null),
+        [23] = (FoodValue.Seconds, null),
+        [24] = (FoodValue.Seconds, null),
+        [25] = (FoodValue.Seconds, 1.25),
+    };
 
     // Potioncrafting_Ingredient_Slot:Retrieve Prep Effects finds an ingredient's row by its Item class.
     private readonly Dictionary<string, TableRow> ingredientRows = (tables ?? [])
@@ -566,71 +597,61 @@ internal sealed class ItemFacts(
         return value;
     }
 
+    /// <summary>
+    /// Drinking a potion runs FoodManager:Drink Potion, which passes each of the five effect slots to Find Any Apply
+    /// Potion Effects as its EffectNPower, truncated, for the effect number of PotionEffectTranslatorTable, and its
+    /// DurationofEffectN as the amount. The potion crafting window writes potions that way. Neither function reads
+    /// PotionEffects, the restoration amount or the damage fields, so they are no facts of the potion. Lab runs
+    /// potions-1101 to potions-1101c drank the four bought potions: only Dwarfs Flaggon's Improved Jumping 5 for 60 s,
+    /// which is effect number 5, did anything, and restored 60 stamina.
+    /// </summary>
     private void AddEffects(List<Fact> facts, JsonNode? potion)
     {
-        var effects = RecordValues.At(potion, "PotionEffects");
-        if (effects is not JsonArray array)
+        if (potionEffectNames is null || potion is null)
         {
             facts.Add(StatVocabulary.Unknown(Stat.Effects));
-        }
-        else
-        {
-            for (var index = 0; index < array.Count; index++)
-            {
-                var number = (index + 1).ToString(CultureInfo.InvariantCulture);
-                // The potion data names its mana effect Restore Magic, which no tooltip shows. Foods, ingredients and
-                // Detailed Stats call it mana, so pages do too.
-                var name = Display(array[index]);
-                AddEffect(
-                    facts,
-                    Stat.Effect,
-                    "Effect " + number,
-                    name == "Restore Magic" ? "Restore Mana" : name,
-                    RecordValues.Number(RecordValues.At(potion, "Effect" + number + "Power")),
-                    RecordValues.Number(RecordValues.At(potion, "DurationofEffect" + number))
-                );
-            }
-        }
-        foreach (
-            var (field, stat) in new[]
-            {
-                ("AmountofHealthorManatorestore", Stat.RestorationAmount),
-                ("Amountofdamagetodealtohealth", Stat.HealthDamage),
-                ("Amountofdamagetodealtomana", Stat.ManaDamage),
-            }
-        )
-        {
-            var value = RecordValues.Number(RecordValues.At(potion, field));
-            if (value != 0)
-            {
-                facts.Add(StatVocabulary.Number(stat, value));
-            }
-        }
-    }
-
-    private static void AddEffect(
-        List<Fact> facts,
-        Stat stat,
-        string? label,
-        string? name,
-        double? power,
-        double? duration
-    )
-    {
-        // Hide zero-power entries so inherited enum and duration defaults do not become facts.
-        if (power == 0)
-        {
             return;
         }
-        facts.Add(
-            StatVocabulary.Effect(
-                stat,
-                name is null || power is null || duration is null
-                    ? null
-                    : new Effect(name, power.Value, duration.Value),
-                label
+        var count = 0;
+        for (var slot = 1; slot <= 5; slot++)
+        {
+            var number = slot.ToString(CultureInfo.InvariantCulture);
+            var power = RecordValues.Number(RecordValues.At(potion, "Effect" + number + "Power"));
+            var amount = RecordValues.Number(RecordValues.At(potion, "DurationofEffect" + number));
+            if (
+                power is not { } id
+                || !PotionDispatch.TryGetValue((int)Math.Truncate(id), out var dispatch)
             )
-        );
+            {
+                continue;
+            }
+            var name = potionEffectNames.Rows.FirstOrDefault(row =>
+                RecordValues.Number(row.Values["EffectInt"]) == Math.Truncate(id)
+            );
+            count++;
+            facts.Add(
+                StatVocabulary.Effect(
+                    Stat.Effect,
+                    name is null || amount is null
+                        ? null
+                        : RecordValues.Text(name.Values["LocalizedEffectName"]) switch
+                        {
+                            null => null,
+                            var text when dispatch.Value == FoodValue.Amount => new Effect(
+                                text,
+                                amount,
+                                0
+                            ),
+                            var text => new Effect(text, dispatch.Power, amount.Value),
+                        },
+                    "Effect " + number
+                )
+            );
+        }
+        if (count == 0)
+        {
+            facts.Add(StatVocabulary.Text(Stat.Effects, "None"));
+        }
     }
 
     private string? JoinEffects(IEnumerable<JsonNode?> effects)

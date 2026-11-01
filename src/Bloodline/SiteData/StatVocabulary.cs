@@ -27,8 +27,6 @@ internal static class StatVocabulary
         [Stat.Effects] = new("Effects"),
         [Stat.Effect] = new("Effect"),
         [Stat.RestorationAmount] = new("Restoration amount", "Heals"),
-        [Stat.HealthDamage] = new("Health damage"),
-        [Stat.ManaDamage] = new("Mana damage"),
         [Stat.ChoppedEffect] = new("Chopped effect"),
         [Stat.CooledEffect] = new("Cooled effect"),
         [Stat.GroundEffect] = new("Ground effect"),

@@ -101,8 +101,6 @@ export type Stat =
   | "effects"
   | "effect"
   | "restorationAmount"
-  | "healthDamage"
-  | "manaDamage"
   | "choppedEffect"
   | "cooledEffect"
   | "groundEffect"

@@ -92,12 +92,7 @@ internal static class ItemList
             ["food", "potion"],
             true,
             null,
-            // A potion with Restore Mana restores its restoration amount as mana instead of healing it.
-            item =>
-                item.Category.Slug == "potion"
-                && item.Facts.Any(fact => fact.Effect?.Name == "Restore Mana")
-                    ? null
-                    : Number(item, Stat.RestorationAmount)
+            item => Number(item, Stat.RestorationAmount)
         ),
         new(
             "effects",

@@ -347,8 +347,6 @@ internal enum Stat
     Effects,
     Effect,
     RestorationAmount,
-    HealthDamage,
-    ManaDamage,
     ChoppedEffect,
     CooledEffect,
     GroundEffect,

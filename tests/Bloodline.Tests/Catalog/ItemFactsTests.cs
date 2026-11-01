@@ -29,102 +29,83 @@ public sealed class ItemFactsTests
             },
             ["WeaponInfo"] = weapon,
         };
-        return new ItemFacts([])
+        return new ItemFacts([], [PotionEffectNames])
             .Resolve(new ClassRecord("/Game/Invented.Invented_C", [], properties), "invented")
             .Facts;
     }
 
+    private static readonly TableRecord PotionEffectNames = new(
+        "/Game/Invented/PotionEffectTranslatorTable.PotionEffectTranslatorTable",
+        null,
+        [
+            .. new[]
+            {
+                (1, "Restore Health"),
+                (5, "Restore Stamina"),
+                (9, "Drunk"),
+                (10, "Relaxed"),
+            }.Select(entry => new TableRow(
+                entry.Item2.Replace(" ", "", StringComparison.Ordinal),
+                Parse(
+                    $$$"""{"EffectInt":{{{entry.Item1}}},"LocalizedEffectName":{"$text":"{{{entry.Item2}}}"}}"""
+                )
+            )),
+        ]
+    );
+
     [Fact]
-    public void PotionEffectsCombineNamePowerAndNonzeroDuration()
+    public void APotionAppliesTheEffectNumberedByItsPowerForItsDurationField()
     {
+        // Dwarfs Flaggon: drinking it restored 60 stamina and nothing of the PotionEffects it names.
         var facts = Facts(
             "Potion",
             potion: Parse(
                 """
-                {"PotionEffects":[{"$enum":"Effects::Mana","display":"Restore Magic"},{"$enum":"Effects::Drunk","display":"Drunk"}],
-                 "Effect1Power":50,"DurationofEffect1":0,"Effect2Power":10,"DurationofEffect2":60,
-                 "AmountofHealthorManatorestore":50,"Amountofdamagetodealtohealth":0,"Amountofdamagetodealtomana":0}
+                {"PotionEffects":[{"$enum":"Effects::Drunk","display":"Drunk"},{"$enum":"Effects::Health","display":"Restore Health"},{"$enum":"Effects::Jump","display":"Improved Jumping"}],
+                 "Effect1Power":345,"DurationofEffect1":60,"Effect2Power":345,"DurationofEffect2":60,"Effect3Power":5,"DurationofEffect3":60,
+                 "AmountofHealthorManatorestore":345,"Amountofdamagetodealtohealth":10,"Amountofdamagetodealtomana":0}
                 """
             )
         );
-        Assert.Equal("Restore Mana 50", facts.Single(fact => fact.Label == "Effect 1").Value);
-        Assert.Equal("Drunk 10 for 60 s", facts.Single(fact => fact.Label == "Effect 2").Value);
-        Assert.DoesNotContain(
-            facts,
-            fact =>
-                fact.Label.EndsWith(" power", StringComparison.Ordinal)
-                || fact.Label.EndsWith(" duration", StringComparison.Ordinal)
+        Assert.Equal(
+            ["Restore Stamina 60"],
+            facts.Where(fact => fact.Stat == Stat.Effect).Select(fact => fact.Value)
         );
-        Assert.Equal("50", facts.Single(fact => fact.Label == "Restoration amount").Value);
-        Assert.DoesNotContain(facts, fact => fact.Label is "Health damage" or "Mana damage");
+        Assert.DoesNotContain(facts, fact => fact.Stat == Stat.RestorationAmount);
     }
 
     [Fact]
-    public void ZeroPowerPotionEffectsAndZeroEffectNumbersAreNotFacts()
+    public void TimedPotionEffectsLastTheirAmountAndUnappliedNumbersDoNothing()
     {
         var facts = Facts(
             "Potion",
             potion: Parse(
-                """
-                {"PotionEffects":[{"$enum":"Effects::Default","display":"Enhance Speed"}],"Effect1Power":0,"DurationofEffect1":60,
-                 "AmountofHealthorManatorestore":0,"Amountofdamagetodealtohealth":0,"Amountofdamagetodealtomana":0}
-                """
+                """{"PotionEffects":[],"Effect1Power":9,"DurationofEffect1":30,"Effect2Power":10,"DurationofEffect2":30}"""
             )
         );
-        Assert.DoesNotContain(
-            facts,
-            fact =>
-                fact.Label.StartsWith("Effect", StringComparison.Ordinal)
-                || fact.Label is "Restoration amount" or "Health damage" or "Mana damage"
+        Assert.Equal(
+            ["Drunk for 30 s"],
+            facts.Where(fact => fact.Stat == Stat.Effect).Select(fact => fact.Value)
         );
     }
 
     [Fact]
-    public void NonzeroEffectDamageNumbersRemainVisibleEvenWithoutAnEffectArrayEntry()
+    public void APotionWhosePowersNameNoEffectHasNone()
     {
+        // Health Potion: Restore Health 345, which drinking reads as effect number 345.
         var facts = Facts(
             "Potion",
-            potion: Parse(
-                """
-                {"PotionEffects":[],"AmountofHealthorManatorestore":0,"Amountofdamagetodealtohealth":5,"Amountofdamagetodealtomana":-2}
-                """
-            )
+            potion: Parse("""{"Effect1Power":345,"DurationofEffect1":0}""")
         );
-        Assert.Equal("5", facts.Single(fact => fact.Label == "Health damage").Value);
-        Assert.Equal("-2", facts.Single(fact => fact.Label == "Mana damage").Value);
-        Assert.DoesNotContain(facts, fact => fact.Label == "Effects");
-    }
-
-    [Theory]
-    [InlineData("Effect1Power")]
-    [InlineData("DurationofEffect1")]
-    [InlineData("EffectName")]
-    public void MissingPotionEffectFieldsKeepTheEffectUnknown(string field)
-    {
-        var potion = Parse(
-            """
-            {"PotionEffects":[{"$enum":"Effects::Speed","display":"Enhance Speed"}],"Effect1Power":10,"DurationofEffect1":60}
-            """
-        );
-        if (field == "EffectName")
-        {
-            potion["PotionEffects"]![0] = null;
-        }
-        else
-        {
-            potion.Remove(field);
-        }
-        Assert.Null(Facts("Potion", potion: potion).Single(fact => fact.Label == "Effect 1").Value);
+        Assert.Equal("None", facts.Single(fact => fact.Stat == Stat.Effects).Value);
+        Assert.DoesNotContain(facts, fact => fact.Stat == Stat.Effect);
     }
 
     [Fact]
-    public void MissingEffectNumbersRemainUnknownWhenTheEffectsArrayIsEmpty()
+    public void AMissingAmountKeepsTheEffectUnknown()
     {
-        var facts = Facts("Potion", potion: Parse("""{"PotionEffects":[]}"""));
-        foreach (var label in new[] { "Restoration amount", "Health damage", "Mana damage" })
-        {
-            Assert.Null(facts.Single(fact => fact.Label == label).Value);
-        }
+        var facts = Facts("Potion", potion: Parse("""{"Effect1Power":1}"""));
+        Assert.Null(facts.Single(fact => fact.Stat == Stat.Effect).Value);
     }
 
     [Fact]
@@ -621,10 +602,7 @@ public sealed class ItemFactsTests
             ],
             facts.Where(fact => fact.Stat == Stat.Effect).Select(fact => fact.Value)
         );
-        Assert.DoesNotContain(
-            facts,
-            fact => fact.Stat is Stat.HealthDamage or Stat.ManaDamage or Stat.Effects
-        );
+        Assert.DoesNotContain(facts, fact => fact.Stat == Stat.Effects);
     }
 
     [Fact]
@@ -662,31 +640,12 @@ public sealed class ItemFactsTests
     {
         var facts = Food("Steak", FoodRow("ApplePie", "Apple Pie", """[["Heal Player",200]]"""));
         Assert.Equal("None", Value(facts, Stat.Effects));
-        Assert.DoesNotContain(
-            facts,
-            fact => fact.Stat is Stat.RestorationAmount or Stat.Effect or Stat.HealthDamage
-        );
+        Assert.DoesNotContain(facts, fact => fact.Stat is Stat.RestorationAmount or Stat.Effect);
     }
 
     [Fact]
     public void FoodEffectsStayUnknownWithoutTheFoodTable()
     {
-    [InlineData("Shield", "Shield")]
-    [InlineData("Primary", "One Handed Weapon")]
-    public void AnItemInTheShieldSlotIsAShieldWhateverItsAttackType(string slot, string type)
-    {
-        // Torch: a one-handed attack type, while equipping it fills the shield slot beside a sword.
-        var item = Item("Weapon");
-        item.Properties["ItemInfo"]!["WeaponType"] = Parse(
-            """{"$enum":"E_AttackType::OneHanded","display":"One Handed Weapon"}"""
-        );
-        item.Properties["ItemInfo"]!["ItemSlot"] = Parse(
-            $$"""{"$enum":"E_SlotType::{{slot}}","display":"{{slot}}"}"""
-        );
-        Assert.Equal(type, new ItemFacts([]).Resolve(item, "invented").Type);
-    }
-
-    [Theory]
         var facts = Food("Steak");
         Assert.Null(Value(facts, Stat.Effects));
         Assert.DoesNotContain(facts, fact => fact.Stat is Stat.RestorationAmount or Stat.Effect);
@@ -708,6 +667,22 @@ public sealed class ItemFactsTests
                 $$"""{"$enum":"E_AttackType::{{attack}}","display":"{{attack}}"}"""
             );
         }
+        Assert.Equal(type, new ItemFacts([]).Resolve(item, "invented").Type);
+    }
+
+    [Theory]
+    [InlineData("Shield", "Shield")]
+    [InlineData("Primary", "One Handed Weapon")]
+    public void AnItemInTheShieldSlotIsAShieldWhateverItsAttackType(string slot, string type)
+    {
+        // Torch: a one-handed attack type, while equipping it fills the shield slot beside a sword.
+        var item = Item("Weapon");
+        item.Properties["ItemInfo"]!["WeaponType"] = Parse(
+            """{"$enum":"E_AttackType::OneHanded","display":"One Handed Weapon"}"""
+        );
+        item.Properties["ItemInfo"]!["ItemSlot"] = Parse(
+            $$"""{"$enum":"E_SlotType::{{slot}}","display":"{{slot}}"}"""
+        );
         Assert.Equal(type, new ItemFacts([]).Resolve(item, "invented").Type);
     }
 

@@ -57,6 +57,13 @@ Potion ingredient treatments SHALL come from `AllIngredientEffects`, which the p
 - **WHEN** `AllIngredientEffects` gives Gildleaf's chopped treatment Restore Health 35
 - **THEN** its page shows Restore Health 35 for chopped Gildleaf
 
+### Requirement: Potion effects as drinking applies them
+A potion's effects SHALL be the effects that drinking it applies: each slot's `EffectNPower` as the effect number of `PotionEffectTranslatorTable` that `FoodManager:Find Any Apply Potion Effects` applies, and its `DurationofEffectN` as the amount. Its `PotionEffects`, restoration amount and damage fields, which drinking does not read, SHALL NOT be published as its effects.
+
+#### Scenario: Health Potion
+- **WHEN** Health Potion's first slot holds power 345, which is no effect number
+- **THEN** its page shows no effect, as drinking it in the game restores no health
+
 ### Requirement: Item status
 Every item SHALL have one status: obtainable through a known source, no known source, or not obtainable in normal play. An item SHALL be marked not obtainable in normal play only when every reference to it lies in an excluded level or other content that the game cannot reach, and the evidence SHALL be listed in the maintainer report.
 
