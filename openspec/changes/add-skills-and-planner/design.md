@@ -2,9 +2,9 @@
 
 ## Context
 
-See proposal.md for motivation and scope. This is item 2 of the architecture change's [Order of later changes](../establish-reference-architecture/design.md#order-of-later-changes). Implementation consumes that change's graph, claims, rules, presentation and lab contracts and the item reference's publication gates. It does not replace them.
+See proposal.md for motivation and scope. This is item 2 of the architecture change's [Order of later changes](../archive/2026-11-01-establish-reference-architecture/design.md#order-of-later-changes). Implementation consumes that change's graph, claims, rules, presentation and lab contracts and the item reference's publication gates. It does not replace them.
 
-The [Character progression in the game data](../establish-reference-architecture/design.md#character-progression-in-the-game-data) findings are the evidence baseline. They describe build 24464547 and identify progression-1 where observations confirmed the extracted widget and struct data. Recorded outputs belong under `artifacts/<build>/runtime/<run-id>/`, not in this change or Git.
+The [Character progression in the game data](../archive/2026-11-01-establish-reference-architecture/design.md#character-progression-in-the-game-data) findings are the evidence baseline. They describe build 24464547 and identify progression-1 where observations confirmed the extracted widget and struct data. Recorded outputs belong under `artifacts/<build>/runtime/<run-id>/`, not in this change or Git.
 
 ### Established progression evidence
 
@@ -130,4 +130,4 @@ These are evidence gaps, not requests to choose product scope. Each resolution t
 
 ## Where Findings Live
 
-Use the architecture change's [Where findings live](../establish-reference-architecture/design.md#where-findings-live) table. This design owns identity choices, measurements that justify budgets and reasons for any domain limit. `tasks.md` owns implementation and evidence-resolution work. The catalog's coverage owns unresolved facts encountered during implementation. Reproduced game defects belong only in `issues/known-issues.json`. Required behavior belongs in this change's spec deltas. Run outputs and rule vectors stay in build artifacts. The commit body records planning validation. No README addition is needed for this planning-only change.
+Use the architecture change's [Where findings live](../archive/2026-11-01-establish-reference-architecture/design.md#where-findings-live) table. This design owns identity choices, measurements that justify budgets and reasons for any domain limit. `tasks.md` owns implementation and evidence-resolution work. The catalog's coverage owns unresolved facts encountered during implementation. Reproduced game defects belong only in `issues/known-issues.json`. Required behavior belongs in this change's spec deltas. Run outputs and rule vectors stay in build artifacts. The commit body records planning validation. No README addition is needed for this planning-only change.

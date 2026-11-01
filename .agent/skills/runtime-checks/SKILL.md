@@ -66,7 +66,7 @@ A published fact or a known issue rests on the running game, because code is eas
 ## Captures
 
 - `capture-screen <name>` keeps an engine screenshot with the interface. Add `noui` for the scene alone.
-- `capture-model {"item": "<class path>", "name": "<name>"}` renders an item alone, with a transparent background, at a clear noon, in the light of the character sheet's own preview. `openspec/changes/establish-reference-architecture/design.md` records the presentation and why.
+- `capture-model {"item": "<class path>", "name": "<name>"}` renders an item alone, with a transparent background, at a clear noon, in the light of the character sheet's own preview. `openspec/changes/archive/2026-11-01-establish-reference-architecture/design.md` records the presentation and why.
 
 Both need `launch render`.
 
