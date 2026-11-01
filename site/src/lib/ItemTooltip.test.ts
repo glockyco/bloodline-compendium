@@ -191,3 +191,29 @@ it('keeps a conditional crossbow bolt separate from the unconditional shot count
 		expect(rows(body, 'dd')).toEqual(['1']);
 	}
 });
+it('shows shield block facts in details and previews without inventing damage', () => {
+	const facts: Fact[] = [
+		{
+			stat: 'blockStaminaCost',
+			label: 'Block Stamina Cost',
+			number: 50,
+			unit: '%',
+			text: null,
+			effect: null
+		},
+		{
+			stat: 'extraFullBlocks',
+			label: 'Extra Full Blocks',
+			number: 3,
+			text: null,
+			effect: null
+		}
+	];
+	const preview = render(ItemTooltip, { props: { item: { ...fixture, facts } } }).body;
+	const details = render(ItemDetails, { props: { rows: detailRows(facts), wide: true } }).body;
+	for (const body of [preview, details]) {
+		expect(rows(body, 'dt')).toEqual(['Block Stamina Cost', 'Extra Full Blocks']);
+		expect(rows(body, 'dd')).toEqual(['50 %', '3']);
+		expect(body).not.toContain('Damage');
+	}
+});

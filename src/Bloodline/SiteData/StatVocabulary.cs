@@ -22,6 +22,12 @@ internal static class StatVocabulary
         [Stat.HeadHitDamage] = new("Head Hit Damage", Unit: "per projectile"),
         [Stat.ProjectilesPerShot] = new("Projectiles Per Shot"),
         [Stat.ChargedBodyHitDamage] = new("Fully Charged Body Hit Damage", Unit: "per projectile"),
+        [Stat.BlockStaminaCost] = new(
+            "Block Stamina Cost",
+            Unit: "% of incoming damage after full blocks"
+        ),
+        [Stat.ExtraFullBlocks] = new("Extra Full Blocks", Unit: "without stamina cost"),
+        [Stat.ShieldChargeDamage] = new("Shield Charge Damage", Unit: "per shield contact"),
         [Stat.Speed] = new("Speed", "Speed"),
         [Stat.DamageType] = new("Damage type"),
         [Stat.MagazineSize] = new("Magazine size"),

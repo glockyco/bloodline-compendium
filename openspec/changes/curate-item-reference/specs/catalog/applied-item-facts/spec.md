@@ -77,7 +77,7 @@ A weapon's damage SHALL be what its hits take from an enemy, read from the code 
 
 #### Scenario: Shield
 - **WHEN** no code that Areman Shield runs reads its damage fields
-- **THEN** its page shows no damage
+- **THEN** its page shows no damage, a block stamina cost of 50% of incoming damage after full blocks are spent, and three extra blocks without stamina cost
 
 ### Requirement: Ranged projectile groups
 Projectile groups with different damage or conditions SHALL be shown separately. The first group SHALL supply the card, tooltip comparison and numeric damage columns. The numeric projectile count SHALL include unconditional groups, and conditional groups SHALL carry their condition.

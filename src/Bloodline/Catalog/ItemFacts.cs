@@ -281,7 +281,20 @@ internal sealed class ItemFacts(
                     )
                     .FirstOrDefault(function => function is not null);
             }
-            if (ranged)
+            if (type == "Shield")
+            {
+                // Block Attack halves incoming damage for stamina after absolute blocks are spent.
+                // AbsoluteBlockWidget adds three maximum charges while a heavy-slot item is valid.
+                facts.Add(StatVocabulary.Number(Stat.BlockStaminaCost, 50));
+                facts.Add(StatVocabulary.Number(Stat.ExtraFullBlocks, 3));
+                if (
+                    item.Path
+                    is WeaponRoot + "Shields/Half-colorKiteshield.Half-colorKiteshield_C"
+                        or WeaponRoot + "Shields/ShieldOfBurnsley.ShieldOfBurnsley_C"
+                )
+                    Add(Stat.ShieldChargeDamage, "ItemInfo.Damage");
+            }
+            else if (ranged)
             {
                 projectileFunction = AddRangedFacts(facts, item, type!, out projectileGroups);
             }

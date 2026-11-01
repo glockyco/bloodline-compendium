@@ -73,6 +73,47 @@ it('combines stat filters with every or any and sorts missing values last', () =
 	]);
 });
 
+it('offers shield block facts as generic numeric columns for filtering and sorting', () => {
+	const base = index.items.find((item) => item.slug === 'lanternedge')!;
+	const ids = ['blockStaminaCost', 'extraFullBlocks'];
+	const items: ItemSummary[] = [
+		{
+			...base,
+			name: 'Shield',
+			type: 'Shield',
+			cells: {
+				blockStaminaCost: { number: 50, text: null },
+				extraFullBlocks: { number: 3, text: null }
+			}
+		},
+		{
+			...base,
+			name: 'Other Shield',
+			type: 'Shield',
+			cells: {
+				blockStaminaCost: { number: 75, text: null },
+				extraFullBlocks: { number: 1, text: null }
+			}
+		}
+	];
+	const shields: ItemIndex = {
+		...index,
+		items,
+		columns: [
+			{ id: 'damage', label: 'Damage', numeric: true, categories: ['weapon'], unit: null },
+			{ id: ids[0], label: 'Block Stamina Cost', numeric: true, categories: ['weapon'], unit: '%' },
+			{ id: ids[1], label: 'Extra Full Blocks', numeric: true, categories: ['weapon'], unit: null }
+		]
+	};
+	const state = readState(
+		new URLSearchParams('category=weapon&stat=blockStaminaCost::50&sort=extraFullBlocks'),
+		shields
+	);
+	expect(shownColumns(items, state, shields).map((column) => column.id)).toEqual(ids);
+	expect(names(items.filter((item) => matches(item, state, shields)))).toEqual(['Shield']);
+	expect(names(sortItems(items, state.sort))).toEqual(['Shield', 'Other Shield']);
+});
+
 it('offers ranged hit columns and sorts their numeric values with absent facts last', () => {
 	const ids = ['bodyHitDamage', 'headHitDamage', 'projectilesPerShot', 'chargedBodyHitDamage'];
 	const labels = [

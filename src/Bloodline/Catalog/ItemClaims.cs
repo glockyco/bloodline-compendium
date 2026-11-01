@@ -132,6 +132,59 @@ internal sealed class ItemClaims(CodeIndex? code, long build)
         );
         foreach (var fact in page.Facts)
         {
+            if (fact.Stat == Stat.ShieldChargeDamage)
+            {
+                claims.Add(
+                    new FactClaim(
+                        item,
+                        fact.Label,
+                        ClaimType.Extracted,
+                        build,
+                        ["ItemInfo.Damage"],
+                        code is null
+                            ? []
+                            : ClaimCitations.Resolve(
+                                item + ":" + fact.Label,
+                                [
+                                    item.Split('.')[0]
+                                        + ":BndEvt__HitBox_K2Node_ComponentBoundEvent_0_ComponentBeginOverlapSignature__DelegateSignature",
+                                    "/Game/UltimateSkillSystem/SkillSystemSkill/ShieldCharge:OnStartCasting",
+                                    "/Game/Animations/FirstPersonCharacterBP_Modular1:AnimNotify_Shield Charge",
+                                    "/Game/Animations/FirstPersonCharacterBP_Modular1:AnimNotify_End Shield Charge",
+                                ],
+                                functions
+                            )
+                    )
+                );
+                continue;
+            }
+            if (fact.Stat is Stat.BlockStaminaCost or Stat.ExtraFullBlocks)
+            {
+                var citation =
+                    fact.Stat == Stat.BlockStaminaCost
+                        ? "/Game/BloodlinesAlpha/Blueprints/FirstPerson2/FirstPersonCharacter2:Block Attack"
+                        : "/Game/Widgets/AbsoluteBlockWidget:Check if player has a shield equipped";
+                claims.Add(
+                    new FactClaim(
+                        item,
+                        fact.Label,
+                        ClaimType.Formula,
+                        build,
+                        fact.Stat == Stat.BlockStaminaCost
+                            ?
+                            [
+                                "Block Attack.Damage",
+                                "ShieldEquipped",
+                                "Current Absolute Block Shields",
+                            ]
+                            : ["HeavyItem", "Maximum Absolute Block Shields"],
+                        code is null
+                            ? []
+                            : ClaimCitations.Resolve(item + ":" + fact.Label, [citation], functions)
+                    )
+                );
+                continue;
+            }
             if (
                 fact.Stat
                 is Stat.BodyHitDamage

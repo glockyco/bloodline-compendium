@@ -267,16 +267,19 @@ export function facetGroups(
 		.filter((group) => group.options.length > 0);
 }
 
-const rangedColumns: Record<string, true> = {
+const specializedWeaponColumns: Record<string, true> = {
 	bodyHitDamage: true,
 	headHitDamage: true,
 	projectilesPerShot: true,
-	chargedBodyHitDamage: true
+	chargedBodyHitDamage: true,
+	blockStaminaCost: true,
+	extraFullBlocks: true,
+	shieldChargeDamage: true
 };
 
 /**
  * The columns after name, type and value: those for the selected categories or for a list of one category's items,
- * and the column of every stat filter. Ranged columns follow the facts present in the shown items.
+ * and the column of every stat filter. Specialized weapon columns follow the facts present in the shown items.
  */
 export function shownColumns(
 	shown: ItemSummary[],
@@ -286,13 +289,16 @@ export function shownColumns(
 	const selected = state.facets.category ?? [];
 	const filtered = new Set(state.stats.map((filter) => filter.column));
 	const weapons = shown.filter((item) => item.category === 'weapon');
-	const rangedOnly =
-		weapons.length > 0 && weapons.every((item) => item.cells.bodyHitDamage && !item.cells.damage);
+	const noMeleeDamage =
+		weapons.length > 0 &&
+		weapons.every(
+			(item) => !item.cells.damage && (item.cells.bodyHitDamage || item.cells.blockStaminaCost)
+		);
 	return index.columns.filter(
 		(column) =>
 			filtered.has(column.id) ||
-			((!rangedColumns[column.id] || shown.some((item) => item.cells[column.id])) &&
-				(column.id !== 'damage' || !rangedOnly) &&
+			((!specializedWeaponColumns[column.id] || shown.some((item) => item.cells[column.id])) &&
+				(column.id !== 'damage' || !noMeleeDamage) &&
 				column.categories.length > 0 &&
 				(selected.length
 					? selected.every((category) => column.categories.includes(category))

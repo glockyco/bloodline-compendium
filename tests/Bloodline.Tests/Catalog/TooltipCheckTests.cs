@@ -100,6 +100,25 @@ public sealed class TooltipCheckTests
         TooltipObservation tooltip
     ) => TooltipCheck.Check(1, [item], [tooltip], []).Differences;
 
+    [Fact]
+    public void ShieldTooltipDamageRemainsAnUnownedDifferenceUntilTheWeaponIssueMerge()
+    {
+        var shield = Sword with
+        {
+            Type = "Shield",
+            Facts =
+            [
+                StatVocabulary.Number(Stat.BlockStaminaCost, 50),
+                StatVocabulary.Number(Stat.ExtraFullBlocks, 3),
+            ],
+        };
+        var difference = Assert.Single(Differences(shield, Tooltip(shield, "Damage: 15")));
+        Assert.Equal("Damage", difference.Field);
+        Assert.Equal("15", difference.Tooltip);
+        Assert.Null(difference.Catalog);
+        Assert.Null(difference.Reason);
+    }
+
     [Theory]
     [InlineData(85, false)]
     [InlineData(185, true)]

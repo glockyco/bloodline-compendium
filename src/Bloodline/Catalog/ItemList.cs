@@ -107,6 +107,30 @@ internal static class ItemList
             "per projectile",
             item => Number(item, Stat.ChargedBodyHitDamage)
         ),
+        new(
+            "blockStaminaCost",
+            "Block Stamina Cost",
+            ["weapon"],
+            true,
+            "% of incoming damage after full blocks",
+            item => Number(item, Stat.BlockStaminaCost)
+        ),
+        new(
+            "extraFullBlocks",
+            "Extra Full Blocks",
+            ["weapon"],
+            true,
+            "without stamina cost",
+            item => Number(item, Stat.ExtraFullBlocks)
+        ),
+        new(
+            "shieldChargeDamage",
+            "Shield Charge Damage",
+            ["weapon"],
+            true,
+            "per shield contact",
+            item => Number(item, Stat.ShieldChargeDamage)
+        ),
         new("speed", "Speed", ["weapon"], false, null, Speed),
         new(
             "magazineSize",
