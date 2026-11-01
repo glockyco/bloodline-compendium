@@ -338,9 +338,9 @@ public sealed class WorldMechanismTests
     }
 
     [Theory]
-    [InlineData(true, false, "Requires talking to Scarecrow first.")]
-    [InlineData(false, false, "Only until you talk to Scarecrow.")]
-    [InlineData(false, true, "Given only once.")]
+    [InlineData(true, false, "Requires talking to Scarecrow first")]
+    [InlineData(false, false, "Only until you talk to Scarecrow")]
+    [InlineData(false, true, "Given only once")]
     public void DialogueTagChecksNameTheConversationThatSetsTheTag(bool set, bool own, string label)
     {
         var grant = new InnerObjectRecord(
@@ -456,8 +456,8 @@ public sealed class WorldMechanismTests
     }
 
     [Theory]
-    [InlineData(true, "Available during Hallowed Eve.")]
-    [InlineData(false, "Available outside Hallowed Eve.")]
+    [InlineData(true, "Available during Hallowed Eve")]
+    [InlineData(false, "Available outside Hallowed Eve")]
     public void DialogueCalendarCheckUsesItsRequiredResult(bool required, string label)
     {
         var grant = new InnerObjectRecord(

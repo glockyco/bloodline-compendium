@@ -248,7 +248,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
                                 ConditionKind.Unknown,
                                 null,
                                 null,
-                                "Whether this gathering method is active is unknown."
+                                "Whether this gathering method is active is unknown"
                             ),
                         ],
                         Odds = LootOdds.Of(
@@ -318,7 +318,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
                     ConditionKind.GameState,
                     null,
                     level,
-                    FormattableString.Invariant($"Requires level {level}.")
+                    FormattableString.Invariant($"Requires level {level}")
                 ),
             ]
         : properties.ContainsKey("Required level")
@@ -330,7 +330,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
                     ConditionKind.Unknown,
                     null,
                     null,
-                    "The required gathering level could not be read."
+                    "The required gathering level could not be read"
                 ),
             ]
         : WorldSourceData.Conditions(context, properties, levelPath);

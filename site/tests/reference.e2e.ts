@@ -155,7 +155,7 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 		'per container',
 		'Makes',
 		'Silverglass shard',
-		'Requires a lit forge.',
+		'Requires a lit forge',
 		'Location unknown'
 	])
 		await expect(page.locator('article')).toContainText(text);

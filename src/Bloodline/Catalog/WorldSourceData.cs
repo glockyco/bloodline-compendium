@@ -110,13 +110,13 @@ internal static class WorldSourceData
                         ConditionKind.CalendarEvent,
                         Reference(EntityKind.CalendarEvent, null, "Hallowed Eve"),
                         null,
-                        "Available during Hallowed Eve: Truill in the game calendar or October in the real-world calendar."
+                        "Available during Hallowed Eve: Truill in the game calendar or October in the real-world calendar"
                     )
                     : new(
                         ConditionKind.Unknown,
                         null,
                         null,
-                        "Availability of content tagged \"Halloween Decor\" is unknown."
+                        "Availability of content tagged \"Halloween Decor\" is unknown"
                     )
             );
         }
@@ -210,8 +210,8 @@ internal static class WorldSourceData
                         null,
                         money,
                         money is { } value
-                            ? FormattableString.Invariant($"Requires at least {value} gold.")
-                            : "Requires enough gold. The amount is unknown."
+                            ? FormattableString.Invariant($"Requires at least {value} gold")
+                            : "Requires an unknown amount of gold"
                     )
                 );
             }
@@ -241,7 +241,7 @@ internal static class WorldSourceData
                         ConditionKind.Quest,
                         quest,
                         null,
-                        $"Requires the quest \"{quest.Name}\" to be {state}."
+                        $"Requires the quest \"{quest.Name}\" to be {state}"
                     )
                 );
             }
@@ -278,7 +278,7 @@ internal static class WorldSourceData
                             : ConditionKind.QuestStage,
                         quest,
                         amount,
-                        $"Requires objective \"{objective}\" of \"{quest.Name}\" to be {(type == "ObjectivesAreCompleted" ? "completed" : "incomplete")}."
+                        $"Requires objective \"{objective}\" of \"{quest.Name}\" to be {(type == "ObjectivesAreCompleted" ? "completed" : "incomplete")}"
                     )
                 );
             }
@@ -291,9 +291,9 @@ internal static class WorldSourceData
                         null,
                         level,
                         level is null
-                            ? "The required fishing level is unknown."
+                            ? "The required fishing level is unknown"
                             : FormattableString.Invariant(
-                                $"Requires fishing level {(type == "EXACT_FishingLevel" ? "exactly " : "at least ")}{level}."
+                                $"Requires Fishing level {(type == "EXACT_FishingLevel" ? "exactly " : "at least ")}{level}"
                             )
                     )
                 );
@@ -307,8 +307,8 @@ internal static class WorldSourceData
                         null,
                         rank,
                         rank is null
-                            ? "The required chapter rank is unknown."
-                            : FormattableString.Invariant($"Requires chapter rank {rank}.")
+                            ? "The required chapter rank is unknown"
+                            : FormattableString.Invariant($"Requires chapter rank {rank}")
                     )
                 );
             }
@@ -321,15 +321,15 @@ internal static class WorldSourceData
                             ConditionKind.Unknown,
                             null,
                             null,
-                            "The required Hallowed Eve calendar state is unknown."
+                            "The required Hallowed Eve calendar state is unknown"
                         )
                         : new(
                             ConditionKind.CalendarEvent,
                             Reference(EntityKind.CalendarEvent, null, "Hallowed Eve"),
                             required.Value ? 1 : 0,
                             required.Value
-                                ? "Available during Hallowed Eve."
-                                : "Available outside Hallowed Eve."
+                                ? "Available during Hallowed Eve"
+                                : "Available outside Hallowed Eve"
                         )
                 );
             }
@@ -358,7 +358,7 @@ internal static class WorldSourceData
         if (setters.Contains(DialogueTags.Package(dialogue.Path)))
             return set
                 ? (true, null)
-                : (true, new(ConditionKind.GameState, null, null, "Given only once."));
+                : (true, new(ConditionKind.GameState, null, null, "Given only once"));
         var names = setters
             .SelectMany(context.Tags.Speakers)
             .Distinct(StringComparer.Ordinal)
@@ -374,7 +374,7 @@ internal static class WorldSourceData
                 ConditionKind.GameState,
                 null,
                 null,
-                set ? $"Requires talking to {who} first." : $"Only until you talk to {who}."
+                set ? $"Requires talking to {who} first" : $"Only until you talk to {who}"
             )
         );
     }

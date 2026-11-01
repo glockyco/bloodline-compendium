@@ -166,7 +166,7 @@ export function summaryContext(sources: Source[]): string | null {
 
 /**
  * The conditions that hold for every summarized source. A level that every source requires of the same skill is
- * one condition with the range of levels, such as weaponsmithing level 10 to 40.
+ * one condition with the range of levels, such as Weaponsmithing level 10 to 40.
  */
 export function summaryConditions(sources: Source[]): string[] {
 	const [first, ...rest] = sources;

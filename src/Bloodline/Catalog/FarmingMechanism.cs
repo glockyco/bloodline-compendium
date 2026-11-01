@@ -64,7 +64,7 @@ internal sealed class FarmingMechanism : ISourceMechanism
                                         null,
                                         level,
                                         FormattableString.Invariant(
-                                            $"Requires farming level {level}."
+                                            $"Requires Farming level {level}"
                                         )
                                     ),
                                 ]
@@ -75,7 +75,7 @@ internal sealed class FarmingMechanism : ISourceMechanism
                                         ConditionKind.Unknown,
                                         null,
                                         null,
-                                        "The required farming level could not be read."
+                                        "The required farming level could not be read"
                                     ),
                                 ]
                             : [],

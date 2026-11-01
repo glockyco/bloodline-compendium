@@ -88,7 +88,7 @@ internal sealed class FishingMechanism : ISourceMechanism
                                 ConditionKind.Unknown,
                                 null,
                                 null,
-                                "Lava catch availability is unknown."
+                                "Lava catch availability is unknown"
                             ),
                         ],
                         confirmedChoice: false
@@ -147,7 +147,7 @@ internal sealed class FishingMechanism : ISourceMechanism
                                 ConditionKind.GameState,
                                 null,
                                 null,
-                                "Requires an active fishing spot with the matching difficulty."
+                                "Requires an active fishing spot with the matching difficulty"
                             ),
                         ],
                         confirmedChoice: pool != "Standard Lava Loot"

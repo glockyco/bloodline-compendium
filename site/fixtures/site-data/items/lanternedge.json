@@ -464,7 +464,7 @@
 					"kind": "unknown",
 					"entity": null,
 					"value": null,
-					"label": "Requires a lit forge."
+					"label": "Requires a lit forge"
 				}
 			],
 			"relationId": "fixture:lanternedge:source:13",
@@ -884,7 +884,7 @@
 					"kind": "unknown",
 					"entity": null,
 					"value": null,
-					"label": "Requires a lit forge."
+					"label": "Requires a lit forge"
 				}
 			]
 		},

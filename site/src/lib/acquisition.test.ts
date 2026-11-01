@@ -83,15 +83,15 @@ it('states the range of levels when the summarized recipes need different levels
 			{
 				entity: null,
 				kind: 'proficiencyLevel' as const,
-				label: `Requires weaponsmithing level ${value}.`,
+				label: `Requires Weaponsmithing level ${value}`,
 				value
 			}
 		]
 	});
 	expect(summaryConditions([level(10), level(14), level(40)])).toEqual([
-		'Requires weaponsmithing level 10 to 40.'
+		'Requires Weaponsmithing level 10 to 40'
 	]);
-	expect(summaryConditions([level(12), level(12)])).toEqual(['Requires weaponsmithing level 12.']);
+	expect(summaryConditions([level(12), level(12)])).toEqual(['Requires Weaponsmithing level 12']);
 	expect(summaryConditions([level(12), { ...container, conditions: [] }])).toEqual([]);
 });
 

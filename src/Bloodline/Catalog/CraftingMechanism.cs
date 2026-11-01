@@ -225,9 +225,9 @@ internal sealed class CraftingMechanism : ISourceMechanism
             {
                 var skill = part switch
                 {
-                    _ when focus => "focus crafting",
+                    _ when focus => "Focus Crafting",
                     null => null,
-                    _ => "weaponsmithing",
+                    _ => "Weaponsmithing",
                 };
                 conditions.Add(
                     new(
@@ -235,8 +235,8 @@ internal sealed class CraftingMechanism : ISourceMechanism
                         null,
                         level,
                         skill is null
-                            ? $"Required component skill level: {level}. The skill is not recorded."
-                            : $"Requires {skill} level {level}."
+                            ? $"Requires skill level {level}"
+                            : $"Requires {skill} level {level}"
                     )
                 );
             }
@@ -247,7 +247,7 @@ internal sealed class CraftingMechanism : ISourceMechanism
                         ConditionKind.Unknown,
                         null,
                         null,
-                        "The required component skill level could not be read."
+                        "The required component skill level could not be read"
                     )
                 );
             }

@@ -85,7 +85,7 @@ public sealed class TradeMechanismTests
             condition =>
                 condition.Kind == ConditionKind.ProficiencyLevel
                 && condition.Value == 9
-                && condition.Label.Contains("weaponsmithing")
+                && condition.Label == "Requires Weaponsmithing level 9"
         );
         var recipe = source.Source.Recipe!;
         Assert.Equal(
@@ -687,7 +687,7 @@ public sealed class TradeMechanismTests
             condition =>
                 condition.Kind == ConditionKind.ProficiencyLevel
                 && condition.Value == 15
-                && condition.Label.Contains("focus crafting")
+                && condition.Label == "Requires Focus Crafting level 15"
         );
         Assert.DoesNotContain(source.Notes, note => note.Contains("NewEnumerator"));
     }
