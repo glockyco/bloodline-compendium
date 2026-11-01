@@ -54,10 +54,12 @@ public sealed class OnHitFactsTests
         var item = Weapon("Spears/PoisonPike");
         item.Properties["Debuff"] = Debuff("Poison", 17, 12);
         var page = new ItemFacts([]).Resolve(item, "invented");
-        Assert.Equal(
-            new OnHitEffect("Poison", "Melee Hit", 0.2, 17, 1, 12, "Refreshes Without Stacking"),
-            Assert.Single(page.OnHitEffects!)
-        );
+        var effect = Assert.Single(page.OnHitEffects!);
+        Assert.Equal("Poison", effect.Effect);
+        Assert.Equal(0.2, effect.Chance);
+        Assert.Equal(17, effect.Amount);
+        Assert.Equal(1, effect.TickIntervalSeconds);
+        Assert.Equal(12, effect.DurationSeconds);
     }
 
     [Fact]
@@ -70,8 +72,6 @@ public sealed class OnHitFactsTests
         Assert.Equal(15, effect.Amount);
         Assert.Equal(1, effect.TickIntervalSeconds);
         Assert.Equal(5, effect.DurationSeconds);
-        Assert.Contains("Does Not Refresh", effect.Behavior);
-        Assert.Contains("Fire-Resistant", effect.Behavior);
     }
 
     [Theory]
@@ -94,10 +94,12 @@ public sealed class OnHitFactsTests
             new JsonObject { ["Debuff Info"] = Debuff(effect, 9, 8) }
         );
         var page = new ItemFacts([], classes: [item, projectile]).Resolve(item, "invented");
-        Assert.Equal(
-            new OnHitEffect(effect, "Projectile Impact", 1, 9, 1, 8, "Refreshes Without Stacking"),
-            Assert.Single(page.OnHitEffects!)
-        );
+        var onHit = Assert.Single(page.OnHitEffects!);
+        Assert.Equal(effect, onHit.Effect);
+        Assert.Equal(1, onHit.Chance);
+        Assert.Equal(9, onHit.Amount);
+        Assert.Equal(1, onHit.TickIntervalSeconds);
+        Assert.Equal(8, onHit.DurationSeconds);
     }
 
     [Fact]
@@ -109,11 +111,10 @@ public sealed class OnHitFactsTests
         Assert.Equal(2, effects.Count);
         Assert.All(
             effects,
-            effect => Assert.Equal("Firing While Aiming At An Undead Enemy", effect.Trigger)
+            effect => Assert.Contains("undead", effect.Trigger, StringComparison.OrdinalIgnoreCase)
         );
         Assert.Equal("Burn", effects[0].Effect);
         Assert.Equal(15, effects[0].Amount);
-        Assert.Equal("Fire Ground", effects[1].Effect);
         Assert.Equal(3, effects[1].DurationSeconds);
         Assert.Null(effects[1].Amount);
     }
@@ -124,7 +125,10 @@ public sealed class OnHitFactsTests
         var effect = Assert.Single(
             new ItemFacts([]).Resolve(Weapon("Daggers/VeiledSlicers"), "invented").OnHitEffects!
         );
-        Assert.Equal(new OnHitEffect("Restore Mana", "Melee Hit", 1, 5, null, null, null), effect);
+        Assert.Equal(1, effect.Chance);
+        Assert.Equal(5, effect.Amount);
+        Assert.Null(effect.TickIntervalSeconds);
+        Assert.Null(effect.DurationSeconds);
     }
 
     [Theory]

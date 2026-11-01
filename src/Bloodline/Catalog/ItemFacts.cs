@@ -284,9 +284,11 @@ internal sealed class ItemFacts(
             if (type == "Shield")
             {
                 // Block Attack halves incoming damage for stamina after absolute blocks are spent.
-                // AbsoluteBlockWidget adds three maximum charges while a heavy-slot item is valid.
+                // FirstPersonCharacter2:Check if shield is equipped sets ShieldEquipped from IsValid(HeavyItem).
+                // Only AbsoluteBlockWidget(_Permanent):Check if player has a shield equipped writes
+                // Maximum Absolute Block Shields: three base charges plus three for any shield-slot item.
+                facts.Add(StatVocabulary.Number(Stat.ExtraFullBlocks, 6));
                 facts.Add(StatVocabulary.Number(Stat.BlockStaminaCost, 50));
-                facts.Add(StatVocabulary.Number(Stat.ExtraFullBlocks, 3));
                 if (
                     item.Path
                     is WeaponRoot + "Shields/Half-colorKiteshield.Half-colorKiteshield_C"
@@ -484,7 +486,9 @@ internal sealed class ItemFacts(
                     RecordValues.Number(debuff["Damage"]),
                     1,
                     RecordValues.Number(debuff["Duration"]),
-                    "Refreshes Without Stacking"
+                    effect == "Poison"
+                        ? "A new poison restarts the timer."
+                        : "A new burn restarts the timer."
                 )
             );
             inputs.AddRange(
@@ -505,7 +509,7 @@ internal sealed class ItemFacts(
                     15,
                     1,
                     5,
-                    "Does Not Refresh While Burning. Fire-Resistant Targets Are Immune."
+                    "Can't start while burning. Fire-resistant enemies are immune."
                 )
             );
             Cite(Enemy, "Ignite");
@@ -544,11 +548,11 @@ internal sealed class ItemFacts(
                 Cite(projectile, "Effect on Enemy Upon Impact");
                 break;
             case WeaponRoot + "Crossbows/HolyNooseCrossbow":
-                Ignite("Firing While Aiming At An Undead Enemy", 1);
+                Ignite("Every shot aimed at an undead enemy", 1);
                 effects.Add(
                     new(
-                        "Fire Ground",
-                        "Firing While Aiming At An Undead Enemy",
+                        "Burning Ground",
+                        "Every shot aimed at an undead enemy",
                         1,
                         null,
                         null,
@@ -674,14 +678,33 @@ internal sealed class ItemFacts(
                     ? projectile.Damage?.At(itemDamage, damage, charge)
                     : RecordValues.Number(actor.Properties["Damage"]);
             }
-            ProjectileGroup Group(int count, double? body) =>
+            string Kind(string path)
+            {
+                var actor = classes?.FirstOrDefault(record => record.Path == path);
+                bool Is(string root) => path == root || actor?.Ancestors.Contains(root) == true;
+                if (Is("/Game/BloodlinesAlpha/Weapons/Bullet.Bullet_C"))
+                    return "bullet";
+                if (Is("/Game/BloodlinesAlpha/Weapons/CrossBowBolt.CrossBowBolt_C"))
+                    return "bolt";
+                if (Is("/Game/BloodlinesAlpha/Weapons/Arrow.Arrow_C"))
+                    return "arrow";
+                return "projectile";
+            }
+            ProjectileGroup Group(int count, double? body, string kind) =>
                 new(
                     count,
                     body,
-                    body is { } applied && damage is { } bonus ? applied + bonus : null
+                    body is { } applied && damage is { } bonus ? applied + bonus : null,
+                    count == 1 ? kind
+                        : kind == "bullet" ? "pellets"
+                        : kind + "s"
                 );
-            foreach (var group in projectiles.GroupBy(projectile => Applied(projectile, 0)))
-                groups.Add(Group(group.Count(), group.Key));
+            foreach (
+                var group in projectiles.GroupBy(projectile =>
+                    (Damage: Applied(projectile, 0), Kind: Kind(projectile.Class))
+                )
+            )
+                groups.Add(Group(group.Count(), group.Key.Damage, group.Key.Kind));
             if (type is "Gun" or "Pistol")
             {
                 var range = RecordValues.Number(RecordValues.At(properties, "WeaponInfo.Range"));
@@ -716,7 +739,8 @@ internal sealed class ItemFacts(
                                             == "/Game/BloodlinesAlpha/Weapons/Bullet.Bullet_C"
                                         )
                                         ?.Properties["Damage"]
-                                )
+                                ),
+                                "bullet"
                             )
                         );
                     projectileGroups = groups;
@@ -726,10 +750,10 @@ internal sealed class ItemFacts(
             {
                 // FirstPersonCharacterBP_Modular1:AnimNotify_Spawn Arrow assigns WeaponInfo.Damage before the bow override.
                 if (type == "Bow" && !analysis.ReplacesGeneric)
-                    groups.Add(Group(1, damage));
+                    groups.Add(Group(1, damage, "arrow"));
                 projectileGroups = groups;
                 if (type == "Crossbow" && analysis.ReplacesGeneric)
-                    groups.Add(Group(1, damage) with { Condition = "At close range, also" });
+                    groups.Add(Group(1, damage, "bolt") with { Condition = "Point blank" });
             }
             if (
                 type == "Crossbow"

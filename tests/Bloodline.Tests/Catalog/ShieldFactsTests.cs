@@ -44,10 +44,8 @@ public sealed class ShieldFactsTests
         );
         var stamina = Assert.Single(page.Facts, fact => fact.Stat == Stat.BlockStaminaCost);
         Assert.Equal(50, stamina.Number);
-        Assert.Equal("% of incoming damage after full blocks", stamina.Unit);
         var blocks = Assert.Single(page.Facts, fact => fact.Stat == Stat.ExtraFullBlocks);
-        Assert.Equal(3, blocks.Number);
-        Assert.Equal("without stamina cost", blocks.Unit);
+        Assert.Equal(6, blocks.Number);
     }
 
     [Fact]
@@ -78,7 +76,9 @@ public sealed class ShieldFactsTests
         var facts = new ItemFacts([], code: code, build: 123);
         facts.Resolve(Shield(), "invented");
         var claims = facts
-            .Claims.Where(claim => claim.Fact is "Block Stamina Cost" or "Extra Full Blocks")
+            .Claims.Where(claim =>
+                claim.Citations.Any(citation => citations.Contains(citation.Function))
+            )
             .ToArray();
         Assert.Equal(2, claims.Length);
         Assert.All(claims, claim => Assert.Equal(ClaimType.Formula, claim.Type));
@@ -105,7 +105,6 @@ public sealed class ShieldFactsTests
         var page = new ItemFacts([]).Resolve(shield, "invented");
         var charge = Assert.Single(page.Facts, fact => fact.Stat == Stat.ShieldChargeDamage);
         Assert.Equal(17, charge.Number);
-        Assert.Equal("per shield contact", charge.Unit);
         Assert.DoesNotContain(
             new ItemFacts([]).Resolve(Shield(), "other").Facts,
             fact => fact.Stat == Stat.ShieldChargeDamage

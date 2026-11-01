@@ -72,36 +72,20 @@ function statSentence(
 ): string | null {
 	const number = (stat: string) => item.facts.find((fact) => fact.stat === stat)?.number;
 	const plural = isPlural(item.name);
-	const body = number('bodyHitDamage');
-	const groups = item.projectileGroups;
-	if (item.category.name === 'Weapon' && (body != null || (groups && groups.length > 1))) {
-		const sentences: string[] = [];
-		if (groups && groups.length > 1) {
-			const hits = groups.map((group) => ({
-				condition: group.condition,
-				text: `${formatNumber(group.count)} ${group.count === 1 ? 'projectile' : 'projectiles'} dealing ${group.bodyHitDamage == null ? 'unknown' : formatNumber(group.bodyHitDamage)} body hit damage and ${group.headHitDamage == null ? 'unknown' : formatNumber(group.headHitDamage)} head hit damage per projectile`
-			}));
-			const unconditional = hits.filter((hit) => !hit.condition).map((hit) => hit.text);
-			if (unconditional.length)
-				sentences.push(
-					`Per shot, ${plural ? 'they fire' : 'it fires'} ${unconditional.join(' and ')}.`
-				);
-			for (const hit of hits) if (hit.condition) sentences.push(`${hit.condition}: ${hit.text}.`);
-		} else if (body != null) {
-			const hits = [`${formatNumber(body)} body hit damage`];
-			const head = number('headHitDamage');
-			if (head != null) hits.push(`${formatNumber(head)} head hit damage`);
-			sentences.push(`${plural ? 'They deal' : 'It deals'} ${hits.join(' and ')} per projectile.`);
-			const projectiles = number('projectilesPerShot');
-			if (projectiles != null)
-				sentences.push(
-					`${plural ? 'They fire' : 'It fires'} ${formatNumber(projectiles)} ${projectiles === 1 ? 'projectile' : 'projectiles'} per shot.`
-				);
-		}
-		const charged = number('chargedBodyHitDamage');
-		if (charged != null)
-			sentences.push(`Fully charged body hit damage is ${formatNumber(charged)} per projectile.`);
-		return sentences.join(' ');
+	const groups = item.projectileGroups?.filter((group) => !group.condition);
+	if (item.category.name === 'Weapon' && groups?.length) {
+		return groups
+			.map((group, index) => {
+				const body = group.bodyHitDamage == null ? 'Unknown' : formatNumber(group.bodyHitDamage);
+				const head = group.headHitDamage == null ? 'Unknown' : formatNumber(group.headHitDamage);
+				const hits = `${body} damage${group.count > 1 || index > 0 ? ' each' : ''}, ${head} on a headshot.`;
+				if (index > 0)
+					return `Each shot also fires ${formatNumber(group.count)} ${group.projectile} that deal ${hits}`;
+				return group.count === 1
+					? `${plural ? 'They deal' : 'It deals'} ${hits}`
+					: `${plural ? 'They fire' : 'It fires'} ${formatNumber(group.count)} ${group.projectile} that deal ${hits}`;
+			})
+			.join(' ');
 	}
 	const damage = number('damage');
 	if (item.category.name === 'Weapon' && damage)

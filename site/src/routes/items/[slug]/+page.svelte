@@ -187,12 +187,15 @@
 	</div>
 	<div class="detail-layout">
 		<div class="answer" data-pagefind-ignore="all">
-			{#if details.length || (item.projectileGroups && item.projectileGroups.length > 1)}<Section
-					id="details"
-					title="Details"
-				>
+			{#if details.length || item.projectileGroups?.length}<Section id="details" title="Details">
 					<div class="surface detail-surface">
-						<ItemDetails rows={details} projectileGroups={item.projectileGroups} wide />
+						<ItemDetails
+							rows={details}
+							projectileGroups={item.projectileGroups}
+							chargedBodyHitDamage={item.facts.find((fact) => fact.stat === 'chargedBodyHitDamage')
+								?.number}
+							wide
+						/>
 					</div>
 				</Section>{/if}
 			<OnHitEffects effects={item.onHitEffects} />

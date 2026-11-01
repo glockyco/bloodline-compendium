@@ -6,6 +6,7 @@
 		label,
 		headings,
 		numeric = true,
+		stackOnMobile = true,
 		row
 	}: {
 		items: T[];
@@ -13,11 +14,11 @@
 		headings: string[];
 		/** Whether the columns after the first hold numbers, which align right with their heading, one flag per column. */
 		numeric?: boolean | boolean[];
+		stackOnMobile?: boolean;
 		row: Snippet<[T, number]>;
 	} = $props();
 	const preview = $derived(items.length > 10 ? 8 : items.length);
-	// A phone stacks a table of three or more columns into rows, where each value after the name carries its
-	// column's heading as a label.
+	// By default, a phone stacks tables with three or more columns, labelling each value after the name.
 	const labels = $derived(
 		headings
 			.slice(1)
@@ -29,7 +30,7 @@
 {#snippet table(entries: T[], offset: number)}
 	<table
 		class="relation-table"
-		class:stacked={headings.length > 2}
+		class:stacked={stackOnMobile && headings.length > 2}
 		aria-label={label + (offset ? ' continued' : '')}
 		style={labels}
 	>

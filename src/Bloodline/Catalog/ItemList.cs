@@ -77,50 +77,42 @@ internal static class ItemList
         new("damage", "Damage", ["weapon"], true, null, item => Number(item, Stat.Damage)),
         new(
             "bodyHitDamage",
-            "Body Hit Damage",
+            "Damage",
             ["weapon"],
             true,
-            "per projectile",
+            null,
             item => Number(item, Stat.BodyHitDamage)
         ),
         new(
             "headHitDamage",
-            "Head Hit Damage",
+            "Headshot",
             ["weapon"],
             true,
-            "per projectile",
+            null,
             item => Number(item, Stat.HeadHitDamage)
         ),
         new(
             "projectilesPerShot",
-            "Projectiles Per Shot",
+            "Projectiles per Shot",
             ["weapon"],
             true,
             null,
             item => Number(item, Stat.ProjectilesPerShot)
         ),
         new(
-            "chargedBodyHitDamage",
-            "Fully Charged Body Hit Damage",
-            ["weapon"],
-            true,
-            "per projectile",
-            item => Number(item, Stat.ChargedBodyHitDamage)
-        ),
-        new(
             "blockStaminaCost",
-            "Block Stamina Cost",
+            "Blocked Hits",
             ["weapon"],
             true,
-            "% of incoming damage after full blocks",
+            "% of incoming damage in stamina",
             item => Number(item, Stat.BlockStaminaCost)
         ),
         new(
             "extraFullBlocks",
-            "Extra Full Blocks",
+            "Free Blocks",
             ["weapon"],
             true,
-            "without stamina cost",
+            null,
             item => Number(item, Stat.ExtraFullBlocks)
         ),
         new(
@@ -128,7 +120,7 @@ internal static class ItemList
             "Shield Charge Damage",
             ["weapon"],
             true,
-            "per shield contact",
+            "per contact",
             item => Number(item, Stat.ShieldChargeDamage)
         ),
         new("speed", "Speed", ["weapon"], false, null, Speed),

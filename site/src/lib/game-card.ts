@@ -7,10 +7,7 @@ export interface CardLine {
 	text: string;
 }
 
-/**
- * The card pairs weapon speed with applied damage, or armor class with armor.
- * Ranged damage names the body hit so it is not mistaken for a whole shot.
- */
+/** The card pairs weapon speed with applied damage, or armor class with armor. */
 export function cardLines(facts: Fact[]): { first: CardLine | null; second: CardLine | null } {
 	const find = (stat: string) => facts.find((fact) => fact.stat === stat);
 	const speed = find('speed');
@@ -24,7 +21,7 @@ export function cardLines(facts: Fact[]): { first: CardLine | null; second: Card
 			second: damage
 				? {
 						fact: damage,
-						text: `${bodyHitDamage ? titleCase(bodyHitDamage.label) : 'Damage'}: ${factValue(damage) ?? 'Unknown'}`
+						text: `Damage: ${factValue(damage) ?? 'Unknown'}`
 					}
 				: null
 		};
@@ -46,7 +43,7 @@ export interface DetailRow {
 const effectStats = new Set(['effect', 'effects']);
 
 /**
- * Ranged hit facts stay together in Details, including the body hit also shown on the card.
+ * Ranged projectile groups supply their damage table instead of repeating the same facts in rows.
  * A food's or potion's effects share one Effects row where the first of them stands, because the numbers of the game's effect slots mean nothing to a
  * player. Its restoration amount, which the item list's Heals column reads, is already the amount of a Restore
  * Health or Restore Mana effect.
@@ -61,8 +58,10 @@ export function detailRows(
 			fact !== first?.fact &&
 			(fact !== second?.fact || fact.stat === 'bodyHitDamage') &&
 			fact.stat !== 'restorationAmount' &&
-			(!(projectileGroups && projectileGroups.length > 1) ||
-				(fact.stat !== 'bodyHitDamage' && fact.stat !== 'headHitDamage'))
+			(!projectileGroups?.length ||
+				!['bodyHitDamage', 'headHitDamage', 'projectilesPerShot', 'chargedBodyHitDamage'].includes(
+					fact.stat
+				))
 	);
 	const effects = shown.filter((fact) => effectStats.has(fact.stat));
 	const values = effects.map((fact) => factValue(fact) ?? 'Unknown');
@@ -72,8 +71,12 @@ export function detailRows(
 					{
 						key: fact.stat + fact.label,
 						label: titleCase(fact.label),
-						values: [factValue(fact) ?? 'Unknown'],
-						prose: fact.number == null
+						values: [
+							fact.stat === 'blockStaminaCost' && fact.number === 50
+								? 'cost half their damage in stamina'
+								: (factValue(fact) ?? 'Unknown')
+						],
+						prose: fact.number == null || fact.stat === 'blockStaminaCost'
 					}
 				]
 			: fact === effects[0]

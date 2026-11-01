@@ -117,10 +117,6 @@ public sealed class RangedFactsTests
         Assert.Equal(110.5, Number(page, Stat.ChargedBodyHitDamage));
         Assert.Equal(1, Number(page, Stat.ProjectilesPerShot));
         Assert.DoesNotContain(page.Facts, fact => fact.Stat == Stat.Damage);
-        Assert.Equal(
-            "per projectile",
-            page.Facts.Single(fact => fact.Stat == Stat.BodyHitDamage).Unit
-        );
     }
 
     [Fact]
@@ -146,7 +142,7 @@ public sealed class RangedFactsTests
             Fire("Gun", [new FiredProjectile(Bolt, new DamageFormula(100, 0, 0, 0), true)])
         );
         Assert.Equal(
-            [new ProjectileGroup(1, 100, 150), new ProjectileGroup(4, 0, 50)],
+            [new ProjectileGroup(1, 100, 150, "arrow"), new ProjectileGroup(4, 0, 50, "pellets")],
             page.ProjectileGroups
         );
         Assert.Equal(100, Number(page, Stat.BodyHitDamage));
@@ -161,6 +157,42 @@ public sealed class RangedFactsTests
         Assert.Equal(35, Number(page, Stat.BodyHitDamage));
         Assert.Equal(70, Number(page, Stat.HeadHitDamage));
         Assert.Equal(1, Number(page, Stat.ProjectilesPerShot));
+    }
+
+    [Theory]
+    [InlineData("Gun", Bullet, 1, "bullet")]
+    [InlineData("Gun", Bullet, 15, "pellets")]
+    [InlineData("Crossbow", "/Game/BloodlinesAlpha/Weapons/CrossBowBolt.CrossBowBolt_C", 1, "bolt")]
+    [InlineData(
+        "Crossbow",
+        "/Game/BloodlinesAlpha/Weapons/CrossBowBolt.CrossBowBolt_C",
+        2,
+        "bolts"
+    )]
+    [InlineData("Bow", "/Game/BloodlinesAlpha/Weapons/Arrow.Arrow_C", 1, "arrow")]
+    [InlineData("Bow", "/Game/BloodlinesAlpha/Weapons/Arrow.Arrow_C", 2, "arrows")]
+    [InlineData("Gun", "/Game/Invented/Unknown.Unknown_C", 1, "projectile")]
+    [InlineData("Gun", "/Game/Invented/Unknown.Unknown_C", 2, "projectiles")]
+    public void ProjectileNounsFollowTheSpawnedClass(
+        string type,
+        string projectile,
+        int count,
+        string noun
+    )
+    {
+        var page = Resolve(
+            Weapon(type, 100, 50),
+            Fire(
+                type,
+                Enumerable
+                    .Repeat(
+                        new FiredProjectile(projectile, new DamageFormula(10, 0, 0, 0), true),
+                        count
+                    )
+                    .ToArray()
+            )
+        );
+        Assert.Equal(noun, page.ProjectileGroups![0].Projectile);
     }
 
     [Fact]

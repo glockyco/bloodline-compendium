@@ -1065,12 +1065,16 @@
             "number",
             "null"
           ]
+        },
+        "projectile": {
+          "type": "string"
         }
       },
       "required": [
         "count",
         "bodyHitDamage",
-        "headHitDamage"
+        "headHitDamage",
+        "projectile"
       ],
       "title": "ProjectileGroup",
       "type": "object"

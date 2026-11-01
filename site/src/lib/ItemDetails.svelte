@@ -5,11 +5,13 @@
 	let {
 		rows,
 		wide = false,
-		projectileGroups
+		projectileGroups,
+		chargedBodyHitDamage
 	}: {
 		rows: DetailRow[];
 		wide?: boolean;
 		projectileGroups?: ItemPage['projectileGroups'];
+		chargedBodyHitDamage?: number | null;
 	} = $props();
 </script>
 
@@ -19,47 +21,44 @@
 			{#each row.values as value, index (index)}<dd>{value}</dd>{/each}
 		</div>{/each}
 </dl>
-{#if projectileGroups && projectileGroups.length > 1}
+{#if projectileGroups?.length}
 	<div class="projectile-hits">
 		<table>
-			<caption>Projectile Hits</caption>
-			<thead
-				><tr
-					><th scope="col">Projectiles</th><th scope="col">Body Hit Damage</th><th scope="col"
-						>Head Hit Damage</th
-					></tr
-				></thead
-			>
+			<caption>Damage</caption>
+			<thead>
+				<tr
+					><th scope="col">Projectile</th><th scope="col">Body</th><th scope="col">Headshot</th></tr
+				>
+			</thead>
 			<tbody>
 				{#each projectileGroups as group, index (index)}
 					<tr>
 						<td
-							>{formatNumber(group.count)}{#if group.condition}<span class="condition"
-									>{group.condition}</span
-								>{/if}</td
+							>{group.condition ? `${group.condition}: ` : ''}{formatNumber(group.count)}
+							{group.condition ? 'extra ' : ''}{group.projectile}</td
 						>
 						<td
 							>{group.bodyHitDamage == null
 								? 'Unknown'
-								: `${formatNumber(group.bodyHitDamage)} per projectile`}</td
+								: `${formatNumber(group.bodyHitDamage)}${group.count > 1 ? ' each' : ''}`}</td
 						>
 						<td
 							>{group.headHitDamage == null
 								? 'Unknown'
-								: `${formatNumber(group.headHitDamage)} per projectile`}</td
+								: `${formatNumber(group.headHitDamage)}${group.count > 1 ? ' each' : ''}`}</td
 						>
 					</tr>
 				{/each}
 			</tbody>
 		</table>
 	</div>
+	{#if chargedBodyHitDamage !== undefined}<p>
+			Fully charged: {chargedBodyHitDamage == null ? 'Unknown' : formatNumber(chargedBodyHitDamage)} on
+			the body
+		</p>{/if}
 {/if}
 
 <style>
-	.condition {
-		display: block;
-		color: var(--text-soft);
-	}
 	.projectile-hits {
 		overflow-x: auto;
 		margin-top: var(--gap-block);
@@ -81,6 +80,10 @@
 	}
 	th {
 		color: var(--text-soft);
+	}
+	th:first-child,
+	td:first-child {
+		text-align: left;
 	}
 	.details {
 		display: grid;

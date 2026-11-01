@@ -109,7 +109,7 @@ public sealed class TooltipCheckTests
             Facts =
             [
                 StatVocabulary.Number(Stat.BlockStaminaCost, 50),
-                StatVocabulary.Number(Stat.ExtraFullBlocks, 3),
+                StatVocabulary.Number(Stat.ExtraFullBlocks, 6),
             ],
         };
         var difference = Assert.Single(Differences(shield, Tooltip(shield, "Damage: 15")));

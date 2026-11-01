@@ -503,6 +503,7 @@ export interface ProjectileGroup {
   condition?: string | null;
   count: number;
   headHitDamage: number | null;
+  projectile: string;
   [k: string]: unknown;
 }
 /**

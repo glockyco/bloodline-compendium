@@ -271,7 +271,6 @@ const specializedWeaponColumns: Record<string, true> = {
 	bodyHitDamage: true,
 	headHitDamage: true,
 	projectilesPerShot: true,
-	chargedBodyHitDamage: true,
 	blockStaminaCost: true,
 	extraFullBlocks: true,
 	shieldChargeDamage: true

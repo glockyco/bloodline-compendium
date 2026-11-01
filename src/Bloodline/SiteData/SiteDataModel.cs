@@ -244,7 +244,12 @@ internal sealed record ItemPage(
     public ItemStatus Status { get; init; } = ItemStatus.Obtainable;
 }
 
-internal sealed record ProjectileGroup(int Count, double? BodyHitDamage, double? HeadHitDamage)
+internal sealed record ProjectileGroup(
+    int Count,
+    double? BodyHitDamage,
+    double? HeadHitDamage,
+    string Projectile
+)
 {
     public string? Condition { get; init; }
 }

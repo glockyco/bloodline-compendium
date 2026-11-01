@@ -83,7 +83,7 @@ it('offers shield block facts as generic numeric columns for filtering and sorti
 			type: 'Shield',
 			cells: {
 				blockStaminaCost: { number: 50, text: null },
-				extraFullBlocks: { number: 3, text: null }
+				extraFullBlocks: { number: 6, text: null }
 			}
 		},
 		{
@@ -101,8 +101,8 @@ it('offers shield block facts as generic numeric columns for filtering and sorti
 		items,
 		columns: [
 			{ id: 'damage', label: 'Damage', numeric: true, categories: ['weapon'], unit: null },
-			{ id: ids[0], label: 'Block Stamina Cost', numeric: true, categories: ['weapon'], unit: '%' },
-			{ id: ids[1], label: 'Extra Full Blocks', numeric: true, categories: ['weapon'], unit: null }
+			{ id: ids[0], label: 'Blocked Hits', numeric: true, categories: ['weapon'], unit: '%' },
+			{ id: ids[1], label: 'Free Blocks', numeric: true, categories: ['weapon'], unit: null }
 		]
 	};
 	const state = readState(
@@ -115,13 +115,7 @@ it('offers shield block facts as generic numeric columns for filtering and sorti
 });
 
 it('offers ranged hit columns and sorts their numeric values with absent facts last', () => {
-	const ids = ['bodyHitDamage', 'headHitDamage', 'projectilesPerShot', 'chargedBodyHitDamage'];
-	const labels = [
-		'Body Hit Damage',
-		'Head Hit Damage',
-		'Projectiles Per Shot',
-		'Fully Charged Body Hit Damage'
-	];
+	const ids = ['bodyHitDamage', 'headHitDamage', 'projectilesPerShot'];
 	const weapon = index.items.find((item) => item.slug === 'lanternedge')!;
 	const ranged = (name: string, number: number): ItemSummary => ({
 		...weapon,
@@ -133,12 +127,12 @@ it('offers ranged hit columns and sorts their numeric values with absent facts l
 	const rangedIndex: ItemIndex = {
 		...index,
 		items,
-		columns: ids.map((id, position) => ({
+		columns: ids.map((id) => ({
 			id,
-			label: labels[position],
+			label: id,
 			numeric: true,
 			categories: ['weapon'],
-			unit: id === 'projectilesPerShot' ? null : 'per projectile'
+			unit: null
 		}))
 	};
 	const state = readState(new URLSearchParams('category=weapon'), rangedIndex);
@@ -160,13 +154,6 @@ it('offers ranged hit columns and sorts their numeric values with absent facts l
 			'speed',
 			...ids
 		]);
-		const uncharged = { ...item.cells };
-		delete uncharged.chargedBodyHitDamage;
-		expect(
-			shownColumns([{ ...item, cells: uncharged }], state, withMeleeColumns).map(
-				(column) => column.id
-			)
-		).toEqual(['speed', ...ids.slice(0, 3)]);
 	}
 	expect(shownColumns([weapon], state, withMeleeColumns).map((column) => column.id)).toEqual([
 		'damage',
@@ -175,10 +162,6 @@ it('offers ranged hit columns and sorts their numeric values with absent facts l
 	expect(
 		shownColumns([weapon, ranged('Bow', 8)], state, withMeleeColumns).map((column) => column.id)
 	).toEqual(['damage', 'speed', ...ids]);
-	const chargedFilter = { ...state, stats: [{ column: 'chargedBodyHitDamage', min: '', max: '' }] };
-	expect(
-		shownColumns([weapon], chargedFilter, withMeleeColumns).map((column) => column.id)
-	).toEqual(['damage', 'speed', 'chargedBodyHitDamage']);
 });
 
 it('writes only what differs from the defaults and reads it back', () => {

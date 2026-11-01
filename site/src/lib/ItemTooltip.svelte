@@ -52,9 +52,10 @@
 		</div>
 		{#if item.description}<p class="description" data-game>{item.description}</p>{/if}
 	</div>
-	{#if rows.length || (details && item.projectileGroups && item.projectileGroups.length > 1)}<ItemDetails
+	{#if rows.length || (details && item.projectileGroups?.length)}<ItemDetails
 			{rows}
 			projectileGroups={item.projectileGroups}
+			chargedBodyHitDamage={item.facts.find((fact) => fact.stat === 'chargedBodyHitDamage')?.number}
 		/>{/if}
 	{#if details}<OnHitEffects effects={item.onHitEffects} />{/if}
 </div>

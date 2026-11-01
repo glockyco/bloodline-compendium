@@ -236,6 +236,9 @@ Decided in reviews on 2026-10-31 and 2026-11-01, open to change like everything 
 - The side column holds only the game card. The facts its tooltip does not print, such as Value and Effects, open the main column as Details, as Ancient Kingdoms places its Basic Information. What an item fails to do is a known issue in its Bugs section, such as a staff that trains no weapon proficiency.
 - A food's or potion's effects share one Effects row, healing among them as Restore Health, because the game's numbered effect slots mean nothing to a player.
 - Section headings use title case. A condition ends without a period and names a skill as the game writes it, such as "Requires Weaponsmithing level 4".
+- A ranged weapon's damage is a Damage table with one row per kind of projectile and the columns Projectile, Body and Headshot, such as "1 bullet | 100 | 150" and "4 pellets | 0 each | 50 each", using the game's words bullet, pellets, bolt and arrow. The game card says "Damage" with the first row's body damage (comparison 22).
+- On-hit effects are a table with the columns Effect, Chance and What It Does, such as "Poison | 20% per hit | 15 damage per second for 10 seconds. A new poison restarts the timer." (comparison 22).
+- A fact states its own value and is not compared with a number the page does not show, such as a shield's "Free Blocks: 6" and not "6 instead of 3" (comparison 22).
 
 Proposed and not decided:
 
