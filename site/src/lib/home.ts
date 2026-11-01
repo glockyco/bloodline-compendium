@@ -10,7 +10,7 @@ const wayIconCount = 3;
 /** What each large category holds, listed by its most common types. Categories without one list their types. */
 const descriptions: Record<string, string> = {
 	weapon: 'Swords, axes, daggers, spears, shields, bows and firearms',
-	armor: 'Helmets, chest armor, cloaks, trousers, boots and amulets',
+	armor: 'Helmets, chest armor, gauntlets, trousers, boots and amulets',
 	'weapon-part': 'Blades, guards, pommels and grips for smithing weapons',
 	material: 'Ores, ingots, gems, herbs, hides and coins',
 	food: 'Meals, drinks, fish and cooking ingredients',

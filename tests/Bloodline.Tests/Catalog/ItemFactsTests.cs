@@ -492,23 +492,34 @@ public sealed class ItemFactsTests
         string slot,
         string path = "/Game/Invented/Armor.Armor_C",
         params TableRecord[] tables
+    ) => ArmorPage(name, slot, path, tables).Facts;
+
+    private static Bloodline.SiteData.ItemPage ArmorPage(
+        string name,
+        string slot,
+        string path = "/Game/Invented/Armor.Armor_C",
+        params TableRecord[] tables
     ) =>
-        new ItemFacts([], tables)
-            .Resolve(
-                new ClassRecord(
-                    path,
-                    [],
-                    Parse(
-                        $$$"""
-                        {"ItemInfo":{"ItemName":{"$text":"{{{name}}}"},"ItemType":{"$enum":"E_ItemType::Armor","display":"Armor"},
-                         "ItemSlot":{"$enum":"Slot::Invented","display":"{{{slot}}}"},"ArmorType":{"$enum":"Armor::Light","display":"Light"},"Damage":4},
-                         "ArmorInfo":{"DamageRating":2}}
-                        """
-                    )
-                ),
-                "invented"
-            )
-            .Facts;
+        new ItemFacts([], tables).Resolve(
+            new ClassRecord(
+                path,
+                [],
+                Parse(
+                    $$$"""
+                    {"ItemInfo":{"ItemName":{"$text":"{{{name}}}"},"ItemType":{"$enum":"E_ItemType::Armor","display":"Armor"},
+                     "ItemSlot":{"$enum":"Slot::Invented","display":"{{{slot}}}"},"ArmorType":{"$enum":"Armor::Light","display":"Light"},"Damage":4},
+                     "ArmorInfo":{"DamageRating":2}}
+                    """
+                )
+            ),
+            "invented"
+        );
+
+    [Theory]
+    [InlineData("Back", "Arms")]
+    [InlineData("Legs", "Legs")]
+    public void ArmorIsTypedByTheCharacterSheetSlotItFills(string slot, string type) =>
+        Assert.Equal(type, ArmorPage("Iron Gauntlets", slot, tables: ArmorTable).Type);
 
     private static string? Value(IReadOnlyList<Bloodline.SiteData.Fact> facts, Stat stat) =>
         facts.Single(fact => fact.Stat == stat).Value;

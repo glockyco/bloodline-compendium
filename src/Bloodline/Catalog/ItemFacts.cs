@@ -147,6 +147,12 @@ internal sealed class ItemFacts(
             )
         );
 
+    /// <summary>
+    /// E_SlotType calls the arms slot Back: gauntlets, bracers and sleeves of that slot fill the character sheet's
+    /// ArmsSlot, which the armor-slots lab run read with Archer's Straps equipped.
+    /// </summary>
+    private static string? ArmorSlot(string? slot) => slot == "Back" ? "Arms" : slot;
+
     public string? Display(JsonNode? value) =>
         RecordValues.Text(value)
         ?? RecordValues.EnumDisplay(value)
@@ -177,7 +183,7 @@ internal sealed class ItemFacts(
             : category switch
             {
                 "Weapon" => WeaponType(item),
-                "Armor" => Display(RecordValues.At(properties, "ItemInfo.ItemSlot")),
+                "Armor" => ArmorSlot(Display(RecordValues.At(properties, "ItemInfo.ItemSlot"))),
                 _ => readerCategory?.Name,
             };
         var facts = new List<Fact>();
