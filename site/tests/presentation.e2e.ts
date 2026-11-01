@@ -15,6 +15,31 @@ for (const width of [390, 768, 1280]) {
 	});
 }
 
+test('keeps a wrapping section count beside the final word', async ({ page }) => {
+	await page.setViewportSize({ width: 390, height: 900 });
+	await page.goto('/items/lanternedge/');
+	const heading = page.getByRole('heading', { name: /^Delivered by Settlements/ });
+	await heading.evaluate((element) => {
+		element.style.maxWidth = '230px';
+	});
+	const geometry = await heading.evaluate((element) => {
+		const end = element.querySelector('.heading-end')!;
+		const count = end.querySelector('.count')!.getBoundingClientRect();
+		const word = document.createRange();
+		word.selectNodeContents(end.firstChild!);
+		const text = word.getBoundingClientRect();
+		return {
+			gap: count.left - text.right,
+			baselineGap: Math.abs(count.bottom - text.bottom),
+			height: element.getBoundingClientRect().height
+		};
+	});
+	expect(geometry.height).toBeGreaterThan(40);
+	expect(geometry.gap).toBeGreaterThanOrEqual(-1);
+	expect(geometry.gap).toBeLessThan(16);
+	expect(geometry.baselineGap).toBeLessThan(10);
+});
+
 test.describe('planted defects on the fixture page', () => {
 	test.use({ viewport: { width: 1280, height: 900 } });
 	for (const [defect, css, message] of [

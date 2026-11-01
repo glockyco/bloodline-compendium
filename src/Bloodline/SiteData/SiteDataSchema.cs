@@ -61,9 +61,10 @@ internal static class SiteDataSchema
         var root = CanonicalJson.Options.GetJsonSchemaAsNode(type, exporterOptions).AsObject();
         var definitions = new JsonObject();
         var original = root.DeepClone().AsObject();
+        var active = new HashSet<string>(StringComparer.Ordinal);
         foreach (var key in root.Select(pair => pair.Key).ToList())
         {
-            root[key] = Hoist(root[key], definitions, original);
+            root[key] = Hoist(root[key], definitions, original, active);
         }
         root["$schema"] = "https://json-schema.org/draft/2020-12/schema";
         root["$defs"] = definitions;
@@ -71,14 +72,19 @@ internal static class SiteDataSchema
     }
 
     /// <summary>Moves every titled schema below <paramref name="node"/> into <paramref name="definitions"/> and refers to it instead.</summary>
-    private static JsonNode? Hoist(JsonNode? node, JsonObject definitions, JsonObject original)
+    private static JsonNode? Hoist(
+        JsonNode? node,
+        JsonObject definitions,
+        JsonObject original,
+        HashSet<string> active
+    )
     {
         switch (node)
         {
             case JsonArray array:
                 for (var i = 0; i < array.Count; i++)
                 {
-                    array[i] = Hoist(array[i]?.DeepClone(), definitions, original);
+                    array[i] = Hoist(array[i]?.DeepClone(), definitions, original, active);
                 }
                 return array;
             case JsonObject obj:
@@ -87,22 +93,42 @@ internal static class SiteDataSchema
                 if (obj["$ref"] is JsonValue pointer)
                 {
                     JsonNode? target = original;
-                    foreach (var segment in pointer.GetValue<string>()[2..].Split('/'))
+                    foreach (
+                        var segment in pointer.GetValue<string>() == "#"
+                            ? Array.Empty<string>()
+                            : pointer.GetValue<string>()[2..].Split('/')
+                    )
                     {
                         target = target![segment.Replace("~1", "/").Replace("~0", "~")];
                     }
-                    return Hoist(target!.DeepClone(), definitions, original);
+                    return Hoist(target!.DeepClone(), definitions, original, active);
                 }
+                var name = (obj["title"] as JsonValue)?.GetValue<string>();
+                var nullable = name is not null && RemoveNull(obj);
+                var reference = name is null
+                    ? null
+                    : new JsonObject { ["$ref"] = $"#/$defs/{name}" };
+                JsonNode NamedReference() =>
+                    nullable
+                        ? new JsonObject
+                        {
+                            ["anyOf"] = new JsonArray(
+                                reference,
+                                new JsonObject { ["type"] = "null" }
+                            ),
+                        }
+                        : reference!;
+                if (name is not null && !active.Add(name))
+                    return NamedReference();
                 foreach (var key in obj.Select(pair => pair.Key).ToList())
                 {
-                    obj[key] = Hoist(obj[key]?.DeepClone(), definitions, original);
+                    obj[key] = Hoist(obj[key]?.DeepClone(), definitions, original, active);
                 }
-                if (obj["title"] is not JsonValue title)
+                if (name is null)
                 {
                     return obj;
                 }
-                var name = title.GetValue<string>();
-                var nullable = RemoveNull(obj);
+                active.Remove(name);
                 if (definitions[name] is { } existing)
                 {
                     if (!JsonNode.DeepEquals(existing, obj))
@@ -116,13 +142,7 @@ internal static class SiteDataSchema
                 {
                     definitions[name] = obj;
                 }
-                var reference = new JsonObject { ["$ref"] = $"#/$defs/{name}" };
-                return nullable
-                    ? new JsonObject
-                    {
-                        ["anyOf"] = new JsonArray(reference, new JsonObject { ["type"] = "null" }),
-                    }
-                    : reference;
+                return NamedReference();
             default:
                 return node;
         }

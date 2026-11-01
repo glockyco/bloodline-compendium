@@ -53,6 +53,7 @@
 - [x] 8.9 Load the missing page's assets from the site root, open previews on a first tap and separate places with a space, and verify a nested missing address, a phone tap and Gold Coin
 - [x] 8.10 Capture every item's tooltip in render mode with `tooltip-sweep.mjs --capture`, compare each screenshot with the lab's shown-only reading, and give every difference an owner, and verify that no published tooltip value lacks a screenshot that shows it
 - [x] 8.11 Link a GitHub issue form for wrong facts from every page's footer, with the page's address filled in, and verify the link from Iron Ingot opens the form with its address
+- [x] 8.12 Publish one plain-name page per shared in-game name, merge indistinguishable copies, add labelled item-slot version tabs with stable fragments and exact-version links and previews, retain list rows per version and search results per name, keep wrapping heading counts beside their text, and verify Copper Flintlock Pistol, Bolt-Orb, Incriminating Evidence, Shield of Burnsley, Scholars Robes and Dwarven Boar Spear at 1440, 1024, 768 and 390 px
 
 ## 9. Weapons as hits apply them
 

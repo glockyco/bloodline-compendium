@@ -329,6 +329,51 @@ it.each([
 	});
 });
 
+it('allows same-name versions at distinct static fragments and rejects missing version content', async () => {
+	await publication(async (directory) => {
+		const entity = {
+			kind: 'item',
+			key: '/Invented/First',
+			name: 'Invented blade',
+			slug: 'invented',
+			icon: null,
+			fragment: 'first'
+		};
+		const graph = {
+			entities: [
+				{ entity, relations: [] },
+				{ entity: { ...entity, key: '/Invented/Second', fragment: 'second' }, relations: [] }
+			],
+			relations: []
+		};
+		await writeFile(join(directory, 'graph.json'), JSON.stringify(graph));
+		await writeFile(
+			join(directory, 'items/invented/index.html'),
+			publicationItemPage(
+				'Invented blade',
+				'<div id="first">First version</div><div id="second" hidden>Second version</div>'
+			)
+		);
+		expect((await publicationGate(directory)).relations).toBe(0);
+		await writeFile(
+			join(directory, 'items/invented/index.html'),
+			publicationItemPage('Invented blade', '<div id="first">First version</div>')
+		);
+		await expect(publicationGate(directory)).rejects.toThrow(
+			'Missing entity version /items/invented/#second'
+		);
+	});
+});
+
+it('rejects links to a different version than their canonical graph reference', async () => {
+	await publication(async (directory) => {
+		const graph = await writeRelationFixture(directory);
+		graph.relations[0].target = { ...graph.relations[0].target, fragment: 'wrong-version' };
+		await writeFile(join(directory, 'graph.json'), JSON.stringify(graph));
+		await expect(publicationGate(directory)).rejects.toThrow('Reference version differs');
+	});
+});
+
 it('rejects a slug on a kind without pages', async () => {
 	await publication(async (directory) => {
 		const graph = await writeRelationFixture(directory);

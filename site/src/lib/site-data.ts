@@ -202,6 +202,7 @@ export interface WeaponPart {
  * via the `definition` "EntityReference".
  */
 export interface EntityReference {
+  fragment?: string | null;
   icon: string | null;
   key: string | null;
   kind: EntityKind;
@@ -427,13 +428,16 @@ export interface ItemPage {
   notes: IssueNote[];
   onHitEffects?: OnHitEffect[] | null;
   projectileGroups?: ProjectileGroup[] | null;
-  qualifier?: string | null;
   relations: EntityRelation[];
   slug: string;
   sources: Source[];
   status: ItemStatus;
   type: string;
   uses: ItemUse[];
+  versionId?: string | null;
+  versionLabel?: string | null;
+  versionName?: string | null;
+  versions: ItemPage[];
   [k: string]: unknown;
 }
 /**
@@ -590,11 +594,12 @@ export interface ItemSummary {
   kind: EntityKind;
   name: string;
   placeSources: string[][];
-  qualifier?: string | null;
   slug: string;
   status: ItemStatus;
   type: string;
   value: number | null;
+  versionId?: string | null;
+  versionLabel?: string | null;
   [k: string]: unknown;
 }
 /**

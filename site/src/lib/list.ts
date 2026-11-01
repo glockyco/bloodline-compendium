@@ -167,7 +167,7 @@ export function matches(
 	skip?: string
 ): boolean {
 	const needle = state.name.trim().toLocaleLowerCase('en');
-	if (needle && !nameMatches(`${item.name} ${item.qualifier ?? ''}`, needle)) return false;
+	if (needle && !nameMatches(`${item.name} ${item.versionLabel ?? ''}`, needle)) return false;
 	// A skipped facet's selection neither filters nor scopes the facets that depend on it.
 	const scoping = skip ? { ...state, facets: { ...state.facets, [skip]: [] } } : state;
 	for (const facet of index.facets) {

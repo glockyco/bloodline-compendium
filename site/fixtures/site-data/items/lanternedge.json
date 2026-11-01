@@ -2,7 +2,10 @@
 	"slug": "lanternedge",
 	"name": "Lanternedge",
 	"type": "Sword",
-	"qualifier": null,
+	"versionId": null,
+	"versionLabel": null,
+	"versionName": null,
+	"versions": [],
 	"uses": [],
 	"description": "A slender blade etched with a path of tiny stars.",
 	"category": {

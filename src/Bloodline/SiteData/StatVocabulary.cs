@@ -3,8 +3,7 @@ using System.Globalization;
 namespace Bloodline.SiteData;
 
 /// <summary>
-/// The one place that names item stats for readers. Labels also form qualifiers in item slugs, such as
-/// "5 Armor rating", so a changed label changes URLs. Tooltip labels follow the game's own item tooltip.
+/// The one place that names item stats for readers. Tooltip labels follow the game's own item tooltip.
 /// </summary>
 internal static class StatVocabulary
 {
@@ -68,8 +67,7 @@ internal static class StatVocabulary
     }
 
     /// <summary>
-    /// The value in invariant form, as item qualifiers and coverage details have always written it, or null
-    /// when it is unknown.
+    /// The value in invariant form for version labels and coverage details, or null when it is unknown.
     /// </summary>
     public static string? Display(Fact fact) =>
         fact.Number?.ToString("G", CultureInfo.InvariantCulture)

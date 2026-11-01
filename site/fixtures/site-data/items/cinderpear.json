@@ -2,7 +2,10 @@
 	"slug": "cinderpear",
 	"name": "Cinderpear",
 	"type": "Fruit",
-	"qualifier": null,
+	"versionId": null,
+	"versionLabel": null,
+	"versionName": null,
+	"versions": [],
 	"uses": [
 		{
 			"kind": "crafting",

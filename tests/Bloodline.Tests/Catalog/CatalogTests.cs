@@ -200,7 +200,7 @@ public sealed class CatalogTests
     }
 
     [Fact]
-    public void SlugsUseDisplayNamesAndResolveCollisionsIndependentlyOfOrdering()
+    public void SameNamesSharePlainSlugsIndependentlyOfOrdering()
     {
         var a = Item("/Game/A/IronSword.IronSword_C");
         var b = Item("/Game/B/Iron_Sword.Iron_Sword_C");
@@ -214,7 +214,47 @@ public sealed class CatalogTests
         var backward = ItemIdentity.Slugs([b, a]);
         Assert.Equal(forward[a.Path], backward[a.Path]);
         Assert.Equal(forward[b.Path], backward[b.Path]);
-        Assert.NotEqual(forward[a.Path], forward[b.Path]);
+        Assert.Equal("iron-sword", forward[b.Path]);
+        Assert.Equal(forward[a.Path], forward[b.Path]);
+    }
+
+    [Fact]
+    public void CatalogMergesCopiesAndKeepsDistinguishableVersionRowsAndReferences()
+    {
+        var a = Item("/Game/A.A_C");
+        var copy = Item("/Game/Copy.Copy_C");
+        var b = Item("/Game/B.B_C");
+        b.Properties["WeaponInfo"]!["Damage"] = 24;
+        var result = Build(
+            Records(
+                [copy, b, a],
+                [
+                    new LevelRecord(
+                        "/Game/Meadow",
+                        [],
+                        [
+                            new ActorRecord("Copy", copy.Path, new JsonObject()),
+                            new ActorRecord("B", b.Path, new JsonObject()),
+                        ]
+                    ),
+                ]
+            )
+        );
+        Assert.Equal(2, result.Items.Count);
+        Assert.Equal(2, result.Index.Items.Count);
+        Assert.Equal(2, result.Index.Categories.Single().Count);
+        Assert.All(result.Items, item => Assert.Equal("iron-sword", item.Slug));
+        var canonical = result.Items.Single(item => item.Key == a.Path);
+        Assert.Single(canonical.Sources);
+        Assert.Equal("10 Damage", canonical.VersionLabel);
+        Assert.Equal("a", canonical.VersionId);
+        Assert.Contains(
+            result.Graph.Relations,
+            relation => relation.Target.Key == a.Path && relation.Target.Fragment == "a"
+        );
+        Assert.DoesNotContain(result.Graph.Entities, entity => entity.Entity.Key == copy.Path);
+        Assert.DoesNotContain(result.Report.Gaps, gap => gap.Kind == GapKind.ItemWithoutSource);
+        Assert.Equal(["a", "b"], result.Index.Items.Select(item => item.VersionId));
     }
 
     [Theory]

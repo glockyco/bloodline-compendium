@@ -326,9 +326,9 @@
 						></thead
 					>
 					<tbody
-						>{#each rows as item (item.slug)}<tr>
+						>{#each rows as item (item.key)}<tr>
 								<td class="name"
-									><EntityLink class="item-name" entity={item}
+									><EntityLink class="item-name" entity={{ ...item, fragment: item.versionId }}
 										>{#if item.icon}<img
 												src={'/icons/' + item.icon + '-48.webp'}
 												alt=""
@@ -336,8 +336,8 @@
 												height="32"
 												loading="lazy"
 											/>{/if}<span data-game
-											>{item.name}{#if item.qualifier}<span class="qualifier"
-													>{` (${item.qualifier})`}</span
+											>{item.name}{#if item.versionLabel}<span class="version-label"
+													>{` ${item.versionLabel}`}</span
 												>{/if}</span
 										></EntityLink
 									>{#if statusNote[item.status]}<small class="status-note"
@@ -708,7 +708,8 @@
 		height: var(--size-icon-row);
 		object-fit: contain;
 	}
-	.qualifier {
+	.version-label {
+		display: block;
 		color: var(--text-muted);
 	}
 	.status-note {

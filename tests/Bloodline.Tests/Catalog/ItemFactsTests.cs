@@ -453,7 +453,10 @@ public sealed class ItemFactsTests
         var page = new ItemFacts([]).Resolve(Item(category), "invented");
 
         Assert.Equal("Unknown", page.Type);
-        Assert.Null(page.Qualifier);
+        Assert.Null(page.VersionId);
+        Assert.Null(page.VersionLabel);
+        Assert.Null(page.VersionName);
+        Assert.Empty(page.Versions);
         Assert.Empty(page.Uses);
     }
 

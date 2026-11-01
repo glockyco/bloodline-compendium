@@ -118,12 +118,11 @@ function firstWay(sources: Source[]): string | null {
 
 /**
  * The description search engines and chat apps show for an item: what it is, its damage or armor, and the first way
- * to get it, as wiki descriptions open. A qualifier names the item as its title does, so same-named items differ.
+ * to get it, as wiki descriptions open.
  */
 export function describeItem(item: ItemPage, confirmedSources: Source[]): string {
-	const name = item.name + (item.qualifier ? ` (${item.qualifier})` : '');
 	return [
-		`${name} ${isPlural(item.name) ? 'are' : 'is'} ${typePhrase(item)} in The Bloodline.`,
+		`${item.name} ${isPlural(item.name) ? 'are' : 'is'} ${typePhrase(item)} in The Bloodline.`,
 		statSentence(item),
 		firstWay(confirmedSources) ?? statusSentence[item.status]
 	]

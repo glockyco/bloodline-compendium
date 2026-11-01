@@ -2,7 +2,10 @@
 	"slug": "hollow-prism",
 	"name": "Hollow Prism",
 	"type": "Curio",
-	"qualifier": null,
+	"versionId": null,
+	"versionLabel": null,
+	"versionName": null,
+	"versions": [],
 	"uses": [],
 	"description": null,
 	"category": {

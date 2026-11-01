@@ -10,6 +10,7 @@ for (const width of [1280, 390]) {
 			'/items/',
 			'/items/lanternedge/',
 			'/items/hollow-prism/',
+			'/items/twin-lantern/',
 			'/known-issues/',
 			'/about/',
 			'/missing/accessibility-probe',

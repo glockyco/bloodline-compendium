@@ -118,18 +118,12 @@ internal sealed class CatalogContext
 
     public EntityReference ItemLink(string path) =>
         Items.TryGetValue(path, out var item) && !IsExcludedClass(path)
-            ? new EntityReference(
-                EntityKind.Item,
-                item.Key,
-                ItemIdentity.DisplayName(item),
-                item.Slug,
-                item.Icon
-            )
+            ? CatalogGraph.Reference(item)
             : new EntityReference(
                 EntityKind.Item,
                 null,
                 Items.TryGetValue(path, out var excluded)
-                    ? ItemIdentity.DisplayName(excluded)
+                    ? excluded.Name
                     : ItemIdentity.Readable(ItemIdentity.ClassName(path)),
                 null,
                 null

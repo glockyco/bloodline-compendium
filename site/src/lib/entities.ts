@@ -21,5 +21,11 @@ export function entityPath(
 	kinds: EntityKindDefinition[]
 ): ResolvedPathname | null {
 	if (!entity.key || !entity.slug) return null;
-	return kindPath(entity.kind, kinds, encodeURIComponent(entity.slug) + '/');
+	return kindPath(
+		entity.kind,
+		kinds,
+		encodeURIComponent(entity.slug) +
+			'/' +
+			(entity.fragment ? '#' + encodeURIComponent(entity.fragment) : '')
+	);
 }

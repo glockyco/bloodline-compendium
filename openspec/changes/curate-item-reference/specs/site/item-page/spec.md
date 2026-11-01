@@ -85,3 +85,61 @@ Every link to an item SHALL show the item's tooltip on hover, keyboard focus and
 #### Scenario: Ingredient link
 - **WHEN** a reader focuses the Bread link on Apple Pie's page
 - **THEN** Bread's tooltip appears beside the link
+
+### Requirement: One page per in-game name
+Items with the same in-game name SHALL share the plain name and its plain slug in page titles, breadcrumbs, game cards, lists, search results and previews. Old qualified addresses SHALL NOT redirect. Items with the same type, category, icon, description, facts, on-hit effects and projectile groups SHALL merge, preserving the union of their sources, recipes, uses and bug notes.
+
+#### Scenario: Indistinguishable copies
+- **WHEN** several Dwarven Boar Spear records have the same player-visible identity
+- **THEN** one item page and one list row contain all their sources and uses
+
+### Requirement: Distinguishable versions
+A shared name with distinguishable versions SHALL offer item-slot tabs under the title. Every tab SHALL show its version's icon, with a label below unless the icons alone distinguish the versions. An icon-only tab SHALL have an accessible name. The selected slot SHALL use the game card's frame, gradient and text color. The tabs SHALL implement tablist, tab and tabpanel semantics with arrow keys, Home and End, one tab stop and visible keyboard focus.
+
+#### Scenario: Bolt-Orb
+- **WHEN** versions differ by their icons
+- **THEN** their tabs show the icons without visible labels and each tab has a distinct accessible name
+
+### Requirement: Whole-version content
+Choosing a tab SHALL switch the whole version, including identity, game card, Details, recipes, sources, uses and Bugs. Every version's content SHALL be server rendered, with the first version usable without JavaScript.
+
+#### Scenario: Copper Flintlock Pistol
+- **WHEN** a reader opens Copper Flintlock Pistol and selects its other damage tab
+- **THEN** the card, damage, sources and bugs change together without adding a qualifier to the item's name
+
+### Requirement: Version links
+A version SHALL have a stable fragment from its class name. Opening a version fragment SHALL select that version, switching SHALL update the fragment, and links from lists, recipes and sources SHALL open and preview that exact version.
+
+#### Scenario: Linked pistol version
+- **WHEN** a reader opens Copper Flintlock Pistol at `#dwarven_flintlock_pistol`
+- **THEN** the 50 Damage version is selected
+- **AND** a preview of that link shows the same version
+
+### Requirement: Versions in browsing and search
+The item list SHALL retain one row per distinguishable version, with the plain name and its label on a secondary line. Search SHALL return one result per name.
+
+#### Scenario: Searching a shared name
+- **WHEN** a reader searches for Copper Flintlock Pistol
+- **THEN** search returns one page and the item list retains its two labelled rows
+
+### Requirement: Version labels identify the difference
+Version labels SHALL use the first distinction that gives every version a distinct label, in this order: type, first differing shown stat in display order, icon alone, first source, value. Shown stats SHALL include ranged body damage and component contributions. The build SHALL fail if versions still lack distinct labels.
+
+#### Scenario: Stat wording
+- **WHEN** armor type, speed or a component contribution distinguishes versions
+- **THEN** armor type reads as "Medium Armor" or "Unarmored", speed as "Standard Speed", and contributions as "+24 Damage" or "+0.2 Speed"
+
+### Requirement: Source and value labels
+Source labels SHALL identify the pickup place, seller, container, random loot, giver, bounty or smithing recipe, using source names when source kinds tie. An absent source SHALL read "No known source". Value SHALL read as "Worth 950 gold".
+
+#### Scenario: Source and value distinctions
+- **WHEN** Incriminating Evidence differs by its source and Heavy Iron Cuirass differs only by value
+- **THEN** the evidence tabs read "Picked up in Woodhurst" and "No known source"
+- **AND** the cuirass tabs read "Worth 950 gold" and "Worth 750 gold"
+
+### Requirement: A heading keeps its count
+A wrapping section heading SHALL keep its count badge beside its last word rather than at the far edge of the row.
+
+#### Scenario: Bounty heading on a phone
+- **WHEN** "Obtained from Bounty Notes" wraps on Shield of Burnsley's note version
+- **THEN** its count follows "Notes" on the same line

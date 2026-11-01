@@ -2,6 +2,28 @@
 	"entities": [
 		{
 			"entity": {
+				"kind": "item",
+				"key": "/Invented/Items/Twin_Lantern_A",
+				"name": "Twin Lantern",
+				"slug": "twin-lantern",
+				"icon": "lanternedge",
+				"fragment": "twin_lantern_a"
+			},
+			"relations": []
+		},
+		{
+			"entity": {
+				"kind": "item",
+				"key": "/Invented/Items/Twin_Lantern_B",
+				"name": "Twin Lantern",
+				"slug": "twin-lantern",
+				"icon": "lanternedge",
+				"fragment": "twin_lantern_b"
+			},
+			"relations": []
+		},
+		{
+			"entity": {
 				"kind": "activity",
 				"key": "/Invented/Pickups/StargazerLooseLoot",
 				"name": "Stargazer loose loot",

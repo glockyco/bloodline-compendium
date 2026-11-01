@@ -35,7 +35,11 @@ internal sealed record EntityReference(
     string Name,
     string? Slug,
     string? Icon
-);
+)
+{
+    /// <summary>The item version to open within its shared-name page, without a leading hash.</summary>
+    public string? Fragment { get; init; }
+}
 
 internal enum ConditionKind
 {
@@ -181,7 +185,8 @@ internal sealed record ItemSummary(
 
     [JsonRequired]
     public string Type { get; init; } = "Unknown";
-    public string? Qualifier { get; init; }
+    public string? VersionId { get; init; }
+    public string? VersionLabel { get; init; }
 
     [JsonRequired]
     public ItemStatus Status { get; init; } = ItemStatus.Obtainable;
@@ -227,7 +232,13 @@ internal sealed record ItemPage(
 
     [JsonRequired]
     public string Type { get; init; } = "Unknown";
-    public string? Qualifier { get; init; }
+    public string? VersionId { get; init; }
+    public string? VersionLabel { get; init; }
+    public string? VersionName { get; init; }
+
+    /// <summary>The other versions on this page, in key order. These entries have no nested versions.</summary>
+    [JsonRequired]
+    public IReadOnlyList<ItemPage> Versions { get; init; } = [];
 
     public IReadOnlyList<ProjectileGroup>? ProjectileGroups { get; init; }
 

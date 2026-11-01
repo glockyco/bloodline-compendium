@@ -8,6 +8,7 @@ const merchant: EntityReference = {
 	key: '/Invented/Merchant',
 	name: 'Merchant',
 	slug: null,
+	fragment: null,
 	icon: null
 };
 
@@ -47,6 +48,12 @@ it('keeps query and fragment suffixes inside the navigation boundary', () => {
 	expect(kindPath('item', kinds, '?category=weapon#results')).toBe(
 		'/items/?category=weapon#results'
 	);
+});
+
+it('retains the exact version fragment on resolved item links', () => {
+	expect(
+		entityPath({ ...merchant, kind: 'item', slug: 'shared blade', fragment: 'bp blade_c' }, kinds)
+	).toBe('/items/shared%20blade/#bp%20blade_c');
 });
 
 it('rejects registry routes that are not local route segments', () => {

@@ -4,7 +4,8 @@
 	import RelationTable from './RelationTable.svelte';
 	import Section from './ui/Section.svelte';
 
-	let { effects }: { effects?: ItemPage['onHitEffects'] } = $props();
+	let { effects, id = 'on-hit-effects' }: { effects?: ItemPage['onHitEffects']; id?: string } =
+		$props();
 
 	type Effect = NonNullable<ItemPage['onHitEffects']>[number];
 
@@ -41,7 +42,7 @@
 </script>
 
 {#if effects?.length}
-	<Section id="on-hit-effects" title="On-Hit Effects" count={effects.length}>
+	<Section {id} title="On-Hit Effects" count={effects.length}>
 		<div class="on-hit-table">
 			<RelationTable
 				items={effects}

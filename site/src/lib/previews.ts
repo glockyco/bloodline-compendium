@@ -3,6 +3,8 @@ import type { EntityKind, Fact, ItemPage } from './site-data.js';
 /** What an item link's preview shows: the item's tooltip. */
 export interface ItemPreview {
 	kind: 'item';
+	versionId: string | null;
+	versions: ItemPreview[];
 	name: string;
 	icon: string | null;
 	description: string | null;
@@ -23,20 +25,26 @@ export type Preview = ItemPreview;
 export const previewKinds: ReadonlySet<EntityKind> = new Set<Preview['kind']>(['item']);
 
 /** The address of a kind's preview data, which `routes/tooltips/[kind]/[slug].json` prerenders. */
-export function previewPath(kind: EntityKind, slug: string): string {
-	return `/tooltips/${kind}/${encodeURIComponent(slug)}.json`;
+export function previewPath(kind: EntityKind, slug: string, fragment: string | null): string {
+	return `/tooltips/${kind}/${encodeURIComponent(slug)}.json${fragment ? '#' + encodeURIComponent(fragment) : ''}`;
 }
 
 const loaded = new Map<string, Promise<Preview | null>>();
 
 /** Loads a preview once per page, and null when it cannot be loaded. */
-export function loadPreview(path: string): Promise<Preview | null> {
-	let preview = loaded.get(path);
+export async function loadPreview(path: string): Promise<Preview | null> {
+	const [resource, fragment] = path.split('#');
+	let preview = loaded.get(resource);
 	if (!preview) {
-		preview = fetch(path)
+		preview = fetch(resource)
 			.then((response) => (response.ok ? (response.json() as Promise<Preview>) : null))
 			.catch(() => null);
-		loaded.set(path, preview);
+		loaded.set(resource, preview);
 	}
-	return preview;
+	const root = await preview;
+	if (!root || !fragment) return root;
+	const versionId = decodeURIComponent(fragment);
+	return root.versionId === versionId
+		? root
+		: (root.versions.find((version) => version.versionId === versionId) ?? root);
 }

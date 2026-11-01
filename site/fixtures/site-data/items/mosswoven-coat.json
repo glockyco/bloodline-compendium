@@ -2,7 +2,10 @@
 	"slug": "mosswoven-coat",
 	"name": "Mosswoven Coat",
 	"type": "Coat",
-	"qualifier": null,
+	"versionId": null,
+	"versionLabel": null,
+	"versionName": null,
+	"versions": [],
 	"uses": [],
 	"description": "A coat stitched from soft, rain-green fibres.",
 	"category": {

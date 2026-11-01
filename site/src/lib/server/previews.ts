@@ -2,8 +2,8 @@ import { readItem } from './data.js';
 import { entries as itemEntries } from '../../routes/items/[slug]/+page.server.js';
 import { firstRoute } from '../acquisition.js';
 import { sourceHeadings } from '../labels.js';
-import type { Preview } from '../previews.js';
-import type { SourceKind } from '../site-data.js';
+import type { ItemPreview, Preview } from '../previews.js';
+import type { ItemPage, SourceKind } from '../site-data.js';
 
 /** For each kind with previews, the slugs that have one and how a slug's preview is built. */
 export const previewSources: {
@@ -18,20 +18,27 @@ export const previewSources: {
 		},
 		async build(slug) {
 			const item = await readItem(slug);
-			return {
-				kind: 'item',
-				name: item.name + (item.qualifier ? ` (${item.qualifier})` : ''),
-				icon: item.icon,
-				description: item.description,
-				facts: item.facts,
-				projectileGroups: item.projectileGroups,
-				onHitEffects: item.onHitEffects,
-				route:
-					firstRoute(item.sources, Object.keys(sourceHeadings) as SourceKind[]) ??
-					(item.status === 'notInNormalPlay'
-						? 'Cannot be obtained in normal play.'
-						: 'No known source.')
-			};
+			return itemPreview(item);
 		}
 	}
 };
+
+/** Each grouped preview retains the tooltip of every version at the name's one resource URL. */
+export function itemPreview(item: ItemPage): ItemPreview {
+	return {
+		kind: 'item',
+		versionId: item.versionId ?? null,
+		versions: item.versions.map(itemPreview),
+		name: item.name,
+		icon: item.icon,
+		description: item.description,
+		facts: item.facts,
+		projectileGroups: item.projectileGroups,
+		onHitEffects: item.onHitEffects,
+		route:
+			firstRoute(item.sources, Object.keys(sourceHeadings) as SourceKind[]) ??
+			(item.status === 'notInNormalPlay'
+				? 'Cannot be obtained in normal play.'
+				: 'No known source.')
+	};
+}

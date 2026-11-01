@@ -22,7 +22,19 @@ const shown = (query = '') =>
 it('browses known items by default while name search finds every item', () => {
 	expect(names(shown())).toEqual(['Cinderpear', 'Lanternedge', 'Mosswoven Coat']);
 	expect(names(shown('name=prism'))).toEqual(['Hollow Prism']);
-	expect(shown('unknown=1')).toHaveLength(4);
+	expect(shown('unknown=1')).toHaveLength(6);
+});
+
+it('keeps same-name versions as separate rows and searches their secondary labels', () => {
+	const base = index.items.find((item) => item.slug === 'lanternedge')!;
+	const versions: ItemSummary[] = [
+		{ ...base, key: '/Invented/BladeA', versionId: 'bladea', versionLabel: '24 Damage' },
+		{ ...base, key: '/Invented/BladeB', versionId: 'bladeb', versionLabel: '12 Damage' }
+	];
+	expect(versions.filter((item) => matches(item, read('name=lanternedge'), index))).toHaveLength(2);
+	expect(
+		versions.filter((item) => matches(item, read('name=24'), index)).map((item) => item.key)
+	).toEqual(['/Invented/BladeA']);
 });
 
 it('counts each filter value under the other filters and hides values without items', () => {

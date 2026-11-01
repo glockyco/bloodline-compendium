@@ -103,9 +103,9 @@ it('agrees with names whose head noun is plural', () => {
 		expect(isPlural(name)).toBe(true);
 });
 
-it('names a same-named item with its qualifier, so two such items never share a description', () => {
-	const soulstaff = { ...item('Soulstaff', 'Weapon', 'Staff'), qualifier: '2' };
-	expect(describeItem(soulstaff, [])).toBe('Soulstaff (2) is a staff in The Bloodline.');
+it('keeps the game name plain when a version has a label', () => {
+	const soulstaff = { ...item('Soulstaff', 'Weapon', 'Staff'), versionLabel: '24 Damage' };
+	expect(describeItem(soulstaff, [])).toBe('Soulstaff is a staff in The Bloodline.');
 });
 
 it('leaves out a zero number and names jewelry, support items and weapon parts', () => {

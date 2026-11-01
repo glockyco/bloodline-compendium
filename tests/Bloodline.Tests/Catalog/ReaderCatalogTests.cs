@@ -8,14 +8,22 @@ namespace Bloodline.Tests.Catalog;
 public sealed class ReaderCatalogTests
 {
     [Fact]
-    public void SameNameItemsUseReadableDistinctTypesInRoutesAndLinks()
+    public void SameNameItemsUsePlainRoutesAndDistinctTypeLabels()
     {
         var blade = Item("Blade", "Iron Part", "Blade");
         var pommel = Item("Pommel", "Iron Part", "Pommel");
-        var pages = new[] { blade, pommel }.Select(item => new ItemFacts([]).Resolve(item, ""));
-        var identities = ItemIdentity.Identities(pages);
-        Assert.Equal(("iron-part-blade", "Blade"), identities[blade.Path]);
-        Assert.Equal(("iron-part-pommel", "Pommel"), identities[pommel.Path]);
+        var pages = new[] { blade, pommel }
+            .Select(item => new ItemFacts([]).Resolve(item, "iron-part"))
+            .ToArray();
+        var grouped = ItemVersions.Group(pages);
+        Assert.Equal(["iron-part", "iron-part"], grouped.Items.Select(item => item.Slug));
+        Assert.Equal(["Blade", "Pommel"], grouped.Items.Select(item => item.VersionLabel));
+        Assert.Equal("blade", grouped.References[blade.Path].Fragment);
+        Assert.Equal("pommel", grouped.References[pommel.Path].Fragment);
+        Assert.All(
+            grouped.References.Values,
+            reference => Assert.Equal("Iron Part", reference.Name)
+        );
     }
 
     [Fact]

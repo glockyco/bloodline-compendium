@@ -22,7 +22,7 @@ const routes = new Set([
 	'/known-issues/',
 	'/about/',
 	'/missing/page',
-	`/items/${top((page) => (page.name + (page.qualifier ?? '')).length)}/`,
+	`/items/${top((page) => page.name.length)}/`,
 	`/items/${top((page) => page.sources.length)}/`,
 	`/items/${top((page) => Math.max(0, ...page.sources.map((source) => source.places.length)))}/`,
 	`/items/${top((page) => page.uses.length)}/`,

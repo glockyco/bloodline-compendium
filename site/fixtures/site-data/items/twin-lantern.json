@@ -1,0 +1,91 @@
+{
+	"key": "/Invented/Items/Twin_Lantern_A",
+	"slug": "twin-lantern",
+	"name": "Twin Lantern",
+	"description": "An invented sword with a pale lantern in its guard.",
+	"category": { "slug": "weapon", "name": "Weapon" },
+	"kind": "item",
+	"type": "Sword",
+	"icon": "lanternedge",
+	"versionId": "twin_lantern_a",
+	"versionLabel": "12 Damage",
+	"versionName": "12 Damage",
+	"status": "noKnownSource",
+	"facts": [
+		{
+			"stat": "value",
+			"label": "Value",
+			"number": 45,
+			"text": null,
+			"effect": null,
+			"unit": "gold",
+			"tooltipLabel": null,
+			"gameShows": null,
+			"gameShowsIssue": null
+		},
+		{
+			"stat": "damage",
+			"label": "Damage",
+			"number": 12,
+			"text": null,
+			"effect": null,
+			"unit": null,
+			"tooltipLabel": "Damage",
+			"gameShows": null,
+			"gameShowsIssue": null
+		}
+	],
+	"sources": [],
+	"uses": [],
+	"relations": [],
+	"notes": [],
+	"projectileGroups": null,
+	"onHitEffects": null,
+	"versions": [
+		{
+			"key": "/Invented/Items/Twin_Lantern_B",
+			"slug": "twin-lantern",
+			"name": "Twin Lantern",
+			"description": "An invented sword with a bright lantern in its guard.",
+			"category": { "slug": "weapon", "name": "Weapon" },
+			"kind": "item",
+			"type": "Sword",
+			"icon": "lanternedge",
+			"versionId": "twin_lantern_b",
+			"versionLabel": "24 Damage",
+			"versionName": "24 Damage",
+			"status": "noKnownSource",
+			"facts": [
+				{
+					"stat": "value",
+					"label": "Value",
+					"number": 45,
+					"text": null,
+					"effect": null,
+					"unit": "gold",
+					"tooltipLabel": null,
+					"gameShows": null,
+					"gameShowsIssue": null
+				},
+				{
+					"stat": "damage",
+					"label": "Damage",
+					"number": 24,
+					"text": null,
+					"effect": null,
+					"unit": null,
+					"tooltipLabel": "Damage",
+					"gameShows": null,
+					"gameShowsIssue": null
+				}
+			],
+			"sources": [],
+			"uses": [],
+			"relations": [],
+			"notes": [],
+			"projectileGroups": null,
+			"onHitEffects": null,
+			"versions": []
+		}
+	]
+}

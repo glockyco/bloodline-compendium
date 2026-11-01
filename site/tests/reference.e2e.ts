@@ -29,13 +29,13 @@ test('filters items with counted facets, preserves URL state and sorts numeric v
 		'Lanternedge',
 		'Cinderpear'
 	]);
-	await page.getByRole('button', { name: 'Show 1 more without a known way to get them' }).click();
-	await expect(page.locator('.item-name').last()).toHaveText('Hollow Prism');
+	await page.getByRole('button', { name: 'Show 3 more without a known way to get them' }).click();
+	await expect(page.locator('.item-name', { hasText: 'Hollow Prism' })).toHaveText('Hollow Prism');
 	await expect(page.locator('tr', { hasText: 'Hollow Prism' })).toContainText('No known source');
 	await expect(page.locator('.item-name img').first()).toHaveAttribute('src', /-48.webp$/);
 	await page.getByRole('button', { name: 'Item', exact: true }).click();
 	await page.getByRole('button', { name: 'Item', exact: true }).click();
-	await expect(page.locator('.item-name').first()).toHaveText('Mosswoven Coat');
+	await expect(page.locator('.item-name').first()).toContainText('Twin Lantern');
 });
 
 test('name filtering combines with facets and empty results can be cleared', async ({ page }) => {
@@ -45,7 +45,11 @@ test('name filtering combines with facets and empty results can be cleared', asy
 	const name = page.getByRole('searchbox', { name: 'Search by name' });
 	await name.fill('Lantern');
 	await name.press('Enter');
-	await expect(page.locator('.item-name')).toHaveText(['Lanternedge']);
+	await expect(page.locator('.item-name')).toHaveText([
+		'Lanternedge',
+		'Twin Lantern 12 Damage',
+		'Twin Lantern 24 Damage'
+	]);
 	await expect(page).toHaveURL(/name=Lantern/);
 	await name.fill('No invented match');
 	await name.press('Enter');
@@ -505,7 +509,8 @@ test('each public page has production identity, social metadata and generated br
 			'/about/',
 			'/items/hollow-prism/',
 			'/items/lanternedge/',
-			'/items/mosswoven-coat/'
+			'/items/mosswoven-coat/',
+			'/items/twin-lantern/'
 		]
 			.map((route) => origin + route)
 			.sort()

@@ -23,13 +23,18 @@
 		class?: string;
 		children: Snippet;
 	} = $props();
+	const lastSpace = $derived(title.lastIndexOf(' '));
 </script>
 
 <section class={['section', className]} aria-labelledby={id}>
 	<header>
 		<div class="heading">
 			<h2 {id}>
-				{title}{#if count !== undefined}<span class="count">{formatNumber(count)}</span>{/if}
+				{#if count === undefined}{title}{:else}{title.slice(0, lastSpace + 1)}<span
+						class="heading-end"
+						>{title.slice(lastSpace + 1)}&nbsp;<span class="count">{formatNumber(count)}</span
+						></span
+					>{/if}
 			</h2>
 			{#if action}<div class="action">{@render action()}</div>{/if}
 		</div>
@@ -57,12 +62,12 @@
 		gap: var(--gap-inline);
 	}
 	h2 {
-		display: flex;
-		align-items: baseline;
-		gap: var(--gap-inline);
 		margin: 0;
 		font-size: var(--type-section);
 		line-height: var(--leading-heading);
+	}
+	.heading-end {
+		white-space: nowrap;
 	}
 	.count {
 		color: var(--text-muted);

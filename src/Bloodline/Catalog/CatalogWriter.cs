@@ -23,7 +23,7 @@ internal static class CatalogWriter
             CanonicalJson.Write(Path.Combine(staging, "issues.json"), catalog.Issues);
             Directory.CreateDirectory(Path.Combine(staging, "items"));
             Directory.CreateDirectory(Path.Combine(staging, "icons"));
-            foreach (var item in catalog.Items)
+            foreach (var item in ItemVersions.Pages(catalog.Items))
             {
                 CanonicalJson.Write(Path.Combine(staging, "items", item.Slug + ".json"), item);
             }

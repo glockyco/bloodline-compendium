@@ -59,14 +59,15 @@ internal static class CatalogBuilder
         var selected = records.Classes.Where(ItemIdentity.IsInventoryItem).ToArray();
         var initial = selected.ToDictionary(
             item => item.Path,
-            item => resolver.Resolve(item, ""),
+            item =>
+                resolver.Resolve(
+                    item,
+                    ItemIdentity.Slug(
+                        RecordValues.Text(RecordValues.At(item.Properties, "ItemInfo.ItemName"))!
+                    )
+                ),
             StringComparer.OrdinalIgnoreCase
         );
-        var identities = ItemIdentity.Identities(initial.Values);
-        foreach (var (id, identity) in identities)
-        {
-            initial[id] = initial[id] with { Slug = identity.Slug, Qualifier = identity.Qualifier };
-        }
         var context = new CatalogContext(records, initial, exclusions);
         var candidates = mechanisms
             .SelectMany(mechanism => mechanism.FindSources(context))
@@ -194,7 +195,78 @@ internal static class CatalogBuilder
                     new GapEntry(name, null, recipe + ": built on " + context.ItemLink(item).Name)
                 );
         }
-        var graphResult = CatalogGraph.Build(items, context.Places.All);
+        var claims = resolver.Claims.Where(claim => !context.IsExcludedClass(claim.Item)).ToArray();
+        var tooltips =
+            records.Tooltips.Count == 0
+                ? null
+                : TooltipCheck.Check(records.Build.BuildId, items, records.Tooltips, claims);
+        var pages = items.ToDictionary(item => item.Key, StringComparer.Ordinal);
+        // Known causes are owned elsewhere, so coverage lists only the differences that no cause explains.
+        foreach (
+            var difference in tooltips?.Differences.Where(difference => difference.Reason is null)
+                ?? []
+        )
+        {
+            var item = pages[difference.Item];
+            gapEntries[GapKind.TooltipDifference]
+                .Add(
+                    new GapEntry(
+                        item.Name,
+                        CatalogGraph.Reference(item),
+                        TooltipCheck.Describe(difference)
+                    )
+                );
+        }
+        // Issue causes cite code as facts do, so they fail on the same missing or partly parsed functions.
+        if (records.Code is { } code)
+        {
+            foreach (var issue in records.Issues.Issues)
+            {
+                ClaimCitations.Resolve("Known issue " + issue.Id, issue.Citations, code);
+            }
+        }
+        var (noted, issues) = KnownIssues.Attach(
+            TooltipCheck.WithGameShows(items, tooltips),
+            records.Issues,
+            tooltips,
+            resolver.IgnoredFoodEffects,
+            resolver.UntrainedWeapons
+        );
+        var grouped = ItemVersions.Group(noted);
+        var graphResult = CatalogGraph.Build(grouped.Items, context.Places.All, grouped.References);
+        var canonicalItems = graphResult.Items.ToDictionary(
+            item => item.Key,
+            StringComparer.Ordinal
+        );
+        EntityReference Canonical(EntityReference reference) =>
+            reference.Kind == EntityKind.Item
+            && reference.Key is { } key
+            && grouped.References.TryGetValue(key, out var canonical)
+                ? canonical
+                : reference;
+        issues = issues
+            .Select(issue =>
+                issue with
+                {
+                    Affected = issue.Affected.Select(Canonical).Distinct().ToArray(),
+                }
+            )
+            .ToArray();
+        foreach (var entries in gapEntries.Values)
+        {
+            for (var index = 0; index < entries.Count; index++)
+            {
+                var entry = entries[index];
+                if (entry.Entity is { } entity)
+                    entries[index] = entry with { Entity = Canonical(entity) };
+            }
+        }
+        gapEntries[GapKind.ItemWithoutSource]
+            .RemoveAll(entry =>
+                entry.Entity?.Key is { } key
+                && canonicalItems.TryGetValue(key, out var item)
+                && item.Sources.Any(source => !source.Unconfirmed)
+            );
         var withoutPages = EntityKinds
             .All.Where(kind => !kind.HasPages)
             .Select(kind => kind.Kind)
@@ -247,50 +319,8 @@ internal static class CatalogBuilder
                     );
             }
         }
-        var claims = resolver.Claims.Where(claim => !context.IsExcludedClass(claim.Item)).ToArray();
-        var tooltips =
-            records.Tooltips.Count == 0
-                ? null
-                : TooltipCheck.Check(
-                    records.Build.BuildId,
-                    graphResult.Items,
-                    records.Tooltips,
-                    claims
-                );
-        var pages = graphResult.Items.ToDictionary(item => item.Key, StringComparer.Ordinal);
-        // Known causes are owned elsewhere, so coverage lists only the differences that no cause explains.
-        foreach (
-            var difference in tooltips?.Differences.Where(difference => difference.Reason is null)
-                ?? []
-        )
-        {
-            var item = pages[difference.Item];
-            gapEntries[GapKind.TooltipDifference]
-                .Add(
-                    new GapEntry(
-                        item.Name,
-                        CatalogGraph.Reference(item),
-                        TooltipCheck.Describe(difference)
-                    )
-                );
-        }
-        // Issue causes cite code as facts do, so they fail on the same missing or partly parsed functions.
-        if (records.Code is { } code)
-        {
-            foreach (var issue in records.Issues.Issues)
-            {
-                ClaimCitations.Resolve("Known issue " + issue.Id, issue.Citations, code);
-            }
-        }
-        var (noted, issues) = KnownIssues.Attach(
-            TooltipCheck.WithGameShows(graphResult.Items, tooltips),
-            records.Issues,
-            tooltips,
-            resolver.IgnoredFoodEffects,
-            resolver.UntrainedWeapons
-        );
-        var ordered = noted
-            .OrderBy(item => item.Name, StringComparer.OrdinalIgnoreCase)
+        var ordered = graphResult
+            .Items.OrderBy(item => item.Name, StringComparer.OrdinalIgnoreCase)
             .ThenBy(item => item.Key, StringComparer.Ordinal)
             .ToArray();
         var summaries = ordered
@@ -304,7 +334,8 @@ internal static class CatalogBuilder
             {
                 Key = item.Key,
                 Type = item.Type,
-                Qualifier = item.Qualifier,
+                VersionId = item.VersionId,
+                VersionLabel = item.VersionLabel,
                 Status = item.Status,
                 Facets = ItemList.FacetsOf(item),
                 Cells = ItemList.CellsOf(item),

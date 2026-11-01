@@ -4,7 +4,7 @@
 			"slug": "weapon",
 			"name": "Weapon",
 			"plural": "Weapons",
-			"count": 1
+			"count": 3
 		},
 		{
 			"slug": "armour",
@@ -30,7 +30,8 @@
 			"slug": "cinderpear",
 			"name": "Cinderpear",
 			"type": "Fruit",
-			"qualifier": null,
+			"versionId": null,
+			"versionLabel": null,
 			"category": "food",
 			"value": 8,
 			"icon": "cinderpear",
@@ -50,7 +51,8 @@
 			"slug": "hollow-prism",
 			"name": "Hollow Prism",
 			"type": "Curio",
-			"qualifier": null,
+			"versionId": null,
+			"versionLabel": null,
 			"category": "curio",
 			"value": null,
 			"icon": null,
@@ -69,7 +71,8 @@
 			"slug": "lanternedge",
 			"name": "Lanternedge",
 			"type": "Sword",
-			"qualifier": null,
+			"versionId": null,
+			"versionLabel": null,
 			"category": "weapon",
 			"value": 45,
 			"icon": "lanternedge",
@@ -99,7 +102,8 @@
 			"slug": "mosswoven-coat",
 			"name": "Mosswoven Coat",
 			"type": "Coat",
-			"qualifier": null,
+			"versionId": null,
+			"versionLabel": null,
 			"category": "armour",
 			"value": 90,
 			"icon": "mosswoven-coat",
@@ -119,6 +123,48 @@
 				}
 			},
 			"placeSources": [["enemyDrop"]]
+		},
+		{
+			"slug": "twin-lantern",
+			"name": "Twin Lantern",
+			"type": "Sword",
+			"versionId": "twin_lantern_a",
+			"versionLabel": "12 Damage",
+			"category": "weapon",
+			"value": 45,
+			"icon": "lanternedge",
+			"key": "/Invented/Items/Twin_Lantern_A",
+			"kind": "item",
+			"status": "noKnownSource",
+			"facets": {
+				"category": ["weapon"],
+				"source": [],
+				"availability": ["noKnownSource"],
+				"weaponType": ["Sword"]
+			},
+			"cells": { "damage": { "number": 12, "text": null } },
+			"placeSources": []
+		},
+		{
+			"slug": "twin-lantern",
+			"name": "Twin Lantern",
+			"type": "Sword",
+			"versionId": "twin_lantern_b",
+			"versionLabel": "24 Damage",
+			"category": "weapon",
+			"value": 45,
+			"icon": "lanternedge",
+			"key": "/Invented/Items/Twin_Lantern_B",
+			"kind": "item",
+			"status": "noKnownSource",
+			"facets": {
+				"category": ["weapon"],
+				"source": [],
+				"availability": ["noKnownSource"],
+				"weaponType": ["Sword"]
+			},
+			"cells": { "damage": { "number": 24, "text": null } },
+			"placeSources": []
 		}
 	],
 	"facets": [

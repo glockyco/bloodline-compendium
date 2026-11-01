@@ -8,7 +8,7 @@ internal static class CatalogGraphCheck
     {
         var registry = kinds.ToDictionary(kind => kind.Kind);
         var entities = new Dictionary<(EntityKind, string), EntityDocument>();
-        var slugs = new HashSet<(EntityKind, string)>();
+        var slugs = new HashSet<(EntityKind, string, string?)>();
         var projections =
             new Dictionary<(EntityKind, string, string, RelationDirection), EntityRelation>();
         foreach (var document in graph.Entities)
@@ -22,9 +22,11 @@ internal static class CatalogGraphCheck
             {
                 throw new InvalidDataException($"Duplicate {entity.Kind} key: {key}.");
             }
-            if (entity.Slug is { } slug && !slugs.Add((entity.Kind, slug)))
+            if (entity.Slug is { } slug && !slugs.Add((entity.Kind, slug, entity.Fragment)))
             {
-                throw new InvalidDataException($"Duplicate {entity.Kind} slug: {slug}.");
+                throw new InvalidDataException(
+                    $"Duplicate {entity.Kind} slug/fragment: {slug}#{entity.Fragment}."
+                );
             }
             foreach (var relation in document.Relations)
             {

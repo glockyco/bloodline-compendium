@@ -11,7 +11,8 @@ internal static class CatalogGraph
 {
     public static GraphResult Build(
         IReadOnlyList<ItemPage> items,
-        IEnumerable<EntityReference>? references = null
+        IEnumerable<EntityReference>? references = null,
+        IReadOnlyDictionary<string, EntityReference>? itemReferences = null
     )
     {
         var entities = new Dictionary<(EntityKind Kind, string Key), EntityReference>();
@@ -22,9 +23,16 @@ internal static class CatalogGraph
         var outputs = items.ToDictionary(item => item.Key, StringComparer.Ordinal);
         EntityReference Resolve(EntityReference reference)
         {
+            if (
+                reference.Kind == EntityKind.Item
+                && reference.Key is { } original
+                && itemReferences is not null
+                && itemReferences.TryGetValue(original, out var canonical)
+            )
+                reference = canonical;
             if (reference.Key is not { } key)
             {
-                return reference with { Slug = null, Icon = null };
+                return reference with { Slug = null, Icon = null, Fragment = null };
             }
             var identity = (reference.Kind, key);
             if (entities.TryGetValue(identity, out var known))
@@ -255,7 +263,10 @@ internal static class CatalogGraph
     }
 
     public static EntityReference Reference(ItemPage item) =>
-        new(EntityKind.Item, item.Key, ItemIdentity.DisplayName(item), item.Slug, item.Icon);
+        new(EntityKind.Item, item.Key, item.Name, item.Slug, item.Icon)
+        {
+            Fragment = item.VersionId,
+        };
 
     private static string Id<T>(
         string kind,

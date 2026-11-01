@@ -259,6 +259,12 @@
     },
     "EntityReference": {
       "properties": {
+        "fragment": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "icon": {
           "type": [
             "string",
@@ -533,12 +539,6 @@
             "null"
           ]
         },
-        "qualifier": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
         "relations": {
           "items": {
             "$ref": "#/$defs/EntityRelation"
@@ -565,6 +565,30 @@
             "$ref": "#/$defs/ItemUse"
           },
           "type": "array"
+        },
+        "versionId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "versionLabel": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "versionName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "versions": {
+          "items": {
+            "$ref": "#/$defs/ItemPage"
+          },
+          "type": "array"
         }
       },
       "required": [
@@ -579,6 +603,7 @@
         "kind",
         "relations",
         "type",
+        "versions",
         "uses",
         "notes",
         "status"
@@ -638,12 +663,6 @@
           },
           "type": "array"
         },
-        "qualifier": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
         "slug": {
           "type": "string"
         },
@@ -656,6 +675,18 @@
         "value": {
           "type": [
             "integer",
+            "null"
+          ]
+        },
+        "versionId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "versionLabel": {
+          "type": [
+            "string",
             "null"
           ]
         }

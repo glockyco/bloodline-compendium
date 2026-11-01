@@ -18,7 +18,7 @@ export async function entityGraphGate(directory, pages) {
   }
   const identity = (entity) => JSON.stringify([entity.kind, entity.key]);
   const documents = new Map();
-  const slugs = new Set();
+  const slugs = new Map();
   function reference(entity) {
     const kind = registry.get(entity.kind);
     if (!kind) throw new Error("Unregistered entity kind " + entity.kind);
@@ -34,6 +34,8 @@ export async function entityGraphGate(directory, pages) {
     const canonical = documents.get(identity(entity)).entity;
     if (canonical.slug !== entity.slug)
       throw new Error("Reference slug differs for " + entity.key);
+    if ((canonical.fragment ?? null) !== (entity.fragment ?? null))
+      throw new Error("Reference version differs for " + entity.key);
   }
   for (const document of graph.entities) {
     const entity = document.entity;
@@ -45,9 +47,19 @@ export async function entityGraphGate(directory, pages) {
     documents.set(key, document);
     if (entity.slug) {
       const slug = JSON.stringify([entity.kind, entity.slug]);
-      if (slugs.has(slug))
+      const versions = slugs.get(slug) ?? [];
+      if (
+        versions.some(
+          (version) =>
+            !version.fragment ||
+            !entity.fragment ||
+            version.fragment === entity.fragment ||
+            version.name !== entity.name,
+        )
+      )
         throw new Error("Duplicate entity slug " + entity.slug);
-      slugs.add(slug);
+      versions.push(entity);
+      slugs.set(slug, versions);
     }
   }
   const rows = new Map();
@@ -99,6 +111,8 @@ export async function entityGraphGate(directory, pages) {
       : null;
     const page = path ? pages.get(path) : null;
     if (path && !page) throw new Error("Missing entity page " + path);
+    if (entity.fragment && !page?.ids.has(entity.fragment))
+      throw new Error("Missing entity version " + path + "#" + entity.fragment);
     for (const relation of document.relations) {
       reference(relation.entity);
       const row = rows.get(relation.id);
