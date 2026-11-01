@@ -163,7 +163,7 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 	await expect(page.locator('article')).not.toContainText('Selection weight');
 	await page.goto('/items/mosswoven-coat/');
 	await expect(page.locator('.source-group')).toContainText('20%');
-	await expect(page.locator('.source-group')).toContainText('per kill');
+	await expect(page.locator('.source-group')).toContainText('Chance per Kill');
 	await page.goto('/items/cinderpear/');
 	// A merchant that takes the item as payment is listed apart from the recipes that use it.
 	await expect(page.getByRole('table', { name: 'Used for' })).not.toContainText('Orris');
@@ -196,7 +196,7 @@ test('keeps unconfirmed sources at the end without advertising a way to get the 
 			'only-in-game-files'
 		);
 		const files = page.getByRole('table', { name: 'Only in the Game Files' });
-		await expect(files.getByRole('columnheader')).toHaveText(['Source', 'Missing evidence']);
+		await expect(files.getByRole('columnheader')).toHaveText(['Source', 'Missing Evidence']);
 		const dialogue = files.getByRole('row').filter({ hasText: 'The Silent Curator' });
 		await expect(dialogue).toContainText('Glass Reach');
 		await expect(
@@ -235,7 +235,7 @@ test('shows loose-loot chances beside ordinary pickups without calling them cont
 		await page.goto('/items/lanternedge/');
 		const pickups = page.locator('section[aria-labelledby="source-pickup"]');
 		const table = pickups.getByRole('table');
-		await expect(table.getByRole('columnheader')).toHaveText(['Item', 'Chance per loot spot']);
+		await expect(table.getByRole('columnheader')).toHaveText(['Item', 'Chance per Loot Spot']);
 		await expect(table.getByRole('row').filter({ hasText: 'Stargazer loose loot' })).toContainText(
 			'25%'
 		);
@@ -262,7 +262,7 @@ test('separates container spawns from loot chances on desktop and labelled phone
 			'Container',
 			'Quantity',
 			'Spawns',
-			'Chance per container'
+			'Chance per Container'
 		]);
 		const row = table.locator('.source-row').filter({ hasText: 'Stargazer cache' });
 		await expect(row.locator('.spawn-value')).toHaveText('25% to 100%');
@@ -280,7 +280,7 @@ test('separates container spawns from loot chances on desktop and labelled phone
 				await row
 					.locator('.context-value')
 					.evaluate((cell) => getComputedStyle(cell, '::before').content)
-			).toBe('"Chance per container"');
+			).toBe('"Chance per Container"');
 		}
 	}
 	await page.goto('/items/mosswoven-coat/');

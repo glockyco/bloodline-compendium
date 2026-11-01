@@ -36,6 +36,11 @@ const oddsLabels: Record<OddsEvent, string> = {
 	pick: 'per item gathered'
 };
 
+/** A chance's event as a column heading writes it, such as per Container: every word capitalized but per. */
+export function headingCase(label: string): string {
+	return label.replace(/\b(?!per\b)[a-z]/g, (letter) => letter.toUpperCase());
+}
+
 /** What a chance applies to, such as per container. A pick is one item that a gather or harvest yields. */
 export function oddsLabel(odds: Odds, kind: SourceKind): string {
 	if (odds.event === 'pick') return kind === 'farming' ? 'per item harvested' : 'per item gathered';

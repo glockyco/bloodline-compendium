@@ -12,6 +12,7 @@
 	import ItemTooltip from '#lib/ItemTooltip.svelte';
 	import { sourceColumns, sourceHeadings, sourceIntros, titleCase } from '#lib/labels.js';
 	import {
+		headingCase,
 		oddsLabel,
 		recipeKinds,
 		sortSources,
@@ -70,7 +71,7 @@
 				const contextHeading = sources.some((source) => source.price)
 					? 'Price'
 					: sharedUnit
-						? `Chance ${events[0]}`
+						? `Chance ${headingCase(events[0])}`
 						: 'Chance';
 				return {
 					kind,
@@ -386,7 +387,7 @@
 					<RelationTable
 						items={unconfirmedSources}
 						label="Only in the Game Files"
-						headings={['Source', 'Missing evidence']}
+						headings={['Source', 'Missing Evidence']}
 						numeric={false}
 						>{#snippet row(source, index)}<tr
 								id={`unconfirmed-source-${index + 1}`}
