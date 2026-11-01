@@ -704,23 +704,16 @@ public sealed class ItemFactsTests
         "Halberd",
         "/Game/Invented/FairyStaff.FairyStaff_C",
         "Staff",
-        "Swings like a halberd and trains no weapon proficiency."
+        null
     )]
-    [InlineData(
-        "STAFF",
-        "Shortsword",
-        "Halberd",
-        "/Game/Invented/Other.Other_C",
-        "Staff",
-        "Swings like a halberd and trains no weapon proficiency."
-    )]
+    [InlineData("STAFF", "Shortsword", "Halberd", "/Game/Invented/Other.Other_C", "Staff", null)]
     [InlineData(
         "Nameless",
         "Shortsword",
         "Halberd",
         "/Game/Weapons/Staves/Other.Other_C",
         "Staff",
-        "Swings like a halberd and trains no weapon proficiency."
+        null
     )]
     [InlineData(
         "Staff of Minor Flames",
@@ -728,7 +721,7 @@ public sealed class ItemFactsTests
         "Halberd",
         "/Game/Invented/StaffOfMinorFlames.StaffOfMinorFlames_C",
         "Staff",
-        "Swings like a halberd, launches a projectile for 5 mana and trains no weapon proficiency. Projectile damage is unknown because its normal projectile's damage could not be read."
+        null
     )]
     [InlineData(
         "Staff of Minor Rot",
@@ -736,7 +729,7 @@ public sealed class ItemFactsTests
         "Halberd",
         "/Game/Invented/StaffOfMinorRot.StaffOfMinorRot_C",
         "Staff",
-        "Swings like a halberd, launches a projectile for 5 mana and trains no weapon proficiency. Projectile damage is unknown because its normal projectile's damage could not be read."
+        null
     )]
     [InlineData(
         "Halberd",
@@ -778,6 +771,36 @@ public sealed class ItemFactsTests
             behavior,
             page.Facts.SingleOrDefault(fact => fact.Stat == Stat.WeaponBehavior)?.Text
         );
+    }
+
+    [Theory]
+    [InlineData("Halberd", "Shortsword", true)]
+    [InlineData("Halberd", "Staff", false)]
+    // Copper Battleaxe: typed Halberd for the inventory, while its hits pass the Two Handed attack type.
+    [InlineData("Two Handed Weapon", "Greatsword", false)]
+    public void OnlyHalberdAttacksOfWeaponsOutsideTheStaffClassTrainNoProficiency(
+        string attack,
+        string weaponClass,
+        bool untrained
+    )
+    {
+        var item = Item("Weapon");
+        item.Properties["ItemInfo"]!["WeaponType"] = Parse(
+            """{"$enum":"E_AttackType::Halberd","display":"Halberd"}"""
+        );
+        item.Properties["WeaponInfo"] = new JsonObject
+        {
+            ["AttackType"] = Parse(
+                $$"""{"$enum":"E_AttackType::{{attack}}","display":"{{attack}}"}"""
+            ),
+        };
+        item.Properties["Weapon Class"] = Parse(
+            $$"""{"$enum":"WeaponTypes::{{weaponClass}}","display":"{{weaponClass}}"}"""
+        );
+        var resolver = new ItemFacts([]);
+        resolver.Resolve(item, "invented");
+
+        Assert.Equal(untrained, resolver.UntrainedWeapons.Contains(item.Path));
     }
 
     [Fact]

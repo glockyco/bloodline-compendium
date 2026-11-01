@@ -162,7 +162,13 @@ public sealed class KnownIssueTests
             Issue(KnownIssues.StaffPointBlankDamage),
         ]);
 
-        var (pages, issues) = KnownIssues.Attach(items, registry, null, new HashSet<string>());
+        var (pages, issues) = KnownIssues.Attach(
+            items,
+            registry,
+            null,
+            new HashSet<string>(),
+            new HashSet<string>()
+        );
 
         foreach (var test in cases)
         {
@@ -210,7 +216,13 @@ public sealed class KnownIssueTests
         var page = template with { Key = key, Name = "Invented staff", Type = "Staff" };
 
         var error = Assert.Throws<InvalidDataException>(() =>
-            KnownIssues.Attach([page], new KnownIssueRegistry([]), null, new HashSet<string>())
+            KnownIssues.Attach(
+                [page],
+                new KnownIssueRegistry([]),
+                null,
+                new HashSet<string>(),
+                new HashSet<string>()
+            )
         );
 
         Assert.Contains(issue, error.Message);
@@ -258,7 +270,13 @@ public sealed class KnownIssueTests
             Issue(KnownIssues.KneeArmor),
         ]);
 
-        var (pages, issues) = KnownIssues.Attach([page], registry, report, new HashSet<string>());
+        var (pages, issues) = KnownIssues.Attach(
+            [page],
+            registry,
+            report,
+            new HashSet<string>(),
+            new HashSet<string>()
+        );
 
         Assert.Equal(
             ["armor-without-row", KnownIssues.KneeArmor],
@@ -274,6 +292,7 @@ public sealed class KnownIssueTests
                 [page],
                 new KnownIssueRegistry([Issue("armor-without-row"), Issue(KnownIssues.KneeArmor)]),
                 report,
+                new HashSet<string>(),
                 new HashSet<string>()
             )
         );

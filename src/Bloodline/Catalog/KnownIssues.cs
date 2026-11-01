@@ -26,6 +26,9 @@ internal static partial class KnownIssues
     /// <summary>Reproduced staves can deal default projectile damage at point-blank range.</summary>
     public const string StaffPointBlankDamage = "staff-point-blank-damage";
 
+    /// <summary>Halberd-type weapons, staves of other classes among them, whose hits train no proficiency.</summary>
+    public const string NoProficiency = "halberds-train-no-proficiency";
+
     // Only staves whose point-blank damage was reproduced receive this note, not every late damage write.
     private static readonly HashSet<string> PointBlankStaves = new(StringComparer.Ordinal)
     {
@@ -91,13 +94,15 @@ internal static partial class KnownIssues
 
     /// <summary>
     /// Adds notes for tooltip differences concerning shown values, knee armor, ignored food effects,
-    /// foods that eating ignores, staves without their promised fireballs and reproduced point-blank staff damage.
+    /// foods that eating ignores, staves without their promised fireballs, reproduced point-blank staff damage and
+    /// weapons whose hits train no proficiency.
     /// </summary>
     public static (IReadOnlyList<ItemPage> Items, IReadOnlyList<PublishedIssue> Issues) Attach(
         IReadOnlyList<ItemPage> items,
         KnownIssueRegistry registry,
         TooltipReport? tooltips,
-        IReadOnlySet<string> ignoredFoodEffects
+        IReadOnlySet<string> ignoredFoodEffects,
+        IReadOnlySet<string> untrainedWeapons
     )
     {
         var issues = registry.Issues.ToDictionary(issue => issue.Id, StringComparer.Ordinal);
@@ -152,6 +157,10 @@ internal static partial class KnownIssues
             {
                 notes[item.Key].Add(StaffPointBlankDamage);
             }
+            if (untrainedWeapons.Contains(item.Key))
+            {
+                notes[item.Key].Add(NoProficiency);
+            }
         }
         foreach (var issue in registry.Issues)
         {
@@ -173,9 +182,13 @@ internal static partial class KnownIssues
                         .Select(id => Find(id, "The page of " + item.Name))
                         .Select(issue => new IssueNote(
                             issue.Id,
-                            issue.Id is "armor-without-row" or "armor-slot-adds-none"
-                                ? $"Wearing {item.Name} adds no armor."
-                                : issue.ItemNotes?.GetValueOrDefault(item.Key) ?? issue.Effect
+                            issue.Id switch
+                            {
+                                "armor-without-row" or "armor-slot-adds-none" =>
+                                    $"Wearing {item.Name} adds no armor.",
+                                NoProficiency => $"{item.Name} trains no weapon proficiency.",
+                                _ => issue.ItemNotes?.GetValueOrDefault(item.Key) ?? issue.Effect,
+                            }
                         ))
                         .ToArray(),
                 }

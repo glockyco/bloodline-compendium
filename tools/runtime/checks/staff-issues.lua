@@ -1,4 +1,4 @@
--- lab setup: supplies and equips the requested staff, restores mana between checks, and spawns a Goblin Brute
+-- lab setup: supplies and equips the requested weapon, restores mana between checks, and spawns a Goblin Brute
 -- at a measured distance with movement, actor and behavior ticks disabled. Attacks use the live input bindings.
 -- Damage, health, armor, combo and proficiency are not edited. Pausing preserves visible bars for screenshots.
 local p = requirePlayer()
@@ -30,6 +30,7 @@ end
 local function snapshot()
     local enemy = state.enemy
     local weapon = p['Equipped Weapon']
+    local saved = p['Persistant Ref']
     return {
         mana = p['Current Mana'], maximumMana = p['Maximum Mana'],
         enemyHealth = enemy and enemy:IsValid() and enemy.Health or nil,
@@ -37,6 +38,11 @@ local function snapshot()
         weapon = weapon:IsValid() and weapon:GetFullName() or nil,
         combo = p['Halberd Combo Counter'], sheathed = p['Has Weapon Sheathed'],
         damageMultiplier = p['Damage Multiplier'],
+        -- The experience of the five proficiencies that melee hits award.
+        experience = {
+            oneHanded = saved['One Handed EXP'], twoHanded = saved['Two Handed EXP'], staff = saved['Staff EXP'],
+            spear = saved['Spear EXP'], dagger = saved['Dagger EXP'],
+        },
     }
 end
 
@@ -102,6 +108,13 @@ elseif args.action == 'close-tooltip' then
     state.tooltip = nil
     p['Open/Close Character Sheet'](p)
     return snapshot()
+elseif args.action == 'passive-levels' then
+    -- The character sheet's Detailed Stats lists the passive levels with their EXP as of the moment it opens. The
+    -- window stays open after the sheet closes.
+    commands['open-sheet']({})
+    press(live('CharacterSheet_C'), 'StatWindowButton')
+    p['Open/Close Character Sheet'](p)
+    return snapshot()
 elseif args.action == 'target' then
     if state.enemy and state.enemy:IsValid() then state.enemy:K2_DestroyActor() end
     local rotation = controller:GetControlRotation()
@@ -151,7 +164,9 @@ handle = LoopInGameThreadAfterFrames(1, function()
             if t > 8 then error('Could not reach the second normal combo attack through swings') end
         else
             if args.action == 'attack' and not pressed and t > 0.2 and not p.IsAttacking then
-                calls[#calls + 1] = input(1)
+                -- Halberd-type weapons swing through the release alone, as prime uses it. Pressed and released
+                -- 0.08 seconds apart, Lonland Halberd and Copper Battleaxe landed no hit at any tested distance.
+                if not args.releaseOnly then calls[#calls + 1] = input(1) end
                 pressed = t
             end
             if pressed and not released and t > pressed + 0.08 then

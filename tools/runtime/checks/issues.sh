@@ -116,3 +116,18 @@ for staff in "Halberds/WalkingStick 600" "Staves/AdeptCryomancerStaff 600" "Stav
   staff_check "{\"action\":\"target\",\"distance\":${staff#* }}"
   staff_check '{"action":"attack","pauseOnHit":true,"seconds":3}'
 done
+
+# halberds-train-no-proficiency: one hit each on a fresh Goblin Brute, then Detailed Stats' passive levels. Bloodforged
+# Blade trains One-Handed Weapons and Copper Battleaxe Two-Handed Weapons, while Lonland Halberd and Fairy Staff train
+# none. The window stays on screen once open, so it opens last, and each hit's EXP before and after is in the run's log.
+for weapon in "sword 1HandedWeapons/1HSword_BloodforgedBlade false" \
+  "copper Copper1HWeapons/Copper_Great_Battleaxe true" "halberd Halberds/LonlandHalberd true" \
+  "fairy Halberds/FairyStaff true"; do
+  read -r name path release <<<"$weapon"
+  staff_check "{\"action\":\"equip\",\"item\":\"$item/Weapons/$path.${path##*/}_C\"}"
+  staff_check '{"action":"target","distance":130}'
+  staff_check "{\"action\":\"attack\",\"pauseOnHit\":true,\"seconds\":3,\"releaseOnly\":$release}"
+  lab capture-screen "proficiency-$name-hit"
+done
+staff_check '{"action":"passive-levels"}'
+lab capture-screen proficiency-after

@@ -217,6 +217,28 @@
       "builds": [24464547],
       "report": "notReported",
       "reportUrl": null
+    },
+    {
+      "id": "halberds-train-no-proficiency",
+      "title": "Twenty-one weapons train no weapon proficiency",
+      "effect": "Hits with these weapons add no EXP to One-Handed Weapons, Two-Handed Weapons or any other passive level.",
+      "workaround": null,
+      "steps": [
+        "Open the character sheet and choose Detailed Stats. Under Passive Levels, One-Handed Weapons and Two-Handed Weapons show 0/50 EXP on a new character.",
+        "Equip and draw Lonland Halberd and hit an enemy once.",
+        "Open Detailed Stats again. No passive level shows more EXP.",
+        "Hit an enemy once with Bloodforged Blade and open Detailed Stats again. One-Handed Weapons shows 2/50 EXP."
+      ],
+      "expected": "Each hit adds EXP to a passive level, as hits with other melee weapons do.",
+      "observed": "Hits with Lonland Halberd, Standard Greataxe, Fairy Staff and each other affected weapon add no EXP to any passive level. A hit with Bloodforged Blade adds 2 EXP to One-Handed Weapons, a hit with Copper Battleaxe 2 EXP to Two-Handed Weapons, and hits with staves such as Moonstone Staff add EXP to Focuses.",
+      "cause": "A melee hit passes the weapon's WeaponInfo.AttackType to Add Proper Weapon EXP. One-handed, dagger, spear and two-handed attacks each add EXP to their passive level. A halberd attack adds Staff EXP, which Detailed Stats shows as Focuses, only when the weapon's Weapon Class is Staff, and nothing for any other class. Copper Battleaxe swings like a halberd but passes the two-handed attack type, so it trains Two-Handed Weapons.",
+      "citations": [
+        "/Game/AIBehaviorToolkit/Blueprints/Goblin_Base:Damage From Player Melee",
+        "/Game/BloodlinesAlpha/UI/CharacterSheet/PlayerPassiveLevelStatComponent:Add Proper Weapon EXP"
+      ],
+      "builds": [24464547],
+      "report": "notReported",
+      "reportUrl": null
     }
   ]
 }

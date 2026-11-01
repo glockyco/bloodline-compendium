@@ -286,7 +286,8 @@ internal static class CatalogBuilder
             TooltipCheck.WithGameShows(graphResult.Items, tooltips),
             records.Issues,
             tooltips,
-            resolver.IgnoredFoodEffects
+            resolver.IgnoredFoodEffects,
+            resolver.UntrainedWeapons
         );
         var ordered = noted
             .OrderBy(item => item.Name, StringComparer.OrdinalIgnoreCase)

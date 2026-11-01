@@ -22,6 +22,14 @@ internal sealed class ItemFacts(
     /// <summary>Foods whose effect row lists an effect name that the food manager's switch does not apply.</summary>
     public IReadOnlySet<string> IgnoredFoodEffects => ignoredFoodEffects;
 
+    private readonly HashSet<string> untrainedWeapons = new(StringComparer.Ordinal);
+
+    /// <summary>
+    /// Weapons whose hits award no proficiency experience. A hit passes the weapon's attack type to the game's
+    /// proficiency award, which gives a Halberd attack's experience only to a weapon of the Staff class.
+    /// </summary>
+    public IReadOnlySet<string> UntrainedWeapons => untrainedWeapons;
+
     private readonly Dictionary<string, string?> enumDisplays = enums
         .SelectMany(record => record.Entries.Select(entry => (entry.Name, entry.Display)))
         .GroupBy(entry => entry.Name, StringComparer.Ordinal)
@@ -304,25 +312,12 @@ internal sealed class ItemFacts(
             {
                 Add(Stat.MagazineSize, "WeaponInfo.MagazineSize");
             }
-            if (type == "Staff" && Display(properties["Weapon Class"]) != "Staff")
+            if (
+                Display(RecordValues.At(properties, "WeaponInfo.AttackType")) == "Halberd"
+                && Display(properties["Weapon Class"]) != "Staff"
+            )
             {
-                facts.Add(
-                    StatVocabulary.Text(
-                        Stat.WeaponBehavior,
-                        (
-                            hasSeparateProjectile
-                                ? "Swings like a halberd, launches a projectile for 5 mana and trains no weapon proficiency."
-                                : "Swings like a halberd and trains no weapon proficiency."
-                        )
-                            + (
-                                hasSeparateProjectile
-                                && facts.Single(fact => fact.Stat == Stat.ProjectileDamage).Number
-                                    is null
-                                    ? " Projectile damage is unknown because its normal projectile's damage could not be read."
-                                    : ""
-                            )
-                    )
-                );
+                untrainedWeapons.Add(item.Path);
             }
         }
         if (category == "Armor")
