@@ -15,23 +15,17 @@
 		oddsLabel,
 		recipeKinds,
 		sortSources,
-		firstRoute,
 		summarize,
 		useHeadings,
 		pricePhrase
 	} from '#lib/acquisition.js';
 	import RecipeLine from '#lib/RecipeLine.svelte';
 	import { formatNumber } from '#lib/format.js';
-	import { factValue } from '#lib/stats.js';
-	import type { ItemStatus, Source, SourceKind } from '#lib/site-data.js';
+	import type { Source, SourceKind } from '#lib/site-data.js';
 	import SeoHead from '#lib/SeoHead.svelte';
+	import { describeItem, statusSentence } from '#lib/describe.js';
 	let { data } = $props();
 	const item = $derived(data.item);
-	const statusSentence: Record<ItemStatus, string> = {
-		obtainable: '',
-		noKnownSource: 'No known source. It may come from a quest or event.',
-		notInNormalPlay: 'This item cannot be obtained in normal play. It only appears in test areas.'
-	};
 	// An item page exists only for a kind the registry gives pages.
 	const kind = $derived(data.kinds.find((entry) => entry.kind === item.kind)!);
 	const itemsPath = $derived(kindPath(item.kind, data.kinds)!);
@@ -167,19 +161,7 @@
 	function useLabel(kind: SourceKind): string {
 		return useHeadings[kind] ?? sourceHeadings[kind];
 	}
-	const description = $derived(
-		[
-			`${displayName}: ${titleCase(item.type)} in The Bloodline.`,
-			...item.facts
-				.filter((fact) => factValue(fact) !== null)
-				.slice(0, 2)
-				.map((fact) => `${fact.label}: ${factValue(fact)}.`),
-			firstRoute(confirmedSources, Object.keys(sourceHeadings) as SourceKind[]) ??
-				(item.status === 'notInNormalPlay'
-					? 'Cannot be obtained in normal play.'
-					: 'No known source.')
-		].join(' ')
-	);
+	const description = $derived(describeItem(item, confirmedSources));
 </script>
 
 <SeoHead
