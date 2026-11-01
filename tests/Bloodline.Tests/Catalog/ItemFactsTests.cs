@@ -671,6 +671,22 @@ public sealed class ItemFactsTests
     [Fact]
     public void FoodEffectsStayUnknownWithoutTheFoodTable()
     {
+    [InlineData("Shield", "Shield")]
+    [InlineData("Primary", "One Handed Weapon")]
+    public void AnItemInTheShieldSlotIsAShieldWhateverItsAttackType(string slot, string type)
+    {
+        // Torch: a one-handed attack type, while equipping it fills the shield slot beside a sword.
+        var item = Item("Weapon");
+        item.Properties["ItemInfo"]!["WeaponType"] = Parse(
+            """{"$enum":"E_AttackType::OneHanded","display":"One Handed Weapon"}"""
+        );
+        item.Properties["ItemInfo"]!["ItemSlot"] = Parse(
+            $$"""{"$enum":"E_SlotType::{{slot}}","display":"{{slot}}"}"""
+        );
+        Assert.Equal(type, new ItemFacts([]).Resolve(item, "invented").Type);
+    }
+
+    [Theory]
         var facts = Food("Steak");
         Assert.Null(Value(facts, Stat.Effects));
         Assert.DoesNotContain(facts, fact => fact.Stat is Stat.RestorationAmount or Stat.Effect);

@@ -130,11 +130,14 @@ internal sealed class ItemFacts(
     }.ToDictionary(effect => effect.Item1, StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
-    /// Staves retain their own type within the shared Halberd attack family. Other weapons use their
-    /// attack type, or their item type when no attack type is set.
+    /// Items that fill the shield slot are Shields, as most of them are typed already: lab run hands-1101 equipped
+    /// Metal Pot, Torch, Thurstons Grimoire and Sturdy Wood Kiteshield, typed One Handed Weapon, each in the slot
+    /// Lonland Shield fills, beside a sword. Staves retain their own type within the shared Halberd attack family.
+    /// Other weapons use their attack type, or their item type when no attack type is set.
     /// </summary>
     private string? WeaponType(ClassRecord item) =>
-        IsStaff(item) ? "Staff"
+        Display(RecordValues.At(item.Properties, "ItemInfo.ItemSlot")) == "Shield" ? "Shield"
+        : IsStaff(item) ? "Staff"
         : Display(RecordValues.At(item.Properties, "ItemInfo.WeaponType"))
             is { } attack
                 and not "None"
