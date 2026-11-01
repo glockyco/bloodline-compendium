@@ -55,15 +55,8 @@ The site SHALL let readers find items by name from every page, without a server.
 - **WHEN** a reader types the beginning of a word in an item's name
 - **THEN** matching items are offered with links to their pages
 
-### Requirement: Coverage page
-The site SHALL provide a coverage page that explains each kind of gap and lists the items, sources and packages it affects, with links to item pages.
-
-#### Scenario: Reading the coverage page
-- **WHEN** a reader opens the coverage page
-- **THEN** it lists the items without a known source with links to their pages
-
 ### Requirement: Build label
-Every page SHALL identify the reviewed game release and link to release information. The footer SHALL provide Coverage, About and Ko-fi links. The header SHALL keep search and support visible. The About page SHALL explain the method, release date, distinct data-update date, coverage limits, patch notes and unofficial status.
+Every page SHALL identify the reviewed game release and link to release information. The footer SHALL provide Items, Known Issues, About, wrong-fact reporting and Ko-fi links. The header SHALL keep search and support visible. The About page SHALL explain how the site is made, the release date, the distinct data-update date, what it does not list yet, patch notes and unofficial status.
 
 #### Scenario: Reading release information
 - **WHEN** a reader opens About

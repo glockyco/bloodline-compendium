@@ -9,7 +9,7 @@ The Bloodline needs a current searchable item reference alongside its official w
 - Read the installed Steam build offline into local records, identified by its Steam build and depot manifest IDs. Records are regenerated from the game files whenever they are needed and never stored in Git.
 - Leave out any object that does not parse completely and list it as a gap, instead of publishing partial data.
 - Build an item catalog from the records with readable qualified public identities, facts, icons, acquisition sources and reverse uses. Compute chances only where consumer evidence establishes the complete rule.
-- Publish every named inventory item, including items without a known source. Keep those pages accessible while the default list offers a counted reveal. Coverage explains every known gap.
+- Publish every named inventory item, including items without a known source. Keep those pages accessible while the default list offers a counted reveal. A maintainer report lists every known gap.
 - Publish an answer-first static item reference with Type and category filtering, shareable list state, search, a home hub, About, reviewed release metadata and factual discovery metadata.
 - Deploy to Cloudflare with provenance, file limits, built-site graph integrity and accessible desktop and phone presentation.
 
@@ -19,7 +19,7 @@ The Bloodline needs a current searchable item reference alongside its official w
 
 - `extraction/source-records`: reading the installed build into local records, with build identity, inherited defaults, readable enums and texts, and gaps for anything that does not parse.
 - `catalog/items`: inventory items with readable public identities, facts, icons, sources, reverse uses, reviewed releases and exclusions, and coverage gaps.
-- `site/item-reference`: answer-first item pages, faceted list, home hub, search, About, coverage, release labels, discovery metadata and publication acceptance.
+- `site/item-reference`: answer-first item pages, faceted list, home hub, search, About, release labels, discovery metadata and publication acceptance.
 
 ### Modified Capabilities
 

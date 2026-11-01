@@ -66,7 +66,7 @@ Placed actors store only overrides of their class defaults. The extractor merges
 
 ### Leave out objects that do not parse completely
 
-The extractor enables CUE4Parse's fatal serialization errors. An object that fails to parse is left out entirely, and its package and error are recorded as a gap that the coverage page lists. A package that cannot be loaded at all, such as the 2.2 GB level, is a gap in the same way. This change reads no Blueprint bytecode, so script data reading stays off.
+The extractor enables CUE4Parse's fatal serialization errors. An object that fails to parse is left out entirely, and its package and error are recorded as a gap that the maintainer report lists. A package that cannot be loaded at all, such as the 2.2 GB level, is a gap in the same way. This change reads no Blueprint bytecode, so script data reading stays off.
 
 ### Publish every named inventory item and show what is uncertain
 
@@ -133,7 +133,7 @@ A reviewed release mapping resolves Steam builds to a release name, release date
 
 Acquisition answers the first item-page question. One facts tooltip sits alongside it on desktop and follows it on phones. Reverse uses follow the answer. Relation tables show at most two numeric values with explicit units. Up to ten rows remain visible. Longer sections preview eight with all remaining links in a native disclosure. The item list uses compact rows, Type and category facets, sorting, counts and URL state rather than a gallery of repeated cards.
 
-The home page is a reference hub with an introduction, search, category entry points, release and coverage context. Search and support stay visible in the header. The footer links the reviewed release, Coverage, About and https://ko-fi.com/wowmuch. About owns method, release and data dates, patch notes, limitations and the unofficial disclaimer.
+The home page is a reference hub with an introduction, search, category entry points and release context. Search and support stay visible in the header. The footer links the item list, Known Issues, About, wrong-fact reporting, https://ko-fi.com/wowmuch and the reviewed release. About owns method, release and data dates, patch notes, limitations and the unofficial disclaimer.
 
 ### Adopt sibling reader lessons without importing their systems
 
@@ -160,7 +160,7 @@ Keep producer corrections, behavioral regression coverage, real-data browser rev
 ## Risks / Trade-offs
 
 - CUE4Parse can change its output between versions. Pin it, and compare site data before and after a parser update.
-- Items that only Blueprint logic grants show no source. The coverage page lists them until a later change reads bytecode.
+- Items that only Blueprint logic grants show no source. The maintainer report lists them until a later change reads bytecode.
 - Sources can name levels that players cannot reach. Known test levels are excluded, and a later change checks reachability through the game's travel data.
 - Steam may stop serving an old build, so an earlier publication could not be rebuilt exactly. The site describes only the current build.
 - Steam can update the game during extraction. The build check fails the run.
