@@ -25,6 +25,7 @@ export const previewSources: {
 				description: item.description,
 				facts: item.facts,
 				projectileGroups: item.projectileGroups,
+				onHitEffects: item.onHitEffects,
 				route:
 					firstRoute(item.sources, Object.keys(sourceHeadings) as SourceKind[]) ??
 					(item.status === 'notInNormalPlay'

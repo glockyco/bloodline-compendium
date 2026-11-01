@@ -231,6 +231,8 @@ internal sealed record ItemPage(
 
     public IReadOnlyList<ProjectileGroup>? ProjectileGroups { get; init; }
 
+    public IReadOnlyList<OnHitEffect>? OnHitEffects { get; init; }
+
     [JsonRequired]
     public IReadOnlyList<ItemUse> Uses { get; init; } = [];
 
@@ -246,6 +248,16 @@ internal sealed record ProjectileGroup(int Count, double? BodyHitDamage, double?
 {
     public string? Condition { get; init; }
 }
+
+internal sealed record OnHitEffect(
+    string Effect,
+    string Trigger,
+    double Chance,
+    double? Amount,
+    double? TickIntervalSeconds,
+    double? DurationSeconds,
+    string? Behavior
+);
 
 /// <summary>A page's item-specific note about a known issue, falling back to the issue's effect.</summary>
 internal sealed record IssueNote(string Issue, string Effect);

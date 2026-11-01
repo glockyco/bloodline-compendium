@@ -8,6 +8,7 @@ export interface ItemPreview {
 	description: string | null;
 	facts: Fact[];
 	projectileGroups?: ItemPage['projectileGroups'];
+	onHitEffects?: ItemPage['onHitEffects'];
 	/** The first way to get the item, or the reason none is known. */
 	route: string | null;
 }

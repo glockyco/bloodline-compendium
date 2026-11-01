@@ -506,6 +506,15 @@
           },
           "type": "array"
         },
+        "onHitEffects": {
+          "items": {
+            "$ref": "#/$defs/OnHitEffect"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
         "projectileGroups": {
           "items": {
             "$ref": "#/$defs/ProjectileGroup"
@@ -936,6 +945,54 @@
         "pick"
       ],
       "title": "OddsEvent"
+    },
+    "OnHitEffect": {
+      "properties": {
+        "amount": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "behavior": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "chance": {
+          "type": "number"
+        },
+        "durationSeconds": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "effect": {
+          "type": "string"
+        },
+        "tickIntervalSeconds": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "trigger": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "effect",
+        "trigger",
+        "chance",
+        "amount",
+        "tickIntervalSeconds",
+        "durationSeconds",
+        "behavior"
+      ],
+      "title": "OnHitEffect",
+      "type": "object"
     },
     "Price": {
       "properties": {

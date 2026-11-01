@@ -127,6 +127,23 @@ Shields deal no damage. No shield code reads `WeaponInfo.Damage`, and only Half-
 
 On-hit effects are shown as Afallon shows them, in an On-Hit Effects table with the effect, its chance, its amount and its duration. Poison Pike's `Enemy Hit Event` rolls 1 in 5 and applies `Debuff.Damage` per second for `Debuff.Duration` seconds, and `Numberoftimestoloop` is unused. A weapon whose tooltip shows another damage than its hits apply carries one known issue for all weapons, which replaces the staff entry.
 
+On-hit publication follows the event that actually applies an effect. Poison Pike reads its `Debuff` damage and duration, while the two Minor staves read their projectile's `Debuff Info`. The enemy manager ignores those structs' loop count and delay and uses a one-second timer with an immediate first tick. Duration is not a guaranteed total damage because expiry and the final timer can meet on a frame. Claims cite complete event entry points, whose fingerprints include their reachable ubergraph code, rather than the unresolved computed entry of a whole ubergraph.
+
+Holy Noose Crossbow's fire-time aim trace is distinct from bolt impact. Its Undead condition applies to both Ignite and the three-second fire ground. Torch and Holy Noose use Ignite's no-refresh and fire-resistance guards. Direct projectile debuffs replace and restart the shared status timer. Veiled Slicers restores mana rather than damaging an enemy.
+
+Not published as ordinary on-hit effects:
+
+- Embersnap has separate impact and collider paths with different rolls and amounts. Their interaction has not been settled in the lab.
+- Secondary powers, including shoves and staff channels, have separate activation and cadence rather than an ordinary-hit chance.
+- Assembled wands depend on their configured element and require their own assembly rule.
+- Enchantments are externally applied and no scanned weapon has a nonempty default enchantment.
+- Greathammer's delayed impulse acts only on an already physics-simulating target and is not a guaranteed knockdown.
+- Whipslash's mana-gated combo projectile is an additional hit rather than a status on the melee hit.
+- Rose Daggers transforms corpses and Thurston's Pen charges a held grimoire on kills rather than applying an ordinary living-target hit effect.
+
+- Sturdy Warhammer, Great Mace and Undead Mace have empty ordinary hit overrides, so their temporary-enchantment hooks produce no inherent effect row.
+
+
 ### Wording a player can act on
 
 A rare pool's drop says it comes from a separate roll in addition to the normal drop, since its chance can be 100%. A container that does not always appear shows its chance in a Spawns column, apart from the chance per container. A source that the game files define but nothing in the world places, such as an item lying where no source names the place, is listed under "Only in the Game Files" with the evidence it lacks and stays out of the summary. A bounty note reads "Received when accepting the quest" and names no place or condition, because the quest is the source.
@@ -161,6 +178,8 @@ Lab confirmations are recorded here as they complete.
 - Ranged callback interpretation, runs ranged91c/d. The Blueprint hook's first callback observed post-handler Health and also received unrelated overlap objects. Its second callback did not run. `recognized-hit-summary.json` filters to Bullet, Arrow and CrossBowBolt objects and subtracts consecutive post-handler Health values from the attack's initial Health. This separates individual projectile losses from whole-shot totals without treating requested aim pitches as proof of a head hit. No charged release was measured.
 - Crossbow replacement code. All eight classes with `Custom Fire Event` destroy the supplied generic bolt as their first operation, then create a replacement. They share the player's generic bolt path in `FirstPersonCharacter2:InpActEvt_IA_Attack_K2Node_EnhancedInputActionEvent_27`. The conditional extra bolt therefore uses each weapon's `WeaponInfo.Damage`, apart from the replacement's `ItemInfo.Damage`. Rusty_Crossbow inherits the same event. The similarly named RustyCrossbow does not inherit it and remains unknown.
 - Open ranged question. Gun and pistol fire also creates a generic zero-damage Bullet before Swing Event replaces it. The close-range early-hit observation is established for crossbows, not for firearms. A firearm's transient generic bullet might add a head-only hit before cleanup, which needs its own observation before a conditional group is published.
+- On-hit effects, run onhit93a (`2026-11-01T13-07-25-924Z-onhit93a`). A normal Poison Pike swing took 25 Health. Isolating its live Enemy Hit Event on 100 fresh Goblin Brutes produced 19 poison applications, not a 50% pattern. The sampled application took 15 Health immediately and nine more times at approximately one-second intervals, ending after the tick near 9.03 seconds with no further loss through 11 seconds. Torch's live hit event applied burn twice in 20 isolated trials. Its sampled burn took 15 Health five times, from the immediate tick through 4.04 seconds, then stopped. Fresh targets, unmodified Health and resistances, and event dispatch are recorded by `tools/runtime/checks/on-hit.lua`. The event trials measure the effect handler independently of swing accuracy.
+- On-hit repeat, run onhit93b (`2026-11-01T13-12-54-660Z-onhit93b`), on a fresh save. Poison Pike applied poison in 20 of 100 isolated hit events, with ten 15-Health ticks through 9.04 seconds. Torch applied burn twice in 20 events, with five 15-Health ticks through 4.13 seconds. Both rendered sessions ended with quit. The combined Pike observation is 39 applications in 200 events, supporting the code's 1-in-5 roll rather than 1-in-2.
 
 ## Persona review
 

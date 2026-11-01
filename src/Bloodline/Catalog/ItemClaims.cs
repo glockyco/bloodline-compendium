@@ -74,6 +74,24 @@ internal sealed class ItemClaims(CodeIndex? code, long build)
     ).ToDictionary(function => function.Citation, StringComparer.Ordinal);
     public IReadOnlyList<FactClaim> Claims => claims;
 
+    public void RecordOnHit(
+        string item,
+        IEnumerable<string> inputs,
+        IEnumerable<string> citations
+    ) =>
+        claims.Add(
+            new FactClaim(
+                item,
+                "On-Hit Effects",
+                ClaimType.Formula,
+                build,
+                inputs.ToArray(),
+                code is null
+                    ? []
+                    : ClaimCitations.Resolve(item + ":On-Hit Effects", citations, functions)
+            )
+        );
+
     public void Record(
         string item,
         ItemPage page,

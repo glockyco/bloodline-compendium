@@ -20,7 +20,7 @@
 	// column's heading as a label.
 	const labels = $derived(
 		headings
-			.slice(1, 4)
+			.slice(1)
 			.map((heading, index) => `--label-${index + 2}: ${JSON.stringify(heading)}`)
 			.join('; ')
 	);
@@ -61,6 +61,7 @@
 	   and numbers right-aligned under their heading. Columns size to their content. */
 	.relation-panel {
 		min-width: 0;
+		container-type: inline-size;
 		overflow-x: auto;
 		border: var(--border-width) solid var(--border);
 		border-radius: var(--radius-1);
@@ -111,10 +112,8 @@
 	.relation-panel :global(td) {
 		line-height: var(--leading-data);
 	}
-	/* A phone gives each row's name the full width of a table with three or more columns and puts the other
-	   values on a line below it, each labelled by its heading, so a long skill name never squeezes the name. A
-	   two-column table keeps its columns side by side. */
-	@media (width < 40rem) {
+	/* Narrow panels, including item previews, stack labelled values without horizontal scrolling. */
+	@container (width < 40rem) {
 		.relation-panel :global(.stacked) {
 			display: block;
 		}
@@ -161,6 +160,9 @@
 		}
 		.relation-panel :global(.stacked td:nth-child(4)::before) {
 			content: var(--label-4);
+		}
+		.relation-panel :global(.stacked td:nth-child(5)::before) {
+			content: var(--label-5);
 		}
 	}
 	/* A place that several rows share heads them, so their rows do not repeat it. */

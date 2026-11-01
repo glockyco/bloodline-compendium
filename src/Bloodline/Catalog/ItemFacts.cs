@@ -421,9 +421,141 @@ internal sealed class ItemFacts(
         {
             Type = type ?? "Unknown",
             ProjectileGroups = projectileGroups,
+            OnHitEffects = category == "Weapon" ? ResolveOnHitEffects(item) : null,
         };
         claims.Record(item.Path, page, projectileFunction, projectileDamage);
         return page;
+    }
+
+    private const string WeaponRoot = "/Game/BloodlinesAlpha/Interactables/Weapons/";
+    private const string ProjectileRoot = "/Game/GabrielAguiarProd/ToonProjectilesVol1/Blueprints/";
+    private const string Enemy = "/Game/AIBehaviorToolkit/Blueprints/Goblin_Base";
+    private const string StatusManager =
+        "/Game/AIBehaviorToolkit/Blueprints/EnemyStatusEffectManager";
+
+    private IReadOnlyList<OnHitEffect>? ResolveOnHitEffects(ClassRecord item)
+    {
+        var package = item.Path.Split('.')[0];
+        var effects = new List<OnHitEffect>();
+        var citations = new List<string>();
+        var inputs = new List<string>();
+        void Cite(string owner, params string[] names) =>
+            citations.AddRange(names.Select(name => owner + ":" + name));
+        void Manager(string effect)
+        {
+            Cite(Enemy, "Apply Projectile Debuff");
+            Cite(
+                StatusManager,
+                "Apply " + effect + " Debuff",
+                effect == "Poison" ? "Begin Poisoning" : "Begin Burn",
+                "Stop " + effect
+            );
+        }
+        void Debuff(ClassRecord? owner, string field, string trigger, double chance)
+        {
+            var debuff = owner?.Properties[field];
+            if (debuff is null)
+                throw new InvalidDataException($"Missing on-hit debuff for {item.Path}.");
+            var effect = Display(debuff["DebuffType"]);
+            if (effect is not ("Poison" or "Burn"))
+                throw new InvalidDataException(
+                    $"Unsupported on-hit debuff for {item.Path}: {effect}."
+                );
+            // Apply Projectile Debuff passes Damage and Duration to the manager. Its timer uses
+            // a literal one-second interval, not DelayofrepeatingDamage or Numberoftimestoloop.
+            effects.Add(
+                new(
+                    effect,
+                    trigger,
+                    chance,
+                    RecordValues.Number(debuff["Damage"]),
+                    1,
+                    RecordValues.Number(debuff["Duration"]),
+                    "Refreshes Without Stacking"
+                )
+            );
+            inputs.AddRange(
+                new[] { field + ".DebuffType", field + ".Damage", field + ".Duration" }.Select(
+                    path => owner!.Path + ":" + path
+                )
+            );
+            Manager(effect);
+        }
+        void Ignite(string trigger, double chance)
+        {
+            // Goblin_Base:Ignite passes literal damage 15 and duration 5 to the burn manager.
+            effects.Add(
+                new(
+                    "Burn",
+                    trigger,
+                    chance,
+                    15,
+                    1,
+                    5,
+                    "Does Not Refresh While Burning. Fire-Resistant Targets Are Immune."
+                )
+            );
+            Cite(Enemy, "Ignite");
+            Cite(StatusManager, "Apply Burn Debuff", "Begin Burn", "Stop Burn");
+        }
+        switch (package)
+        {
+            case WeaponRoot + "Spears/PoisonPike":
+                // Enemy Hit Event succeeds only when RandomIntegerInRange(0, 4) returns zero.
+                Debuff(item, "Debuff", "Melee Hit", 1d / 5);
+                Cite(package, "Enemy Hit Event");
+                break;
+            case WeaponRoot + "1HandedWeapons/Torch":
+                // Enemy Hit Event succeeds only when RandomIntegerInRange(0, 5) returns zero.
+                Ignite("Melee Hit", 1d / 6);
+                Cite(package, "Enemy Hit Event");
+                break;
+            case WeaponRoot + "Halberds/StaffOfMinorFlames":
+            case WeaponRoot + "Halberds/StaffOfMinorRot":
+                var projectileName = package.EndsWith(
+                    "StaffOfMinorFlames",
+                    StringComparison.Ordinal
+                )
+                    ? "BP_Projectile_Fireball01Orange_Weak"
+                    : "BP_Projectile_PoisonBall_Weak";
+                var projectile = ProjectileRoot + projectileName;
+                Debuff(
+                    classes?.SingleOrDefault(record =>
+                        record.Path == projectile + "." + projectileName + "_C"
+                    ),
+                    "Debuff Info",
+                    "Projectile Impact",
+                    1
+                );
+                Cite(package, "Swing Event");
+                Cite(projectile, "Effect on Enemy Upon Impact");
+                break;
+            case WeaponRoot + "Crossbows/HolyNooseCrossbow":
+                Ignite("Firing While Aiming At An Undead Enemy", 1);
+                effects.Add(
+                    new(
+                        "Fire Ground",
+                        "Firing While Aiming At An Undead Enemy",
+                        1,
+                        null,
+                        null,
+                        3,
+                        null
+                    )
+                );
+                Cite(package, "Custom Fire Event");
+                break;
+            case WeaponRoot + "Daggers/VeiledSlicers":
+                // Regen Mana passes the literal five to FoodManager:Replenish Mana.
+                effects.Add(new("Restore Mana", "Melee Hit", 1, 5, null, null, null));
+                Cite(package, "ReceiveBeginPlay", "Regen Mana");
+                Cite("/Game/BloodlinesAlpha/UI/CharacterSheet/FoodManager", "Replenish Mana");
+                break;
+            default:
+                return null;
+        }
+        claims.RecordOnHit(item.Path, inputs, citations);
+        return effects;
     }
 
     private IReadOnlyList<FiredProjectile>? RangedProjectiles(RangedFire? analysis)

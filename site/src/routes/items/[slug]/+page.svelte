@@ -10,6 +10,7 @@
 	import Section from '#lib/ui/Section.svelte';
 	import ItemTooltip from '#lib/ItemTooltip.svelte';
 	import ItemDetails from '#lib/ItemDetails.svelte';
+	import OnHitEffects from '#lib/OnHitEffects.svelte';
 	import { detailRows } from '#lib/game-card.js';
 	import { sourceColumns, sourceHeadings, sourceIntros, titleCase } from '#lib/labels.js';
 	import {
@@ -194,6 +195,7 @@
 						<ItemDetails rows={details} projectileGroups={item.projectileGroups} wide />
 					</div>
 				</Section>{/if}
+			<OnHitEffects effects={item.onHitEffects} />
 			<!-- The ways to get an item follow as their own sections, and only an item without one says so here. -->
 			{#if !groups.length}<Section id="how-to-get-it" title="How to Get It">
 					<p class="surface">{statusSentence[item.status]}</p>

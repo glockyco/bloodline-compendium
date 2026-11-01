@@ -422,6 +422,7 @@ export interface ItemPage {
   kind: EntityKind;
   name: string;
   notes: IssueNote[];
+  onHitEffects?: OnHitEffect[] | null;
   projectileGroups?: ProjectileGroup[] | null;
   qualifier?: string | null;
   relations: EntityRelation[];
@@ -474,6 +475,20 @@ export interface Effect {
 export interface IssueNote {
   effect: string;
   issue: string;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "OnHitEffect".
+ */
+export interface OnHitEffect {
+  amount: number | null;
+  behavior: string | null;
+  chance: number;
+  durationSeconds: number | null;
+  effect: string;
+  tickIntervalSeconds: number | null;
+  trigger: string;
   [k: string]: unknown;
 }
 /**

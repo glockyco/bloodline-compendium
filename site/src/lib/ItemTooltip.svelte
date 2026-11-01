@@ -2,6 +2,7 @@
 	import type { Fact, ItemPage } from './site-data.js';
 	import { cardLines, detailRows } from './game-card.js';
 	import ItemDetails from './ItemDetails.svelte';
+	import OnHitEffects from './OnHitEffects.svelte';
 
 	interface TooltipItem {
 		name: string;
@@ -9,6 +10,7 @@
 		description: string | null;
 		facts: Fact[];
 		projectileGroups?: ItemPage['projectileGroups'];
+		onHitEffects?: ItemPage['onHitEffects'];
 	}
 	let {
 		item,
@@ -54,6 +56,7 @@
 			{rows}
 			projectileGroups={item.projectileGroups}
 		/>{/if}
+	{#if details}<OnHitEffects effects={item.onHitEffects} />{/if}
 </div>
 
 <style>
