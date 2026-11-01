@@ -220,7 +220,7 @@
     },
     {
       "id": "halberds-train-no-proficiency",
-      "title": "Twenty-one weapons train no weapon proficiency",
+      "title": "Some weapons train no weapon proficiency",
       "effect": "Hits with these weapons add no EXP to One-Handed Weapons, Two-Handed Weapons or any other passive level.",
       "workaround": null,
       "steps": [
