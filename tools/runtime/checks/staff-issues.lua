@@ -7,7 +7,8 @@ local controller = UEHelpers.GetPlayerController()
 local state = _G.StaffIssueCheck or {}
 _G.StaffIssueCheck = state
 
-local function input(phase)
+local function input(phase, action)
+    action = action or 'IA_Attack'
     local calls = {}
     for _, target in ipairs({ controller, p }) do
         target:GetClass().DynamicBindingObjects:ForEach(function(_, element)
@@ -15,7 +16,7 @@ local function input(phase)
             if binding:GetClass():GetFName():ToString() ~= 'EnhancedInputActionDelegateBinding' then return end
             binding.InputActionDelegateBindings:ForEach(function(_, entry)
                 local b = entry:get()
-                if b.InputAction:IsValid() and b.InputAction:GetFName():ToString() == 'IA_Attack' and b.TriggerEvent == phase then
+                if b.InputAction:IsValid() and b.InputAction:GetFName():ToString() == action and b.TriggerEvent == phase then
                     local name = b.FunctionNameToBind:ToString()
                     target[name](target, { Value = { X = phase == 1 and 1 or 0, Y = 0, Z = 0 }, ValueType = 0 }, 0, 0)
                     calls[#calls + 1] = name
@@ -23,7 +24,7 @@ local function input(phase)
             end)
         end)
     end
-    if #calls == 0 then error('No live Attack binding for phase ' .. phase) end
+    if #calls == 0 then error('No live ' .. action .. ' binding for phase ' .. phase) end
     return calls
 end
 
@@ -118,7 +119,8 @@ elseif args.action == 'passive-levels' then
 elseif args.action == 'target' then
     if state.enemy and state.enemy:IsValid() then state.enemy:K2_DestroyActor() end
     local rotation = controller:GetControlRotation()
-    controller:SetControlRotation({ Pitch = 0, Yaw = rotation.Yaw, Roll = 0 })
+    -- args.pitch tilts the aim in degrees, so ranged checks can compare head and body hits.
+    controller:SetControlRotation({ Pitch = args.pitch or 0, Yaw = rotation.Yaw, Roll = 0 })
     local forward, location = p:GetActorForwardVector(), p:K2_GetActorLocation()
     local transform = {
         Rotation = { X = 0, Y = 0, Z = 0, W = 1 },
@@ -166,10 +168,12 @@ handle = LoopInGameThreadAfterFrames(1, function()
             if args.action == 'attack' and not pressed and t > 0.2 and not p.IsAttacking then
                 -- Halberd-type weapons swing through the release alone, as prime uses it. Pressed and released
                 -- 0.08 seconds apart, Lonland Halberd and Copper Battleaxe landed no hit at any tested distance.
+                -- With block, the alternate fire (block) is held from the press until the end of the check.
+                if args.block then calls[#calls + 1] = input(1, 'IA_AltFire') end
                 if not args.releaseOnly then calls[#calls + 1] = input(1) end
                 pressed = t
             end
-            if pressed and not released and t > pressed + 0.08 then
+            if pressed and not released and t > pressed + (args.hold or 0.08) then
                 calls[#calls + 1] = input(5)
                 released = t
             end
@@ -182,6 +186,7 @@ handle = LoopInGameThreadAfterFrames(1, function()
                 or (args.pauseDuring and released and t >= released + 0.25)
             if stop then
                 CancelDelayedAction(handle)
+                if args.block then calls[#calls + 1] = input(5, 'IA_AltFire') end
                 if args.pauseOnHit or args.pauseDuring then statics:SetGamePaused(world, true) end
                 finish({ initial = initial, final = snapshot(), rows = rows, calls = calls, spawns = state.spawns, hitAt = hitAt })
             end
