@@ -124,7 +124,7 @@
     },
     {
       "id": "staves-without-fireballs",
-      "title": "Four staves launch no fireballs",
+      "title": "Some staves launch no fireballs",
       "effect": "Despite their descriptions, Fairy Staff, Gripclaw Staff and the two staves named Soulstaff launch no fireballs and use no mana.",
       "itemNotes": {
         "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/FairyStaff.FairyStaff_C": "Despite its description, Fairy Staff launches no fireballs and uses no mana.",
@@ -156,7 +156,7 @@
     },
     {
       "id": "staff-point-blank-damage",
-      "title": "Three staves deal 100 damage at point-blank range",
+      "title": "Some staves deal 100 damage at point-blank range",
       "effect": "The projectiles of Walking Stick, Acolyte Geomancer Staff and Moonstone Staff deal 100 damage instead of 12, 20 and 35 if they hit an enemy as they leave the staff. Attacking from close range can make this happen.",
       "itemNotes": {
         "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/WalkingStick.WalkingStick_C": "Walking Stick's projectile deals 100 damage instead of 12 if it hits an enemy as it leaves the staff. Attacking from close range can make this happen.",
@@ -186,7 +186,7 @@
     },
     {
       "id": "staff-tooltip-damage",
-      "title": "Seven staves deal different damage than their tooltips show",
+      "title": "Some staves deal different damage than their tooltips show",
       "effect": "Walking Stick, Adept Cryomancer Staff, Moonstone Staff and Winter's Whisper deal 12, 20, 35 and 35 damage per hit, while their tooltips show 2, 15, 30 and 20. Pinto Staff, Fairy Staff and Gripclaw Staff deal 10 per hit, while their tooltips show 20.",
       "itemNotes": {
         "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/WalkingStick.WalkingStick_C": "Walking Stick deals 12 damage per hit.",
