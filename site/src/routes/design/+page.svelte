@@ -120,7 +120,7 @@
 		<IconSlot icon={null} size="stack" />
 		<Count value={1} />
 		<Count value={123456} />
-		<ButtonLink href="#small">Browse All Items</ButtonLink>
+		<ButtonLink href="#small">Browse Items</ButtonLink>
 	</div>
 	<p>
 		Linked: <EntityLink entity={data.item} />. Without a page: <EntityLink

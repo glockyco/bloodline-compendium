@@ -41,7 +41,7 @@
 			<Search variant="hero" placeholder="Search items, for example {data.example}" />
 		</div>
 		<div class="actions">
-			<ButtonLink href={itemsPath}>Browse All Items</ButtonLink>
+			<ButtonLink href={itemsPath}>Browse Items</ButtonLink>
 			<a href="https://store.steampowered.com/app/1159290/The_Bloodline/" rel="external"
 				>The Bloodline on Steam</a
 			>

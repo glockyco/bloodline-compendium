@@ -18,5 +18,5 @@
 			This page does not exist. Search for an item above, or browse the item list.
 		</p>
 	</header>
-	<div><ButtonLink href={kindPath('item', page.data.kinds)!}>Browse All Items</ButtonLink></div>
+	<div><ButtonLink href={kindPath('item', page.data.kinds)!}>Browse Items</ButtonLink></div>
 </div>
