@@ -20,6 +20,9 @@ internal static partial class KnownIssues
     /// <summary>A food that eating ignores entirely, because the food effect table has no row for it.</summary>
     public const string FoodWithoutRow = "food-without-row";
 
+    /// <summary>Foods whose rows restore other amounts than their descriptions say.</summary>
+    public const string MisdescribedFood = "food-description-mismatch";
+
     /// <summary>Staves whose description promises fireballs that their swings never launch.</summary>
     public const string NoFireballs = "staves-without-fireballs";
 
@@ -64,6 +67,20 @@ internal static partial class KnownIssues
         "/Game/BloodlinesAlpha/Interactables/Crafting_Items/PotatoSeeds.PotatoSeeds_C",
     };
 
+    /// <summary>
+    /// The foods that lab run food-desc-1101 ate, with the health their rows restore. Buttered Bread's description
+    /// swaps its health and mana, and Spud Colossus' promises stamina it does not restore.
+    /// </summary>
+    private static readonly Dictionary<string, double> MisdescribedFoods = new(
+        StringComparer.Ordinal
+    )
+    {
+        [
+            "/Game/BloodlinesAlpha/Interactables/Crafting_Items/GeneralFoodItems/ButteredBread.ButteredBread_C"
+        ] = 15,
+        ["/Game/BloodlinesAlpha/Interactables/Crafting_Items/SpudColossus.SpudColossus_C"] = 200,
+    };
+
     public static KnownIssueRegistry Load(string path)
     {
         var registry = CanonicalJson.Read<KnownIssueRegistry>(path);
@@ -94,7 +111,8 @@ internal static partial class KnownIssues
 
     /// <summary>
     /// Adds notes for tooltip differences concerning shown values, knee armor, ignored food effects,
-    /// foods that eating ignores, staves without their promised fireballs, reproduced point-blank staff damage and
+    /// foods that eating ignores, foods whose descriptions misstate what they restore, staves without their promised
+    /// fireballs, reproduced point-blank staff damage and
     /// weapons whose hits train no proficiency.
     /// </summary>
     public static (IReadOnlyList<ItemPage> Items, IReadOnlyList<PublishedIssue> Issues) Attach(
@@ -148,6 +166,16 @@ internal static partial class KnownIssues
             )
             {
                 notes[item.Key].Add(FoodWithoutRow);
+            }
+            // A later build that changes such a food's healing drops the note, since its row no longer matches.
+            if (
+                MisdescribedFoods.TryGetValue(item.Key, out var health)
+                && item.Facts.Any(fact =>
+                    fact.Effect is { Name: "Restore Health" } effect && effect.Power == health
+                )
+            )
+            {
+                notes[item.Key].Add(MisdescribedFood);
             }
             if (FirelessStaves.Contains(item.Key))
             {

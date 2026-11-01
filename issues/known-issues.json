@@ -123,6 +123,30 @@
       "reportUrl": null
     },
     {
+      "id": "food-description-mismatch",
+      "title": "Some foods restore different amounts than their descriptions say",
+      "effect": "Buttered Bread restores 15 health and 30 mana, the reverse of its description, and Spud Colossus restores 200 health and no stamina, while its description says 200 stamina.",
+      "itemNotes": {
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/GeneralFoodItems/ButteredBread.ButteredBread_C": "Despite its description, Buttered Bread restores 15 health and 30 mana when eaten.",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/SpudColossus.SpudColossus_C": "Despite its description, Spud Colossus restores 200 health and no stamina when eaten."
+      },
+      "workaround": null,
+      "steps": [
+        "Lose some health and mana. Hover Buttered Bread in the inventory. Its description says it restores 30 health and 15 mana.",
+        "Eat it. Health rises by 15 and Mana by 30.",
+        "Lose some health and stamina, and eat Spud Colossus, whose description says it restores 200 stamina. Health rises by up to 200, and Stamina only keeps regenerating as before."
+      ],
+      "expected": "Buttered Bread restores 30 health and 15 mana, and Spud Colossus restores 200 stamina.",
+      "observed": "Buttered Bread restores 15 health and 30 mana. Spud Colossus restores 200 health, up to the maximum, and no stamina.",
+      "cause": "Eating applies the food's row of FoodEffectDataTable. Buttered Bread's row heals 15 and restores 30 mana, and Spud Colossus' row heals 200 and has no stamina effect, while the descriptions the tooltip shows say otherwise.",
+      "citations": [
+        "/Game/BloodlinesAlpha/UI/CharacterSheet/FoodManager:Get Item"
+      ],
+      "builds": [24464547],
+      "report": "notReported",
+      "reportUrl": null
+    },
+    {
       "id": "staves-without-fireballs",
       "title": "Some staves launch no fireballs",
       "effect": "Despite their descriptions, Fairy Staff, Gripclaw Staff and the two staves named Soulstaff launch no fireballs and use no mana.",

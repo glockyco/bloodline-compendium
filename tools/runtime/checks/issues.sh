@@ -27,10 +27,12 @@ uneaten=(
 apple=$item/Crafting_Items/RoastedApple.RoastedApple_C
 stew=$food/DruidsStew.DruidsStew_C
 cake=$food/CarrotCake.CarrotCake_C
+bread=$food/ButteredBread.ButteredBread_C
+spud=$item/Crafting_Items/SpudColossus.SpudColossus_C
 armor='{"values":["ArmorTotal","PlayerPassiveLevelStatComponent.Total Armor"]}'
 health='["Health","Max Health","Health Regen Speed"]'
 meals=$(printf '"%s",' "${uneaten[@]#* }")
-lab give "{\"items\":[\"$knees\",\"$sword\",\"$maw\",\"$pants\",\"$band\",${meals}\"$apple\",\"$stew\",\"$cake\"]}"
+lab give "{\"items\":[\"$knees\",\"$sword\",\"$maw\",\"$pants\",\"$band\",${meals}\"$apple\",\"$stew\",\"$cake\",\"$bread\",\"$spud\"]}"
 lab open-sheet
 lab read-tooltips
 lab player "$armor"
@@ -55,6 +57,16 @@ for step in "${uneaten[@]}" "apple $apple"; do
   lab close-tutorials
   lab capture-screen "${step%% *}-before"
   lab sample "{\"seconds\":6,\"values\":$health,\"actions\":[{\"at\":2,\"command\":\"use\",\"args\":{\"item\":\"${step#* }\"}}]}"
+  lab close-tutorials
+  lab capture-screen "${step%% *}-after"
+done
+# food-description-mismatch: Health, Mana and Stamina are brought low and sampled every frame around each meal.
+for step in "bread $bread" "spud $spud"; do
+  lab take-damage '{"toHealth":10}'
+  lab eval "$(dirname "$0")/lower-bars.lua" '{"mana":5,"stamina":5}'
+  lab close-tutorials
+  lab capture-screen "${step%% *}-before"
+  lab sample "{\"seconds\":4,\"values\":[\"Health\",\"Current Mana\",\"Stamina\"],\"actions\":[{\"at\":1,\"command\":\"use\",\"args\":{\"item\":\"${step#* }\"}}]}"
   lab close-tutorials
   lab capture-screen "${step%% *}-after"
 done
