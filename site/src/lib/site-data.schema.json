@@ -401,6 +401,15 @@
         },
         "issue": {
           "type": "string"
+        },
+        "tooltipValues": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": [
+            "object",
+            "null"
+          ]
         }
       },
       "required": [

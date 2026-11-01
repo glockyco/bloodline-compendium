@@ -478,6 +478,9 @@ export interface Effect {
 export interface IssueNote {
   effect: string;
   issue: string;
+  tooltipValues?: {
+    [k: string]: string;
+  } | null;
   [k: string]: unknown;
 }
 /**

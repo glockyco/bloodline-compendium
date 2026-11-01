@@ -265,7 +265,11 @@ internal sealed record OnHitEffect(
 );
 
 /// <summary>A page's item-specific note about a known issue, falling back to the issue's effect.</summary>
-internal sealed record IssueNote(string Issue, string Effect);
+internal sealed record IssueNote(string Issue, string Effect)
+{
+    /// <summary>Tooltip values with no applied fact, such as the damage a shield never deals.</summary>
+    public IReadOnlyDictionary<string, string>? TooltipValues { get; init; }
+}
 
 internal enum ReportStatus
 {

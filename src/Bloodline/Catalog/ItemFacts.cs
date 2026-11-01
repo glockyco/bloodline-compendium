@@ -339,7 +339,7 @@ internal sealed class ItemFacts(
             // The tooltip contradicts the game only where its damage matches no damage that a normal attack applies,
             // so an unknown applied damage and a separate projectile's damage are no difference.
             if (
-                (type == "Staff" || ranged)
+                type != "Shield"
                 && shownDamage is { } shown
                 && facts[damageIndex].Number is { } applied
                 && applied != shown

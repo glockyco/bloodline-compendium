@@ -28,13 +28,13 @@ it('puts each tooltip difference under the issue that explains it', () => {
 			kind: 'issue',
 			issue: 'armor-issue',
 			sentence: 'Wearing it adds no armor.',
-			differences: [armor]
+			differences: [{ label: 'armorRating', value: '9' }]
 		},
 		{
 			kind: 'issue',
 			issue: 'damage-issue',
 			sentence: 'It deals less damage.',
-			differences: [damage]
+			differences: [{ label: 'damage', value: '20' }]
 		}
 	]);
 });
@@ -56,6 +56,27 @@ it('gives a tooltip difference that no issue on the page explains a row of its o
 		},
 		{ kind: 'difference', fact: unexplained },
 		{ kind: 'difference', fact: elsewhere }
+	]);
+});
+
+it('shows a shield tooltip without inventing an applied Damage fact', () => {
+	const rows = bugRows({
+		facts: [],
+		notes: [
+			{
+				issue: 'weapon-tooltip-damage',
+				effect: 'Areman Shield deals no damage.',
+				tooltipValues: { Damage: '15' }
+			}
+		]
+	});
+	expect(rows).toEqual([
+		{
+			kind: 'issue',
+			issue: 'weapon-tooltip-damage',
+			sentence: 'Areman Shield deals no damage.',
+			differences: [{ label: 'Damage', value: '15' }]
+		}
 	]);
 });
 

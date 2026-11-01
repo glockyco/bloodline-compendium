@@ -110,3 +110,12 @@ Where a lab run read an item's tooltip and it shows another value than the fact 
 #### Scenario: Armor without a table row
 - **WHEN** Leather Pants' tooltip shows ARMOR: 4 and equipping applies 0
 - **THEN** its armor fact is 0 and carries the displayed value 4
+
+#### Scenario: Weapon tooltip damage differs from a normal hit
+- **WHEN** an observed weapon tooltip shows damage different from its known melee or first projectile group's body damage
+- **THEN** its tooltip difference names `weapon-tooltip-damage` and its Bugs row states the applied damage before the tooltip value
+
+#### Scenario: Shield tooltip damage without an applied fact
+- **WHEN** a shield's observed tooltip shows Damage
+- **THEN** it notes `weapon-tooltip-damage` and carries the tooltip value in its issue note without adding a Damage fact
+

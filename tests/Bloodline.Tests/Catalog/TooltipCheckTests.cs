@@ -101,7 +101,7 @@ public sealed class TooltipCheckTests
     ) => TooltipCheck.Check(1, [item], [tooltip], []).Differences;
 
     [Fact]
-    public void ShieldTooltipDamageRemainsAnUnownedDifferenceUntilTheWeaponIssueMerge()
+    public void ShieldTooltipDamageNamesTheWeaponIssueWithoutAnAppliedDamageFact()
     {
         var shield = Sword with
         {
@@ -116,7 +116,7 @@ public sealed class TooltipCheckTests
         Assert.Equal("Damage", difference.Field);
         Assert.Equal("15", difference.Tooltip);
         Assert.Null(difference.Catalog);
-        Assert.Null(difference.Reason);
+        Assert.Equal(KnownIssues.WeaponTooltipDamage, difference.Reason);
     }
 
     [Theory]
@@ -137,7 +137,11 @@ public sealed class TooltipCheckTests
         var differences = Differences(weapon, Tooltip(weapon, $"Damage: {tooltipDamage}"));
         Assert.Equal(differs ? 1 : 0, differences.Count);
         if (differs)
-            Assert.Equal("85", Assert.Single(differences).Catalog);
+        {
+            var difference = Assert.Single(differences);
+            Assert.Equal("85", difference.Catalog);
+            Assert.Equal(KnownIssues.WeaponTooltipDamage, difference.Reason);
+        }
     }
 
     [Fact]
@@ -153,7 +157,7 @@ public sealed class TooltipCheckTests
 
     [Theory]
     [InlineData("Damage: 1,000", "Slow", null, null)]
-    [InlineData("Damage: 40", "Slow", "Damage", null)]
+    [InlineData("Damage: 40", "Slow", "Damage", KnownIssues.WeaponTooltipDamage)]
     [InlineData("Damage: 1,000", "Fast", "Speed", null)]
     [InlineData(": 0", "Slow", "Stat line", null)]
     [InlineData(": ", "Slow", "Stat line", "unlabeled-stat-line")]
@@ -196,7 +200,10 @@ public sealed class TooltipCheckTests
             return;
         }
         var difference = Assert.Single(differences);
-        Assert.Equal(("Damage", "staff-tooltip-damage"), (difference.Field, difference.Reason));
+        Assert.Equal(
+            ("Damage", KnownIssues.WeaponTooltipDamage),
+            (difference.Field, difference.Reason)
+        );
     }
 
     [Fact]
@@ -282,9 +289,8 @@ public sealed class TooltipCheckTests
                 Fact("Leather Pants", Stat.ArmorRating).GameShowsIssue
             )
         );
-        // A difference without a known cause is a catalog question, not a value the page shows.
-        Assert.Null(Fact("Sword", Stat.Damage).GameShows);
-        Assert.Null(Fact("Sword", Stat.Damage).GameShowsIssue);
+        Assert.Equal("40", Fact("Sword", Stat.Damage).GameShows);
+        Assert.Equal(KnownIssues.WeaponTooltipDamage, Fact("Sword", Stat.Damage).GameShowsIssue);
     }
 
     [Fact]

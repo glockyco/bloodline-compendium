@@ -94,10 +94,10 @@ internal static partial class TooltipCheck
             "Potion tooltips show no description, and Base Potion's tooltip shows nothing, as hovering with the real cursor showed in run hover-check-2."
         ),
         new(
-            "staff-tooltip-damage",
+            KnownIssues.WeaponTooltipDamage,
             "game",
             true,
-            "Staff tooltips show ItemInfo.Damage, while normal hits use the projectile's initialized damage or the halberd-style staff's melee damage."
+            "Weapon tooltips show ItemInfo.Damage, while hits use WeaponInfo.Damage or projectile damage. Shields deal no ordinary-hit damage."
         ),
         new(
             "staves-without-fireballs",
@@ -404,10 +404,10 @@ internal static partial class TooltipCheck
                         "Damage",
                         value,
                         Find(Stat.BodyHitDamage) is not null ? Stat.BodyHitDamage : Stat.Damage,
-                        item.Type != "Staff" ? null
-                            // A staff whose swing launches nothing deals no damage, as the no-fireball issue says.
-                            : Find(Stat.Damage)?.Number == 0 ? KnownIssues.NoFireballs
-                            : "staff-tooltip-damage"
+                        item.Type == "Staff" && Find(Stat.Damage)?.Number == 0
+                                ? KnownIssues.NoFireballs
+                            : item.Category.Name == "Weapon" ? KnownIssues.WeaponTooltipDamage
+                            : null
                     );
                     break;
                 case "ARMOR":

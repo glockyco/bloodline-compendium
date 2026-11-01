@@ -2,10 +2,12 @@
 # Walks the steps of the entries in issues/known-issues.json as a player would and takes a screenshot after each
 # step, next to the game's own values, so a recheck shows what the player sees. Run it inside `nix develop` with the
 # lab game launched with `launch render` on a new save.
+# For all checks, set BLOODLINE_SITE_DATA to the regenerated catalog's site directory.
 # Pass `staff` to repeat only the staff checks.
 set -euo pipefail
 lab() { bun "$(dirname "$0")/../lab.mjs" "$@"; }
 if [[ "${1:-all}" != "staff" ]]; then
+  : "${BLOODLINE_SITE_DATA:?Set BLOODLINE_SITE_DATA to the regenerated catalog.}"
 item=/Game/BloodlinesAlpha/Interactables
 food=$item/Crafting_Items/GeneralFoodItems
 knees=$item/Armor/Knees/Knee_Armor_01.Knee_Armor_01_C
@@ -133,7 +135,7 @@ for staff in "${staves[@]}"; do
   done
 done
 
-# staff-tooltip-damage: one hit on a fresh Goblin Brute from range, after the tooltip sweep has read each tooltip. The
+# weapon-tooltip-damage: one hit on a fresh Goblin Brute from range, after the tooltip sweep has read each tooltip. The
 # swinging staves need melee range, the others range for their projectile.
 for staff in "Halberds/WalkingStick 600" "Staves/AdeptCryomancerStaff 600" "Staves/MoonstoneStaff 600" \
   "Staves/ChristmasStaff 600" "Halberds/PintoStaff 130" "Halberds/FairyStaff 130" "Halberds/NecroStaff 130"; do
@@ -142,6 +144,23 @@ for staff in "Halberds/WalkingStick 600" "Staves/AdeptCryomancerStaff 600" "Stav
   staff_check "{\"action\":\"target\",\"distance\":${staff#* }}"
   staff_check '{"action":"attack","pauseOnHit":true,"seconds":3}'
 done
+
+# The other melee weapons follow the same overlap path. Derive them from the current issue notes, not a fixed list.
+if [[ "${1:-all}" != "staff" ]]; then
+  while IFS= read -r weapon; do
+    staff_check "{\"action\":\"equip\",\"item\":\"$weapon\"}"
+    staff_check '{"action":"target","distance":130}'
+    staff_check '{"action":"attack","pauseOnHit":true,"seconds":3}'
+  done < <(bun -e '
+    const root = process.env.BLOODLINE_SITE_DATA;
+    if (!root) throw new Error("Set BLOODLINE_SITE_DATA to the regenerated catalog.");
+    for (const file of new Bun.Glob("items/*.json").scanSync(root)) {
+      const item = await Bun.file(`${root}/${file}`).json();
+      if (item.notes.some(note => note.issue === "weapon-tooltip-damage")
+        && !["Staff", "Shield", "Gun", "Pistol", "Crossbow", "Bow"].includes(item.type)) console.log(item.key);
+    }
+  ')
+fi
 
 # halberds-train-no-proficiency: one hit each on a fresh Goblin Brute, then Detailed Stats' passive levels. Bloodforged
 # Blade trains One-Handed Weapons and Copper Battleaxe Two-Handed Weapons, while Lonland Halberd and Fairy Staff train

@@ -2,7 +2,12 @@ import type { Fact, ItemPage } from './site-data.js';
 
 /** A row of an item page's Bugs section: a known issue with the tooltip values it explains, or a tooltip value that no issue on the page explains. */
 export type BugRow =
-	| { kind: 'issue'; issue: string; sentence: string; differences: Fact[] }
+	| {
+			kind: 'issue';
+			issue: string;
+			sentence: string;
+			differences: { label: string; value: string }[];
+	  }
 	| { kind: 'difference'; fact: Fact };
 
 /** The Bugs rows of an item: its known issues first, each with the tooltip differences it explains, then every other tooltip difference. */
@@ -14,7 +19,12 @@ export function bugRows(item: Pick<ItemPage, 'facts' | 'notes'>): BugRow[] {
 			kind: 'issue',
 			issue: note.issue,
 			sentence: note.effect,
-			differences: differences.filter((fact) => fact.gameShowsIssue === note.issue)
+			differences: [
+				...differences
+					.filter((fact) => fact.gameShowsIssue === note.issue)
+					.map((fact) => ({ label: fact.tooltipLabel ?? fact.label, value: fact.gameShows! })),
+				...Object.entries(note.tooltipValues ?? {}).map(([label, value]) => ({ label, value }))
+			]
 		})),
 		...differences
 			.filter((fact) => fact.gameShowsIssue == null || !noted.has(fact.gameShowsIssue))

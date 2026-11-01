@@ -467,7 +467,7 @@ public sealed class CatalogTests
             {
                 Tooltips =
                 [
-                    Tooltip(sword, "Iron sword", "Damage: 900"),
+                    Tooltip(sword, "Iron sword", "Other: 900"),
                     Tooltip(pants, "Leather pants", "ARMOR: 4"),
                 ],
                 Issues = new KnownIssueRegistry([

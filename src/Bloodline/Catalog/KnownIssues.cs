@@ -47,6 +47,9 @@ internal static partial class KnownIssues
     /// <summary>Reproduced staves can deal default projectile damage at point-blank range.</summary>
     public const string StaffPointBlankDamage = "staff-point-blank-damage";
 
+    /// <summary>Weapons whose tooltip damage differs from their applied ordinary-hit damage.</summary>
+    public const string WeaponTooltipDamage = "weapon-tooltip-damage";
+
     /// <summary>Halberd-type weapons, staves of other classes among them, whose hits train no proficiency.</summary>
     public const string NoProficiency = "halberds-train-no-proficiency";
 
@@ -148,6 +151,22 @@ internal static partial class KnownIssues
             StringComparer.Ordinal
         );
         var causes = TooltipCheck.Reasons.ToDictionary(reason => reason.Id, StringComparer.Ordinal);
+        var tooltipValues = (tooltips?.Differences ?? [])
+            .Where(difference =>
+                difference.Catalog is null
+                && difference.Reason is not null
+                && difference.Tooltip is not null
+            )
+            .GroupBy(difference => (difference.Item, difference.Reason))
+            .ToDictionary(
+                group => group.Key,
+                group =>
+                    (IReadOnlyDictionary<string, string>)
+                        group.ToDictionary(
+                            difference => difference.Field,
+                            difference => difference.Tooltip!
+                        )
+            );
         KnownIssue Find(string id, string user) =>
             issues.TryGetValue(id, out var issue)
                 ? issue
@@ -161,8 +180,8 @@ internal static partial class KnownIssues
                 continue;
             }
             Find(reason, $"The tooltip difference of {difference.Name} in {difference.Field}");
-            // A tooltip line that the page shows no value for, such as one without a label, needs no note.
-            if (difference.Catalog is not null)
+            // Shields need a damage note even though no ordinary-hit damage fact exists.
+            if (difference.Catalog is not null || reason == WeaponTooltipDamage)
             {
                 notes[difference.Item].Add(reason);
             }
@@ -253,9 +272,13 @@ internal static partial class KnownIssues
                                 "armor-without-row" or "armor-slot-adds-none" =>
                                     $"Wearing {item.Name} adds no armor.",
                                 NoProficiency => $"{item.Name} trains no weapon proficiency.",
+                                WeaponTooltipDamage => WeaponDamageNote(item),
                                 _ => issue.ItemNotes?.GetValueOrDefault(item.Key) ?? issue.Effect,
                             }
-                        ))
+                        )
+                        {
+                            TooltipValues = tooltipValues.GetValueOrDefault((item.Key, issue.Id)),
+                        })
                         .ToArray(),
                 }
             )
@@ -272,6 +295,16 @@ internal static partial class KnownIssues
             ))
             .ToArray();
         return (pages, published);
+    }
+
+    private static string WeaponDamageNote(ItemPage item)
+    {
+        string Damage(Stat stat) =>
+            StatVocabulary.Display(item.Facts.First(fact => fact.Stat == stat))!;
+        return item.Type == "Shield" ? $"{item.Name} deals no damage."
+            : item.Facts.Any(fact => fact.Stat == Stat.BodyHitDamage)
+                ? $"{item.Name} deals {Damage(Stat.BodyHitDamage)} damage per hit, {Damage(Stat.HeadHitDamage)} on a headshot."
+            : $"{item.Name} deals {Damage(Stat.Damage)} damage per hit.";
     }
 
     [GeneratedRegex("^[a-z0-9]+(-[a-z0-9]+)*$")]

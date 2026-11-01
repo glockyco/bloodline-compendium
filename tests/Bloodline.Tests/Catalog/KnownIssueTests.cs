@@ -301,6 +301,74 @@ public sealed class KnownIssueTests
     }
 
     [Theory]
+    [InlineData("Dagger", 8d, null, "Goblin Shiv deals 8 damage per hit.")]
+    [InlineData("Staff", 12d, null, "Goblin Shiv deals 12 damage per hit.")]
+    [InlineData("Pistol", 50d, 100d, "Goblin Shiv deals 50 damage per hit, 100 on a headshot.")]
+    [InlineData("Shield", null, null, "Goblin Shiv deals no damage.")]
+    public void WeaponDamageNotesUseAppliedDamageAndIncludeShieldsWithoutDamageFacts(
+        string type,
+        double? damage,
+        double? headshot,
+        string effect
+    )
+    {
+        var item = new ItemPage(
+            "/Game/Invented/Shiv.Shiv_C",
+            "shiv",
+            "Goblin Shiv",
+            null,
+            new CategoryLink("weapons", "Weapon"),
+            null,
+            damage is null ? []
+                : headshot is null ? [StatVocabulary.Number(Stat.Damage, damage)]
+                :
+                [
+                    StatVocabulary.Number(Stat.BodyHitDamage, damage),
+                    StatVocabulary.Number(Stat.HeadHitDamage, headshot),
+                ],
+            []
+        )
+        {
+            Type = type,
+        };
+        var report = new TooltipReport(
+            1,
+            TooltipCheck.Consumer,
+            [],
+            1,
+            TooltipCheck.Reasons,
+            [],
+            [
+                new(
+                    item.Key,
+                    item.Name,
+                    "Damage",
+                    "20",
+                    damage?.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    KnownIssues.WeaponTooltipDamage,
+                    []
+                ),
+            ]
+        );
+        var (pages, issues) = KnownIssues.Attach(
+            [item],
+            new KnownIssueRegistry([Issue(KnownIssues.WeaponTooltipDamage)]),
+            report,
+            new HashSet<string>(),
+            new HashSet<string>()
+        );
+        var page = Assert.Single(pages);
+        var note = Assert.Single(page.Notes);
+        Assert.Equal(effect, note.Effect);
+        Assert.Equal(item.Key, Assert.Single(Assert.Single(issues).Affected).Key);
+        if (type == "Shield")
+        {
+            Assert.DoesNotContain(page.Facts, fact => fact.Stat == Stat.Damage);
+            Assert.Equal("20", note.TooltipValues!["Damage"]);
+        }
+    }
+
+    [Theory]
     [InlineData("same-id", "same-id", false, null)]
     [InlineData("Bad_Id", "other-id", false, null)]
     [InlineData("one-id", "other-id", true, null)]

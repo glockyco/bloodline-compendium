@@ -373,9 +373,9 @@
 										>{#each row.sentence.split(item.name) as part, index (index)}{#if index}<span
 													data-game>{item.name}</span
 												>{/if}{part}{/each}</span
-									>{#each row.differences as fact (fact.stat)}<small
-											>The game's tooltip shows {fact.tooltipLabel ?? fact.label}
-											{fact.gameShows}</small
+									>{#each row.differences as difference (difference.label)}<small
+											>The game's tooltip shows {difference.label}
+											{difference.value}</small
 										>{/each}<small
 										><!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- the resolved issue page with its section. -->
 										<a href={resolve('known-issues/') + '#' + row.issue}>Read about this issue</a
