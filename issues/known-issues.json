@@ -26,7 +26,7 @@
     },
     {
       "id": "armor-slot-adds-none",
-      "title": "Amulets and support items show armor they never add",
+      "title": "Rings and other accessories show armor they never add",
       "effect": "Some amulets and support items, such as Bonecaller's Band and Pactborn Wings, show an armor value in their tooltips but add no armor when worn.",
       "workaround": null,
       "steps": [
@@ -102,7 +102,7 @@
     },
     {
       "id": "food-effect-not-applied",
-      "title": "Druid's Stew does not boost foraging",
+      "title": "Druid's Stew does not boost foraging experience",
       "effect": "Druid's Stew grants Druidsight but not the foraging experience boost it lists.",
       "itemNotes": {
         "/Game/BloodlinesAlpha/Interactables/Crafting_Items/GeneralFoodItems/DruidsStew.DruidsStew_C": "Despite its description, Druid's Stew does not boost foraging experience. It still gives Druidsight."
