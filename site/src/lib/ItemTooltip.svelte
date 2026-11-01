@@ -130,10 +130,12 @@
 	.second {
 		font-size: var(--type-1);
 	}
+	/* The game sets the description at its stat line's size, so it wraps where the game wraps it. */
 	.description {
 		margin: 0;
 		padding: 0 var(--inset-loose);
-		font-size: var(--type-2);
+		font-size: var(--type-1);
 		line-height: var(--leading-snug);
+		text-wrap: pretty;
 	}
 </style>
