@@ -258,57 +258,21 @@ small {
 	color: var(--text-warning);
 }
 /* Row dividers span the surface, so each entry carries the inset instead of the list. */
-.acquisition-routes,
 .bug-rows {
 	list-style: none;
 	padding: 0;
 }
-.acquisition-routes .more-ways {
-	display: none;
-}
-.acquisition-routes .more-ways button {
-	width: 100%;
-	min-height: var(--size-control);
-	padding: var(--inset-cell) var(--inset);
-	text-align: left;
-	border: 0;
-	background: none;
-	color: var(--accent);
-}
-.acquisition-routes li + li,
 .bug-rows li + li {
 	border-top: var(--border-width) solid var(--border);
 }
-.acquisition-routes a,
 .bug-rows li {
 	display: grid;
 	gap: var(--gap-line);
 	padding: var(--inset-cell) var(--inset);
 	text-decoration: none;
 }
-.acquisition-routes a:hover strong {
-	text-decoration: underline;
-}
-.acquisition-routes strong {
-	font-weight: var(--weight-strong);
-}
-.acquisition-routes small,
 .bug-rows small {
 	margin: 0;
-}
-.route-line {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: baseline;
-	gap: 0 var(--gap-line);
-}
-.route-line .verb,
-.route-line .more,
-.route-line .where {
-	color: var(--text-soft);
-}
-.acquisition-routes .when {
-	color: var(--text-soft);
 }
 /* Filters above a table: one row of labelled controls of one height, each label above its control. */
 .use-filters {
@@ -401,14 +365,6 @@ details[open] > summary .show-less {
 	border: 0;
 }
 
-@media (width < 40rem) {
-	.acquisition-routes.capped .later {
-		display: none;
-	}
-	.acquisition-routes.capped .more-ways {
-		display: block;
-	}
-}
 /* Below desktop width a page reads as one column, because a side column narrows descriptions below a phone's
    measure. A tablet keeps the answer first and the game card below it at a readable width. A phone shows the game
    card first, so the item's purpose is on the first screen, then the answer and the details. */

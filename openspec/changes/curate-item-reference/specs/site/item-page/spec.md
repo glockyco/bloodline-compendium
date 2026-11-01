@@ -6,26 +6,23 @@ Defines what an item page shows and in which order, so that its first screen ans
 
 ## ADDED Requirements
 
-### Requirement: First-screen answer
-The first screen SHALL show the item's tooltip and a summary of every way to get it, each led by a verb such as Buy, Craft, Cook, Loot, Find or Receive, with up to two named sources, a count of further sources, the place, the price or chance, and any season or unlock condition.
+### Requirement: Ways to get an item first
+An item page SHALL open with its game card and Details, followed by its recipe and the sections of its sources grouped by how they are obtained, before what the item is used for or buys. The page SHALL NOT repeat those sources in a summary. An item without a known source SHALL say so in a How to Get It section in their place.
 
-#### Scenario: Seasonal merchant
-- **WHEN** a reader opens the Dark Brown Scarecrow Hat
-- **THEN** the summary names the Hallowed Eve Merchant in Woodhurst, the price in Ghostgreen Apples, and October or Truill
+#### Scenario: Iron Ore
+- **WHEN** a reader opens Iron Ore
+- **THEN** Sold by and the other source sections follow Details, and Used For and Buys follow them
 
-### Requirement: Summary values describe every named source
-A level, price or chance on a summary line SHALL hold for every source the line names, and the line SHALL show their range otherwise.
+#### Scenario: No known source
+- **WHEN** a reader opens an item without a known source
+- **THEN** How to Get It says that no source is known
+
+### Requirement: Search descriptions describe every named source
+A level, price or chance in a search description's way to get the item SHALL hold for every source it names, and it SHALL show their range otherwise.
 
 #### Scenario: Containers with different chances
-- **WHEN** a reader opens Azure Lover, whose containers give 1.7% to 38.5%
-- **THEN** the container line shows that range instead of one container's chance
-
-### Requirement: Phone first screens retain key facts
-On phones, the summary SHALL precede the tooltip only when it is short, and the tooltip's key values and a link to the uses SHALL be visible within the first screen.
-
-#### Scenario: Long summary on a phone
-- WHEN an item's acquisition summary is long on a phone
-- THEN it does not precede the tooltip and the first screen retains the tooltip's key values and a link to uses
+- **WHEN** a search engine shows Azure Lover, whose containers give 1.7% to 38.5%
+- **THEN** its description shows that range instead of one container's chance
 
 ### Requirement: Recipe line
 A crafted item SHALL show its recipe as a visible line: ingredients with quantities and icons, station, discipline and level, output quantity and experience. Nothing essential to crafting SHALL sit behind a disclosure.

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount, tick } from 'svelte';
 	import { resolve } from '$app/paths';
 	import SourceRow from '#lib/SourceRow.svelte';
 	import RelationTable from '#lib/RelationTable.svelte';
@@ -18,7 +17,6 @@
 		oddsLabel,
 		recipeKinds,
 		sortSources,
-		summarize,
 		useHeadings,
 		pricePhrase
 	} from '#lib/acquisition.js';
@@ -83,7 +81,6 @@
 					byPlace,
 					showPlaces,
 					recipe: recipeKinds.has(kind),
-					summary: sources.length ? summarize(kind, sources) : null,
 					showAmount,
 					showSpawn,
 					showContext,
@@ -111,20 +108,6 @@
 		groups.filter((group) => group.recipe).flatMap((group) => group.sources)
 	);
 	const sourceGroups = $derived(groups.filter((group) => !group.recipe));
-	// A phone shows the first ways to get the item until the reader asks for the rest, so the answer stays short
-	// enough to lead the page with the game card right below it.
-	const firstWays = 3;
-	let mounted = $state(false);
-	let allWays = $state(false);
-	let routes = $state<HTMLElement>();
-	onMount(() => {
-		mounted = true;
-	});
-	async function showAllWays() {
-		allWays = true;
-		await tick();
-		routes?.querySelectorAll<HTMLElement>('li > a')[firstWays]?.focus();
-	}
 	// The skill level a use needs shows in its own column, so the condition that states it does not repeat.
 	const levelOf = (use: (typeof uses)[number]) =>
 		use.conditions.find((condition) => condition.kind === 'proficiencyLevel')?.value ?? null;
@@ -206,53 +189,10 @@
 			{#if details.length}<Section id="details" title="Details">
 					<div class="surface detail-surface"><ItemDetails rows={details} wide /></div>
 				</Section>{/if}
-			<Section id="how-to-get-it" title="How to Get It">
-				{#snippet action()}{#if sortedUses.length}<a href={uses.length ? '#used-for' : '#buys'}
-							>Used for {formatNumber(sortedUses.length)}</a
-						>{/if}{/snippet}
-				{#if !groups.length}
-					<p class="surface">
-						{statusSentence[item.status]}
-					</p>
-				{:else}
-					<ul
-						class="surface acquisition-routes"
-						class:capped={mounted && !allWays && groups.length > firstWays + 1}
-						bind:this={routes}
-					>
-						{#each groups as group, index (group.kind)}{@const summary = group.summary!}
-							<li class:later={index >= firstWays}>
-								<a href={group.recipe ? '#recipes' : '#source-' + group.kind}
-									><span class="route-line"
-										><span class="verb">{summary.verb}</span
-										>{#each summary.entries as entry, position (entry.name)}{@const last =
-												position ===
-												summary.entries.length - 1}{#if position && summary.joiner === ' and '}<span
-													class="more">and</span
-												>{/if}<span class="entry"
-												><strong data-game>{entry.name}</strong>{#if entry.place}&nbsp;<span
-														class="where">in <span data-game>{entry.place}</span></span
-													>{/if}{#if (!last && summary.joiner === ', ') || (last && summary.more && summary.joiner === ' and ')},{/if}</span
-											>{/each}{#if summary.more}<span class="more"
-												>and {formatNumber(summary.more)} more</span
-											>{/if}{#if summary.places.length}<span data-game class="where-only"
-												>{' ' + summary.places.join(' and ')}</span
-											>{/if}</span
-									>{#if summary.context}<small>{summary.context}</small
-										>{/if}{#each summary.conditions as condition (condition)}<small class="when"
-											>{condition}</small
-										>{/each}</a
-								>
-							</li>
-						{/each}
-						{#if mounted && !allWays && groups.length > firstWays + 1}<li class="more-ways">
-								<button type="button" onclick={showAllWays}
-									>Show {groups.length - firstWays} more ways to get it</button
-								>
-							</li>{/if}
-					</ul>
-				{/if}
-			</Section>
+			<!-- The ways to get an item follow as their own sections, and only an item without one says so here. -->
+			{#if !groups.length}<Section id="how-to-get-it" title="How to Get It">
+					<p class="surface">{statusSentence[item.status]}</p>
+				</Section>{/if}
 		</div>
 		<aside class="item-side" aria-label="Game card">
 			<ItemTooltip item={{ ...item, name: displayName }} details={false} />
@@ -271,6 +211,38 @@
 							/>{/each}
 					</Section>
 				</div>{/if}
+			{#each sourceGroups as group (group.kind)}
+				<Section
+					class="source-group"
+					id={'source-' + group.kind}
+					title={sourceHeadings[group.kind]}
+					count={group.sources.length}
+					line={sourceIntros[group.kind]}
+				>
+					<RelationTable
+						items={group.sources}
+						label={sourceHeadings[group.kind]}
+						headings={group.headings}
+						>{#snippet row(
+							source,
+							index
+						)}{#if group.byPlace && (index === 0 || placeOf(group.sources[index - 1]) !== placeOf(source))}<tr
+									class="place-heading"
+									><th colspan={group.headings.length} scope="colgroup" data-game
+										>{placeOf(source)}</th
+									></tr
+								>{/if}<SourceRow
+								{source}
+								showAmount={group.showAmount}
+								showSpawn={group.showSpawn}
+								showContext={group.showContext}
+								showUnit={!group.sharedUnit}
+								showPlaces={!group.byPlace && group.showPlaces}
+								id={`source-${group.kind}-${index + 1}`}
+							/>{/snippet}</RelationTable
+					>
+				</Section>
+			{/each}
 			{#if uses.length}<Section
 					id="used-for"
 					title="Used For"
@@ -354,38 +326,6 @@
 							>{/snippet}</RelationTable
 					>
 				</Section>{/if}
-			{#each sourceGroups as group (group.kind)}
-				<Section
-					class="source-group"
-					id={'source-' + group.kind}
-					title={sourceHeadings[group.kind]}
-					count={group.sources.length}
-					line={sourceIntros[group.kind]}
-				>
-					<RelationTable
-						items={group.sources}
-						label={sourceHeadings[group.kind]}
-						headings={group.headings}
-						>{#snippet row(
-							source,
-							index
-						)}{#if group.byPlace && (index === 0 || placeOf(group.sources[index - 1]) !== placeOf(source))}<tr
-									class="place-heading"
-									><th colspan={group.headings.length} scope="colgroup" data-game
-										>{placeOf(source)}</th
-									></tr
-								>{/if}<SourceRow
-								{source}
-								showAmount={group.showAmount}
-								showSpawn={group.showSpawn}
-								showContext={group.showContext}
-								showUnit={!group.sharedUnit}
-								showPlaces={!group.byPlace && group.showPlaces}
-								id={`source-${group.kind}-${index + 1}`}
-							/>{/snippet}</RelationTable
-					>
-				</Section>
-			{/each}
 			{#if unconfirmedSources.length}<Section
 					id="only-in-game-files"
 					title="Only in the Game Files"

@@ -127,8 +127,14 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 	page
 }) => {
 	await page.goto('/items/lanternedge/');
-	await expect(page.getByRole('heading', { name: 'How to Get It', exact: true })).toBeVisible();
-	await expect(page.locator('.acquisition-routes')).toContainText('Sold by');
+	// The ways to get the item lead the sources, without a summary that repeats them.
+	await expect(page.getByRole('heading', { name: 'How to Get It', exact: true })).toHaveCount(0);
+	const order = await page
+		.locator('.item-relations section')
+		.evaluateAll((sections) => sections.map((section) => section.getAttribute('aria-labelledby')));
+	expect(order.slice(0, 2)).toEqual(['recipes', 'source-shop']);
+	if (order.includes('used-for'))
+		expect(order.indexOf('used-for')).toBeGreaterThan(order.lastIndexOf('source-shop'));
 	const card = page.getByRole('complementary', { name: 'Game card' });
 	await expect(card).toContainText('Damage: 12');
 	await expect(card.locator('.first')).toHaveText('Average');
@@ -137,10 +143,6 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 	await expect(details).not.toContainText(/Attack Speed/i);
 	await expect(details).toContainText(/Magazine Size\s*Unknown/);
 	await expect(card).not.toContainText('Magazine Size');
-	const shopLink = page.locator('.acquisition-routes a[href="#source-shop"]');
-	await shopLink.click();
-	await expect(page).toHaveURL(/#source-shop$/);
-	await expect(page.locator('#source-shop')).toBeInViewport();
 	const delivery = page.locator('section').filter({
 		has: page.getByRole('heading', { name: 'Delivered by Settlements' })
 	});
@@ -155,7 +157,7 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 		'Cinderpear',
 		'1 to 2',
 		'50.8% to 86.6%',
-		'per container',
+		'Chance per Container',
 		'Makes',
 		'Silverglass shard',
 		'Requires a lit forge',
@@ -244,9 +246,6 @@ test('shows loose-loot chances beside ordinary pickups without calling them cont
 		);
 		await expect(table.getByRole('row').filter({ hasText: 'Watchtower blade' })).toBeVisible();
 		await expect(pickups).not.toContainText('Loose items lying on the ground');
-		await expect(page.locator('.acquisition-routes a[href="#source-pickup"]')).toContainText(
-			'Found on the ground in Glass Reach'
-		);
 		await expect(page.locator('section[aria-labelledby="source-containerLoot"]')).not.toContainText(
 			'Stargazer loose loot'
 		);
@@ -270,7 +269,6 @@ test('separates container spawns from loot chances on desktop and labelled phone
 		const row = table.locator('.source-row').filter({ hasText: 'Stargazer cache' });
 		await expect(row.locator('.spawn-value')).toHaveText('25% to 100%');
 		await expect(row.locator('.context-value')).toHaveText('50.8% to 86.6%');
-		await expect(page.locator('.acquisition-routes')).toContainText('50.8% to 86.6% per container');
 		if (width === 390) {
 			await expect(table).toHaveClass(/stacked/);
 			await expect(row.locator('.spawn-value')).toBeVisible();
