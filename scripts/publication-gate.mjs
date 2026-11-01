@@ -62,16 +62,15 @@ export async function publicationGate(directory) {
             .split(",")
             .map((filter) => filter.trim()),
         ];
+      // A row that merges sources of the same name and place lists each relation it shows, space-separated.
       if (
         attrs["data-relation-id"] &&
         !["script", "style", "template"].includes(node.tagName)
       )
-        page.relations.add(
-          JSON.stringify([
-            attrs["data-relation-id"],
-            attrs["data-relation-direction"],
-          ]),
-        );
+        for (const id of attrs["data-relation-id"].split(/\s+/))
+          page.relations.add(
+            JSON.stringify([id, attrs["data-relation-direction"]]),
+          );
       if (node.tagName === "title") titles.push(text(node));
       if (
         node.tagName === "meta" &&

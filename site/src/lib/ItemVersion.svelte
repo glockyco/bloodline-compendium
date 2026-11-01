@@ -33,7 +33,28 @@
 	// Details keep mixed projectile hits together beside the game card.
 	const details = $derived(detailRows(item.facts, item.projectileGroups));
 	const confirmedSources = $derived(item.sources.filter((source) => !source.unconfirmed));
-	const unconfirmedSources = $derived(item.sources.filter((source) => source.unconfirmed));
+	// Unconfirmed sources of one name and place share a row, which keeps each source's relation. One sentence says
+	// why none is confirmed.
+	const unconfirmedSources = $derived.by(() => {
+		const key = (source: Source) =>
+			source.name + '|' + source.places.map((place) => place.name).join(',');
+		const sources = item.sources.filter((candidate) => candidate.unconfirmed);
+		return sources
+			.filter((source, index) => sources.findIndex((other) => key(other) === key(source)) === index)
+			.map((source) => ({
+				source,
+				relationIds: sources
+					.filter((other) => key(other) === key(source))
+					.map((other) => other.relationId)
+			}));
+	});
+	const unconfirmedSentence = $derived(
+		`The game files list these ways to get ${item.name}, but no ${
+			unconfirmedSources.some(({ source }) => source.kind === 'dialogue')
+				? 'place or person'
+				: 'place'
+		} in the world uses them.`
+	);
 	const bugs = $derived(bugRows(item));
 	const groups = $derived(
 		(Object.keys(sourceHeadings) as SourceKind[])
@@ -302,15 +323,16 @@
 				id={idPrefix + 'only-in-game-files'}
 				title="Only in the Game Files"
 				count={unconfirmedSources.length}
+				line={unconfirmedSentence}
 			>
 				<RelationTable
 					items={unconfirmedSources}
 					label="Only in the Game Files"
-					headings={['Source', 'Missing Evidence']}
+					headings={['Source']}
 					numeric={false}
-					>{#snippet row(source, index)}<tr
+					>{#snippet row({ source, relationIds }, index)}<tr
 							id={`${idPrefix}unconfirmed-source-${index + 1}`}
-							data-relation-id={source.relationId}
+							data-relation-id={relationIds.join(' ')}
 							data-relation-direction="incoming"
 							><td
 								><span class="relation-name"
@@ -320,8 +342,6 @@
 												entity={place}
 											/>{/each}
 									</p>{/if}</td
-							><td
-								>{#each source.notes as note, index (index)}<p>{note}</p>{/each}</td
 							></tr
 						>{/snippet}</RelationTable
 				>

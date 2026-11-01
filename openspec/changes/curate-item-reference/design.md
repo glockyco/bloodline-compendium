@@ -245,6 +245,7 @@ Decided in reviews on 2026-10-31 and 2026-11-01, open to change like everything 
 - A name that several items share has one page. Copies a player cannot tell apart are one item. Versions that differ get item-slot tabs under the title with the version's icon and what tells it apart, in the order kind, first differing stat, icon alone, where it comes from, value, and the whole page switches with the tab (comparisons 25 and 26).
 - A Known Issues entry shows its title, what the bug does, any workaround and the affected items. Its steps sit collapsed under "Steps to Reproduce" and end with what a player sees, so the page shows no separate Expected and Observed. The page title has no line above it (comparison 28).
 - Known Issues titles read "Rings and other accessories show armor they never add" and "Druid's Stew does not boost foraging experience", because players never see the slot names (comparison 29).
+- "Only in the Game Files" lists each source once by name and place, under one sentence such as "The game files list these ways to get Stone, but no place in the world uses them.", which says "place or person" when a conversation is among them (comparison 30).
 - A fact states its own value and is not compared with a number the page does not show, such as a shield's "Free Blocks: 6" and not "6 instead of 3" (comparison 22).
 
 Proposed and not decided:

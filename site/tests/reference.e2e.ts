@@ -205,13 +205,12 @@ test('keeps unconfirmed sources at the end without advertising a way to get the 
 			'only-in-game-files'
 		);
 		const files = page.getByRole('table', { name: 'Only in the Game Files' });
-		await expect(files.getByRole('columnheader')).toHaveText(['Source', 'Missing Evidence']);
+		await expect(files.getByRole('columnheader')).toHaveText(['Source']);
 		const dialogue = files.getByRole('row').filter({ hasText: 'The Silent Curator' });
 		await expect(dialogue).toContainText('Glass Reach');
 		await expect(
-			dialogue.getByText('This dialogue is marked unused in the game files.')
-		).toBeVisible();
-		await expect(files.getByText('No placed instance was found for this pickup.')).toBeVisible();
+			page.locator('#only-in-game-files').locator('xpath=ancestor::section[1]')
+		).toContainText('no place or person in the world uses them');
 		await expect(page.locator('meta[name="description"]')).toHaveAttribute(
 			'content',
 			/No known source\./
@@ -538,7 +537,7 @@ test('renders typed references and every relation without JavaScript', async ({
 			for (const relation of document.relations)
 				await expect(
 					page.locator(
-						`[data-relation-id="${relation.id}"][data-relation-direction="${relation.direction}"]`
+						`[data-relation-id~="${relation.id}"][data-relation-direction="${relation.direction}"]`
 					)
 				).toHaveCount(1);
 		}
