@@ -462,9 +462,10 @@ test('each public page has production identity, social metadata and generated br
 				'content',
 				description!
 			);
+			// An item with an icon shares that icon, and pages without one share the emblem banner.
 			await expect(page.locator(`meta[${attribute}="${prefix}:image"]`)).toHaveAttribute(
 				'content',
-				origin + '/og-default.png'
+				origin + (route === '/items/lanternedge/' ? '/share/lanternedge.png' : '/og-default.png')
 			);
 		}
 	}
@@ -483,7 +484,8 @@ test('each public page has production identity, social metadata and generated br
 		'favicon-192x192.png',
 		'favicon-512x512.png',
 		'apple-touch-icon.png',
-		'og-default.png'
+		'og-default.png',
+		'share/lanternedge.png'
 	]) {
 		const response = await request.get('/' + icon);
 		expect(response.status()).toBe(200);

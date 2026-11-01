@@ -36,6 +36,35 @@ export async function writeSiteAssets({ site, dataDirectory, fixtures }) {
       );
   }
 
+  // A shared item link shows its icon. Chat apps draw small images beside the text, so the icon loses its empty margin
+  // and sits on the site's icon slot colour (`--surface-slot`), which keeps dark icons visible on light and dark themes.
+  for (const name of await readdir(join(dataDirectory, "icons"))) {
+    if (!name.endsWith(".png")) continue;
+    const source = join(dataDirectory, "icons", name);
+    const icon = await sharp(source)
+      .trim()
+      .toBuffer()
+      .catch(() => sharp(source).toBuffer());
+    await write(
+      `share/${name}`,
+      sharp({
+        create: { width: 256, height: 256, channels: 4, background: "#261f37" },
+      })
+        .composite([
+          {
+            input: await sharp(icon)
+              .resize(208, 208, {
+                fit: "contain",
+                background: { r: 0, g: 0, b: 0, alpha: 0 },
+              })
+              .toBuffer(),
+          },
+        ])
+        .png(),
+      true,
+    );
+  }
+
   // Fixture builds use invented art, so checks never need the network or the publisher's art.
   const hero = fixtures
     ? join(site, "fixtures/store-art/hero.jpg")

@@ -20,7 +20,22 @@
 		kind?: EntityKindDefinition;
 	} = $props();
 	const canonical = $derived(SITE_ORIGIN + page.url.pathname);
-	const image = SITE_ORIGIN + '/og-default.png';
+	// An entity with an icon shares it as a small square beside the text, and every other page the emblem banner.
+	const image = $derived(
+		entity?.icon
+			? {
+					url: `${SITE_ORIGIN}/share/${entity.icon}.png`,
+					width: 256,
+					height: 256,
+					alt: entity.name
+				}
+			: {
+					url: SITE_ORIGIN + '/og-default.png',
+					width: 1200,
+					height: 630,
+					alt: 'The Bloodline Compendium book emblem'
+				}
+	);
 	const structuredData = $derived([
 		...(entity && kind?.structuredDataType
 			? [
@@ -70,15 +85,15 @@
 	<meta property="og:title" content={title} />
 	<meta property="og:description" content={description} />
 	<meta property="og:url" content={canonical} />
-	<meta property="og:image" content={image} />
-	<meta property="og:image:width" content="1200" />
-	<meta property="og:image:height" content="630" />
-	<meta property="og:image:alt" content="The Bloodline Compendium book emblem" />
-	<meta name="twitter:card" content="summary_large_image" />
+	<meta property="og:image" content={image.url} />
+	<meta property="og:image:width" content={String(image.width)} />
+	<meta property="og:image:height" content={String(image.height)} />
+	<meta property="og:image:alt" content={image.alt} />
+	<meta name="twitter:card" content={entity?.icon ? 'summary' : 'summary_large_image'} />
 	<meta name="twitter:title" content={title} />
 	<meta name="twitter:description" content={description} />
-	<meta name="twitter:image" content={image} />
-	<meta name="twitter:image:alt" content="The Bloodline Compendium book emblem" />
+	<meta name="twitter:image" content={image.url} />
+	<meta name="twitter:image:alt" content={image.alt} />
 	{#each structuredData as entry, index (index)}
 		<!-- eslint-disable-next-line svelte/no-at-html-tags -- Serialized JSON has '<' escaped to prevent script-tag breakout. The split closing tag avoids the Svelte parser's raw script handling. -->
 		{@html '<script type="application/ld+json">' +
