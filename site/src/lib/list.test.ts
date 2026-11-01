@@ -25,7 +25,7 @@ it('browses known items by default while name search finds every item', () => {
 	expect(shown('unknown=1')).toHaveLength(6);
 });
 
-it('keeps same-name versions as separate rows and searches their secondary labels', () => {
+it('keeps same-name versions as separate rows and matches their stored labels', () => {
 	const base = index.items.find((item) => item.slug === 'lanternedge')!;
 	const versions: ItemSummary[] = [
 		{ ...base, key: '/Invented/BladeA', versionId: 'bladea', versionLabel: '24 Damage' },

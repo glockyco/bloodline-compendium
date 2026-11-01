@@ -335,11 +335,7 @@
 												width="32"
 												height="32"
 												loading="lazy"
-											/>{/if}<span data-game
-											>{item.name}{#if item.versionLabel}<span class="version-label"
-													>{` ${item.versionLabel}`}</span
-												>{/if}</span
-										></EntityLink
+											/>{/if}<span data-game>{item.name}</span></EntityLink
 									>{#if statusNote[item.status]}<small class="status-note"
 											>{statusNote[item.status]}</small
 										>{/if}</td
@@ -707,10 +703,6 @@
 		width: var(--size-icon-row);
 		height: var(--size-icon-row);
 		object-fit: contain;
-	}
-	.version-label {
-		display: block;
-		color: var(--text-muted);
 	}
 	.status-note {
 		display: block;

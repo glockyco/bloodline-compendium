@@ -127,11 +127,11 @@ A version SHALL have a stable fragment from its class name. Opening a version fr
 - **AND** a preview of that link shows the same version
 
 ### Requirement: Versions in browsing and search
-The item list SHALL retain one row per distinguishable version, with the plain name and its label on a secondary line. Search SHALL return one result per name.
+The item list SHALL retain one row per distinguishable version, showing only its plain name. Version labels SHALL appear only in the item page's tabs, never beside names in lists, recipes, sources, link previews or search results. Links SHALL retain their exact version fragments. Search SHALL return one result per name.
 
 #### Scenario: Searching a shared name
 - **WHEN** a reader searches for Copper Flintlock Pistol
-- **THEN** search returns one page and the item list retains its two labelled rows
+- **THEN** search returns one page and the item list retains two rows named Copper Flintlock Pistol, without version labels
 
 ### Requirement: Version labels identify the difference
 Version labels SHALL use the first distinction that gives every version a distinct label, in this order: type, first differing shown stat in display order, icon alone, first source, value. Shown stats SHALL include ranged body damage and component contributions. The build SHALL fail if versions still lack distinct labels.

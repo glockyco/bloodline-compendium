@@ -47,8 +47,8 @@ test('name filtering combines with facets and empty results can be cleared', asy
 	await name.press('Enter');
 	await expect(page.locator('.item-name')).toHaveText([
 		'Lanternedge',
-		'Twin Lantern 12 Damage',
-		'Twin Lantern 24 Damage'
+		'Twin Lantern',
+		'Twin Lantern'
 	]);
 	await expect(page).toHaveURL(/name=Lantern/);
 	await name.fill('No invented match');
