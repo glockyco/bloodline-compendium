@@ -147,6 +147,34 @@
       "reportUrl": null
     },
     {
+      "id": "potions-without-effect",
+      "title": "Some potions do nothing when used",
+      "effect": "Health Potion, Mana Potion and Castleside Cider do nothing when used, and Dwarfs Flaggon only restores 60 stamina.",
+      "itemNotes": {
+        "/Game/BloodlinesAlpha/Interactables/HealthPotion.HealthPotion_C": "Despite its description, Health Potion restores no health when used.",
+        "/Game/ManaPotion.ManaPotion_C": "Despite its description, Mana Potion restores no mana when used.",
+        "/Game/BloodlinesAlpha/Interactables/CastlesideCider.CastlesideCider_C": "Castleside Cider does nothing when used.",
+        "/Game/BloodlinesAlpha/Interactables/TheDwarfsFlaggonBeer.TheDwarfsFlaggonBeer_C": "Despite its description, Dwarfs Flaggon does not make you drunk. It only restores 60 stamina."
+      },
+      "workaround": null,
+      "steps": [
+        "Lose some health and mana. Hover Health Potion in the inventory. Its description calls it a standard healing potion.",
+        "Use it. The potion is gone, and Health only keeps regenerating as before.",
+        "Use Mana Potion with some mana missing. Mana only keeps regenerating as before.",
+        "Use Dwarfs Flaggon with some stamina missing. Stamina rises by 60 at once, and no Drunk status appears."
+      ],
+      "expected": "Health Potion restores health, Mana Potion restores mana, and Dwarfs Flaggon makes you drunk, as their descriptions say.",
+      "observed": "Health Potion, Mana Potion and Castleside Cider are used up without any effect. Dwarfs Flaggon restores 60 stamina and nothing else.",
+      "cause": "Using a potion runs FoodManager's Drink Potion, which reads each effect slot's power as an effect number of PotionEffectTranslatorTable and its duration as the amount, as the potion crafting window writes potions. These potions store their real powers there, such as 345 for Restore Health, which are no effect numbers. Dwarfs Flaggon's Improved Jumping holds 5, the number of Restore Stamina, with 60 as its duration.",
+      "citations": [
+        "/Game/BloodlinesAlpha/UI/CharacterSheet/FoodManager:Drink Potion",
+        "/Game/BloodlinesAlpha/UI/CharacterSheet/FoodManager:Find Any Apply Potion Effects"
+      ],
+      "builds": [24464547],
+      "report": "notReported",
+      "reportUrl": null
+    },
+    {
       "id": "staves-without-fireballs",
       "title": "Some staves launch no fireballs",
       "effect": "Despite their descriptions, Fairy Staff, Gripclaw Staff and the two staves named Soulstaff launch no fireballs and use no mana.",

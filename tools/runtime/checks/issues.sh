@@ -29,10 +29,16 @@ stew=$food/DruidsStew.DruidsStew_C
 cake=$food/CarrotCake.CarrotCake_C
 bread=$food/ButteredBread.ButteredBread_C
 spud=$item/Crafting_Items/SpudColossus.SpudColossus_C
+potions=(
+  "health $item/HealthPotion.HealthPotion_C"
+  "mana /Game/ManaPotion.ManaPotion_C"
+  "cider $item/CastlesideCider.CastlesideCider_C"
+  "flaggon $item/TheDwarfsFlaggonBeer.TheDwarfsFlaggonBeer_C"
+)
 armor='{"values":["ArmorTotal","PlayerPassiveLevelStatComponent.Total Armor"]}'
 health='["Health","Max Health","Health Regen Speed"]'
 meals=$(printf '"%s",' "${uneaten[@]#* }")
-lab give "{\"items\":[\"$knees\",\"$sword\",\"$maw\",\"$pants\",\"$band\",${meals}\"$apple\",\"$stew\",\"$cake\",\"$bread\",\"$spud\"]}"
+lab give "{\"items\":[\"$knees\",\"$sword\",\"$maw\",\"$pants\",\"$band\",${meals}\"$apple\",\"$stew\",\"$cake\",\"$bread\",\"$spud\",$(printf '"%s",' "${potions[@]#* }" | sed 's/,$//')]}"
 lab open-sheet
 lab read-tooltips
 lab player "$armor"
@@ -69,6 +75,14 @@ for step in "bread $bread" "spud $spud"; do
   lab sample "{\"seconds\":4,\"values\":[\"Health\",\"Current Mana\",\"Stamina\"],\"actions\":[{\"at\":1,\"command\":\"use\",\"args\":{\"item\":\"${step#* }\"}}]}"
   lab close-tutorials
   lab capture-screen "${step%% *}-after"
+done
+# potions-without-effect: Health, Mana and Stamina are brought low and sampled every frame around each potion.
+for step in "${potions[@]}"; do
+  lab take-damage '{"toHealth":10}'
+  lab eval "$(dirname "$0")/lower-bars.lua" '{"mana":5,"stamina":5}'
+  lab sample "{\"seconds\":4,\"values\":[\"Health\",\"Current Mana\",\"Stamina\"],\"actions\":[{\"at\":0.5,\"command\":\"use\",\"args\":{\"item\":\"${step#* }\"}}]}"
+  lab close-tutorials
+  lab capture-screen "${step%% *}-used"
 done
 # food-effect-not-applied: the status effects after Druid's Stew, then after Carrot Cake.
 for step in "stew $stew" "cake $cake"; do

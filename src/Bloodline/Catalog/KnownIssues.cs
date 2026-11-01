@@ -23,6 +23,24 @@ internal static partial class KnownIssues
     /// <summary>Foods whose rows restore other amounts than their descriptions say.</summary>
     public const string MisdescribedFood = "food-description-mismatch";
 
+    /// <summary>Bought potions whose effect slots name no effect that using them applies.</summary>
+    public const string PotionsWithoutEffect = "potions-without-effect";
+
+    /// <summary>
+    /// The potions that lab runs potions-1101 to potions-1101c used, with the one effect each applied. Only Dwarfs
+    /// Flaggon did anything, by restoring stamina.
+    /// </summary>
+    private static readonly Dictionary<string, string?> IneffectivePotions = new(
+        StringComparer.Ordinal
+    )
+    {
+        ["/Game/BloodlinesAlpha/Interactables/HealthPotion.HealthPotion_C"] = null,
+        ["/Game/ManaPotion.ManaPotion_C"] = null,
+        ["/Game/BloodlinesAlpha/Interactables/CastlesideCider.CastlesideCider_C"] = null,
+        ["/Game/BloodlinesAlpha/Interactables/TheDwarfsFlaggonBeer.TheDwarfsFlaggonBeer_C"] =
+            "Restore Stamina",
+    };
+
     /// <summary>Staves whose description promises fireballs that their swings never launch.</summary>
     public const string NoFireballs = "staves-without-fireballs";
 
@@ -111,7 +129,7 @@ internal static partial class KnownIssues
 
     /// <summary>
     /// Adds notes for tooltip differences concerning shown values, knee armor, ignored food effects,
-    /// foods that eating ignores, foods whose descriptions misstate what they restore, staves without their promised
+    /// foods that eating ignores, foods whose descriptions misstate what they restore, potions without their effects, staves without their promised
     /// fireballs, reproduced point-blank staff damage and
     /// weapons whose hits train no proficiency.
     /// </summary>
@@ -176,6 +194,21 @@ internal static partial class KnownIssues
             )
             {
                 notes[item.Key].Add(MisdescribedFood);
+            }
+            // A later build that gives such a potion other effects drops the note, since its effects then differ.
+            if (
+                IneffectivePotions.TryGetValue(item.Key, out var applied)
+                && (
+                    applied is null
+                        ? item.Facts.Any(fact => fact.Stat == Stat.Effects && fact.Text == "None")
+                        : item
+                            .Facts.Where(fact => fact.Stat == Stat.Effect)
+                            .Select(fact => fact.Effect?.Name)
+                            .SequenceEqual([applied])
+                )
+            )
+            {
+                notes[item.Key].Add(PotionsWithoutEffect);
             }
             if (FirelessStaves.Contains(item.Key))
             {
