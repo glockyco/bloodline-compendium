@@ -253,6 +253,7 @@ small {
 	position: sticky;
 	top: var(--gap-block);
 	min-width: 0;
+	margin-top: var(--inset-below-heading);
 }
 .unknown {
 	color: var(--text-warning);
@@ -377,6 +378,7 @@ details[open] > summary .show-less {
 		grid-row: auto;
 		position: static;
 		max-width: var(--size-item-side);
+		margin-top: 0;
 	}
 	.item-relations {
 		grid-row: 3;

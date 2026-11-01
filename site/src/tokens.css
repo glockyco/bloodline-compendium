@@ -166,6 +166,8 @@
 	/* A row's note lines up with the name beside its icon. */
 	--inset-note: calc(var(--size-icon-row) + var(--gap-inline));
 	--inset-ribbon: calc(var(--size-ribbon-notch) + var(--inset));
+	/* The game card beside the main column starts level with the first section's panel, below its heading. */
+	--inset-below-heading: calc(var(--type-section) * var(--leading-heading) + var(--gap-heading));
 	--position-below: 100%;
 
 	--duration-hover: 0.15s;

@@ -241,6 +241,8 @@ Decided in reviews on 2026-10-31 and 2026-11-01, open to change like everything 
 - A ranged weapon's damage is a Damage table with one row per kind of projectile and the columns Projectile, Body and Headshot, such as "1 bullet | 100 | 150" and "4 pellets | 0 each | 50 each", using the game's words bullet, pellets, bolt and arrow. The game card says "Damage" with the first row's body damage (comparison 22).
 - On-hit effects are a table with the columns Effect, Chance and What It Does, such as "Poison | 20% per hit | 15 damage per second for 10 seconds. A new poison restarts the timer." (comparison 22).
 - The game card's description has the stat line's size, as in the game's tooltip, is left-aligned and keeps a single word off its last line (comparison 23).
+- Beside the main column, the game card starts level with the first section's panel, not with its heading (2026-11-01).
+- A name that several items share has one page. Copies a player cannot tell apart are one item. Versions that differ get item-slot tabs under the title with the version's icon and what tells it apart, in the order kind, first differing stat, icon alone, where it comes from, value, and the whole page switches with the tab (comparisons 25 and 26).
 - A fact states its own value and is not compared with a number the page does not show, such as a shield's "Free Blocks: 6" and not "6 instead of 3" (comparison 22).
 
 Proposed and not decided:
