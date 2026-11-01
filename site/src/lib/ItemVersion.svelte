@@ -63,7 +63,9 @@
 				// Sources share a place heading where several stand in the same place. A source in several places
 				// would sit under one of them while naming the others, so such groups list places in their rows.
 				const places = listed.map(placeOf);
+				// Picked Up rows are their places, so they never share a place heading.
 				const byPlace =
+					kind !== 'pickup' &&
 					listed.every((source) => source.places.length <= 1) &&
 					new Set(places).size > 1 &&
 					places.some((place, index) => places.indexOf(place) !== index);
@@ -233,6 +235,7 @@
 							showContext={group.showContext}
 							showUnit={!group.sharedUnit}
 							showPlaces={!group.byPlace && group.showPlaces}
+							placeFirst={group.kind === 'pickup'}
 							id={`${idPrefix}source-${group.kind}-${index + 1}`}
 						/>{/snippet}</RelationTable
 				>

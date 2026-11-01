@@ -46,7 +46,7 @@ export const sourceColumns: Record<SourceKind, string> = {
 	containerLoot: 'Container',
 	randomLoot: 'Loot',
 	enemyDrop: 'Creature',
-	pickup: 'Item',
+	pickup: 'Location',
 	dialogue: 'Person',
 	fishing: 'Fishing',
 	gathering: 'Resource',

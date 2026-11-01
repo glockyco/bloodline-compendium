@@ -235,7 +235,7 @@ test('keeps unconfirmed sources at the end without advertising a way to get the 
 	await expect(result).not.toContainText('Unplaced prism');
 });
 
-test('shows loose-loot chances beside ordinary pickups without calling them containers', async ({
+test('names Picked Up rows by their place, with loot-spot chances, and never as containers', async ({
 	page
 }) => {
 	for (const width of [1280, 390]) {
@@ -243,11 +243,12 @@ test('shows loose-loot chances beside ordinary pickups without calling them cont
 		await page.goto('/items/lanternedge/');
 		const pickups = page.locator('section[aria-labelledby="source-pickup"]');
 		const table = pickups.getByRole('table');
-		await expect(table.getByRole('columnheader')).toHaveText(['Item', 'Chance per Loot Spot']);
-		await expect(table.getByRole('row').filter({ hasText: 'Stargazer loose loot' })).toContainText(
-			'25%'
-		);
-		await expect(table.getByRole('row').filter({ hasText: 'Watchtower blade' })).toBeVisible();
+		await expect(table.getByRole('columnheader')).toHaveText(['Location', 'Chance per Loot Spot']);
+		const rows = table.locator('tbody tr');
+		await expect(rows).toHaveCount(2);
+		await expect(rows.filter({ hasText: 'Glass Reach' })).toHaveCount(2);
+		await expect(rows.filter({ hasText: '25%' })).toHaveCount(1);
+		await expect(pickups).not.toContainText('Stargazer loose loot');
 		await expect(pickups).not.toContainText('Loose items lying on the ground');
 		await expect(page.locator('section[aria-labelledby="source-containerLoot"]')).not.toContainText(
 			'Stargazer loose loot'

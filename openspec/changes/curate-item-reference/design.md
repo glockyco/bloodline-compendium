@@ -88,7 +88,7 @@ A layout check loads extreme pages, such as the longest names, the most sources,
 
 A visual review at four widths found the tokens consistent but their use not: a home card title outranked an item page's sections, paragraph margins added to parent gaps, prose ran to 160 characters a line and phones spent a fifth of the screen on the header. Type now has roles, each with one size everywhere: the page title, sections at 24 px, subsections and card titles at 20 px, body text, an introduction at 18 px, and metadata at 14 px for labels, counts, table headings, release dates and secondary lines. Data rows use a tighter leading than prose. Text elements carry no outer margins and their parents own the gaps: 4 px within an entry, 12 px between blocks, 16 px from a heading to its body and 32 px between sections. Text pages keep a 70 character measure.
 
-On phones, a relation table row puts its name on the full width and its other columns on a line below, and an item list row puts the name first and its type, labelled stats and value on the next line, all in one surface. The header keeps the brand and navigation on one row above the search, the footer leads with its links at touch size, and the filter sheet uses touch-sized rows. Item pages read the answer, the game card and the details in one order at every narrow width.
+On phones, a relation table row puts its name on the full width and each other column on its own line below, its label on the left and its value with its unit on the right, so every number keeps its label, and an item list row puts the name first and its type, labelled stats and value on the next line, all in one surface. The header keeps the brand and navigation on one row above the search, the footer leads with its links at touch size, and the filter sheet uses touch-sized rows. Item pages read the answer, the game card and the details in one order at every narrow width.
 
 ### A source names what the player meets
 
@@ -246,6 +246,7 @@ Decided in reviews on 2026-10-31 and 2026-11-01, open to change like everything 
 - A Known Issues entry shows its title, what the bug does, any workaround and the affected items. Its steps sit collapsed under "Steps to Reproduce" and end with what a player sees, so the page shows no separate Expected and Observed. The page title has no line above it (comparison 28).
 - Known Issues titles read "Rings and other accessories show armor they never add" and "Druid's Stew does not boost foraging experience", because players never see the slot names (comparison 29).
 - "Only in the Game Files" lists each source once by name and place, under one sentence such as "The game files list these ways to get Stone, but no place in the world uses them.", which says "place or person" when a conversation is among them (comparison 30).
+- Picked Up rows name their place under "Location", as the OSRS Wiki's Spawns table does, because a loot spot shows only the item on the ground and the loot table's name, such as "Supply Box", is never seen in the game (comparison 32, lab run placer32).
 - A fact states its own value and is not compared with a number the page does not show, such as a shield's "Free Blocks: 6" and not "6 instead of 3" (comparison 22).
 
 Proposed and not decided:

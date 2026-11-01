@@ -11,6 +11,7 @@
 		showSpawn = false,
 		showContext = false,
 		showPlaces = true,
+		placeFirst = false,
 		showUnit = true,
 		id
 	}: {
@@ -19,6 +20,8 @@
 		showSpawn?: boolean;
 		showContext?: boolean;
 		showPlaces?: boolean;
+		/** Whether the row is its place, as on Picked Up, instead of the thing that gives the item. */
+		placeFirst?: boolean;
 		/** Whether the chance names its event, which the heading names instead when every row shares it. */
 		showUnit?: boolean;
 		id: string;
@@ -39,13 +42,15 @@
 	data-relation-direction="incoming"
 >
 	<td class="source-identity">
-		<span class="relation-name"><EntityLink entity={source.entity} /></span>
+		{#snippet placeList()}{#if places.length}{#each places as place, index (index)}{index
+						? ', '
+						: ''}<EntityLink entity={place} />{/each}{:else if source.settlement}Your settlement{:else}Location
+				unknown{/if}{/snippet}
+		<span class="relation-name"
+			>{#if placeFirst}{@render placeList()}{:else}<EntityLink entity={source.entity} />{/if}</span
+		>
 		<Conditions conditions={source.conditions} />
-		{#if showPlaces}<p class="source-places">
-				{#if places.length}{#each places as place, index (index)}{index ? ', ' : ''}<EntityLink
-							entity={place}
-						/>{/each}{:else if source.settlement}Your settlement{:else}Location unknown{/if}
-			</p>{/if}
+		{#if showPlaces && !placeFirst}<p class="source-places">{@render placeList()}</p>{/if}
 		{#if source.inputs.length || source.notes.length || source.quotes?.length}
 			<details class="row-details">
 				<summary
@@ -117,12 +122,5 @@
 <style>
 	.currency-price {
 		white-space: normal;
-	}
-	@media (width < 40rem) {
-		.source-row.with-spawn :is(.spawn-value, .context-value) {
-			display: flex;
-			flex: 1 0 100%;
-			justify-content: space-between;
-		}
 	}
 </style>

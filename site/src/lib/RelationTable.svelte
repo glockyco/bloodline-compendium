@@ -145,13 +145,21 @@
 		.relation-panel :global(.stacked tr > :first-child) {
 			flex-basis: 100%;
 		}
-		.relation-panel :global(.stacked td:nth-child(2)) {
-			flex: 1;
+		/* Each value takes its own line, its label on the left and the value with its unit on the right. */
+		.relation-panel :global(.stacked td:nth-child(n + 2)) {
+			display: flex;
+			flex: 1 0 100%;
+			align-items: baseline;
+			gap: var(--gap-inline);
 		}
 		.relation-panel :global(.stacked td:nth-child(n + 2)::before) {
-			margin-right: var(--gap-inline);
+			margin-right: auto;
 			color: var(--text-muted);
 			font-size: var(--type-meta);
+		}
+		.relation-panel :global(.stacked .numeric small) {
+			display: inline;
+			margin-top: 0;
 		}
 		.relation-panel :global(.stacked td:nth-child(2)::before) {
 			content: var(--label-2);
