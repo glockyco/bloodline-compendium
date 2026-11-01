@@ -92,7 +92,11 @@ internal static class ItemList
             ["food", "potion"],
             true,
             null,
-            item => Number(item, Stat.RestorationAmount)
+            // A potion with Restore Magic restores its restoration amount as magic instead of healing it.
+            item =>
+                item.Facts.Any(fact => fact.Effect?.Name == "Restore Magic")
+                    ? null
+                    : Number(item, Stat.RestorationAmount)
         ),
         new(
             "effects",
