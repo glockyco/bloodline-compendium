@@ -50,7 +50,13 @@
 							<h3 class="field-label">
 								Affected Items <span class="muted">{formatNumber(affected.length)}</span>
 							</h3>
-							<ExpandableList items={affected} initial={9} noun="items" className="affected-list">
+							<ExpandableList
+								items={affected}
+								initial={9}
+								noun="items"
+								label={issue.title}
+								className="affected-list"
+							>
 								{#snippet row(entity)}<EntityLink {entity} icon />{/snippet}
 							</ExpandableList>
 						</div>{/if}

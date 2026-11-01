@@ -6,9 +6,17 @@
 		initial,
 		noun,
 		className,
+		label,
 		row
-	}: { items: T[]; initial: number; noun: string; className: string; row: Snippet<[T, number]> } =
-		$props();
+	}: {
+		items: T[];
+		initial: number;
+		noun: string;
+		className: string;
+		/** The list's name for screen readers, which the button names after its count. */
+		label: string;
+		row: Snippet<[T, number]>;
+	} = $props();
 	const preview = $derived(items.length > 10 ? initial : items.length);
 </script>
 
@@ -19,7 +27,7 @@
 	<StaticMore
 		more={`Show ${items.length - preview} more ${noun}`}
 		less={`Hide additional ${noun}`}
-		label={noun}
+		{label}
 	>
 		<ul class={className}>
 			{#each items.slice(preview) as item, index (index)}<li>
