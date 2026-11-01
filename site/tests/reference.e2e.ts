@@ -195,7 +195,7 @@ test('keeps unconfirmed sources at the end without advertising a way to get the 
 			'aria-labelledby',
 			'only-in-game-files'
 		);
-		const files = page.getByRole('table', { name: 'Only in the game files' });
+		const files = page.getByRole('table', { name: 'Only in the Game Files' });
 		await expect(files.getByRole('columnheader')).toHaveText(['Source', 'Missing evidence']);
 		const dialogue = files.getByRole('row').filter({ hasText: 'The Silent Curator' });
 		await expect(dialogue).toContainText('Glass Reach');
@@ -615,7 +615,7 @@ test('notes a known issue on the affected item and explains it on a linked, sear
 		'/items/mosswoven-coat/'
 	);
 	await expect(entry.getByText('Confirmed on')).toBeHidden();
-	await entry.getByText('For developers').click();
+	await entry.getByText('For Developers').click();
 	await expect(entry.getByText('Confirmed on')).toBeVisible();
 	// An issue nobody has reported says nothing about reporting.
 	await expect(entry).not.toContainText('Report');

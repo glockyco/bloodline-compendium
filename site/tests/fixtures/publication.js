@@ -67,7 +67,7 @@ export async function writePublication(directory) {
 		),
 		'known-issues/index.html': publicationPage(
 			'Invented issues',
-			'<section id="unknown"><details><summary>Affected items</summary><a href="/items/other/">Pebble</a></details></section>'
+			'<section id="unknown"><details><summary>Affected Items</summary><a href="/items/other/">Pebble</a></details></section>'
 		),
 		'about/index.html': publicationPage('Invented about'),
 		'404.html': publicationPage(

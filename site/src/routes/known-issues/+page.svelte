@@ -48,14 +48,14 @@
 						</div>{/if}
 					{#if affected.length}<div class="field">
 							<h3 class="field-label">
-								Affected items <span class="muted">{formatNumber(affected.length)}</span>
+								Affected Items <span class="muted">{formatNumber(affected.length)}</span>
 							</h3>
 							<ExpandableList items={affected} initial={9} noun="items" className="affected-list">
 								{#snippet row(entity)}<EntityLink {entity} icon />{/snippet}
 							</ExpandableList>
 						</div>{/if}
 					<div class="field">
-						<h3 class="field-label">Steps to see it</h3>
+						<h3 class="field-label">Steps to See It</h3>
 						<ol class="steps">
 							{#each issue.steps as step, index (index)}<li>{step}</li>{/each}
 						</ol>
@@ -66,15 +66,15 @@
 							<dd>{issue.expected}</dd>
 						</div>
 						<div class="field">
-							<dt class="field-label">Observed in the game</dt>
+							<dt class="field-label">Observed in the Game</dt>
 							<dd>{issue.observed}</dd>
 						</div>
 					</dl>
 					<details class="developer" data-developer>
-						<summary>For developers</summary>
+						<summary>For Developers</summary>
 						<dl>
 							<div class="field">
-								<dt class="field-label">Cause, derived from the game's code</dt>
+								<dt class="field-label">Cause</dt>
 								<dd>{issue.cause}</dd>
 							</div>
 							<div class="field">

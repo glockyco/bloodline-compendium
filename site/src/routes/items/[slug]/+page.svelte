@@ -380,12 +380,12 @@
 			{/each}
 			{#if unconfirmedSources.length}<Section
 					id="only-in-game-files"
-					title="Only in the game files"
+					title="Only in the Game Files"
 					count={unconfirmedSources.length}
 				>
 					<RelationTable
 						items={unconfirmedSources}
-						label="Only in the game files"
+						label="Only in the Game Files"
 						headings={['Source', 'Missing evidence']}
 						numeric={false}
 						>{#snippet row(source, index)}<tr

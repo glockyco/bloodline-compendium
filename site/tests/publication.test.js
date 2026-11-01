@@ -46,7 +46,7 @@ it.each([
 	[
 		'issue backlink',
 		'known-issues/index.html',
-		'<section id="unknown"><details><summary>Affected items</summary><a href="/items/missing/">Missing</a></details></section>',
+		'<section id="unknown"><details><summary>Affected Items</summary><a href="/items/missing/">Missing</a></details></section>',
 		'missing target'
 	],
 	[
