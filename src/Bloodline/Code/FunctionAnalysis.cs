@@ -53,7 +53,15 @@ internal sealed class FunctionAnalysis(
         )
         {
             ClassNames = ClassNamesOf(function),
-            SpawnedDamage = function.Name is "Staff Attack" or "Swing Event"
+            RangedFire = function.Name
+                is "Swing Event"
+                    or "Custom Fire Event"
+                    or "Custom Shoot Bow Event"
+                    or "AnimNotify_Spawn Arrow"
+                    or "Calculate Random Shotgun Projectiles"
+                ? RangedFireAnalysis.Analyze(function, functions, body)
+                : null,
+            SpawnedDamage = function.Name is "Staff Attack" or "Swing Event" or "Custom Fire Event"
                 ? SpawnDamage(body)
                 : null,
         };

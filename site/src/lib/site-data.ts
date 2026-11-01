@@ -92,6 +92,10 @@ export type Stat =
   | "speedContribution"
   | "damage"
   | "projectileDamage"
+  | "bodyHitDamage"
+  | "headHitDamage"
+  | "projectilesPerShot"
+  | "chargedBodyHitDamage"
   | "speed"
   | "damageType"
   | "magazineSize"
@@ -418,6 +422,7 @@ export interface ItemPage {
   kind: EntityKind;
   name: string;
   notes: IssueNote[];
+  projectileGroups?: ProjectileGroup[] | null;
   qualifier?: string | null;
   relations: EntityRelation[];
   slug: string;
@@ -469,6 +474,17 @@ export interface Effect {
 export interface IssueNote {
   effect: string;
   issue: string;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "ProjectileGroup".
+ */
+export interface ProjectileGroup {
+  bodyHitDamage: number | null;
+  condition?: string | null;
+  count: number;
+  headHitDamage: number | null;
   [k: string]: unknown;
 }
 /**

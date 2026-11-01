@@ -229,6 +229,8 @@ internal sealed record ItemPage(
     public string Type { get; init; } = "Unknown";
     public string? Qualifier { get; init; }
 
+    public IReadOnlyList<ProjectileGroup>? ProjectileGroups { get; init; }
+
     [JsonRequired]
     public IReadOnlyList<ItemUse> Uses { get; init; } = [];
 
@@ -238,6 +240,11 @@ internal sealed record ItemPage(
 
     [JsonRequired]
     public ItemStatus Status { get; init; } = ItemStatus.Obtainable;
+}
+
+internal sealed record ProjectileGroup(int Count, double? BodyHitDamage, double? HeadHitDamage)
+{
+    public string? Condition { get; init; }
 }
 
 /// <summary>A page's item-specific note about a known issue, falling back to the issue's effect.</summary>
@@ -338,6 +345,10 @@ internal enum Stat
     SpeedContribution,
     Damage,
     ProjectileDamage,
+    BodyHitDamage,
+    HeadHitDamage,
+    ProjectilesPerShot,
+    ChargedBodyHitDamage,
     Speed,
     DamageType,
     MagazineSize,

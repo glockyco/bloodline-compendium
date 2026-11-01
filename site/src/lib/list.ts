@@ -267,9 +267,16 @@ export function facetGroups(
 		.filter((group) => group.options.length > 0);
 }
 
+const rangedColumns: Record<string, true> = {
+	bodyHitDamage: true,
+	headHitDamage: true,
+	projectilesPerShot: true,
+	chargedBodyHitDamage: true
+};
+
 /**
  * The columns after name, type and value: those for the selected categories or for a list of one category's items,
- * and the column of every stat filter.
+ * and the column of every stat filter. Ranged columns follow the facts present in the shown items.
  */
 export function shownColumns(
 	shown: ItemSummary[],
@@ -278,10 +285,15 @@ export function shownColumns(
 ): ListColumn[] {
 	const selected = state.facets.category ?? [];
 	const filtered = new Set(state.stats.map((filter) => filter.column));
+	const weapons = shown.filter((item) => item.category === 'weapon');
+	const rangedOnly =
+		weapons.length > 0 && weapons.every((item) => item.cells.bodyHitDamage && !item.cells.damage);
 	return index.columns.filter(
 		(column) =>
 			filtered.has(column.id) ||
-			(column.categories.length > 0 &&
+			((!rangedColumns[column.id] || shown.some((item) => item.cells[column.id])) &&
+				(column.id !== 'damage' || !rangedOnly) &&
+				column.categories.length > 0 &&
 				(selected.length
 					? selected.every((category) => column.categories.includes(category))
 					: shown.length > 0 && shown.every((item) => column.categories.includes(item.category))))

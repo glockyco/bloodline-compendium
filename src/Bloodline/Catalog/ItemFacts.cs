@@ -231,6 +231,8 @@ internal sealed class ItemFacts(
         var facts = new List<Fact>();
         CodeFunction? projectileFunction = null;
         var projectileDamage = false;
+        var ranged = type is "Gun" or "Pistol" or "Crossbow" or "Bow";
+        IReadOnlyList<ProjectileGroup>? projectileGroups = null;
         void Add(Stat stat, string path)
         {
             var value = RecordValues.At(properties, path);
@@ -279,7 +281,11 @@ internal sealed class ItemFacts(
                     )
                     .FirstOrDefault(function => function is not null);
             }
-            if (projectileDamage)
+            if (ranged)
+            {
+                projectileFunction = AddRangedFacts(facts, item, type!, out projectileGroups);
+            }
+            else if (projectileDamage)
             {
                 facts.Add(
                     StatVocabulary.Number(Stat.Damage, NormalProjectileDamage(projectileFunction))
@@ -308,7 +314,9 @@ internal sealed class ItemFacts(
             {
                 Add(Stat.Damage, "WeaponInfo.Damage");
             }
-            var damageIndex = facts.FindIndex(fact => fact.Stat == Stat.Damage);
+            var damageIndex = facts.FindIndex(fact =>
+                fact.Stat == (ranged ? Stat.BodyHitDamage : Stat.Damage)
+            );
             var separateDamage = hasSeparateProjectile
                 ? NormalProjectileDamage(projectileFunction)
                 : null;
@@ -316,7 +324,7 @@ internal sealed class ItemFacts(
             // The tooltip contradicts the game only where its damage matches no damage that a normal attack applies,
             // so an unknown applied damage and a separate projectile's damage are no difference.
             if (
-                type == "Staff"
+                (type == "Staff" || ranged)
                 && shownDamage is { } shown
                 && facts[damageIndex].Number is { } applied
                 && applied != shown
@@ -412,9 +420,200 @@ internal sealed class ItemFacts(
         )
         {
             Type = type ?? "Unknown",
+            ProjectileGroups = projectileGroups,
         };
         claims.Record(item.Path, page, projectileFunction, projectileDamage);
         return page;
+    }
+
+    private IReadOnlyList<FiredProjectile>? RangedProjectiles(RangedFire? analysis)
+    {
+        bool Projectile(FiredProjectile actor)
+        {
+            var record = classes?.FirstOrDefault(record => record.Path == actor.Class);
+            // HolyNooseCrossbow:Custom Fire Event can also create FireGround, which is an effect, not a projectile.
+            return record is null
+                || record.Properties.ContainsKey("Damage")
+                || record.Properties.ContainsKey("ProjectileMovement");
+        }
+        IReadOnlyList<FiredProjectile> Filter(IReadOnlyList<FiredProjectile> actors) =>
+            actors.All(Projectile) ? actors : actors.Where(Projectile).ToArray();
+        if (analysis?.Projectiles is { } projectiles)
+            return Filter(projectiles);
+        if (analysis?.Alternatives is not { Count: > 0 } alternatives)
+            return null;
+        var filtered = alternatives.Select(Filter).ToArray();
+        var first = filtered[0];
+        if (filtered.Skip(1).All(actors => actors.SequenceEqual(first)))
+            return first;
+        if (
+            filtered.Any(actors =>
+                actors.Count != first.Count
+                || !actors
+                    .Select(actor => actor.Class)
+                    .SequenceEqual(first.Select(actor => actor.Class))
+            )
+        )
+            return null;
+        return first
+            .Select(
+                (actor, index) =>
+                    filtered.All(actors => actors[index] == actor)
+                        ? actor
+                        : actor with
+                        {
+                            Assigned = true,
+                            Damage = null,
+                        }
+            )
+            .ToArray();
+    }
+
+    private CodeFunction? AddRangedFacts(
+        List<Fact> facts,
+        ClassRecord item,
+        string type,
+        out IReadOnlyList<ProjectileGroup>? projectileGroups
+    )
+    {
+        var properties = item.Properties;
+        var damage = RecordValues.Number(RecordValues.At(properties, "WeaponInfo.Damage"));
+        var itemDamage = RecordValues.Number(RecordValues.At(properties, "ItemInfo.Damage"));
+        var chain = new[] { item.Path }.Concat(item.Ancestors).ToArray();
+        CodeFunction? Entry(string name) =>
+            chain
+                .Select(path =>
+                    code?.Functions.SingleOrDefault(function =>
+                        function.Package == path.Split('.')[0] && function.Name == name
+                    )
+                )
+                .FirstOrDefault(function => function is not null);
+        var fire = Entry(
+            type == "Crossbow" ? "Custom Fire Event"
+            : type == "Bow" ? "Custom Shoot Bow Event"
+            : "Swing Event"
+        );
+        var resolved = RangedProjectiles(fire?.RangedFire);
+        var complete =
+            code is not null
+            && chain
+                .Where(path => !path.StartsWith("/Script/", StringComparison.Ordinal))
+                .All(path =>
+                    classes?.Any(record => record.Path == path) == true
+                    && !code.Gaps.Any(gap => gap.Package == path.Split('.')[0])
+                )
+            && fire is { ParseStatus: CodeParseStatus.Complete, RangedFire: not null }
+            && resolved is not null
+            && !fire.RangedFire.DeferredCleanup;
+        projectileGroups = null;
+        double? charged = null;
+        if (complete)
+        {
+            var analysis = fire!.RangedFire!;
+            var projectiles = resolved!;
+            var groups = new List<ProjectileGroup>();
+            double? Applied(FiredProjectile projectile, double charge)
+            {
+                static bool PlayerProjectile(string path) =>
+                    path
+                        is "/Game/BloodlinesAlpha/Weapons/Bullet.Bullet_C"
+                            or "/Game/BloodlinesAlpha/Weapons/Arrow.Arrow_C"
+                            or "/Game/BloodlinesAlpha/Weapons/CrossBowBolt.CrossBowBolt_C";
+                var actor = classes?.FirstOrDefault(record => record.Path == projectile.Class);
+                if (
+                    actor is null
+                    || (!PlayerProjectile(actor.Path) && !actor.Ancestors.Any(PlayerProjectile))
+                )
+                    return null;
+                return projectile.Assigned
+                    ? projectile.Damage?.At(itemDamage, damage, charge)
+                    : RecordValues.Number(actor.Properties["Damage"]);
+            }
+            ProjectileGroup Group(int count, double? body) =>
+                new(
+                    count,
+                    body,
+                    body is { } applied && damage is { } bonus ? applied + bonus : null
+                );
+            foreach (var group in projectiles.GroupBy(projectile => Applied(projectile, 0)))
+                groups.Add(Group(group.Count(), group.Key));
+            if (type is "Gun" or "Pistol")
+            {
+                var range = RecordValues.Number(RecordValues.At(properties, "WeaponInfo.Range"));
+                var shotgun = code!.Functions.SingleOrDefault(function =>
+                    function.Package
+                        == "/Game/BloodlinesAlpha/Blueprints/FirstPerson2/FirstPersonCharacter2"
+                    && function.Name == "Calculate Random Shotgun Projectiles"
+                );
+                var genericCount =
+                    range is null ? (int?)null
+                    : range == 0 ? 1
+                    : shotgun
+                        is {
+                            ParseStatus: CodeParseStatus.Complete,
+                            RangedFire.Projectiles: not null
+                        }
+                        ? shotgun.RangedFire.Projectiles.Count
+                    : null;
+                // FirstPersonCharacter2:Calculate Random Shotgun Projectiles emits one immediately, then delayed pellets.
+                // Swing Event's synchronous cleanup removes only the immediate bullet, not those emitted afterwards.
+                if (genericCount is { } count)
+                {
+                    var remaining = count - (analysis.ReplacesGeneric ? 1 : 0);
+                    if (remaining > 0)
+                        groups.Add(
+                            Group(
+                                remaining,
+                                RecordValues.Number(
+                                    classes
+                                        ?.FirstOrDefault(record =>
+                                            record.Path
+                                            == "/Game/BloodlinesAlpha/Weapons/Bullet.Bullet_C"
+                                        )
+                                        ?.Properties["Damage"]
+                                )
+                            )
+                        );
+                    projectileGroups = groups;
+                }
+            }
+            else
+            {
+                // FirstPersonCharacterBP_Modular1:AnimNotify_Spawn Arrow assigns WeaponInfo.Damage before the bow override.
+                if (type == "Bow" && !analysis.ReplacesGeneric)
+                    groups.Add(Group(1, damage));
+                projectileGroups = groups;
+                if (type == "Crossbow" && analysis.ReplacesGeneric)
+                    groups.Add(Group(1, damage) with { Condition = "At close range, also" });
+            }
+            if (
+                type == "Crossbow"
+                && analysis.MaximumCharge is > 0 and var maximum
+                && projectiles.Count > 0
+            )
+                charged = Applied(projectiles[0], maximum);
+        }
+        facts.Add(
+            StatVocabulary.Number(
+                Stat.BodyHitDamage,
+                projectileGroups?.FirstOrDefault()?.BodyHitDamage
+            )
+        );
+        facts.Add(
+            StatVocabulary.Number(
+                Stat.HeadHitDamage,
+                projectileGroups?.FirstOrDefault()?.HeadHitDamage
+            )
+        );
+        facts.Add(
+            StatVocabulary.Number(
+                Stat.ProjectilesPerShot,
+                projectileGroups?.Where(group => group.Condition is null).Sum(group => group.Count)
+            )
+        );
+        if (fire?.RangedFire?.MaximumCharge is > 0 && type == "Crossbow")
+            facts.Add(StatVocabulary.Number(Stat.ChargedBodyHitDamage, charged));
+        return fire;
     }
 
     private double? NormalProjectileDamage(CodeFunction? function)

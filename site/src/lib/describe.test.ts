@@ -24,6 +24,61 @@ it('opens with what the item is and its damage, then names the first seller with
 	);
 });
 
+it('describes ranged hits per projectile, shot count and optional charged hits', () => {
+	const bow = item('Ash Bow', 'Weapon', 'Bow', [
+		fact('bodyHitDamage', 8),
+		fact('headHitDamage', 16),
+		fact('projectilesPerShot', 1),
+		fact('chargedBodyHitDamage', 24)
+	]);
+	expect(describeItem(bow, [])).toBe(
+		'Ash Bow is a bow in The Bloodline. It deals 8 body hit damage and 16 head hit damage per projectile. It fires 1 projectile per shot. Fully charged body hit damage is 24 per projectile.'
+	);
+	const gun = item('Scattergun', 'Weapon', 'Gun', [
+		fact('bodyHitDamage', 0),
+		fact('headHitDamage', 0),
+		fact('projectilesPerShot', 6)
+	]);
+	expect(describeItem(gun, [])).toContain(
+		'It deals 0 body hit damage and 0 head hit damage per projectile. It fires 6 projectiles per shot.'
+	);
+	expect(describeItem(gun, [])).not.toContain('Fully charged');
+});
+
+it('enumerates heterogeneous projectile hits instead of applying the first hit to the whole shot', () => {
+	const gun = {
+		...item('Rusty Scattergun', 'Weapon', 'Gun', [
+			fact('bodyHitDamage', 60),
+			fact('headHitDamage', 120),
+			fact('projectilesPerShot', 7)
+		]),
+		projectileGroups: [
+			{ count: 1, bodyHitDamage: 60, headHitDamage: 120 },
+			{ count: 6, bodyHitDamage: 10, headHitDamage: 20 }
+		]
+	};
+	expect(describeItem(gun, [])).toBe(
+		'Rusty Scattergun is a gun in The Bloodline. Per shot, it fires 1 projectile dealing 60 body hit damage and 120 head hit damage per projectile and 6 projectiles dealing 10 body hit damage and 20 head hit damage per projectile.'
+	);
+});
+
+it('describes the extra crossbow bolt only under its close-range condition', () => {
+	const crossbow = {
+		...item('Ash Crossbow', 'Weapon', 'Crossbow', [
+			fact('bodyHitDamage', 85),
+			fact('headHitDamage', 185),
+			fact('projectilesPerShot', 1)
+		]),
+		projectileGroups: [
+			{ count: 1, bodyHitDamage: 85, headHitDamage: 185, condition: null },
+			{ count: 1, bodyHitDamage: 100, headHitDamage: 200, condition: 'At close range, also' }
+		]
+	};
+	expect(describeItem(crossbow, [])).toBe(
+		'Ash Crossbow is a crossbow in The Bloodline. Per shot, it fires 1 projectile dealing 85 body hit damage and 185 head hit damage per projectile. At close range, also: 1 projectile dealing 100 body hit damage and 200 head hit damage per projectile.'
+	);
+});
+
 it('agrees with names whose head noun is plural', () => {
 	const gauntlets = item('Iron Gauntlets', 'Armor', 'Arms', [
 		fact('armorType', null, 'Medium'),

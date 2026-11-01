@@ -53,6 +53,7 @@ internal sealed record CodeFunction(
 
     /// <summary>Actors created by this entry and the Damage value assigned to each.</summary>
     public IReadOnlyList<SpawnedDamage>? SpawnedDamage { get; init; }
+    public RangedFire? RangedFire { get; init; }
 }
 
 /// <summary>A class the code compares a value with and the name it assigns when they are equal.</summary>

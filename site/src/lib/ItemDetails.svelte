@@ -1,6 +1,16 @@
 <script lang="ts">
 	import type { DetailRow } from './game-card.js';
-	let { rows, wide = false }: { rows: DetailRow[]; wide?: boolean } = $props();
+	import type { ItemPage } from './site-data.js';
+	import { formatNumber } from './format.js';
+	let {
+		rows,
+		wide = false,
+		projectileGroups
+	}: {
+		rows: DetailRow[];
+		wide?: boolean;
+		projectileGroups?: ItemPage['projectileGroups'];
+	} = $props();
 </script>
 
 <dl class="details" class:wide>
@@ -9,8 +19,69 @@
 			{#each row.values as value, index (index)}<dd>{value}</dd>{/each}
 		</div>{/each}
 </dl>
+{#if projectileGroups && projectileGroups.length > 1}
+	<div class="projectile-hits">
+		<table>
+			<caption>Projectile Hits</caption>
+			<thead
+				><tr
+					><th scope="col">Projectiles</th><th scope="col">Body Hit Damage</th><th scope="col"
+						>Head Hit Damage</th
+					></tr
+				></thead
+			>
+			<tbody>
+				{#each projectileGroups as group, index (index)}
+					<tr>
+						<td
+							>{formatNumber(group.count)}{#if group.condition}<span class="condition"
+									>{group.condition}</span
+								>{/if}</td
+						>
+						<td
+							>{group.bodyHitDamage == null
+								? 'Unknown'
+								: `${formatNumber(group.bodyHitDamage)} per projectile`}</td
+						>
+						<td
+							>{group.headHitDamage == null
+								? 'Unknown'
+								: `${formatNumber(group.headHitDamage)} per projectile`}</td
+						>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	</div>
+{/if}
 
 <style>
+	.condition {
+		display: block;
+		color: var(--text-soft);
+	}
+	.projectile-hits {
+		overflow-x: auto;
+		margin-top: var(--gap-block);
+	}
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		font-variant-numeric: tabular-nums;
+	}
+	caption {
+		text-align: left;
+		margin-bottom: var(--gap-line);
+	}
+	th,
+	td {
+		padding: var(--gap-line);
+		text-align: right;
+		vertical-align: top;
+	}
+	th {
+		color: var(--text-soft);
+	}
 	.details {
 		display: grid;
 		gap: var(--gap-line);

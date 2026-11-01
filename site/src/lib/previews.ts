@@ -1,4 +1,4 @@
-import type { EntityKind, Fact } from './site-data.js';
+import type { EntityKind, Fact, ItemPage } from './site-data.js';
 
 /** What an item link's preview shows: the item's tooltip. */
 export interface ItemPreview {
@@ -7,6 +7,7 @@ export interface ItemPreview {
 	icon: string | null;
 	description: string | null;
 	facts: Fact[];
+	projectileGroups?: ItemPage['projectileGroups'];
 	/** The first way to get the item, or the reason none is known. */
 	route: string | null;
 }

@@ -79,6 +79,17 @@ A weapon's damage SHALL be what its hits take from an enemy, read from the code 
 - **WHEN** no code that Areman Shield runs reads its damage fields
 - **THEN** its page shows no damage
 
+### Requirement: Ranged projectile groups
+Projectile groups with different damage or conditions SHALL be shown separately. The first group SHALL supply the card, tooltip comparison and numeric damage columns. The numeric projectile count SHALL include unconditional groups, and conditional groups SHALL carry their condition.
+
+#### Scenario: Rusty Blunderbuss
+- **WHEN** Swing Event replaces the immediate generic pellet with a 100-damage bullet and four delayed generic pellets of 0 remain
+- **THEN** its page shows one projectile of 100 body and 150 head damage, four projectiles of 0 body and 50 head damage, and five projectiles per shot
+
+#### Scenario: Crossbow's early generic bolt
+- **WHEN** the generic bolt can hit at close range before Custom Fire Event replaces it
+- **THEN** its page shows the generic bolt's damage as a conditional group and the unconditional projectile count remains one
+
 ### Requirement: On-hit effects
 A weapon that applies an effect when it hits SHALL publish the effect, its chance per hit, its amount and its duration as the code applies them.
 

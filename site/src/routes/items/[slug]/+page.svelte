@@ -31,8 +31,8 @@
 	const kind = $derived(data.kinds.find((entry) => entry.kind === item.kind)!);
 	const itemsPath = $derived(kindPath(item.kind, data.kinds)!);
 	const displayName = $derived(item.name + (item.qualifier ? ` (${item.qualifier})` : ''));
-	// The facts the game's tooltip does not print open the page, beside the game card, as its Details.
-	const details = $derived(detailRows(item.facts));
+	// Details keep mixed projectile hits together beside the game card.
+	const details = $derived(detailRows(item.facts, item.projectileGroups));
 	const confirmedSources = $derived(item.sources.filter((source) => !source.unconfirmed));
 	const unconfirmedSources = $derived(item.sources.filter((source) => source.unconfirmed));
 	const bugs = $derived(bugRows(item));
@@ -186,8 +186,13 @@
 	</div>
 	<div class="detail-layout">
 		<div class="answer" data-pagefind-ignore="all">
-			{#if details.length}<Section id="details" title="Details">
-					<div class="surface detail-surface"><ItemDetails rows={details} wide /></div>
+			{#if details.length || (item.projectileGroups && item.projectileGroups.length > 1)}<Section
+					id="details"
+					title="Details"
+				>
+					<div class="surface detail-surface">
+						<ItemDetails rows={details} projectileGroups={item.projectileGroups} wide />
+					</div>
 				</Section>{/if}
 			<!-- The ways to get an item follow as their own sections, and only an item without one says so here. -->
 			{#if !groups.length}<Section id="how-to-get-it" title="How to Get It">

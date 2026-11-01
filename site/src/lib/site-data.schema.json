@@ -506,6 +506,15 @@
           },
           "type": "array"
         },
+        "projectileGroups": {
+          "items": {
+            "$ref": "#/$defs/ProjectileGroup"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
         "qualifier": {
           "type": [
             "string",
@@ -977,6 +986,38 @@
       ],
       "title": "PriceRule"
     },
+    "ProjectileGroup": {
+      "properties": {
+        "bodyHitDamage": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "condition": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "count": {
+          "type": "integer"
+        },
+        "headHitDamage": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "count",
+        "bodyHitDamage",
+        "headHitDamage"
+      ],
+      "title": "ProjectileGroup",
+      "type": "object"
+    },
     "PublishedIssue": {
       "properties": {
         "affected": {
@@ -1402,6 +1443,10 @@
         "speedContribution",
         "damage",
         "projectileDamage",
+        "bodyHitDamage",
+        "headHitDamage",
+        "projectilesPerShot",
+        "chargedBodyHitDamage",
         "speed",
         "damageType",
         "magazineSize",

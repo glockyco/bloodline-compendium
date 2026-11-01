@@ -73,6 +73,73 @@ it('combines stat filters with every or any and sorts missing values last', () =
 	]);
 });
 
+it('offers ranged hit columns and sorts their numeric values with absent facts last', () => {
+	const ids = ['bodyHitDamage', 'headHitDamage', 'projectilesPerShot', 'chargedBodyHitDamage'];
+	const labels = [
+		'Body Hit Damage',
+		'Head Hit Damage',
+		'Projectiles Per Shot',
+		'Fully Charged Body Hit Damage'
+	];
+	const weapon = index.items.find((item) => item.slug === 'lanternedge')!;
+	const ranged = (name: string, number: number): ItemSummary => ({
+		...weapon,
+		name,
+		type: 'Bow',
+		cells: Object.fromEntries(ids.map((id) => [id, { number, text: null }]))
+	});
+	const items = [ranged('Low', 2), { ...weapon, name: 'Absent', cells: {} }, ranged('High', 10)];
+	const rangedIndex: ItemIndex = {
+		...index,
+		items,
+		columns: ids.map((id, position) => ({
+			id,
+			label: labels[position],
+			numeric: true,
+			categories: ['weapon'],
+			unit: id === 'projectilesPerShot' ? null : 'per projectile'
+		}))
+	};
+	const state = readState(new URLSearchParams('category=weapon'), rangedIndex);
+	expect(shownColumns(items, state, rangedIndex).map((column) => column.id)).toEqual(ids);
+	for (const id of ids) {
+		const descending = readState(new URLSearchParams(`sort=${id}`), rangedIndex);
+		expect(descending.sort).toEqual({ column: id, direction: 'desc' });
+		expect(names(sortItems(items, descending.sort))).toEqual(['High', 'Low', 'Absent']);
+		const ascending = readState(new URLSearchParams(`sort=${id}&dir=asc`), rangedIndex);
+		expect(names(sortItems(items, ascending.sort))).toEqual(['Low', 'High', 'Absent']);
+	}
+	const withMeleeColumns = {
+		...rangedIndex,
+		columns: [...index.columns, ...rangedIndex.columns]
+	};
+	for (const type of ['Gun', 'Pistol', 'Crossbow', 'Bow']) {
+		const item = { ...ranged(type, 8), type };
+		expect(shownColumns([item], state, withMeleeColumns).map((column) => column.id)).toEqual([
+			'speed',
+			...ids
+		]);
+		const uncharged = { ...item.cells };
+		delete uncharged.chargedBodyHitDamage;
+		expect(
+			shownColumns([{ ...item, cells: uncharged }], state, withMeleeColumns).map(
+				(column) => column.id
+			)
+		).toEqual(['speed', ...ids.slice(0, 3)]);
+	}
+	expect(shownColumns([weapon], state, withMeleeColumns).map((column) => column.id)).toEqual([
+		'damage',
+		'speed'
+	]);
+	expect(
+		shownColumns([weapon, ranged('Bow', 8)], state, withMeleeColumns).map((column) => column.id)
+	).toEqual(['damage', 'speed', ...ids]);
+	const chargedFilter = { ...state, stats: [{ column: 'chargedBodyHitDamage', min: '', max: '' }] };
+	expect(
+		shownColumns([weapon], chargedFilter, withMeleeColumns).map((column) => column.id)
+	).toEqual(['damage', 'speed', 'chargedBodyHitDamage']);
+});
+
 it('writes only what differs from the defaults and reads it back', () => {
 	const query = 'name=lan&category=weapon&stat=damage:5:&sort=damage&dir=asc&unknown=1';
 	expect(writeState(read(query), index).toString()).toBe(

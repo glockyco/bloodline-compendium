@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Fact } from './site-data.js';
+	import type { Fact, ItemPage } from './site-data.js';
 	import { cardLines, detailRows } from './game-card.js';
 	import ItemDetails from './ItemDetails.svelte';
 
@@ -8,6 +8,7 @@
 		icon: string | null;
 		description: string | null;
 		facts: Fact[];
+		projectileGroups?: ItemPage['projectileGroups'];
 	}
 	let {
 		item,
@@ -21,7 +22,7 @@
 	} = $props();
 
 	const lines = $derived(cardLines(item.facts));
-	const rows = $derived(details ? detailRows(item.facts) : []);
+	const rows = $derived(details ? detailRows(item.facts, item.projectileGroups) : []);
 	// The game shrinks a long name to keep its ribbon on one line. Here it shrinks to body size at most, and a
 	// name still too wide for the card wraps instead of running under the notches.
 	const nameFit = $derived(26 / Math.max(item.name.length, 1));
@@ -49,7 +50,10 @@
 		</div>
 		{#if item.description}<p class="description" data-game>{item.description}</p>{/if}
 	</div>
-	{#if rows.length}<ItemDetails {rows} />{/if}
+	{#if rows.length || (details && item.projectileGroups && item.projectileGroups.length > 1)}<ItemDetails
+			{rows}
+			projectileGroups={item.projectileGroups}
+		/>{/if}
 </div>
 
 <style>

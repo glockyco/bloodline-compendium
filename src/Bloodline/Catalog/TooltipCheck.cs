@@ -274,7 +274,13 @@ internal static partial class TooltipCheck
                 {
                     Facts = item
                         .Facts.Select(fact =>
-                            shown.TryGetValue((item.Key, fact.Stat), out var value)
+                            shown.TryGetValue(
+                                (
+                                    item.Key,
+                                    fact.Stat == Stat.BodyHitDamage ? Stat.Damage : fact.Stat
+                                ),
+                                out var value
+                            )
                                 ? fact with
                                 {
                                     GameShows = value.Value,
@@ -391,11 +397,13 @@ internal static partial class TooltipCheck
                     break;
                 case "Damage" when item.Type == "Staff" && Find(Stat.Damage)?.Number is null:
                     break;
+                case "Damage" when Find(Stat.BodyHitDamage) is { Number: null }:
+                    break;
                 case "Damage":
                     Number(
                         "Damage",
                         value,
-                        Stat.Damage,
+                        Find(Stat.BodyHitDamage) is not null ? Stat.BodyHitDamage : Stat.Damage,
                         item.Type != "Staff" ? null
                             // A staff whose swing launches nothing deals no damage, as the no-fireball issue says.
                             : Find(Stat.Damage)?.Number == 0 ? KnownIssues.NoFireballs

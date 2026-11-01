@@ -114,6 +114,65 @@ internal sealed class ItemClaims(CodeIndex? code, long build)
         );
         foreach (var fact in page.Facts)
         {
+            if (
+                fact.Stat
+                is Stat.BodyHitDamage
+                    or Stat.HeadHitDamage
+                    or Stat.ProjectilesPerShot
+                    or Stat.ChargedBodyHitDamage
+            )
+            {
+                var citations = new List<CodeCitation>();
+                if (projectileFunction is { ParseStatus: CodeParseStatus.Complete })
+                    citations.Add(new(projectileFunction.Citation, projectileFunction.Fingerprint));
+                citations.AddRange(
+                    functions
+                        .Values.Where(function =>
+                            function.ParseStatus == CodeParseStatus.Complete
+                            && (
+                                function.Package.EndsWith(
+                                    "/FirstPersonCharacter2",
+                                    StringComparison.Ordinal
+                                )
+                                    && function.Name
+                                        is "Ready and fire bow"
+                                            or "Calculate Random Shotgun Projectiles"
+                                            or "InpActEvt_IA_Attack_K2Node_EnhancedInputActionEvent_17"
+                                            or "InpActEvt_IA_Attack_K2Node_EnhancedInputActionEvent_27"
+                                || function.Package.EndsWith(
+                                    "/FirstPersonCharacterBP_Modular1",
+                                    StringComparison.Ordinal
+                                )
+                                    && function.Name == "AnimNotify_Spawn Arrow"
+                                || function.Package.EndsWith(
+                                    "/Goblin_Base",
+                                    StringComparison.Ordinal
+                                )
+                                    && function.Name == "Damage From Player Arrow"
+                            )
+                        )
+                        .Select(function => new CodeCitation(
+                            function.Citation,
+                            function.Fingerprint
+                        ))
+                );
+                claims.Add(
+                    new FactClaim(
+                        item,
+                        fact.Label,
+                        fact.Number is null ? ClaimType.Unknown : ClaimType.Formula,
+                        build,
+                        [
+                            "WeaponInfo.Damage",
+                            "WeaponInfo.Range",
+                            "ItemInfo.Damage",
+                            "Normal attack.SpawnedProjectile.Damage",
+                        ],
+                        citations
+                    )
+                );
+                continue;
+            }
             if (fact.Stat == Stat.ProjectileDamage || fact.Stat == Stat.Damage && projectileDamage)
             {
                 claims.Add(

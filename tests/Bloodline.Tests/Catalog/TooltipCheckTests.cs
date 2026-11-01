@@ -101,6 +101,38 @@ public sealed class TooltipCheckTests
     ) => TooltipCheck.Check(1, [item], [tooltip], []).Differences;
 
     [Theory]
+    [InlineData(85, false)]
+    [InlineData(185, true)]
+    public void RangedTooltipsCompareTheirDamageWithTheBodyHit(double tooltipDamage, bool differs)
+    {
+        var weapon = Sword with
+        {
+            Type = "Crossbow",
+            Facts =
+            [
+                StatVocabulary.Number(Stat.BodyHitDamage, 85),
+                StatVocabulary.Number(Stat.HeadHitDamage, 185),
+                StatVocabulary.Number(Stat.ProjectilesPerShot, 1),
+            ],
+        };
+        var differences = Differences(weapon, Tooltip(weapon, $"Damage: {tooltipDamage}"));
+        Assert.Equal(differs ? 1 : 0, differences.Count);
+        if (differs)
+            Assert.Equal("85", Assert.Single(differences).Catalog);
+    }
+
+    [Fact]
+    public void UnknownBodyDamageDoesNotContradictTheTooltip()
+    {
+        var weapon = Sword with
+        {
+            Type = "Gun",
+            Facts = [StatVocabulary.Unknown(Stat.BodyHitDamage)],
+        };
+        Assert.Empty(Differences(weapon, Tooltip(weapon, "Damage: 100")));
+    }
+
+    [Theory]
     [InlineData("Damage: 1,000", "Slow", null, null)]
     [InlineData("Damage: 40", "Slow", "Damage", null)]
     [InlineData("Damage: 1,000", "Fast", "Speed", null)]

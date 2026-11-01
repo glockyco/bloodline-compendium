@@ -24,6 +24,7 @@ export const previewSources: {
 				icon: item.icon,
 				description: item.description,
 				facts: item.facts,
+				projectileGroups: item.projectileGroups,
 				route:
 					firstRoute(item.sources, Object.keys(sourceHeadings) as SourceKind[]) ??
 					(item.status === 'notInNormalPlay'

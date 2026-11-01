@@ -75,6 +75,38 @@ internal static class ItemList
     private static readonly ColumnRule[] Columns =
     [
         new("damage", "Damage", ["weapon"], true, null, item => Number(item, Stat.Damage)),
+        new(
+            "bodyHitDamage",
+            "Body Hit Damage",
+            ["weapon"],
+            true,
+            "per projectile",
+            item => Number(item, Stat.BodyHitDamage)
+        ),
+        new(
+            "headHitDamage",
+            "Head Hit Damage",
+            ["weapon"],
+            true,
+            "per projectile",
+            item => Number(item, Stat.HeadHitDamage)
+        ),
+        new(
+            "projectilesPerShot",
+            "Projectiles Per Shot",
+            ["weapon"],
+            true,
+            null,
+            item => Number(item, Stat.ProjectilesPerShot)
+        ),
+        new(
+            "chargedBodyHitDamage",
+            "Fully Charged Body Hit Damage",
+            ["weapon"],
+            true,
+            "per projectile",
+            item => Number(item, Stat.ChargedBodyHitDamage)
+        ),
         new("speed", "Speed", ["weapon"], false, null, Speed),
         new(
             "magazineSize",
