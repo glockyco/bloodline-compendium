@@ -64,6 +64,28 @@ A potion's effects SHALL be the effects that drinking it applies: each slot's `E
 - **WHEN** Health Potion's first slot holds power 345, which is no effect number
 - **THEN** its page shows no effect, as drinking it in the game restores no health
 
+### Requirement: Weapon damage as hits apply it
+A weapon's damage SHALL be what its hits take from an enemy, read from the code its attack runs. A ranged weapon SHALL publish the damage of a body hit and of a head hit per projectile, and its projectiles per shot. A shield SHALL publish no damage.
+
+#### Scenario: Crossbow
+- **WHEN** the Crossbow's fire code replaces its bolt with one of `ItemInfo.Damage` 85 and a head hit adds the player's `Arrow/Bullet Damage` of 100
+- **THEN** its page shows 85 for a body hit and 185 for a head hit
+
+#### Scenario: Powerful Blunderbuss
+- **WHEN** its fire code spawns 15 pellets that carry no damage
+- **THEN** its page shows 15 pellets that deal 0 on the body and 20 on the head
+
+#### Scenario: Shield
+- **WHEN** no code that Areman Shield runs reads its damage fields
+- **THEN** its page shows no damage
+
+### Requirement: On-hit effects
+A weapon that applies an effect when it hits SHALL publish the effect, its chance per hit, its amount and its duration as the code applies them.
+
+#### Scenario: Poison Pike
+- **WHEN** Poison Pike's hit code rolls 1 in 5 and poisons for 15 per second over 10 seconds
+- **THEN** its page lists Poison with a 20% chance, 15 damage per second and 10 seconds
+
 ### Requirement: Item status
 Every item SHALL have one status: obtainable through a known source, no known source, or not obtainable in normal play. An item SHALL be marked not obtainable in normal play only when every reference to it lies in an excluded level or other content that the game cannot reach, and the evidence SHALL be listed in the maintainer report.
 

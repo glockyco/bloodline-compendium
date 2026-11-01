@@ -54,6 +54,13 @@
 - [x] 8.10 Capture every item's tooltip in render mode with `tooltip-sweep.mjs --capture`, compare each screenshot with the lab's shown-only reading, and give every difference an owner, and verify that no published tooltip value lacks a screenshot that shows it
 - [x] 8.11 Link a GitHub issue form for wrong facts from every page's footer, with the page's address filled in, and verify the link from Iron Ingot opens the form with its address
 
+## 9. Weapons as hits apply them
+
+- [ ] 9.1 Read the fire code of every gun, pistol, crossbow and bow, publish each one's body-hit damage, head-hit damage and projectiles per shot, and verify one weapon of each fire pattern in the lab at body and head aim
+- [ ] 9.2 Remove the Damage fact from shields, publish their block stamina and extra blocks once a lab run measures them, add the Shield Charge damage of Half-color Kiteshield and Shield of Burnsley once its trigger is found, and verify Areman Shield in the lab
+- [ ] 9.3 Read the on-hit code of Poison Pike, Sturdy Warhammer, Great Mace, Greathammer, Undead Mace and Torch, publish each effect's chance, amount and duration, show them in an On-Hit Effects table, and verify Poison Pike in the lab
+- [ ] 9.4 Merge `staff-tooltip-damage` into one known issue for every weapon whose tooltip shows another damage than its hits apply, with its wording through a comparison, and give each such weapon a Bugs row
+
 ## 10. Layout system
 
 - [x] 10.1 Define spacing roles in `tokens.css`, make stylelint accept only roles for padding, margin, gap and inset outside it, and migrate every declaration
