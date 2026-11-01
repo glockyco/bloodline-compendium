@@ -288,6 +288,8 @@ test('separates container spawns from loot chances on desktop and labelled phone
 });
 test('previews an item link on keyboard focus and hover', async ({ page }) => {
 	await page.goto('/items/lanternedge/');
+	// Previews listen from hydration on, so a focus before the scripts run would show nothing.
+	await page.waitForLoadState('networkidle');
 	const ingredient = page.locator('.recipe').getByRole('link', { name: 'Cinderpear' });
 	await ingredient.focus();
 	const preview = page.locator('#entity-preview');
