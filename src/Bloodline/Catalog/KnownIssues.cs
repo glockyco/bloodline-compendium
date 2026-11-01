@@ -174,12 +174,17 @@ internal static partial class KnownIssues
                 }
             }
         }
+        // An item's Bugs rows follow the order of the Known Issues page, which is the registry's.
+        var order = registry
+            .Issues.Select((issue, index) => (issue.Id, index))
+            .ToDictionary(entry => entry.Id, entry => entry.index, StringComparer.Ordinal);
         var pages = items
             .Select(item =>
                 item with
                 {
                     Notes = notes[item.Key]
                         .Select(id => Find(id, "The page of " + item.Name))
+                        .OrderBy(issue => order[issue.Id])
                         .Select(issue => new IssueNote(
                             issue.Id,
                             issue.Id switch

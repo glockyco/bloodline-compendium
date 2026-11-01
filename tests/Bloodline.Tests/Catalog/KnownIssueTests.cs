@@ -264,10 +264,11 @@ public sealed class KnownIssueTests
                 Difference("Description", "Text", "crafted-armor-tooltip"),
             ]
         );
+        // The registry lists knee armor first, so the page's rows do too, although its ID sorts last.
         var registry = new KnownIssueRegistry([
+            Issue(KnownIssues.KneeArmor),
             Issue("armor-without-row"),
             Issue("armor-slot-adds-none"),
-            Issue(KnownIssues.KneeArmor),
         ]);
 
         var (pages, issues) = KnownIssues.Attach(
@@ -279,7 +280,7 @@ public sealed class KnownIssueTests
         );
 
         Assert.Equal(
-            ["armor-without-row", KnownIssues.KneeArmor],
+            [KnownIssues.KneeArmor, "armor-without-row"],
             Assert.Single(pages).Notes.Select(note => note.Issue)
         );
         Assert.Equal(
