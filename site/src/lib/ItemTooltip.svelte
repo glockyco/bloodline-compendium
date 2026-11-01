@@ -39,8 +39,45 @@
 		return { first: null, second: null };
 	});
 	const native = $derived(new Set([lines.first?.fact, lines.second?.fact]));
-	// Facts the game's tooltip does not print follow the game card, in the site's own type.
-	const extra = $derived(item.facts.filter((fact) => !native.has(fact)));
+	// Facts the game's tooltip does not print follow the game card, in the site's own type. A food's or potion's
+	// effects share one Effects row where the first of them stands, because the numbers of the game's effect slots
+	// mean nothing to a player. A food's restoration amount is the health it heals, so it reads as Restore Health.
+	// A potion repeats the amount of its Restore Health or Restore Magic effect as its restoration amount, which
+	// the row then leaves out.
+	const effectStats = new Set(['effect', 'effects', 'restorationAmount']);
+	const potionRestores = new Set(['Restore Health', 'Restore Magic']);
+	const rows = $derived.by(() => {
+		const facts = item.facts.filter((fact) => !native.has(fact));
+		const effects = facts.filter((fact) => effectStats.has(fact.stat));
+		const repeated = (amount: Fact) =>
+			effects.some(
+				(fact) =>
+					fact.effect != null &&
+					potionRestores.has(fact.effect.name) &&
+					fact.effect.power === amount.number
+			);
+		const values = effects.flatMap((fact) =>
+			fact.stat !== 'restorationAmount'
+				? [factValue(fact) ?? 'Unknown']
+				: repeated(fact)
+					? []
+					: [`Restore Health ${factValue(fact) ?? 'Unknown'}`]
+		);
+		return facts.flatMap((fact) =>
+			!effectStats.has(fact.stat)
+				? [
+						{
+							key: fact.stat + fact.label,
+							label: titleCase(fact.label),
+							values: [factValue(fact) ?? 'Unknown'],
+							prose: fact.number == null
+						}
+					]
+				: fact === effects[0]
+					? [{ key: 'effects', label: 'Effects', values, prose: true }]
+					: []
+		);
+	});
 	// The game shrinks a long name to keep its ribbon on one line. Here it shrinks to body size at most, and a
 	// name still too wide for the card wraps instead of running under the notches.
 	const nameFit = $derived(26 / Math.max(item.name.length, 1));
@@ -68,10 +105,10 @@
 		</div>
 		{#if item.description}<p class="description" data-game>{item.description}</p>{/if}
 	</div>
-	{#if extra.length}<dl class="extra">
-			{#each extra as fact (fact.stat + fact.label)}<div class:prose={fact.number == null}>
-					<dt>{titleCase(fact.label)}</dt>
-					<dd>{factValue(fact) ?? 'Unknown'}</dd>
+	{#if rows.length}<dl class="extra">
+			{#each rows as row (row.key)}<div class:prose={row.prose}>
+					<dt>{row.label}</dt>
+					{#each row.values as value, index (index)}<dd>{value}</dd>{/each}
 				</div>{/each}
 		</dl>{/if}
 </div>
@@ -158,17 +195,18 @@
 		margin: 0;
 	}
 	/* A label and its value share a row, and a long value wraps in its own track on the right instead of under
-	   the label. */
+	   the label. Several values of one row, such as effects, stack as its lines. */
 	.extra div {
 		display: grid;
 		grid-template-columns: max-content minmax(0, 1fr);
 		align-items: baseline;
-		gap: var(--gap-block);
+		column-gap: var(--gap-block);
 	}
 	.extra dt {
 		color: var(--text-soft);
 	}
 	.extra dd {
+		grid-column: 2;
 		margin: 0;
 		text-align: right;
 		font-variant-numeric: tabular-nums;

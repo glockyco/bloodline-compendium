@@ -31,3 +31,34 @@ it('omits unexplained tooltip differences from previews', () => {
 	expect(body).not.toContain("The game's tooltip shows");
 	expect(body).not.toContain('<a ');
 });
+
+const effect = (name: string, power: number): Fact => ({
+	stat: 'effect',
+	label: 'Effect 1',
+	number: null,
+	text: null,
+	effect: { name, power, seconds: 0 }
+});
+const restoration = (number: number): Fact => ({
+	stat: 'restorationAmount',
+	label: 'Restoration amount',
+	number,
+	text: null,
+	effect: null
+});
+// The labels and values of the rows below the game card, in order.
+const rows = (body: string, tag: 'dt' | 'dd') =>
+	[...body.matchAll(new RegExp(`<${tag}[^>]*>([^<]*)</${tag}>`, 'g'))].map((match) => match[1]);
+
+it("lists a food's healing beside its other effects, even when another effect restores the same amount", () => {
+	const item = { ...fixture, facts: [effect('Restore Mana', 100), restoration(100)] };
+	const { body } = render(ItemTooltip, { props: { item } });
+	expect(rows(body, 'dt')).toEqual(['Effects']);
+	expect(rows(body, 'dd')).toEqual(['Restore Mana 100', 'Restore Health 100']);
+});
+
+it("leaves out a potion's restoration amount that repeats its restore effect", () => {
+	const item = { ...fixture, facts: [effect('Restore Magic', 75), restoration(75)] };
+	const { body } = render(ItemTooltip, { props: { item } });
+	expect(rows(body, 'dd')).toEqual(['Restore Magic 75']);
+});
