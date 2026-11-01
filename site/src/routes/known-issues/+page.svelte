@@ -19,7 +19,6 @@
 />
 <div class="sections" data-pagefind-body>
 	<header class="page-heading">
-		<p class="eyebrow">Problems in the game itself</p>
 		<h1 data-pagefind-meta="title">Known Issues</h1>
 		<p class="intro">
 			This page lists bugs in The Bloodline that affect items. Each bug was confirmed in the game
@@ -60,23 +59,13 @@
 								{#snippet row(entity)}<EntityLink {entity} icon />{/snippet}
 							</ExpandableList>
 						</div>{/if}
-					<div class="field">
-						<h3 class="field-label">Steps to See It</h3>
+					<details class="disclosure">
+						<summary>Steps to Reproduce</summary>
 						<ol class="steps">
 							{#each issue.steps as step, index (index)}<li>{step}</li>{/each}
 						</ol>
-					</div>
-					<dl class="outcome">
-						<div class="field">
-							<dt class="field-label">Expected</dt>
-							<dd>{issue.expected}</dd>
-						</div>
-						<div class="field">
-							<dt class="field-label">Observed in the Game</dt>
-							<dd>{issue.observed}</dd>
-						</div>
-					</dl>
-					<details class="developer" data-developer>
+					</details>
+					<details class="disclosure" data-developer>
 						<summary>For Developers</summary>
 						<dl>
 							<div class="field">
@@ -161,25 +150,23 @@
 		display: block;
 		padding-inline: 0;
 	}
-	.outcome {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(var(--size-card-narrow), 1fr));
-		gap: var(--gap-groups);
-		margin: 0;
+	/* Steps and developer details stay one click away, so an entry shows what the bug does and what to do. */
+	.disclosure {
+		padding-top: var(--gap-block);
+		border-top: var(--border-width) solid var(--border);
 	}
 	dd {
 		color: var(--text-soft);
 	}
-	.developer {
-		padding-top: var(--gap-block);
-		border-top: var(--border-width) solid var(--border);
-	}
-	.developer summary {
+	.disclosure summary {
 		cursor: pointer;
 		color: var(--text-soft);
 		font-weight: var(--weight-strong);
 	}
-	.developer dl {
+	.steps {
+		margin: var(--gap-block) 0 0;
+	}
+	.disclosure dl {
 		display: grid;
 		gap: var(--gap-block);
 		margin: var(--gap-block) 0 0;
