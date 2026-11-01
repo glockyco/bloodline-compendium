@@ -129,11 +129,14 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 	await page.goto('/items/lanternedge/');
 	await expect(page.getByRole('heading', { name: 'How to Get It', exact: true })).toBeVisible();
 	await expect(page.locator('.acquisition-routes')).toContainText('Sold by');
-	const details = page.getByRole('complementary', { name: 'Item details' });
-	await expect(details).toContainText('Damage: 12');
-	await expect(details.locator('.first')).toHaveText('Average');
+	const card = page.getByRole('complementary', { name: 'Game card' });
+	await expect(card).toContainText('Damage: 12');
+	await expect(card.locator('.first')).toHaveText('Average');
+	// The facts the game's tooltip does not print open the main column as Details, not under the card.
+	const details = page.getByRole('region', { name: 'Details' });
 	await expect(details).not.toContainText(/Attack Speed/i);
 	await expect(details).toContainText(/Magazine Size\s*Unknown/);
+	await expect(card).not.toContainText('Magazine Size');
 	const shopLink = page.locator('.acquisition-routes a[href="#source-shop"]');
 	await shopLink.click();
 	await expect(page).toHaveURL(/#source-shop$/);
@@ -159,7 +162,7 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 		'Location unknown'
 	])
 		await expect(page.locator('article')).toContainText(text);
-	await expect(details.locator('img')).toHaveAttribute('src', /-160.webp$/);
+	await expect(card.locator('img')).toHaveAttribute('src', /-160.webp$/);
 	await expect(page.locator('article')).not.toContainText('Selection weight');
 	await page.goto('/items/mosswoven-coat/');
 	await expect(page.locator('.source-group')).toContainText('20%');
@@ -597,11 +600,11 @@ test('notes a known issue on the affected item and explains it on a linked, sear
 		"The game's tooltip shows Armor 8",
 		'Read about this issue'
 	]);
-	const details = page.getByRole('complementary', { name: 'Item details' });
-	await expect(details.locator('#bugs')).toHaveCount(0);
+	const card = page.getByRole('complementary', { name: 'Game card' });
+	await expect(card.locator('#bugs')).toHaveCount(0);
 	await expect(page.locator('article section').last()).toHaveAttribute('aria-labelledby', 'bugs');
-	await expect(details).toContainText('ARMOR: 0');
-	await expect(details).not.toContainText("The game's tooltip shows");
+	await expect(card).toContainText('ARMOR: 0');
+	await expect(card).not.toContainText("The game's tooltip shows");
 	await expect(note.getByRole('link', { name: 'Read about this issue' })).toHaveAttribute(
 		'href',
 		'/known-issues/#invented-coat-armor'

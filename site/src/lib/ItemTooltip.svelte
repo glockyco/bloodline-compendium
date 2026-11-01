@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Fact } from './site-data.js';
-	import { titleCase } from './labels.js';
-	import { factValue } from './stats.js';
+	import { cardLines, detailRows } from './game-card.js';
+	import ItemDetails from './ItemDetails.svelte';
 
 	interface TooltipItem {
 		name: string;
@@ -11,60 +11,17 @@
 	}
 	let {
 		item,
-		heading = 'h2'
+		heading = 'h2',
+		details = true
 	}: {
 		item: TooltipItem;
 		heading?: 'h2' | 'p';
+		/** Whether the facts the game's tooltip does not print follow the card, as in link previews. */
+		details?: boolean;
 	} = $props();
 
-	const find = (stat: string) => item.facts.find((fact) => fact.stat === stat);
-	// The game's tooltip has two stat lines beside the icon: a weapon's speed word and its damage, or an armor
-	// piece's class and its armor. They read as the game prints them, with the value the game applies.
-	const lines = $derived.by(() => {
-		const speed = find('speed');
-		const damage = find('damage');
-		const type = find('armorType');
-		const armor = find('armorRating');
-		if (speed || damage)
-			return {
-				first: speed ? { fact: speed, text: speed.text ?? 'Unknown' } : null,
-				second: damage ? { fact: damage, text: `Damage: ${factValue(damage) ?? 'Unknown'}` } : null
-			};
-		if (type || armor)
-			return {
-				first:
-					type && type.text !== 'Unarmored' ? { fact: type, text: `Type: ${type.text}` } : null,
-				second: armor ? { fact: armor, text: `ARMOR: ${factValue(armor) ?? 'Unknown'}` } : null
-			};
-		return { first: null, second: null };
-	});
-	const native = $derived(new Set([lines.first?.fact, lines.second?.fact]));
-	// Facts the game's tooltip does not print follow the game card, in the site's own type. A food's or potion's
-	// effects share one Effects row where the first of them stands, because the numbers of the game's effect slots
-	// mean nothing to a player. Its restoration amount, which the item list's Heals column reads, is already the
-	// amount of a Restore Health or Restore Mana effect.
-	const effectStats = new Set(['effect', 'effects']);
-	const rows = $derived.by(() => {
-		const facts = item.facts.filter(
-			(fact) => !native.has(fact) && fact.stat !== 'restorationAmount'
-		);
-		const effects = facts.filter((fact) => effectStats.has(fact.stat));
-		const values = effects.map((fact) => factValue(fact) ?? 'Unknown');
-		return facts.flatMap((fact) =>
-			!effectStats.has(fact.stat)
-				? [
-						{
-							key: fact.stat + fact.label,
-							label: titleCase(fact.label),
-							values: [factValue(fact) ?? 'Unknown'],
-							prose: fact.number == null
-						}
-					]
-				: fact === effects[0]
-					? [{ key: 'effects', label: 'Effects', values, prose: true }]
-					: []
-		);
-	});
+	const lines = $derived(cardLines(item.facts));
+	const rows = $derived(details ? detailRows(item.facts) : []);
 	// The game shrinks a long name to keep its ribbon on one line. Here it shrinks to body size at most, and a
 	// name still too wide for the card wraps instead of running under the notches.
 	const nameFit = $derived(26 / Math.max(item.name.length, 1));
@@ -92,12 +49,7 @@
 		</div>
 		{#if item.description}<p class="description" data-game>{item.description}</p>{/if}
 	</div>
-	{#if rows.length}<dl class="extra">
-			{#each rows as row (row.key)}<div class:prose={row.prose}>
-					<dt>{row.label}</dt>
-					{#each row.values as value, index (index)}<dd>{value}</dd>{/each}
-				</div>{/each}
-		</dl>{/if}
+	{#if rows.length}<ItemDetails {rows} />{/if}
 </div>
 
 <style>
@@ -175,31 +127,5 @@
 		padding: 0 var(--inset-loose);
 		font-size: var(--type-2);
 		line-height: var(--leading-snug);
-	}
-	.extra {
-		display: grid;
-		gap: var(--gap-line);
-		margin: 0;
-	}
-	/* A label and its value share a row, and a long value wraps in its own track on the right instead of under
-	   the label. Several values of one row, such as effects, stack as its lines. */
-	.extra div {
-		display: grid;
-		grid-template-columns: max-content minmax(0, 1fr);
-		align-items: baseline;
-		column-gap: var(--gap-block);
-	}
-	.extra dt {
-		color: var(--text-soft);
-	}
-	.extra dd {
-		grid-column: 2;
-		margin: 0;
-		text-align: right;
-		font-variant-numeric: tabular-nums;
-	}
-	/* A worded value, such as an effect, reads left to right from its own edge instead of hugging the right. */
-	.extra .prose dd {
-		text-align: left;
 	}
 </style>

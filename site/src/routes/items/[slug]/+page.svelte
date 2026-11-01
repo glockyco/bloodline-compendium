@@ -10,6 +10,8 @@
 	import { bugRows } from '#lib/bugs.js';
 	import Section from '#lib/ui/Section.svelte';
 	import ItemTooltip from '#lib/ItemTooltip.svelte';
+	import ItemDetails from '#lib/ItemDetails.svelte';
+	import { detailRows } from '#lib/game-card.js';
 	import { sourceColumns, sourceHeadings, sourceIntros, titleCase } from '#lib/labels.js';
 	import {
 		headingCase,
@@ -31,6 +33,8 @@
 	const kind = $derived(data.kinds.find((entry) => entry.kind === item.kind)!);
 	const itemsPath = $derived(kindPath(item.kind, data.kinds)!);
 	const displayName = $derived(item.name + (item.qualifier ? ` (${item.qualifier})` : ''));
+	// The facts the game's tooltip does not print open the page, beside the game card, as its Details.
+	const details = $derived(detailRows(item.facts));
 	const confirmedSources = $derived(item.sources.filter((source) => !source.unconfirmed));
 	const unconfirmedSources = $derived(item.sources.filter((source) => source.unconfirmed));
 	const bugs = $derived(bugRows(item));
@@ -199,6 +203,9 @@
 	</div>
 	<div class="detail-layout">
 		<div class="answer" data-pagefind-ignore="all">
+			{#if details.length}<Section id="details" title="Details">
+					<div class="surface detail-surface"><ItemDetails rows={details} wide /></div>
+				</Section>{/if}
 			<Section id="how-to-get-it" title="How to Get It">
 				{#snippet action()}{#if sortedUses.length}<a href={uses.length ? '#used-for' : '#buys'}
 							>Used for {formatNumber(sortedUses.length)}</a
@@ -247,8 +254,8 @@
 				{/if}
 			</Section>
 		</div>
-		<aside class="item-side" aria-label="Item details">
-			<ItemTooltip item={{ ...item, name: displayName }} />
+		<aside class="item-side" aria-label="Game card">
+			<ItemTooltip item={{ ...item, name: displayName }} details={false} />
 			{#if !item.icon}<p class="muted">No icon is known for this item.</p>{/if}
 		</aside>
 		<div class="item-relations" data-pagefind-ignore="all">

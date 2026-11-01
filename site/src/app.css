@@ -240,6 +240,10 @@ small {
 	gap: var(--gap-groups);
 	grid-column: 1;
 }
+/* The Details rows keep the inset of a list row's content. */
+.detail-surface {
+	padding: var(--inset);
+}
 .item-side {
 	display: grid;
 	gap: var(--gap-block);

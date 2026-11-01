@@ -62,9 +62,9 @@ Facets and columns are declared per category in the catalog, so a new kind or up
 
 ### Item page order
 
-Title and identity, then the game card with the values the game applies and the facts below it beside the first-screen answer, then recipe, uses, detailed sources grouped by method and place, and Bugs. The Related entities section goes, because sources, recipes and uses already render every relation. The page renders only sections with content. A phone shows the first three ways to get an item until the reader asks for the rest, and a page with no recipe, use or source table reads as one column.
+Title and identity, then the game card with the values the game applies beside Details, the facts the game's tooltip does not print, and the first-screen answer, then recipe, uses, detailed sources grouped by method and place, and Bugs. The Related entities section goes, because sources, recipes and uses already render every relation. The page renders only sections with content. A phone shows the first three ways to get an item until the reader asks for the rest, and a page with no recipe, use or source table reads as one column.
 
-Below 1024 px the page reads as one column, because a side column narrowed descriptions below a phone's measure at 768 px. A tablet keeps the answer first and the game card below it, at most 24rem wide. A phone shows the game card first, so what the item is for is on the first screen, and How to Get It follows. Both choices came from a review of rendered options on Apple, Iron Ore and two tablet pages.
+Below 1024 px the page reads as one column, because a side column narrowed descriptions below a phone's measure at 768 px. A tablet keeps the answer first and the game card below it, at most 24rem wide. A phone shows the game card and Details first, so what the item is for and does is on the first screen, and How to Get It follows. Both choices came from a review of rendered options on Apple, Iron Ore and two tablet pages.
 
 Game bugs and the values that the game's tooltip shows instead of the applied ones go to the Bugs section at the end of the page, in rows like How to Get It's. A known issue's row holds its sentence about this item, the tooltip values it explains and a link to its entry on Known Issues, which keeps the title, the affected items and the steps. A tooltip value that no issue explains takes a row of its own. The side column and link previews show only applied values, so the side column stays light for later tools such as a character planner's equip and compare actions.
 
@@ -188,7 +188,7 @@ Decided in reviews on 2026-10-31 and 2026-11-01, open to change like everything 
 - Summary lines use the words of the section headings and keep each name with its place. Records that nothing in the world confirms stay out of the summary, in their own section.
 - Every sentence serves the visitor on the page where it stands. Home says what a visitor can look up and leads to Browse Items. About, which a visitor opens on purpose, says what the game and the site are, how the site is made, that it is an unofficial fan project, and links elsewhere, Ko-fi among them.
 - A search description says what the item is, its damage or armor, and the first way to get it with the first seller's price. A shared link shows the item's icon on its slot color.
-- The side column holds the game card and its numbers. What an item fails to do is a known issue in its Bugs section, such as a staff that trains no weapon proficiency.
+- The side column holds only the game card. The facts its tooltip does not print, such as Value and Effects, open the main column as Details, as Ancient Kingdoms places its Basic Information. What an item fails to do is a known issue in its Bugs section, such as a staff that trains no weapon proficiency.
 - A food's or potion's effects share one Effects row, healing among them as Restore Health, because the game's numbered effect slots mean nothing to a player.
 - Section headings use title case. A condition ends without a period and names a skill as the game writes it, such as "Requires Weaponsmithing level 4".
 
