@@ -242,15 +242,22 @@ internal sealed class ItemFacts(
                 facts.Add(
                     StatVocabulary.Number(Stat.Damage, NormalProjectileDamage(projectileFunction))
                 );
-                if (facts[^1].Number is null)
+                // A staff hits only through the projectile its Staff Attack spawns. One that spawns none deals no
+                // damage, which the staff-damage-1 lab run saw for both Soulstaffs.
+                if (
+                    facts[^1].Number is null
+                    && projectileFunction
+                        is { ParseStatus: CodeParseStatus.Complete, SpawnedDamage.Count: 0 }
+                )
+                {
+                    facts[^1] = StatVocabulary.Number(Stat.Damage, 0);
+                }
+                else if (facts[^1].Number is null)
                 {
                     facts.Add(
                         StatVocabulary.Text(
                             Stat.WeaponBehavior,
-                            projectileFunction
-                                is { ParseStatus: CodeParseStatus.Complete, SpawnedDamage.Count: 0 }
-                                ? "Normal-hit damage is unknown because this staff has no normal projectile."
-                                : "Normal-hit damage is unknown because its normal projectile's damage could not be read."
+                            "Normal-hit damage is unknown because its normal projectile's damage could not be read."
                         )
                     );
                 }

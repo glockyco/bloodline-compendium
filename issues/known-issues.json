@@ -129,8 +129,8 @@
       "itemNotes": {
         "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/FairyStaff.FairyStaff_C": "Despite its description, Fairy Staff launches no fireballs and uses no mana.",
         "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/NecroStaff.NecroStaff_C": "Despite its description, Gripclaw Staff launches no fireballs and uses no mana.",
-        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/DeathsGrasp_Soulstaff.DeathsGrasp_Soulstaff_C": "Despite its description, Soulstaff launches no fireballs and uses no mana.",
-        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/PriestsSoulStaff.PriestsSoulStaff_C": "Despite its description, Soulstaff launches no fireballs and uses no mana."
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/DeathsGrasp_Soulstaff.DeathsGrasp_Soulstaff_C": "Despite its description, Soulstaff launches no fireballs, uses no mana and deals no damage.",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/PriestsSoulStaff.PriestsSoulStaff_C": "Despite its description, Soulstaff launches no fireballs, uses no mana and deals no damage."
       },
       "workaround": null,
       "steps": [

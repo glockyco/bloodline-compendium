@@ -292,7 +292,7 @@ public sealed class CatalogTests
     }
 
     [Fact]
-    public void StaffWithoutANormalProjectileDoesNotPublishItsSpecialAttackOrMeleeDefaults()
+    public void StaffWhoseAttackSpawnsNoProjectileDealsNoDamage()
     {
         var item = Item("/Game/Soulstaff.Soulstaff_C", "Soulstaff");
         item.Properties["Weapon Class"] = Parse("""{"$enum":"Weapon::Staff","display":"Staff"}""");
@@ -312,13 +312,8 @@ public sealed class CatalogTests
             SpawnedDamage = [],
         };
         var page = new ItemFacts([], code: CodeIndex.Create([function])).Resolve(item, "soulstaff");
-        Assert.Null(Assert.Single(page.Facts, fact => fact.Stat == Stat.Damage).Number);
-        Assert.Contains(
-            page.Facts,
-            fact =>
-                fact.Stat == Stat.WeaponBehavior
-                && fact.Text!.Contains("no normal projectile", StringComparison.Ordinal)
-        );
+        Assert.Equal(0, Assert.Single(page.Facts, fact => fact.Stat == Stat.Damage).Number);
+        Assert.DoesNotContain(page.Facts, fact => fact.Stat == Stat.WeaponBehavior);
     }
 
     [Theory]

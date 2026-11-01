@@ -99,6 +99,12 @@ internal static partial class TooltipCheck
             true,
             "Staff tooltips show ItemInfo.Damage, while normal hits use the projectile's initialized damage or the halberd-style staff's melee damage."
         ),
+        new(
+            "staves-without-fireballs",
+            "game",
+            true,
+            "Staff tooltips show ItemInfo.Damage, while a staff whose swing spawns no projectile deals no damage, as run staff-damage-1 showed for both Soulstaffs."
+        ),
     ];
 
     /// <summary>
@@ -390,7 +396,10 @@ internal static partial class TooltipCheck
                         "Damage",
                         value,
                         Stat.Damage,
-                        item.Type == "Staff" ? "staff-tooltip-damage" : null
+                        item.Type != "Staff" ? null
+                            // A staff whose swing launches nothing deals no damage, as the no-fireball issue says.
+                            : Find(Stat.Damage)?.Number == 0 ? KnownIssues.NoFireballs
+                            : "staff-tooltip-damage"
                     );
                     break;
                 case "ARMOR":
