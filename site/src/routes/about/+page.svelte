@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import SeoHead from '#lib/SeoHead.svelte';
+	import { wrongFactHref } from '#lib/seo.js';
 	let { data } = $props();
 	const dateFormat = new Intl.DateTimeFormat('en', { dateStyle: 'long', timeZone: 'UTC' });
 	const date = (value: string) => dateFormat.format(new Date(value));
@@ -53,12 +54,7 @@
 			<li><a href={data.release.patchNotesUrl} rel="external">Patch Notes</a></li>
 			<li><a href={resolve('known-issues/')}>Known Issues</a></li>
 			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- an address on GitHub, not on this site. -->
-			<li>
-				<a
-					href="https://github.com/glockyco/bloodline-compendium/issues/new?template=wrong-fact.yml"
-					>Report a wrong fact</a
-				>
-			</li>
+			<li><a href={wrongFactHref('/about/')}>Report a wrong fact</a></li>
 			<li><a href="https://ko-fi.com/wowmuch">Support on Ko-fi</a></li>
 		</ul>
 	</aside>

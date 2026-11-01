@@ -12,7 +12,7 @@
 	import { markHydrated } from '#lib/hydration.js';
 	import ReleaseInfo from '#lib/ReleaseInfo.svelte';
 	import { kindPath } from '#lib/entities.js';
-	import { SITE_ORIGIN } from '#lib/seo.js';
+	import { wrongFactHref } from '#lib/seo.js';
 	let { data, children } = $props();
 	const itemsPath = $derived(kindPath('item', data.kinds)!);
 	// Home opens with the game's art, so its header sits on the art and its search sits in the hero.
@@ -21,11 +21,7 @@
 	// results sooner.
 	const list = $derived(page.url.pathname === itemsPath);
 	const current = (path: string) => (page.url.pathname.startsWith(path) ? 'page' : undefined);
-	// The issue form's Page field takes its value from the query, so a report names the page it came from.
-	const reportHref = $derived(
-		'https://github.com/glockyco/bloodline-compendium/issues/new?template=wrong-fact.yml&page=' +
-			encodeURIComponent(SITE_ORIGIN + page.url.pathname)
-	);
+	const reportHref = $derived(wrongFactHref(page.url.pathname));
 	function revealFragment() {
 		if (!window.location.hash) return;
 		let id: string;
