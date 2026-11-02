@@ -69,9 +69,11 @@
 		<nav aria-label="Main">
 			<a href={itemsPath} aria-current={current(itemsPath)}>Items</a>
 		</nav>
-		<CompendiumSwitcher />
 		{#if !home}<div class="header-search" class:on-list={list}><Search /></div>{/if}
-		<a class="support" href="https://ko-fi.com/wowmuch">Support</a>
+		<div class="tools">
+			<CompendiumSwitcher />
+			<a class="support" href="https://ko-fi.com/wowmuch">Support</a>
+		</div>
 	</div>
 </header>
 <main id="main" tabindex="-1" class:shell={!home}>{@render children()}</main>
@@ -80,7 +82,7 @@
 	<div class="footer-inner">
 		<h2>The Bloodline Compendium</h2>
 		<section aria-labelledby="footer-site">
-			<h3 id="footer-site">This site</h3>
+			<h3 id="footer-site">This Site</h3>
 			<ul>
 				<li><a href={itemsPath}>Items</a></li>
 				<li><a href={resolve('known-issues/')}>Known Issues</a></li>
@@ -97,7 +99,7 @@
 			</ul>
 		</section>
 		<section aria-labelledby="footer-game">
-			<h3 id="footer-game">Game &amp; community</h3>
+			<h3 id="footer-game">Game &amp; Community</h3>
 			<ul>
 				<li>
 					<a href="https://store.steampowered.com/app/1159290/The_Bloodline/"
@@ -110,7 +112,7 @@
 			</ul>
 		</section>
 		<section class="others-band" aria-labelledby="footer-others">
-			<h3 id="footer-others">Other compendiums</h3>
+			<h3 id="footer-others">Other Compendiums</h3>
 			<ul class="others">
 				{#each otherCompendiums as compendium (compendium.icon)}
 					<li>
@@ -203,12 +205,18 @@
 		max-width: var(--size-header-search);
 		margin-left: auto;
 	}
-	.support {
+	/* The compendium switcher and Support end the bar together. */
+	.tools {
+		display: flex;
+		align-items: center;
+		gap: var(--gap-block);
 		margin-left: auto;
-		color: var(--text-soft);
 	}
-	.header-search + .support {
+	.header-search + .tools {
 		margin-left: 0;
+	}
+	.support {
+		color: var(--text-soft);
 	}
 	/* The page fills the window, and the main region takes the room the footer leaves. */
 	main {
@@ -328,7 +336,7 @@
 			flex-basis: 100%;
 			max-width: none;
 		}
-		.header-search + .support {
+		.header-search + .tools {
 			margin-left: auto;
 		}
 		.header-search.on-list {
@@ -348,6 +356,10 @@
 		}
 		.bar > nav {
 			margin-left: auto;
+		}
+		.tools,
+		.header-search + .tools {
+			margin-left: 0;
 		}
 		.support {
 			display: none;

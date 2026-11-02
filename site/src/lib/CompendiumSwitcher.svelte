@@ -43,7 +43,7 @@
 		</svg>
 	</button>
 	<div id="compendium-switcher" class="panel" hidden={!open}>
-		<p class="title">Game compendiums</p>
+		<p class="title">Game Compendiums</p>
 		<ul>
 			{#each compendiums as compendium (compendium.icon)}
 				<li>
@@ -64,7 +64,7 @@
 				</li>
 			{/each}
 		</ul>
-		<a class="about" href={resolve('about/')}>About this compendium</a>
+		<a class="about" href={resolve('about/')}>About this Compendium</a>
 	</div>
 </div>
 
@@ -98,10 +98,11 @@
 		stroke: currentColor;
 		stroke-width: 1.7;
 	}
+	/* The toggle sits at the end of the bar, so the panel opens towards the left. */
 	.panel {
 		position: absolute;
 		top: var(--position-below);
-		left: 0;
+		right: 0;
 		z-index: var(--layer-tooltip);
 		width: var(--size-switcher);
 		margin-top: var(--gap-inline);
@@ -160,12 +161,5 @@
 		margin-top: var(--gap-inline);
 		border-top: var(--border-width) solid var(--border);
 		border-radius: 0;
-	}
-	/* On a phone the toggle sits at the right edge, so the panel opens towards the left. */
-	@media (width < 40rem) {
-		.panel {
-			right: 0;
-			left: auto;
-		}
 	}
 </style>
