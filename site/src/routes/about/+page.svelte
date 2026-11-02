@@ -2,20 +2,11 @@
 	import { resolve } from '$app/paths';
 	import SeoHead from '#lib/SeoHead.svelte';
 	import { wrongFactHref } from '#lib/seo.js';
+	import { iconUrl, otherCompendiums } from '#lib/compendiums.js';
 	let { data } = $props();
 	const dateFormat = new Intl.DateTimeFormat('en', { dateStyle: 'long', timeZone: 'UTC' });
 	const date = (value: string) => dateFormat.format(new Date(value));
 	const steam = 'https://store.steampowered.com/app/1159290/The_Bloodline/';
-	// The other compendiums, with the logos that compendiums.org shows for them.
-	const compendiums = [
-		{ name: 'Afallon', url: 'https://afallon.compendiums.org/', icon: 'afallon' },
-		{
-			name: 'Ancient Kingdoms',
-			url: 'https://ancient-kingdoms.compendiums.org/',
-			icon: 'ancient-kingdoms'
-		},
-		{ name: 'Erenshor', url: 'https://erenshor.compendiums.org/', icon: 'erenshor' }
-	];
 </script>
 
 <SeoHead
@@ -64,16 +55,10 @@
 		<section aria-labelledby="more-compendiums">
 			<h2 id="more-compendiums">More Compendiums</h2>
 			<ul class="compendiums">
-				{#each compendiums as compendium (compendium.url)}
+				{#each otherCompendiums as compendium (compendium.url)}
 					<li>
 						<a href={compendium.url} rel="external">
-							<img
-								src="https://compendiums.org/icons/{compendium.icon}.webp"
-								alt=""
-								width="128"
-								height="128"
-								loading="lazy"
-							/>
+							<img src={iconUrl(compendium)} alt="" width="128" height="128" loading="lazy" />
 							{compendium.name}
 						</a>
 					</li>

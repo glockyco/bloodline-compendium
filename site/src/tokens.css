@@ -154,6 +154,10 @@
 	--size-item-side: 20rem;
 	--size-relation-number: 7.5rem;
 	--size-gap-columns: 17rem;
+	/* The compendium switcher's panel and the icon of its toggle, and the label column of the footer's link groups. */
+	--size-switcher: min(19rem, 90vw);
+	--size-icon-control: 1.125rem;
+	--size-footer-label: 11rem;
 	--size-screen: 100dvh;
 	--size-hero-min: 16rem;
 	--size-hero-max: 46rem;

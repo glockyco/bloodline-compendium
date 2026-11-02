@@ -11,6 +11,8 @@
 	import EntityPreviews from '#lib/EntityPreviews.svelte';
 	import { markHydrated } from '#lib/hydration.js';
 	import ReleaseInfo from '#lib/ReleaseInfo.svelte';
+	import CompendiumSwitcher from '#lib/CompendiumSwitcher.svelte';
+	import { iconUrl, otherCompendiums } from '#lib/compendiums.js';
 	import { kindPath } from '#lib/entities.js';
 	import { wrongFactHref } from '#lib/seo.js';
 	let { data, children } = $props();
@@ -66,8 +68,8 @@
 		</a>
 		<nav aria-label="Main">
 			<a href={itemsPath} aria-current={current(itemsPath)}>Items</a>
-			<a href={resolve('about/')} aria-current={current('/about/')}>About</a>
 		</nav>
+		<CompendiumSwitcher />
 		{#if !home}<div class="header-search" class:on-list={list}><Search /></div>{/if}
 		<a class="support" href="https://ko-fi.com/wowmuch">Support</a>
 	</div>
@@ -76,18 +78,52 @@
 <EntityPreviews />
 <footer class="site-footer">
 	<div class="footer-inner">
-		<nav aria-label="Footer">
-			<a href={itemsPath}>Items</a><a href={resolve('known-issues/')}>Known Issues</a><a
-				href={resolve('about/')}>About</a
-			><!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- an address on GitHub, not on this site. --><a
-				href={reportHref}>Report a wrong fact</a
-			><a href="https://ko-fi.com/wowmuch">Support on Ko-fi</a>
-		</nav>
-		<ReleaseInfo release={data.release} />
-		<p>
-			Unofficial fan project, not affiliated with Shieldbearer Studios or 505 Games. Art on the home
-			page is from The Bloodline's Steam page.
-		</p>
+		<h2>The Bloodline Compendium</h2>
+		<section aria-labelledby="footer-site">
+			<h3 id="footer-site">This site</h3>
+			<ul>
+				<li><a href={itemsPath}>Items</a></li>
+				<li><a href={resolve('known-issues/')}>Known Issues</a></li>
+				<li><a href={resolve('about/')}>About</a></li>
+			</ul>
+		</section>
+		<section aria-labelledby="footer-project">
+			<h3 id="footer-project">Project</h3>
+			<ul>
+				<li><a href="https://github.com/glockyco/bloodline-compendium">Code on GitHub</a></li>
+				<li><a href="https://ko-fi.com/wowmuch">Support on Ko-fi</a></li>
+				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- an address on GitHub, not on this site. -->
+				<li><a href={reportHref}>Report a wrong fact</a></li>
+			</ul>
+		</section>
+		<section aria-labelledby="footer-game">
+			<h3 id="footer-game">Game &amp; community</h3>
+			<ul>
+				<li>
+					<a href="https://store.steampowered.com/app/1159290/The_Bloodline/"
+						>The Bloodline on Steam</a
+					>
+				</li>
+			</ul>
+		</section>
+		<section class="others-band" aria-labelledby="footer-others">
+			<h3 id="footer-others">Other compendiums</h3>
+			<ul class="others">
+				{#each otherCompendiums as compendium (compendium.icon)}
+					<li>
+						<a href={compendium.url} rel="external">
+							<img src={iconUrl(compendium)} alt="" width="128" height="128" loading="lazy" />
+							{compendium.name}
+						</a>
+					</li>
+				{/each}
+			</ul>
+		</section>
+		<div class="notes">
+			<ReleaseInfo release={data.release} />
+			<p>Unofficial fan project, not affiliated with Shieldbearer Studios or 505 Games.</p>
+			<p>Art on the home page is from The Bloodline's Steam page.</p>
+		</div>
 	</div>
 </footer>
 
@@ -185,32 +221,101 @@
 		border-top: var(--border-width) solid var(--border);
 		color: var(--text-muted);
 	}
-	/* The footer is quieter than the page: its links keep body size, and its notes are metadata. */
+	/* The footer is quieter than the page. Each group of links is a band with its label beside it. */
 	.footer-inner {
-		display: grid;
-		gap: var(--gap-inline);
 		max-width: var(--size-page);
 		margin: 0 auto;
 		padding: var(--inset-loose) var(--gutter) var(--gap-groups);
 		font-size: var(--type-meta);
 		line-height: var(--leading-meta);
 	}
-	.footer-inner nav {
-		flex-wrap: wrap;
+	.footer-inner h2 {
+		margin-bottom: var(--gap-inline);
+		color: var(--text);
+		font-size: var(--type-2);
+	}
+	.footer-inner section {
+		display: grid;
+		grid-template-columns: var(--size-footer-label) minmax(0, 1fr);
+		align-items: baseline;
 		gap: var(--gap-inline) var(--gap-groups);
+		padding: var(--gap-block) 0;
+		border-bottom: var(--border-width) solid var(--border);
 	}
-	.footer-inner nav a {
-		min-height: var(--size-chip);
+	.footer-inner h3 {
+		color: var(--text);
 		font-size: var(--type-1);
-		color: var(--accent);
-		font-weight: var(--weight-regular);
-		text-decoration: underline;
 	}
-	.footer-inner p {
+	.footer-inner ul {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0 var(--gap-groups);
+		padding: 0;
+		list-style: none;
+	}
+	.footer-inner li {
 		line-height: inherit;
 	}
-	/* Below desktop width the search takes a row of its own under the brand and navigation. */
+	.site-footer a {
+		display: inline-flex;
+		align-items: center;
+		min-height: var(--size-chip);
+		color: var(--text-soft);
+		text-decoration: none;
+	}
+	.site-footer a:hover {
+		color: var(--text);
+		text-decoration: underline;
+	}
+	/* The other compendiums as equal cards with their logos, three in a row and full-width rows on phones. Their
+	   label sits at the middle of the cards rather than on the baseline of their names. */
+	.footer-inner .others-band {
+		align-items: center;
+	}
+	.footer-inner .others {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: var(--gap-block);
+	}
+	.others a {
+		gap: var(--gap-inline);
+		width: 100%;
+		min-height: var(--size-control);
+		padding: 0 var(--inset);
+		border: var(--border-width) solid var(--border);
+		border-radius: var(--radius-1);
+		background: var(--surface-panel);
+		color: var(--text);
+		white-space: nowrap;
+		transition:
+			border-color var(--duration-hover),
+			background-color var(--duration-hover);
+	}
+	.others a:hover {
+		border-color: var(--border-control);
+		background: var(--surface-raised);
+		text-decoration: none;
+	}
+	.others img {
+		flex: none;
+		width: var(--size-icon-row);
+		height: var(--size-icon-row);
+	}
+	.notes {
+		display: grid;
+		gap: var(--gap-line);
+		padding-top: var(--gap-block);
+	}
+	.notes p {
+		line-height: inherit;
+		text-wrap: pretty;
+	}
+	/* Below desktop width the search takes a row of its own under the brand and navigation, and the footer's
+	   labels go above their links. */
 	@media (width < 64rem) {
+		.footer-inner section {
+			grid-template-columns: minmax(0, 1fr);
+		}
 		.bar {
 			flex-wrap: wrap;
 			gap: var(--gap-block) var(--gap-section);
@@ -229,7 +334,10 @@
 	}
 	/* A phone keeps the brand and navigation on one row above the search. Support stays in the footer. */
 	@media (width < 40rem) {
-		.footer-inner nav a {
+		.footer-inner .others {
+			grid-template-columns: minmax(0, 1fr);
+		}
+		.site-footer a {
 			min-height: var(--size-control);
 		}
 		.bar {
