@@ -39,6 +39,9 @@
 				was read on <time datetime={data.release.dataDate}>{date(data.release.dataDate)}</time>.
 				Quest and event rewards are not listed yet.
 			</p>
+			<p>
+				<a href="https://github.com/glockyco/bloodline-compendium" rel="external">Code on GitHub</a>
+			</p>
 		</section>
 		<section aria-labelledby="fan-project">
 			<h2 id="fan-project">Unofficial Fan Project</h2>
