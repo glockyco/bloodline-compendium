@@ -6,6 +6,16 @@
 	const dateFormat = new Intl.DateTimeFormat('en', { dateStyle: 'long', timeZone: 'UTC' });
 	const date = (value: string) => dateFormat.format(new Date(value));
 	const steam = 'https://store.steampowered.com/app/1159290/The_Bloodline/';
+	// The other compendiums, with the logos that compendiums.org shows for them.
+	const compendiums = [
+		{ name: 'Afallon', url: 'https://afallon.compendiums.org/', icon: 'afallon' },
+		{
+			name: 'Ancient Kingdoms',
+			url: 'https://ancient-kingdoms.compendiums.org/',
+			icon: 'ancient-kingdoms'
+		},
+		{ name: 'Erenshor', url: 'https://erenshor.compendiums.org/', icon: 'erenshor' }
+	];
 </script>
 
 <SeoHead
@@ -51,6 +61,25 @@
 				assets belong to their owners.
 			</p>
 		</section>
+		<section aria-labelledby="more-compendiums">
+			<h2 id="more-compendiums">More Compendiums</h2>
+			<ul class="compendiums">
+				{#each compendiums as compendium (compendium.url)}
+					<li>
+						<a href={compendium.url} rel="external">
+							<img
+								src="https://compendiums.org/icons/{compendium.icon}.webp"
+								alt=""
+								width="128"
+								height="128"
+								loading="lazy"
+							/>
+							{compendium.name}
+						</a>
+					</li>
+				{/each}
+			</ul>
+		</section>
 	</div>
 	<aside class="panel" aria-labelledby="more-links">
 		<h2 id="more-links">More Links</h2>
@@ -89,6 +118,36 @@
 		margin: 0;
 		padding: 0;
 		list-style: none;
+	}
+	/* Each other compendium as a link card with its logo, styled like the site's other link cards. */
+	.compendiums {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--gap-block);
+	}
+	.compendiums a {
+		display: flex;
+		align-items: center;
+		gap: var(--gap-block);
+		padding: var(--inset);
+		border: var(--border-width) solid var(--border);
+		border-radius: var(--radius-2);
+		background: var(--surface-panel);
+		color: var(--text);
+		font-weight: var(--weight-strong);
+		text-decoration: none;
+		transition:
+			border-color var(--duration-hover),
+			background-color var(--duration-hover);
+	}
+	.compendiums a:hover {
+		border-color: var(--border-control);
+		background: var(--surface-raised);
+		color: var(--text);
+	}
+	.compendiums img {
+		width: var(--size-emblem);
+		height: var(--size-emblem);
 	}
 	@media (width < 64rem) {
 		.about-layout {
