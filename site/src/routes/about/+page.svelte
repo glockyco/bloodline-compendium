@@ -119,16 +119,22 @@
 		padding: 0;
 		list-style: none;
 	}
-	/* Each other compendium as a link card with its logo, styled like the site's other link cards. */
+	/* Each other compendium as an equal link card, three in a row with the logo above the name, and full-width
+	   rows on phones, styled like the site's other link cards. */
 	.compendiums {
-		display: flex;
-		flex-wrap: wrap;
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
 		gap: var(--gap-block);
+	}
+	.compendiums li {
+		display: grid;
 	}
 	.compendiums a {
 		display: flex;
+		flex-direction: column;
 		align-items: center;
-		gap: var(--gap-block);
+		gap: var(--gap-inline);
+		text-align: center;
 		padding: var(--inset);
 		border: var(--border-width) solid var(--border);
 		border-radius: var(--radius-2);
@@ -148,6 +154,16 @@
 	.compendiums img {
 		width: var(--size-emblem);
 		height: var(--size-emblem);
+	}
+	@media (width < 40rem) {
+		.compendiums {
+			grid-template-columns: minmax(0, 1fr);
+		}
+		.compendiums a {
+			flex-direction: row;
+			gap: var(--gap-block);
+			text-align: start;
+		}
 	}
 	@media (width < 64rem) {
 		.about-layout {
