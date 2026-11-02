@@ -104,6 +104,9 @@
 						>The Bloodline on Steam</a
 					>
 				</li>
+				<li>
+					<a href="https://discord.gg/the-bloodline-615569967588573194">The Bloodline Discord</a>
+				</li>
 			</ul>
 		</section>
 		<section class="others-band" aria-labelledby="footer-others">
