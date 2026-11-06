@@ -13,6 +13,8 @@ description: Run The Bloodline in the lab to observe behaviour, read tooltips, c
 
 Run `prepare` again after a game update or after changing `tools/runtime/bridge/main.lua`. It reinstalls UE4SS and the bridge into an existing copy.
 
+When replacing the UE4SS pin, try a stable release before a newer experimental build. The compatibility reason for the current pin and its archive checksums live beside `ue4ss` in `tools/runtime/lab.mjs`.
+
 ## Sessions
 
 - `launch` starts the game headless, with `-nullrhi`. Blueprints, widgets, tooltips and per-frame sampling work, and the machine stays free to use.

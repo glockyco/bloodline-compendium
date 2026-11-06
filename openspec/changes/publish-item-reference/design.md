@@ -10,6 +10,9 @@ See proposal.md for motivation. Measurements below come from spikes on Steam bui
 - The 109 levels include test maps. `DevTestMap` alone places 395 item classes.
 - Steam keeps every build. Its app manifest names the installed build and depot manifest, and DepotDownloader downloads any earlier manifest of an owned app.
 - Contributors may use macOS, Windows or Linux. CI never has game files.
+- The native `/Script/TheBloodline` module holds only seven utility classes. REA's native-code analysis is not an extraction path for this Blueprint gameplay.
+- CUE4Parse parsed all 2,276 packages under `BloodlinesAlpha/Interactables` on macOS in the initial recon. Script reading also returned Blueprint function bytecode.
+- No prebuilt world-map texture was found. The minimap uses a render target. Orthographic SceneCapture2D exports worked for the 8.1 km overworld landscape and outdoor areas in the map spike. Dungeon captures needed BSP hidden and base-color capture. These findings establish a capture path, not a finished capture recipe.
 
 ## Goals / Non-Goals
 
@@ -114,7 +117,7 @@ SvelteKit 3 prerenders every page with the static adapter, and server-only loads
 - A Nix flake supplies one development shell for macOS and Linux. It overrides nixpkgs' .NET SDK 10.0.401 with 10.0.403 and runtime 10.0.14, because runtimes up to 10.0.12 are affected by CVE-2026-96231 and SDK 10.0.401 by CVE-2026-70165 on Windows. Windows contributors install the versions named in `global.json` and `package.json`.
 - C#: central package management with locked restore, nullable references, SDK analyzers with warnings as errors, CSharpier, and xUnit v3 on Microsoft.Testing.Platform.
 - Site: ESLint with eslint-plugin-svelte, Prettier, svelte-check, Vitest and Playwright.
-- GitHub Actions runs every check inside the Nix shell on invented fixtures, with SHA-pinned actions and no secrets. Renovate opens grouped updates. CUE4Parse updates are reviewed by hand, because a parser change can change site data.
+- GitHub Actions runs every check inside the Nix shell on invented fixtures, with SHA-pinned actions and no secrets. Dependency updates are manual, as described in README.md.
 - A check fails when a game file or extracted output is tracked by Git.
 
 ### Minimal agent instructions
