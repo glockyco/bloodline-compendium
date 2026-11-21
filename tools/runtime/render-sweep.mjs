@@ -31,14 +31,17 @@ const lab = (...args) =>
     stdio: ["ignore", "pipe", "pipe"],
   });
 
+/** Every published item with whether it is armor, including the versions that share a page. */
 async function readItems() {
-  const items = [];
-  for (const file of (await readdir(join(site, "items"))).sort())
-    items.push(
-      JSON.parse(await readFile(join(site, "items", file), "utf8")).key,
-    );
+  const items = new Map();
+  for (const file of (await readdir(join(site, "items"))).sort()) {
+    const page = JSON.parse(await readFile(join(site, "items", file), "utf8"));
+    for (const item of [page, ...(page.versions ?? [])])
+      items.set(item.key, item.category.slug === "armor");
+  }
   return items;
 }
+const armor = await readItems();
 
 /** The mesh, materials and scale of each weapon part, from its row in WeaponComponentTable. */
 async function readParts() {
@@ -99,7 +102,7 @@ const bodyMeshes = new Set(
     )
     .map((render) => render.item),
 );
-const remaining = (await readItems()).filter(
+const remaining = [...armor.keys()].filter(
   (key) =>
     (again || (!done.has(key) && !failed.has(key))) &&
     (!only || only.has(key)) &&
@@ -111,7 +114,11 @@ console.log(
 if (remaining.length) restart();
 let count = 0;
 for (const key of remaining) {
-  const args = { item: key, name: renderName(key, body) };
+  const args = {
+    item: key,
+    name: renderName(key, body),
+    worn: armor.get(key),
+  };
   if (parts.has(key)) args.part = parts.get(key);
   try {
     lab("capture-model", JSON.stringify(args));

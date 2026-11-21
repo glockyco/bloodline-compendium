@@ -861,18 +861,24 @@ async function captureModel(config, lab, args) {
   // Every render shares the light of a clear noon, so colours compare across items.
   await game(config, lab, "set-time", { hours: 12 });
   await game(config, lab, "set-weather", { type: 0 });
-  // The sheet creates slots only for the items in its visible area, so the inventory holds nothing but the item.
-  await game(config, lab, "clear-tooltips", {});
-  await game(config, lab, "give", { items: [args.item] });
-  // An open sheet does not show the item just given until it opens again. A sheet that just opened creates its
-  // slots over the next frames and fades its preview's light in, so the capture waits for both.
-  await game(config, lab, "open-sheet", { refresh: true });
-  await waitFor(
-    async () => (await game(config, lab, "shows-item", { item: args.item })).shown,
-    20,
-    "the sheet to show the item",
-  );
-  await new Promise((settled) => setTimeout(settled, 1500));
+  if (args.worn === false) {
+    // An item that is not worn needs no inventory slot, only the preview's light, which an open sheet keeps on.
+    await game(config, lab, "open-sheet", {});
+  } else {
+    // The sheet creates slots only for the items in its visible area, so the inventory holds nothing but the item.
+    await game(config, lab, "clear-tooltips", {});
+    await game(config, lab, "give", { items: [args.item] });
+    // An open sheet does not show the item just given until it opens again. A sheet that just opened creates its
+    // slots over the next frames and fades its preview's light in, so the capture waits for both.
+    await game(config, lab, "open-sheet", { refresh: true });
+    await waitFor(
+      async () =>
+        (await game(config, lab, "shows-item", { item: args.item })).shown,
+      20,
+      "the sheet to show the item",
+    );
+    await new Promise((settled) => setTimeout(settled, 1500));
+  }
   const passes = (file) => [
     join(lab.captures, `${file}-color.png`),
     join(lab.captures, `${file}-mask.png`),

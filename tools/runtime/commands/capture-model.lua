@@ -280,7 +280,8 @@ local function capture()
     component.PrimitiveRenderMode = 2
     for _, shownComponent in ipairs(shown) do component:ShowOnlyComponent(shownComponent) end
     component.bCaptureEveryFrame = false
-    local size = args.size or 2048
+    -- Published renders are at most 640 pixels, and lab.mjs combines four samples into each output pixel.
+    local size = args.size or 1280
     -- ESceneCaptureSource 0 is the scene colour that the preview captures, 5 the device depth, which is 0 only
     -- where nothing was drawn. ETextureRenderTargetFormat 3, RGBA8 in sRGB, stores the scene colour as the sheet
     -- shows it.
@@ -316,7 +317,8 @@ local function capture()
   if posed then preview.SkeletalMesh:SetAnimationMode(0) end
   if ok then finish(result) else finish(nil, result) end
 end
-ExecuteInGameThreadAfterFrames(20, function()
+-- Only equipped armor needs the frames the preview takes to put it on.
+ExecuteInGameThreadAfterFrames(posed and 20 or 2, function()
   if not posed then return capture() end
   preview.SkeletalMesh:SetAnimationMode(1)
   ExecuteInGameThreadAfterFrames(5, capture)
