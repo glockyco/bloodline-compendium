@@ -18,7 +18,8 @@ public sealed class PickupObjectMechanismTests
         JsonObject? overrides = null,
         string? ancestor = null,
         bool placed = true,
-        bool excluded = false
+        bool excluded = false,
+        string type = Object
     )
     {
         var records = new CatalogRecords(
@@ -29,7 +30,7 @@ public sealed class PickupObjectMechanismTests
                     [ItemIdentity.BaseItem],
                     Parse("""{"ItemInfo":{"ItemName":{"$text":"Leaf"},"Quantity":3}}""")
                 ),
-                new ClassRecord(Object, [ancestor ?? ItemIdentity.Interactable], defaults),
+                new ClassRecord(type, [ancestor ?? ItemIdentity.Interactable], defaults),
             ],
             [],
             [],
@@ -37,9 +38,7 @@ public sealed class PickupObjectMechanismTests
                 new LevelRecord(
                     Level,
                     [],
-                    placed
-                        ? [new ActorRecord("Bundle1", Object, overrides ?? new JsonObject())]
-                        : []
+                    placed ? [new ActorRecord("Bundle1", type, overrides ?? new JsonObject())] : []
                 ),
             ],
             [],
@@ -209,5 +208,65 @@ public sealed class PickupObjectMechanismTests
                 note.Contains("9", StringComparison.Ordinal)
                 && note.Contains("unknown", StringComparison.OrdinalIgnoreCase)
         );
+    }
+
+    [Fact]
+    public void PlacedObjectOfAnAlwaysPresentClassIsCertain()
+    {
+        var defaults = Parse("""{"Item":{"$ref":"/Game/Invented/Leaf.Leaf_C"}}""");
+        var source = Assert
+            .Single(
+                new PickupObjectMechanism().FindSources(
+                    Context(
+                        defaults,
+                        ancestor: ItemIdentity.BaseItem,
+                        type: ItemIdentity.Interactable
+                    )
+                )
+            )
+            .Source;
+        Assert.Equal(new Odds(OddsEvent.LootSpot, 1, 1, null), source.Odds);
+    }
+
+    [Fact]
+    public void QuestPlacementsAndOtherClassesKeepAnUnknownChance()
+    {
+        var defaults = Parse("""{"Item":{"$ref":"/Game/Invented/Leaf.Leaf_C"}}""");
+        var quest = Assert
+            .Single(
+                new PickupObjectMechanism().FindSources(
+                    Context(
+                        defaults,
+                        Parse("""{"Need Quest?":true}"""),
+                        ItemIdentity.BaseItem,
+                        type: ItemIdentity.Interactable
+                    )
+                )
+            )
+            .Source;
+        var other = Assert
+            .Single(new PickupObjectMechanism().FindSources(Context(defaults)))
+            .Source;
+        Assert.Null(quest.Odds);
+        Assert.Null(other.Odds);
+    }
+
+    [Fact]
+    public void UnplacedObjectHasNoChance()
+    {
+        var defaults = Parse("""{"Item":{"$ref":"/Game/Invented/Leaf.Leaf_C"}}""");
+        var source = Assert
+            .Single(
+                new PickupObjectMechanism().FindSources(
+                    Context(
+                        defaults,
+                        ancestor: ItemIdentity.BaseItem,
+                        placed: false,
+                        type: ItemIdentity.Interactable
+                    )
+                )
+            )
+            .Source;
+        Assert.Null(source.Odds);
     }
 }

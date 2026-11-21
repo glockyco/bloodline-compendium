@@ -7,6 +7,17 @@ internal sealed class PickupObjectMechanism : ISourceMechanism
 {
     internal const string LootItem =
         "/Game/BloodlinesAlpha/Interactables/LootItem_Pickup.LootItem_Pickup_C";
+
+    // Placements of these classes are there and visible whenever their level loads on a new game. An
+    // InteractableObject that needs a quest can be absent, and QuestBasedInteractionObject hides until its quest is
+    // active, so both keep an unknown chance.
+    private static readonly string[] AlwaysPresent =
+    [
+        ItemIdentity.Interactable,
+        "/Game/BloodlinesAlpha/Interactables/TagBasedInteractionObject.TagBasedInteractionObject_C",
+        "/Game/BloodlinesAlpha/Interactables/HearthsongCandle.HearthsongCandle_C",
+        LootItem,
+    ];
     private static readonly (string Class, string Field, int? Quantity)[] Collectibles =
     [
         (
@@ -77,7 +88,9 @@ internal sealed class PickupObjectMechanism : ISourceMechanism
                         properties,
                         places.Count == 1 ? places[0].Key : null
                     ),
-                    notes
+                    notes,
+                    AlwaysPresent.Contains(path)
+                        && RecordValues.Boolean(properties["Need Quest?"]) != true
                 );
             }
             foreach (var rule in Collectibles)
@@ -121,7 +134,8 @@ internal sealed class PickupObjectMechanism : ISourceMechanism
         IReadOnlyList<EntityReference> places,
         EntityReference entity,
         IReadOnlyList<RelationCondition> conditions,
-        IReadOnlyList<string>? notes = null
+        IReadOnlyList<string>? notes = null,
+        bool present = false
     ) =>
         new(
             item,
@@ -140,6 +154,8 @@ internal sealed class PickupObjectMechanism : ISourceMechanism
                 Entity = entity,
                 Conditions = conditions,
                 Unconfirmed = places.Count == 0,
+                Odds =
+                    present && places.Count > 0 ? new Odds(OddsEvent.LootSpot, 1, 1, null) : null,
             }
         );
 }

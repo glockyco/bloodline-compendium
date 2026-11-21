@@ -23,6 +23,8 @@ internal sealed class PickupMechanism : ISourceMechanism
                     )
                     {
                         Entity = context.Places.Get(placement.Level),
+                        // An item placed in a level as itself is there whenever the level loads.
+                        Odds = new Odds(OddsEvent.LootSpot, 1, 1, null),
                         Conditions = WorldSourceData.Conditions(
                             context,
                             placement.Properties,
