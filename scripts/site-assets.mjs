@@ -65,6 +65,46 @@ export async function writeSiteAssets({ site, dataDirectory, fixtures }) {
     );
   }
 
+  // Item pages show renders at two densities. A shared link to an item with a render shows it large, centred on the
+  // site's night colour with room around it, because chat apps crop a wide preview image at its edges.
+  const renders = await readdir(join(dataDirectory, "renders")).catch(() => []);
+  for (const name of renders) {
+    if (!name.endsWith(".webp")) continue;
+    const source = join(dataDirectory, "renders", name);
+    const hash = name.slice(0, -5);
+    for (const size of [320, 640])
+      await write(
+        `renders/${hash}-${size}.webp`,
+        sharp(source)
+          .resize(size, size, { fit: "inside", withoutEnlargement: true })
+          .webp({ quality: 85, alphaQuality: 100 }),
+        true,
+      );
+    await write(
+      `share/render-${hash}.png`,
+      sharp({
+        create: {
+          width: 1200,
+          height: 630,
+          channels: 4,
+          background: "#15121d",
+        },
+      })
+        .composite([
+          {
+            input: await sharp(source)
+              .resize(520, 520, {
+                fit: "contain",
+                background: { r: 0, g: 0, b: 0, alpha: 0 },
+              })
+              .toBuffer(),
+          },
+        ])
+        .png(),
+      true,
+    );
+  }
+
   // Fixture builds use invented art, so checks never need the network or the publisher's art.
   const hero = fixtures
     ? join(site, "fixtures/store-art/hero.jpg")

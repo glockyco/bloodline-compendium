@@ -168,7 +168,7 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 		'Location unknown'
 	])
 		await expect(page.locator('article')).toContainText(text);
-	await expect(card.locator('img')).toHaveAttribute('src', /-160.webp$/);
+	await expect(card.locator('img[src^="/icons/"]')).toHaveAttribute('src', /-160.webp$/);
 	await expect(page.locator('article')).not.toContainText('Selection weight');
 	await page.goto('/items/mosswoven-coat/');
 	await expect(page.locator('.source-group')).toContainText('20%');
@@ -501,10 +501,13 @@ test('each public page has production identity, social metadata and generated br
 				'content',
 				description!
 			);
-			// An item with an icon shares that icon, and pages without one share the emblem banner.
+			// An item with a render shares that render, and pages without one share the emblem banner.
 			await expect(page.locator(`meta[${attribute}="${prefix}:image"]`)).toHaveAttribute(
 				'content',
-				origin + (route === '/items/lanternedge/' ? '/share/lanternedge.png' : '/og-default.png')
+				origin +
+					(route === '/items/lanternedge/'
+						? '/share/render-e63ab07e5b00300d6a000df2f6d7102b180c78adda508a04e3cf068b0f8dc64f.png'
+						: '/og-default.png')
 			);
 		}
 	}
@@ -524,7 +527,9 @@ test('each public page has production identity, social metadata and generated br
 		'favicon-512x512.png',
 		'apple-touch-icon.png',
 		'og-default.png',
-		'share/lanternedge.png'
+		'share/lanternedge.png',
+		'share/render-e63ab07e5b00300d6a000df2f6d7102b180c78adda508a04e3cf068b0f8dc64f.png',
+		'renders/e63ab07e5b00300d6a000df2f6d7102b180c78adda508a04e3cf068b0f8dc64f-320.webp'
 	]) {
 		const response = await request.get('/' + icon);
 		expect(response.status()).toBe(200);
@@ -621,6 +626,39 @@ test('Pagefind searches with the registry kind filter', async ({ page, request }
 		return result.results.length;
 	}, label);
 	expect(count).toBeGreaterThan(0);
+});
+
+test('shows an item render above the game card and switches the body where it has two', async ({
+	page
+}) => {
+	await page.goto('/items/mosswoven-coat/');
+	const side = page.getByRole('complementary', { name: 'Game card' });
+	const render = side.locator('figure img');
+	await expect(render).toHaveAttribute('alt', 'Mosswoven Coat on the male body');
+	const male = await render.getAttribute('src');
+	await side.getByRole('button', { name: 'Female' }).click();
+	await expect(render).toHaveAttribute('alt', 'Mosswoven Coat on the female body');
+	await expect(side.getByRole('button', { name: 'Female' })).toHaveAttribute(
+		'aria-pressed',
+		'true'
+	);
+	expect(await render.getAttribute('src')).not.toBe(male);
+	// An item with one render shows no body choice, and its shared link previews that render.
+	await page.goto('/items/lanternedge/');
+	await expect(page.locator('figure.item-model img')).toHaveAttribute('alt', 'Lanternedge');
+	await expect(page.getByRole('group', { name: 'Body' })).toHaveCount(0);
+	await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+		'content',
+		/\/share\/render-e63ab07e[0-9a-f]+\.png$/
+	);
+	await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
+		'content',
+		'summary_large_image'
+	);
+	// An item without a render keeps its icon as the preview.
+	await page.goto('/items/cinderpear/');
+	await expect(page.locator('figure.item-model')).toHaveCount(0);
+	await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary');
 });
 
 test('notes a known issue on the affected item and explains it on a linked, searchable page', async ({

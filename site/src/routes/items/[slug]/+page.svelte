@@ -75,6 +75,7 @@
 	{description}
 	entity={{ kind: item.kind, key: item.key, name: item.name, slug: item.slug, icon: item.icon }}
 	{kind}
+	render={item.renders[0]?.hash}
 	breadcrumbs={[
 		{ name: 'Home', path: '/' },
 		{ name: 'Items', path: itemsPath },

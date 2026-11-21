@@ -9,7 +9,8 @@
 		breadcrumbs = [],
 		website = false,
 		entity,
-		kind
+		kind,
+		render
 	}: {
 		title: string;
 		description: string;
@@ -18,23 +19,36 @@
 		website?: boolean;
 		entity?: EntityReference;
 		kind?: EntityKindDefinition;
+		/** The hash of the entity's model render, which a shared link shows large. */
+		render?: string;
 	} = $props();
 	const canonical = $derived(SITE_ORIGIN + page.url.pathname);
-	// An entity with an icon shares it as a small square beside the text, and every other page the emblem banner.
+	// An entity with a render shares it as a large picture, one with only an icon shares that as a small square beside
+	// the text, and every other page the emblem banner.
 	const image = $derived(
-		entity?.icon
+		render && entity
 			? {
-					url: `${SITE_ORIGIN}/share/${entity.icon}.png`,
-					width: 256,
-					height: 256,
-					alt: entity.name
-				}
-			: {
-					url: SITE_ORIGIN + '/og-default.png',
+					url: `${SITE_ORIGIN}/share/render-${render}.png`,
 					width: 1200,
 					height: 630,
-					alt: 'The Bloodline Compendium book emblem'
+					alt: entity.name,
+					large: true
 				}
+			: entity?.icon
+				? {
+						url: `${SITE_ORIGIN}/share/${entity.icon}.png`,
+						width: 256,
+						height: 256,
+						alt: entity.name,
+						large: false
+					}
+				: {
+						url: SITE_ORIGIN + '/og-default.png',
+						width: 1200,
+						height: 630,
+						alt: 'The Bloodline Compendium book emblem',
+						large: true
+					}
 	);
 	const structuredData = $derived([
 		...(entity && kind?.structuredDataType
@@ -89,7 +103,7 @@
 	<meta property="og:image:width" content={String(image.width)} />
 	<meta property="og:image:height" content={String(image.height)} />
 	<meta property="og:image:alt" content={image.alt} />
-	<meta name="twitter:card" content={entity?.icon ? 'summary' : 'summary_large_image'} />
+	<meta name="twitter:card" content={image.large ? 'summary_large_image' : 'summary'} />
 	<meta name="twitter:title" content={title} />
 	<meta name="twitter:description" content={description} />
 	<meta name="twitter:image" content={image.url} />

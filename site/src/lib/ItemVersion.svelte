@@ -8,6 +8,7 @@
 	import Section from '#lib/ui/Section.svelte';
 	import ItemTooltip from '#lib/ItemTooltip.svelte';
 	import ItemDetails from '#lib/ItemDetails.svelte';
+	import ItemModel from '#lib/ItemModel.svelte';
 	import OnHitEffects from '#lib/OnHitEffects.svelte';
 	import { detailRows } from '#lib/game-card.js';
 	import { sourceColumns, sourceHeadings, sourceIntros } from '#lib/labels.js';
@@ -196,6 +197,7 @@
 			</Section>{/if}
 	</div>
 	<aside class="item-side" aria-label="Game card">
+		<ItemModel name={item.name} renders={item.renders} />
 		<ItemTooltip {item} details={false} />
 	</aside>
 	<div class="item-relations" data-pagefind-ignore="all">
