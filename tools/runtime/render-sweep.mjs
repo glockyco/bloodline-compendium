@@ -129,11 +129,8 @@ for (const key of remaining) {
     if (/Timed out|not running|No session/i.test(message)) restart();
     continue;
   }
-  // The inventory holds 100 items, and each capture gives one.
-  if (++count % 50 === 0) {
-    lab("clear-tooltips");
+  if (++count % 50 === 0)
     console.log(`${count} of ${remaining.length} rendered.`);
-  }
 }
 console.log(
   `Rendered ${count} items on the ${body} body. ${failures.length} renders failed in this build.`,

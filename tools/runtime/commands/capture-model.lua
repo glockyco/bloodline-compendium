@@ -239,8 +239,11 @@ local function capture()
     local view
     if subject == "worn" then
       -- Three quarters: the camera stands 25 degrees to the subject's left and 12 degrees above it, so the subject
-      -- turns toward the viewer's right and its left side shows.
-      local flat = rotate(front, up, -25)
+      -- turns toward the viewer's right and its left side shows. A piece worn on the back, a Support item at a
+      -- spine socket such as wings or a pack, is seen from behind, as the player sees it on others.
+      local attach = field(defaults.ArmorInfo, "/Game/BloodlinesAlpha/Interactables/Armor/F_ArmorInfo.F_ArmorInfo", "AttachPoint")
+      local onBack = itemInfo(defaults.ItemInfo, "ItemSlot") == 9 and attach and attach:ToString():find("^spine") ~= nil
+      local flat = rotate(onBack and scale(front, -1) or front, up, -25)
       view = rotate(flat, math3:Cross_VectorVector(up, flat), -12)
     elseif subject == "object" then
       -- An object lying in the world is seen from 25 degrees to its left and 35 degrees above, so its top shows.
