@@ -126,7 +126,9 @@
 		</section>
 		<div class="notes">
 			<ReleaseInfo release={data.release} />
-			<p>Unofficial fan project, not affiliated with Shieldbearer Studios or 505 Games.</p>
+			<p>
+				Unofficial fan project, not affiliated with Shieldbearer Studios, 505 Pulse or 505 Games.
+			</p>
 			<p>Art on the home page is from The Bloodline's Steam page.</p>
 		</div>
 	</div>

@@ -7,14 +7,15 @@ const majorCount = 6;
 const iconCount = 5;
 const wayIconCount = 3;
 
-/** What each large category holds, listed by its most common types. Categories without one list their types. */
+/** What each large category holds, each word matching several of its items. Categories without one list their types. */
 const descriptions: Record<string, string> = {
-	weapon: 'Swords, axes, daggers, spears, shields, bows and firearms',
-	armor: 'Helmets, chest armor, gauntlets, trousers, boots and amulets',
-	'weapon-part': 'Blades, guards, pommels and grips for smithing weapons',
-	material: 'Ores, ingots, gems, herbs, hides and coins',
+	weapon: 'Swords, axes, maces, daggers, spears, staves, shields, bows, crossbows and guns',
+	armor: 'Helmets, chest armor, sleeves, leg armor, boots, pauldrons, belts, amulets and rings',
+	'weapon-part':
+		'Blades, heads, guards, grips, pommels, shafts and wand parts for smithing weapons',
+	material: 'Ores, ingots, logs, hides, gems, herbs, mushrooms, coins and engineering parts',
 	food: 'Meals, drinks, fish and cooking ingredients',
-	'quest-item': 'Keys, letters, emblems and quest deliveries'
+	'quest-item': 'Keys and the goods quests ask for'
 };
 
 /**

@@ -27,8 +27,8 @@
 				The Bloodline is a single-player sandbox RPG in an open fantasy world, played in first
 				person. You follow questlines or roam freely, join guilds, build your village and fight with
 				weapons or magic. Nearly every action you take has its own level. There are over 500 skills
-				to unlock. Shieldbearer Studios makes the game, and 505 Pulse and 505 Games publish it. It
-				has been in Steam Early Access since October&nbsp;5,&nbsp;2023.
+				to unlock. Shieldbearer Studios makes the game, and 505 Pulse publishes it. It has been in
+				Steam Early Access since October&nbsp;5,&nbsp;2023.
 			</p>
 			<p><a href={steam} rel="external">Play The Bloodline on Steam</a></p>
 		</section>
