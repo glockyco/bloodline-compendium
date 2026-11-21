@@ -234,7 +234,7 @@ test('keeps unconfirmed sources at the end without advertising a way to get the 
 	await expect(result).not.toContainText('Unplaced prism');
 });
 
-test('names Picked Up rows by their place, with loot-spot chances, and never as containers', async ({
+test('names Picked Up rows by their place, with spawn-point chances, and never as containers', async ({
 	page
 }) => {
 	for (const width of [1280, 390]) {
@@ -242,7 +242,10 @@ test('names Picked Up rows by their place, with loot-spot chances, and never as 
 		await page.goto('/items/lanternedge/');
 		const pickups = page.locator('section[aria-labelledby="source-pickup"]');
 		const table = pickups.getByRole('table');
-		await expect(table.getByRole('columnheader')).toHaveText(['Location', 'Chance per Loot Spot']);
+		await expect(table.getByRole('columnheader')).toHaveText([
+			'Location',
+			'Chance per Spawn Point'
+		]);
 		const rows = table.locator('tbody tr');
 		await expect(rows).toHaveCount(2);
 		await expect(rows.filter({ hasText: 'Glass Reach' })).toHaveCount(2);
