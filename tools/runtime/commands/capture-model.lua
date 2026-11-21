@@ -135,10 +135,23 @@ local function capture()
     end
 
     local shown, meshes, actors = {}, {}, {}
+    -- A spawned item actor goes away after the capture with every actor attached to it. Its own lights, such as a
+    -- lantern's or a lute's glow, would light the preview's later captures too, as a sweep found when every render
+    -- after the Acorn Lute came out nearly white, so they are switched off.
+    local function own(actor)
+      local list = { actor }
+      local attached = {}
+      actor:GetAttachedActors(attached, true)
+      for _, entry in ipairs(attached) do list[#list + 1] = entry.get and entry:get() or entry end
+      for _, each in ipairs(list) do
+        actors[#actors + 1] = each
+        for _, light in ipairs(components(each, "/Script/Engine.LightComponent")) do light:SetVisibility(false, true) end
+      end
+    end
     local function asObject()
       -- The item's own actor, as it lies in the world, facing the way the character faces.
       local actor = spawn(itemClass, bodyAt)
-      actors[#actors + 1] = actor
+      own(actor)
       actor:K2_SetActorRotation(math3:MakeRotFromXZ(front, up), false)
       local visible = visibleMeshes(actor)
       if #visible == 0 then error("The item's own actor draws no mesh: " .. args.item) end
@@ -184,7 +197,7 @@ local function capture()
       end
     elseif subject == "carried" then
       local actor = spawn(itemClass, bodyAt)
-      actors[#actors + 1] = actor
+      own(actor)
       local visible = visibleMeshes(actor)
       if #visible == 0 then error("The item's own actor draws no mesh: " .. args.item) end
       -- The largest mesh decides how the weapon stands, and the actor turns so that mesh's axes take their places.
