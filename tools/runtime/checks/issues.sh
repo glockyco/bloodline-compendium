@@ -176,3 +176,35 @@ for weapon in "sword 1HandedWeapons/1HSword_BloodforgedBlade false" \
 done
 staff_check '{"action":"passive-levels"}'
 lab capture-screen proficiency-after
+
+if [[ "${1:-all}" != "staff" ]]; then
+# copied-item-names: each tooltip shows another item's name above a description of something else.
+copied=(
+  "$item/Crafting_Items/Ore_And_Ingots/EarthOrb.EarthOrb_C"
+  "$item/Crafting_Items/Ore_And_Ingots/Whisperquartz.Whisperquartz_C"
+  "$item/Crafting_Items/WeaponComponents/WC_TerrashardWandCore.WC_TerrashardWandCore_C"
+  "$item/Weapons/1HandedWeapons/1HAXE_Woodaxe.1HAXE_Woodaxe_C"
+  "$item/Crafting_Items/WeaponComponents/WC_BonemetalBlade.WC_BonemetalBlade_C"
+)
+lab clear-tooltips
+lab give "{\"items\":[$(printf '"%s",' "${copied[@]}" | sed 's/,$//')]}"
+lab open-sheet
+lab read-tooltips
+lab place-tooltips
+lab capture-screen copied-names
+lab clear-tooltips
+# shared-save-tags: one Emberglass of a pair in the Hills of Delvenaugh is taken, the game saves and the area loads
+# again. The area removes taken objects about a minute after it loads, and then the untaken Emberglass is gone too.
+pickups=$(dirname "$0")/placed-pickups.lua
+delvenaugh=/Game/Overworld/OpenWorldAreas/HillsOfDelvenaugh
+lab eval "$pickups" "{\"open\":\"$delvenaugh\"}"
+sleep 90
+lab eval "$pickups" '{}'
+lab eval "$pickups" '{"take":"TagBasedInteractionObject12_20"}'
+sleep 6
+lab eval "$(dirname "$0")/save-game.lua"
+lab eval "$pickups" "{\"open\":\"$delvenaugh\"}"
+sleep 90
+lab eval "$pickups" '{}'
+lab capture-screen shared-tags-after
+fi

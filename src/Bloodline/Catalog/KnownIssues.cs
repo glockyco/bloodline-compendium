@@ -102,6 +102,50 @@ internal static partial class KnownIssues
         ["/Game/BloodlinesAlpha/Interactables/Crafting_Items/SpudColossus.SpudColossus_C"] = 200,
     };
 
+    /// <summary>Items whose tooltips show another item's name above a description of something else.</summary>
+    public const string CopiedName = "copied-item-names";
+
+    /// <summary>The items whose copied names the tooltip sweep read on screen.</summary>
+    private static readonly HashSet<string> CopiedNames = new(StringComparer.Ordinal)
+    {
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/EarthOrb.EarthOrb_C",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/Whisperquartz.Whisperquartz_C",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/WeaponComponents/WC_TerrashardWandCore.WC_TerrashardWandCore_C",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/1HandedWeapons/1HAXE_Woodaxe.1HAXE_Woodaxe_C",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/WeaponComponents/WC_BonemetalBlade.WC_BonemetalBlade_C",
+    };
+
+    /// <summary>Placed items that disappear once another placed item with their Tag is taken.</summary>
+    public const string SharedTag = "shared-save-tags";
+
+    /// <summary>
+    /// The items that lab runs placed1 and twins1 to twins3 saw disappear after another placed item with the same Tag
+    /// was taken. The Briarwatch debris of Whitebrook Haven came back and stay out.
+    /// </summary>
+    private static readonly HashSet<string> TwinItems = new(StringComparer.Ordinal)
+    {
+        "/Game/BloodlinesAlpha/Interactables/Armor/Arms/WebspinnerGauntlets.WebspinnerGauntlets_C",
+        "/Game/BloodlinesAlpha/Interactables/Armor/ETC/LifebinderRing.LifebinderRing_C",
+        "/Game/BloodlinesAlpha/Interactables/Armor/Legs/LegArmor_Sparkbottoms.LegArmor_Sparkbottoms_C",
+        "/Game/BloodlinesAlpha/Interactables/BagOfGold100gp.BagOfGold100gp_C",
+        "/Game/BloodlinesAlpha/Interactables/BoneDust_Item.BoneDust_Item_C",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/FineCloth.FineCloth_C",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/GenericPotions/MediumHealthPotion.MediumHealthPotion_C",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/GenericPotions/MediumStaminaPotion.MediumStaminaPotion_C",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/CryoliteBloom.CryoliteBloom_C",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/EarthshardHeart.EarthshardHeart_C",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/Emberglass.Emberglass_C",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/GoldIngot.GoldIngot_C",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/IronIngot.IronIngot_C",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/MystcopperIngot.MystcopperIngot_C",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/SilverIngot.SilverIngot_C",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/Stone.Stone_C",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/StonegemCore.StonegemCore_C",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/Whisperquartz.Whisperquartz_C",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/1HandedWeapons/1HSWORD_LonlandSword.1HSWORD_LonlandSword_C",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/2H_Weapons/TwoHanded_Tool_Weapons/MiningPickaxe.MiningPickaxe_C",
+    };
+
     public static KnownIssueRegistry Load(string path)
     {
         var registry = CanonicalJson.Read<KnownIssueRegistry>(path);
@@ -240,6 +284,14 @@ internal static partial class KnownIssues
             if (untrainedWeapons.Contains(item.Key))
             {
                 notes[item.Key].Add(NoProficiency);
+            }
+            if (CopiedNames.Contains(item.Key))
+            {
+                notes[item.Key].Add(CopiedName);
+            }
+            if (TwinItems.Contains(item.Key))
+            {
+                notes[item.Key].Add(SharedTag);
             }
         }
         foreach (var issue in registry.Issues)

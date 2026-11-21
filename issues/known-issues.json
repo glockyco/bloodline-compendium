@@ -288,6 +288,72 @@
       "builds": [24464547],
       "report": "notReported",
       "reportUrl": null
+    },
+    {
+      "id": "copied-item-names",
+      "title": "Some items show another item's name",
+      "effect": "Five items show the name of another item: a wood axe named Askillian Gladus, a blade named Bonemetal Grip, an earth orb named Bolt-Orb, a breeze stone named Earthshard Heart and a geo wand core named Stormbound Wand Core.",
+      "itemNotes": {
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/EarthOrb.EarthOrb_C": "Despite its name, this Bolt-Orb is an earth orb, as its description says.",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/Whisperquartz.Whisperquartz_C": "Despite its name, this Earthshard Heart is a stone that emits a breeze, as its description says.",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/WeaponComponents/WC_TerrashardWandCore.WC_TerrashardWandCore_C": "Despite its name, this Stormbound Wand Core is a geo-attuned wand core, as its description says.",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/1HandedWeapons/1HAXE_Woodaxe.1HAXE_Woodaxe_C": "Despite its name, this Askillian Gladus is a wood axe, as its description says.",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/WeaponComponents/WC_BonemetalBlade.WC_BonemetalBlade_C": "Despite its name, this Bonemetal Grip is a blade, as its description says."
+      },
+      "workaround": "Tell them apart by their descriptions and icons.",
+      "steps": [
+        "Hover Bolt-Orb in the inventory. The tooltip shows the name Bolt-Orb above \"An orb containing churning, magical earth magic.\"",
+        "Hover the other Bolt-Orb. Its tooltip shows the same name above \"An orb containing concentrated manathunder.\""
+      ],
+      "expected": "Each item shows its own name, such as an earth orb named for earth.",
+      "observed": "The tooltips of the wood axe, the Bonemetal blade, the earth orb, the breeze stone and the geo wand core show the names Askillian Gladus, Bonemetal Grip, Bolt-Orb, Earthshard Heart and Stormbound Wand Core, each the name of another item, above descriptions of what they are.",
+      "cause": "Each item's ItemInfo carries another item's ItemName, which the inventory tooltip shows.",
+      "citations": ["/Game/BloodlinesAlpha/UI/Inventory/UI_InventoryItem_2:OnMouseEnter"],
+      "builds": [24464547],
+      "report": "notReported",
+      "reportUrl": null
+    },
+    {
+      "id": "shared-save-tags",
+      "title": "Some items disappear when you take a matching item",
+      "effect": "Some items lie in pairs, such as two Emberglass in the Hills of Delvenaugh. Taking one makes the other disappear when the area loads again. Taking Stone or Ulfberht Blade in Whitebrook Haven, Lifebinder Ring or Webspinner Gauntlets in Drakthul Fjord or Spark Bottoms in the Glennheim Hills makes the others of these five disappear.",
+      "itemNotes": {
+        "/Game/BloodlinesAlpha/Interactables/Weapons/2H_Weapons/TwoHanded_Tool_Weapons/MiningPickaxe.MiningPickaxe_C": "Some Mining Picks in the Glennheim Hills lie in pairs. Taking one makes the other disappear when the area loads again.",
+        "/Game/BloodlinesAlpha/Interactables/BagOfGold100gp.BagOfGold100gp_C": "Some Bags of Gold in the Glennheim Hills lie in pairs. Taking one makes the other disappear when the area loads again.",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/Emberglass.Emberglass_C": "Some Emberglass in the Hills of Delvenaugh lies in pairs. Taking one makes the other disappear when the area loads again.",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/CryoliteBloom.CryoliteBloom_C": "Some Cryolite Blooms in the Hills of Delvenaugh lie in pairs. Taking one makes the other disappear when the area loads again.",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/EarthshardHeart.EarthshardHeart_C": "Some Earthshard Hearts in the Hills of Delvenaugh lie in pairs. Taking one makes the other disappear when the area loads again.",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/Whisperquartz.Whisperquartz_C": "Some of these Earthshard Hearts in the Hills of Delvenaugh lie in pairs. Taking one makes the other disappear when the area loads again.",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/StonegemCore.StonegemCore_C": "Some Shockgem Cores in the Hills of Delvenaugh lie in pairs. Taking one makes the other disappear when the area loads again.",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/SilverIngot.SilverIngot_C": "Some Silver Ingots in the Hills of Delvenaugh lie in pairs. Taking one makes the other disappear when the area loads again.",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/MystcopperIngot.MystcopperIngot_C": "Some Mystcopper Ingots in the Hills of Delvenaugh lie in pairs. Taking one makes the other disappear when the area loads again.",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/GoldIngot.GoldIngot_C": "Some Gold Ingots in the Hills of Delvenaugh lie in pairs. Taking one makes the other disappear when the area loads again.",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/IronIngot.IronIngot_C": "Some Iron Ingots in the Hills of Delvenaugh lie in pairs. Taking one makes the other disappear when the area loads again.",
+        "/Game/BloodlinesAlpha/Interactables/BoneDust_Item.BoneDust_Item_C": "Some Bone Dust in the Hills of Delvenaugh lies in pairs. Taking one makes the other disappear when the area loads again.",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/FineCloth.FineCloth_C": "Some Fine Cloth in the Hills of Delvenaugh lies in pairs. Taking one makes the other disappear when the area loads again.",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/GenericPotions/MediumStaminaPotion.MediumStaminaPotion_C": "In the Harbinger Stronghold, a Medium Stamina Potion and a Medium Health Potion lie as a pair. Taking one makes the other disappear when the area loads again.",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/GenericPotions/MediumHealthPotion.MediumHealthPotion_C": "In the Harbinger Stronghold, a Medium Stamina Potion and a Medium Health Potion lie as a pair. Taking one makes the other disappear when the area loads again.",
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/Stone.Stone_C": "Taking the Stone or Ulfberht Blade in Whitebrook Haven, Lifebinder Ring or Webspinner Gauntlets in Drakthul Fjord or Spark Bottoms in the Glennheim Hills makes the others of these five disappear.",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/1HandedWeapons/1HSWORD_LonlandSword.1HSWORD_LonlandSword_C": "Taking Stone or Ulfberht Blade in Whitebrook Haven, Lifebinder Ring or Webspinner Gauntlets in Drakthul Fjord or Spark Bottoms in the Glennheim Hills makes the others of these five disappear.",
+        "/Game/BloodlinesAlpha/Interactables/Armor/ETC/LifebinderRing.LifebinderRing_C": "Taking Stone or Ulfberht Blade in Whitebrook Haven, Lifebinder Ring or Webspinner Gauntlets in Drakthul Fjord or Spark Bottoms in the Glennheim Hills makes the others of these five disappear.",
+        "/Game/BloodlinesAlpha/Interactables/Armor/Arms/WebspinnerGauntlets.WebspinnerGauntlets_C": "Taking Stone or Ulfberht Blade in Whitebrook Haven, Lifebinder Ring or Webspinner Gauntlets in Drakthul Fjord or Spark Bottoms in the Glennheim Hills makes the others of these five disappear.",
+        "/Game/BloodlinesAlpha/Interactables/Armor/Legs/LegArmor_Sparkbottoms.LegArmor_Sparkbottoms_C": "Taking Stone or Ulfberht Blade in Whitebrook Haven, Lifebinder Ring or Webspinner Gauntlets in Drakthul Fjord or Spark Bottoms in the Glennheim Hills makes the others of these five disappear."
+      },
+      "workaround": "Take both items of a pair before you leave the area.",
+      "steps": [
+        "In the Harbinger Stronghold, take the Medium Stamina Potion and leave the Medium Health Potion.",
+        "Save, leave the Stronghold and return. About a minute after the Stronghold loads, the Medium Health Potion is gone."
+      ],
+      "expected": "The Medium Health Potion stays until you take it.",
+      "observed": "In 29 of 31 groups of placed items that share a save tag, taking one made the others disappear about a minute after the area loaded again, as did taking one of the five items without a tag. Taking both items of a pair in one visit kept both.",
+      "cause": "Taking an item adds its Tag to the game instance's Completed Achievements, and an item whose Tag is listed destroys itself when its area loads. Each pair shares one Tag, and the five items carry none, so they share the Tag None.",
+      "citations": [
+        "/Game/BloodlinesAlpha/Interactables/TagBasedInteractionObject:Take Item",
+        "/Game/BloodlinesAlpha/Interactables/TagBasedInteractionObject:ReceiveBeginPlay"
+      ],
+      "builds": [24464547],
+      "report": "notReported",
+      "reportUrl": null
     }
   ]
 }
