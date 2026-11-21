@@ -606,8 +606,10 @@ async function waitForGame(config, lab, check, seconds, what) {
   );
 }
 
-async function newSave(config, lab, name) {
-  if (!name) throw new Error("Name the save: lab.mjs new-save <name>");
+async function newSave(config, lab, name, body) {
+  if (!name) throw new Error("Name the save: lab.mjs new-save <name> [female]");
+  if (body && body !== "female")
+    throw new Error(`The character's body is male or female, not ${body}.`);
   // The game keeps 20 characters of a save name, and starting a save that exists loads it without creating a
   // character, which leaves the run in an earlier run's game.
   if (name.length > 20)
@@ -636,7 +638,7 @@ async function newSave(config, lab, name) {
     180,
     "character creation",
   );
-  await game(config, lab, "create-character", {});
+  await game(config, lab, "create-character", { body });
   return waitForGame(
     config,
     lab,
@@ -736,14 +738,16 @@ async function captureScreen(config, lab, name, ui) {
 
 /**
  * Combines a model capture's colour pass and depth pass into a transparent picture. Both passes are rendered at
- * twice the output size. Each output pixel takes the share of its four samples that the depth marks as the
- * subject as its opacity, and the mean colour of those samples, so edges are smooth without background colour
- * bleeding in. The picture is cropped to the subject with a margin of 5% of its longer side on every side.
+ * twice the output size. A sample belongs to the subject where the depth marks it, or as far as the colour pass's
+ * alpha, the inverse of the drawn opacity, says something translucent was drawn there, such as slime metal, which
+ * writes no depth. Each output pixel takes the mean coverage of its four samples as its opacity and their colour
+ * weighted by coverage, so edges are smooth without background colour bleeding in. The picture is cropped to the
+ * subject with a margin of 5% of its longer side on every side.
  */
-async function composeModel(colorFile, maskFile, target) {
+async function composeModel(colorFile, maskFile) {
   const sharp = createRequire(join(root, "site/package.json"))("sharp");
   const color = await sharp(colorFile)
-    .removeAlpha()
+    .ensureAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
   const mask = await sharp(maskFile)
@@ -763,22 +767,34 @@ async function composeModel(colorFile, maskFile, target) {
       const sum = [0, 0, 0];
       for (let dy = 0; dy < 2; dy++)
         for (let dx = 0; dx < 2; dx++) {
-          const i = ((2 * y + dy) * width + 2 * x + dx) * 3;
-          if (mask.data[i] + mask.data[i + 1] + mask.data[i + 2] === 0)
-            continue;
-          covered++;
-          for (let c = 0; c < 3; c++) sum[c] += color.data[i + c];
+          const sample = (2 * y + dy) * width + 2 * x + dx;
+          const m = sample * 3;
+          const c = sample * 4;
+          const coverage =
+            mask.data[m] + mask.data[m + 1] + mask.data[m + 2] > 0
+              ? 1
+              : 1 - color.data[c + 3] / 255;
+          // A trace of opacity is noise in the pass, not a translucent surface.
+          if (coverage < 0.05) continue;
+          covered += coverage;
+          for (let k = 0; k < 3; k++) sum[k] += coverage * color.data[c + k];
         }
       if (!covered) continue;
       const o = (y * out.width + x) * 4;
-      for (let c = 0; c < 3; c++) pixels[o + c] = Math.round(sum[c] / covered);
+      for (let k = 0; k < 3; k++) pixels[o + k] = Math.round(sum[k] / covered);
       pixels[o + 3] = Math.round((255 * covered) / 4);
       ((left = Math.min(left, x)),
         (top = Math.min(top, y)),
         (right = Math.max(right, x)),
         (bottom = Math.max(bottom, y)));
     }
-  if (right < 0) throw new Error("The model capture shows no subject.");
+  return { pixels, out, box: right < 0 ? null : { left, top, right, bottom } };
+}
+
+/** Writes a combined capture cropped to the subject with a margin of 5% of its longer side on every side. */
+async function writeModel({ pixels, out, box }, target) {
+  const sharp = createRequire(join(root, "site/package.json"))("sharp");
+  const { left, top, right, bottom } = box;
   const margin = Math.round(
     0.05 * Math.max(right - left + 1, bottom - top + 1),
   );
@@ -790,22 +806,46 @@ async function composeModel(colorFile, maskFile, target) {
     height:
       Math.min(out.height - 1, bottom + margin) - Math.max(0, top - margin) + 1,
   };
-  // A subject that touches the edge of the frame may be cut off, so the render is refused.
-  if (
-    left === 0 ||
-    top === 0 ||
-    right === out.width - 1 ||
-    bottom === out.height - 1
-  )
-    throw new Error(
-      "The subject touches the edge of the model capture and may be cut off.",
-    );
   await sharp(pixels, {
     raw: { width: out.width, height: out.height, channels: 4 },
   })
     .extract(crop)
     .png()
     .toFile(target);
+}
+
+/**
+ * The frame that fits the subject a capture showed, from its pixels and the capture's frame: the subject's middle
+ * becomes the centre, and its longer side, with a tenth to spare, the diameter. A subject cut off at the edge
+ * extends beyond what the capture shows, so its frame doubles.
+ */
+function refinedFrame({ out, box }, frame) {
+  const size = out.width;
+  const cut =
+    box.left === 0 ||
+    box.top === 0 ||
+    box.right === size - 1 ||
+    box.bottom === size - 1;
+  const u = (box.left + box.right + 1) / 2 / size - 0.5;
+  const v = 0.5 - (box.top + box.bottom + 1) / 2 / size;
+  const span = 2 * frame.halfWidth;
+  const along = (vector, amount) => ({
+    X: vector.X * amount,
+    Y: vector.Y * amount,
+    Z: vector.Z * amount,
+  });
+  const shift = [along(frame.right, u * span), along(frame.up, v * span)];
+  const extent =
+    (Math.max(box.right - box.left + 1, box.bottom - box.top + 1) / size) *
+    span;
+  return {
+    center: {
+      X: frame.center.X + shift[0].X + shift[1].X,
+      Y: frame.center.Y + shift[0].Y + shift[1].Y,
+      Z: frame.center.Z + shift[0].Z + shift[1].Z,
+    },
+    radius: cut ? frame.radius * 2 : (extent / 2) * 1.1,
+  };
 }
 
 async function captureModel(config, lab, args) {
@@ -823,28 +863,60 @@ async function captureModel(config, lab, args) {
   await game(config, lab, "set-weather", { type: 0 });
   await game(config, lab, "give", { items: [args.item] });
   await game(config, lab, "open-sheet", {});
-  const file = `capture-${Date.now()}`;
-  const result = await game(config, lab, "capture-model", {
-    item: args.item,
-    directory: config.windowsPath(lab.captures),
-    file,
-  });
-  const passes = [
+  const passes = (file) => [
     join(lab.captures, `${file}-color.png`),
     join(lab.captures, `${file}-mask.png`),
   ];
-  await waitFor(
-    async () => (await Promise.all(passes.map(exists))).every(Boolean),
-    30,
-    "the model capture's files",
-  );
   const target = join(config.runtime, session.run, `${args.name}.png`);
   if (await exists(target))
     throw new Error(
       `${relative(root, target)} exists. Captures in a run are never overwritten.`,
     );
-  await composeModel(passes[0], passes[1], target);
-  for (const pass of passes) await rm(pass);
+  // The first capture frames the subject by its bounds. A subject that the capture cuts off, or that fills less
+  // than half of it because its bounds reach beyond what it draws, is captured again in the frame its pixels give.
+  // Armor the preview wears without drawing anything, such as some belts, is captured again as its own actor.
+  let frame;
+  let subject;
+  let result;
+  let composed;
+  for (let attempt = 0; ; attempt++) {
+    const file = `capture-${Date.now()}`;
+    result = await game(config, lab, "capture-model", {
+      item: args.item,
+      part: args.part,
+      subject,
+      frame,
+      directory: config.windowsPath(lab.captures),
+      file,
+    });
+    await waitFor(
+      async () => (await Promise.all(passes(file).map(exists))).every(Boolean),
+      30,
+      "the model capture's files",
+    );
+    composed = await composeModel(...passes(file));
+    for (const pass of passes(file)) await rm(pass);
+    if (!composed.box && result.kind === "worn" && !subject) {
+      subject = "object";
+      frame = undefined;
+      continue;
+    }
+    if (!composed.box) throw new Error("The model capture shows no subject.");
+    const { left, top, right, bottom } = composed.box;
+    const size = composed.out.width;
+    const cut =
+      left === 0 || top === 0 || right === size - 1 || bottom === size - 1;
+    const small = Math.max(right - left + 1, bottom - top + 1) < size / 2;
+    if (!cut && !small) break;
+    if (attempt === 3)
+      throw new Error(
+        cut
+          ? "The subject touches the edge of the model capture and may be cut off."
+          : "The subject fills less than half of the model capture.",
+      );
+    frame = refinedFrame(composed, result.frame);
+  }
+  await writeModel(composed, target);
   await record(config, session, {
     command: "keep",
     file: relative(root, target),
@@ -865,7 +937,7 @@ Lab copy and game:
   status                          show the lab copy, session and run
 
 In the game (arguments are one JSON object):
-  new-save <name>                 start a new game and create a character
+  new-save <name> [female]        start a new game and create a character, with the female body if named
   capture-screen <name> [noui]    keep an engine screenshot in the run (render mode)
   capture-model <json>            keep a model render in the run (render mode)
   eval <file> [json]              run a Lua file with the command helpers and args
@@ -914,7 +986,7 @@ async function main([command, ...rest]) {
       return { run: relative(root, join(config.runtime, session.run)) };
     }
     case "new-save":
-      return newSave(config, lab, rest[0]);
+      return newSave(config, lab, rest[0], rest[1]);
     case "capture-screen":
       return captureScreen(
         config,
