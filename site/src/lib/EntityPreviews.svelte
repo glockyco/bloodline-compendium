@@ -164,7 +164,7 @@
 	/* Hidden until placed, so it never flashes at the corner of the page. */
 	.entity-preview {
 		position: fixed;
-		z-index: var(--layer-tooltip);
+		z-index: var(--layer-preview);
 		top: 0;
 		left: 0;
 		visibility: hidden;

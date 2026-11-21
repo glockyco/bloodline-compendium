@@ -183,6 +183,8 @@
 	--layer-tooltip: 3;
 	--layer-skip: 10;
 	--layer-search: 100;
+	/* A preview docked at the top of a phone screen lies over the page header, or the header hides its name. */
+	--layer-preview: 101;
 }
 
 @media (width < 64rem) {

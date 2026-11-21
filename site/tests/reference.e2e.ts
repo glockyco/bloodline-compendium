@@ -337,6 +337,38 @@ test('a first tap previews an item link and a second tap follows it', async ({
 		await context.close();
 	}
 });
+test('a preview docked at the top of a phone screen is not hidden under the header', async ({
+	browser,
+	baseURL
+}) => {
+	const context = await browser.newContext({
+		baseURL,
+		hasTouch: true,
+		isMobile: true,
+		viewport: { width: 390, height: 844 }
+	});
+	try {
+		const page = await context.newPage();
+		await page.goto('/items/lanternedge/');
+		await page.waitForLoadState('networkidle');
+		const ingredient = page.locator('.recipe').getByRole('link', { name: 'Cinderpear' });
+		// A link in the lower half of the screen docks its preview at the top, where the sticky header sits.
+		await ingredient.evaluate((link) => window.scrollBy(0, link.getBoundingClientRect().top - 700));
+		expect((await ingredient.boundingBox())!.y).toBeGreaterThan(422);
+		await ingredient.tap();
+		const preview = page.locator('#entity-preview');
+		await expect(preview).toContainText('Cinderpear');
+		const covered = await preview.evaluate((panel) => {
+			const box = panel.getBoundingClientRect();
+			// The preview ignores the pointer, so hit-testing needs it to take part for this one check.
+			panel.style.pointerEvents = 'auto';
+			return !panel.contains(document.elementFromPoint(box.left + box.width / 2, box.top + 8));
+		});
+		expect(covered).toBe(false);
+	} finally {
+		await context.close();
+	}
+});
 test('finds items by word prefix from the shared search', async ({ page }) => {
 	await page.goto('/');
 	const search = page.locator('pagefind-searchbox input');
