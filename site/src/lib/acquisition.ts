@@ -260,7 +260,7 @@ function placeName(source: Source): string | null {
 }
 
 /** The ways that stand somewhere in the world, so a missing place is worth saying, unlike a recipe or a seed. */
-const placedKinds: ReadonlySet<SourceKind> = new Set([
+export const placedKinds: ReadonlySet<SourceKind> = new Set([
 	'shop',
 	'currencyShop',
 	'stable',

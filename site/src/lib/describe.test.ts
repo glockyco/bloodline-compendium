@@ -68,15 +68,18 @@ it('leaves conditional projectile groups out of the short description', () => {
 	expect(description).not.toContain('Point blank');
 });
 
-it('uses each group noun, preserves unknown damage and agrees with plural weapon names', () => {
+it('uses each group noun, leaves unknown damage out and agrees with plural weapon names', () => {
 	const weapon = {
 		...item('Twin Bows', 'Weapon', 'Bow'),
-		projectileGroups: [{ count: 3, projectile: 'arrows', bodyHitDamage: null, headHitDamage: 0 }]
+		projectileGroups: [{ count: 3, projectile: 'arrows', bodyHitDamage: 4, headHitDamage: null }]
 	};
 	const description = describeItem(weapon, []);
-	expect(description).toContain('They fire 3 arrows');
-	expect(description).toContain('Unknown damage each, 0 on a headshot');
-	expect(description).not.toContain('null');
+	expect(description).toContain('They fire 3 arrows that deal 4 damage each.');
+	const unknown = describeItem(
+		{ ...weapon, projectileGroups: [{ ...weapon.projectileGroups[0], bodyHitDamage: null }] },
+		[]
+	);
+	expect(unknown).not.toMatch(/Unknown|null|deal/);
 });
 
 it('agrees with names whose head noun is plural', () => {

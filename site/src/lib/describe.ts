@@ -72,13 +72,17 @@ function statSentence(
 ): string | null {
 	const number = (stat: string) => item.facts.find((fact) => fact.stat === stat)?.number;
 	const plural = isPlural(item.name);
-	const groups = item.projectileGroups?.filter((group) => !group.condition);
+	// A description states only damage that is known, so a group with unknown body damage is left out.
+	const groups = item.projectileGroups?.filter(
+		(group) => !group.condition && group.bodyHitDamage != null
+	);
 	if (item.category.name === 'Weapon' && groups?.length) {
 		return groups
 			.map((group, index) => {
-				const body = group.bodyHitDamage == null ? 'Unknown' : formatNumber(group.bodyHitDamage);
-				const head = group.headHitDamage == null ? 'Unknown' : formatNumber(group.headHitDamage);
-				const hits = `${body} damage${group.count > 1 || index > 0 ? ' each' : ''}, ${head} on a headshot.`;
+				const body = formatNumber(group.bodyHitDamage!);
+				const head =
+					group.headHitDamage == null ? '' : `, ${formatNumber(group.headHitDamage)} on a headshot`;
+				const hits = `${body} damage${group.count > 1 || index > 0 ? ' each' : ''}${head}.`;
 				if (index > 0)
 					return `Each shot also fires ${formatNumber(group.count)} ${group.projectile} that deal ${hits}`;
 				return group.count === 1

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Source } from './site-data.js';
 	import { formatNumber, formatChanceRange } from './format.js';
-	import { chanceText, formatAmount, oddsLabel, payPrice } from './acquisition.js';
+	import { chanceText, formatAmount, oddsLabel, payPrice, placedKinds } from './acquisition.js';
 	import EntityLink from './ui/EntityLink.svelte';
 	import Conditions from './Conditions.svelte';
 	import UnknownValue from './ui/UnknownValue.svelte';
@@ -50,7 +50,12 @@
 			>{#if placeFirst}{@render placeList()}{:else}<EntityLink entity={source.entity} />{/if}</span
 		>
 		<Conditions conditions={source.conditions} />
-		{#if showPlaces && !placeFirst}<p class="source-places">{@render placeList()}</p>{/if}
+		<!-- Random loot and crops stand nowhere in particular, so only ways that stand somewhere miss a place. -->
+		{#if showPlaces && !placeFirst && (places.length || source.settlement || placedKinds.has(source.kind))}<p
+				class="source-places"
+			>
+				{@render placeList()}
+			</p>{/if}
 		{#if source.inputs.length || source.notes.length || source.quotes?.length}
 			<details class="row-details">
 				<summary

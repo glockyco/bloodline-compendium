@@ -14,6 +14,7 @@
 	import {
 		headingCase,
 		oddsLabel,
+		placedKinds,
 		recipeKinds,
 		sortSources,
 		useHeadings,
@@ -161,8 +162,11 @@
 				(useLevel == null || (levelOf(use) ?? 0) <= useLevel)
 		);
 	});
-	function placeOf(source: Source): string {
-		return source.places[0]?.name ?? (source.settlement ? 'Your settlement' : 'Location unknown');
+	function placeOf(source: Source): string | null {
+		if (source.places[0]) return source.places[0].name;
+		if (source.settlement) return 'Your settlement';
+		// Random loot and crops stand nowhere in particular, so only ways that stand somewhere miss a place.
+		return placedKinds.has(source.kind) ? 'Location unknown' : null;
 	}
 	function useLabel(kind: SourceKind): string {
 		return useHeadings[kind] ?? sourceHeadings[kind];

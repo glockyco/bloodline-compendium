@@ -23,7 +23,11 @@ export function bugRows(item: Pick<ItemPage, 'facts' | 'notes'>): BugRow[] {
 				...differences
 					.filter((fact) => fact.gameShowsIssue === note.issue)
 					.map((fact) => ({ label: fact.tooltipLabel ?? fact.label, value: fact.gameShows! })),
-				...Object.entries(note.tooltipValues ?? {}).map(([label, value]) => ({ label, value }))
+				// A tooltip value read as a whole line, such as "Type: Light", carries its own label.
+				...Object.entries(note.tooltipValues ?? {}).map(([label, value]) => {
+					const line = /^([^:]+): (.*)$/.exec(value);
+					return line ? { label: line[1], value: line[2] } : { label, value };
+				})
 			]
 		})),
 		...differences
