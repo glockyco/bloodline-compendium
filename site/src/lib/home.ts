@@ -1,5 +1,5 @@
 import type { CategorySummary, ItemIndex, ItemPage, ItemSummary, SourceKind } from './site-data.js';
-import { sourceNames } from './labels.js';
+import { sourceHeadings } from './labels.js';
 
 /** Browse categories shown large on the home page, in this order when they exist. */
 const majorOrder = ['weapon', 'armor', 'weapon-part', 'material', 'food', 'quest-item'];
@@ -160,29 +160,30 @@ export function homeData(index: ItemIndex, pages: ItemPage[]): HomeData {
 	const currencyList = [...currencies]
 		.sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'en'))
 		.map(([name]) => name);
+	// The heading names the way, so a line gives only what stands behind it.
 	const texts: Partial<Record<SourceKind, string>> = {
-		shop: `Sold by ${plural(giverCount('shop'), 'merchant', 'merchants')}`,
+		shop: plural(giverCount('shop'), 'merchant', 'merchants'),
 		currencyShop:
 			currencyList.length > 2
-				? `Bought with ${currencyList[0]} and ${plural(currencyList.length - 1, 'other currency', 'other currencies')}`
-				: `Bought with ${wordList.format(currencyList)}`,
-		smithing: `Made from ${plural(giverCount('smithing'), 'smithing recipe', 'smithing recipes')}`,
-		crafting: `Made from ${plural(giverCount('crafting'), 'crafting recipe', 'crafting recipes')}`,
-		cooking: `Cooked from ${plural(giverCount('cooking'), 'recipe', 'recipes')}`,
-		containerLoot: `Found in ${plural(giverCount('containerLoot'), 'kind of container', 'kinds of container')}`,
-		randomLoot: 'Rolled from general container loot',
-		enemyDrop: `Dropped by ${plural(giverCount('enemyDrop'), 'kind of creature', 'kinds of creature')}`,
-		pickup: 'Placed in the world',
-		dialogue: `Given by ${plural(giverCount('dialogue'), 'person', 'people')} in conversation`,
-		settlementDelivery: `Delivered by ${plural(giverCount('settlementDelivery'), 'settlement building', 'settlement buildings')}`,
-		bountyNote: `Given with ${plural(giverCount('bountyNote'), 'bounty note', 'bounty notes')}`,
-		gathering: 'Gathered from plants, ore and other nodes',
-		fishing: 'Caught by fishing',
-		farming: 'Harvested from planted seeds'
+				? `${currencyList[0]} and ${plural(currencyList.length - 1, 'other currency', 'other currencies')}`
+				: wordList.format(currencyList),
+		smithing: plural(giverCount('smithing'), 'recipe', 'recipes'),
+		crafting: plural(giverCount('crafting'), 'recipe', 'recipes'),
+		cooking: plural(giverCount('cooking'), 'recipe', 'recipes'),
+		containerLoot: plural(giverCount('containerLoot'), 'kind of container', 'kinds of container'),
+		randomLoot: 'General container loot',
+		enemyDrop: plural(giverCount('enemyDrop'), 'kind of creature', 'kinds of creature'),
+		pickup: 'In the world',
+		dialogue: plural(giverCount('dialogue'), 'person', 'people'),
+		settlementDelivery: plural(giverCount('settlementDelivery'), 'building', 'buildings'),
+		bountyNote: plural(giverCount('bountyNote'), 'bounty note', 'bounty notes'),
+		gathering: 'Plants, ore and other nodes',
+		fishing: 'Fishing spots',
+		farming: 'Planted seeds'
 	};
 	const candidates: { key: string; label: string; text: string; kinds: SourceKind[] }[] = (
 		Object.keys(texts) as SourceKind[]
-	).map((kind) => ({ key: kind, label: sourceNames[kind], text: texts[kind]!, kinds: [kind] }));
+	).map((kind) => ({ key: kind, label: sourceHeadings[kind], text: texts[kind]!, kinds: [kind] }));
 	const ways = candidates
 		.map((way) => {
 			const members = items.filter((item) =>

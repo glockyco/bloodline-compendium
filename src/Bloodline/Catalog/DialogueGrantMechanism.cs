@@ -150,7 +150,7 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
                     notes.Add(
                         together
                             ? $"The same line gives it {matching.Length} times."
-                            : $"{matching.Length} lines of the conversation give it. Whether one conversation reaches more than one is unknown."
+                            : $"{matching.Length} lines of this conversation give it."
                     );
                 }
                 foreach (var (name, place, generated, entity) in users)

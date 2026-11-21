@@ -118,8 +118,10 @@ it('describes loose loot as found on the ground with its known place and odds', 
 		odds: { ...container.odds!, event: 'lootSpot' as const }
 	};
 	expect(firstRoute([pickup], ['pickup'])).toBe(
-		'Found on the ground in Glass Reach, 50.8% to 86.6% per loot spot'
+		'Found on the ground in Glass Reach, 50.8% to 86.6% per spawn point'
 	);
+	const placed = { ...pickup, odds: { ...pickup.odds, chance: 1, highestChance: null } };
+	expect(sourceContext(placed)).toBe('Always');
 });
 
 it('counts an item currency instead of pluralizing its name', () => {

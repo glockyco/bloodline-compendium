@@ -7,6 +7,7 @@ export function titleCase(value: string): string {
 		.replace(/\b[a-z]/g, (letter) => letter.toUpperCase());
 }
 
+/** The one name of each way to get an item: its item-page heading, filter, Home row and search description. */
 export const sourceHeadings: Record<SourceKind, string> = {
 	shop: 'Sold by',
 	currencyShop: 'Sold for Special Currency',
@@ -58,27 +59,4 @@ export const sourceColumns: Record<SourceKind, string> = {
 	seasonalGift: 'Gift',
 	archaeology: 'Find',
 	reward: 'Reward'
-};
-/** Short names for each way of getting an item, for filters and overviews. */
-export const sourceNames: Record<SourceKind, string> = {
-	shop: 'Merchants',
-	currencyShop: 'Currency traders',
-	smithing: 'Smithing',
-	crafting: 'Crafting',
-	cooking: 'Cooking',
-	containerLoot: 'Containers',
-	randomLoot: 'Random loot',
-	enemyDrop: 'Creatures',
-	pickup: 'World pickups',
-	dialogue: 'Conversations',
-	fishing: 'Fishing',
-	gathering: 'Gathering',
-	farming: 'Farming',
-	bountyNote: 'Bounty notes',
-	settlementDelivery: 'Settlements',
-	stable: 'Stables',
-	contract: 'Contracts',
-	seasonalGift: 'Seasonal gifts',
-	archaeology: 'Archaeology',
-	reward: 'Rewards'
 };

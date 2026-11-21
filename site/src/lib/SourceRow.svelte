@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Source } from './site-data.js';
 	import { formatNumber, formatChanceRange } from './format.js';
-	import { formatAmount, oddsLabel, payPrice } from './acquisition.js';
+	import { chanceText, formatAmount, oddsLabel, payPrice } from './acquisition.js';
 	import EntityLink from './ui/EntityLink.svelte';
 	import Conditions from './Conditions.svelte';
 	import UnknownValue from './ui/UnknownValue.svelte';
@@ -106,10 +106,12 @@
 					></span
 				>
 			{:else if source.odds?.chance != null}
-				{formatChanceRange(
-					source.odds.chance,
-					source.odds.highestChance ?? source.odds.chance
-				)}{#if showUnit}<small>{oddsLabel(source.odds, source.kind)}</small>{/if}
+				{chanceText(
+					source.odds,
+					source.kind
+				)}{#if showUnit && chanceText(source.odds, source.kind) !== 'Always'}<small
+						>{oddsLabel(source.odds, source.kind)}</small
+					>{/if}
 			{:else if source.odds?.unknown}<UnknownValue
 					reason={source.odds.unknown}
 					id={id + '-odds'}

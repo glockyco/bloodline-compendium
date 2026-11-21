@@ -13,7 +13,7 @@
 		writeState,
 		type ListState
 	} from '#lib/list.js';
-	import { sourceNames } from '#lib/labels.js';
+	import { sourceHeadings } from '#lib/labels.js';
 	import type { ItemSummary, ListFacet, SourceKind } from '#lib/site-data.js';
 	import { formatNumber } from '#lib/format.js';
 	import SeoHead from '#lib/SeoHead.svelte';
@@ -109,7 +109,7 @@
 
 	function valueLabel(facet: ListFacet, value: string): string {
 		return (
-			facet.labels[value] ?? (facet.id === 'source' ? sourceNames[value as SourceKind] : value)
+			facet.labels[value] ?? (facet.id === 'source' ? sourceHeadings[value as SourceKind] : value)
 		);
 	}
 	function apply(next: ListState) {

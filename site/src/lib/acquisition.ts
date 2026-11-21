@@ -28,7 +28,7 @@ export function pricePhrase(amount: string, currency: Price['currency']): string
 
 const oddsLabels: Record<OddsEvent, string> = {
 	container: 'per container',
-	lootSpot: 'per loot spot',
+	lootSpot: 'per spawn point',
 	kill: 'per kill',
 	delivery: 'per delivery',
 	use: 'per use',
@@ -47,13 +47,22 @@ export function oddsLabel(odds: Odds, kind: SourceKind): string {
 	return oddsLabels[odds.event];
 }
 
+/** A source's chance as its row shows it. A placed item is there every time, which reads Always, as on the OSRS Wiki. */
+export function chanceText(odds: Odds, kind: SourceKind): string {
+	const highest = odds.highestChance ?? odds.chance!;
+	return kind === 'pickup' && odds.chance === 1 && highest === 1
+		? 'Always'
+		: formatChanceRange(odds.chance!, highest);
+}
+
 export function sourceContext(source: Source): string | null {
 	if (source.price) {
 		const amount = payPrice(source.price);
 		return amount === 0 ? 'Free' : pricePhrase(formatNumber(amount), source.price.currency);
 	}
 	if (source.odds?.chance != null) {
-		return `${formatChanceRange(source.odds.chance, source.odds.highestChance ?? source.odds.chance)} ${oddsLabel(source.odds, source.kind)}`;
+		const chance = chanceText(source.odds, source.kind);
+		return chance === 'Always' ? chance : `${chance} ${oddsLabel(source.odds, source.kind)}`;
 	}
 	return null;
 }
