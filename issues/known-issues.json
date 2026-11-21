@@ -26,8 +26,8 @@
     },
     {
       "id": "armor-slot-adds-none",
-      "title": "Rings and other accessories show armor they never add",
-      "effect": "Some amulets and support items, such as Bonecaller's Band and Pactborn Wings, show an armor value in their tooltips but add no armor when worn.",
+      "title": "Some accessories show armor they never add",
+      "effect": "Some rings, amulets, belts, wings and packs, such as Bonecaller's Band and Pactborn Wings, show an armor value in their tooltips but add no armor when worn.",
       "workaround": null,
       "steps": [
         "Equip a piece of body armor and note Armor on the character sheet.",
@@ -75,7 +75,7 @@
     {
       "id": "food-without-row",
       "title": "Some foods do nothing when eaten",
-      "effect": "Steak, Soup, Turkey Leg, Cooked Red Wrangler, Red Wrangler Sandwich and Potato Seeds are used up without any effect when eaten, although their descriptions promise healing.",
+      "effect": "Steak, Soup, Turkey Leg, Cooked Red Wrangler, Red Wrangler Sandwich and Potato Seeds are consumed without any effect, although their descriptions say they restore health.",
       "itemNotes": {
         "/Game/BloodlinesAlpha/Interactables/Steak.Steak_C": "Despite its description, Steak restores no health when eaten.",
         "/Game/BloodlinesAlpha/Interactables/Soup.Soup_C": "Despite its description, Soup restores no health when eaten.",
@@ -208,7 +208,7 @@
     },
     {
       "id": "staff-point-blank-damage",
-      "title": "Some staves deal 100 damage at point-blank range",
+      "title": "Some staves deal 100 damage at close range",
       "effect": "The projectiles of Walking Stick, Acolyte Geomancer Staff and Moonstone Staff deal 100 damage instead of 12, 20 and 35 if they hit an enemy as they leave the staff. Attacking from close range can make this happen.",
       "itemNotes": {
         "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/WalkingStick.WalkingStick_C": "Walking Stick's projectile deals 100 damage instead of 12 if it hits an enemy as it leaves the staff. Attacking from close range can make this happen.",
