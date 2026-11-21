@@ -868,8 +868,8 @@ async function captureModel(config, lab, args) {
     // The sheet creates slots only for the items in its visible area, so the inventory holds nothing but the item.
     await game(config, lab, "clear-tooltips", {});
     await game(config, lab, "give", { items: [args.item] });
-    // An open sheet does not show the item just given until it opens again. A sheet that just opened creates its
-    // slots over the next frames and fades its preview's light in, so the capture waits for both.
+    // An open sheet does not show the item just given until it opens again, and a sheet that just opened creates
+    // its slots over the next frames, so the capture waits for the item's slot.
     await game(config, lab, "open-sheet", { refresh: true });
     await waitFor(
       async () =>
@@ -877,7 +877,6 @@ async function captureModel(config, lab, args) {
       20,
       "the sheet to show the item",
     );
-    await new Promise((settled) => setTimeout(settled, 1500));
   }
   const passes = (file) => [
     join(lab.captures, `${file}-color.png`),
