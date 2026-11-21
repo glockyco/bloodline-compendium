@@ -16,6 +16,7 @@
 	import { sourceHeadings } from '#lib/labels.js';
 	import type { ItemSummary, ListFacet, SourceKind } from '#lib/site-data.js';
 	import { formatNumber } from '#lib/format.js';
+	import { neutralSale } from '#lib/rules/price.js';
 	import SeoHead from '#lib/SeoHead.svelte';
 	import EntityLink from '#lib/ui/EntityLink.svelte';
 	import { kindPath } from '#lib/entities.js';
@@ -83,7 +84,7 @@
 		{ id: 'name', label: 'Item', numeric: false },
 		...(showType ? [{ id: 'type', label: 'Type', numeric: false }] : []),
 		...columns,
-		{ id: 'value', label: 'Value', numeric: true }
+		{ id: 'value', label: 'Sells for', numeric: true }
 	]);
 	const activeCount = $derived(
 		Object.values(list.facets).reduce((sum, values) => sum + values.length, 0) +
@@ -352,8 +353,10 @@
 										data-label={cellText(item, column.id) ? column.label : undefined}
 										>{cellText(item, column.id) || 'None'}</td
 									>{/each}
-								<td class="numeric value" data-label="Value"
-									>{item.value === null ? 'Unknown' : formatNumber(item.value) + ' gold'}</td
+								<td class="numeric value" data-label="Sells for"
+									>{item.value === null
+										? 'Unknown'
+										: formatNumber(neutralSale(item.value)) + ' gold'}</td
 								>
 							</tr>{/each}</tbody
 					>

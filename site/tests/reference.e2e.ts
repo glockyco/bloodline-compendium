@@ -19,8 +19,8 @@ test('filters items with counted facets, preserves URL state and sorts numeric v
 	await expect(weapons).toBeChecked();
 	await expect(page.locator('.item-name')).toHaveText(['Lanternedge']);
 	await weapons.uncheck();
-	await page.getByRole('button', { name: 'Value', exact: true }).click();
-	await expect(page.getByRole('columnheader', { name: 'Value' })).toHaveAttribute(
+	await page.getByRole('button', { name: 'Sells for', exact: true }).click();
+	await expect(page.getByRole('columnheader', { name: 'Sells for' })).toHaveAttribute(
 		'aria-sort',
 		'descending'
 	);
@@ -631,12 +631,9 @@ test('notes a known issue on the affected item and explains it on a linked, sear
 	await expect(note.getByRole('heading', { name: 'Bugs 1' })).toBeVisible();
 	await expect(note.locator('ul.surface > li')).toHaveCount(1);
 	await expect(note.locator('li > span')).toHaveText(
-		'The Mosswoven Coat adds no armor when worn, although its tooltip shows armor.'
+		'Wearing the Mosswoven Coat adds no armor, although the tooltip shows ARMOR: 8.'
 	);
-	await expect(note.locator('li > small')).toHaveText([
-		"The game's tooltip shows Armor 8",
-		'Read about this issue'
-	]);
+	await expect(note.locator('li > small')).toHaveText(['Read about this issue']);
 	const card = page.getByRole('complementary', { name: 'Game card' });
 	await expect(card.locator('#bugs')).toHaveCount(0);
 	await expect(page.locator('article section').last()).toHaveAttribute('aria-labelledby', 'bugs');

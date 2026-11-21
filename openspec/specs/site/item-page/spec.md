@@ -52,24 +52,24 @@ Detailed sources SHALL be grouped by how they are obtained, then by place where 
 - **THEN** the containers are grouped by place and each shows its chance per container
 
 ### Requirement: Applied and displayed values
-Where the game's tooltip shows another value than the game applies, the game card SHALL show the applied value and the page's Bugs section SHALL state the value the tooltip shows. The side column and link previews SHALL show only applied values.
+Where the game's tooltip shows another value than the game applies, the game card SHALL show the applied value and the page's Bugs section SHALL name the tooltip's value as the game prints it, as the contrast to the applied one. The side column and link previews SHALL show only applied values.
 
 #### Scenario: Leather Pants
 - **WHEN** a reader opens Leather Pants
-- **THEN** the game card shows Armor 0
-- **AND** the Bugs section says that the game's tooltip shows Armor 4, with a link to the known issue
+- **THEN** the game card shows ARMOR: 0
+- **AND** the Bugs section reads "Wearing Leather Pants adds no armor, although the tooltip shows ARMOR: 4.", with a link to the known issue
 
 ### Requirement: Bugs section
-An item with a known game issue or a tooltip difference SHALL end with a Bugs section whose rows look like the page's other lists. A known issue SHALL take one row with its sentence about this item, the tooltip values it explains and a link to its entry on Known Issues, without the issue's title or its list of affected items. A tooltip difference that no known issue explains SHALL take a row of its own.
+An item with a known game issue or a tooltip difference SHALL end with a Bugs section whose rows look like the page's other lists. A known issue SHALL take one row with its sentence about this item, ending with the tooltip values it explains, and a link to its entry on Known Issues, without the issue's title or its list of affected items. A tooltip difference that no known issue explains SHALL take a row of its own that names the tooltip's value and the applied one.
 
 #### Scenario: Walking Stick
 - **WHEN** a reader opens Walking Stick
 - **THEN** one row says that its projectile deals 100 damage instead of 12 if it hits an enemy as it leaves the staff, and links the point-blank entry without naming the other staves
-- **AND** another row says that the game's tooltip shows Damage 2
+- **AND** another row says that Walking Stick deals 12 damage per hit, although the tooltip shows Damage: 2
 
 #### Scenario: Velosian Plume-helm
 - **WHEN** a reader opens Velosian Plume-helm
-- **THEN** one row says that wearing it adds no armor and that the game's tooltip shows Armor 9 and Type Medium, with a link to the known issue
+- **THEN** one row says that wearing it adds no armor, although the tooltip shows ARMOR: 9 and Type: Medium, with a link to the known issue
 
 ### Requirement: Status without a known source
 An item without a known source SHALL state its status, either that it cannot be obtained in normal play or that it has no known source and may come from a quest or event, and SHALL still show its uses and facts.
@@ -140,12 +140,12 @@ Version labels SHALL use the first distinction that gives every version a distin
 - **THEN** armor type reads as "Medium Armor" or "Unarmored", speed as "Standard Speed", and contributions as "+24 Damage" or "+0.2 Speed"
 
 ### Requirement: Source and value labels
-Source labels SHALL identify the pickup place, seller, container, random loot, giver, bounty or smithing recipe, using source names when source kinds tie. An absent source SHALL read "No known source". Value SHALL read as "Worth 950 gold".
+Source labels SHALL identify the pickup place, seller, container, random loot, giver, bounty or smithing recipe, using source names when source kinds tie. An absent source SHALL read "No known source". Value SHALL read as what a merchant pays at neutral respect, such as "Sells for 95 gold", the term Details and the item list use.
 
 #### Scenario: Source and value distinctions
 - **WHEN** Incriminating Evidence differs by its source and Heavy Iron Cuirass differs only by value
 - **THEN** the evidence tabs read "Picked up in Woodhurst" and "No known source"
-- **AND** the cuirass tabs read "Worth 950 gold" and "Worth 750 gold"
+- **AND** the cuirass tabs read "Sells for 95 gold" and "Sells for 75 gold"
 
 ### Requirement: A heading keeps its count
 A wrapping section heading SHALL keep its count badge beside its last word rather than at the far edge of the row.

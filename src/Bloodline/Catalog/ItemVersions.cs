@@ -1,3 +1,4 @@
+using System.Globalization;
 using Bloodline.Output;
 using Bloodline.SiteData;
 
@@ -154,9 +155,10 @@ internal static class ItemVersions
             return labels;
         labels = versions
             .Select(item =>
-                item.Facts.FirstOrDefault(fact => fact.Stat == Stat.Value) is { } fact
-                && StatVocabulary.Display(fact) is { } value
-                    ? $"Worth {value} gold"
+                item.Facts.FirstOrDefault(fact => fact.Stat == Stat.Value)?.Number is { } value
+                    ? "Sells for "
+                        + NeutralSalePrice(value).ToString("N0", CultureInfo.InvariantCulture)
+                        + " gold"
                     : null
             )
             .ToArray();
@@ -166,6 +168,14 @@ internal static class ItemVersions
             $"Item {versions[0].Name} has distinguishable versions without unique version labels."
         );
     }
+
+    /// <summary>
+    /// What a merchant pays at neutral respect, as Window_Trading_Shop:GetSellValueWithMultiplier computes it in
+    /// 32-bit floats with the multiplier 1.4: the base value times 1.5 minus the multiplier, truncated, and at least 1.
+    /// The site's sell-price rule computes the same amount for Details.
+    /// </summary>
+    private static int NeutralSalePrice(double value) =>
+        Math.Max((int)MathF.Truncate((float)value * (1.5f - 1.4f)), 1);
 
     private static string? StatLabel(Fact? fact)
     {

@@ -105,3 +105,9 @@ export const sellPrice: Rule<{ value: number; multiplier: number }, number> = {
 		};
 	}
 };
+
+/** What a merchant pays at neutral respect, the amount the site names "Sells for". */
+export function neutralSale(value: number): number {
+	const sale = sellPrice.evaluate({ value, multiplier: neutralMultiplier });
+	return sale.known ? sale.value : value;
+}

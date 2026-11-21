@@ -276,7 +276,7 @@ public sealed class ItemVersionsTests
     public void ValueIsLastAndUnlabelledDistinctVersionsFailTheCatalog()
     {
         Assert.Equal(
-            ["Worth 950 gold", "Worth 750 gold"],
+            ["Sells for 95 gold", "Sells for 75 gold"],
             ItemVersions
                 .Group([
                     Item("A", StatVocabulary.Number(Stat.Value, 950)),

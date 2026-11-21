@@ -361,18 +361,12 @@
 									>{#each row.sentence.split(item.name) as part, index (index)}{#if index}<span
 												data-game>{item.name}</span
 											>{/if}{part}{/each}</span
-								>{#each row.differences as difference (difference.label)}<small
-										>The game's tooltip shows {difference.label}
-										{difference.value}</small
-									>{/each}<small
+								><small
 									><!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- the resolved issue page with its section. -->
 									<a href={resolve('known-issues/') + '#' + row.issue}>Read about this issue</a
 									></small
 								>
-							{:else}<span
-									>The game's tooltip shows {row.fact.tooltipLabel ?? row.fact.label}
-									{row.fact.gameShows}</span
-								>{#if row.fact.gameShowsIssue}<small
+							{:else}<span>{row.sentence}</span>{#if row.fact.gameShowsIssue}<small
 										><!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- the resolved issue page with its section. -->
 										<a href={resolve('known-issues/') + '#' + row.fact.gameShowsIssue}
 											>Read about this issue</a
