@@ -64,7 +64,11 @@ internal static class CatalogCommand
                 var commit = Git("rev-parse", "HEAD").Trim();
                 var dirty = Git("status", "--porcelain").Length != 0;
                 var timer = Stopwatch.StartNew();
-                var catalog = CatalogBuilder.Build(records, iconsDirectory: layout.IconsDirectory);
+                var catalog = CatalogBuilder.Build(
+                    records,
+                    iconsDirectory: layout.IconsDirectory,
+                    renders: RenderIndex.Load(layout.RendersDirectory)
+                );
                 var provenance = new SiteBuild(
                     records.Build.AppId,
                     records.Build.BuildId,

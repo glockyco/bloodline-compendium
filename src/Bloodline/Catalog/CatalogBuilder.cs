@@ -26,7 +26,8 @@ internal static class CatalogBuilder
         CatalogRecords records,
         IReadOnlyList<Exclusion>? exclusions = null,
         IReadOnlyList<ISourceMechanism>? mechanisms = null,
-        string? iconsDirectory = null
+        string? iconsDirectory = null,
+        IReadOnlyDictionary<string, IReadOnlyList<ItemRender>>? renders = null
     )
     {
         exclusions ??= Exclusions.Reviewed;
@@ -118,6 +119,7 @@ internal static class CatalogBuilder
             item = item with
             {
                 Icon = icon,
+                Renders = renders?.GetValueOrDefault(item.Key) ?? [],
                 Sources = sources,
                 Status =
                     sources.Count > 0 && confirmedSources == 0

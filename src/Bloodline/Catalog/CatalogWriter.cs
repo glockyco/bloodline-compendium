@@ -23,6 +23,7 @@ internal static class CatalogWriter
             CanonicalJson.Write(Path.Combine(staging, "issues.json"), catalog.Issues);
             Directory.CreateDirectory(Path.Combine(staging, "items"));
             Directory.CreateDirectory(Path.Combine(staging, "icons"));
+            Directory.CreateDirectory(Path.Combine(staging, "renders"));
             foreach (var item in ItemVersions.Pages(catalog.Items, catalog.Index.Categories))
             {
                 CanonicalJson.Write(Path.Combine(staging, "items", item.Slug + ".json"), item);
@@ -37,6 +38,18 @@ internal static class CatalogWriter
                 File.Copy(
                     Path.Combine(layout.IconsDirectory, icon + ".png"),
                     Path.Combine(staging, "icons", icon + ".png")
+                );
+            }
+            foreach (
+                var render in catalog
+                    .Items.SelectMany(item => item.Renders)
+                    .Select(render => render.Hash)
+                    .Distinct(StringComparer.Ordinal)
+            )
+            {
+                File.Copy(
+                    Path.Combine(layout.RendersDirectory, render + ".webp"),
+                    Path.Combine(staging, "renders", render + ".webp")
                 );
             }
             if (Directory.Exists(layout.SiteDirectory))

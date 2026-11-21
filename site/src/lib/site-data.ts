@@ -114,6 +114,11 @@ export type Stat =
   | "heatedEffect";
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "RenderBody".
+ */
+export type RenderBody = "male" | "female";
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "ItemStatus".
  */
 export type ItemStatus = "obtainable" | "noKnownSource" | "notInNormalPlay";
@@ -429,6 +434,7 @@ export interface ItemPage {
   onHitEffects?: OnHitEffect[] | null;
   projectileGroups?: ProjectileGroup[] | null;
   relations: EntityRelation[];
+  renders: ItemRender[];
   slug: string;
   sources: Source[];
   status: ItemStatus;
@@ -511,6 +517,17 @@ export interface ProjectileGroup {
   count: number;
   headHitDamage: number | null;
   projectile: string;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "ItemRender".
+ */
+export interface ItemRender {
+  body: RenderBody;
+  hash: string;
+  height: number;
+  width: number;
   [k: string]: unknown;
 }
 /**

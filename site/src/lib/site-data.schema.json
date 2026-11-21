@@ -545,6 +545,12 @@
           },
           "type": "array"
         },
+        "renders": {
+          "items": {
+            "$ref": "#/$defs/ItemRender"
+          },
+          "type": "array"
+        },
         "slug": {
           "type": "string"
         },
@@ -606,9 +612,34 @@
         "versions",
         "uses",
         "notes",
-        "status"
+        "status",
+        "renders"
       ],
       "title": "ItemPage",
+      "type": "object"
+    },
+    "ItemRender": {
+      "properties": {
+        "body": {
+          "$ref": "#/$defs/RenderBody"
+        },
+        "hash": {
+          "type": "string"
+        },
+        "height": {
+          "type": "integer"
+        },
+        "width": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "body",
+        "hash",
+        "width",
+        "height"
+      ],
+      "title": "ItemRender",
       "type": "object"
     },
     "ItemStatus": {
@@ -1311,6 +1342,13 @@
       ],
       "title": "RelationRow",
       "type": "object"
+    },
+    "RenderBody": {
+      "enum": [
+        "male",
+        "female"
+      ],
+      "title": "RenderBody"
     },
     "ReportStatus": {
       "enum": [

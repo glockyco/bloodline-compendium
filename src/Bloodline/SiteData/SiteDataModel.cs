@@ -253,6 +253,10 @@ internal sealed record ItemPage(
 
     [JsonRequired]
     public ItemStatus Status { get; init; } = ItemStatus.Obtainable;
+
+    /// <summary>The item's model renders, one per body the game draws it on, in <c>renders/</c>.</summary>
+    [JsonRequired]
+    public IReadOnlyList<ItemRender> Renders { get; init; } = [];
 }
 
 internal sealed record ProjectileGroup(
@@ -498,6 +502,19 @@ internal enum ItemStatus
     Obtainable,
     NoKnownSource,
     NotInNormalPlay,
+}
+
+/// <summary>
+/// A model render of an item on one body: <c>renders/&lt;Hash&gt;.webp</c>, with its size in pixels, so a page can
+/// reserve its space before it loads.
+/// </summary>
+internal sealed record ItemRender(RenderBody Body, string Hash, int Width, int Height);
+
+/// <summary>The body a render shows an item on. Only armor that dresses the body differs between them.</summary>
+internal enum RenderBody
+{
+    Male,
+    Female,
 }
 
 internal enum PriceRule

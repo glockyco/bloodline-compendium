@@ -949,5 +949,13 @@
 		}
 	],
 	"notes": [],
-	"status": "obtainable"
+	"status": "obtainable",
+	"renders": [
+		{
+			"body": "male",
+			"hash": "e63ab07e5b00300d6a000df2f6d7102b180c78adda508a04e3cf068b0f8dc64f",
+			"width": 160,
+			"height": 480
+		}
+	]
 }

@@ -85,7 +85,9 @@
 			"notes": [],
 			"projectileGroups": null,
 			"onHitEffects": null,
-			"versions": []
+			"versions": [],
+			"renders": []
 		}
-	]
+	],
+	"renders": []
 }

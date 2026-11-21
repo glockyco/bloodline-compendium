@@ -85,6 +85,9 @@ internal sealed class RecordLayout(string outputDirectory, long buildId)
 
     public string IconsDirectory => System.IO.Path.Combine(RecordsDirectory, "icons");
 
+    /// <summary>The checked model renders that <c>tools/runtime/publish-renders.mjs</c> writes, with their index.</summary>
+    public string RendersDirectory => System.IO.Path.Combine(BuildDirectory, "renders");
+
     public string CodeIndexFile => System.IO.Path.Combine(RecordsDirectory, "code", "index.json");
 
     public string ClaimsFile => System.IO.Path.Combine(BuildDirectory, "item-claims.json");

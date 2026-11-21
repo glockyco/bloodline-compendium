@@ -145,5 +145,6 @@
 		}
 	],
 	"notes": [],
-	"status": "obtainable"
+	"status": "obtainable",
+	"renders": []
 }

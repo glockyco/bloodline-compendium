@@ -95,5 +95,19 @@
 			"issue": "invented-coat-armor"
 		}
 	],
-	"status": "obtainable"
+	"status": "obtainable",
+	"renders": [
+		{
+			"body": "male",
+			"hash": "ba7f02da037ef8ec4b074c9d653f39758076a0c8bb7feac786d057ea36cc5ba6",
+			"width": 400,
+			"height": 480
+		},
+		{
+			"body": "female",
+			"hash": "3756ad1b565952dfbcf5c201f8ec60917bd527369e915a548d702da38fa40069",
+			"width": 400,
+			"height": 480
+		}
+	]
 }
