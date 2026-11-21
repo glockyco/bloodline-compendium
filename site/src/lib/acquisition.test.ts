@@ -2,6 +2,7 @@ import { expect, it } from 'vitest';
 import {
 	formatAmount,
 	firstRoute,
+	pluralName,
 	sortSources,
 	sourceContext,
 	summaryConditions,
@@ -100,17 +101,17 @@ it('omits unconfirmed routes from previews and search descriptions', () => {
 	const confirmed = { ...container, unconfirmed: false };
 	expect(firstRoute([unconfirmed], ['dialogue'])).toBeNull();
 	expect(firstRoute([unconfirmed, confirmed], ['dialogue', 'containerLoot'])).toBe(
-		'Found in Stargazer cache in Glass Reach, 50.8% to 86.6% per container'
+		'Found in a Stargazer cache in Glass Reach, 50.8% to 86.6% per container'
 	);
 	expect(
 		firstRoute(
 			[{ ...unconfirmed, kind: 'containerLoot', name: 'Unused cache' }, confirmed],
 			['containerLoot']
 		)
-	).toBe('Found in Stargazer cache in Glass Reach, 50.8% to 86.6% per container');
+	).toBe('Found in a Stargazer cache in Glass Reach, 50.8% to 86.6% per container');
 });
 
-it('describes loose loot as found on the ground with its known place and odds', () => {
+it('describes a pickup by its place and odds, and a placed item as always there', () => {
 	const pickup = {
 		...container,
 		kind: 'pickup' as const,
@@ -118,10 +119,40 @@ it('describes loose loot as found on the ground with its known place and odds', 
 		odds: { ...container.odds!, event: 'lootSpot' as const }
 	};
 	expect(firstRoute([pickup], ['pickup'])).toBe(
-		'Found on the ground in Glass Reach, 50.8% to 86.6% per spawn point'
+		'Picked up in Glass Reach, 50.8% to 86.6% per spawn point'
 	);
 	const placed = { ...pickup, odds: { ...pickup.odds, chance: 1, highestChance: null } };
 	expect(sourceContext(placed)).toBe('Always');
+});
+
+it('names givers as a sentence does: containers with an article, creatures in the plural, roles with the', () => {
+	const creature = {
+		...container,
+		kind: 'enemyDrop' as const,
+		name: 'Hill Troll',
+		unconfirmed: false
+	};
+	const highwayman = { ...creature, name: 'Highwayman Archer' };
+	const shop = {
+		...container,
+		kind: 'shop' as const,
+		name: 'Shopkeeper',
+		odds: null,
+		unconfirmed: false
+	};
+	const building = { ...shop, name: 'Armorer', settlement: true, places: [] };
+	const lost = { ...container, name: 'Chest', places: [], unconfirmed: false };
+	expect(firstRoute([creature], ['enemyDrop'])).toMatch(/^Dropped by Hill Trolls in Glass Reach/);
+	expect(firstRoute([highwayman], ['enemyDrop'])).toMatch(/^Dropped by Highwayman Archers/);
+	expect(firstRoute([shop], ['shop'], new Set(['Shopkeeper']))).toBe(
+		'Sold by the Shopkeeper in Glass Reach'
+	);
+	expect(firstRoute([shop], ['shop'])).toBe('Sold by Shopkeeper in Glass Reach');
+	expect(firstRoute([building], ['shop'])).toBe("Sold by your settlement's Armorer");
+	expect(firstRoute([lost], ['containerLoot'])).toMatch(/^Found in a Chest, location unknown/);
+	expect(pluralName('Spirit of the Forest')).toBe('Spirits of the Forest');
+	expect(pluralName('Fairy')).toBe('Fairies');
+	expect(pluralName('Deer')).toBe('Deer');
 });
 
 it('counts an item currency instead of pluralizing its name', () => {

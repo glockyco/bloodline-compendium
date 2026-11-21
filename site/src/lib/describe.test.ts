@@ -144,5 +144,5 @@ it('gives a first name that shares its place with the next one that place', () =
 	});
 	expect(
 		describeItem(item('Bandit Knife', 'Material', 'Material'), [crate('Chest'), crate('Crate')])
-	).toBe('Bandit Knife is a material in The Bloodline. Found in Chest in Wolfden Priory.');
+	).toBe('Bandit Knife is a material in The Bloodline. Found in a Chest in Wolfden Priory.');
 });

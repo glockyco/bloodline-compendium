@@ -216,7 +216,7 @@ test('keeps unconfirmed sources at the end without advertising a way to get the 
 		);
 		await expect(page.locator('meta[name="description"]')).not.toHaveAttribute(
 			'content',
-			/Silent Curator|Unplaced prism|Found on the ground/
+			/Silent Curator|Unplaced prism|Picked up/
 		);
 	}
 	await page.goto('/items/?name=prism');

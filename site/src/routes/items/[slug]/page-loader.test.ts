@@ -1,6 +1,12 @@
 import { expect, it, vi } from 'vitest';
 import { entries, load } from './+page.server.js';
-import { readGraph, readIndex, readItem, readKinds } from '#lib/server/data.js';
+import {
+	readGraph,
+	readIndex,
+	readItem,
+	readKinds,
+	readSharedMerchantNames
+} from '#lib/server/data.js';
 import fixture from '../../../../fixtures/site-data/items/lanternedge.json';
 import registry from '../../../../fixtures/site-data/kinds.json';
 import type { EntityGraph, EntityKindDefinition, ItemIndex, ItemPage } from '#lib/site-data.js';
@@ -9,7 +15,8 @@ vi.mock('#lib/server/data.js', () => ({
 	readGraph: vi.fn(),
 	readIndex: vi.fn(),
 	readItem: vi.fn(),
-	readKinds: vi.fn()
+	readKinds: vi.fn(),
+	readSharedMerchantNames: vi.fn()
 }));
 
 it('prerenders one page per plain slug even when distinct graph items share it', async () => {
@@ -33,6 +40,7 @@ it('loads every grouped version for SSR without repeating graph relations', asyn
 	const grouped = { ...root, versions: [second] };
 	vi.mocked(readIndex).mockResolvedValue({ items: [root, second] } as unknown as ItemIndex);
 	vi.mocked(readItem).mockResolvedValue(grouped);
+	vi.mocked(readSharedMerchantNames).mockResolvedValue([]);
 	const data = await load({ params: { slug: root.slug } });
 	expect(readItem).toHaveBeenCalledWith(root.slug);
 	expect(data.item.versionId).toBe('bladea');

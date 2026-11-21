@@ -26,3 +26,13 @@ export const readItem = (slug: string) => json<ItemPage>('items/' + slug + '.jso
 export const readKinds = () => json<EntityKindDefinition[]>('kinds.json');
 export const readGraph = () => json<EntityGraph>('graph.json');
 export const readIssues = () => json<PublishedIssue[]>('issues.json');
+/**
+ * The merchant names that several merchants share, such as Shopkeeper. Such a name is a role, which a sentence
+ * writes with "the", while a person's name stands alone.
+ */
+export async function readSharedMerchantNames(): Promise<string[]> {
+	const counts = new Map<string, number>();
+	for (const { entity } of (await readGraph()).entities)
+		if (entity.kind === 'merchant') counts.set(entity.name, (counts.get(entity.name) ?? 0) + 1);
+	return [...counts].filter(([, count]) => count > 1).map(([name]) => name);
+}

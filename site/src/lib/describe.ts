@@ -1,4 +1,4 @@
-import { sortSources, summarize, summaryContext } from './acquisition.js';
+import { entryText, sortSources, summarize, summaryContext } from './acquisition.js';
 import { formatNumber } from './format.js';
 import { sourceHeadings } from './labels.js';
 import type { ItemPage, ItemStatus, Source, SourceKind } from './site-data.js';
@@ -97,34 +97,45 @@ function statSentence(
 }
 
 /** The first way the page lists, as its summary line names it, with the first seller's price. */
-function firstWay(sources: Source[]): string | null {
+function firstWay(sources: Source[], shared: ReadonlySet<string>): string | null {
 	for (const kind of Object.keys(sourceHeadings) as SourceKind[]) {
 		const group = sortSources(sources.filter((source) => source.kind === kind));
 		if (!group.length) continue;
-		const summary = summarize(kind, group);
+		const summary = summarize(kind, group, shared);
 		const [entry] = summary.entries;
-		// A name without a place shares the place of the name after it.
-		const place = entry?.place ?? summary.entries.find((other) => other.place)?.place;
+		// Names joined by "and" share one place, which the last of them carries.
+		const later =
+			summary.joiner === ' and '
+				? summary.entries.find((other) => other.place || other.unknown)
+				: null;
 		const where = entry
-			? place
-				? `${entry.name} in ${place}`
-				: entry.name
+			? entryText({
+					name: entry.name,
+					place: entry.place ?? later?.place ?? null,
+					unknown: entry.unknown || (!entry.place && later?.unknown)
+				})
 			: summary.places.join(' and ');
 		const price = group[0].price ? summaryContext([group[0]]) : null;
-		return `${summary.verb} ${where}${price ? ` for ${price === 'Free' ? 'free' : price}` : ''}.`;
+		return `${summary.verb} ${where}${price ? ` for ${price === 'Free' ? 'free' : price}` : ''}.`
+			.replace(' ,', ',')
+			.replace('  ', ' ');
 	}
 	return null;
 }
 
 /**
  * The description search engines and chat apps show for an item: what it is, its damage or armor, and the first way
- * to get it, as wiki descriptions open.
+ * to get it, as wiki descriptions open. `shared` holds the merchant names that several merchants share.
  */
-export function describeItem(item: ItemPage, confirmedSources: Source[]): string {
+export function describeItem(
+	item: ItemPage,
+	confirmedSources: Source[],
+	shared: ReadonlySet<string> = new Set()
+): string {
 	return [
 		`${item.name} ${isPlural(item.name) ? 'are' : 'is'} ${typePhrase(item)} in The Bloodline.`,
 		statSentence(item),
-		firstWay(confirmedSources) ?? statusSentence[item.status]
+		firstWay(confirmedSources, shared) ?? statusSentence[item.status]
 	]
 		.filter(Boolean)
 		.join(' ');

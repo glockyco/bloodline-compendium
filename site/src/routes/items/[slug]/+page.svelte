@@ -20,7 +20,8 @@
 	const description = $derived(
 		describeItem(
 			item,
-			item.sources.filter((source) => !source.unconfirmed)
+			item.sources.filter((source) => !source.unconfirmed),
+			new Set(data.sharedMerchantNames)
 		)
 	);
 	const showType = $derived(

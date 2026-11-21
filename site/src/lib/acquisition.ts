@@ -99,25 +99,25 @@ export const useHeadings: Partial<Record<SourceKind, string>> = {
 };
 
 /**
- * The words a first-screen summary leads with for each way of getting an item. They follow the headings of the
- * sections the summary links to, so "Dropped by" names a creature and "Found in" a container.
+ * The words a sentence leads with for each way of getting an item: the section heading's words in sentence case,
+ * so "Made by smithing" stands for the heading "Made by Smithing" and "Dropped by" names a creature.
  */
 export const sourceVerbs: Record<SourceKind, string> = {
 	shop: 'Sold by',
 	currencyShop: 'Sold by',
 	stable: 'Sold by',
-	smithing: 'Smithed',
+	smithing: 'Made by smithing',
 	crafting: 'Crafted',
 	cooking: 'Cooked',
 	containerLoot: 'Found in',
 	randomLoot: 'Found in',
 	enemyDrop: 'Dropped by',
-	pickup: 'Found on the ground in',
-	dialogue: 'Given by',
-	fishing: 'Caught by',
+	pickup: 'Picked up in',
+	dialogue: 'Given in dialogue by',
+	fishing: 'Fished in',
 	gathering: 'Gathered from',
 	farming: 'Grown from',
-	bountyNote: 'Received when accepting the quest',
+	bountyNote: 'Obtained when you accept the quest',
 	settlementDelivery: 'Delivered by',
 	contract: 'Given by',
 	seasonalGift: 'Given by',
@@ -128,10 +128,58 @@ export const sourceVerbs: Record<SourceKind, string> = {
 /** The ways of getting an item that a recipe line shows in full instead of a source table. */
 export const recipeKinds: ReadonlySet<SourceKind> = new Set(['smithing', 'crafting', 'cooking']);
 
-/** A name in a summary line with the place it stands in, or with no place when the next entry shares it. */
+/**
+ * A name in a summary line with the place it stands in. A null place shares the next entry's place, or none when
+ * `unknown` says that no place is known.
+ */
 export interface SummaryEntry {
 	name: string;
 	place: string | null;
+	unknown?: boolean;
+}
+
+const irregularPlurals: Record<string, string> = {
+	Deer: 'Deer',
+	Sheep: 'Sheep',
+	Fish: 'Fish',
+	Elf: 'Elves',
+	Wolf: 'Wolves',
+	Dwarf: 'Dwarves',
+	Mouse: 'Mice',
+	Goose: 'Geese'
+};
+
+/** The plural of a creature's name, made on its head noun, such as Goblin Brutes and Spirits of the Forest. */
+export function pluralName(name: string): string {
+	const [head, ...rest] = name.split(' of ');
+	const words = head.split(' ');
+	const last = words.pop()!;
+	const plural =
+		irregularPlurals[last] ??
+		(/man$/.test(last)
+			? last.replace(/man$/, 'men')
+			: /[^aeiou]y$/.test(last)
+				? last.slice(0, -1) + 'ies'
+				: /(s|x|z|ch|sh)$/.test(last)
+					? last + 'es'
+					: last + 's');
+	return [[...words, plural].join(' '), ...rest].join(' of ');
+}
+
+/**
+ * How a sentence names what gives the item. A person's name stands as it is. A container takes an article and a
+ * creature the plural, as wikis write "dropped by goblins", unless its name is one creature's, such as The Copper
+ * King. A settlement building is yours, and a merchant whose name several merchants share, such as Shopkeeper, is a
+ * role and takes "the".
+ */
+export function giverPhrase(source: Source, shared: ReadonlySet<string> = new Set()): string {
+	if (source.kind === 'containerLoot')
+		return (/^[aeiou]/i.test(source.name) ? 'an ' : 'a ') + source.name;
+	if (source.kind === 'enemyDrop')
+		return source.name.startsWith('The ') ? source.name : pluralName(source.name);
+	if (source.settlement) return `your settlement's ${source.name}`;
+	if (shared.has(source.name)) return `the ${source.name}`;
+	return source.name;
 }
 
 /** One line of the first-screen summary for the sources of one kind. */
@@ -206,53 +254,90 @@ export function summaryConditions(sources: Source[]): string[] {
 	return [...new Set(shared)];
 }
 
+/** Where a source stands. A settlement building's phrase already says it is yours, so it names no place. */
 function placeName(source: Source): string | null {
-	return source.places[0]?.name ?? (source.settlement ? 'your settlement' : null);
+	return source.settlement ? null : (source.places[0]?.name ?? null);
 }
 
+/** The ways that stand somewhere in the world, so a missing place is worth saying, unlike a recipe or a seed. */
+const placedKinds: ReadonlySet<SourceKind> = new Set([
+	'shop',
+	'currencyShop',
+	'stable',
+	'containerLoot',
+	'enemyDrop',
+	'dialogue',
+	'gathering'
+]);
+
 /**
- * The first two names, each with the place it stands in. Names that share one place name it once, and a name whose
- * place is unknown beside a located one says so. One name in several places names two of them.
+ * The first two givers, each with the place it stands in. Givers that share one place name it once, and a giver
+ * whose place is unknown says so. One giver in several places names two of them.
  */
-function pairedEntries(sources: Source[]): {
+function pairedEntries(
+	kind: SourceKind,
+	sources: Source[],
+	shared: ReadonlySet<string>
+): {
 	entries: SummaryEntry[];
 	joiner: ', ' | ' and ';
 	more: number;
 } {
-	const names = [...new Set(sources.map((source) => source.name))];
+	// A settlement building and a merchant of the same name elsewhere are different givers, so phrases group them.
+	const phrases = sources.map((source) => giverPhrase(source, shared));
+	const names = [...new Set(phrases)];
+	const of = (name: string) => sources.filter((_, index) => phrases[index] === name);
+	const unknown = (group: Source[]) =>
+		placedKinds.has(kind) && group.every((source) => !source.settlement && !source.places.length);
 	if (names.length === 1) {
 		const places = [
 			...new Set(sources.map(placeName).filter((place): place is string => place !== null))
 		];
 		return {
-			entries: [{ name: names[0], place: places.length ? places.slice(0, 2).join(' and ') : null }],
+			entries: [
+				{
+					name: names[0],
+					place: places.length ? places.slice(0, 2).join(' and ') : null,
+					unknown: unknown(sources)
+				}
+			],
 			joiner: ', ',
 			more: 0
 		};
 	}
-	const shown = names.slice(0, 2).map((name) => ({
-		name,
-		place: placeName(sources.find((source) => source.name === name)!)
-	}));
+	const shown = names.slice(0, 2).map((name) => {
+		const group = of(name);
+		return { name, place: placeName(group[0]), unknown: unknown(group) };
+	});
 	const more = names.length - shown.length;
-	if (shown.every((entry) => entry.place === shown[0].place)) {
+	if (
+		shown.every((entry) => entry.place === shown[0].place && entry.unknown === shown[0].unknown)
+	) {
 		return {
 			entries: shown.map((entry, index) => ({
 				name: entry.name,
-				place: index === shown.length - 1 ? entry.place : null
+				place: index === shown.length - 1 ? entry.place : null,
+				unknown: index === shown.length - 1 && entry.unknown
 			})),
 			joiner: ' and ',
 			more
 		};
 	}
-	return {
-		entries: shown.map((entry) => ({ name: entry.name, place: entry.place ?? 'an unknown place' })),
-		joiner: ', ',
-		more
-	};
+	return { entries: shown, joiner: ', ', more };
 }
 
-export function summarize(kind: SourceKind, sources: Source[]): SourceSummary {
+/** The places of sources a summary names by place alone, such as pickups and fishing spots. */
+function placesOf(sources: Source[]): string[] {
+	return [
+		...new Set(sources.flatMap((source) => (source.places.length ? [source.places[0].name] : [])))
+	].slice(0, 2);
+}
+
+export function summarize(
+	kind: SourceKind,
+	sources: Source[],
+	shared: ReadonlySet<string> = new Set()
+): SourceSummary {
 	const first = sources[0];
 	const recipe = recipeKinds.has(kind) ? first.recipe : null;
 	const base = {
@@ -279,28 +364,30 @@ export function summarize(kind: SourceKind, sources: Source[]): SourceSummary {
 			places: []
 		};
 	}
-	if (kind === 'pickup') {
-		// An item lying in a place no source records still says that the place is unknown.
-		const places = [
-			...new Set(sources.flatMap((source) => (source.places.length ? [source.places[0].name] : [])))
-		].slice(0, 2);
+	if (kind === 'pickup' || kind === 'fishing') {
+		// A pickup or a fishing spot is its place, so the line names places alone, and says when none is known.
+		const places = placesOf(sources);
 		return {
 			...base,
-			verb: sourceVerbs[kind],
-			entries: [],
+			verb: places.length ? sourceVerbs[kind] : sourceVerbs[kind].replace(/ in$/, ''),
+			entries: places.length ? [] : [{ name: '', place: null, unknown: true }],
 			joiner: ', ',
 			more: 0,
-			places: places.length ? places : ['an unknown place']
+			places
 		};
 	}
-	return { ...base, verb: sourceVerbs[kind], ...pairedEntries(sources), places: [] };
+	return { ...base, verb: sourceVerbs[kind], ...pairedEntries(kind, sources, shared), places: [] };
+}
+
+/** An entry as a sentence writes it, with its place or that the place is unknown. */
+export function entryText(entry: SummaryEntry): string {
+	if (entry.place) return `${entry.name} in ${entry.place}`;
+	return entry.unknown ? `${entry.name}, location unknown` : entry.name;
 }
 
 /** A summary line as plain text, for previews and search descriptions. */
 export function summaryText(summary: SourceSummary): string {
-	const entries = summary.entries.map((entry) =>
-		entry.place ? `${entry.name} in ${entry.place}` : entry.name
-	);
+	const entries = summary.entries.map(entryText);
 	const line = [
 		summary.verb,
 		entries.join(summary.joiner) +
@@ -310,17 +397,22 @@ export function summaryText(summary: SourceSummary): string {
 		summary.places.join(' and ')
 	]
 		.filter(Boolean)
-		.join(' ');
+		.join(' ')
+		.replace(' ,', ',');
 	return [line, summary.context].filter(Boolean).join(', ');
 }
 
 /** The first way to get an item as one sentence, for previews, or null when no way is known. */
-export function firstRoute(sources: Source[], order: SourceKind[]): string | null {
+export function firstRoute(
+	sources: Source[],
+	order: SourceKind[],
+	shared: ReadonlySet<string> = new Set()
+): string | null {
 	for (const kind of order) {
 		const group = sortSources(
 			sources.filter((source) => !source.unconfirmed && source.kind === kind)
 		);
-		if (group.length) return summaryText(summarize(kind, group));
+		if (group.length) return summaryText(summarize(kind, group, shared));
 	}
 	return null;
 }
