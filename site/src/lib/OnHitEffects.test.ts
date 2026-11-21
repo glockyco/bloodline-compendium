@@ -81,7 +81,7 @@ it('uses the aimed-shot condition for each Holy Noose effect', () => {
 	expect(body).not.toContain('Every hit');
 });
 
-it('preserves unknown amounts and durations without displaying null', () => {
+it('preserves unknown amounts without displaying null and burns ground without an unmeasured duration', () => {
 	const body = text(
 		render(OnHitEffects, {
 			props: {
@@ -92,7 +92,8 @@ it('preserves unknown amounts and durations without displaying null', () => {
 			}
 		}).body
 	);
-	expect(body.match(/Unknown/g)).toHaveLength(2);
+	expect(body.match(/Unknown/g)).toHaveLength(1);
+	expect(body).toContain('Sets the ground under the enemy on fire.');
 	expect(body).not.toContain('null');
 	expect(body).not.toContain('undefined');
 });

@@ -115,7 +115,7 @@ public sealed class OnHitFactsTests
         );
         Assert.Equal("Burn", effects[0].Effect);
         Assert.Equal(15, effects[0].Amount);
-        Assert.Equal(3, effects[1].DurationSeconds);
+        Assert.Null(effects[1].DurationSeconds);
         Assert.Null(effects[1].Amount);
     }
 

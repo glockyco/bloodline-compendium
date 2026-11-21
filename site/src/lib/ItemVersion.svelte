@@ -193,7 +193,6 @@
 	</div>
 	<aside class="item-side" aria-label="Game card">
 		<ItemTooltip {item} details={false} />
-		{#if !item.icon}<p class="muted">No icon is known for this item.</p>{/if}
 	</aside>
 	<div class="item-relations" data-pagefind-ignore="all">
 		{#if recipes.length}<div class="recipes">

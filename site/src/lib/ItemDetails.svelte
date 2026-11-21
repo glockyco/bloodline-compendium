@@ -53,8 +53,9 @@
 		</table>
 	</div>
 	{#if chargedBodyHitDamage !== undefined}<p>
-			Fully charged: {chargedBodyHitDamage == null ? 'Unknown' : formatNumber(chargedBodyHitDamage)} on
-			the body
+			Fully charged by aiming: {chargedBodyHitDamage == null
+				? 'Unknown'
+				: formatNumber(chargedBodyHitDamage)} on the body
 		</p>{/if}
 {/if}
 

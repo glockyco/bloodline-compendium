@@ -262,3 +262,8 @@ Decided in reviews, open to change like everything else here:
 - Each source kind's template is grammatical for every count, such as "1 item" and "2 items" (comparison 35).
 - A way to get an item is named by its item-page heading everywhere: on the item page, in the item list's How to Get filter, on Home and in search descriptions, such as "Sold by", "Made by Smithing" and "Dropped by". Home's line under it gives only what stands behind it, such as "90 merchants" (comparison 37).
 - Several lines of one conversation that give the item read "3 lines of this conversation give it." (comparison 37).
+- A shield's Details read "Blocks Without Stamina: 6" and "Other Blocks: cost half the attack's damage in stamina", and the item list's columns take the same names (comparison 38, lab run shields92a).
+- A crossbow's extra bolt reads "At close range: 1 extra bolt", and its charged shot "Fully charged by aiming: 110.5 on the body" (comparison 38, lab runs ranged91b to d and charge1).
+- An on-hit effect that only some enemies trigger says so briefly, such as "Every shot at an enemy the game counts as undead" on Holy Noose Crossbow. The enemies it names belong in a creature list filtered by the game's tag, linked from the effect once creature pages exist, not in a list written into the page (comparison 38, lab run charge1).
+- Details and previews show what a merchant pays at neutral respect as "Sells for 5 gold", because no screen in the game shows the base value. The item list keeps its Value column for sorting (comparison 38, lab run sell1).
+- The site does not say that it lacks something an item has, such as an icon (comparison 38).

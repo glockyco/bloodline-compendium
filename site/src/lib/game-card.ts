@@ -1,6 +1,8 @@
 import type { Fact, ItemPage } from './site-data.js';
 import { titleCase } from './labels.js';
 import { factValue } from './stats.js';
+import { formatNumber } from './format.js';
+import { neutralMultiplier, sellPrice } from './rules/price.js';
 
 export interface CardLine {
 	fact: Fact;
@@ -65,22 +67,34 @@ export function detailRows(
 	);
 	const effects = shown.filter((fact) => effectStats.has(fact.stat));
 	const values = effects.map((fact) => factValue(fact) ?? 'Unknown');
-	return shown.flatMap((fact) =>
-		!effectStats.has(fact.stat)
-			? [
-					{
-						key: fact.stat + fact.label,
-						label: titleCase(fact.label),
-						values: [
-							fact.stat === 'blockStaminaCost' && fact.number === 50
-								? 'cost half their damage in stamina'
-								: (factValue(fact) ?? 'Unknown')
-						],
-						prose: fact.number == null || fact.stat === 'blockStaminaCost'
-					}
-				]
-			: fact === effects[0]
-				? [{ key: 'effects', label: 'Effects', values, prose: true }]
-				: []
-	);
+	return shown.flatMap((fact) => {
+		if (effectStats.has(fact.stat))
+			return fact === effects[0] ? [{ key: 'effects', label: 'Effects', values, prose: true }] : [];
+		// No screen in the game shows the base value, so Details shows what a merchant pays at neutral respect.
+		const sale =
+			fact.stat === 'value' && fact.number != null
+				? sellPrice.evaluate({ value: fact.number, multiplier: neutralMultiplier })
+				: null;
+		if (sale?.known)
+			return [
+				{
+					key: 'sells-for',
+					label: 'Sells for',
+					values: [`${formatNumber(sale.value)} gold`],
+					prose: false
+				}
+			];
+		return [
+			{
+				key: fact.stat + fact.label,
+				label: titleCase(fact.label),
+				values: [
+					fact.stat === 'blockStaminaCost' && fact.number === 50
+						? "cost half the attack's damage in stamina"
+						: (factValue(fact) ?? 'Unknown')
+				],
+				prose: fact.number == null || fact.stat === 'blockStaminaCost'
+			}
+		];
+	});
 }

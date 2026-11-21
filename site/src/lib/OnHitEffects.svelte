@@ -10,7 +10,8 @@
 	type Effect = NonNullable<ItemPage['onHitEffects']>[number];
 
 	function chance(effect: Effect): string {
-		if (effect.trigger === 'Every shot aimed at an undead enemy') return effect.trigger;
+		// A trigger the catalog words for players, such as Holy Noose's undead condition, stands as written.
+		if (effect.trigger.startsWith('Every ')) return effect.trigger;
 		if (effect.chance === 1) return 'Every hit';
 		const percent = effect.chance * 100;
 		return Math.abs(percent - Math.round(percent)) < 1e-9
@@ -21,7 +22,7 @@
 	function description(effect: Effect): string {
 		if (effect.effect === 'Burning Ground') {
 			return effect.durationSeconds == null
-				? 'Unknown'
+				? 'Sets the ground under the enemy on fire.'
 				: `Sets the ground under the enemy on fire for ${formatNumber(effect.durationSeconds)} seconds.`;
 		}
 		if (effect.amount == null) return 'Unknown';

@@ -185,7 +185,6 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 	await expect(page.getByRole('tooltip')).toHaveText('How often the orchard yields it is unknown.');
 	await page.goto('/items/hollow-prism/');
 	await expect(page.getByText('No known source. It may come from a quest or event.')).toBeVisible();
-	await expect(page.getByText('No icon is known for this item.')).toBeVisible();
 });
 
 test('keeps unconfirmed sources at the end without advertising a way to get the item', async ({

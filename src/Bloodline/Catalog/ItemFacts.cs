@@ -509,7 +509,8 @@ internal sealed class ItemFacts(
                     15,
                     1,
                     5,
-                    "Cannot start while burning. Fire-resistant enemies are immune."
+                    // Fire-resistant enemies' immunity stays unpublished until a lab run observes it.
+                    "Cannot start while burning."
                 )
             );
             Cite(Enemy, "Ignite");
@@ -548,15 +549,17 @@ internal sealed class ItemFacts(
                 Cite(projectile, "Effect on Enemy Upon Impact");
                 break;
             case WeaponRoot + "Crossbows/HolyNooseCrossbow":
-                Ignite("Every shot aimed at an undead enemy", 1);
+                // Custom Fire Event ignites the aimed enemy when its actor tags contain Undead, which zombies lack.
+                Ignite("Every shot at an enemy the game counts as undead", 1);
+                // How long the ground burns stays unpublished until a lab run measures it.
                 effects.Add(
                     new(
                         "Burning Ground",
-                        "Every shot aimed at an undead enemy",
+                        "Every shot at an enemy the game counts as undead",
                         1,
                         null,
                         null,
-                        3,
+                        null,
                         null
                     )
                 );
@@ -753,7 +756,7 @@ internal sealed class ItemFacts(
                     groups.Add(Group(1, damage, "arrow"));
                 projectileGroups = groups;
                 if (type == "Crossbow" && analysis.ReplacesGeneric)
-                    groups.Add(Group(1, damage, "bolt") with { Condition = "Point blank" });
+                    groups.Add(Group(1, damage, "bolt") with { Condition = "At close range" });
             }
             if (
                 type == "Crossbow"

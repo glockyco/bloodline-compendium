@@ -101,7 +101,7 @@ internal static class ItemList
         ),
         new(
             "blockStaminaCost",
-            "Blocked Hits",
+            "Other Blocks",
             ["weapon"],
             true,
             "% of incoming damage in stamina",
@@ -109,7 +109,7 @@ internal static class ItemList
         ),
         new(
             "extraFullBlocks",
-            "Free Blocks",
+            "Blocks Without Stamina",
             ["weapon"],
             true,
             null,
