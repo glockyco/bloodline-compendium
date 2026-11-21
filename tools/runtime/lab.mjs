@@ -895,6 +895,7 @@ async function captureModel(config, lab, args) {
       item: args.item,
       part: args.part,
       subject,
+      again: attempt > 0 && subject === undefined,
       frame,
       directory: config.windowsPath(lab.captures),
       file,

@@ -28,7 +28,9 @@ local weaponType = itemInfo(defaults.ItemInfo, "WeaponType")
 -- args.subject = "object" shows armor as its own actor, for armor that the preview wears without drawing it.
 local subject = args.part and "part" or args.subject == "object" and "object" or armor and "worn"
   or (weaponType and weaponType ~= 0) and "carried" or "object"
-if subject == "worn" then commands["equip"]({ item = args.item }) end
+-- A capture taken again in a refined frame finds the armor already equipped, as the first capture left it.
+if subject == "worn" and not args.again then commands["equip"]({ item = args.item }) end
+local posed = subject == "worn"
 
 local function scale(v, s) return { X = v.X * s, Y = v.Y * s, Z = v.Z * s } end
 local function add(a, b) return { X = a.X + b.X, Y = a.Y + b.Y, Z = a.Z + b.Z } end
@@ -298,11 +300,11 @@ local function capture()
       frame = frame,
     }
   end)
-  if subject == "worn" then preview.SkeletalMesh:SetAnimationMode(0) end
+  if posed then preview.SkeletalMesh:SetAnimationMode(0) end
   if ok then finish(result) else finish(nil, result) end
 end
 ExecuteInGameThreadAfterFrames(20, function()
-  if subject ~= "worn" then return capture() end
+  if not posed then return capture() end
   preview.SkeletalMesh:SetAnimationMode(1)
   ExecuteInGameThreadAfterFrames(5, capture)
 end)
