@@ -21,7 +21,7 @@
 
 - [x] 4.1 Show the render above the game card with a Male and Female choice where an item has both, and verify it with invented fixture renders
 - [x] 4.2 Preview a shared item link with its render, and verify the share image and card type
-- [ ] 4.3 Document the sweep, the female body and the publish step in the runtime-checks skill and the README's update workflow
+- [x] 4.3 Document the sweep, the female body and the publish step in the runtime-checks skill and the README's update workflow
 
 ## 5. Integration
 
