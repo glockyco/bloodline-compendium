@@ -18,7 +18,7 @@ Non-goals:
 ### What the render shows
 
 The subject follows what the game draws:
-- Armor is equipped and rendered as the preview character wears it. Body meshes come from `ArmorInfo`, and pieces carried at a socket, such as helmets and pauldrons, come from the item's attached actor. Every equip attaches one more copy, and the newest may still be scaled to almost nothing, so the largest copy counts.
+- Armor is equipped and rendered as the preview character wears it, by itself, in the body's rest pose. The preview's idle animation bent the sleeves at the elbow and hunched the torso, and the Erenshor project's item renders (`erenshor-data-mining`, change `show-item-pictures-by-role`, D2) show worn pieces on a hidden body in its rest pose for the same reason. Body meshes come from `ArmorInfo`, and pieces carried at a socket, such as helmets and pauldrons, come from the item's attached actor. Every equip attaches one more copy, and the newest may still be scaled to almost nothing, so the largest copy counts.
 - Armor the preview wears without drawing anything, such as Assassin's Belt, is rendered as its own actor instead.
 - A weapon is its own actor, spawned in the diorama, so it no longer depends on the preview carrying it. Rendering the carried copy failed for daggers, spears, staves and halberds, which the preview did not show. The largest mesh decides how the actor turns, and every visible mesh of the actor shows, so a staff keeps its orb and The Embersnap its pipe and cog.
 - A weapon part is the mesh, materials and scale of its `WeaponComponentTable` row, because its own actor draws nothing. Cores have no mesh in that row and get no render.

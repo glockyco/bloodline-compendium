@@ -862,7 +862,8 @@ async function captureModel(config, lab, args) {
   await game(config, lab, "set-time", { hours: 12 });
   await game(config, lab, "set-weather", { type: 0 });
   await game(config, lab, "give", { items: [args.item] });
-  await game(config, lab, "open-sheet", {});
+  // An open sheet does not show the item just given until it opens again.
+  await game(config, lab, "open-sheet", { refresh: true });
   const passes = (file) => [
     join(lab.captures, `${file}-color.png`),
     join(lab.captures, `${file}-mask.png`),

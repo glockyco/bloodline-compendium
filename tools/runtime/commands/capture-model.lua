@@ -87,9 +87,12 @@ local function boundsOf(list)
   return low, high
 end
 
--- The preview character takes on what the player equips a few frames later, so the rest waits.
+-- The preview character takes on what the player equips a few frames later, so the rest waits. Worn armor is then
+-- shown in the body's rest pose, as the meshes were made, because the preview's idle animation bends the arms and
+-- hunches the torso: EAnimationMode 1, a single animation node without an animation, holds the rest pose, and the
+-- worn parts follow the body's pose. The preview's own animation returns afterwards.
 local finish = defer()
-ExecuteInGameThreadAfterFrames(20, function()
+local function capture()
   local ok, result = pcall(function()
     -- Every view starts from the way the preview character faces. Modular character meshes face their local +Y.
     -- The preview shows the character turned 27 degrees from its camera, so the camera's direction is no front.
@@ -292,5 +295,11 @@ ExecuteInGameThreadAfterFrames(20, function()
       frame = frame,
     }
   end)
+  if subject == "worn" then preview.SkeletalMesh:SetAnimationMode(0) end
   if ok then finish(result) else finish(nil, result) end
+end
+ExecuteInGameThreadAfterFrames(20, function()
+  if subject ~= "worn" then return capture() end
+  preview.SkeletalMesh:SetAnimationMode(1)
+  ExecuteInGameThreadAfterFrames(5, capture)
 end)
