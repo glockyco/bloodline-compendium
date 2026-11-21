@@ -509,7 +509,7 @@ internal sealed class ItemFacts(
                     15,
                     1,
                     5,
-                    "Can't start while burning. Fire-resistant enemies are immune."
+                    "Cannot start while burning. Fire-resistant enemies are immune."
                 )
             );
             Cite(Enemy, "Ignite");

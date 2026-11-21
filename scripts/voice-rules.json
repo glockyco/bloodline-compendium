@@ -51,5 +51,9 @@
   {
     "pattern": "(/Game/|/Script/|\\b\\w+_C\\b|NewEnumerator|\\w::\\w|\\b(BP|DT|WBP|SM)_\\w+)",
     "reason": "Identifiers. Show the game's names, never package paths, class names or enum words."
+  },
+  {
+    "pattern": "(\\b[a-z]+n't\\b|\\b(it|you|they|we|that|there|what|here)'(s|re|ll|ve|d)\\b)",
+    "reason": "Contractions. Write \"does not\" and \"it is\"."
   }
 ]
