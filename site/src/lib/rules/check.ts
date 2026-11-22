@@ -1,6 +1,7 @@
 import type { Rule } from './rule.js';
 import { experienceRequirement } from './experience.js';
 import { buyPrice, respectDiscount, sellPrice } from './price.js';
+import { proficiencyPointsPerLevel, rankCosts } from './progression.js';
 
 /** Every rule that has game results to compare against. */
 export const rules = [experienceRequirement, respectDiscount, buyPrice, sellPrice];
@@ -41,4 +42,82 @@ export function ruleMismatches(
 		}
 	}
 	return problems;
+}
+
+/** A lab `eval` of `progression.lua`: its arguments and the steps it recorded, each with the numbers that changed. */
+export interface ProgressionRecord {
+	args: { action?: string; tree?: string; widget?: string };
+	steps: { changed?: Record<string, [number, number]>; widget?: { cost?: number } }[];
+}
+
+/**
+ * The level ups where the proficiency points a discipline gained differ from the rule. A step counts when exactly
+ * one tracked level rose by one, so a step that skipped levels, as large grants do, cannot blur the amount. Blood
+ * Magic's points follow the Blood Levels setting, which these runs do not record, so they are left out.
+ */
+export function proficiencyMismatches(records: ProgressionRecord[]): {
+	compared: number;
+	problems: string[];
+} {
+	let compared = 0;
+	const problems: string[] = [];
+	for (const record of records) {
+		if (record.args.action !== 'discipline') continue;
+		for (const step of record.steps) {
+			const changed = step.changed ?? {};
+			const level = Object.keys(changed).find(
+				(name) => name.startsWith('instance.') && name.endsWith(' Level')
+			);
+			if (!level) continue;
+			const [from, to] = changed[level];
+			if (to - from !== 1) continue;
+			const name = level.slice('instance.'.length, -' Level'.length);
+			const expected = proficiencyPointsPerLevel(name, from);
+			if (!expected.known) continue;
+			const points = Object.keys(changed).find(
+				(key) => key.startsWith('instance.') && key.includes('Point')
+			);
+			const gained = points ? changed[points][1] - changed[points][0] : 0;
+			compared++;
+			if (gained !== expected.value)
+				problems.push(
+					`proficiency-points for ${name} level ${from}: rule ${expected.value}, game ${gained}`
+				);
+		}
+	}
+	return { compared, problems };
+}
+
+/**
+ * The passive purchases where the points the game took differ from the rule's rank costs. Each press of a passive's
+ * button that took points bought the next rank, so the amounts taken, in order, are its rank costs.
+ */
+export function rankCostMismatches(
+	records: ProgressionRecord[],
+	passives: Map<string, { pointCost: number; costIncrease: number; ranks: number }>
+): { compared: number; problems: string[] } {
+	let compared = 0;
+	const problems: string[] = [];
+	for (const record of records) {
+		if (record.args.action !== 'passive' || !record.args.tree || !record.args.widget) continue;
+		const passive = passives.get(record.args.tree + ':' + record.args.widget);
+		if (!passive) {
+			problems.push(`next-rank-cost has no passive ${record.args.tree} ${record.args.widget}`);
+			continue;
+		}
+		const taken = record.steps.flatMap((step) =>
+			Object.entries(step.changed ?? {})
+				.filter(([key, [before, after]]) => key.includes('Point') && after < before)
+				.map(([, [before, after]]) => before - after)
+		);
+		const costs = rankCosts(passive);
+		compared += taken.length;
+		taken.forEach((amount, rank) => {
+			if (amount !== costs[rank])
+				problems.push(
+					`next-rank-cost for ${record.args.widget} rank ${rank + 1}: rule ${costs[rank]}, game ${amount}`
+				);
+		});
+	}
+	return { compared, problems };
 }

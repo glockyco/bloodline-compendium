@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { experienceRequirement } from './experience.js';
-import { ruleMismatches } from './check.js';
+import { proficiencyMismatches, rankCostMismatches, ruleMismatches } from './check.js';
+import { proficiencyPointsPerLevel } from './progression.js';
 
 describe('experience requirement', () => {
 	it('rounds half up to a multiple of 25', () => {
@@ -38,5 +39,55 @@ describe('rule check', () => {
 		expect(ruleMismatches(experienceRequirement, [record(400)])).toEqual([
 			'experience-requirement for {"level":5}: rule 375, game 400'
 		]);
+	});
+});
+
+describe('proficiency points per level', () => {
+	it('gives Necromancy 2, Staff only its first level, and Vampirism none', () => {
+		expect(proficiencyPointsPerLevel('Necromancy', 4)).toMatchObject({ value: 2 });
+		expect(proficiencyPointsPerLevel('Staff', 1)).toMatchObject({ value: 1 });
+		expect(proficiencyPointsPerLevel('Staff', 2)).toMatchObject({ value: 0 });
+		expect(proficiencyPointsPerLevel('Vampirism', 1)).toMatchObject({ value: 0 });
+		expect(proficiencyPointsPerLevel('Pyromancy', 9)).toMatchObject({ value: 1 });
+	});
+
+	it('leaves Blood Magic unknown, because the Blood Levels setting decides it', () => {
+		expect(proficiencyPointsPerLevel('Blood Magic', 2)).toMatchObject({ known: false });
+	});
+
+	it('compares single level ups only, and reports a wrong amount', () => {
+		const step = (from: number, to: number, before: number, after: number) => ({
+			changed: {
+				'instance.Necromancy Level': [from, to] as [number, number],
+				'instance.Necro Points': [before, after] as [number, number]
+			}
+		});
+		const result = proficiencyMismatches([
+			{
+				args: { action: 'discipline' },
+				steps: [step(2, 3, 0, 2), step(3, 9, 2, 14), step(9, 10, 14, 15)]
+			}
+		]);
+		expect(result.compared).toBe(2);
+		expect(result.problems).toEqual(['proficiency-points for Necromancy level 9: rule 2, game 1']);
+	});
+});
+
+describe('passive rank costs against purchases', () => {
+	it('compares the points each press took with the rank costs in order', () => {
+		const press = (before: number, after: number) => ({
+			changed: { 'instance.Necro Points': [before, after] as [number, number] }
+		});
+		const result = rankCostMismatches(
+			[
+				{
+					args: { action: 'passive', tree: 'Tree', widget: 'Glow' },
+					steps: [press(20, 18), press(18, 14), press(14, 9)]
+				}
+			],
+			new Map([['Tree:Glow', { pointCost: 2, costIncrease: 2, ranks: 3 }]])
+		);
+		expect(result.compared).toBe(3);
+		expect(result.problems).toEqual(['next-rank-cost for Glow rank 3: rule 6, game 5']);
 	});
 });

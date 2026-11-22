@@ -1,5 +1,5 @@
 import { formatNumber } from '../format.js';
-import { missingInputs, type Rule } from './rule.js';
+import { missingInputs, type Rule, type RuleResult } from './rule.js';
 
 /**
  * The cost of a passive's next rank: buying a rank raises the button's Point Cost by its Point Increase Per Level,
@@ -45,4 +45,32 @@ export function rankCosts(passive: {
 		costs.push(next.value);
 	}
 	return costs;
+}
+
+/**
+ * Proficiency points a discipline grants when it reaches the next level, by the name of the level the game tracks,
+ * such as Necromancy or Staff. Each discipline's tracking function calls Add Proficiency Points with its own amount:
+ * Necromancy 2, Staff 1 for its first level up and none after, Vampirism none, and every other discipline 1. Blood
+ * Magic sets its points to the Blood Levels setting plus 1 instead, so its points per level depend on the setting.
+ * Runs grants1, progression2 and progression3 recorded every level up.
+ */
+export function proficiencyPointsPerLevel(
+	levelName: string,
+	fromLevel: number
+): RuleResult<number> & { setByBloodLevels?: true } {
+	if (levelName === 'Blood Magic')
+		return { known: false, missing: ['Blood Levels setting'], setByBloodLevels: true };
+	const value =
+		levelName === 'Necromancy'
+			? 2
+			: levelName === 'Vampirism' || (levelName === 'Staff' && fromLevel > 1)
+				? 0
+				: 1;
+	return {
+		known: true,
+		value,
+		steps: [
+			`${levelName} level ${formatNumber(fromLevel)} to ${formatNumber(fromLevel + 1)}: ${formatNumber(value)} points`
+		]
+	};
 }
