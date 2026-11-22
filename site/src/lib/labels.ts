@@ -1,4 +1,4 @@
-import type { SourceKind } from './site-data.js';
+import type { RelationCondition, SourceKind } from './site-data.js';
 export function titleCase(value: string): string {
 	return value
 		.replace(/([a-z])([A-Z])/g, '$1 $2')
@@ -43,6 +43,12 @@ export const sourceIntros: Partial<Record<SourceKind, string>> = {
 		'Completed buildings in your settlement add resources every game week. Collect them under Resources Ready in the settlement overview.',
 	skillTree:
 		'Learning a skill costs 1 skill point once the discipline reaches the level shown. Clicking the skill again refunds the point.'
+};
+/** The level a source kind's rows need, shown as its own column, such as the discipline level of a skill tree. */
+export const sourceLevels: Partial<
+	Record<SourceKind, { condition: RelationCondition['kind']; heading: string }>
+> = {
+	skillTree: { condition: 'disciplineLevel', heading: 'Required Level' }
 };
 /** What a source table's first column lists for each way of getting an item. */
 export const sourceColumns: Record<SourceKind, string> = {

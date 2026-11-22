@@ -1,18 +1,9 @@
-import type {
-	CategorySummary,
-	ItemIndex,
-	ItemPage,
-	ItemSummary,
-	SourceKind
-} from '../site-data.js';
-import { sourceHeadings } from '../labels.js';
-import { plural } from '../format.js';
+import type { CategorySummary, ItemIndex, ItemSummary, SourceKind } from '../site-data.js';
 
 /** Browse categories shown large on the home page, in this order when they exist. */
 const majorOrder = ['weapon', 'armor', 'weapon-part', 'material', 'food', 'quest-item'];
 const majorCount = 6;
 const iconCount = 5;
-const wayIconCount = 3;
 
 /** What each large category holds, each word matching several of its items. Categories without one list their types. */
 const descriptions: Record<string, string> = {
@@ -53,21 +44,7 @@ const featuredIcons: Record<string, string[]> = {
 	],
 	material: ['ruby-gem', 'gold-ingot', 'frostvein-chunk', 'growgloom', 'deer-pelt'],
 	food: ['fletcher-s-brew', 'apple-pie', 'fondue', 'queenfish', 'coastal-hotpot'],
-	'quest-item': ['artificers-windmill-key', 'lions-mane-emblem', 'windstone', 'hunters-pack'],
-	shop: ['golden-crown', 'ash-lute', 'heavy-iron-plate-cuirass'],
-	smithing: ['astral-greatblade', 'heavy-moonstone-axe-head', 'astral-guard'],
-	containerLoot: ['godsgift-rune', 'troedian-ore', 'portal-coin'],
-	pickup: ['boltbringer', 'sorrowsong', 'thurstons-grimoire'],
-	randomLoot: ['gold-shilling', 'portal-coin', 'gold-ingot'],
-	enemyDrop: ['the-copper-crown', 'gold-shilling', 'ethereal-archstone'],
-	cooking: ['fondue', 'druid-s-stew', 'carrot-cake'],
-	dialogue: ['godsgift-rune', 'exquisite-spice', 'troedian-metal'],
-	settlementDelivery: ['gold-ingot', 'ruby-gem', 'amethyst-gem'],
-	gathering: ['glowing-hibiscus', 'candyberry', 'growgloom'],
-	fishing: ['queenfish'],
-	farming: ['carrot', 'potato', 'apple'],
-	currencyShop: ['winter-warden-cuirass', 'froststrider-hood', 'winter-warden-helm'],
-	bountyNote: ['a-walk-in-the-woods-1', 'the-golden-goblet', 'the-jeweled-dagger']
+	'quest-item': ['artificers-windmill-key', 'lions-mane-emblem', 'windstone', 'hunters-pack']
 };
 
 export interface HomeGroup {
@@ -78,22 +55,12 @@ export interface HomeGroup {
 	icons: string[];
 }
 
-export interface HomeWay {
-	key: string;
-	label: string;
-	text: string;
-	kinds: SourceKind[];
-	count: number;
-	icons: string[];
-}
-
 export interface HomeData {
 	count: number;
 	known: number;
 	example: string;
 	groups: HomeGroup[];
 	minor: CategorySummary[];
-	ways: HomeWay[];
 }
 
 const wordList = new Intl.ListFormat('en', { type: 'conjunction' });
@@ -120,8 +87,8 @@ function describe(category: CategorySummary, items: ItemSummary[]): string {
 /** The ways to get an item, as its How to Get filter values. */
 const sourcesOf = (item: ItemSummary) => (item.facets.source ?? []) as SourceKind[];
 
-/** The home page's browse entries and source overview, derived from the published site data. */
-export function homeData(index: ItemIndex, pages: ItemPage[]): HomeData {
+/** The home page's browse entries, derived from the published item list. */
+export function homeData(index: ItemIndex): HomeData {
 	const items = index.items;
 	// The item list hides items without a known source until asked, so counts that link to it count the same.
 	const listed = (category: string) =>
@@ -144,63 +111,6 @@ export function homeData(index: ItemIndex, pages: ItemPage[]): HomeData {
 			icons: pickIcons(members, featuredIcons[category.slug], iconCount)
 		};
 	});
-
-	const givers = new Map<SourceKind, Set<string>>();
-	const currencies = new Map<string, number>();
-	for (const page of pages)
-		for (const source of page.sources) {
-			if (source.unconfirmed) continue;
-			if (!givers.has(source.kind)) givers.set(source.kind, new Set());
-			givers.get(source.kind)!.add(source.name);
-			if (source.kind === 'currencyShop' && source.price?.currency)
-				currencies.set(
-					source.price.currency.name,
-					(currencies.get(source.price.currency.name) ?? 0) + 1
-				);
-		}
-	const giverCount = (kind: SourceKind) => givers.get(kind)?.size ?? 0;
-	// The most used currency names the way, so the line stays short however many currencies exist.
-	const currencyList = [...currencies]
-		.sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'en'))
-		.map(([name]) => name);
-	// The heading names the way, so a line gives only what stands behind it.
-	const texts: Partial<Record<SourceKind, string>> = {
-		shop: plural(giverCount('shop'), 'merchant', 'merchants'),
-		currencyShop:
-			currencyList.length > 2
-				? `${currencyList[0]} and ${plural(currencyList.length - 1, 'other currency', 'other currencies')}`
-				: wordList.format(currencyList),
-		smithing: plural(giverCount('smithing'), 'recipe', 'recipes'),
-		crafting: plural(giverCount('crafting'), 'recipe', 'recipes'),
-		cooking: plural(giverCount('cooking'), 'recipe', 'recipes'),
-		containerLoot: plural(giverCount('containerLoot'), 'kind of container', 'kinds of container'),
-		randomLoot: 'General container loot',
-		enemyDrop: plural(giverCount('enemyDrop'), 'kind of creature', 'kinds of creature'),
-		pickup: 'In the world',
-		dialogue: plural(giverCount('dialogue'), 'person', 'people'),
-		settlementDelivery: plural(giverCount('settlementDelivery'), 'building', 'buildings'),
-		bountyNote: plural(giverCount('bountyNote'), 'bounty note', 'bounty notes'),
-		gathering: 'Plants, ore and other nodes',
-		fishing: 'Fishing spots',
-		farming: 'Planted seeds'
-	};
-	const candidates: { key: string; label: string; text: string; kinds: SourceKind[] }[] = (
-		Object.keys(texts) as SourceKind[]
-	).map((kind) => ({ key: kind, label: sourceHeadings[kind], text: texts[kind]!, kinds: [kind] }));
-	const ways = candidates
-		.map((way) => {
-			const members = items.filter((item) =>
-				sourcesOf(item).some((kind) => way.kinds.includes(kind))
-			);
-			return {
-				...way,
-				count: members.length,
-				icons: pickIcons(members, featuredIcons[way.key], wayIconCount)
-			};
-		})
-		.filter((way) => way.count > 0)
-		.sort((a, b) => b.count - a.count || a.label.localeCompare(b.label, 'en'));
-
 	return {
 		count: items.length,
 		known: items.filter((item) => sourcesOf(item).length > 0).length,
@@ -209,7 +119,6 @@ export function homeData(index: ItemIndex, pages: ItemPage[]): HomeData {
 		minor: ordered
 			.slice(majorCount)
 			.map((category) => ({ ...category, count: listed(category.slug) }))
-			.filter((category) => category.count > 0),
-		ways
+			.filter((category) => category.count > 0)
 	};
 }

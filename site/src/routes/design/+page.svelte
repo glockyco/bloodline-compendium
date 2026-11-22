@@ -3,6 +3,10 @@
 	import RelationTable from '#lib/RelationTable.svelte';
 	import Conditions from '#lib/Conditions.svelte';
 	import ItemTooltip from '#lib/items/ItemTooltip.svelte';
+	import SkillTooltip from '#lib/skills/SkillTooltip.svelte';
+	import PassiveTooltip from '#lib/skills/PassiveTooltip.svelte';
+	import SpellsongTooltip from '#lib/skills/SpellsongTooltip.svelte';
+	import DisciplineTooltip from '#lib/skills/DisciplineTooltip.svelte';
 	import type { Fact } from '#lib/site-data.js';
 	import ButtonLink from '#lib/ui/ButtonLink.svelte';
 	import Card from '#lib/ui/Card.svelte';
@@ -116,8 +120,6 @@
 		title="A Section Heading Long Enough to Wrap Across Two Lines on a Phone"
 	/>
 	<div class="row">
-		<IconSlot icon={icons[0] ?? null} size="stack" />
-		<IconSlot icon={null} size="stack" />
 		<Count value={1} />
 		<Count value={123456} />
 		<ButtonLink href="#small">Browse Items</ButtonLink>
@@ -161,6 +163,63 @@
 <section aria-labelledby="tooltip" class="tooltip-fixture">
 	<SectionHeading id="tooltip" title="Item Tooltip" />
 	<ItemTooltip item={tooltipItem} heading="p" />
+</section>
+
+<!-- The other kinds' cards at their extremes: an unknown stat, many ranks, a long tune and a long name. -->
+<section aria-labelledby="kind-tooltips" class="tooltip-fixture">
+	<SectionHeading id="kind-tooltips" title="Skill, Passive, Spellsong and Discipline Tooltips" />
+	<div class="row">
+		<SkillTooltip
+			heading="p"
+			skill={{
+				name: 'A Skill Name Long Enough to Shrink Its Ribbon',
+				icon: icons[0] ?? null,
+				description: 'Throws something that burns, with a description long enough to wrap.',
+				facts: [
+					{
+						stat: 'cooldown',
+						label: 'Cooldown',
+						tooltipLabel: 'Cooldown',
+						number: 12.5,
+						text: null,
+						effect: null,
+						unit: 'seconds'
+					} as Fact,
+					{
+						stat: 'manaCost',
+						label: 'Mana Cost',
+						tooltipLabel: 'Mana Cost',
+						number: null,
+						text: null,
+						effect: null,
+						unit: null
+					} as Fact
+				]
+			}}
+		/>
+		<PassiveTooltip
+			passive={{
+				name: 'Kindle',
+				icon: icons[1] ?? null,
+				description: '+2% damage per rank.',
+				unlocks: 'Pyromancy level 5',
+				costs: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+			}}
+		/>
+		<SpellsongTooltip
+			song={{
+				name: 'Ballad',
+				description: null,
+				tune: [1, 2, 3, 4, 1, 2, 3, 4, 1, 2],
+				charges: 1,
+				experience: 0,
+				route: null
+			}}
+		/>
+		<DisciplineTooltip
+			discipline={{ name: 'Utility Gadgets', category: 'Tech/Etc.', contents: null }}
+		/>
+	</div>
 </section>
 
 <style>

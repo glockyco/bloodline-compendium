@@ -1,20 +1,28 @@
 <script lang="ts">
-	import type { DisciplinePage, Fact } from '../site-data.js';
+	import type { DisciplinePage, Fact, RelationCondition, Stat } from '../site-data.js';
 	import RelationTable from '../RelationTable.svelte';
 	import Section from '../ui/Section.svelte';
 	import EntityLink from '../ui/EntityLink.svelte';
-	import { formatNumber } from '../format.js';
-	import { factValue } from '../stats.js';
+	import Conditions from '../Conditions.svelte';
+	import CardGrid from '../ui/CardGrid.svelte';
+	import Card from '../ui/Card.svelte';
+	import { formatNumber, plural } from '../format.js';
 	import { rankCosts } from '../rules/progression.js';
 	import Tune from './Tune.svelte';
 	/**
-	 * A discipline as item pages show relations: its skills, passives and spellsongs each in one table, grouped by the
-	 * level row the game's window shows them in.
+	 * A discipline's skills, spellsongs and passives, each in one table grouped by the level row the game's window
+	 * shows them in. Skills show the skill list's stat columns that any of them has.
 	 */
 	let {
 		discipline,
-		skillFacts
-	}: { discipline: DisciplinePage; skillFacts: Record<string, Fact[]> } = $props();
+		skillFacts,
+		songLayout = 'table'
+	}: {
+		discipline: DisciplinePage;
+		skillFacts: Record<string, Fact[]>;
+		/** Comparison only: how spellsongs lay out. Removed once the layout is chosen. */
+		songLayout?: 'table' | 'cards' | 'compact';
+	} = $props();
 	const level = $derived(discipline.levelName ?? discipline.name);
 	// The relations each entry shows, by the key of the entity at their other end, so the static page carries them.
 	const relationIds = $derived(
@@ -30,42 +38,62 @@
 			row.passives.map((passive) => ({ row: row.level, passive }))
 		)
 	);
-	const fact = (key: string | null, ...stats: string[]) =>
-		(skillFacts[key ?? ''] ?? []).find((entry) => stats.includes(entry.stat));
-	function cost(key: string | null): string {
-		const found = fact(key, 'manaCost', 'staminaCost');
-		if (!found) return '';
-		const value = factValue(found);
-		return value == null ? 'Unknown' : `${value} ${found.stat === 'manaCost' ? 'mana' : 'stamina'}`;
+	const factOf = (key: string | null, stat: Stat) =>
+		(skillFacts[key ?? ''] ?? []).find((entry) => entry.stat === stat);
+	// The skill list's stat columns, in its order, that any skill of this discipline has.
+	const statOrder: Stat[] = ['baseDamage', 'manaCost', 'staminaCost', 'cooldown'];
+	const statColumns = $derived(
+		statOrder.flatMap((stat) => {
+			const found = slots
+				.map(({ slot }) => factOf(slot.skill.key, stat))
+				.find((entry) => entry !== undefined);
+			return found ? [{ stat, label: found.label, unit: found.unit ?? null }] : [];
+		})
+	);
+	// A cell reads as a list cell does: none for a stat the skill lacks, unknown for one the game does not tell.
+	function cell(key: string | null, stat: Stat): string {
+		const found = factOf(key, stat);
+		if (!found) return 'None';
+		return found.number == null ? 'Unknown' : formatNumber(found.number);
 	}
-	function points(costs: number[]): string {
-		if (costs.every((value) => value === 0)) return 'Free';
-		return costs.map(formatNumber).join(', ');
+	// An entry whose own level differs from its row's label says the level it needs, as a condition.
+	function ownLevel(required: number, checked: string, row: number): RelationCondition[] {
+		return required !== row || checked !== level
+			? [
+					{
+						kind: 'disciplineLevel',
+						entity: null,
+						value: required,
+						label: `Unlocks at ${checked} level ${formatNumber(required)}`
+					}
+				]
+			: [];
 	}
+	const where = (song: DisciplinePage['spellsongs'][number]) => song.sources;
 </script>
 
 {#if slots.length}<Section id="skills" title="Skills" count={slots.length}>
 		<RelationTable
 			items={slots}
 			label="Skills"
-			headings={['Skill', 'Cooldown', 'Cost']}
+			headings={['Skill', ...statColumns]}
 			collapse={false}
 			>{#snippet row({ row, slot }, index)}{#if index === 0 || slots[index - 1].row !== row}<tr
-						class="place-heading"
-						><th colspan="3" scope="colgroup">{level} Level {formatNumber(row)}</th></tr
-					>{/if}<tr data-relation-id={ids(slot.skill.key)} data-relation-direction="outgoing"
+						class="group-heading"
+						><th colspan={statColumns.length + 1} scope="colgroup"
+							>{level} Level {formatNumber(row)}</th
+						></tr
+					>{/if}<tr
+					id={'skill-' + slot.skill.slug}
+					data-relation-id={ids(slot.skill.key)}
+					data-relation-direction="outgoing"
 					><td
-						><EntityLink
-							entity={slot.skill}
-							icon
-						/>{#if slot.requiredLevel !== row || slot.checkedLevel !== level}<small
-								>Unlocks at {slot.checkedLevel} level {formatNumber(slot.requiredLevel)}</small
-							>{/if}</td
-					><td class="numeric"
-						>{fact(slot.skill.key, 'cooldown')
-							? factValue(fact(slot.skill.key, 'cooldown')!)
-							: ''}</td
-					><td class="numeric">{cost(slot.skill.key)}</td></tr
+						><EntityLink entity={slot.skill} icon /><Conditions
+							conditions={ownLevel(slot.requiredLevel, slot.checkedLevel, row)}
+						/></td
+					>{#each statColumns as column (column.stat)}<td class="numeric"
+							>{cell(slot.skill.key, column.stat)}</td
+						>{/each}</tr
 				>{/snippet}</RelationTable
 		>
 	</Section>{/if}
@@ -74,38 +102,73 @@
 		title="Spellsongs"
 		count={discipline.spellsongs.length}
 	>
-		<RelationTable
-			items={discipline.spellsongs}
-			label="Spellsongs"
-			headings={['Spellsong', 'Tune', 'Charges', 'Note Sheet']}
-			numeric={[false, true, false]}
-			collapse={false}
-			>{#snippet row(song)}<tr id={song.anchor}
-					><td
-						><span class="relation-name" data-game>{song.name}</span>{#if song.description}<small
-								data-game>{song.description}</small
-							>{/if}</td
-					><td><Tune tune={song.tune} /></td><td class="numeric">{formatNumber(song.charges)}</td
-					><td
-						>{#each song.sources as source, index (source.relationId)}{index ? ', ' : ''}<span
-								data-relation-id={source.relationId}
-								data-relation-direction="incoming"
-								>{source.places[0]?.name ?? 'Location unknown'}</span
-							>{:else}<span class="muted">No known source</span>{/each}</td
-					></tr
-				>{/snippet}</RelationTable
-		>
+		{#if songLayout === 'cards'}<CardGrid rows={4} label="Spellsongs">
+				{#each discipline.spellsongs as song (song.key)}<Card>
+						<h3 id={song.anchor} data-game>{song.name}</h3>
+						<Tune tune={song.tune} />
+						<span data-game>{song.description ?? ''}</span>
+						<span class="muted"
+							>{plural(song.charges, 'charge', 'charges')} · {#each where(song) as source, index (source.relationId)}{index
+									? ', '
+									: ''}<span data-relation-id={source.relationId} data-relation-direction="incoming"
+									>Note sheet in {source.places[0]?.name ?? 'an unknown place'}</span
+								>{:else}No known source{/each}</span
+						>
+					</Card>{/each}
+			</CardGrid>
+		{:else}
+			<RelationTable
+				items={discipline.spellsongs}
+				label="Spellsongs"
+				headings={songLayout === 'compact'
+					? ['Spellsong', 'Tune', 'Charges', 'Note Sheet']
+					: ['Spellsong', 'Tune', 'Charges', 'Note Sheet']}
+				numeric={[false, true, false]}
+				collapse={false}
+				>{#snippet row(song)}<tr id={song.anchor}
+						><td
+							><EntityLink
+								entity={{
+									kind: 'spellsong',
+									key: song.key,
+									name: song.name,
+									slug: null,
+									icon: null,
+									fragment: song.anchor,
+									host: {
+										kind: discipline.kind,
+										key: discipline.key,
+										name: discipline.name,
+										slug: discipline.slug,
+										icon: null
+									}
+								}}
+							/>{#if song.description && songLayout === 'table'}<small data-game
+									>{song.description}</small
+								>{/if}</td
+						><td class="tune-cell"><Tune tune={song.tune} /></td><td class="numeric"
+							>{formatNumber(song.charges)}</td
+						><td
+							>{#each where(song) as source, index (source.relationId)}{index ? ', ' : ''}<span
+									data-relation-id={source.relationId}
+									data-relation-direction="incoming"
+									>{source.places[0]?.name ?? 'Location unknown'}</span
+								>{:else}<span class="muted">No known source</span>{/each}</td
+						></tr
+					>{/snippet}</RelationTable
+			>
+		{/if}
 	</Section>{/if}
 {#if passives.length}<Section id="passives" title="Passives" count={passives.length}>
 		<RelationTable
 			items={passives}
 			label="Passives"
-			headings={['Passive', 'Points per Rank']}
+			headings={['Passive', { label: 'Cost per Rank', unit: 'points' }]}
 			collapse={false}
 			>{#snippet row(
 				{ row, passive },
 				index
-			)}{#if index === 0 || passives[index - 1].row !== row}<tr class="place-heading"
+			)}{#if index === 0 || passives[index - 1].row !== row}<tr class="group-heading"
 						><th colspan="2" scope="colgroup">Proficiency Level {formatNumber(row)}</th></tr
 					>{/if}<tr id={passive.anchor}
 					><td
@@ -117,13 +180,10 @@
 									height="24"
 									loading="lazy"
 								/>{/if}<span data-game>{passive.name}</span></span
-						>{#if passive.description}<small data-game>{passive.description}</small
-							>{/if}{#if passive.requiredLevel !== row}<small
-								>Unlocks at {passive.checkedLevel} level {formatNumber(
-									passive.requiredLevel
-								)}</small
-							>{/if}</td
-					><td class="numeric">{points(rankCosts(passive))}</td></tr
+						>{#if passive.description}<small data-game>{passive.description}</small>{/if}<Conditions
+							conditions={ownLevel(passive.requiredLevel, passive.checkedLevel, row)}
+						/></td
+					><td class="numeric">{rankCosts(passive).map(formatNumber).join(', ')}</td></tr
 				>{/snippet}</RelationTable
 		>
 	</Section>{/if}
@@ -137,5 +197,9 @@
 	.passive-name img {
 		width: var(--size-icon-inline);
 		height: var(--size-icon-inline);
+	}
+	/* A tune reads as one phrase, so its arrows never wrap. */
+	.tune-cell :global(.tune) {
+		flex-wrap: nowrap;
 	}
 </style>

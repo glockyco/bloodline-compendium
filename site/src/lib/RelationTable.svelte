@@ -12,7 +12,8 @@
 	}: {
 		items: T[];
 		label: string;
-		headings: string[];
+		/** Column headings. A heading with a unit names it once for every row, which the rows then leave out. */
+		headings: (string | { label: string; unit: string | null })[];
 		/** Whether the columns after the first hold numbers, which align right with their heading, one flag per column. */
 		numeric?: boolean | boolean[];
 		stackOnMobile?: boolean;
@@ -21,11 +22,20 @@
 		row: Snippet<[T, number]>;
 	} = $props();
 	const preview = $derived(collapse && items.length > 10 ? 8 : items.length);
-	// By default, a phone stacks tables with three or more columns, labelling each value after the name.
+	const parts = $derived(
+		headings.map((heading) =>
+			typeof heading === 'string' ? { label: heading, unit: null } : heading
+		)
+	);
+	// By default, a phone stacks tables with three or more columns, labelling each value after the name, with its
+	// unit, since the stacked rows have no heading.
 	const labels = $derived(
-		headings
+		parts
 			.slice(1)
-			.map((heading, index) => `--label-${index + 2}: ${JSON.stringify(heading)}`)
+			.map(
+				(heading, index) =>
+					`--label-${index + 2}: ${JSON.stringify(heading.unit ? `${heading.label} (${heading.unit})` : heading.label)}`
+			)
 			.join('; ')
 	);
 </script>
@@ -39,10 +49,10 @@
 	>
 		<thead
 			><tr
-				>{#each headings as heading, index (index)}<th
+				>{#each parts as heading, index (index)}<th
 						scope="col"
 						class:numeric={index > 0 && (Array.isArray(numeric) ? numeric[index - 1] : numeric)}
-						>{heading}</th
+						>{heading.label}{#if heading.unit}<small>{heading.unit}</small>{/if}</th
 					>{/each}</tr
 			></thead
 		>
@@ -178,7 +188,7 @@
 		}
 	}
 	/* A place that several rows share heads them, so their rows do not repeat it. */
-	.relation-panel :global(.place-heading th) {
+	.relation-panel :global(.group-heading th) {
 		background: var(--surface-raised);
 		color: var(--text-soft);
 		font-size: var(--type-0);

@@ -2,7 +2,7 @@
 	import SourceRow from '#lib/items/SourceRow.svelte';
 	import RelationTable from '#lib/RelationTable.svelte';
 	import Section from '#lib/ui/Section.svelte';
-	import { sourceColumns, sourceHeadings, sourceIntros } from '#lib/labels.js';
+	import { sourceColumns, sourceHeadings, sourceIntros, sourceLevels } from '#lib/labels.js';
 	import {
 		headingCase,
 		oddsLabel,
@@ -75,6 +75,7 @@
 					sharedUnit,
 					headings: [
 						sourceColumns[kind],
+						...(sourceLevels[kind] ? [sourceLevels[kind].heading] : []),
 						...(showAmount ? ['Quantity'] : []),
 						...(showSpawn ? ['Spawns'] : []),
 						...(showContext ? [contextHeading] : [])
@@ -107,7 +108,7 @@
 				source,
 				index
 			)}{#if group.byPlace && (index === 0 || placeOf(group.sources[index - 1]) !== placeOf(source))}<tr
-						class="place-heading"
+						class="group-heading"
 						><th colspan={group.headings.length} scope="colgroup" data-game>{placeOf(source)}</th
 						></tr
 					>{/if}<SourceRow
@@ -118,6 +119,7 @@
 					showUnit={!group.sharedUnit}
 					showPlaces={!group.byPlace && group.showPlaces}
 					placeFirst={group.kind === 'pickup'}
+					levelCondition={sourceLevels[group.kind]?.condition}
 					id={`${idPrefix}source-${group.kind}-${index + 1}`}
 				/>{/snippet}</RelationTable
 		>

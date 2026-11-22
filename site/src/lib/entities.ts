@@ -29,6 +29,11 @@ export function browseKinds(
 		}));
 }
 
+/** A kind's name for one entity, such as "Item" or "Calendar Event", from its ID. */
+export function kindLabel(kind: EntityKind): string {
+	return kind.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, (letter) => letter.toUpperCase());
+}
+
 /**
  * A count of entities in their kind's words, such as "1 item" or "3 disciplines", from the kind's ID and its list
  * label. Entities of several kinds count as pages.
@@ -40,7 +45,7 @@ export function kindCount(
 	const shared = new Set(entities.map((entity) => entity.kind));
 	const kind = shared.size === 1 ? kinds.find((entry) => entry.kind === [...shared][0]) : null;
 	const many = kind ? kind.searchFilter.toLocaleLowerCase('en') : 'pages';
-	const one = kind ? kind.kind.replace(/([a-z])([A-Z])/g, '$1 $2').toLocaleLowerCase('en') : 'page';
+	const one = kind ? kindLabel(kind.kind).toLocaleLowerCase('en') : 'page';
 	return { count: entities.length, noun: entities.length === 1 ? one : many, many };
 }
 

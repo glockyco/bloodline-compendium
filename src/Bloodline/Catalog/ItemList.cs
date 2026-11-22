@@ -25,7 +25,8 @@ internal static class ItemList
         Func<ItemPage, ListCell?> Cell
     );
 
-    private static readonly IReadOnlyDictionary<ItemStatus, string> Availability = new Dictionary<
+    /// <summary>What every list's Availability filter calls each status, items and skills alike.</summary>
+    internal static readonly IReadOnlyDictionary<ItemStatus, string> Availability = new Dictionary<
         ItemStatus,
         string
     >

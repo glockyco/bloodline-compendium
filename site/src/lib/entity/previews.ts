@@ -49,6 +49,15 @@ export interface SpellsongPreview {
 	route: string | null;
 }
 
+/** What a discipline link's preview shows: its category and what it teaches. */
+export interface DisciplinePreview {
+	kind: 'discipline';
+	name: string;
+	category: string;
+	/** Its skills, passives and spellsongs counted, such as "31 skills and 13 passives", or null when it has none. */
+	contents: string | null;
+}
+
 /**
  * The previews of a hosted kind's entries on one host page, keyed by their anchor, which a link's fragment picks.
  */
@@ -61,7 +70,8 @@ export interface HostedPreviews<P extends PassivePreview | SpellsongPreview> {
  * Every kind's preview. A kind gets previews by adding its type here, its kind to `previewKinds`, its tooltip to
  * `TooltipPresenter.svelte` and its data to `previewSources` in `server/previews.ts`.
  */
-export type Preview = ItemPreview | SkillPreview | PassivePreview | SpellsongPreview;
+export type Preview =
+	ItemPreview | SkillPreview | PassivePreview | SpellsongPreview | DisciplinePreview;
 
 /** A preview resource: one entity's preview, or the previews of a hosted kind's entries on one page. */
 export type PreviewResource =
@@ -72,7 +82,8 @@ export const previewKinds: ReadonlySet<EntityKind> = new Set<Preview['kind']>([
 	'item',
 	'skill',
 	'passive',
-	'spellsong'
+	'spellsong',
+	'discipline'
 ]);
 
 /** The address of a kind's preview data, which `routes/tooltips/[kind]/[slug].json` prerenders. */

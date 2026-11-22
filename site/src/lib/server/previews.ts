@@ -10,8 +10,9 @@ import { entries as itemEntries } from '../../routes/items/[slug]/+page.server.j
 import { firstRoute } from '../items/acquisition.js';
 import { sourceHeadings } from '../labels.js';
 import { rankCosts } from '../rules/progression.js';
-import { skillStatus } from '../skills/describe.js';
+import { disciplineContents, skillStatus } from '../skills/describe.js';
 import type {
+	DisciplinePreview,
 	HostedPreviews,
 	ItemPreview,
 	PassivePreview,
@@ -101,6 +102,22 @@ export const previewSources: {
 						}
 					])
 				)
+			};
+		}
+	},
+	discipline: {
+		async slugs() {
+			return (await readDisciplines()).disciplines.map((discipline) => discipline.slug);
+		},
+		async build(slug): Promise<DisciplinePreview> {
+			const summary = (await readDisciplines()).disciplines.find(
+				(discipline) => discipline.slug === slug
+			)!;
+			return {
+				kind: 'discipline',
+				name: summary.name,
+				category: summary.category.name,
+				contents: disciplineContents(summary)
 			};
 		}
 	}

@@ -554,14 +554,14 @@ internal sealed class SkillProducer
             ),
             Facet("availability", "Availability", Enum.GetNames<ItemStatus>().Select(Camel)) with
             {
-                Labels = new Dictionary<string, string>
-                {
-                    [Camel(nameof(ItemStatus.Obtainable))] = "A way to get it is known",
-                    [Camel(nameof(ItemStatus.NoKnownSource))] = "No known source",
-                    [Camel(nameof(ItemStatus.NotInNormalPlay))] = "Not in normal play",
-                },
+                Labels = ItemList.Availability.ToDictionary(
+                    pair => Camel(pair.Key.ToString()),
+                    pair => pair.Value
+                ),
             },
-        }.Where(facet => facet.Values.Count > 0).ToArray();
+        }
+            .Where(facet => facet.Values.Count > 0)
+            .ToArray();
     }
 
     /// <summary>The skills table's rows by name, which the game looks up without regard to case.</summary>

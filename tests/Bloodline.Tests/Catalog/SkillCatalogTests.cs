@@ -356,7 +356,7 @@ public sealed class SkillVersionTests
         Assert.Single(page.Sources);
         Assert.Null(page.VersionId);
         Assert.Equal(2, merged.References.Count);
-        // Skills that show something else become versions, labelled as the game's tooltip line.
+        // Skills that show something else become versions, labelled value first as item tabs are.
         var versions = EntityVersions.Group(
             [
                 Skill("Crush", 1, ItemStatus.Obtainable),
@@ -365,7 +365,7 @@ public sealed class SkillVersionTests
             SkillProducer.Versions
         );
         Assert.Equal(
-            ["Cooldown: 1 seconds", "Cooldown: 15 seconds"],
+            ["1-Second Cooldown", "15-Second Cooldown"],
             versions.Entities.Select(skill => skill.VersionLabel)
         );
         var shared = Assert.Single(EntityVersions.Pages(versions.Entities, SkillProducer.Versions));

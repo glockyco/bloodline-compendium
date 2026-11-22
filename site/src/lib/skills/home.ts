@@ -1,9 +1,10 @@
 import type { DisciplineIndex, SkillIndex } from '../site-data.js';
 
-/** A skill window category on the home page: its disciplines and icons of the skills it teaches. */
+/** A skill window category on the home page: its disciplines, its skills with a known way to learn them, and icons. */
 export interface HomeSkillGroup {
 	slug: string;
 	name: string;
+	count: number;
 	disciplines: string[];
 	icons: string[];
 }
@@ -29,6 +30,9 @@ export function homeSkills(disciplines: DisciplineIndex, skills: SkillIndex): Ho
 		groups: categories.map((category) => ({
 			slug: category.slug,
 			name: category.name,
+			count: skills.skills.filter(
+				(skill) => skill.category === category.slug && skill.status === 'obtainable'
+			).length,
 			disciplines: disciplines.disciplines
 				.filter((entry) => entry.category.slug === category.slug)
 				.map((entry) => entry.name),

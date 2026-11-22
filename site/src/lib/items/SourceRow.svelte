@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Source } from '../site-data.js';
+	import type { RelationCondition, Source } from '../site-data.js';
 	import { formatNumber, formatChanceRange } from '../format.js';
 	import { chanceText, formatAmount, oddsLabel, payPrice, placedKinds } from './acquisition.js';
 	import EntityLink from '../ui/EntityLink.svelte';
@@ -13,6 +13,7 @@
 		showPlaces = true,
 		placeFirst = false,
 		showUnit = true,
+		levelCondition,
 		id
 	}: {
 		source: Source;
@@ -24,8 +25,23 @@
 		placeFirst?: boolean;
 		/** Whether the chance names its event, which the heading names instead when every row shares it. */
 		showUnit?: boolean;
+		/**
+		 * The kind of condition a level column shows, such as a skill tree's discipline level. The row then shows its
+		 * value in that column, and its conditions leave it out.
+		 */
+		levelCondition?: RelationCondition['kind'];
 		id: string;
 	} = $props();
+	const level = $derived(
+		levelCondition
+			? source.conditions.find((condition) => condition.kind === levelCondition)
+			: undefined
+	);
+	const conditions = $derived(
+		levelCondition
+			? source.conditions.filter((condition) => condition.kind !== levelCondition)
+			: source.conditions
+	);
 	// The camp maps of one terrain share their terrain's name, so a list names each place once.
 	const places = $derived(
 		source.places.filter(
@@ -49,7 +65,7 @@
 		<span class="relation-name"
 			>{#if placeFirst}{@render placeList()}{:else}<EntityLink entity={source.entity} />{/if}</span
 		>
-		<Conditions conditions={source.conditions} />
+		<Conditions {conditions} />
 		<!-- Random loot and crops stand nowhere in particular, so only ways that stand somewhere miss a place. -->
 		{#if showPlaces && !placeFirst && (places.length || source.settlement || placedKinds.has(source.kind))}<p
 				class="source-places"
@@ -82,6 +98,10 @@
 			</details>
 		{/if}
 	</td>
+	{#if levelCondition}<td class="numeric"
+			>{#if level?.value != null}{formatNumber(level.value)}{:else}<span class="muted">Unknown</span
+				>{/if}</td
+		>{/if}
 	{#if showAmount}<td class="numeric"
 			>{source.amount ? formatAmount(source.amount) : 'Unknown'}<small
 				>{source.amount?.max === 1 ? 'item' : 'items'}</small

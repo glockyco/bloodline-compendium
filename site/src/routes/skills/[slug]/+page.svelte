@@ -46,10 +46,10 @@
 		<li aria-current="page" data-game>{skill.name}</li>
 	</ol>
 </nav>
-<EntityArticle {kind}>
+<EntityArticle {kind} name={data.skill.name}>
 	<EntityVersions {versions} name={skill.name} bind:selected>
 		{#snippet heading()}
-			<h1 data-pagefind-meta="title" data-game>{skill.name}</h1>
+			<h1 data-game>{skill.name}</h1>
 			<p class="identity">
 				<a
 					href={kindPath(

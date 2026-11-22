@@ -98,10 +98,13 @@
 				label: `${formatNumber(data.skills.known)} skills with a known way to learn them`
 			}}
 		/>
-		<CardGrid rows={3}>
+		<CardGrid rows={3} columns={4}>
 			{#each data.skills.groups as group (group.slug)}
 				<Card href={kindPath('discipline', data.kinds, '#' + group.slug)!}>
-					<span class="group-head"><h3>{group.name}</h3></span>
+					<span class="group-head"
+						><h3>{group.name}</h3>
+						<Count value={group.count} /></span
+					>
 					<span class="group-text" data-game>{group.disciplines.join(', ')}</span>
 					<span class="slots" data-ui="slots">
 						{#each [0, 1, 2, 3, 4] as slot (slot)}<IconSlot
@@ -111,32 +114,6 @@
 				</Card>
 			{/each}
 		</CardGrid>
-	</section>
-
-	<section aria-labelledby="ways-heading">
-		<SectionHeading id="ways-heading" title="How to Get Items" />
-		<ul class="ways">
-			{#each data.ways as way (way.key)}
-				<li>
-					<a
-						class="way"
-						href={kindPath(
-							'item',
-							data.kinds,
-							`?${way.kinds.map((kind) => `source=${kind}`).join('&')}`
-						)!}
-					>
-						<span class="stack">
-							{#each way.icons as icon (icon)}<IconSlot {icon} size="stack" />{/each}
-						</span>
-						<span class="way-text"><b>{way.label}</b><span>{way.text}</span></span>
-						<span class="way-count"
-							>{formatNumber(way.count)}<small>{way.count === 1 ? 'item' : 'items'}</small></span
-						>
-					</a>
-				</li>
-			{/each}
-		</ul>
 	</section>
 </div>
 
@@ -206,11 +183,6 @@
 	.content > section {
 		margin: var(--gap-section) 0 0;
 	}
-	ul {
-		margin: 0;
-		padding: 0;
-		list-style: none;
-	}
 	.group-head {
 		display: flex;
 		align-items: baseline;
@@ -237,62 +209,6 @@
 		flex-wrap: wrap;
 		gap: var(--gap-inline) var(--gap-groups);
 		margin: var(--gap-inline) 0 0;
-		color: var(--text-muted);
-	}
-
-	.ways {
-		display: grid;
-		/* At most two columns, so a row keeps room for its label beside its samples and count. */
-		grid-template-columns: repeat(
-			auto-fill,
-			minmax(max(min(100%, var(--size-way)), calc((100% - var(--gap-section)) / 2)), 1fr)
-		);
-		column-gap: var(--gap-section);
-	}
-	.ways > li {
-		display: grid;
-	}
-	.way {
-		display: grid;
-		grid-template-columns: auto minmax(0, 1fr) auto;
-		align-items: center;
-		gap: var(--gap-block);
-		padding: var(--inset) 0;
-		border-bottom: var(--border-width) solid var(--border);
-		color: var(--text);
-		text-decoration: none;
-	}
-	.way:hover b {
-		text-decoration: underline;
-	}
-	.stack {
-		display: grid;
-		grid-template-columns: repeat(3, var(--size-icon-stack));
-		gap: var(--gap-line);
-	}
-	.way-text {
-		display: grid;
-	}
-	.way-text b {
-		font-weight: var(--weight-strong);
-	}
-	.way-text span {
-		color: var(--text-muted);
-		font-size: var(--type-meta);
-		line-height: var(--leading-meta);
-	}
-	.way-count {
-		font-family: var(--font-heading);
-		font-size: var(--type-sub);
-		line-height: var(--leading-display);
-		text-align: right;
-		font-variant-numeric: tabular-nums;
-	}
-	.way-count small {
-		display: block;
-		margin-top: var(--gap-line);
-		font-family: var(--font-body);
-		font-size: var(--type-meta);
 		color: var(--text-muted);
 	}
 

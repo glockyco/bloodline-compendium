@@ -604,7 +604,7 @@ test('renders typed references and every relation without JavaScript', async ({
 		await expect(
 			page
 				.locator('.source-group', { has: page.locator('#source-shop') })
-				.locator('.place-heading')
+				.locator('th[scope="colgroup"]')
 				.first()
 		).toContainText('Glass Reach');
 		await expect(source).toContainText('Stock refresh conditions are unknown.');

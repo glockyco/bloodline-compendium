@@ -320,7 +320,11 @@
 									class:numeric={column.numeric}
 									aria-sort={ariaSort(column.id)}
 									><button type="button" class="sort" onclick={() => sort(column.id)}
-										>{column.label}<span
+										><span class="sort-label"
+											>{column.label}{#if 'unit' in column && column.unit}<small class="unit"
+													>{column.unit}</small
+												>{/if}</span
+										><span
 											class="sort-mark"
 											class:idle={list.sort.column !== column.id}
 											aria-hidden="true"
@@ -683,6 +687,19 @@
 	}
 	.sort-mark {
 		color: var(--accent);
+	}
+	/* A heading's unit sits under its label, aligned with it, so the arrow stays beside the label. */
+	.sort-label {
+		display: grid;
+		justify-items: inherit;
+	}
+	th.numeric .sort-label {
+		justify-items: end;
+	}
+	.sort-label .unit {
+		margin: 0;
+		color: var(--text-muted);
+		font-weight: var(--weight-regular);
 	}
 	/* Only the active column shows its arrow, and an idle arrow appears on hover and focus. */
 	.sort-mark.idle {

@@ -173,8 +173,9 @@ internal static class EntityVersions
             Stat.Speed => value + " Speed",
             Stat.DamageContribution => Signed(fact, value) + " Damage",
             Stat.SpeedContribution => Signed(fact, value) + " Speed",
-            // A value with a unit reads as the game's tooltip line, such as "Cooldown: 15 seconds".
-            _ when fact.Unit is { } unit => $"{fact.TooltipLabel ?? fact.Label}: {value} {unit}",
+            // A duration reads as items' tabs do, value first, such as "15-Second Cooldown".
+            _ when fact.Unit == "seconds" => $"{value}-Second {fact.Label}",
+            _ when fact.Unit is { } unit => $"{fact.Label}: {value} {unit}",
             _ => value + " " + fact.Label,
         };
     }

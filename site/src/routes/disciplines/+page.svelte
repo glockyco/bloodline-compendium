@@ -4,7 +4,7 @@
 	import CardGrid from '#lib/ui/CardGrid.svelte';
 	import Card from '#lib/ui/Card.svelte';
 	import { entityPath } from '#lib/entities.js';
-	import { plural } from '#lib/format.js';
+	import { disciplineContents } from '#lib/skills/describe.js';
 	let { data } = $props();
 	// The categories in the skill window's order, which the catalog keeps.
 	const categories = $derived(
@@ -12,15 +12,6 @@
 			([, category]) => category
 		)
 	);
-	function counts(discipline: (typeof data.index.disciplines)[number]): string {
-		return [
-			discipline.skills ? plural(discipline.skills, 'skill', 'skills') : null,
-			discipline.passives ? plural(discipline.passives, 'passive', 'passives') : null,
-			discipline.spellsongs ? plural(discipline.spellsongs, 'spellsong', 'spellsongs') : null
-		]
-			.filter(Boolean)
-			.join(', ');
-	}
 </script>
 
 <SeoHead
@@ -48,7 +39,7 @@
 						)!}
 					>
 						<h3 data-game>{discipline.name}</h3>
-						<span class="muted">{counts(discipline)}</span>
+						<span class="muted">{disciplineContents(discipline)}</span>
 					</Card>
 				{/each}
 			</CardGrid>

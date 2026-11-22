@@ -5,28 +5,21 @@
 	import DisciplineTables from '#lib/skills/DisciplineTables.svelte';
 	import BugsSection from '#lib/entity/BugsSection.svelte';
 	import { entityPath, kindPath } from '#lib/entities.js';
-	import { plural } from '#lib/format.js';
-	const andList = new Intl.ListFormat('en', { type: 'conjunction' });
+	import { disciplineContents } from '#lib/skills/describe.js';
 	let { data } = $props();
 	const discipline = $derived(data.discipline);
 	const kind = $derived(data.kinds.find((entry) => entry.kind === discipline.kind)!);
 	const listPath = $derived(kindPath(discipline.kind, data.kinds)!);
-	const skills = $derived(discipline.skillRows.reduce((sum, row) => sum + row.slots.length, 0));
-	const passives = $derived(
-		discipline.passiveRows.reduce((sum, row) => sum + row.passives.length, 0)
-	);
 	const contents = $derived(
-		[
-			skills ? plural(skills, 'skill', 'skills') : null,
-			passives ? plural(passives, 'passive', 'passives') : null,
-			discipline.spellsongs.length
-				? plural(discipline.spellsongs.length, 'spellsong', 'spellsongs')
-				: null
-		].filter((part) => part !== null)
+		disciplineContents({
+			skills: discipline.skillRows.reduce((sum, row) => sum + row.slots.length, 0),
+			passives: discipline.passiveRows.reduce((sum, row) => sum + row.passives.length, 0),
+			spellsongs: discipline.spellsongs.length
+		})
 	);
 	const description = $derived(
 		`${discipline.name} is a ${discipline.category.name} discipline in The Bloodline.` +
-			(contents.length ? ` It has ${andList.format(contents)}.` : '')
+			(contents ? ` It has ${contents}.` : '')
 	);
 	const reference = $derived({
 		kind: discipline.kind,
@@ -55,9 +48,9 @@
 		<li aria-current="page" data-game>{discipline.name}</li>
 	</ol>
 </nav>
-<EntityArticle {kind}>
+<EntityArticle {kind} name={discipline.name}>
 	<div class="item-heading">
-		<h1 data-pagefind-meta="title" data-game>{discipline.name}</h1>
+		<h1 data-game>{discipline.name}</h1>
 		<p class="identity">
 			<a href={kindPath(discipline.kind, data.kinds, '#' + discipline.category.slug)!}
 				>{discipline.category.name}</a
@@ -65,7 +58,12 @@
 		</p>
 	</div>
 	<div class="item-relations" data-pagefind-ignore="all">
-		<DisciplineTables {discipline} skillFacts={data.skillFacts} />
+		<!-- Comparison only: the spellsong layout option to build. Removed once the layout is chosen. -->
+		<DisciplineTables
+			{discipline}
+			skillFacts={data.skillFacts}
+			songLayout={import.meta.env.VITE_SONG_LAYOUT ?? 'table'}
+		/>
 		<BugsSection notes={discipline.notes} name={discipline.name} />
 	</div>
 </EntityArticle>
