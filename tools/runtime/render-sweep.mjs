@@ -4,8 +4,8 @@
 // male render showed body meshes, because only those have female counterparts. Items that earlier sweeps of the
 // build already rendered on the same body, or that failed, are skipped, so the sweep can resume. --again renders
 // them anyway, such as after a view changed, and the latest render of an item counts. An item that fails is written
-// to render-failures.json in the runtime directory with its error, and the game restarts only when it stopped
-// answering.
+// to render-failures.json in the runtime directory with its error. When the game stopped answering or the character
+// kept a piece on, the game restarts and the item is tried once more.
 import { execFileSync } from "node:child_process";
 import { readFile, readdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
@@ -112,8 +112,8 @@ console.log(
   `${done.size} items already rendered on the ${body} body, ${failed.size} failed before, ${remaining.length} to do.`,
 );
 if (remaining.length) restart();
-let count = 0;
-for (const key of remaining) {
+/** Captures an item's render, and returns the line of the error that tells why it failed or null when it is kept. */
+function capture(key) {
   const args = {
     item: key,
     name: renderName(key, body),
@@ -122,18 +122,34 @@ for (const key of remaining) {
   if (parts.has(key)) args.part = parts.get(key);
   try {
     lab("capture-model", JSON.stringify(args));
+    return null;
   } catch (error) {
     const lines = String(error.stderr || error.message).split("\n");
-    const message = (
+    return (
       lines.find((line) =>
         /error|failed|did not|draws|shows nothing|touches/i.test(line),
       ) ?? lines[0]
     ).trim();
+  }
+}
+
+// An error about the item's own model leaves the game as it was. A game that stopped answering, or a character that
+// kept a piece on or never showed the item, would fail every capture after it too.
+const stuck =
+  /Timed out|not running|No session|Still equipped|not equipped|No inventory slot/i;
+let count = 0;
+for (const key of remaining) {
+  let message = capture(key);
+  if (message && stuck.test(message)) {
+    console.log(`${key} failed: ${message} Trying once more on a new game.`);
+    restart();
+    message = capture(key);
+  }
+  if (message) {
     console.log(`${key} failed: ${message}`);
     failures.push({ item: key, body, error: message });
     await writeFile(failuresFile, JSON.stringify(failures, null, 2) + "\n");
-    // An error the game reported leaves it running. Only a game that stopped answering needs a restart.
-    if (/Timed out|not running|No session/i.test(message)) restart();
+    if (stuck.test(message)) restart();
     continue;
   }
   if (++count % 50 === 0)
