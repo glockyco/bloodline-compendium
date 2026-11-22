@@ -119,6 +119,8 @@ The [runtime-checks skill](.agent/skills/runtime-checks/SKILL.md) lists the comm
 
 Read [AGENTS.md](AGENTS.md) for contribution boundaries and browser-review requirements. [openspec/](openspec/) holds behavior requirements and change designs. [SiteDataModel.cs](src/Bloodline/SiteData/SiteDataModel.cs) defines the site contract. Regenerate its consumers with `bun run types` after changing it.
 
+Stored characters and shared build links outlive releases. Raise `PlannerFormat` in [SkillProducer.cs](src/Bloodline/Catalog/SkillProducer.cs) when a field of `planner.json` changes meaning, and `linkVersion` in [link.ts](site/src/lib/planner/link.ts) when the link's data changes shape, because an old link must fail with a message rather than open a different build.
+
 Update dependencies by hand. Leave the Renovate app disabled for this repository, and review CUE4Parse updates against regenerated site data because a parser change can change published facts.
 
 Run the same checks as CI:
