@@ -6,7 +6,7 @@ Evidence comes from build 24464547: the extracted records, the code index in `re
 
 ### How the game presents progression
 
-- The skill window opens four categories, Magic, Melee, Ranged and Tech, and each category's menu opens trees. Each of the 21 level-based trees is created by one button handler of `SkillTree_Subcategories_MAGIC`, `_Melee`, `_RANGED` or `_GADGETS` (code index). The Biomancy button opens `ArcaneLBSkillTree`. 21 older trees drawn with `ConnectionLine` widgets, such as `PyromancySkillTree`, are referenced only by themselves, so no player reaches them.
+- The skill window opens four categories, Magic, Melee, Ranged and Tech, and each category's menu opens trees. Each of the 21 level-based trees is created by one button handler of `SkillTree_Subcategories_MAGIC`, `_Melee`, `_RANGED` or `_GADGETS` (code index). The button named Biomancy reads "Arcane" and opens `ArcaneLBSkillTree`. 21 older trees drawn with `ConnectionLine` widgets, such as `PyromancySkillTree`, are referenced only by themselves, so no player reaches them.
 - A tree window shows a header with the discipline level, skill points and the discipline's proficiency points. Its left panel lists skills in rows "<Discipline> Level N:", and its right panel, "<Discipline> Proficiency Tree", lists passives in rows "Proficiency Level N:". Ranked passives show rank pips. Nothing connects the nodes (run treeshots1, screenshots of all 21 trees). Lute shows "You can find spellsongs hidden throughout the world!" over 13 cards that read "???" until learned.
 - The live trees hold 327 skill slots, each with a different skill, and 138 passive buttons (run skilltrees1). The records hold the same slots and passives with the same values (extraction since commit `da42013`, compared field by field with skilltrees1).
 - A slot names its skill class, `Required Level` and `Level To Check`, the discipline whose level it checks. Roanan's Call in the Druid tree checks Unarmed level 1. A passive names `Passive Name`, `Passive Description`, `Required Level`, `Level To Check`, `Point Cost`, `Point Increase Per Level`, `MultiLevel`, `Max MultiLevel` and `MultiLevel Passive Name`.
@@ -16,7 +16,7 @@ Evidence comes from build 24464547: the extracted records, the code index in `re
 - Unlocking a skill costs 1 skill point. Pressing it again refunds the point (run passives1).
 - Rank k of a ranked passive costs `Point Cost + (k - 1) x Point Increase Per Level`, up to `Max MultiLevel` ranks: Lasting Servitude cost 2, 4, 6, 8 and 10, Lingering Souls 1 to 5. A single-rank passive charges `Point Cost` once (run passives1).
 - A discipline level grants 1 proficiency point of that discipline, Necromancy 2 (run grants1). Necromancy's tracking adds one besides `Add Proficiency Points`.
-- Blood Magic level ups set the points to the game instance's `Blood Level` plus 1, replacing the balance. `Blood Level` is the gore option of the settings window, which `SettingsWindow1`'s Blood selection writes and enemies read to bleed (code index, run treeshots1 with `Blood Level` 7 and 0). Blood pool rituals and necromancer shrines also grant points through `Grant Bloodmagic Proficiency Point` and `Grant Necromancy Proficiency Point`.
+- Each Blood Magic level up sets the Blood Magic points to the game instance's `Blood Level` plus 1, whatever was spent. `Blood Level` is the "Blood Levels" option of the video settings window, which `SettingsWindow1`'s Blood selection writes and enemies read to bleed. In run rowgate1 the window's own box chose "No blood", "A bit of blood", "Default Amount" and "BLOODBATH", and the next level up left 2, 3, 4 and 6 points. After spending 2 of 3 points, a level up restored 3. Blood pool rituals and necromancer shrines also grant points through `Grant Bloodmagic Proficiency Point` and `Grant Necromancy Proficiency Point`.
 - Staff and Vampirism level ups grant no points after the first. Neither tree has passives.
 
 ### Where skills come from
@@ -72,9 +72,9 @@ The producer finds live trees as the widget classes that the subcategory menus' 
 
 ### Tree layout from the widget tree
 
-Extraction records, for every Blueprint widget, its parent panel and position in that panel, and the text of text widgets, so the producer can read row labels and the order of slots and passives within a row. The producer groups slots by their row panel and checks that every slot in a row shares one required level, and passives likewise. A mismatch fails the catalog rather than publishing a layout the game does not show.
+Extraction records every widget of a widget tree with its parent panel and position, and the text of text widgets. A row is the panel that holds a level label, and each slot sits in its own scale box inside it, so the producer follows a slot's chain of panels up to the row and orders a row's entries by their chain of positions. Each entry keeps its own required level, because that level gates it: in run rowgate1, at Necromancy level 6, Lasting Servitude, which requires level 5 and sits in the row labelled level 10, bought its ranks, while Death Dealer in the same row, which requires level 10, stayed locked. Entries whose level differs from their row's label go to the maintainer report.
 
-The discipline name comes from the label the game shows on its menu button and in the tree header. If that label is not in the records after this extension, the change records where it lives before using any other name.
+The discipline name is the label of the menu button that opens the tree, such as "Arcane" for the button named Biomancy and "Focuses" for Staves. Extraction records each widget Blueprint's delegate bindings, so the producer follows a button's click binding to its handler and the handler to the tree class it creates. Handler names alone mislead, because copied handlers keep the name of the button they were copied from, such as the Flintlock button's handler named after Pyromancy.
 
 ### Skills
 
@@ -123,7 +123,6 @@ Refactor the catalog, then the site, each verified by unchanged item output and 
 ## Open Questions
 
 - Which row the game reads for classes with two rows.
-- Where the discipline label lives in the records.
 - How a spellsong's tune maps to the four note directions the game draws, observed in the lab.
 - Whether the Blood Magic defect reproduces through the settings window, which decides the known issue.
 

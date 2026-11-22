@@ -1,36 +1,36 @@
 ## 1. Extraction
 
-- [ ] 1.1 Record each Blueprint widget's parent panel and position, and text widgets with their text, in `ExtractionRunner.Widgets`, and update the `ClassRecord` documentation
-- [ ] 1.2 Re-extract build 24464547 and confirm every tree row's slots and passives match the treeshots1 screenshots in order
+- [x] 1.1 Record each Blueprint widget's parent panel and position, and text widgets with their text, in `ExtractionRunner.Widgets`, and update the `ClassRecord` documentation
+- [x] 1.2 Re-extract build 24464547 and confirm every tree row's slots and passives match the treeshots1 screenshots in order
 
 ## 2. Catalog by kind
 
-- [ ] 2.1 Save the current real-data site data, claims and report as the comparison baseline outside Git
-- [ ] 2.2 Introduce kind producers, move item selection, facts, icons, versions and tooltip comparison into `ItemProducer`, and make `CatalogBuilder` an orchestrator
-- [ ] 2.3 Make source mechanisms return sources for an entity reference, and move merging, statuses, gaps and status evidence to every kind with sources
+- [x] 2.1 Save the current real-data site data, claims and report as the comparison baseline outside Git
+- [x] 2.2 Introduce kind producers, move item selection, facts, icons, versions and tooltip comparison into `ItemProducer`, and make `CatalogBuilder` an orchestrator
+- [x] 2.3 Make source mechanisms return sources for an entity reference, and move merging, statuses, gaps and status evidence to every kind with sources
 - [ ] 2.4 Make claims one file keyed by entity reference, read by `compare`, and make the writer write every kind's index and pages
 - [ ] 2.5 Add host kinds to the registry, with link targets, sitemap and graph checks for anchored entries
-- [ ] 2.6 Regenerate schema and types, update fixtures and C# tests, and confirm the real-data item output matches the baseline file by file
+- [x] 2.6 Regenerate schema and types, update fixtures and C# tests, and confirm the real-data item output matches the baseline file by file
 
 ## 3. Site by kind
 
-- [ ] 3.1 Reorganize `site/src/lib/` into `items/`, `skills/`, `entity/`, `list/` and `ui/` folders
-- [ ] 3.2 Extract the shared list from `routes/items/+page.svelte` and keep the item list's behaviour, covered by the existing browser tests
+- [x] 3.1 Reorganize `site/src/lib/` into `items/`, `skills/`, `entity/`, `list/` and `ui/` folders
+- [x] 3.2 Extract the shared list from `routes/items/+page.svelte` and keep the item list's behaviour, covered by the existing browser tests
 - [ ] 3.3 Extract the page shell and route factory, and register tooltips per kind in the presenter
 - [ ] 3.4 Read the Browse menu, footer lists, home entries, search lists and missing-page links from the kind registry
 - [ ] 3.5 Review the item list and an item page at 1440 and 390 px on real data against production
 
 ## 4. Skills in the catalog
 
-- [ ] 4.1 Find live trees from the subcategory menus' button handlers, with category, order and the label the game shows
-- [ ] 4.2 Produce disciplines with skill and passive rows from the widget layout, failing on mixed levels in a row
+- [x] 4.1 Find live trees from the subcategory menus' button handlers, with category, order and the label the game shows
+- [x] 4.2 Produce disciplines with skill and passive rows from the widget layout, reporting entries whose level differs from their row
 - [ ] 4.3 Produce skills from the skills table and live trees, establish in the lab which row the game reads for the three classes with two rows, and report the rest
-- [ ] 4.4 Add source mechanisms for tree slots, skill books, dialogue unlocks and code grants, with the reviewed table of event wording and its fingerprint check
-- [ ] 4.5 Assign statuses to skills without a source, distinguishing older trees from no reference
+- [x] 4.4 Add source mechanisms for tree slots, skill books, dialogue unlocks and code grants, with the reviewed table of event wording and its fingerprint check
+- [x] 4.5 Assign statuses to skills without a source, distinguishing older trees from no reference
 - [ ] 4.6 Produce passives with rank costs and spellsongs with their note sheet sources, and observe in the lab how tunes map to note directions
 - [ ] 4.7 Compare the tree records with the latest `skill-trees.lua` run in the maintainer report
 - [ ] 4.8 Read every tree skill's in-game tooltip in the lab and compare it with the skill's facts
-- [ ] 4.9 Add producer tests on invented records for reachability, layout, sources, statuses and rank costs
+- [x] 4.9 Add producer tests on invented records for reachability, layout, sources, statuses and rank costs
 
 ## 5. Rules and issues
 

@@ -9,20 +9,24 @@ Publishes the game's disciplines, skills, passives and spellsongs with where eac
 ### Requirement: Disciplines a player reaches
 The catalog SHALL publish as disciplines the skill trees that the skill window's menus open, found through the code that opens them, with the category and order of their menu. A tree that no menu opens SHALL NOT be published, and SHALL NOT be listed by name anywhere in the catalog's code.
 
-#### Scenario: Menu label differs from its tree
-- **WHEN** the Magic menu's Biomancy button opens the Arcane tree
-- **THEN** the catalog publishes one discipline for that tree under the label the game shows
+#### Scenario: Button name differs from its label
+- **WHEN** the Magic menu's button named Biomancy reads "Arcane" and opens the Arcane tree
+- **THEN** the catalog publishes one discipline for that tree under the label "Arcane"
 
 #### Scenario: Older tree beside a live one
 - **WHEN** a tree class exists that no menu opens
 - **THEN** it has no discipline and its skills get sources only from what else teaches them
 
 ### Requirement: Trees as the game lays them out
-Each discipline SHALL list its skill slots and its passives in the rows and order of the game's tree window, each row with its required level. The catalog SHALL fail when the slots or passives in one row disagree on their required level.
+Each discipline SHALL list its skill slots and its passives in the rows and order of the game's tree window, each row with the level its label shows. Each slot and passive SHALL carry its own required level, which decides when it unlocks. A slot or passive whose required level differs from its row's label SHALL appear in the maintainer report.
 
 #### Scenario: Row with several skills
 - **WHEN** a tree row holds four skills of discipline level 10
 - **THEN** the discipline lists that row once with the four skills in the game's order
+
+#### Scenario: Passive in a row of another level
+- **WHEN** a passive that requires level 5 sits in the row labelled level 10
+- **THEN** the discipline lists it in that row with its own required level of 5, and the maintainer report names it
 
 ### Requirement: Every skill the game defines
 The catalog SHALL publish every skill class that the skills table or a live tree names, keyed by its class path. A class with several table rows SHALL take its facts from the row the game reads for it, and the other rows SHALL appear in the maintainer report. A table row without a class SHALL appear in the maintainer report and SHALL NOT be published.
