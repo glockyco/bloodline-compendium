@@ -31,11 +31,8 @@
 		{#if data.issues.length}<nav class="issue-index text-side panel" aria-labelledby="issue-index">
 				<h2 id="issue-index">On This Page</h2>
 				<ol>
-					{#each data.issues as { issue, affected } (issue.id)}<li>
-							<a href={'#' + issue.id}>{issue.title}</a>{#if affected.length}<span class="muted"
-									>{formatNumber(affected.length)}
-									{kindCount(affected, data.kinds).noun}</span
-								>{/if}
+					{#each data.issues as { issue } (issue.id)}<li>
+							<a href={'#' + issue.id} title={issue.title}>{issue.title}</a>
 						</li>{/each}
 				</ol>
 			</nav>{/if}
@@ -122,15 +119,16 @@
 		padding: 0;
 		list-style: none;
 	}
-	/* Each entry keeps its count in a column of its own, so a wrapped title never strands it. */
+	/* Each title keeps one line in the side column and ends in an ellipsis where it is longer, with the whole
+	   title on hover. Each issue shows its count under Affected. */
 	.issue-index li {
-		display: grid;
-		grid-template-columns: minmax(0, 1fr) max-content;
-		align-items: baseline;
-		gap: var(--gap-block);
+		min-width: 0;
 	}
-	.issue-index span {
-		font-size: var(--type-0);
+	.issue-index a {
+		display: block;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 	.text-layout {
 		margin-top: var(--gap-section);
