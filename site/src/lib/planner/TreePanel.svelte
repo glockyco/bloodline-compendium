@@ -49,6 +49,23 @@
 			icon: skill?.icon ?? null
 		};
 	}
+	// A passive links to its row on the discipline page, where its tooltip shows each rank's cost.
+	const passiveReference = (passive: PlannerDiscipline['passives'][number]): EntityReference => ({
+		kind: 'passive',
+		key: passive.key,
+		name: passive.name,
+		slug: null,
+		icon: passive.icon,
+		fragment: passive.anchor,
+		host: {
+			kind: 'discipline',
+			key: discipline.key,
+			name: discipline.name,
+			slug: discipline.slug,
+			icon: null,
+			fragment: null
+		}
+	});
 	// An entry that checks another discipline's level names it, as the discipline page does.
 	const needs = (required: number, checked: string) =>
 		`Unlocks at ${names.get(checked) ?? 'another discipline'} level ${formatNumber(required)}`;
@@ -118,15 +135,10 @@
 						><th colspan="2" scope="colgroup">Level {formatNumber(passive.requiredLevel)}</th></tr
 					>{/if}<tr class:locked={levelOf(state, passive.levelDiscipline) < passive.requiredLevel}
 					><td
-						><span class="with-icon"
-							>{#if passive.icon}<img
-									src="/icons/{passive.icon}-48.webp"
-									alt=""
-									width="24"
-									height="24"
-									loading="lazy"
-								/>{/if}<span data-game>{passive.name}</span></span
-						>{#if passive.levelDiscipline !== discipline.key}<small
+						><EntityLink
+							entity={passiveReference(passive)}
+							icon
+						/>{#if passive.levelDiscipline !== discipline.key}<small
 								>{needs(passive.requiredLevel, passive.levelDiscipline)}</small
 							>{/if}</td
 					><td class="numeric"
@@ -183,14 +195,5 @@
 	td small {
 		display: block;
 		color: var(--text-muted);
-	}
-	.with-icon {
-		display: inline-flex;
-		align-items: center;
-		gap: var(--gap-inline);
-	}
-	.with-icon img {
-		width: var(--size-icon-inline);
-		height: var(--size-icon-inline);
 	}
 </style>
