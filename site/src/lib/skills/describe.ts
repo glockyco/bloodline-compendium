@@ -19,8 +19,7 @@ export function disciplineContents(
 export const skillStatusSentence: Record<ItemStatus, string> = {
 	obtainable: '',
 	noKnownSource: 'No known way to learn this skill.',
-	notInNormalPlay:
-		'This skill cannot be learned in normal play. It only sits in skill trees the game no longer opens.'
+	notInNormalPlay: 'This skill is unused. The game never offers it to you.'
 };
 
 /** The status sentence a skill page opens with, or null when its sources answer how to learn it. */

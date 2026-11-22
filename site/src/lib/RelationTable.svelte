@@ -27,15 +27,15 @@
 			typeof heading === 'string' ? { label: heading, unit: null } : heading
 		)
 	);
-	// By default, a phone stacks tables with three or more columns, labelling each value after the name, with its
-	// unit, since the stacked rows have no heading.
+	// By default, a phone stacks tables with three or more columns, labelling each value after the name. With no
+	// heading above them, a value carries its column's unit after it, as the game writes "4 seconds".
 	const labels = $derived(
 		parts
 			.slice(1)
-			.map(
-				(heading, index) =>
-					`--label-${index + 2}: ${JSON.stringify(heading.unit ? `${heading.label} (${heading.unit})` : heading.label)}`
-			)
+			.flatMap((heading, index) => [
+				`--label-${index + 2}: ${JSON.stringify(heading.label)}`,
+				`--unit-${index + 2}: ${JSON.stringify(heading.unit ? ' ' + heading.unit : '')}`
+			])
 			.join('; ')
 	);
 </script>
@@ -185,6 +185,26 @@
 		}
 		.relation-panel :global(.stacked td:nth-child(5)::before) {
 			content: var(--label-5);
+		}
+		.relation-panel :global(.stacked td:nth-child(2)::after) {
+			content: var(--unit-2);
+			white-space: pre;
+		}
+		.relation-panel :global(.stacked td:nth-child(3)::after) {
+			content: var(--unit-3);
+			white-space: pre;
+		}
+		.relation-panel :global(.stacked td:nth-child(4)::after) {
+			content: var(--unit-4);
+			white-space: pre;
+		}
+		.relation-panel :global(.stacked td:nth-child(5)::after) {
+			content: var(--unit-5);
+			white-space: pre;
+		}
+		/* A value the row lacks or the game does not tell has no unit to carry. */
+		.relation-panel :global(.stacked td.absent::after) {
+			content: none;
 		}
 	}
 	/* A place that several rows share heads them, so their rows do not repeat it. */

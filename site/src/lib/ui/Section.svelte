@@ -79,9 +79,11 @@
 	.action {
 		margin-left: auto;
 	}
+	/* An intro wraps so its last line never holds a word or two alone. */
 	.line {
 		margin: 0;
 		color: var(--text-muted);
+		text-wrap: pretty;
 	}
 	.body {
 		display: grid;

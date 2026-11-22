@@ -58,12 +58,7 @@
 		</p>
 	</div>
 	<div class="item-relations" data-pagefind-ignore="all">
-		<!-- Comparison only: the spellsong layout option to build. Removed once the layout is chosen. -->
-		<DisciplineTables
-			{discipline}
-			skillFacts={data.skillFacts}
-			songLayout={import.meta.env.VITE_SONG_LAYOUT ?? 'table'}
-		/>
+		<DisciplineTables {discipline} skillFacts={data.skillFacts} />
 		<BugsSection notes={discipline.notes} name={discipline.name} />
 	</div>
 </EntityArticle>

@@ -16,18 +16,15 @@
 	import { rankCosts } from '../rules/progression.js';
 	import Tune from './Tune.svelte';
 	/**
-	 * A discipline's skills, spellsongs and passives, each in one table grouped by the level row the game's window
-	 * shows them in. Skills show the skill list's stat columns that any of them has.
+	 * A discipline's skills and passives in tables grouped by the level row the game's window shows them in, and its
+	 * spellsongs as cards, as the game's grid shows them. Skills show the skill list's stat columns that any has.
 	 */
 	let {
 		discipline,
-		skillFacts,
-		songLayout = 'table'
+		skillFacts
 	}: {
 		discipline: DisciplinePage;
 		skillFacts: Record<string, Fact[]>;
-		/** Comparison only: how spellsongs lay out. Removed once the layout is chosen. */
-		songLayout?: 'table' | 'cards' | 'compact';
 	} = $props();
 	// The relations each entry shows, by the key of the entity at their other end, so the static page carries them.
 	const relationIds = $derived(
@@ -99,7 +96,9 @@
 						><EntityLink entity={slot.skill} icon /><Conditions
 							conditions={ownLevel(slot.requiredLevel, slot.levelDiscipline, row)}
 						/></td
-					>{#each statColumns as column (column.stat)}<td class="numeric"
+					>{#each statColumns as column (column.stat)}<td
+							class="numeric"
+							class:absent={factOf(slot.skill.key, column.stat)?.number == null}
 							>{cell(slot.skill.key, column.stat)}</td
 						>{/each}</tr
 				>{/snippet}</RelationTable
@@ -110,62 +109,22 @@
 		title="Spellsongs"
 		count={discipline.spellsongs.length}
 	>
-		{#if songLayout === 'cards'}<CardGrid rows={4} label="Spellsongs">
-				{#each discipline.spellsongs as song (song.key)}<Card>
-						<h3 id={song.anchor} data-game>{song.name}</h3>
-						<Tune tune={song.tune} />
-						<span data-game>{song.description ?? ''}</span>
-						<span class="muted"
-							>{plural(song.charges, 'charge', 'charges')} · {#each where(song) as source, index (source.relationId)}{index
-									? ', '
-									: ''}<span data-relation-id={source.relationId} data-relation-direction="incoming"
-									>Note sheet in {source.places[0]?.name ?? 'an unknown place'}</span
-								>{:else}No known source{/each}</span
-						>
-					</Card>{/each}
-			</CardGrid>
-		{:else}
-			<RelationTable
-				items={discipline.spellsongs}
-				label="Spellsongs"
-				headings={songLayout === 'compact'
-					? ['Spellsong', 'Tune', 'Charges', 'Note Sheet']
-					: ['Spellsong', 'Tune', 'Charges', 'Note Sheet']}
-				numeric={[false, true, false]}
-				collapse={false}
-				>{#snippet row(song)}<tr id={song.anchor}
-						><td
-							><EntityLink
-								entity={{
-									kind: 'spellsong',
-									key: song.key,
-									name: song.name,
-									slug: null,
-									icon: null,
-									fragment: song.anchor,
-									host: {
-										kind: discipline.kind,
-										key: discipline.key,
-										name: discipline.name,
-										slug: discipline.slug,
-										icon: null
-									}
-								}}
-							/>{#if song.description && songLayout === 'table'}<small data-game
-									>{song.description}</small
-								>{/if}</td
-						><td class="tune-cell"><Tune tune={song.tune} /></td><td class="numeric"
-							>{formatNumber(song.charges)}</td
-						><td
-							>{#each where(song) as source, index (source.relationId)}{index ? ', ' : ''}<span
-									data-relation-id={source.relationId}
-									data-relation-direction="incoming"
-									>{source.places[0]?.name ?? 'Location unknown'}</span
-								>{:else}<span class="muted">No known source</span>{/each}</td
-						></tr
-					>{/snippet}</RelationTable
-			>
-		{/if}
+		<CardGrid rows={4} label="Spellsongs">
+			{#each discipline.spellsongs as song (song.key)}<Card>
+					<h3 id={song.anchor} data-game>{song.name}</h3>
+					<Tune tune={song.tune} />
+					<span data-game>{song.description ?? ''}</span>
+					<span class="muted"
+						>{plural(song.charges, 'charge', 'charges')} · {#each where(song) as source, index (source.relationId)}{index
+								? ', '
+								: ''}<span data-relation-id={source.relationId} data-relation-direction="incoming"
+								>Note sheet in {#if source.places[0]}<EntityLink
+										entity={source.places[0]}
+									/>{:else}an unknown place{/if}</span
+							>{:else}No known source{/each}</span
+					>
+				</Card>{/each}
+		</CardGrid>
 	</Section>{/if}
 {#if passives.length}<Section id="passives" title="Passives" count={passives.length}>
 		<RelationTable
@@ -205,9 +164,5 @@
 	.passive-name img {
 		width: var(--size-icon-inline);
 		height: var(--size-icon-inline);
-	}
-	/* A tune reads as one phrase, so its arrows never wrap. */
-	.tune-cell :global(.tune) {
-		flex-wrap: nowrap;
 	}
 </style>

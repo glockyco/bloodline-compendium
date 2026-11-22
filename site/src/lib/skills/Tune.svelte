@@ -15,9 +15,9 @@
 </span>
 
 <style>
+	/* A tune reads as one phrase, so its arrows never wrap. */
 	.tune {
 		display: inline-flex;
-		flex-wrap: wrap;
 		gap: var(--gap-line);
 	}
 	svg {
