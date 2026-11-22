@@ -15,6 +15,7 @@
 	import { formatNumber, plural } from '../format.js';
 	import { rankCosts } from '../rules/progression.js';
 	import Tune from './Tune.svelte';
+	import { skillRowAnchor } from './anchors.js';
 	/**
 	 * A discipline's skills and passives in tables grouped by the level row the game's window shows them in, and its
 	 * spellsongs as cards, as the game's grid shows them. Skills show the skill list's stat columns that any has.
@@ -90,7 +91,7 @@
 						><th colspan={statColumns.length + 1} scope="colgroup">Level {formatNumber(row)}</th
 						></tr
 					>{/if}<tr
-					id={'skill-' + slot.skill.slug}
+					id={skillRowAnchor(slot.skill.slug ?? '')}
 					data-relation-id={ids(slot.skill.key)}
 					data-relation-direction="outgoing"
 					><td
