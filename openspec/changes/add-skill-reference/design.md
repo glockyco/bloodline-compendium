@@ -78,7 +78,7 @@ The discipline name is the label of the menu button that opens the tree, such as
 
 ### Skills
 
-A skill is a skill class. Its facts come from the table row the game reads for that class, cited by the function that looks the row up. For the three classes with two rows, the lab reads the game's tooltip to establish which row it uses, and the other row is reported as a gap. Rows without a class are reported and not published. Carrion Flock is published with what its class and slot state, and its missing row is a coverage gap shown as unknown facts.
+A skill is a skill class. Its row is the table row named by the class's `SkillId`, matched without regard to case, because the skill slot's tooltip looks rows up that way (`SkillSlot:HandleTooltip`). Its facts are what that tooltip shows: the row's name, description and cooldown, the row's cost as "Mana Cost" or, when the class's `Uses Stamina` is set, "Stamina Cost", and "Base Damage" from the `SkillInfo.Damage` of the class the row names, shown only above zero. In run skilltips1 this rule matched the tooltips of all 327 tree skills, including Thunder Staff, whose class has two rows, and Carrion Flock, whose row names an older class. Rows that no class's `SkillId` names are reported and not published.
 
 A skill's sources are:
 

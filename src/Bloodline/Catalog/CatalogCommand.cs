@@ -103,6 +103,14 @@ internal static class CatalogCommand
                         ? $"Tooltip check: {tooltips.Compared} compared, {tooltips.Unread.Count} unread, {tooltips.Differences.Count} differences, {tooltips.Differences.Count(difference => difference.Reason is null)} without a known cause."
                         : $"Tooltip check: no lab run of build {buildId} read item tooltips."
                 );
+                var skillTooltips = records.SkillTooltips.Count(tooltip =>
+                    catalog.Skills.Skills.Any(skill => skill.Key == tooltip.Skill)
+                );
+                Console.WriteLine(
+                    skillTooltips > 0
+                        ? $"Skill tooltip check: {skillTooltips} compared, {catalog.Report.Gaps.Where(gap => gap.Kind == GapKind.TooltipDifference).SelectMany(gap => gap.Entries).Count(entry => entry.Entity?.Kind == EntityKind.Skill)} differences."
+                        : $"Skill tooltip check: no lab run of build {buildId} read skill tooltips."
+                );
                 return 0;
             }
             catch (Exception error)

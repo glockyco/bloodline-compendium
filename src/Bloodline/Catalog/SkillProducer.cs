@@ -78,8 +78,7 @@ internal sealed class SkillProducer
     )
     {
         var trees = context.SkillTrees.All;
-        var rows = SkillRows(coverage);
-        var skillNames = new Dictionary<string, string>(StringComparer.Ordinal);
+        var rows = SkillRows();
         var treeSkills = trees
             .SelectMany(tree => tree.SkillRows.SelectMany(row => row.Entries))
             .Select(slot => RecordValues.AnyReference(slot.Properties["Skill"]))
@@ -91,14 +90,21 @@ internal sealed class SkillProducer
             .Select(widget => RecordValues.AnyReference(widget.Properties["Skill"]))
             .OfType<string>()
             .ToHashSet(StringComparer.Ordinal);
-        var keys = rows.Keys.Concat(treeSkills).Distinct(StringComparer.Ordinal).ToArray();
+        var keys = TableSkills()
+            .Concat(treeSkills)
+            .Distinct(StringComparer.Ordinal)
+            .Order(StringComparer.Ordinal)
+            .ToArray();
+        var rowOf = keys.ToDictionary(key => key, key => RowOf(key, rows), StringComparer.Ordinal);
+        foreach (var row in rows.Values.Where(row => !rowOf.Values.Contains(row)))
+            coverage.Add(
+                GapKind.UnreadSkillRow,
+                row.Name,
+                null,
+                "No skill's SkillId names this row."
+            );
         var named = keys.Select(key =>
-                (
-                    Key: key,
-                    Name: rows.TryGetValue(key, out var row)
-                        ? RecordValues.Text(row.Values["Name"])
-                        : null
-                )
+                (Key: key, Name: RecordValues.Text(rowOf[key]?.Values["Name"]))
             )
             .ToArray();
         var slugs = Slugs(named.Select(entry => (entry.Key, entry.Name ?? Readable(entry.Key))));
@@ -106,7 +112,7 @@ internal sealed class SkillProducer
         var entities = new List<GraphEntity>();
         foreach (var (key, name) in named)
         {
-            var row = rows.GetValueOrDefault(key);
+            var row = rowOf[key];
             var reference = new EntityReference(
                 EntityKind.Skill,
                 key,
@@ -132,7 +138,7 @@ internal sealed class SkillProducer
                     reference.Name,
                     RecordValues.Text(row?.Values["Description"]),
                     reference.Icon,
-                    Facts(row),
+                    Facts(key, row),
                     sources
                 )
                 {
@@ -461,9 +467,10 @@ internal sealed class SkillProducer
 
     private static readonly (string Id, Stat Stat)[] NumericColumns =
     [
+        ("baseDamage", Stat.BaseDamage),
         ("manaCost", Stat.ManaCost),
+        ("staminaCost", Stat.StaminaCost),
         ("cooldown", Stat.Cooldown),
-        ("castTime", Stat.CastTime),
     ];
 
     private static IReadOnlyList<ListFacet> Facets(
@@ -507,60 +514,58 @@ internal sealed class SkillProducer
         }.Where(facet => facet.Values.Count > 0).ToArray();
     }
 
-    /// <summary>
-    /// The skills table's row for each skill class. A class with several rows takes its first row by name, and the
-    /// others go to the maintainer report. Rows without a class go there too.
-    /// </summary>
-    private Dictionary<string, TableRow> SkillRows(Coverage coverage)
+    /// <summary>The skills table's rows by name, which the game looks up without regard to case.</summary>
+    private Dictionary<string, TableRow> SkillRows()
     {
-        var result = new Dictionary<string, TableRow>(StringComparer.Ordinal);
         var table = context.Records.Tables.SingleOrDefault(table =>
             ItemIdentity.ClassName(table.Path) == SkillsTable
         );
-        if (table is null)
-            return result;
-        foreach (
-            var group in table
-                .Rows.GroupBy(row => RecordValues.AnyReference(row.Values["Skill"]) ?? "")
-                .OrderBy(group => group.Key, StringComparer.Ordinal)
-        )
-        {
-            var ordered = group.OrderBy(row => row.Name, StringComparer.Ordinal).ToArray();
-            if (group.Key.Length == 0)
-            {
-                foreach (var row in ordered)
-                    coverage.Add(
-                        GapKind.UnreadSkillRow,
-                        row.Name,
-                        null,
-                        "The row names no skill class."
-                    );
-                continue;
-            }
-            result[group.Key] = ordered[0];
-            foreach (var row in ordered.Skip(1))
-                coverage.Add(
-                    GapKind.UnreadSkillRow,
-                    row.Name,
-                    null,
-                    $"A second row for {ItemIdentity.ClassName(group.Key)}, after {ordered[0].Name}."
-                );
-        }
-        return result;
+        return (table?.Rows ?? []).ToDictionary(row => row.Name, StringComparer.OrdinalIgnoreCase);
     }
 
-    private static IReadOnlyList<Fact> Facts(TableRow? row)
+    /// <summary>The skill classes the skills table's rows name.</summary>
+    private IEnumerable<string> TableSkills() =>
+        SkillRows()
+            .Values.Select(row => RecordValues.AnyReference(row.Values["Skill"]))
+            .OfType<string>();
+
+    /// <summary>
+    /// The row the game reads for a skill: the row named by the skill class's SkillId, as the skill slot's tooltip
+    /// looks it up (SkillSlot:HandleTooltip), checked for every tree skill in run skilltips1.
+    /// </summary>
+    private TableRow? RowOf(string skill, Dictionary<string, TableRow> rows) =>
+        context.Classes.TryGetValue(skill, out var type)
+        && Words(type.Properties["SkillId"]) is { } id
+        && rows.TryGetValue(id, out var row)
+            ? row
+            : null;
+
+    /// <summary>
+    /// The facts the game's skill tooltip shows: the cooldown and cost from the skill's row, the cost in stamina when
+    /// the skill class uses stamina, and the base damage of the skill class that the row names, shown only above
+    /// zero.
+    /// </summary>
+    private IReadOnlyList<Fact> Facts(string skill, TableRow? row)
     {
         if (row is null)
-            return [StatVocabulary.Unknown(Stat.ManaCost), StatVocabulary.Unknown(Stat.Cooldown)];
+            return [StatVocabulary.Unknown(Stat.Cooldown), StatVocabulary.Unknown(Stat.ManaCost)];
+        var stamina =
+            context.Classes.TryGetValue(skill, out var type)
+            && type.Properties["Uses Stamina"]?.GetValue<bool>() == true;
+        var damage =
+            RecordValues.AnyReference(row.Values["Skill"]) is { } named
+            && context.Classes.TryGetValue(named, out var source)
+                ? source.Properties["SkillInfo"]?["Damage"]?.GetValue<double>()
+                : null;
         return
         [
-            StatVocabulary.Number(Stat.ManaCost, row.Values["ManaCost"]?.GetValue<double>()),
+            .. damage is > 0
+                ? [StatVocabulary.Number(Stat.BaseDamage, damage)]
+                : Array.Empty<Fact>(),
             StatVocabulary.Number(Stat.Cooldown, row.Values["Cooldown"]?.GetValue<double>()),
-            StatVocabulary.Number(Stat.CastTime, row.Values["CastngTime"]?.GetValue<double>()),
-            StatVocabulary.Text(
-                Stat.SkillType,
-                (row.Values["SpellType"] as JsonObject)?["display"]?.GetValue<string>()
+            StatVocabulary.Number(
+                stamina ? Stat.StaminaCost : Stat.ManaCost,
+                row.Values["ManaCost"]?.GetValue<double>()
             ),
         ];
     }

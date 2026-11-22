@@ -37,11 +37,11 @@ internal static class StatVocabulary
         [Stat.CooledEffect] = new("Cooled effect"),
         [Stat.GroundEffect] = new("Ground effect"),
         [Stat.HeatedEffect] = new("Heated effect"),
-        [Stat.ManaCost] = new("Mana Cost", Unit: "mana"),
-        [Stat.Cooldown] = new("Cooldown", Unit: "s"),
-        [Stat.CastTime] = new("Cast Time", Unit: "s"),
-        [Stat.GlobalCooldown] = new("Global Cooldown", Unit: "s"),
-        [Stat.SkillType] = new("Type"),
+        // Skill labels follow the game's skill tooltip, such as "Cooldown: 2 seconds" and "Mana Cost: 15".
+        [Stat.BaseDamage] = new("Base Damage", "Base Damage"),
+        [Stat.Cooldown] = new("Cooldown", "Cooldown", "seconds"),
+        [Stat.ManaCost] = new("Mana Cost", "Mana Cost"),
+        [Stat.StaminaCost] = new("Stamina Cost", "Stamina Cost"),
     };
 
     /// <summary>A fact whose value the game files do not determine.</summary>

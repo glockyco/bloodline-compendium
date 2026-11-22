@@ -21,6 +21,9 @@ internal sealed record CatalogRecords(
     /// <summary>Inventory tooltips that lab runs of the build read, empty when no run read any.</summary>
     public IReadOnlyList<TooltipObservation> Tooltips { get; init; } = [];
 
+    /// <summary>Skill tooltips that lab runs of the build read, empty when no run read any.</summary>
+    public IReadOnlyList<SkillTooltip> SkillTooltips { get; init; } = [];
+
     /// <summary>The repository's known game defects, which the build copies beside the program.</summary>
     public KnownIssueRegistry Issues { get; init; } = new([]);
 
@@ -38,6 +41,7 @@ internal sealed record CatalogRecords(
         {
             Code = CanonicalJson.Read<CodeIndex>(layout.CodeIndexFile),
             Tooltips = TooltipCheck.Load(layout.RuntimeDirectory),
+            SkillTooltips = SkillTooltipCheck.Load(layout.RuntimeDirectory),
             Issues = KnownIssues.Load(Path.Combine(AppContext.BaseDirectory, "known-issues.json")),
         };
 

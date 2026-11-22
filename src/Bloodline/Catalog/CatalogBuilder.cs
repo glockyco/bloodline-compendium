@@ -112,6 +112,7 @@ internal static class CatalogBuilder
         foreach (var item in graphResult.Items)
             SourceGaps(CatalogGraph.Reference(item), item.Name, item.Sources, coverage);
         var skills = skillProducer.Finish(skillsPrepared, graphResult);
+        SkillTooltipCheck.Compare(skills.Skills, records.SkillTooltips, coverage);
         foreach (var skill in skills.Skills)
             SourceGaps(
                 new EntityReference(

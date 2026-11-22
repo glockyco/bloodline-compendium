@@ -125,11 +125,10 @@ export type Stat =
   | "cooledEffect"
   | "groundEffect"
   | "heatedEffect"
-  | "manaCost"
+  | "baseDamage"
   | "cooldown"
-  | "castTime"
-  | "globalCooldown"
-  | "skillType";
+  | "manaCost"
+  | "staminaCost";
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "RenderBody".

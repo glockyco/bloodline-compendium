@@ -156,7 +156,9 @@ internal sealed class SkillEventMechanism : ISourceMechanism
         }
         // A reviewed function that its package no longer has means the game moved the event, and its text may be
         // stale. Code without the package at all, such as invented test records, has nothing to compare.
-        var packages = code.Functions.Select(function => function.Package).ToHashSet(StringComparer.Ordinal);
+        var packages = code
+            .Functions.Select(function => function.Package)
+            .ToHashSet(StringComparer.Ordinal);
         foreach (var entry in Reviewed)
         {
             if (

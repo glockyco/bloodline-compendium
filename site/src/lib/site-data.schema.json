@@ -2136,11 +2136,10 @@
         "cooledEffect",
         "groundEffect",
         "heatedEffect",
-        "manaCost",
+        "baseDamage",
         "cooldown",
-        "castTime",
-        "globalCooldown",
-        "skillType"
+        "manaCost",
+        "staminaCost"
       ],
       "title": "Stat"
     },

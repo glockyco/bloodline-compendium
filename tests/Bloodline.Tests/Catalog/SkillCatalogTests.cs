@@ -176,6 +176,9 @@ public sealed class SkillCatalogTests
                 new ClassRecord(Slot, [], new JsonObject()),
                 new ClassRecord(Passive, [], new JsonObject()),
                 new ClassRecord(Book, [], new JsonObject()),
+                .. new[] { "Ember", "Spark", "Forgotten", "Lost", "Booked" }.Select(
+                    name => new ClassRecord(Skill(name), [], Json($$"""{"SkillId":"{{name}}"}"""))
+                ),
             ],
             [skills],
             [],
@@ -257,5 +260,31 @@ public sealed class SkillCatalogTests
         );
         var error = Assert.Throws<InvalidDataException>(() => Build(unlock));
         Assert.Contains("/Game/Invented/Shrine:Bless", error.Message);
+    }
+
+    [Fact]
+    public void ReportsATooltipThatShowsOtherValuesThanTheFacts()
+    {
+        var skill = Build().Skills.Skills.Single(skill => skill.Name == "Ember");
+        var shown = SkillTooltipCheck
+            .Expected(skill)
+            .Select(text =>
+                text.StartsWith("Cooldown", StringComparison.Ordinal) ? "Cooldown: 9 seconds" : text
+            )
+            .ToArray();
+        var coverage = new Coverage();
+        SkillTooltipCheck.Compare([skill], [new SkillTooltip(skill.Key, "run", shown)], coverage);
+        var entry = Assert.Single(
+            coverage.Report([]).Gaps.Single(gap => gap.Kind == GapKind.TooltipDifference).Entries
+        );
+        Assert.Contains("Cooldown: 5 seconds", entry.Detail);
+        Assert.Contains("Cooldown: 9 seconds", entry.Detail);
+        var agreeing = new Coverage();
+        SkillTooltipCheck.Compare(
+            [skill],
+            [new SkillTooltip(skill.Key, "run", SkillTooltipCheck.Expected(skill))],
+            agreeing
+        );
+        Assert.Empty(agreeing.Report([]).Gaps);
     }
 }

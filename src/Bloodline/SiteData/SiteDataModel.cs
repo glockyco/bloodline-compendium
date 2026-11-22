@@ -419,11 +419,10 @@ internal enum Stat
     CooledEffect,
     GroundEffect,
     HeatedEffect,
-    ManaCost,
+    BaseDamage,
     Cooldown,
-    CastTime,
-    GlobalCooldown,
-    SkillType,
+    ManaCost,
+    StaminaCost,
 }
 
 /// <summary>
