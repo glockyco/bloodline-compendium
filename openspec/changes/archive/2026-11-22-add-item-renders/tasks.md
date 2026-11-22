@@ -25,4 +25,4 @@
 
 ## 5. Integration
 
-- [ ] 5.1 Run every check, build real data with renders, review every page kind at 1440 and 390 px, deploy to staging and production, and record the review in the commit bodies
+- [x] 5.1 Run every check, build real data with renders, review every page kind at 1440 and 390 px, deploy to staging and production, and record the review in the commit bodies
