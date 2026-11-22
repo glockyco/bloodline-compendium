@@ -3,6 +3,7 @@
 import { readFile, readdir } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import {
+  attributeMismatches,
   levelGrantMismatches,
   proficiencyMismatches,
   rankCostMismatches,
@@ -78,6 +79,7 @@ for (const file of await readdir(join(site, "disciplines"))) {
     }
 }
 for (const check of [
+  ["attribute-effects", attributeMismatches(progression)],
   ["level-grant", levelGrantMismatches(progression)],
   ["proficiency-points", proficiencyMismatches(progression)],
   ["next-rank-cost", rankCostMismatches(progression, passives)],
@@ -92,6 +94,6 @@ for (const check of [
 }
 for (const problem of problems) console.error(problem);
 console.log(
-  `Rules: ${rules.length + 3} rules against ${compared} recorded game results, ${problems.length} problems.`,
+  `Rules: ${rules.length + 4} rules against ${compared} recorded game results, ${problems.length} problems.`,
 );
 if (problems.length) process.exitCode = 1;

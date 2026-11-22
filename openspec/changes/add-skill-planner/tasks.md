@@ -7,7 +7,7 @@
 
 ## 2. Rules and inputs
 
-- [ ] 2.1 Add rules for character level grants, attribute effects and regeneration with worded steps, citations and vectors, and extend `rules:check`
+- [x] 2.1 Add rules for character level grants, attribute effects and regeneration with worded steps, citations and vectors, and extend `rules:check`
 - [ ] 2.2 Write the planner payload from the catalog and add its budget to the payload gate
 - [ ] 2.3 Build the planner state, evaluator and diagnostics in `site/src/lib/planner/` with unit tests on invented inputs
 

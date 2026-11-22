@@ -86,6 +86,6 @@ export interface LevelGrant {
 
 /**
  * The points a character gets for each character level. The player's Level Up adds 1 skill point and 3 level up
- * points, at every level that runs passives1, progression2, treeshots1, planner1 and attributes2 recorded.
+ * points, at every level up the build's lab runs recorded, which rules:check compares.
  */
 export const characterLevelGrant: LevelGrant = { skillPoints: 1, levelUpPoints: 3 };

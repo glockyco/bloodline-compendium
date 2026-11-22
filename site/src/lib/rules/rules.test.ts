@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { experienceRequirement } from './experience.js';
+import { attributeEffects } from './attributes.js';
 import {
+	attributeMismatches,
 	levelGrantMismatches,
 	proficiencyMismatches,
 	rankCostMismatches,
@@ -75,6 +77,59 @@ describe('proficiency points per level', () => {
 		]);
 		expect(result.compared).toBe(2);
 		expect(result.problems).toEqual(['proficiency-points for Necromancy level 9: rule 2, game 1']);
+	});
+});
+
+const ones = {
+	Strength: 1,
+	Intelligence: 1,
+	Dexterity: 1,
+	Endurance: 1,
+	Fortitude: 1,
+	Constitution: 1,
+	Vitality: 1,
+	Wisdom: 1,
+	Willpower: 1
+};
+
+describe('attribute effects', () => {
+	it('starts a new character at 150 health, 200 stamina and 100 mana', () => {
+		expect(attributeEffects(ones)).toMatchObject({
+			known: true,
+			value: { health: 150, stamina: 200, mana: 100, healthRegen: 1, pickupStrength: 215 }
+		});
+	});
+
+	it('adds each point and grows regeneration with the square root of the points above the first', () => {
+		const result = attributeEffects({ ...ones, Constitution: 21, Vitality: 21, Endurance: 21 });
+		if (!result.known) throw new Error('expected a known result');
+		expect(result.value.health).toBe(150 + 20 * 15 + 20 * 10);
+		expect(result.value.stamina).toBe(200 + 20 * 15 + 20 * 30);
+		expect(result.value.healthRegen.toFixed(2)).toBe('1.31');
+		expect(result.value.armorWeightReduction).toBe(28.41);
+	});
+
+	it('is unknown above the measured levels and names the attribute', () => {
+		expect(attributeEffects({ ...ones, Strength: 22 })).toEqual({
+			known: false,
+			missing: ['Strength']
+		});
+	});
+
+	it('compares the level up window at the precision it shows', () => {
+		const step = (strength: number, pickup: number) => ({
+			widget: {
+				levels: { ...ones, Strength: strength },
+				texts: { TextBlock_36: `   Pickup Strength: ${pickup}\r\n   Strength EXP bonus: +2.4%` }
+			}
+		});
+		const result = attributeMismatches([
+			{ args: { action: 'attributes' }, steps: [step(1, 215), step(1, 230)] }
+		]);
+		expect(result.compared).toBe(2);
+		expect(result.problems).toEqual([
+			'attributes at 1/1/1/1/1/1/1/1/1: pickupStrength rule 215, game 230'
+		]);
 	});
 });
 

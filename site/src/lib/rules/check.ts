@@ -1,5 +1,6 @@
 import type { Rule } from './rule.js';
 import { experienceRequirement } from './experience.js';
+import { attributeEffects, attributes } from './attributes.js';
 import { buyPrice, respectDiscount, sellPrice } from './price.js';
 import { characterLevelGrant, proficiencyPointsPerLevel, rankCosts } from './progression.js';
 
@@ -47,7 +48,11 @@ export function ruleMismatches(
 /** A lab `eval` of `progression.lua`: its arguments and the steps it recorded, each with the numbers that changed. */
 export interface ProgressionRecord {
 	args: { action?: string; tree?: string; widget?: string };
-	steps: { changed?: Record<string, [number, number]>; widget?: { cost?: number } }[];
+	steps: {
+		changed?: Record<string, [number, number]>;
+		/** A passive button's state, or the level up window's texts and attribute levels. */
+		widget?: { cost?: number; texts?: Record<string, string>; levels?: Record<string, number> };
+	}[];
 }
 
 /**
@@ -146,6 +151,62 @@ export function levelGrantMismatches(records: ProgressionRecord[]): {
 				problems.push(
 					`level-grant for level ${level[0]}: rule ${characterLevelGrant.skillPoints} skill and ${characterLevelGrant.levelUpPoints} level up points, game ${skill} and ${points}`
 				);
+		}
+	}
+	return { compared, problems };
+}
+
+/** The values the level up window shows, each read after its label, such as "Pickup Strength: 515". */
+function panelOf(text: string) {
+	const read = (label: string) => {
+		const match = new RegExp(`(?:^|\\s)${label}: \\+?([\\d,.]+)`).exec(text);
+		return match ? Number(match[1].replace(/,/g, '')) : undefined;
+	};
+	return {
+		health: read('Health'),
+		mana: read('Mana'),
+		stamina: read('Stamina'),
+		healthRegen: read('Health Regen'),
+		manaRegen: read('Mana Regen'),
+		staminaRegen: read('Stamina Regen'),
+		armorWeightReduction: read('Armor Weight Reduction'),
+		diseaseResistance: read('Disease Resistance'),
+		pickupStrength: read('Pickup Strength'),
+		strengthExpBonus: read('Strength EXP bonus'),
+		intelligenceExpBonus: read('Intelligence EXP bonus'),
+		dexterityExpBonus: read('Dexterity EXP bonus')
+	};
+}
+
+/**
+ * The level up window readings where a value the window shows differs from the attribute rules at the levels it
+ * recorded. The window rounds regeneration to two decimals and the EXP bonuses to one, so each value compares at the
+ * precision the window shows it.
+ */
+export function attributeMismatches(records: ProgressionRecord[]): {
+	compared: number;
+	problems: string[];
+} {
+	let compared = 0;
+	const problems: string[] = [];
+	for (const record of records) {
+		if (record.args.action !== 'attributes') continue;
+		for (const step of record.steps) {
+			const widget = step.widget;
+			if (!widget?.texts || !widget.levels) continue;
+			const effects = attributeEffects(widget.levels);
+			if (!effects.known) continue;
+			const shown = panelOf(Object.values(widget.texts).join('\n'));
+			compared++;
+			for (const [name, value] of Object.entries(shown)) {
+				if (value === undefined) continue;
+				const ours = effects.value[name as keyof typeof effects.value];
+				const decimals = (String(value).split('.')[1] ?? '').length;
+				if (Math.abs(ours - value) > 0.5 * 10 ** -decimals + 1e-9)
+					problems.push(
+						`attributes at ${attributes.map((attribute) => widget.levels![attribute]).join('/')}: ${name} rule ${ours}, game ${value}`
+					);
+			}
 		}
 	}
 	return { compared, problems };
