@@ -5,7 +5,7 @@ Findings come from Steam build 24464547. `curate-item-reference` first planned t
 What the game holds:
 - `WeaponComponentTable` has 791 parts with their class, part kind, the weapon types they fit (`TypeFilters`), damage, speed, value and `WeaponsmithingLevelRequired`.
 - `ItemRecipes` has 1,124 rows with up to four ingredients, their quantities, `CraftAmount` and `CraftingType`. `AllFoodRecipes` has 100 rows and `SeedDataTable` 18.
-- `CustomWeapon_Base` assembles a crafted weapon from its parts. Two quality tables disagree: `Crafting` gives D 0.75 and F 0.5, and `CustomWeapon_Base` gives D 0.9 and F 0.8.
+- `CustomWeapon_Base` assembles a crafted weapon from its parts. Neither its class record nor the `Crafting` widget's holds quality multipliers, so where the game keeps the multiplier for each quality grade is open.
 - `Armorsmithing` holds the armorsmithing qualities. The player also has rune tiers, an attunement table and enchantments with melee trigger types, as `establish-reference-architecture`'s design records.
 - `AllIngredientEffects` has 27 rows of ingredient treatments, which the potion crafting window reads.
 
@@ -53,7 +53,7 @@ Each rule ships only after a check under `tools/runtime/checks/` observes it in 
 
 ### Builds share one link format
 
-Equipment joins the skill planner's builds and their link format rather than a second format, as Afallon's gear plan extends its character builds. The link budget of `add-skills-and-planner` applies to builds with equipment too.
+Equipment joins the skill planner's builds and their link format rather than a second format, as Afallon's gear plan extends its character builds. The link budget of `add-skill-planner` applies to builds with equipment too.
 
 ## Risks / Trade-offs
 
@@ -62,7 +62,7 @@ Equipment joins the skill planner's builds and their link format rather than a s
 
 ## Open Questions
 
-- Which quality table applies to equipped weapons, and to which stats.
+- Where the game keeps each quality grade's multiplier, which quality applies to equipped weapons, and to which stats.
 - Whether every part that matches `TypeFilters` fits, and how part contributions combine.
 - Armor by class and quality, required levels, material costs and rune slots per armorsmithing quality.
 - Attunement effectiveness and break chance by tier and level, and what enchanting changes.

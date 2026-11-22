@@ -26,7 +26,7 @@ None. The new capabilities consume `catalog/entity-graph`, `site/game-rules`, `s
 
 ## Impact
 
-- Catalog: producers beside `CraftingMechanism`, `CookingMechanism` and `FarmingMechanism`, and a filled `CraftingData` in `SiteDataModel.cs` with regenerated types.
+- Catalog: producers on the kind structure of `add-skill-reference`, beside `CraftingMechanism`, `CookingMechanism` and `FarmingMechanism`, and a filled `CraftingData` in `SiteDataModel.cs` with regenerated types.
 - Site: rules in `site/src/lib/rules/` for weapon assembly, quality and equipment totals, a weapon builder route, armor arithmetic on item pages, and the planner's equipment part.
 - Lab: checks under `tools/runtime/checks/` for crafted weapon quality, armorsmithing, attunement, enchanting and treated ingredients.
-- Depends on `curate-item-reference`, `publish-item-reference` and, for the planner part, `add-skills-and-planner`.
+- Depends on `curate-item-reference`, `publish-item-reference`, `add-skill-reference` and, for the planner part, `add-skill-planner`.

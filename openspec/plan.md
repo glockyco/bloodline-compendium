@@ -13,34 +13,38 @@ Every feature the compendium will grow, in the order it is built, with what each
    - Bows and shields, whose views are not settled.
    - A review step before renders are published.
    - Creatures and people get renders with their own pages.
-3. Disciplines, skills and the skill planner: `add-skills-and-planner`.
-   - Pages for disciplines, skills, passives and spellsongs.
-   - The planner's first part: levels, unlocked skills, passive ranks, points, characters kept in the browser.
-   - Sharing builds: build links that fit a Discord message, a preview card for each shared build, and a copyable text summary in the form players already post.
+3. Disciplines, skills and the skill planner: `add-skill-reference`, then `add-skill-planner`.
+   - The reference first moves the catalog and the site from items to kinds: one producer per kind, sources for any entity, and lists, pages, tooltips, claims and coverage that work across kinds. Item output stays unchanged through that move.
+   - It then publishes the 21 disciplines with their trees laid out as the skill window shows them, every skill the game defines with where it comes from, and passives and spellsongs on their discipline's page.
+   - The planner covers what one level up and one tree window decide together: character and discipline levels, attributes with the health, stamina and mana they give, skills, passive ranks and the ten hotbar slots. Builds are shared as links that fit a Discord message and as text, and characters are kept in the browser.
 4. Crafting and equipment: `add-crafting-and-equipment`.
    - Smithing with weapon parts and quality, and a weapon builder.
    - Armorsmithing, runes, attunement and enchanting.
    - Crafting stations, cooking with ingredient treatments, farming and recipe learning.
    - The planner's second part: equipment, crafted weapons, runes and enchantments with armor and mobility totals.
 5. Places and people: towns, regions, dungeons and settlement buildings, and the merchants, trainers, quest givers and conversation partners in them.
+   - Places also list what is placed in them for progression: the 34 skill books, the 11 spellsong note sheets, and the blood pool ritual sites and necromancer shrines that grant Blood Magic and Necromancy points. Skill and spellsong sources name these places as unlinked text until then.
    - The settlement Blacksmith's stock drawn from its item pool as an item source, with its chance per restock, verified by the Knight's Broadsword.
    - The default stock of faction currency shops as an item source, verified by the Lionsmane Cuirass for 350 Iuba.
    - A respect control for city prices, remembered by the browser, verified by respect 750 in Elderglen.
 6. Creatures and loot, with drop tables and spawn odds.
+   - No player skill from the skills table is referenced by an enemy, so creature abilities need their own reading.
    - The weapon each enemy sets as its rare drop on construction and the finds Fenraen digs up as item sources, verified by a Bandit Cutter's weapon drop.
 7. Quests, achievements and guilds with their ranks.
-8. The interactive map from level captures and placements, linked both ways with the pages of places, people, creatures and resources.
+8. The interactive map from level captures and placements, linked both ways with the pages of places, people, creatures and resources. Skill books, note sheets and point shrines are map markers.
 9. Mounts, companions, diseases, calendar events and the arena.
+   - Vampirism as a disease grants Feed and opens the Vampirism tree's purpose, which the skill reference publishes without explaining.
    - Stables, contract scroll pools, seasonal gifts, archaeology rewards and level reward variables as item sources, verified by Brown Horse, Meteor Storm, Holly Harpoon, a fossil and Feral Maw.
    - Seasonal state from the reader's date, verified by a Hallowed Eve item in October and in March.
-10. Mechanics guides with calculators on the shared rules: experience, armor, crafting quality, settlement income and farming.
-11. Reading a save in the browser, to show progress and to start a planned character from it.
+10. Mechanics guides with calculators on the shared rules: experience, armor, crafting quality, settlement income, farming, and the attribute and discipline curves the planner measures.
+11. Reading a save in the browser, to show progress and to start a planned character from it. The player keeps unlocked skills in `UnlockedSkills` and passive ranks on each passive button, which a save reader needs to map.
 
-Renders come first because they make the item pages and their link previews show what each item looks like, which no other source offers. Skills and the planner come before places and people, because the planner offers what the official wiki cannot and exercises the rules module early. Item sources keep naming merchants and places as unlinked references until places and people are published.
+Renders come first because they make the item pages and their link previews show what each item looks like, which no other source offers. Skills and the planner come before places and people, because the planner offers what the official wiki cannot and exercises the rules module early, and because moving the catalog to kinds with the second kind shapes the structure every later kind uses. Item, skill and spellsong sources keep naming merchants and places as unlinked references until places and people are published.
 
 Later, without a place in the order yet:
 - A page per game update listing the facts it changed, linked to the patch notes. The project context line "The site describes only the current game build" needs revising first.
 - Visitor analytics. The tool and what it may record are decided when this is scheduled.
+- Link previews for each shared build. A build link keeps the build in the query so that a Worker in front of the static site can later write each build's title and summary into the planner's preview tags. A generated image per build needs a decision on its cost, because rendering images in a Worker is likely to exceed the free plan's CPU time. Until then the planner has one fixed preview.
 
 Not planned:
 - A combat simulator.
@@ -52,21 +56,24 @@ Not planned:
 
 ### Kinds with pages
 
-When a kind gets pages, references to it already in the graph become links and sitemap entries without changes to existing pages. Three things must exist before the first new kind ships, and `curate-item-reference` builds them:
-- one tooltip presenter that picks each kind's tooltip, with the item tooltip as its first kind,
-- search entries for every kind with pages,
-- a review of entities that share a name, such as the 12 merchants named Shopkeeper or the levels that make up one town, so that one thing a player meets gets one page.
+When a kind gets pages, references to it already in the graph become links and sitemap entries without changes to existing pages. `curate-item-reference` built one tooltip presenter, search entries per kind and the review of entities that share a name. `add-skill-reference` moves the catalog and the site onto kinds, as its design describes. Every later kind adds a producer, its sources, its page and its tooltip to that structure, and changes the structure when a kind does not fit it instead of working around it.
 
-Place names come first among these, because places, people, the map and item sources all show them.
+Place names come first among the later kinds, because places, people, the map and the sources of items, skills and spellsongs all show them.
+
+### Reading the game
+
+- Data that the game defines in its interface lives in widget trees, such as the skill slots and passives of the skill trees. Extraction records the Blueprint widgets of every widget tree. Look there when class defaults leave a value empty.
+- The game ships assets that no player reaches, such as 21 older skill trees beside the 21 the skill window opens. Whether something is reachable follows from the code that opens or grants it, never from its name or folder.
+- Some sources are events in code, such as becoming a vampire granting Feed. Their reader text is written once per cited function and checked against the function's fingerprint, as facts are.
 
 ### Navigation
 
-The header lists Items alone. The change that adds the second kind with pages adds a Browse menu after Afallon's.
+The header lists Items alone. `add-skill-reference` adds a Browse menu after Afallon's, with entries read from the kind registry.
 
 ### Sharing and link previews
 
 - Every page has a title, a description and an image for link previews. Item renders replace the category art in previews once they exist.
-- A shared build travels in the part of the address that a server receives, because Discord builds its preview from the HTML the server returns. A Worker in front of the static site writes each build's preview tags and image. The planner change decides the address form.
+- A shared build travels in the query, which a server receives, so that per-build previews can be added later without changing the link format. Until then the planner has one fixed preview, as "Later" describes.
 - A build link fits in a Discord message of 2,000 characters with room for a comment.
 
 ### Delivery budgets
