@@ -29,14 +29,17 @@ export const nextRankCost: Rule<{ pointCost: number; costIncrease: number }, num
 	}
 };
 
-/** The cost of each rank of a passive, from its first rank's cost, its increase and its number of ranks. */
+/**
+ * The cost of each rank of a passive, from its first rank's cost, its increase and its number of ranks. A passive
+ * whose maximum rank is unknown lists only its first rank, the one the game is sure to offer.
+ */
 export function rankCosts(passive: {
 	pointCost: number;
 	costIncrease: number;
-	ranks: number;
+	ranks: number | null;
 }): number[] {
 	const costs = [passive.pointCost];
-	while (costs.length < passive.ranks) {
+	while (costs.length < (passive.ranks ?? 1)) {
 		const next = nextRankCost.evaluate({
 			pointCost: costs[costs.length - 1],
 			costIncrease: passive.costIncrease

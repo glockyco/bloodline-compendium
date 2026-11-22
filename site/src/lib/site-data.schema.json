@@ -1435,7 +1435,10 @@
           ]
         },
         "ranks": {
-          "type": "integer"
+          "type": [
+            "integer",
+            "null"
+          ]
         },
         "requiredLevel": {
           "type": "integer"

@@ -850,8 +850,8 @@ internal sealed record PassiveRow(int Level, IReadOnlyList<PassiveEntry> Passive
 /// <summary>
 /// A passive of a discipline. <see cref="Anchor"/> is its fragment on the discipline page. It unlocks at
 /// <see cref="RequiredLevel"/> in <see cref="LevelDiscipline"/>. Rank k costs <see cref="PointCost"/> plus k - 1
-/// times <see cref="CostIncrease"/>, for <see cref="Ranks"/> ranks. <see cref="RankName"/> is the name the game gives
-/// its later ranks, when it has one.
+/// times <see cref="CostIncrease"/>, for <see cref="Ranks"/> ranks, or null when the game's files do not give its
+/// maximum rank. <see cref="RankName"/> is the name the game gives its later ranks, when it has one.
 /// </summary>
 internal sealed record PassiveEntry(
     string Key,
@@ -862,7 +862,7 @@ internal sealed record PassiveEntry(
     EntityReference LevelDiscipline,
     int PointCost,
     int CostIncrease,
-    int Ranks,
+    int? Ranks,
     string? RankName,
     string? Icon
 );

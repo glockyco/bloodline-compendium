@@ -94,7 +94,7 @@ export function proficiencyMismatches(records: ProgressionRecord[]): {
  */
 export function rankCostMismatches(
 	records: ProgressionRecord[],
-	passives: Map<string, { pointCost: number; costIncrease: number; ranks: number }>
+	passives: Map<string, { pointCost: number; costIncrease: number; ranks: number | null }>
 ): { compared: number; problems: string[] } {
 	let compared = 0;
 	const problems: string[] = [];

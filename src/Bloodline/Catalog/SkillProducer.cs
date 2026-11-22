@@ -231,17 +231,25 @@ internal sealed class SkillProducer
                         RecordValues.Text(widget.Properties["Passive Name"])
                         ?? Readable(widget.Path);
                     var anchor = Anchor("passive-" + ItemIdentity.Slug(name), anchors);
+                    // The class defaults give every passive these, so a missing one means the records changed, and a
+                    // guess would publish a free or always open passive.
+                    int Required(string field) =>
+                        Integer(widget.Properties[field])
+                        ?? throw new InvalidDataException(
+                            $"The passive {tree.Path}:{widget.Path} has no {field}."
+                        );
                     var entry = new PassiveEntry(
                         tree.Path + ":" + widget.Path,
                         anchor,
                         name,
                         RecordValues.Text(widget.Properties["Passive Description"]),
-                        Integer(widget.Properties["Required Level"]) ?? 0,
+                        Required("Required Level"),
                         LevelDiscipline(trees, CheckedLevel(widget) ?? tree.LevelName ?? tree.Name),
-                        Integer(widget.Properties["Point Cost"]) ?? 0,
-                        Integer(widget.Properties["Point Increase Per Level"]) ?? 0,
+                        Required("Point Cost"),
+                        Required("Point Increase Per Level"),
+                        // A passive with ranks whose maximum cannot be read keeps it unknown rather than one rank.
                         widget.Properties["MultiLevel"]?.GetValue<bool>() == true
-                            ? Integer(widget.Properties["Max MultiLevel"]) ?? 1
+                            ? Integer(widget.Properties["Max MultiLevel"])
                             : 1,
                         RecordValues.Text(widget.Properties["MultiLevel Passive Name"])
                             is { Length: > 0 } rank

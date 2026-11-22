@@ -93,7 +93,14 @@ public sealed class SkillCatalogTests
     /// two slots in boxes, placed in the opposite order of their names, and a proficiency row of level 5 whose second
     /// passive requires level 3. An older tree that nothing opens holds another skill.
     /// </summary>
-    private static CatalogResult Build(params CodeFunction[] extraCode)
+    private static CatalogResult Build(params CodeFunction[] extraCode) =>
+        Build(
+            """{"Point Cost":1,"Point Increase Per Level":1,"MultiLevel":false,"Max MultiLevel":5,"Required Level":0}""",
+            extraCode
+        );
+
+    /// <summary>The same catalog with other class defaults for passive buttons, which Kindle takes its values from.</summary>
+    private static CatalogResult Build(string passiveDefaults, params CodeFunction[] extraCode)
     {
         ClassRecord Widgets(
             string path,
@@ -201,13 +208,7 @@ public sealed class SkillCatalogTests
                 menu,
                 categories,
                 new ClassRecord(Slot, [], new JsonObject()),
-                new ClassRecord(
-                    Passive,
-                    [],
-                    Json(
-                        """{"Point Cost":1,"Point Increase Per Level":1,"MultiLevel":false,"Max MultiLevel":5,"Required Level":0}"""
-                    )
-                ),
+                new ClassRecord(Passive, [], Json(passiveDefaults)),
                 new ClassRecord(Book, [], new JsonObject()),
                 .. new[] { "Ember", "Spark", "Forgotten", "Lost", "Booked" }.Select(
                     name => new ClassRecord(Skill(name), [], Json($$"""{"SkillId":"{{name}}"}"""))
@@ -385,6 +386,29 @@ public sealed class SkillCatalogTests
             coverage.Report([]).Gaps.Single(gap => gap.Kind == GapKind.TreeDifference).Entries,
             entry => entry.Detail!.Contains("point cost", StringComparison.Ordinal)
         );
+    }
+
+    [Fact]
+    public void APassiveWhoseMaximumRankIsUnreadableKeepsItUnknown()
+    {
+        var kindle = Build(
+            """{"Point Cost":1,"Point Increase Per Level":1,"MultiLevel":false,"Required Level":0}"""
+        )
+            .Skills.Disciplines.SelectMany(page => page.PassiveRows)
+            .SelectMany(row => row.Passives)
+            .Single(passive => passive.Name == "Kindle");
+        Assert.Null(kindle.Ranks);
+    }
+
+    [Fact]
+    public void APassiveWithoutACostFailsTheCatalog()
+    {
+        var error = Assert.Throws<InvalidDataException>(() =>
+            Build(
+                """{"Point Increase Per Level":1,"MultiLevel":false,"Max MultiLevel":5,"Required Level":0}"""
+            )
+        );
+        Assert.Contains("Point Cost", error.Message);
     }
 }
 

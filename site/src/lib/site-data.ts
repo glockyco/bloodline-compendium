@@ -328,7 +328,7 @@ export interface PassiveEntry {
   name: string;
   pointCost: number;
   rankName: string | null;
-  ranks: number;
+  ranks: number | null;
   requiredLevel: number;
   [k: string]: unknown;
 }
