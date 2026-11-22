@@ -23,6 +23,14 @@
 		"slug": "mosswoven-coat",
 		"fragment": null
 	},
+	"mechanic:discipline-levels": {
+		"kind": "mechanic",
+		"key": "Mechanic:Discipline Levels",
+		"name": "Discipline Levels",
+		"slug": "discipline-levels",
+		"icon": null,
+		"fragment": null
+	},
 	"mechanic:proficiency-points": {
 		"kind": "mechanic",
 		"key": "Mechanic:Proficiency Points",

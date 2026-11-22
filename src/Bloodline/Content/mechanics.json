@@ -1,5 +1,29 @@
 [
 	{
+		"name": "Discipline Levels",
+		"intro": "Every discipline levels up on its own as you use it. Higher levels unlock its skills and give [proficiency points](mechanic:proficiency-points) for its passives.",
+		"sections": [
+			{
+				"heading": "How They Level",
+				"paragraphs": [
+					"Every discipline starts at level 1, and there is no level cap. Melee weapons get experience when you hit an enemy, [Shields](discipline:shields) when you block an attack, [Unarmed](discipline:unarmed) when you punch, and magic disciplines when you cast their spells."
+				]
+			},
+			{
+				"heading": "The Skill Tree",
+				"paragraphs": [
+					"Press L to open the skill tree. You unlock skills and buy passives there. Tab opens the radial menu, which also has a Skill Tree button."
+				]
+			}
+		],
+		"evidence": [
+			"Run facts1, build 24464547: on a new character every discipline and profession was at level 1, with 0 skill points and 0 proficiency points.",
+			"Run progression2, build 24464547: Necromancy passed level 5,700 without stopping.",
+			"Code: Goblin_Base's Damage From Player Melee calls the player's Add Proper Weapon EXP, FirstPersonCharacter2's Block Attack calls Increase Shield EXP, the fist animation's AnimNotify_SwingFist calls Unarmed Level Tracking, and Skill's Add EXP Based On Spell Type passes a spell's experience to its magic discipline.",
+			"Run facts1, build 24464547: IMC_InGameActions maps L to IA_OpenCloseSkillTree and Tab to IA_OpenCloseRadialMenu. Run radial1: the radial menu shows Skill Tree with L beside it."
+		]
+	},
+	{
 		"name": "Skill Points",
 		"intro": "Skill points unlock skills in the skill trees. You get one each time your character levels up.",
 		"sections": [

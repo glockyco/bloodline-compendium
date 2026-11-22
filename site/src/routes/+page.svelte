@@ -136,7 +136,7 @@
 		text-shadow: var(--shadow-text);
 	}
 	.lede {
-		max-width: var(--size-lede);
+		max-width: var(--size-measure);
 		margin: var(--gap-block) 0 var(--gap-section);
 		font-size: var(--type-intro);
 		line-height: var(--leading-intro);

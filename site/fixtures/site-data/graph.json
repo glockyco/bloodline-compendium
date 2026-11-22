@@ -1437,6 +1437,17 @@
 				"fragment": null
 			},
 			"relations": []
+		},
+		{
+			"entity": {
+				"kind": "mechanic",
+				"key": "Mechanic:Discipline Levels",
+				"name": "Discipline Levels",
+				"slug": "discipline-levels",
+				"icon": null,
+				"fragment": null
+			},
+			"relations": []
 		}
 	],
 	"relations": [

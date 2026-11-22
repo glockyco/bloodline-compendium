@@ -1,6 +1,12 @@
 {
 	"mechanics": [
 		{
+			"key": "Mechanic:Discipline Levels",
+			"slug": "discipline-levels",
+			"name": "Discipline Levels",
+			"intro": "Each discipline levels up as you use it."
+		},
+		{
 			"key": "Mechanic:Skill Points",
 			"slug": "skill-points",
 			"name": "Skill Points",

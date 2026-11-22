@@ -19,8 +19,8 @@
 		The Bloodline Compendium is a fan-made wiki for The Bloodline, generated from the game's files.
 	</p>
 </header>
-<div class="about-layout">
-	<div class="sections">
+<div class="text-layout">
+	<div class="sections text-main">
 		<section aria-labelledby="game">
 			<h2 id="game">About The Bloodline</h2>
 			<p>
@@ -66,7 +66,7 @@
 			</ul>
 		</section>
 	</div>
-	<aside class="panel" aria-labelledby="more-links">
+	<aside class="panel text-side" aria-labelledby="more-links">
 		<h2 id="more-links">More Links</h2>
 		<ul>
 			<li><a href={steam} rel="external">The Bloodline on Steam</a></li>
@@ -80,29 +80,8 @@
 </div>
 
 <style>
-	/* The text at a reading measure with the links beside it, as on Afallon's About page. */
-	.about-layout {
-		display: grid;
-		grid-template-columns: minmax(0, var(--size-measure)) var(--size-item-side);
-		justify-content: space-between;
-		align-items: start;
-		gap: var(--gap-section);
+	.text-layout {
 		margin-top: var(--gap-section);
-	}
-	aside {
-		display: grid;
-		gap: var(--gap-block);
-	}
-	aside h2 {
-		margin: 0;
-		font-size: var(--type-sub);
-	}
-	ul {
-		display: grid;
-		gap: var(--gap-inline);
-		margin: 0;
-		padding: 0;
-		list-style: none;
 	}
 	/* Each other compendium as an equal link card, three in a row with the logo above the name, and full-width
 	   rows on phones, styled like the site's other link cards. */
@@ -110,6 +89,10 @@
 		display: grid;
 		grid-template-columns: repeat(3, minmax(0, 1fr));
 		gap: var(--gap-block);
+		max-width: none;
+		margin: 0;
+		padding: 0;
+		list-style: none;
 	}
 	.compendiums li {
 		display: grid;
@@ -148,11 +131,6 @@
 			flex-direction: row;
 			gap: var(--gap-block);
 			text-align: start;
-		}
-	}
-	@media (width < 64rem) {
-		.about-layout {
-			grid-template-columns: minmax(0, 1fr);
 		}
 	}
 </style>

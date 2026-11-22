@@ -1,3 +1,15 @@
+<script lang="ts" module>
+	/**
+	 * How many cards a full line holds for a set of a given size, at most the given number: the most that divide the
+	 * set evenly, so no line ends with a lone card, as four mechanics read as two lines of two.
+	 */
+	export function balancedColumns(count: number, most = 3): number {
+		for (let columns = Math.min(most, count); columns > 1; columns--)
+			if (count % columns === 0) return columns;
+		return Math.min(most, Math.max(count, 1));
+	}
+</script>
+
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	let {

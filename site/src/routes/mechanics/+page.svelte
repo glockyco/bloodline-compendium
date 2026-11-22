@@ -1,45 +1,49 @@
 <script lang="ts">
 	import SeoHead from '#lib/SeoHead.svelte';
-	import RelationTable from '#lib/RelationTable.svelte';
-	import EntityLink from '#lib/ui/EntityLink.svelte';
-	import LinkedText from '#lib/ui/LinkedText.svelte';
+	import Card from '#lib/ui/Card.svelte';
+	import CardGrid, { balancedColumns } from '#lib/ui/CardGrid.svelte';
+	import { entityPath } from '#lib/entities.js';
+	import { plainText } from '#lib/links.js';
 	let { data } = $props();
 </script>
 
 <SeoHead
 	title="Mechanics | The Bloodline Compendium"
-	description="How parts of The Bloodline work, such as skill points, proficiency points and the Blood Levels setting."
+	description="Discipline levels, skill points, proficiency points and the Blood Levels setting in The Bloodline."
 />
 <header class="page-heading list-title">
 	<h1>Mechanics</h1>
-	<p class="intro">How parts of the game work, each tested in the game.</p>
+	<p class="intro">
+		How disciplines level up, what skill and proficiency points buy, and what the Blood Levels
+		setting changes.
+	</p>
 </header>
-<div class="mechanic-table">
-	<RelationTable
-		items={data.index.mechanics}
-		label="Mechanics"
-		headings={['Mechanic', 'What It Covers']}
-		numeric={false}
-		collapse={false}
-		>{#snippet row(mechanic)}<tr
-				><td
-					><EntityLink
-						entity={{
-							kind: 'mechanic',
-							key: mechanic.key,
-							name: mechanic.name,
-							slug: mechanic.slug,
-							icon: null
-						}}
-					/></td
-				><td><LinkedText text={mechanic.intro} /></td></tr
-			>{/snippet}</RelationTable
-	>
-</div>
+<CardGrid rows={2} columns={balancedColumns(data.index.mechanics.length)} label="Mechanics">
+	{#each data.index.mechanics as mechanic (mechanic.key)}<Card
+			href={entityPath(
+				{
+					kind: 'mechanic',
+					key: mechanic.key,
+					name: mechanic.name,
+					slug: mechanic.slug,
+					icon: null
+				},
+				data.kinds
+			)!}
+		>
+			<h2 class="card-head">{mechanic.name}</h2>
+			<p class="card-text">{plainText(mechanic.intro)}</p>
+		</Card>{/each}
+</CardGrid>
 
 <style>
-	/* A mechanic's name stays on one line, and its description takes the rest of the row. */
-	.mechanic-table :global(td:first-child) {
-		white-space: nowrap;
+	.card-head {
+		margin: 0;
+		font-size: var(--type-sub);
+		line-height: var(--leading-heading);
+	}
+	.card-text {
+		margin: 0;
+		color: var(--text-muted);
 	}
 </style>

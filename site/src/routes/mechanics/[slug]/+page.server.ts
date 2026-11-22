@@ -8,5 +8,6 @@ export async function entries() {
 export async function load({ params }: { params: { slug: string } }) {
 	if (!(await readMechanics()).mechanics.some((mechanic) => mechanic.slug === params.slug))
 		error(404, 'Mechanic not found');
-	return { mechanic: await readMechanic(params.slug) };
+	const [mechanic, { mechanics }] = await Promise.all([readMechanic(params.slug), readMechanics()]);
+	return { mechanic, others: mechanics.filter((other) => other.slug !== params.slug) };
 }

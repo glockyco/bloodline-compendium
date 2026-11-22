@@ -120,7 +120,7 @@ label {
 }
 /* An intro is one or two lines, so its lines balance instead of leaving a short last one. */
 .intro {
-	max-width: var(--size-measure-intro);
+	max-width: var(--size-measure);
 	color: var(--text-muted);
 	font-size: var(--type-intro);
 	line-height: var(--leading-intro);
@@ -139,11 +139,56 @@ label {
 .page-heading > * {
 	margin: 0;
 }
-/* The sections of a text page, one below the other, as Afallon's detail sections, at a reading measure. */
+/* The sections of a text page, one below the other, as Afallon's detail sections. Prose keeps its measure, and
+   tables and panels take the column's width. */
 .sections {
 	display: grid;
 	gap: var(--gap-section);
+}
+.sections :where(p, ol, ul):where(:not(.surface *, .panel *)) {
 	max-width: var(--size-measure);
+}
+/* A text page's main column with a side column for its contents and links, as on GOV.UK's two-thirds layout, so
+   wide screens use the width beside the prose. The side column comes first in the source where it holds the
+   page's contents, so phones show those before the text, and stays in view while the text scrolls past. */
+.text-layout {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) var(--size-item-side);
+	align-items: start;
+	gap: var(--gap-section);
+}
+.text-layout > .text-main {
+	grid-row: 1;
+	grid-column: 1;
+}
+.text-layout > .text-side {
+	position: sticky;
+	top: var(--gap-section);
+	grid-row: 1;
+	grid-column: 2;
+	display: grid;
+	gap: var(--gap-block);
+}
+/* A side column with several groups, such as a page's contents and related pages, spaces the groups apart more
+   than a heading from its links. */
+.text-side:has(> section) {
+	gap: var(--gap-groups);
+}
+.text-side > section {
+	display: grid;
+	gap: var(--gap-block);
+}
+.text-side h2 {
+	margin: 0;
+	font-size: var(--type-sub);
+}
+.text-side ul,
+.text-side ol {
+	display: grid;
+	gap: var(--gap-inline);
+	margin: 0;
+	padding: 0;
+	list-style: none;
 }
 .sections > section {
 	display: grid;
@@ -255,7 +300,7 @@ small {
 /* A page title beside its icon in a slot, as a profession's or a discipline's. */
 .icon-heading {
 	grid-template-columns: auto minmax(0, 1fr);
-	align-items: center;
+	align-items: start;
 	gap: var(--gap-block);
 }
 .item-heading h1 {
@@ -435,6 +480,14 @@ details[open] > summary .show-less {
 	   row adds a second gap. */
 	.detail-layout:not(:has(> .answer)) .item-relations {
 		grid-row: 2;
+	}
+	.text-layout {
+		grid-template-columns: minmax(0, 1fr);
+	}
+	.text-layout > :is(.text-main, .text-side) {
+		position: static;
+		grid-row: auto;
+		grid-column: 1;
 	}
 }
 @media (width < 40rem) {

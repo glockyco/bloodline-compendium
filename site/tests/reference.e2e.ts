@@ -570,6 +570,7 @@ test('each public page has production identity, social metadata and generated br
 			'/professions/',
 			'/professions/starsmithing/',
 			'/mechanics/',
+			'/mechanics/discipline-levels/',
 			'/mechanics/skill-points/',
 			'/mechanics/proficiency-points/'
 		]
@@ -721,7 +722,7 @@ test('notes a known issue on the affected item and explains it on a linked, sear
 	// An issue nobody has reported says nothing about reporting.
 	await expect(entry).not.toContainText('Report');
 	await page.goto('/known-issues/');
-	await page.getByRole('navigation', { name: 'Issues' }).getByRole('link').first().click();
+	await page.getByRole('navigation', { name: 'On This Page' }).getByRole('link').first().click();
 	await expect(page).toHaveURL(/\/known-issues\/#invented-coat-armor$/);
 	await page.goto('/about/');
 	for (const region of ['main', 'footer'])

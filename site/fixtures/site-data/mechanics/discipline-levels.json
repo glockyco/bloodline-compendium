@@ -1,0 +1,15 @@
+{
+	"key": "Mechanic:Discipline Levels",
+	"slug": "discipline-levels",
+	"name": "Discipline Levels",
+	"kind": "mechanic",
+	"intro": "Each discipline levels up as you use it.",
+	"sections": [
+		{
+			"heading": "How They Level",
+			"paragraphs": ["[Emberlore](discipline:emberlore) levels up when you cast its spells."],
+			"anchor": "how-they-level"
+		}
+	],
+	"evidence": ["Invented run three."]
+}
