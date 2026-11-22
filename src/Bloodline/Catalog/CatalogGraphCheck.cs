@@ -55,6 +55,18 @@ internal static class CatalogGraphCheck
                     $"{owner} links to {reference.Kind} without pages: {reference.Name}."
                 );
             }
+            if (kind.Host is { } host && reference.Key is not null)
+            {
+                if (
+                    reference.Host is not { } page
+                    || page.Kind != host
+                    || reference.Fragment is null
+                )
+                    throw new InvalidDataException(
+                        $"{owner} references {reference.Kind} {reference.Name} without its {host} page and anchor."
+                    );
+                Reference(page, owner);
+            }
             if (reference.Key is { } key)
             {
                 if (!entities.TryGetValue((reference.Kind, key), out var target))

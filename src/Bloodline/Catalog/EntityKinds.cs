@@ -18,5 +18,12 @@ internal static class EntityKinds
         new(EntityKind.Quest, false, null, "Quests", "Thing"),
         new(EntityKind.Resource, false, null, "Resources", "Thing"),
         new(EntityKind.Activity, false, null, "Activities", "Thing"),
+        new(EntityKind.Discipline, true, "disciplines", "Disciplines", "Thing"),
+        new(EntityKind.Skill, true, "skills", "Skills", "Thing"),
+        new(EntityKind.Passive, false, null, "Passives", "Thing") { Host = EntityKind.Discipline },
+        new(EntityKind.Spellsong, false, null, "Spellsongs", "Thing")
+        {
+            Host = EntityKind.Discipline,
+        },
     ];
 }

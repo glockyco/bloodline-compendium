@@ -21,7 +21,11 @@ export type EntityKind =
   | "calendarEvent"
   | "quest"
   | "resource"
-  | "activity";
+  | "activity"
+  | "discipline"
+  | "skill"
+  | "passive"
+  | "spellsong";
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "ConditionKind".
@@ -41,6 +45,11 @@ export type ConditionKind =
  * via the `definition` "RelationDirection".
  */
 export type RelationDirection = "outgoing" | "incoming";
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "PointKind".
+ */
+export type PointKind = "skillPoint" | "proficiencyPoint" | "levelUpPoint";
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "SourceKind".
@@ -65,7 +74,11 @@ export type SourceKind =
   | "contract"
   | "seasonalGift"
   | "archaeology"
-  | "reward";
+  | "reward"
+  | "skillTree"
+  | "skillBook"
+  | "noteSheet"
+  | "event";
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "OddsEvent".
@@ -111,7 +124,12 @@ export type Stat =
   | "choppedEffect"
   | "cooledEffect"
   | "groundEffect"
-  | "heatedEffect";
+  | "heatedEffect"
+  | "manaCost"
+  | "cooldown"
+  | "castTime"
+  | "globalCooldown"
+  | "skillType";
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "RenderBody".
@@ -126,11 +144,15 @@ export type ItemStatus = "obtainable" | "noKnownSource" | "notInNormalPlay";
 export interface SiteDataFiles {
   build: SiteBuild;
   crafting: CraftingData;
+  discipline: DisciplinePage;
+  disciplines: DisciplineIndex;
   graph: EntityGraph;
   issues: PublishedIssue[];
   item: ItemPage;
   items: ItemIndex;
   kinds: EntityKindDefinition[];
+  skill: SkillPage;
+  skills: SkillIndex;
   [k: string]: unknown;
 }
 /**
@@ -208,6 +230,7 @@ export interface WeaponPart {
  */
 export interface EntityReference {
   fragment?: string | null;
+  host?: EntityReference | null;
   icon: string | null;
   key: string | null;
   kind: EntityKind;
@@ -236,20 +259,59 @@ export interface WeaponFamily {
 }
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
- * via the `definition` "EntityGraph".
+ * via the `definition` "DisciplinePage".
  */
-export interface EntityGraph {
-  entities: EntityDocument[];
-  relations: RelationRow[];
+export interface DisciplinePage {
+  category: string;
+  key: string;
+  kind: EntityKind;
+  levelName: string | null;
+  name: string;
+  notes: IssueNote[];
+  passiveRows: PassiveRow[];
+  relations: EntityRelation[];
+  skillRows: SkillRow[];
+  slug: string;
+  spellsongs: SpellsongEntry[];
   [k: string]: unknown;
 }
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
- * via the `definition` "EntityDocument".
+ * via the `definition` "IssueNote".
  */
-export interface EntityDocument {
-  entity: EntityReference;
-  relations: EntityRelation[];
+export interface IssueNote {
+  effect: string;
+  issue: string;
+  tooltipValues?: {
+    [k: string]: string;
+  } | null;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "PassiveRow".
+ */
+export interface PassiveRow {
+  level: number;
+  passives: PassiveEntry[];
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "PassiveEntry".
+ */
+export interface PassiveEntry {
+  anchor: string;
+  checkedLevel: string;
+  costIncrease: number;
+  description: string | null;
+  icon: string | null;
+  key: string;
+  name: string;
+  pointCost: number;
+  rankName: string | null;
+  ranks: number;
+  requiredLevel: number;
   [k: string]: unknown;
 }
 /**
@@ -278,17 +340,36 @@ export interface RelationCondition {
 }
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
- * via the `definition` "RelationRow".
+ * via the `definition` "SkillRow".
  */
-export interface RelationRow {
-  attributes: Source | null;
-  conditions: RelationCondition[];
-  forwardLabel: string;
-  id: string;
-  kind: string;
-  reverseLabel: string;
-  source: EntityReference;
-  target: EntityReference;
+export interface SkillRow {
+  level: number;
+  slots: SkillSlotEntry[];
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "SkillSlotEntry".
+ */
+export interface SkillSlotEntry {
+  checkedLevel: string;
+  requiredLevel: number;
+  skill: EntityReference;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "SpellsongEntry".
+ */
+export interface SpellsongEntry {
+  anchor: string;
+  charges: number;
+  description: string | null;
+  experience: number;
+  key: string;
+  name: string;
+  sources: Source[];
+  tune: number[];
   [k: string]: unknown;
 }
 /**
@@ -298,6 +379,7 @@ export interface RelationRow {
 export interface Source {
   amount: Amount | null;
   conditions: RelationCondition[];
+  cost?: PointCost | null;
   entity: EntityReference;
   inputs: ItemAmount[];
   kind: SourceKind;
@@ -321,6 +403,15 @@ export interface Source {
 export interface Amount {
   max: number;
   min: number;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "PointCost".
+ */
+export interface PointCost {
+  amount: number;
+  points: PointKind;
   [k: string]: unknown;
 }
 /**
@@ -386,6 +477,61 @@ export interface Recipe {
 export interface ChanceRange {
   max: number;
   min: number;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "DisciplineIndex".
+ */
+export interface DisciplineIndex {
+  disciplines: DisciplineSummary[];
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "DisciplineSummary".
+ */
+export interface DisciplineSummary {
+  category: string;
+  key: string;
+  name: string;
+  passives: number;
+  skills: number;
+  slug: string;
+  spellsongs: number;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "EntityGraph".
+ */
+export interface EntityGraph {
+  entities: EntityDocument[];
+  relations: RelationRow[];
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "EntityDocument".
+ */
+export interface EntityDocument {
+  entity: EntityReference;
+  relations: EntityRelation[];
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "RelationRow".
+ */
+export interface RelationRow {
+  attributes: Source | null;
+  conditions: RelationCondition[];
+  forwardLabel: string;
+  id: string;
+  kind: string;
+  reverseLabel: string;
+  source: EntityReference;
+  target: EntityReference;
   [k: string]: unknown;
 }
 /**
@@ -479,18 +625,6 @@ export interface Effect {
   name: string;
   power: number | null;
   seconds: number;
-  [k: string]: unknown;
-}
-/**
- * This interface was referenced by `SiteDataFiles`'s JSON-Schema
- * via the `definition` "IssueNote".
- */
-export interface IssueNote {
-  effect: string;
-  issue: string;
-  tooltipValues?: {
-    [k: string]: string;
-  } | null;
   [k: string]: unknown;
 }
 /**
@@ -634,9 +768,77 @@ export interface ListCell {
  */
 export interface EntityKindDefinition {
   hasPages: boolean;
+  host?:
+    | "item"
+    | "merchant"
+    | "person"
+    | "creature"
+    | "place"
+    | "container"
+    | "recipe"
+    | "building"
+    | "calendarEvent"
+    | "quest"
+    | "resource"
+    | "activity"
+    | "discipline"
+    | "skill"
+    | "passive"
+    | "spellsong"
+    | null;
   kind: EntityKind;
   route: string | null;
   searchFilter: string;
   structuredDataType: string;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "SkillPage".
+ */
+export interface SkillPage {
+  description: string | null;
+  facts: Fact[];
+  icon: string | null;
+  key: string;
+  kind: EntityKind;
+  name: string;
+  notes: IssueNote[];
+  relations: EntityRelation[];
+  slug: string;
+  sources: Source[];
+  status: ItemStatus;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "SkillIndex".
+ */
+export interface SkillIndex {
+  categories: CategorySummary[];
+  columns: ListColumn[];
+  facets: ListFacet[];
+  skills: SkillSummary[];
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "SkillSummary".
+ */
+export interface SkillSummary {
+  category: string;
+  cells: {
+    [k: string]: ListCell;
+  };
+  facets: {
+    [k: string]: string[];
+  };
+  icon: string | null;
+  key: string;
+  kind: EntityKind;
+  name: string;
+  placeSources: string[][];
+  slug: string;
+  status: ItemStatus;
   [k: string]: unknown;
 }

@@ -3,8 +3,26 @@ using Bloodline.SiteData;
 
 namespace Bloodline.Catalog;
 
+/// <summary>
+/// Conversations that give something: an item through an AddItemDialogue event, or a skill through an UnlockSkill
+/// event, with the people who hold the conversation and the lines that lead to the gift.
+/// </summary>
 internal sealed class DialogueGrantMechanism : ISourceMechanism
 {
+    /// <summary>A dialogue event class that gives an entity, the field naming it and the field of its amount.</summary>
+    private sealed record Grant(
+        string EventClass,
+        EntityKind Kind,
+        string Field,
+        string? AmountField
+    );
+
+    private static readonly Grant[] Grants =
+    [
+        new("AddItemDialogue_C", EntityKind.Item, "Item To Add", "Amount to Give"),
+        new("UnlockSkill_C", EntityKind.Skill, "Skill to Add", null),
+    ];
+
     public IEnumerable<EntitySource> FindSources(CatalogContext context)
     {
         var dialoguePaths = context
@@ -42,9 +60,15 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
         foreach (var dialogue in context.Records.Dialogues)
         {
             var grants = dialogue
-                .Objects.Where(obj =>
-                    WorldSourceData.IsClass(context, obj.Class, "AddItemDialogue_C")
+                .Objects.Select(obj =>
+                    (
+                        Object: obj,
+                        Spec: Grants.FirstOrDefault(spec =>
+                            WorldSourceData.IsClass(context, obj.Class, spec.EventClass)
+                        )
+                    )
                 )
+                .Where(entry => entry.Spec is not null)
                 .ToArray();
             if (grants.Length == 0)
             {
@@ -102,19 +126,23 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
                 );
             }
             var rewards = grants
-                .Select(grant =>
+                .Select(entry =>
                 {
+                    var (grant, spec) = entry;
                     var properties = context.Classes.TryGetValue(grant.Class, out var defaults)
                         ? RecordMerge.OverlayProperties(defaults.Properties, grant.Properties)
                         : grant.Properties;
                     return (
                         Grant: grant,
-                        Item: RecordValues.AnyReference(properties["Item To Add"]),
-                        Amount: WorldSourceData.Integer(properties["Amount to Give"]) ?? 1
+                        Spec: spec!,
+                        Item: RecordValues.AnyReference(properties[spec!.Field]),
+                        Amount: spec.AmountField is { } field
+                            ? WorldSourceData.Integer(properties[field]) ?? 1
+                            : 1
                     );
                 })
                 .ToArray();
-            foreach (var (grant, item, amount) in rewards)
+            foreach (var (grant, spec, item, amount) in rewards)
             {
                 if (amount <= 0 || item is null)
                 {
@@ -162,7 +190,7 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
                             name,
                             place is null ? [] : [place],
                             null,
-                            new Amount(amount, amount),
+                            spec.AmountField is null ? null : new Amount(amount, amount),
                             [],
                             generated
                                 ?
@@ -183,6 +211,7 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
                         }
                     )
                     {
+                        Kind = spec.Kind,
                         Unresolved = requirements.Unresolved,
                     };
                 }

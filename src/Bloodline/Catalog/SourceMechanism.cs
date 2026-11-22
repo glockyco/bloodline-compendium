@@ -49,6 +49,11 @@ internal sealed class CatalogContext
 
     public DialogueTags Tags => tags ??= new DialogueTags(this);
 
+    private SkillTrees? skillTrees;
+
+    /// <summary>The skill trees a player reaches, which skill and spellsong sources and producers share.</summary>
+    public SkillTrees SkillTrees => skillTrees ??= new SkillTrees(this);
+
     public CatalogContext(
         CatalogRecords records,
         IReadOnlyDictionary<string, ItemPage> items,

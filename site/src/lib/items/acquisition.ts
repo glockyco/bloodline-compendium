@@ -122,7 +122,11 @@ export const sourceVerbs: Record<SourceKind, string> = {
 	contract: 'Given by',
 	seasonalGift: 'Given by',
 	archaeology: 'Dug up from',
-	reward: 'Given by'
+	reward: 'Given by',
+	skillTree: 'Unlocked in the tree of',
+	skillBook: 'Learned from a skill book in',
+	noteSheet: 'Learned from a note sheet in',
+	event: 'Unlocked by'
 };
 
 /** The ways of getting an item that a recipe line shows in full instead of a source table. */

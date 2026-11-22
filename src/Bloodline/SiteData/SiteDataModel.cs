@@ -19,15 +19,26 @@ internal enum EntityKind
     Quest,
     Resource,
     Activity,
+    Discipline,
+    Skill,
+    Passive,
+    Spellsong,
 }
 
+/// <summary>
+/// A registered kind. A kind with <see cref="Host"/> has no pages of its own: each of its entities is an anchored
+/// entry on a page of the host kind, such as a passive on its discipline's page.
+/// </summary>
 internal sealed record EntityKindDefinition(
     EntityKind Kind,
     bool HasPages,
     string? Route,
     string SearchFilter,
     string StructuredDataType
-);
+)
+{
+    public EntityKind? Host { get; init; }
+}
 
 internal sealed record EntityReference(
     EntityKind Kind,
@@ -39,6 +50,13 @@ internal sealed record EntityReference(
 {
     /// <summary>The item version to open within its shared-name page, without a leading hash.</summary>
     public string? Fragment { get; init; }
+
+    /// <summary>
+    /// For an entity of a hosted kind, the host page that shows it, such as a passive's discipline. The link leads
+    /// to that page at <see cref="Fragment"/>.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public EntityReference? Host { get; init; }
 }
 
 internal enum ConditionKind
@@ -401,6 +419,11 @@ internal enum Stat
     CooledEffect,
     GroundEffect,
     HeatedEffect,
+    ManaCost,
+    Cooldown,
+    CastTime,
+    GlobalCooldown,
+    SkillType,
 }
 
 /// <summary>
@@ -448,6 +471,20 @@ internal sealed record Source(
 
     /// <summary>The lines of a conversation that give the item, in the game's own words.</summary>
     public IReadOnlyList<Quote> Quotes { get; init; } = [];
+
+    /// <summary>The progression points a source costs, such as the skill point that unlocks a tree skill.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public PointCost? Cost { get; init; }
+}
+
+/// <summary>An amount of progression points, such as 1 skill point.</summary>
+internal sealed record PointCost(int Amount, PointKind Points);
+
+internal enum PointKind
+{
+    SkillPoint,
+    ProficiencyPoint,
+    LevelUpPoint,
 }
 
 /// <summary>A line of game dialogue. <see cref="Player"/> marks a line the player chooses.</summary>
@@ -551,6 +588,18 @@ internal enum SourceKind
     SeasonalGift,
     Archaeology,
     Reward,
+
+    /// <summary>A slot in a discipline's skill tree.</summary>
+    SkillTree,
+
+    /// <summary>A skill book placed in a level, which teaches its skill when read.</summary>
+    SkillBook,
+
+    /// <summary>A note sheet placed in a level, which teaches its spellsong.</summary>
+    NoteSheet,
+
+    /// <summary>An event in the game's code, such as becoming a vampire.</summary>
+    Event,
 }
 
 /// <summary>A price in gold, the game's money, or in a currency item when <see cref="Currency"/> is set.</summary>
@@ -612,6 +661,163 @@ internal sealed record ArmorQuality(
     IReadOnlyDictionary<string, double> ArmorByClass
 );
 
+/// <summary>The disciplines in the skill window's order. Written as <c>disciplines.json</c>.</summary>
+internal sealed record DisciplineIndex(IReadOnlyList<DisciplineSummary> Disciplines);
+
+/// <summary>
+/// A discipline as the discipline list shows it. <see cref="Category"/> is the skill window's category, such as
+/// Magic.
+/// </summary>
+internal sealed record DisciplineSummary(
+    string Key,
+    string Slug,
+    string Name,
+    string Category,
+    int Skills,
+    int Passives,
+    int Spellsongs
+);
+
+/// <summary>
+/// Everything a discipline page shows, laid out as the game's tree window. Written as
+/// <c>disciplines/&lt;slug&gt;.json</c>. <see cref="Key"/> is the tree's widget class path. <see cref="LevelName"/>
+/// is the name the game tracks the discipline's level by, such as Pyromancy, which the progression rules read.
+/// </summary>
+internal sealed record DisciplinePage(
+    string Key,
+    string Slug,
+    string Name,
+    string Category,
+    string? LevelName,
+    IReadOnlyList<SkillRow> SkillRows,
+    IReadOnlyList<PassiveRow> PassiveRows,
+    IReadOnlyList<SpellsongEntry> Spellsongs
+)
+{
+    [JsonRequired]
+    public EntityKind Kind { get; init; } = EntityKind.Discipline;
+
+    [JsonRequired]
+    public IReadOnlyList<EntityRelation> Relations { get; init; } = [];
+
+    /// <summary>Known issues that affect what this page shows.</summary>
+    [JsonRequired]
+    public IReadOnlyList<IssueNote> Notes { get; init; } = [];
+}
+
+/// <summary>A row of the tree's skill panel: the level its label shows and its slots in the game's order.</summary>
+internal sealed record SkillRow(int Level, IReadOnlyList<SkillSlotEntry> Slots);
+
+/// <summary>
+/// A skill slot: its skill, and the level of <see cref="CheckedLevel"/>, a discipline's level name, that unlocks it.
+/// </summary>
+internal sealed record SkillSlotEntry(
+    EntityReference Skill,
+    int RequiredLevel,
+    string CheckedLevel
+);
+
+/// <summary>A row of the tree's proficiency panel: the level its label shows and its passives in order.</summary>
+internal sealed record PassiveRow(int Level, IReadOnlyList<PassiveEntry> Passives);
+
+/// <summary>
+/// A passive of a discipline. <see cref="Anchor"/> is its fragment on the discipline page. Rank k costs
+/// <see cref="PointCost"/> plus k - 1 times <see cref="CostIncrease"/>, for <see cref="Ranks"/> ranks.
+/// <see cref="RankName"/> is the name the game gives its later ranks, when it has one.
+/// </summary>
+internal sealed record PassiveEntry(
+    string Key,
+    string Anchor,
+    string Name,
+    string? Description,
+    int RequiredLevel,
+    string CheckedLevel,
+    int PointCost,
+    int CostIncrease,
+    int Ranks,
+    string? RankName,
+    string? Icon
+);
+
+/// <summary>
+/// A spellsong, played on the lute. <see cref="Tune"/> is its notes as the game numbers them, from 1 to 4.
+/// </summary>
+internal sealed record SpellsongEntry(
+    string Key,
+    string Anchor,
+    string Name,
+    string? Description,
+    IReadOnlyList<int> Tune,
+    int Charges,
+    double Experience,
+    IReadOnlyList<Source> Sources
+);
+
+/// <summary>The skill list's filters, columns and rows. Written as <c>skills.json</c>.</summary>
+internal sealed record SkillIndex(
+    IReadOnlyList<CategorySummary> Categories,
+    IReadOnlyList<SkillSummary> Skills
+)
+{
+    [JsonRequired]
+    public IReadOnlyList<ListFacet> Facets { get; init; } = [];
+
+    [JsonRequired]
+    public IReadOnlyList<ListColumn> Columns { get; init; } = [];
+}
+
+/// <summary>What the skill list shows of a skill. <see cref="Category"/> is its skill window category slug.</summary>
+internal sealed record SkillSummary(
+    string Key,
+    string Slug,
+    string Name,
+    string? Icon,
+    string Category,
+    ItemStatus Status
+)
+{
+    [JsonRequired]
+    public EntityKind Kind { get; init; } = EntityKind.Skill;
+
+    [JsonRequired]
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Facets { get; init; } =
+        new Dictionary<string, IReadOnlyList<string>>();
+
+    [JsonRequired]
+    public IReadOnlyDictionary<string, ListCell> Cells { get; init; } =
+        new Dictionary<string, ListCell>();
+
+    [JsonRequired]
+    public IReadOnlyList<IReadOnlyList<string>> PlaceSources { get; init; } = [];
+}
+
+/// <summary>
+/// Everything a skill page shows. Written as <c>skills/&lt;slug&gt;.json</c>. <see cref="Key"/> is the skill's class
+/// path.
+/// </summary>
+internal sealed record SkillPage(
+    string Key,
+    string Slug,
+    string Name,
+    string? Description,
+    string? Icon,
+    IReadOnlyList<Fact> Facts,
+    IReadOnlyList<Source> Sources
+)
+{
+    [JsonRequired]
+    public EntityKind Kind { get; init; } = EntityKind.Skill;
+
+    [JsonRequired]
+    public ItemStatus Status { get; init; } = ItemStatus.Obtainable;
+
+    [JsonRequired]
+    public IReadOnlyList<EntityRelation> Relations { get; init; } = [];
+
+    [JsonRequired]
+    public IReadOnlyList<IssueNote> Notes { get; init; } = [];
+}
+
 /// <summary>The files of the site data, gathered only to export one schema for all of them.</summary>
 internal sealed record SiteDataFiles(
     SiteBuild Build,
@@ -620,5 +826,9 @@ internal sealed record SiteDataFiles(
     IReadOnlyList<EntityKindDefinition> Kinds,
     EntityGraph Graph,
     IReadOnlyList<PublishedIssue> Issues,
-    CraftingData Crafting
+    CraftingData Crafting,
+    DisciplineIndex Disciplines,
+    DisciplinePage Discipline,
+    SkillIndex Skills,
+    SkillPage Skill
 );

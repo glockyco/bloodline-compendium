@@ -46,6 +46,15 @@ internal enum GapKind
 
     /// <summary>Items the crafting window maps to a recipe row that the recipe table lacks.</summary>
     MissingRecipeRow,
+
+    /// <summary>Skills and spellsongs without a confirmed source.</summary>
+    EntityWithoutSource,
+
+    /// <summary>Tree slots and passives whose required level differs from the level their row's label shows.</summary>
+    RowLevelDifference,
+
+    /// <summary>Skill table rows the catalog does not publish: rows without a class, or a class's later rows.</summary>
+    UnreadSkillRow,
 }
 
 /// <summary>

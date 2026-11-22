@@ -30,7 +30,11 @@ export const sourceHeadings: Record<SourceKind, string> = {
 	archaeology: 'Dug Up',
 	reward: 'Rewarded',
 	// Random loot names no place or chance, so it follows the ways that do.
-	randomLoot: 'Found as Random Loot'
+	randomLoot: 'Found as Random Loot',
+	skillTree: 'In a Skill Tree',
+	skillBook: 'Learned from a Skill Book',
+	noteSheet: 'Learned from a Note Sheet',
+	event: 'Unlocked by an Event'
 };
 
 export const sourceIntros: Partial<Record<SourceKind, string>> = {
@@ -58,5 +62,9 @@ export const sourceColumns: Record<SourceKind, string> = {
 	contract: 'Contract',
 	seasonalGift: 'Gift',
 	archaeology: 'Find',
-	reward: 'Reward'
+	reward: 'Reward',
+	skillTree: 'Discipline',
+	skillBook: 'Location',
+	noteSheet: 'Location',
+	event: 'Event'
 };

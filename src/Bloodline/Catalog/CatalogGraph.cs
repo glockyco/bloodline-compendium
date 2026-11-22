@@ -5,20 +5,40 @@ using Bloodline.SiteData;
 
 namespace Bloodline.Catalog;
 
-internal sealed record GraphResult(EntityGraph Graph, IReadOnlyList<ItemPage> Items);
+/// <summary>An entity of a kind other than items, with the sources the graph turns into its relations.</summary>
+internal sealed record GraphEntity(EntityReference Reference, IReadOnlyList<Source> Sources);
+
+/// <summary>
+/// The graph, the item pages with their relations and uses, and for every other entity its document and its sources
+/// with their relations resolved.
+/// </summary>
+internal sealed record GraphResult(EntityGraph Graph, IReadOnlyList<ItemPage> Items)
+{
+    public IReadOnlyDictionary<(EntityKind, string), EntityDocument> Documents { get; init; } =
+        new Dictionary<(EntityKind, string), EntityDocument>();
+
+    public IReadOnlyDictionary<(EntityKind, string), IReadOnlyList<Source>> Sources { get; init; } =
+        new Dictionary<(EntityKind, string), IReadOnlyList<Source>>();
+}
 
 internal static class CatalogGraph
 {
     public static GraphResult Build(
         IReadOnlyList<ItemPage> items,
         IEnumerable<EntityReference>? references = null,
-        IReadOnlyDictionary<string, EntityReference>? itemReferences = null
+        IReadOnlyDictionary<string, EntityReference>? itemReferences = null,
+        IReadOnlyList<GraphEntity>? others = null
     )
     {
+        others ??= [];
         var entities = new Dictionary<(EntityKind Kind, string Key), EntityReference>();
         foreach (var item in items)
         {
             entities.Add((EntityKind.Item, item.Key), Reference(item));
+        }
+        foreach (var other in others)
+        {
+            entities.Add((other.Reference.Kind, other.Reference.Key!), other.Reference);
         }
         var outputs = items.ToDictionary(item => item.Key, StringComparer.Ordinal);
         EntityReference Resolve(EntityReference reference)
@@ -72,9 +92,20 @@ internal static class CatalogGraph
         var pages = new List<ItemPage>(items.Count);
         foreach (var item in items)
         {
-            var target = Reference(item);
+            pages.Add(item with { Sources = ResolveSources(Reference(item), item.Sources) });
+        }
+        var otherSources = others.ToDictionary(
+            other => (other.Reference.Kind, other.Reference.Key!),
+            other => ResolveSources(other.Reference, other.Sources)
+        );
+
+        IReadOnlyList<Source> ResolveSources(
+            EntityReference target,
+            IReadOnlyList<Source> originals
+        )
+        {
             var sources = new Dictionary<string, Source>(StringComparer.Ordinal);
-            foreach (var original in item.Sources)
+            foreach (var original in originals)
             {
                 var source = original with
                 {
@@ -158,7 +189,7 @@ internal static class CatalogGraph
                 string UseId(string kind, EntityReference input, int quantity) =>
                     Id(kind, input, target, new { RelationId = id, quantity });
             }
-            pages.Add(item with { Sources = sources.Values.ToArray() });
+            return sources.Values.ToArray();
         }
 
         void AddUse(
@@ -259,7 +290,13 @@ internal static class CatalogGraph
                     }
                 )
                 .ToArray()
-        );
+        )
+        {
+            Documents = documents
+                .Where(document => document.Entity.Kind != EntityKind.Item)
+                .ToDictionary(document => (document.Entity.Kind, document.Entity.Key!)),
+            Sources = otherSources,
+        };
     }
 
     public static EntityReference Reference(ItemPage item) =>
@@ -297,6 +334,9 @@ internal static class CatalogGraph
             SourceKind.Smithing or SourceKind.Crafting or SourceKind.Cooking => "Produces",
             SourceKind.EnemyDrop => "Drops",
             SourceKind.Dialogue => "Gives",
+            SourceKind.SkillTree => "Holds",
+            SourceKind.SkillBook or SourceKind.NoteSheet => "Teaches",
+            SourceKind.Event => "Unlocks",
             _ => "Provides",
         };
 
@@ -307,6 +347,9 @@ internal static class CatalogGraph
             SourceKind.Smithing or SourceKind.Crafting or SourceKind.Cooking => "Made with",
             SourceKind.EnemyDrop => "Dropped by",
             SourceKind.Dialogue => "Given by",
+            SourceKind.SkillTree => "In the tree of",
+            SourceKind.SkillBook or SourceKind.NoteSheet => "Taught by",
+            SourceKind.Event => "Unlocked by",
             _ => "Obtained from",
         };
 }

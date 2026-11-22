@@ -18,6 +18,10 @@ internal sealed record CatalogResult(
 
     /// <summary>The known game issues, each with the published pages that note it.</summary>
     public IReadOnlyList<PublishedIssue> Issues { get; init; } = [];
+
+    /// <summary>Disciplines and skills with their lists.</summary>
+    public SkillOutput Skills { get; init; } =
+        new(new DisciplineIndex([]), [], new SkillIndex([], []), []);
 }
 
 internal static class CatalogBuilder
@@ -48,6 +52,10 @@ internal static class CatalogBuilder
             new ContainerLootMechanism(),
             new RandomLootMechanism(),
             new EnemyDropMechanism(),
+            new SkillTreeMechanism(),
+            new SkillBookMechanism(),
+            new NoteSheetMechanism(),
+            new SkillEventMechanism(),
         ];
         Exclusions.Validate(records, exclusions);
         var coverage = new Coverage();
@@ -62,6 +70,13 @@ internal static class CatalogBuilder
             candidates
                 .Where(candidate => candidate.Kind == EntityKind.Item)
                 .ToLookup(candidate => candidate.Key, StringComparer.OrdinalIgnoreCase),
+            coverage
+        );
+        var skillProducer = new SkillProducer(context, iconsDirectory);
+        var skillsPrepared = skillProducer.Prepare(
+            candidates
+                .Where(candidate => candidate.Kind != EntityKind.Item)
+                .ToLookup(candidate => (candidate.Kind, candidate.Key)),
             coverage
         );
         foreach (
@@ -88,13 +103,28 @@ internal static class CatalogBuilder
         var graphResult = CatalogGraph.Build(
             prepared.Grouped.Items,
             context.Places.All,
-            prepared.Grouped.References
+            prepared.Grouped.References,
+            skillsPrepared.GraphEntities
         );
         coverage.Canonicalize(reference => ItemProducer.Canonical(prepared, reference));
         var items = itemProducer.Finish(prepared, graphResult.Items, coverage);
         SharedNames(graphResult.Graph, coverage);
         foreach (var item in graphResult.Items)
             SourceGaps(CatalogGraph.Reference(item), item.Name, item.Sources, coverage);
+        var skills = skillProducer.Finish(skillsPrepared, graphResult);
+        foreach (var skill in skills.Skills)
+            SourceGaps(
+                new EntityReference(
+                    EntityKind.Skill,
+                    skill.Key,
+                    skill.Name,
+                    skill.Slug,
+                    skill.Icon
+                ),
+                skill.Name,
+                skill.Sources,
+                coverage
+            );
         return new CatalogResult(
             items.Index,
             items.Items,
@@ -106,6 +136,7 @@ internal static class CatalogBuilder
             Claims = items.Claims,
             Tooltips = items.Tooltips,
             Issues = items.Issues,
+            Skills = skills,
         };
     }
 

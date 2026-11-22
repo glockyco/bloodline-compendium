@@ -145,6 +145,127 @@
       "title": "CraftingData",
       "type": "object"
     },
+    "DisciplineIndex": {
+      "properties": {
+        "disciplines": {
+          "items": {
+            "$ref": "#/$defs/DisciplineSummary"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "disciplines"
+      ],
+      "title": "DisciplineIndex",
+      "type": "object"
+    },
+    "DisciplinePage": {
+      "properties": {
+        "category": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/EntityKind"
+        },
+        "levelName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "notes": {
+          "items": {
+            "$ref": "#/$defs/IssueNote"
+          },
+          "type": "array"
+        },
+        "passiveRows": {
+          "items": {
+            "$ref": "#/$defs/PassiveRow"
+          },
+          "type": "array"
+        },
+        "relations": {
+          "items": {
+            "$ref": "#/$defs/EntityRelation"
+          },
+          "type": "array"
+        },
+        "skillRows": {
+          "items": {
+            "$ref": "#/$defs/SkillRow"
+          },
+          "type": "array"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "spellsongs": {
+          "items": {
+            "$ref": "#/$defs/SpellsongEntry"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "key",
+        "slug",
+        "name",
+        "category",
+        "levelName",
+        "skillRows",
+        "passiveRows",
+        "spellsongs",
+        "kind",
+        "relations",
+        "notes"
+      ],
+      "title": "DisciplinePage",
+      "type": "object"
+    },
+    "DisciplineSummary": {
+      "properties": {
+        "category": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "passives": {
+          "type": "integer"
+        },
+        "skills": {
+          "type": "integer"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "spellsongs": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "key",
+        "slug",
+        "name",
+        "category",
+        "skills",
+        "passives",
+        "spellsongs"
+      ],
+      "title": "DisciplineSummary",
+      "type": "object"
+    },
     "Effect": {
       "properties": {
         "name": {
@@ -222,7 +343,11 @@
         "calendarEvent",
         "quest",
         "resource",
-        "activity"
+        "activity",
+        "discipline",
+        "skill",
+        "passive",
+        "spellsong"
       ],
       "title": "EntityKind"
     },
@@ -230,6 +355,27 @@
       "properties": {
         "hasPages": {
           "type": "boolean"
+        },
+        "host": {
+          "enum": [
+            "item",
+            "merchant",
+            "person",
+            "creature",
+            "place",
+            "container",
+            "recipe",
+            "building",
+            "calendarEvent",
+            "quest",
+            "resource",
+            "activity",
+            "discipline",
+            "skill",
+            "passive",
+            "spellsong",
+            null
+          ]
         },
         "kind": {
           "$ref": "#/$defs/EntityKind"
@@ -263,6 +409,16 @@
           "type": [
             "string",
             "null"
+          ]
+        },
+        "host": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EntityReference"
+            },
+            {
+              "type": "null"
+            }
           ]
         },
         "icon": {
@@ -1065,6 +1221,110 @@
       "title": "OnHitEffect",
       "type": "object"
     },
+    "PassiveEntry": {
+      "properties": {
+        "anchor": {
+          "type": "string"
+        },
+        "checkedLevel": {
+          "type": "string"
+        },
+        "costIncrease": {
+          "type": "integer"
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "icon": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "key": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "pointCost": {
+          "type": "integer"
+        },
+        "rankName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "ranks": {
+          "type": "integer"
+        },
+        "requiredLevel": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "key",
+        "anchor",
+        "name",
+        "description",
+        "requiredLevel",
+        "checkedLevel",
+        "pointCost",
+        "costIncrease",
+        "ranks",
+        "rankName",
+        "icon"
+      ],
+      "title": "PassiveEntry",
+      "type": "object"
+    },
+    "PassiveRow": {
+      "properties": {
+        "level": {
+          "type": "integer"
+        },
+        "passives": {
+          "items": {
+            "$ref": "#/$defs/PassiveEntry"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "level",
+        "passives"
+      ],
+      "title": "PassiveRow",
+      "type": "object"
+    },
+    "PointCost": {
+      "properties": {
+        "amount": {
+          "type": "integer"
+        },
+        "points": {
+          "$ref": "#/$defs/PointKind"
+        }
+      },
+      "required": [
+        "amount",
+        "points"
+      ],
+      "title": "PointCost",
+      "type": "object"
+    },
+    "PointKind": {
+      "enum": [
+        "skillPoint",
+        "proficiencyPoint",
+        "levelUpPoint"
+      ],
+      "title": "PointKind"
+    },
     "Price": {
       "properties": {
         "amount": {
@@ -1432,6 +1692,217 @@
       "title": "SiteRelease",
       "type": "object"
     },
+    "SkillIndex": {
+      "properties": {
+        "categories": {
+          "items": {
+            "$ref": "#/$defs/CategorySummary"
+          },
+          "type": "array"
+        },
+        "columns": {
+          "items": {
+            "$ref": "#/$defs/ListColumn"
+          },
+          "type": "array"
+        },
+        "facets": {
+          "items": {
+            "$ref": "#/$defs/ListFacet"
+          },
+          "type": "array"
+        },
+        "skills": {
+          "items": {
+            "$ref": "#/$defs/SkillSummary"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "categories",
+        "skills",
+        "facets",
+        "columns"
+      ],
+      "title": "SkillIndex",
+      "type": "object"
+    },
+    "SkillPage": {
+      "properties": {
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "facts": {
+          "items": {
+            "$ref": "#/$defs/Fact"
+          },
+          "type": "array"
+        },
+        "icon": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "key": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/EntityKind"
+        },
+        "name": {
+          "type": "string"
+        },
+        "notes": {
+          "items": {
+            "$ref": "#/$defs/IssueNote"
+          },
+          "type": "array"
+        },
+        "relations": {
+          "items": {
+            "$ref": "#/$defs/EntityRelation"
+          },
+          "type": "array"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/Source"
+          },
+          "type": "array"
+        },
+        "status": {
+          "$ref": "#/$defs/ItemStatus"
+        }
+      },
+      "required": [
+        "key",
+        "slug",
+        "name",
+        "description",
+        "icon",
+        "facts",
+        "sources",
+        "kind",
+        "status",
+        "relations",
+        "notes"
+      ],
+      "title": "SkillPage",
+      "type": "object"
+    },
+    "SkillRow": {
+      "properties": {
+        "level": {
+          "type": "integer"
+        },
+        "slots": {
+          "items": {
+            "$ref": "#/$defs/SkillSlotEntry"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "level",
+        "slots"
+      ],
+      "title": "SkillRow",
+      "type": "object"
+    },
+    "SkillSlotEntry": {
+      "properties": {
+        "checkedLevel": {
+          "type": "string"
+        },
+        "requiredLevel": {
+          "type": "integer"
+        },
+        "skill": {
+          "$ref": "#/$defs/EntityReference"
+        }
+      },
+      "required": [
+        "skill",
+        "requiredLevel",
+        "checkedLevel"
+      ],
+      "title": "SkillSlotEntry",
+      "type": "object"
+    },
+    "SkillSummary": {
+      "properties": {
+        "category": {
+          "type": "string"
+        },
+        "cells": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ListCell"
+          },
+          "type": "object"
+        },
+        "facets": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "type": "object"
+        },
+        "icon": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "key": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/EntityKind"
+        },
+        "name": {
+          "type": "string"
+        },
+        "placeSources": {
+          "items": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "type": "array"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/ItemStatus"
+        }
+      },
+      "required": [
+        "key",
+        "slug",
+        "name",
+        "icon",
+        "category",
+        "status",
+        "kind",
+        "facets",
+        "cells",
+        "placeSources"
+      ],
+      "title": "SkillSummary",
+      "type": "object"
+    },
     "Source": {
       "properties": {
         "amount": {
@@ -1449,6 +1920,16 @@
             "$ref": "#/$defs/RelationCondition"
           },
           "type": "array"
+        },
+        "cost": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PointCost"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "entity": {
           "$ref": "#/$defs/EntityReference"
@@ -1570,9 +2051,62 @@
         "contract",
         "seasonalGift",
         "archaeology",
-        "reward"
+        "reward",
+        "skillTree",
+        "skillBook",
+        "noteSheet",
+        "event"
       ],
       "title": "SourceKind"
+    },
+    "SpellsongEntry": {
+      "properties": {
+        "anchor": {
+          "type": "string"
+        },
+        "charges": {
+          "type": "integer"
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "experience": {
+          "type": "number"
+        },
+        "key": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/Source"
+          },
+          "type": "array"
+        },
+        "tune": {
+          "items": {
+            "type": "integer"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "key",
+        "anchor",
+        "name",
+        "description",
+        "tune",
+        "charges",
+        "experience",
+        "sources"
+      ],
+      "title": "SpellsongEntry",
+      "type": "object"
     },
     "Stat": {
       "enum": [
@@ -1601,7 +2135,12 @@
         "choppedEffect",
         "cooledEffect",
         "groundEffect",
-        "heatedEffect"
+        "heatedEffect",
+        "manaCost",
+        "cooldown",
+        "castTime",
+        "globalCooldown",
+        "skillType"
       ],
       "title": "Stat"
     },
@@ -1681,6 +2220,12 @@
     "crafting": {
       "$ref": "#/$defs/CraftingData"
     },
+    "discipline": {
+      "$ref": "#/$defs/DisciplinePage"
+    },
+    "disciplines": {
+      "$ref": "#/$defs/DisciplineIndex"
+    },
     "graph": {
       "$ref": "#/$defs/EntityGraph"
     },
@@ -1701,6 +2246,12 @@
         "$ref": "#/$defs/EntityKindDefinition"
       },
       "type": "array"
+    },
+    "skill": {
+      "$ref": "#/$defs/SkillPage"
+    },
+    "skills": {
+      "$ref": "#/$defs/SkillIndex"
     }
   },
   "required": [
@@ -1710,7 +2261,11 @@
     "kinds",
     "graph",
     "issues",
-    "crafting"
+    "crafting",
+    "disciplines",
+    "discipline",
+    "skills",
+    "skill"
   ],
   "title": "SiteDataFiles",
   "type": "object"

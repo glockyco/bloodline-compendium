@@ -28,9 +28,34 @@ internal static class CatalogWriter
             {
                 CanonicalJson.Write(Path.Combine(staging, "items", item.Slug + ".json"), item);
             }
+            CanonicalJson.Write(
+                Path.Combine(staging, "disciplines.json"),
+                catalog.Skills.DisciplineIndex
+            );
+            CanonicalJson.Write(Path.Combine(staging, "skills.json"), catalog.Skills.SkillIndex);
+            Directory.CreateDirectory(Path.Combine(staging, "disciplines"));
+            Directory.CreateDirectory(Path.Combine(staging, "skills"));
+            foreach (var discipline in catalog.Skills.Disciplines)
+            {
+                CanonicalJson.Write(
+                    Path.Combine(staging, "disciplines", discipline.Slug + ".json"),
+                    discipline
+                );
+            }
+            foreach (var skill in catalog.Skills.Skills)
+            {
+                CanonicalJson.Write(Path.Combine(staging, "skills", skill.Slug + ".json"), skill);
+            }
             foreach (
                 var icon in catalog
                     .Items.Select(item => item.Icon)
+                    .Concat(catalog.Skills.Skills.Select(skill => skill.Icon))
+                    .Concat(
+                        catalog.Skills.Disciplines.SelectMany(page =>
+                            page.PassiveRows.SelectMany(row => row.Passives)
+                                .Select(passive => passive.Icon)
+                        )
+                    )
                     .OfType<string>()
                     .Distinct(StringComparer.Ordinal)
             )
