@@ -180,6 +180,7 @@
 			"label": "Required Level",
 			"categories": ["magic", "other"],
 			"numeric": true,
+			"ascending": true,
 			"unit": null
 		},
 		{

@@ -42,8 +42,8 @@
 - [x] 6.1 Compare discipline page layouts in Plannotator with the game's tree window screenshots, at both widths
 - [ ] 6.2 Build discipline pages with skill rows, proficiency rows, Lute's spellsongs, facts and Bugs
 - [x] 6.3 Compare skill page, skill tooltip, passive and spellsong tooltip designs and status wording in Plannotator
-- [ ] 6.4 Build skill pages, the skill list with its filters and reveal, and passive and spellsong anchors and tooltips
-- [ ] 6.5 Add fixtures with extreme content for every new kind and browser tests for the list, pages, anchors and tooltips
+- [x] 6.4 Build skill pages, the skill list with its filters and reveal, and passive and spellsong anchors and tooltips
+- [x] 6.5 Add fixtures with extreme content for every new kind and browser tests for the list, pages, anchors and tooltips
 - [x] 6.6 Link every entry to the discipline whose level it checks, and head discipline rows "Level 5"
 - [x] 6.7 Rebuild home and search as icon tiles and the site's own result rows, with two home buttons
 
