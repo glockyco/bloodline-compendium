@@ -54,10 +54,27 @@ local function meshOf(component)
   if not (mesh and mesh:IsValid()) then pcall(function() mesh = component.SkeletalMesh end) end
   return mesh and mesh:IsValid() and mesh or nil
 end
+-- The other actor a component hangs on, or nil when it hangs on nothing beyond its own actor. An item can hang a
+-- mesh on a character instead of on itself, as pauldrons hang one piece on each shoulder.
+local function hungOn(actor, component)
+  local own = actor:GetFullName()
+  local at = component
+  for _ = 1, 16 do
+    at = at:GetAttachParent()
+    if not (at and at:IsValid()) then return nil end
+    local owner = at:GetOwner()
+    if owner:GetFullName() ~= own then return owner end
+  end
+end
+-- The meshes an actor draws at its own place or on the preview character. A mesh it hangs on another character is
+-- no part of the picture: Assassin's Belt, lying in the world, hangs one of its daggers on the player's body.
 local function visibleMeshes(actor)
   local visible = {}
   for _, component in ipairs(components(actor, "/Script/Engine.MeshComponent")) do
-    if component:IsVisible() and not component.bHiddenInGame and meshOf(component) then visible[#visible + 1] = component end
+    if component:IsVisible() and not component.bHiddenInGame and meshOf(component) then
+      local other = hungOn(actor, component)
+      if not other or other:GetFullName() == preview:GetFullName() then visible[#visible + 1] = component end
+    end
   end
   return visible
 end

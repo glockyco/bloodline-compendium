@@ -748,9 +748,11 @@ async function captureScreen(config, lab, name, ui) {
  * Combines a model capture's colour pass and depth pass into a transparent picture. Both passes are rendered at
  * twice the output size. A sample belongs to the subject where the depth marks it, or as far as the colour pass's
  * alpha, the inverse of the drawn opacity, says something translucent was drawn there, such as slime metal, which
- * writes no depth. Each output pixel takes the mean coverage of its four samples as its opacity and their colour
- * weighted by coverage, so edges are smooth without background colour bleeding in. The picture is cropped to the
- * subject with a margin of 5% of its longer side on every side.
+ * writes no depth. A surface that only glows, such as Anointed Halo's ring, writes neither, so when both find
+ * nothing, a sample belongs to the subject where its colour differs from the capture's backdrop. Each output pixel
+ * takes the mean coverage of its four samples as its opacity and their colour weighted by coverage, so edges are
+ * smooth without background colour bleeding in. The picture is cropped to the subject with a margin of 5% of its
+ * longer side on every side.
  */
 async function composeModel(colorFile, maskFile) {
   const sharp = createRequire(join(root, "site/package.json"))("sharp");
@@ -764,39 +766,67 @@ async function composeModel(colorFile, maskFile) {
     .toBuffer({ resolveWithObject: true });
   const { width, height } = color.info;
   const out = { width: width / 2, height: height / 2 };
-  const pixels = Buffer.alloc(out.width * out.height * 4);
-  let left = out.width,
-    top = out.height,
-    right = -1,
-    bottom = -1;
-  for (let y = 0; y < out.height; y++)
-    for (let x = 0; x < out.width; x++) {
-      let covered = 0;
-      const sum = [0, 0, 0];
-      for (let dy = 0; dy < 2; dy++)
-        for (let dx = 0; dx < 2; dx++) {
-          const sample = (2 * y + dy) * width + 2 * x + dx;
-          const m = sample * 3;
-          const c = sample * 4;
-          const coverage =
-            mask.data[m] + mask.data[m + 1] + mask.data[m + 2] > 0
-              ? 1
-              : 1 - color.data[c + 3] / 255;
-          // A trace of opacity is noise in the pass, not a translucent surface.
-          if (coverage < 0.05) continue;
-          covered += coverage;
-          for (let k = 0; k < 3; k++) sum[k] += coverage * color.data[c + k];
-        }
-      if (!covered) continue;
-      const o = (y * out.width + x) * 4;
-      for (let k = 0; k < 3; k++) pixels[o + k] = Math.round(sum[k] / covered);
-      pixels[o + 3] = Math.round((255 * covered) / 4);
-      ((left = Math.min(left, x)),
-        (top = Math.min(top, y)),
-        (right = Math.max(right, x)),
-        (bottom = Math.max(bottom, y)));
-    }
-  return { pixels, out, box: right < 0 ? null : { left, top, right, bottom } };
+  const drawn = (sample) => {
+    const m = sample * 3;
+    const coverage =
+      mask.data[m] + mask.data[m + 1] + mask.data[m + 2] > 0
+        ? 1
+        : 1 - color.data[sample * 4 + 3] / 255;
+    // A trace of opacity is noise in the pass, not a translucent surface.
+    return coverage < 0.05 ? 0 : coverage;
+  };
+  // The capture leaves a margin around the subject, so its first sample shows the backdrop.
+  const glowing = (sample) =>
+    [0, 1, 2].some(
+      (k) => Math.abs(color.data[sample * 4 + k] - color.data[k]) > 12,
+    )
+      ? 1
+      : 0;
+  // Only a backdrop of one colour tells a glow apart, so every sample on the capture's border must show it.
+  const plainBackdrop = () => {
+    for (let x = 0; x < width; x++)
+      if (glowing(x) || glowing((height - 1) * width + x)) return false;
+    for (let y = 0; y < height; y++)
+      if (glowing(y * width) || glowing(y * width + width - 1)) return false;
+    return true;
+  };
+  const combine = (coverageOf) => {
+    const pixels = Buffer.alloc(out.width * out.height * 4);
+    let left = out.width,
+      top = out.height,
+      right = -1,
+      bottom = -1;
+    for (let y = 0; y < out.height; y++)
+      for (let x = 0; x < out.width; x++) {
+        let covered = 0;
+        const sum = [0, 0, 0];
+        for (let dy = 0; dy < 2; dy++)
+          for (let dx = 0; dx < 2; dx++) {
+            const sample = (2 * y + dy) * width + 2 * x + dx;
+            const coverage = coverageOf(sample);
+            if (!coverage) continue;
+            covered += coverage;
+            for (let k = 0; k < 3; k++)
+              sum[k] += coverage * color.data[sample * 4 + k];
+          }
+        if (!covered) continue;
+        const o = (y * out.width + x) * 4;
+        for (let k = 0; k < 3; k++)
+          pixels[o + k] = Math.round(sum[k] / covered);
+        pixels[o + 3] = Math.round((255 * covered) / 4);
+        ((left = Math.min(left, x)),
+          (top = Math.min(top, y)),
+          (right = Math.max(right, x)),
+          (bottom = Math.max(bottom, y)));
+      }
+    return {
+      pixels,
+      out,
+      box: right < 0 ? null : { left, top, right, bottom },
+    };
+  };
+  const composed = combine(drawn);
+  return composed.box || !plainBackdrop() ? composed : combine(glowing);
 }
 
 /** Writes a combined capture cropped to the subject with a margin of 5% of its longer side on every side. */

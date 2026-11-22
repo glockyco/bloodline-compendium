@@ -37,7 +37,7 @@ The camera first frames the engine bounds of the subject. Some skeletal parts, s
 
 ### Coverage
 
-The depth pass marks opaque surfaces, but translucent materials, such as slime metal, write no depth. The colour pass stores the inverse of the drawn opacity in its alpha, so a sample counts as the subject where the depth marks it or as far as that alpha says something was drawn.
+The depth pass marks opaque surfaces, but translucent materials, such as slime metal, write no depth. The colour pass stores the inverse of the drawn opacity in its alpha, so a sample counts as the subject where the depth marks it or as far as that alpha says something was drawn. A surface that only glows, such as Anointed Halo's ring with the material `M_GoodSky_Sun_Emissive`, writes neither. When both find nothing and the capture's border shows one colour, a sample counts where its colour differs from that backdrop.
 
 ### The female body
 
