@@ -44,6 +44,9 @@ const commonArguments = [
   "-NOSPLASH",
   "-unattended",
 ];
+// The bridge loads through the game's own dwmapi, and the process gets no audio device. -nosound silences the
+// engine, but the startup movie plays through Windows' media player, which still reaches the speakers.
+const dllOverrides = "dwmapi=n,b;mmdevapi=d";
 const modes = {
   // No renderer and no window: Blueprints and widgets run, which suffices for checks that read values.
   headless: ["-nullrhi"],
@@ -438,7 +441,7 @@ async function launch(config, lab, mode, label) {
       "--bottle",
       config.bottle,
       "--dll",
-      "dwmapi=n,b",
+      dllOverrides,
       "--no-wait",
       "--",
       config.windowsPath(lab.executable),
