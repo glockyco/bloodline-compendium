@@ -11,10 +11,9 @@
 	import ButtonLink from '#lib/ui/ButtonLink.svelte';
 	import Card from '#lib/ui/Card.svelte';
 	import CardGrid from '#lib/ui/CardGrid.svelte';
-	import Count from '#lib/ui/Count.svelte';
 	import EntityLink from '#lib/ui/EntityLink.svelte';
 	import IconTile from '#lib/ui/IconTile.svelte';
-	import SectionHeading from '#lib/ui/SectionHeading.svelte';
+	import Section from '#lib/ui/Section.svelte';
 	import { formatNumber } from '#lib/format.js';
 	let { data } = $props();
 	const icons = $derived(data.icons);
@@ -94,146 +93,140 @@
 <h1>Presentation Fixtures</h1>
 <p class="intro">Invented content at the extremes each shared primitive must survive.</p>
 
-<section aria-labelledby="cards">
-	<SectionHeading
-		id="cards"
-		title="Cards"
-		count={cards.length}
-		link={{ href: '#tables', label: 'Jump to tables' }}
-	/>
-	<CardGrid rows={3} label="Card fixtures">
-		{#each cards as card (card.title)}
-			<Card href="#cards">
-				<span class="card-head" data-ui="row"
-					><h3>{card.title}</h3>
-					<Count value={card.count} /></span
-				>
-				<span class="card-text" data-ui="row">{card.text}</span>
-			</Card>
-		{/each}
-	</CardGrid>
-</section>
+<div class="fixtures">
+	<Section id="cards" title="Cards" count={cards.length}
+		>{#snippet action()}<a href="#tables">Jump to tables</a>{/snippet}
+		<CardGrid rows={3} label="Card fixtures">
+			{#each cards as card (card.title)}
+				<Card href="#cards">
+					<span class="card-head" data-ui="row"><h3>{card.title}</h3></span>
+					<span class="card-text" data-ui="row">{card.text}</span>
+				</Card>
+			{/each}
+		</CardGrid>
+	</Section>
 
-<section aria-labelledby="tiles">
-	<SectionHeading id="tiles" title="Tiles" count={tiles.length} />
-	<ul class="tile-grid">
-		{#each tiles as tile (tile.name)}<li>
-				<IconTile href="#tiles" icon={tile.icon} name={tile.name} meta={tile.meta} />
-			</li>{/each}
-	</ul>
-</section>
+	<Section id="tiles" title="Tiles" count={tiles.length}>
+		<ul class="tile-grid">
+			{#each tiles as tile (tile.name)}<li>
+					<IconTile href="#tiles" icon={tile.icon} name={tile.name} meta={tile.meta} />
+				</li>{/each}
+		</ul>
+	</Section>
 
-<section aria-labelledby="small">
-	<SectionHeading
+	<Section
 		id="small"
 		title="A Section Heading Long Enough to Wrap Across Two Lines on a Phone"
-	/>
-	<div class="row">
-		<Count value={1} />
-		<Count value={123456} />
-		<ButtonLink href="#small">Browse Items</ButtonLink>
-		<ButtonLink href="#small" secondary>Browse Skills</ButtonLink>
-	</div>
-	<p>
-		Linked: <EntityLink entity={data.item} />. Without a page: <EntityLink
-			entity={{
-				kind: 'merchant',
-				key: '/Invented/Merchant',
-				name: 'Unpublished Merchant',
-				slug: null,
-				icon: null
-			}}
-		/>.
-	</p>
-	<div id="condition-fixture">
-		<Conditions
-			conditions={[
-				{
-					kind: 'gameState',
-					entity: data.item,
-					value: 13,
-					label: `Requires ${data.item.name} at level 13.`
-				}
-			]}
-		/>
-	</div>
-</section>
-
-<section aria-labelledby="tables">
-	<SectionHeading id="tables" title="Tables" />
-	<RelationTable items={rows} label="Table fixture" headings={['Merchant', 'Price']}
-		>{#snippet row(entry)}<tr
-				><td><span class="relation-name">{entry.name}</span></td><td class="numeric"
-					>{formatNumber(entry.price)}<small>gold</small></td
-				></tr
-			>{/snippet}</RelationTable
+		count={123456}
 	>
-</section>
-
-<section aria-labelledby="tooltip" class="tooltip-fixture">
-	<SectionHeading id="tooltip" title="Item Tooltip" />
-	<ItemTooltip item={tooltipItem} heading="p" />
-</section>
-
-<!-- The other kinds' cards at their extremes: an unknown stat, many ranks, a long tune and a long name. -->
-<section aria-labelledby="kind-tooltips" class="tooltip-fixture">
-	<SectionHeading id="kind-tooltips" title="Skill, Passive, Spellsong and Discipline Tooltips" />
-	<div class="row">
-		<SkillTooltip
-			heading="p"
-			skill={{
-				name: 'A Skill Name Long Enough to Shrink Its Ribbon',
-				icon: icons[0] ?? null,
-				description: 'Throws something that burns, with a description long enough to wrap.',
-				facts: [
+		<div class="row">
+			<ButtonLink href="#small">Browse Items</ButtonLink>
+			<ButtonLink href="#small" secondary>Browse Skills</ButtonLink>
+		</div>
+		<p>
+			Linked: <EntityLink entity={data.item} />. Without a page: <EntityLink
+				entity={{
+					kind: 'merchant',
+					key: '/Invented/Merchant',
+					name: 'Unpublished Merchant',
+					slug: null,
+					icon: null
+				}}
+			/>.
+		</p>
+		<div id="condition-fixture">
+			<Conditions
+				conditions={[
 					{
-						stat: 'cooldown',
-						label: 'Cooldown',
-						tooltipLabel: 'Cooldown',
-						number: 12.5,
-						text: null,
-						effect: null,
-						unit: 'seconds'
-					} as Fact,
-					{
-						stat: 'manaCost',
-						label: 'Mana Cost',
-						tooltipLabel: 'Mana Cost',
-						number: null,
-						text: null,
-						effect: null,
-						unit: null
-					} as Fact
-				]
-			}}
-		/>
-		<PassiveTooltip
-			passive={{
-				name: 'Kindle',
-				icon: icons[1] ?? null,
-				description: '+2% damage per rank.',
-				unlocks: 'Pyromancy level 5',
-				costs: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-			}}
-		/>
-		<SpellsongTooltip
-			song={{
-				name: 'Ballad',
-				description: null,
-				tune: [1, 2, 3, 4, 1, 2, 3, 4, 1, 2],
-				charges: 1,
-				experience: 0,
-				route: null
-			}}
-		/>
-		<DisciplineTooltip
-			discipline={{ name: 'Utility Gadgets', category: 'Tech/Etc.', contents: null }}
-		/>
-	</div>
-</section>
+						kind: 'gameState',
+						entity: data.item,
+						value: 13,
+						label: `Requires ${data.item.name} at level 13.`
+					}
+				]}
+			/>
+		</div>
+	</Section>
+
+	<Section id="tables" title="Tables">
+		<RelationTable items={rows} label="Table fixture" headings={['Merchant', 'Price']}
+			>{#snippet row(entry)}<tr
+					><td><span class="relation-name">{entry.name}</span></td><td class="numeric"
+						>{formatNumber(entry.price)}<small>gold</small></td
+					></tr
+				>{/snippet}</RelationTable
+		>
+	</Section>
+
+	<Section id="tooltip" title="Item Tooltip" class="tooltip-fixture">
+		<ItemTooltip item={tooltipItem} heading="p" />
+	</Section>
+
+	<!-- The other kinds' cards at their extremes: an unknown stat, many ranks, a long tune and a long name. -->
+	<Section
+		id="kind-tooltips"
+		title="Skill, Passive, Spellsong and Discipline Tooltips"
+		class="tooltip-fixture"
+	>
+		<div class="row">
+			<SkillTooltip
+				heading="p"
+				skill={{
+					name: 'A Skill Name Long Enough to Shrink Its Ribbon',
+					icon: icons[0] ?? null,
+					description: 'Throws something that burns, with a description long enough to wrap.',
+					facts: [
+						{
+							stat: 'cooldown',
+							label: 'Cooldown',
+							tooltipLabel: 'Cooldown',
+							number: 12.5,
+							text: null,
+							effect: null,
+							unit: 'seconds'
+						} as Fact,
+						{
+							stat: 'manaCost',
+							label: 'Mana Cost',
+							tooltipLabel: 'Mana Cost',
+							number: null,
+							text: null,
+							effect: null,
+							unit: null
+						} as Fact
+					]
+				}}
+			/>
+			<PassiveTooltip
+				passive={{
+					name: 'Kindle',
+					icon: icons[1] ?? null,
+					description: '+2% damage per rank.',
+					unlocks: 'Pyromancy level 5',
+					costs: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+				}}
+			/>
+			<SpellsongTooltip
+				song={{
+					name: 'Ballad',
+					description: null,
+					tune: [1, 2, 3, 4, 1, 2, 3, 4, 1, 2],
+					charges: 1,
+					experience: 0,
+					route: null
+				}}
+			/>
+			<DisciplineTooltip
+				discipline={{ name: 'Utility Gadgets', category: 'Tech/Etc.', contents: null }}
+			/>
+		</div>
+	</Section>
+</div>
 
 <style>
-	section {
+	.fixtures {
+		display: grid;
+		gap: var(--gap-page);
 		margin-top: var(--gap-page);
 	}
 	.card-head {
@@ -260,7 +253,7 @@
 		gap: var(--gap-block);
 		margin-bottom: var(--gap-groups);
 	}
-	.tooltip-fixture {
+	.fixtures :global(.tooltip-fixture) {
 		max-width: var(--size-item-side);
 	}
 </style>

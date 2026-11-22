@@ -5,7 +5,7 @@
 	import { formatNumber, plural } from '#lib/format.js';
 	import ButtonLink from '#lib/ui/ButtonLink.svelte';
 	import IconTile from '#lib/ui/IconTile.svelte';
-	import SectionHeading from '#lib/ui/SectionHeading.svelte';
+	import Section from '#lib/ui/Section.svelte';
 	import { entityPath, kindPath } from '#lib/entities.js';
 	let { data } = $props();
 	const itemsPath = $derived(kindPath('item', data.kinds)!);
@@ -64,12 +64,8 @@
 </section>
 
 <div class="content">
-	<section aria-labelledby="items-heading">
-		<SectionHeading
-			id="items-heading"
-			title="Items"
-			link={{ href: itemsPath, label: `All ${formatNumber(data.count)} items` }}
-		/>
+	<Section id="items-heading" title="Items"
+		>{#snippet action()}<a href={itemsPath}>All {formatNumber(data.count)} items</a>{/snippet}
 		<ul class="tile-grid">
 			{#each data.categories as category (category.slug)}<li>
 					<IconTile
@@ -80,14 +76,11 @@
 					/>
 				</li>{/each}
 		</ul>
-	</section>
+	</Section>
 
-	<section aria-labelledby="disciplines-heading">
-		<SectionHeading
-			id="disciplines-heading"
-			title="Disciplines"
-			link={{ href: skillsPath, label: `All ${formatNumber(data.skills.known)} skills` }}
-		/>
+	<Section id="disciplines-heading" title="Disciplines"
+		>{#snippet action()}<a href={skillsPath}>All {formatNumber(data.skills.known)} skills</a
+			>{/snippet}
 		<ul class="tile-grid">
 			{#each data.skills.disciplines as discipline (discipline.key)}<li>
 					<IconTile
@@ -99,7 +92,7 @@
 					/>
 				</li>{/each}
 		</ul>
-	</section>
+	</Section>
 </div>
 
 <style>
@@ -161,12 +154,11 @@
 	}
 
 	.content {
+		display: grid;
+		gap: var(--gap-section);
 		max-width: var(--size-page);
 		margin: 0 auto;
-		padding: 0 var(--gutter) var(--gap-page);
-	}
-	.content > section {
-		margin: var(--gap-section) 0 0;
+		padding: var(--gap-section) var(--gutter) var(--gap-page);
 	}
 	.links {
 		margin: 0 0 var(--gap-block);

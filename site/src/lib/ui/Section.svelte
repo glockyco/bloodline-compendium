@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { formatNumber } from '../format.js';
+	import Count from './Count.svelte';
 	import LinkedText from './LinkedText.svelte';
 	/**
 	 * A section of a page, as in Afallon: a heading with its count and one optional action above one body. The body
@@ -32,9 +32,7 @@
 		<div class="heading">
 			<h2 {id}>
 				{#if count === undefined}{title}{:else}{title.slice(0, lastSpace + 1)}<span
-						class="heading-end"
-						>{title.slice(lastSpace + 1)}&nbsp;<span class="count">{formatNumber(count)}</span
-						></span
+						class="heading-end">{title.slice(lastSpace + 1)}&nbsp;<Count value={count} /></span
 					>{/if}
 			</h2>
 			{#if action}<div class="action">{@render action()}</div>{/if}
@@ -69,13 +67,6 @@
 	}
 	.heading-end {
 		white-space: nowrap;
-	}
-	.count {
-		color: var(--text-muted);
-		font-family: var(--font-body);
-		font-size: var(--type-meta);
-		line-height: var(--leading-meta);
-		font-variant-numeric: tabular-nums;
 	}
 	.action {
 		margin-left: auto;
