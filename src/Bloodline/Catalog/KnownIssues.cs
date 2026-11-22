@@ -180,13 +180,12 @@ internal static partial class KnownIssues
     /// fireballs, reproduced point-blank staff damage and
     /// weapons whose hits train no proficiency.
     /// </summary>
-    public static (IReadOnlyList<ItemPage> Items, IReadOnlyList<PublishedIssue> Issues) Attach(
+    public static IReadOnlyList<ItemPage> Attach(
         IReadOnlyList<ItemPage> items,
         KnownIssueRegistry registry,
         TooltipReport? tooltips,
         IReadOnlySet<string> ignoredFoodEffects,
-        IReadOnlySet<string> untrainedWeapons,
-        IReadOnlySet<string>? otherKeys = null
+        IReadOnlySet<string> untrainedWeapons
     )
     {
         var issues = registry.Issues.ToDictionary(issue => issue.Id, StringComparer.Ordinal);
@@ -295,26 +294,11 @@ internal static partial class KnownIssues
                 notes[item.Key].Add(SharedTag);
             }
         }
-        foreach (var issue in registry.Issues)
-        {
-            foreach (var key in issue.Notes?.Keys ?? [])
-            {
-                // Pages of other kinds, such as disciplines, note an issue only through this entry.
-                if (otherKeys?.Contains(key) == true)
-                    continue;
-                if (!notes.TryGetValue(key, out var itemNotes) || !itemNotes.Contains(issue.Id))
-                {
-                    throw new InvalidDataException(
-                        $"Known issue {issue.Id} has a notes entry for {key}, which does not note this issue."
-                    );
-                }
-            }
-        }
         // An item's Bugs rows follow the order of the Known Issues page, which is the registry's.
         var order = registry
             .Issues.Select((issue, index) => (issue.Id, index))
             .ToDictionary(entry => entry.Id, entry => entry.index, StringComparer.Ordinal);
-        var pages = items
+        return items
             .Select(item =>
                 item with
                 {
@@ -339,18 +323,55 @@ internal static partial class KnownIssues
                 }
             )
             .ToArray();
-        var published = registry
+    }
+
+    /// <summary>
+    /// The notes the registry gives an entity of a kind without derived notes, such as a discipline or a skill: each
+    /// issue whose notes name its key, with that sentence, in the registry's order.
+    /// </summary>
+    public static IReadOnlyList<IssueNote> RegistryNotes(KnownIssueRegistry registry, string key) =>
+        registry
+            .Issues.Where(issue => issue.Notes?.ContainsKey(key) == true)
+            .Select(issue => new IssueNote(issue.Id, issue.Notes![key]))
+            .ToArray();
+
+    /// <summary>
+    /// Every issue with the pages of every kind that note it, by name. A registry notes entry for a key that no page
+    /// notes fails the catalog, so a sentence cannot go unpublished. <paramref name="versions"/> maps the key of an
+    /// entity that merged into a version to that version, so its entry finds the page that carries it.
+    /// </summary>
+    public static IReadOnlyList<PublishedIssue> Publish(
+        KnownIssueRegistry registry,
+        IEnumerable<(EntityReference Reference, IReadOnlyList<IssueNote> Notes)> pages,
+        IReadOnlyDictionary<string, EntityReference>? versions = null
+    )
+    {
+        var noted = pages.ToArray();
+        foreach (var issue in registry.Issues)
+        foreach (var key in issue.Notes?.Keys ?? [])
+        {
+            var pageKey = versions?.GetValueOrDefault(key)?.Key ?? key;
+            if (
+                !noted.Any(page =>
+                    page.Reference.Key == pageKey && page.Notes.Any(note => note.Issue == issue.Id)
+                )
+            )
+                throw new InvalidDataException(
+                    $"Known issue {issue.Id} has a notes entry for {key}, which does not note this issue."
+                );
+        }
+        return registry
             .Issues.Select(issue => new PublishedIssue(
                 issue,
-                pages
+                noted
                     .Where(page => page.Notes.Any(note => note.Issue == issue.Id))
-                    .OrderBy(page => page.Name, StringComparer.OrdinalIgnoreCase)
-                    .ThenBy(page => page.Key, StringComparer.Ordinal)
-                    .Select(CatalogGraph.Reference)
+                    .Select(page => page.Reference)
+                    .Distinct()
+                    .OrderBy(reference => reference.Name, StringComparer.OrdinalIgnoreCase)
+                    .ThenBy(reference => reference.Key, StringComparer.Ordinal)
                     .ToArray()
             ))
             .ToArray();
-        return (pages, published);
     }
 
     private static string WeaponDamageNote(ItemPage item)

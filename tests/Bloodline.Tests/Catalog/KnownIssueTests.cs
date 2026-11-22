@@ -38,6 +38,15 @@ public sealed class KnownIssueTests
                 .AsObject()
         );
 
+    private static IReadOnlyList<PublishedIssue> Published(
+        KnownIssueRegistry registry,
+        IReadOnlyList<ItemPage> pages
+    ) =>
+        KnownIssues.Publish(
+            registry,
+            pages.Select(page => (CatalogGraph.Reference(page), page.Notes))
+        );
+
     private static CatalogRecords Records(params KnownIssue[] issues) =>
         new(new BuildRecord(1159290, 1, []), [KneeGuards()], [], [], [], [], [], [])
         {
@@ -162,13 +171,14 @@ public sealed class KnownIssueTests
             Issue(KnownIssues.StaffPointBlankDamage),
         ]);
 
-        var (pages, issues) = KnownIssues.Attach(
+        var pages = KnownIssues.Attach(
             items,
             registry,
             null,
             new HashSet<string>(),
             new HashSet<string>()
         );
+        var issues = Published(registry, pages);
 
         foreach (var test in cases)
         {
@@ -271,13 +281,14 @@ public sealed class KnownIssueTests
             Issue("armor-slot-adds-none"),
         ]);
 
-        var (pages, issues) = KnownIssues.Attach(
+        var pages = KnownIssues.Attach(
             [page],
             registry,
             report,
             new HashSet<string>(),
             new HashSet<string>()
         );
+        var issues = Published(registry, pages);
 
         Assert.Equal(
             [KnownIssues.KneeArmor, "armor-without-row"],
@@ -350,13 +361,15 @@ public sealed class KnownIssueTests
                 ),
             ]
         );
-        var (pages, issues) = KnownIssues.Attach(
+        var registry = new KnownIssueRegistry([Issue(KnownIssues.WeaponTooltipDamage)]);
+        var pages = KnownIssues.Attach(
             [item],
-            new KnownIssueRegistry([Issue(KnownIssues.WeaponTooltipDamage)]),
+            registry,
             report,
             new HashSet<string>(),
             new HashSet<string>()
         );
+        var issues = Published(registry, pages);
         var page = Assert.Single(pages);
         var note = Assert.Single(page.Notes);
         Assert.Equal(effect, note.Effect);

@@ -2,7 +2,10 @@
 	"key": "/Invented/Trees/Songcraft",
 	"slug": "songcraft",
 	"name": "Songcraft",
-	"category": "Tech/Etc.",
+	"category": {
+		"slug": "tech-etc",
+		"name": "Tech/Etc."
+	},
 	"levelName": "Songcraft",
 	"skillRows": [],
 	"passiveRows": [],

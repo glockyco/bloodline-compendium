@@ -6,6 +6,7 @@ import type {
 	SourceKind
 } from '../site-data.js';
 import { sourceHeadings } from '../labels.js';
+import { plural } from '../format.js';
 
 /** Browse categories shown large on the home page, in this order when they exist. */
 const majorOrder = ['weapon', 'armor', 'weapon-part', 'material', 'food', 'quest-item'];
@@ -93,10 +94,6 @@ export interface HomeData {
 	groups: HomeGroup[];
 	minor: CategorySummary[];
 	ways: HomeWay[];
-}
-
-function plural(count: number, one: string, many: string): string {
-	return `${count.toLocaleString('en')} ${count === 1 ? one : many}`;
 }
 
 const wordList = new Intl.ListFormat('en', { type: 'conjunction' });

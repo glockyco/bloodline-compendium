@@ -4,6 +4,11 @@ export function formatNumber(value: number): string {
 	return numberFormat.format(value);
 }
 
+/** A count with its noun in the right number, such as "1 skill" or "12 skills". */
+export function plural(count: number, one: string, many: string): string {
+	return `${formatNumber(count)} ${count === 1 ? one : many}`;
+}
+
 const percentFormat = new Intl.NumberFormat('en', { maximumFractionDigits: 1 });
 const rarityFormat = new Intl.NumberFormat('en', { maximumSignificantDigits: 2 });
 

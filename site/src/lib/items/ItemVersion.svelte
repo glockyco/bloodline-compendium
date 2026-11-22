@@ -1,11 +1,10 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
 	import SourceSections from '#lib/entity/SourceSections.svelte';
 	import UnconfirmedSources from '#lib/entity/UnconfirmedSources.svelte';
 	import RelationTable from '#lib/RelationTable.svelte';
 	import EntityLink from '#lib/ui/EntityLink.svelte';
 	import Conditions from '#lib/Conditions.svelte';
-	import { bugRows } from '#lib/items/bugs.js';
+	import BugsSection from '#lib/entity/BugsSection.svelte';
 	import Section from '#lib/ui/Section.svelte';
 	import ItemTooltip from '#lib/items/ItemTooltip.svelte';
 	import ItemDetails from '#lib/items/ItemDetails.svelte';
@@ -28,7 +27,6 @@
 	// Details keep mixed projectile hits together beside the game card.
 	const details = $derived(detailRows(item.facts, item.projectileGroups));
 	const confirmedSources = $derived(item.sources.filter((source) => !source.unconfirmed));
-	const bugs = $derived(bugRows(item));
 	// Recipes show as recipe lines of their own, smithing first as the source sections order their kinds.
 	const recipes = $derived(
 		(Object.keys(sourceHeadings) as SourceKind[])
@@ -204,31 +202,6 @@
 				>
 			</Section>{/if}
 		<UnconfirmedSources sources={item.sources} name={item.name} {idPrefix} />
-		{#if bugs.length}
-			<Section id={idPrefix + 'bugs'} title="Bugs" count={bugs.length}>
-				<ul class="surface bug-rows">
-					{#each bugs as row (row.kind === 'issue' ? row.issue : row.fact.stat)}
-						<li>
-							{#if row.kind === 'issue'}<span
-									>{#each row.sentence.split(item.name) as part, index (index)}{#if index}<span
-												data-game>{item.name}</span
-											>{/if}{part}{/each}</span
-								><small
-									><!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- the resolved issue page with its section. -->
-									<a href={resolve('known-issues/') + '#' + row.issue}>Read about this issue</a
-									></small
-								>
-							{:else}<span>{row.sentence}</span>{#if row.fact.gameShowsIssue}<small
-										><!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- the resolved issue page with its section. -->
-										<a href={resolve('known-issues/') + '#' + row.fact.gameShowsIssue}
-											>Read about this issue</a
-										></small
-									>{/if}
-							{/if}
-						</li>
-					{/each}
-				</ul>
-			</Section>
-		{/if}
+		<BugsSection notes={item.notes} facts={item.facts} name={item.name} {idPrefix} />
 	</div>
 </div>

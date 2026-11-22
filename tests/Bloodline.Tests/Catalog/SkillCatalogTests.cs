@@ -216,7 +216,7 @@ public sealed class SkillCatalogTests
         var discipline = Assert.Single(Build().Skills.Disciplines);
         Assert.Equal(
             ("Fire", "Magic", "Fire"),
-            (discipline.Name, discipline.Category, discipline.LevelName)
+            (discipline.Name, discipline.Category.Name, discipline.LevelName)
         );
         Assert.DoesNotContain(Build().Skills.Disciplines, page => page.Key == Old);
     }
@@ -304,5 +304,71 @@ public sealed class SkillCatalogTests
             agreeing
         );
         Assert.Empty(agreeing.Report([]).Gaps);
+    }
+}
+
+public sealed class SkillVersionTests
+{
+    private static SkillPage Skill(
+        string key,
+        double cooldown,
+        ItemStatus status,
+        params Source[] sources
+    ) =>
+        new(
+            $"/Game/Invented/{key}.{key}_C",
+            "meteor",
+            "Meteor",
+            "Calls down a meteor.",
+            null,
+            [StatVocabulary.Number(Stat.Cooldown, cooldown)],
+            sources
+        )
+        {
+            Status = status,
+        };
+
+    private static Source Tree(string name) =>
+        new(SourceKind.SkillTree, name, [], null, new Amount(1, 1), [], [])
+        {
+            Entity = new EntityReference(
+                EntityKind.Discipline,
+                $"/Invented/{name}",
+                name,
+                null,
+                null
+            ),
+        };
+
+    [Fact]
+    public void SkillsOfOneNameShareAPageAsItemsDo()
+    {
+        // Copies that show the same are one skill, with the sources of both and the best status.
+        var merged = EntityVersions.Group(
+            [
+                Skill("Meteor", 60, ItemStatus.NotInNormalPlay),
+                Skill("MeteorOld", 60, ItemStatus.Obtainable, Tree("Pyromancy")),
+            ],
+            SkillProducer.Versions
+        );
+        var page = Assert.Single(merged.Entities);
+        Assert.Equal(ItemStatus.Obtainable, page.Status);
+        Assert.Single(page.Sources);
+        Assert.Null(page.VersionId);
+        Assert.Equal(2, merged.References.Count);
+        // Skills that show something else become versions, labelled as the game's tooltip line.
+        var versions = EntityVersions.Group(
+            [
+                Skill("Crush", 1, ItemStatus.Obtainable),
+                Skill("CrushOld", 15, ItemStatus.NoKnownSource),
+            ],
+            SkillProducer.Versions
+        );
+        Assert.Equal(
+            ["Cooldown: 1 seconds", "Cooldown: 15 seconds"],
+            versions.Entities.Select(skill => skill.VersionLabel)
+        );
+        var shared = Assert.Single(EntityVersions.Pages(versions.Entities, SkillProducer.Versions));
+        Assert.Single(shared.Versions);
     }
 }

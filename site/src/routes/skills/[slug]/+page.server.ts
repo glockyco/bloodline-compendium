@@ -2,7 +2,9 @@ import { error } from '@sveltejs/kit';
 import { readSkill, readSkills } from '#lib/server/data.js';
 
 export async function entries() {
-	return (await readSkills()).skills.map((skill) => ({ slug: skill.slug }));
+	// Versions of one name share a page, so their rows share its slug.
+	const slugs = new Set((await readSkills()).skills.map((skill) => skill.slug));
+	return [...slugs].map((slug) => ({ slug }));
 }
 
 export async function load({ params }: { params: { slug: string } }) {

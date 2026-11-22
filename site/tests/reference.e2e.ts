@@ -146,7 +146,8 @@ test('answers acquisition first and exposes facts, quantities and uncertainty', 
 		expect(order.indexOf('used-for')).toBeGreaterThan(order.lastIndexOf('source-shop'));
 	const card = page.getByRole('complementary', { name: 'Game card' });
 	await expect(card).toContainText('Damage: 12');
-	await expect(card.locator('.first')).toHaveText('Average');
+	// The card's first stat line is the one the game prints large, here the weapon's attack speed.
+	await expect(card.getByText('Average', { exact: true })).toBeVisible();
 	// The facts the game's tooltip does not print open the main column as Details, not under the card.
 	const details = page.getByRole('region', { name: 'Details' });
 	await expect(details).not.toContainText(/Attack Speed/i);
@@ -554,7 +555,16 @@ test('each public page has production identity, social metadata and generated br
 			'/items/hollow-prism/',
 			'/items/lanternedge/',
 			'/items/mosswoven-coat/',
-			'/items/twin-lantern/'
+			'/items/twin-lantern/',
+			'/disciplines/',
+			'/disciplines/emberlore/',
+			'/disciplines/songcraft/',
+			'/skills/',
+			'/skills/cinder-flick/',
+			'/skills/forgotten-spark/',
+			'/skills/lanternedge-flare/',
+			'/skills/lost-chant/',
+			'/skills/moss-ward/'
 		]
 			.map((route) => origin + route)
 			.sort()

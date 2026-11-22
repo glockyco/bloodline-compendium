@@ -261,7 +261,7 @@ export interface WeaponFamily {
  * via the `definition` "DisciplinePage".
  */
 export interface DisciplinePage {
-  category: string;
+  category: CategoryLink;
   key: string;
   kind: EntityKind;
   levelName: string | null;
@@ -272,6 +272,15 @@ export interface DisciplinePage {
   skillRows: SkillRow[];
   slug: string;
   spellsongs: SpellsongEntry[];
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "CategoryLink".
+ */
+export interface CategoryLink {
+  name: string;
+  slug: string;
   [k: string]: unknown;
 }
 /**
@@ -491,7 +500,7 @@ export interface DisciplineIndex {
  * via the `definition` "DisciplineSummary".
  */
 export interface DisciplineSummary {
-  category: string;
+  category: CategoryLink;
   key: string;
   name: string;
   passives: number;
@@ -589,15 +598,6 @@ export interface ItemPage {
   versionLabel?: string | null;
   versionName?: string | null;
   versions: ItemPage[];
-  [k: string]: unknown;
-}
-/**
- * This interface was referenced by `SiteDataFiles`'s JSON-Schema
- * via the `definition` "CategoryLink".
- */
-export interface CategoryLink {
-  name: string;
-  slug: string;
   [k: string]: unknown;
 }
 /**
@@ -803,11 +803,14 @@ export interface SkillPage {
   kind: EntityKind;
   name: string;
   notes: IssueNote[];
-  qualifier?: string | null;
   relations: EntityRelation[];
   slug: string;
   sources: Source[];
   status: ItemStatus;
+  versionId?: string | null;
+  versionLabel?: string | null;
+  versionName?: string | null;
+  versions: SkillPage[];
   [k: string]: unknown;
 }
 /**
@@ -840,5 +843,7 @@ export interface SkillSummary {
   placeSources: string[][];
   slug: string;
   status: ItemStatus;
+  versionId?: string | null;
+  versionLabel?: string | null;
   [k: string]: unknown;
 }

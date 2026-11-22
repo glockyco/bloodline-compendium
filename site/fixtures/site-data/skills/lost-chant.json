@@ -28,5 +28,6 @@
 	"kind": "skill",
 	"status": "noKnownSource",
 	"relations": [],
-	"notes": []
+	"notes": [],
+	"versions": []
 }

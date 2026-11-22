@@ -106,7 +106,9 @@ export async function entityGraphGate(directory, pages) {
     const owner = kind.host ? entity.host : entity;
     const ownerKind = kind.host ? registry.get(kind.host) : kind;
     if (kind.host && (!owner || owner.kind !== kind.host || !entity.fragment))
-      throw new Error("Hosted entity without its host and anchor: " + entity.key);
+      throw new Error(
+        "Hosted entity without its host and anchor: " + entity.key,
+      );
     const path = ownerKind.hasPages
       ? "/" +
         ownerKind.route.replace(/^\/+|\/+$/g, "") +

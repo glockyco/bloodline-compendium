@@ -21,7 +21,14 @@ internal sealed record CatalogResult(
 
     /// <summary>Disciplines and skills with their lists.</summary>
     public SkillOutput Skills { get; init; } =
-        new(new DisciplineIndex([]), [], new SkillIndex([], []), []);
+        new(
+            new DisciplineIndex([]),
+            [],
+            new SkillIndex([], []),
+            [],
+            [],
+            new Dictionary<string, EntityReference>()
+        );
 }
 
 internal static class CatalogBuilder
@@ -101,7 +108,7 @@ internal static class CatalogBuilder
                 ClaimCitations.Resolve("Known issue " + issue.Id, issue.Citations, code);
         }
         var graphResult = CatalogGraph.Build(
-            prepared.Grouped.Items,
+            prepared.Grouped.Entities,
             context.Places.All,
             prepared.Grouped.References,
             skillsPrepared.GraphEntities
@@ -112,32 +119,30 @@ internal static class CatalogBuilder
         foreach (var item in graphResult.Items)
             SourceGaps(CatalogGraph.Reference(item), item.Name, item.Sources, coverage);
         var skills = skillProducer.Finish(skillsPrepared, graphResult);
-        SkillTooltipCheck.Compare(skills.Skills, records.SkillTooltips, coverage);
-        var issues = items
-            .Issues.Select(issue =>
-                issue with
-                {
-                    Affected =
-                    [
-                        .. issue.Affected,
-                        .. skills
-                            .Disciplines.Where(page =>
-                                page.Notes.Any(note => note.Issue == issue.Issue.Id)
-                            )
-                            .Select(page => SkillProducer.DisciplineReference(page)),
-                    ],
-                }
-            )
-            .ToArray();
+        SkillTooltipCheck.Compare(skills.Entries, records.SkillTooltips, coverage);
+        // The Known Issues page lists every page of every kind that notes an issue.
+        var issues = KnownIssues.Publish(
+            records.Issues,
+            [
+                .. items.Items.Select(item => (CatalogGraph.Reference(item), item.Notes)),
+                .. skills.Disciplines.Select(page =>
+                    (SkillProducer.DisciplineReference(page), page.Notes)
+                ),
+                .. skills.Skills.Select(skill =>
+                    (EntityVersions.Reference(skill, EntityKind.Skill), skill.Notes)
+                ),
+            ],
+            prepared
+                .Grouped.References.Concat(skills.References)
+                .ToDictionary(
+                    pair => pair.Key,
+                    pair => pair.Value,
+                    StringComparer.OrdinalIgnoreCase
+                )
+        );
         foreach (var skill in skills.Skills)
             SourceGaps(
-                new EntityReference(
-                    EntityKind.Skill,
-                    skill.Key,
-                    skill.Name,
-                    skill.Slug,
-                    skill.Icon
-                ),
+                EntityVersions.Reference(skill, EntityKind.Skill),
                 skill.Name,
                 skill.Sources,
                 coverage

@@ -2,7 +2,8 @@
 	import { onMount } from 'svelte';
 	import '@pagefind/component-ui/css';
 	import { page } from '$app/state';
-	import { kindPath } from './entities.js';
+	import { browseKinds } from './entities.js';
+	const browse = $derived(browseKinds(page.data.kinds));
 	let {
 		variant = 'header',
 		placeholder = 'Search the compendium'
@@ -22,7 +23,11 @@
 		hide-shortcut
 	></pagefind-searchbox>
 	<noscript
-		>Search needs JavaScript. Browse the <a href={kindPath('item', page.data.kinds)!}>item list</a> instead.</noscript
+		>Search needs JavaScript. Browse the lists of {#each browse as entry, index (entry.path)}{index
+				? index === browse.length - 1
+					? ' and '
+					: ', '
+				: ''}<a href={entry.path}>{entry.label}</a>{/each} instead.</noscript
 	>
 </div>
 

@@ -300,10 +300,7 @@ internal static class CatalogGraph
     }
 
     public static EntityReference Reference(ItemPage item) =>
-        new(EntityKind.Item, item.Key, item.Name, item.Slug, item.Icon)
-        {
-            Fragment = item.VersionId,
-        };
+        EntityVersions.Reference(item, EntityKind.Item);
 
     private static string Id<T>(
         string kind,

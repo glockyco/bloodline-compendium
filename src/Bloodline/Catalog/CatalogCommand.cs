@@ -104,7 +104,7 @@ internal static class CatalogCommand
                         : $"Tooltip check: no lab run of build {buildId} read item tooltips."
                 );
                 var skillTooltips = records.SkillTooltips.Count(tooltip =>
-                    catalog.Skills.Skills.Any(skill => skill.Key == tooltip.Skill)
+                    catalog.Skills.Entries.Any(skill => skill.Key == tooltip.Skill)
                 );
                 Console.WriteLine(
                     skillTooltips > 0

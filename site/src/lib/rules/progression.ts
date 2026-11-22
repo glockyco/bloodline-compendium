@@ -30,7 +30,11 @@ export const nextRankCost: Rule<{ pointCost: number; costIncrease: number }, num
 };
 
 /** The cost of each rank of a passive, from its first rank's cost, its increase and its number of ranks. */
-export function rankCosts(passive: { pointCost: number; costIncrease: number; ranks: number }): number[] {
+export function rankCosts(passive: {
+	pointCost: number;
+	costIncrease: number;
+	ranks: number;
+}): number[] {
 	const costs = [passive.pointCost];
 	while (costs.length < passive.ranks) {
 		const next = nextRankCost.evaluate({

@@ -163,7 +163,7 @@
     "DisciplinePage": {
       "properties": {
         "category": {
-          "type": "string"
+          "$ref": "#/$defs/CategoryLink"
         },
         "key": {
           "type": "string"
@@ -233,7 +233,7 @@
     "DisciplineSummary": {
       "properties": {
         "category": {
-          "type": "string"
+          "$ref": "#/$defs/CategoryLink"
         },
         "key": {
           "type": "string"
@@ -1763,12 +1763,6 @@
           },
           "type": "array"
         },
-        "qualifier": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
         "relations": {
           "items": {
             "$ref": "#/$defs/EntityRelation"
@@ -1786,6 +1780,30 @@
         },
         "status": {
           "$ref": "#/$defs/ItemStatus"
+        },
+        "versionId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "versionLabel": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "versionName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "versions": {
+          "items": {
+            "$ref": "#/$defs/SkillPage"
+          },
+          "type": "array"
         }
       },
       "required": [
@@ -1798,6 +1816,7 @@
         "sources",
         "kind",
         "status",
+        "versions",
         "relations",
         "notes"
       ],
@@ -1892,6 +1911,18 @@
         },
         "status": {
           "$ref": "#/$defs/ItemStatus"
+        },
+        "versionId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "versionLabel": {
+          "type": [
+            "string",
+            "null"
+          ]
         }
       },
       "required": [

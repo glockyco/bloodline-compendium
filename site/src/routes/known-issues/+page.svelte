@@ -4,6 +4,7 @@
 	import ExpandableList from '#lib/ExpandableList.svelte';
 	import SeoHead from '#lib/SeoHead.svelte';
 	import { formatNumber } from '#lib/format.js';
+	import { kindCount } from '#lib/entities.js';
 	let { data } = $props();
 	const builds = (ids: number[]) =>
 		ids
@@ -15,14 +16,14 @@
 
 <SeoHead
 	title="Known Issues | The Bloodline Compendium"
-	description="This page lists bugs in The Bloodline that affect items. Each bug was confirmed in the game and comes with steps to reproduce it."
+	description="This page lists bugs in The Bloodline, with the items, skills and disciplines they affect. Each bug was confirmed in the game and comes with steps to reproduce it."
 />
 <div class="sections" data-pagefind-body>
 	<header class="page-heading">
 		<h1 data-pagefind-meta="title">Known Issues</h1>
 		<p class="intro">
-			This page lists bugs in The Bloodline that affect items. Each bug was confirmed in the game
-			and comes with steps to reproduce it.
+			This page lists bugs in The Bloodline, with the items, skills and disciplines they affect.
+			Each bug was confirmed in the game and comes with steps to reproduce it.
 		</p>
 	</header>
 	{#if data.issues.length}<nav class="issue-index surface" aria-label="Issues">
@@ -30,13 +31,13 @@
 				{#each data.issues as { issue, affected } (issue.id)}<li>
 						<a href={'#' + issue.id}>{issue.title}</a>{#if affected.length}<span class="muted"
 								>{formatNumber(affected.length)}
-								{affected.length === 1 ? 'item' : 'items'}</span
+								{kindCount(affected, data.kinds).noun}</span
 							>{/if}
 					</li>{/each}
 			</ol>
 		</nav>{/if}
 	{#each data.issues as { issue, affected } (issue.id)}
-		<!-- Item pages link the whole issue, so the anchor holds its heading and its surface. -->
+		<!-- Entity pages link the whole issue, so the anchor holds its heading and its surface. -->
 		<div class="issue-anchor" id={issue.id}>
 			<Section id={issue.id + '-title'} title={issue.title}>
 				<div class="surface issue">
@@ -47,12 +48,12 @@
 						</div>{/if}
 					{#if affected.length}<div class="field">
 							<h3 class="field-label">
-								Affected Items <span class="muted">{formatNumber(affected.length)}</span>
+								Affected <span class="muted">{formatNumber(affected.length)}</span>
 							</h3>
 							<ExpandableList
 								items={affected}
 								initial={9}
-								noun="items"
+								noun={kindCount(affected, data.kinds).many}
 								label={issue.title}
 								className="affected-list"
 							>

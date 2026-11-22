@@ -5,12 +5,17 @@ using Bloodline.SiteData;
 
 namespace Bloodline.Catalog;
 
-/// <summary>The skill kinds' output: the discipline list and pages, and the skill list and pages.</summary>
+/// <summary>
+/// The skill kinds' output: the discipline list and pages, the skill list, and the skill versions, which share a page
+/// by slug. <see cref="Entries"/> keeps every skill class as itself, for checks keyed by class.
+/// </summary>
 internal sealed record SkillOutput(
     DisciplineIndex DisciplineIndex,
     IReadOnlyList<DisciplinePage> Disciplines,
     SkillIndex SkillIndex,
-    IReadOnlyList<SkillPage> Skills
+    IReadOnlyList<SkillPage> Skills,
+    IReadOnlyList<SkillPage> Entries,
+    IReadOnlyDictionary<string, EntityReference> References
 );
 
 /// <summary>
@@ -44,7 +49,37 @@ internal sealed class SkillProducer
     internal sealed record Prepared(
         IReadOnlyList<DisciplinePage> Disciplines,
         IReadOnlyList<SkillPage> Skills,
+        IReadOnlyList<SkillPage> Entries,
+        IReadOnlyDictionary<string, EntityReference> References,
         IReadOnlyList<GraphEntity> GraphEntities
+    );
+
+    /// <summary>How skills of one name become versions of one page, as items do.</summary>
+    public static readonly VersionPolicy<SkillPage> Versions = new(
+        EntityKind.Skill,
+        Shown: skill => new
+        {
+            skill.Icon,
+            skill.Description,
+            skill.Facts,
+        },
+        Merge: copies =>
+            copies.Count == 1
+                ? copies[0]
+                : copies[0] with
+                {
+                    Sources = EntityVersions.Union(copies.SelectMany(skill => skill.Sources)),
+                    Notes = EntityVersions.Union(copies.SelectMany(skill => skill.Notes)),
+                    Status = EntityVersions.MergedStatus(copies.Select(skill => skill.Status)),
+                },
+        AsVersion: (skill, id, label, name) =>
+            skill with
+            {
+                VersionId = id,
+                VersionLabel = label,
+                VersionName = name,
+            },
+        WithVersions: (skill, others) => skill with { Versions = others }
     );
 
     public static EntityReference DisciplineReference(SkillTree tree) =>
@@ -116,96 +151,53 @@ internal sealed class SkillProducer
                 )
             )
             .ToArray();
-        var resolved = named
-            .Select(entry =>
-            {
-                var sources = CatalogContext.MergeSources(
-                    candidates[(EntityKind.Skill, entry.Key)],
-                    context.ExcludedLevels
-                );
-                var confirmed = sources.Count(source => !source.Unconfirmed);
-                var status =
-                    confirmed > 0 ? ItemStatus.Obtainable
-                    : olderTreeSkills.Contains(entry.Key) ? ItemStatus.NotInNormalPlay
-                    : ItemStatus.NoKnownSource;
-                return (
-                    entry.Key,
-                    entry.Name,
-                    Shown: entry.Name ?? Readable(entry.Key),
-                    Sources: sources,
-                    Status: status
-                );
-            })
-            .ToArray();
-        // Skills that share a name are told apart by their discipline, or else by their status, as players tell them
-        // apart in game. An ordinal follows only where those match too.
-        var qualifiers = resolved
-            .GroupBy(entry => entry.Shown, StringComparer.OrdinalIgnoreCase)
-            .Where(group => group.Count() > 1)
-            .SelectMany(group =>
-                group.Select(entry =>
-                    (
-                        entry.Key,
-                        Qualifier: entry
-                            .Sources.Where(source => source.Kind == SourceKind.SkillTree)
-                            .Select(source => source.Name)
-                            .FirstOrDefault()
-                            ?? (
-                                entry.Status == ItemStatus.Obtainable ? "Outside the trees"
-                                : entry.Status == ItemStatus.NotInNormalPlay ? "Unused"
-                                : "No known source"
-                            )
-                    )
-                )
-            )
-            .ToDictionary(entry => entry.Key, entry => entry.Qualifier, StringComparer.Ordinal);
-        var slugs = Slugs(
-            resolved.Select(entry =>
-                (
-                    entry.Key,
-                    qualifiers.TryGetValue(entry.Key, out var qualifier)
-                        ? entry.Shown + " " + qualifier
-                        : entry.Shown
-                )
-            )
-        );
-        var skills = new List<SkillPage>();
-        var entities = new List<GraphEntity>();
-        foreach (var (key, name, shown, sources, status) in resolved)
+        var entries = new List<SkillPage>();
+        foreach (var (key, name) in named)
         {
             var row = rowOf[key];
-            var reference = new EntityReference(
-                EntityKind.Skill,
+            var shown = name ?? Readable(key);
+            var sources = CatalogContext.MergeSources(
+                candidates[(EntityKind.Skill, key)],
+                context.ExcludedLevels
+            );
+            var page = new SkillPage(
                 key,
+                ItemIdentity.Slug(shown),
                 shown,
-                slugs[key],
-                Icon(row?.Values["Icon"])
-            );
+                RecordValues.Text(row?.Values["Description"]),
+                Icon(row?.Values["Icon"]),
+                Facts(key, row),
+                sources
+            )
+            {
+                Status =
+                    sources.Any(source => !source.Unconfirmed) ? ItemStatus.Obtainable
+                    : olderTreeSkills.Contains(key) ? ItemStatus.NotInNormalPlay
+                    : ItemStatus.NoKnownSource,
+                Notes = KnownIssues.RegistryNotes(context.Records.Issues, key),
+            };
             if (name is null)
-                coverage.Add(GapKind.UnknownFact, reference.Name, reference, "Name");
-            skills.Add(
-                new SkillPage(
-                    key,
-                    slugs[key],
-                    reference.Name,
-                    RecordValues.Text(row?.Values["Description"]),
-                    reference.Icon,
-                    Facts(key, row),
-                    sources
-                )
-                {
-                    Status = status,
-                    Qualifier = qualifiers.GetValueOrDefault(key),
-                }
-            );
-            entities.Add(new GraphEntity(reference, sources));
-            if (sources.All(source => source.Unconfirmed))
+                coverage.Add(
+                    GapKind.UnknownFact,
+                    shown,
+                    EntityVersions.Reference(page, EntityKind.Skill),
+                    "Name"
+                );
+            entries.Add(page);
+        }
+        // Skills of one name share a page as an item's versions do: copies that show the same merge, and skills
+        // that show something else become versions.
+        var versioned = EntityVersions.Group(entries, Versions);
+        var skills = versioned.Entities.ToList();
+        var entities = new List<GraphEntity>();
+        foreach (var skill in skills)
+        {
+            var reference = EntityVersions.Reference(skill, EntityKind.Skill);
+            entities.Add(new GraphEntity(reference, skill.Sources));
+            if (skill.Sources.All(source => source.Unconfirmed))
                 coverage.Add(GapKind.EntityWithoutSource, reference.Name, reference);
         }
-        var skillReferences = entities.ToDictionary(
-            entity => entity.Reference.Key!,
-            entity => entity.Reference
-        );
+        var skillReferences = versioned.References;
         var disciplines = new List<DisciplinePage>();
         var songRows = SpellsongRows(context).ToArray();
         foreach (var tree in trees)
@@ -338,24 +330,18 @@ internal sealed class SkillProducer
                     tree.Path,
                     discipline.Slug!,
                     tree.Name,
-                    tree.Category,
+                    new CategoryLink(ItemIdentity.Slug(tree.Category), tree.Category),
                     tree.LevelName,
                     skillRows,
                     passiveRows,
                     spellsongs
                 )
                 {
-                    // A discipline notes an issue whose registry entry names it, in the registry's order.
-                    Notes = context
-                        .Records.Issues.Issues.Where(issue =>
-                            issue.Notes?.ContainsKey(tree.Path) == true
-                        )
-                        .Select(issue => new IssueNote(issue.Id, issue.Notes![tree.Path]))
-                        .ToArray(),
+                    Notes = KnownIssues.RegistryNotes(context.Records.Issues, tree.Path),
                 }
             );
         }
-        return new Prepared(disciplines, skills, entities);
+        return new Prepared(disciplines, skills, entries, skillReferences, entities);
     }
 
     public SkillOutput Finish(Prepared prepared, GraphResult graph)
@@ -383,15 +369,13 @@ internal sealed class SkillProducer
             .ToArray();
         var categories = disciplines
             .Select(page => page.Category)
-            .Distinct(StringComparer.Ordinal)
-            .Select(name => new CategorySummary(ItemIdentity.Slug(name), name, name, 0))
+            .Distinct()
+            .Select(category => new CategorySummary(category.Slug, category.Name, category.Name, 0))
             .ToList();
         var categoryOf = disciplines
             .SelectMany(page =>
                 page.SkillRows.SelectMany(row => row.Slots)
-                    .Select(slot =>
-                        (Skill: slot.Skill.Key!, Category: ItemIdentity.Slug(page.Category))
-                    )
+                    .Select(slot => (Skill: slot.Skill.Key!, Category: page.Category.Slug))
             )
             .GroupBy(entry => entry.Skill, StringComparer.Ordinal)
             .ToDictionary(
@@ -464,6 +448,8 @@ internal sealed class SkillProducer
                     page.Status
                 )
                 {
+                    VersionId = page.VersionId,
+                    VersionLabel = page.VersionLabel,
                     Facets = facets
                         .Where(pair => pair.Value.Count > 0)
                         .ToDictionary(pair => pair.Key, pair => pair.Value),
@@ -523,7 +509,9 @@ internal sealed class SkillProducer
                     )),
                 ],
             },
-            skills
+            skills,
+            prepared.Entries,
+            prepared.References
         );
     }
 
@@ -636,23 +624,6 @@ internal sealed class SkillProducer
         RecordValues.AnyReference(reference) is { } path && textures.TryGetValue(path, out var hash)
             ? hash
             : null;
-
-    /// <summary>Slugs from names, qualified by an ordinal only where names repeat.</summary>
-    private static Dictionary<string, string> Slugs(IEnumerable<(string Key, string Name)> entries)
-    {
-        var result = new Dictionary<string, string>(StringComparer.Ordinal);
-        foreach (
-            var group in entries
-                .OrderBy(entry => entry.Key, StringComparer.Ordinal)
-                .GroupBy(entry => ItemIdentity.Slug(entry.Name))
-        )
-        {
-            var index = 0;
-            foreach (var (key, _) in group)
-                result[key] = index++ == 0 ? group.Key : $"{group.Key}-{index}";
-        }
-        return result;
-    }
 
     private static string Anchor(string wanted, HashSet<string> used)
     {

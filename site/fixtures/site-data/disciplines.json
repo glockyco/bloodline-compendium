@@ -4,7 +4,10 @@
 			"key": "/Invented/Trees/Emberlore",
 			"slug": "emberlore",
 			"name": "Emberlore",
-			"category": "Magic",
+			"category": {
+				"slug": "magic",
+				"name": "Magic"
+			},
 			"skills": 2,
 			"passives": 3,
 			"spellsongs": 0
@@ -13,7 +16,10 @@
 			"key": "/Invented/Trees/Songcraft",
 			"slug": "songcraft",
 			"name": "Songcraft",
-			"category": "Tech/Etc.",
+			"category": {
+				"slug": "tech-etc",
+				"name": "Tech/Etc."
+			},
 			"skills": 0,
 			"passives": 0,
 			"spellsongs": 2

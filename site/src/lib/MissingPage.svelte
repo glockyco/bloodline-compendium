@@ -2,7 +2,9 @@
 	import SeoHead from '#lib/SeoHead.svelte';
 	import ButtonLink from '#lib/ui/ButtonLink.svelte';
 	import { page } from '$app/state';
-	import { kindPath } from '#lib/entities.js';
+	import { browseKinds } from '#lib/entities.js';
+	// Every kind with pages, as the header lists them.
+	const browse = $derived(browseKinds(page.data.kinds));
 </script>
 
 <SeoHead
@@ -14,9 +16,19 @@
 	<header class="page-heading">
 		<p class="eyebrow">404</p>
 		<h1>Page not found</h1>
-		<p class="intro">
-			This page does not exist. Search for an item above, or browse the item list.
-		</p>
+		<p class="intro">This page does not exist. Search above, or browse a list.</p>
 	</header>
-	<div><ButtonLink href={kindPath('item', page.data.kinds)!}>Browse Items</ButtonLink></div>
+	<div class="browse">
+		{#each browse as entry (entry.path)}<ButtonLink href={entry.path}
+				>Browse {entry.label}</ButtonLink
+			>{/each}
+	</div>
 </div>
+
+<style>
+	.browse {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--gap-block);
+	}
+</style>

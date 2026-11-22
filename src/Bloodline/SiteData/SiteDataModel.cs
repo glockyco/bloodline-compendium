@@ -240,7 +240,7 @@ internal sealed record ItemPage(
     string? Icon,
     IReadOnlyList<Fact> Facts,
     IReadOnlyList<Source> Sources
-)
+) : IVersionedPage
 {
     [JsonRequired]
     public EntityKind Kind { get; init; } = EntityKind.Item;
@@ -674,7 +674,7 @@ internal sealed record DisciplineSummary(
     string Key,
     string Slug,
     string Name,
-    string Category,
+    CategoryLink Category,
     int Skills,
     int Passives,
     int Spellsongs
@@ -689,7 +689,7 @@ internal sealed record DisciplinePage(
     string Key,
     string Slug,
     string Name,
-    string Category,
+    CategoryLink Category,
     string? LevelName,
     IReadOnlyList<SkillRow> SkillRows,
     IReadOnlyList<PassiveRow> PassiveRows,
@@ -781,6 +781,10 @@ internal sealed record SkillSummary(
     [JsonRequired]
     public EntityKind Kind { get; init; } = EntityKind.Skill;
 
+    /// <summary>The version this row leads to on its page, and the label its tab shows, as item rows carry.</summary>
+    public string? VersionId { get; init; }
+    public string? VersionLabel { get; init; }
+
     [JsonRequired]
     public IReadOnlyDictionary<string, IReadOnlyList<string>> Facets { get; init; } =
         new Dictionary<string, IReadOnlyList<string>>();
@@ -805,7 +809,7 @@ internal sealed record SkillPage(
     string? Icon,
     IReadOnlyList<Fact> Facts,
     IReadOnlyList<Source> Sources
-)
+) : IVersionedPage
 {
     [JsonRequired]
     public EntityKind Kind { get; init; } = EntityKind.Skill;
@@ -813,16 +817,33 @@ internal sealed record SkillPage(
     [JsonRequired]
     public ItemStatus Status { get; init; } = ItemStatus.Obtainable;
 
-    /// <summary>
-    /// What tells this skill apart from others of its name, such as its discipline, null when its name is its own.
-    /// </summary>
-    public string? Qualifier { get; init; }
+    public string? VersionId { get; init; }
+    public string? VersionLabel { get; init; }
+    public string? VersionName { get; init; }
+
+    /// <summary>The other versions on this page, as on an item page. These entries have no nested versions.</summary>
+    [JsonRequired]
+    public IReadOnlyList<SkillPage> Versions { get; init; } = [];
 
     [JsonRequired]
     public IReadOnlyList<EntityRelation> Relations { get; init; } = [];
 
     [JsonRequired]
     public IReadOnlyList<IssueNote> Notes { get; init; } = [];
+}
+
+/// <summary>An entity whose entities of one name share a page, one version for each different thing they show.</summary>
+internal interface IVersionedPage
+{
+    string Key { get; }
+    string Slug { get; }
+    string Name { get; }
+    string? Icon { get; }
+    string? Description { get; }
+    IReadOnlyList<Fact> Facts { get; }
+    IReadOnlyList<Source> Sources { get; }
+    ItemStatus Status { get; }
+    string? VersionId { get; }
 }
 
 /// <summary>The files of the site data, gathered only to export one schema for all of them.</summary>

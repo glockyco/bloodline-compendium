@@ -13,20 +13,15 @@
 	import ReleaseInfo from '#lib/ReleaseInfo.svelte';
 	import CompendiumSwitcher from '#lib/CompendiumSwitcher.svelte';
 	import { iconUrl, otherCompendiums } from '#lib/compendiums.js';
-	import { kindPath } from '#lib/entities.js';
+	import { browseKinds } from '#lib/entities.js';
 	import { wrongFactHref } from '#lib/seo.js';
 	let { data, children } = $props();
 	// Every kind with pages, in the registry's order, leads from the header and the footer.
-	const browse = $derived(
-		data.kinds
-			.filter((kind) => kind.hasPages)
-			.map((kind) => ({ label: kind.searchFilter, path: kindPath(kind.kind, data.kinds)! }))
-	);
+	const browse = $derived(browseKinds(data.kinds));
 	// Home opens with the game's art, so its header sits on the art and its search sits in the hero.
 	const home = $derived(page.url.pathname === '/');
-	// A list has its own name search, so below desktop width it drops the header's search to reach its results
-	// sooner.
-	const list = $derived(browse.some((entry) => page.url.pathname === entry.path));
+	// A list with its own name search drops the header's below desktop width, to reach its results sooner.
+	const list = $derived(page.data.ownSearch === true);
 	const current = (path: string) => (page.url.pathname.startsWith(path) ? 'page' : undefined);
 	const reportHref = $derived(wrongFactHref(page.url.pathname));
 	function revealFragment() {

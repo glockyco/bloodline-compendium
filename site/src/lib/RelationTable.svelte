@@ -7,6 +7,7 @@
 		headings,
 		numeric = true,
 		stackOnMobile = true,
+		collapse = true,
 		row
 	}: {
 		items: T[];
@@ -15,9 +16,11 @@
 		/** Whether the columns after the first hold numbers, which align right with their heading, one flag per column. */
 		numeric?: boolean | boolean[];
 		stackOnMobile?: boolean;
+		/** Whether a long table shows its first rows behind a button, which a table read as a whole turns off. */
+		collapse?: boolean;
 		row: Snippet<[T, number]>;
 	} = $props();
-	const preview = $derived(items.length > 10 ? 8 : items.length);
+	const preview = $derived(collapse && items.length > 10 ? 8 : items.length);
 	// By default, a phone stacks tables with three or more columns, labelling each value after the name.
 	const labels = $derived(
 		headings

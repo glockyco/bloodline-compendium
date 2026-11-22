@@ -1,7 +1,7 @@
 import { formatNumber } from '../format.js';
-import type { Fact, ItemPage } from '../site-data.js';
+import type { Fact, IssueNote } from '../site-data.js';
 
-/** A row of an item page's Bugs section: a known issue's sentence about the item, or a tooltip value that no issue on the page explains. */
+/** A row of an entity page's Bugs section: a known issue's sentence about the entity, or a tooltip value that no issue on the page explains. */
 export type BugRow =
 	| { kind: 'issue'; issue: string; sentence: string }
 	| { kind: 'difference'; fact: Fact; sentence: string };
@@ -17,8 +17,8 @@ function joinAnd(parts: string[]): string {
 		: `${parts.slice(0, -1).join(', ')} and ${parts.at(-1)}`;
 }
 
-/** The Bugs rows of an item: its known issues first, each naming the tooltip values it explains, then every other tooltip difference. */
-export function bugRows(item: Pick<ItemPage, 'facts' | 'notes'>): BugRow[] {
+/** The Bugs rows of an entity: its known issues first, each naming the tooltip values it explains, then every other tooltip difference. */
+export function bugRows(item: { facts: Fact[]; notes: IssueNote[] }): BugRow[] {
 	const differences = item.facts.filter((fact) => fact.gameShows != null && fact.gameShows !== '');
 	const noted = new Set(item.notes.map((note) => note.issue));
 	return [

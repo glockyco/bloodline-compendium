@@ -60,5 +60,6 @@
 	"kind": "skill",
 	"status": "obtainable",
 	"relations": [],
-	"notes": []
+	"notes": [],
+	"versions": []
 }

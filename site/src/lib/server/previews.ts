@@ -10,6 +10,7 @@ import { entries as itemEntries } from '../../routes/items/[slug]/+page.server.j
 import { firstRoute } from '../items/acquisition.js';
 import { sourceHeadings } from '../labels.js';
 import { rankCosts } from '../rules/progression.js';
+import { skillStatus } from '../skills/describe.js';
 import type {
 	HostedPreviews,
 	ItemPreview,
@@ -42,7 +43,7 @@ export const previewSources: {
 	},
 	skill: {
 		async slugs() {
-			return (await readSkills()).skills.map((skill) => skill.slug);
+			return [...new Set((await readSkills()).skills.map((skill) => skill.slug))];
 		},
 		async build(slug) {
 			return skillPreview(await readSkill(slug));
@@ -105,11 +106,13 @@ export const previewSources: {
 	}
 };
 
-/** A skill's preview: its tooltip, and its first way to get it or why none is known. */
+/** A skill's preview: its tooltip, and its first way to get it or why none is known, for each version. */
 export function skillPreview(skill: SkillPage): SkillPreview {
 	const tree = skill.sources.find((source) => source.kind === 'skillTree');
 	return {
 		kind: 'skill',
+		versionId: skill.versionId ?? null,
+		versions: skill.versions.map(skillPreview),
 		name: skill.name,
 		icon: skill.icon,
 		description: skill.description,
@@ -117,9 +120,7 @@ export function skillPreview(skill: SkillPage): SkillPreview {
 		route: tree
 			? `${tree.name}, ${tree.conditions[0]?.label ?? 'a known level'}.`
 			: (firstRoute(skill.sources, Object.keys(sourceHeadings) as SourceKind[]) ??
-				(skill.status === 'notInNormalPlay'
-					? 'Cannot be obtained in normal play.'
-					: 'No known source.'))
+				skillStatus(skill))
 	};
 }
 

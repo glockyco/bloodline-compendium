@@ -28,5 +28,6 @@
 	"kind": "skill",
 	"status": "notInNormalPlay",
 	"relations": [],
-	"notes": []
+	"notes": [],
+	"versions": []
 }

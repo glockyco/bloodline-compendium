@@ -9,14 +9,14 @@
 	import Count from '#lib/ui/Count.svelte';
 	import IconSlot from '#lib/ui/IconSlot.svelte';
 	import SectionHeading from '#lib/ui/SectionHeading.svelte';
-	import { kindPath } from '#lib/entities.js';
+	import { browseKinds, kindPath } from '#lib/entities.js';
 	let { data } = $props();
 	const itemsPath = $derived(kindPath('item', data.kinds)!);
 </script>
 
 <SeoHead
 	title="The Bloodline Compendium | Wiki and Reference"
-	description="Where to get every item in The Bloodline, what it is used for and its stats. A fan-made wiki generated from the game's files."
+	description="Where to get every item and skill in The Bloodline, what they do and their stats. A fan-made wiki generated from the game's files."
 	website
 />
 
@@ -35,13 +35,19 @@
 	<div class="hero-body">
 		<h1 id="title">The Bloodline Compendium</h1>
 		<p class="lede">
-			All {formatNumber(data.count)} items in The Bloodline, with their sources, recipes and uses.
+			All {formatNumber(data.count)} items and {formatNumber(data.skills.known)} skills in The Bloodline,
+			with where to get them and what they do.
 		</p>
 		<div class="hero-search">
-			<Search variant="hero" placeholder="Search items, skills and more, for example {data.example}" />
+			<Search
+				variant="hero"
+				placeholder="Search items, skills and more, for example {data.example}"
+			/>
 		</div>
 		<div class="actions">
-			<ButtonLink href={itemsPath}>Browse Items</ButtonLink>
+			{#each browseKinds(data.kinds) as entry (entry.path)}<ButtonLink href={entry.path}
+					>Browse {entry.label}</ButtonLink
+				>{/each}
 			<a href="https://store.steampowered.com/app/1159290/The_Bloodline/" rel="external"
 				>The Bloodline on Steam</a
 			>
@@ -81,6 +87,30 @@
 						>{category.plural} <Count value={category.count} /></a
 					>{/each}
 			</p>{/if}
+	</section>
+
+	<section aria-labelledby="skills-heading">
+		<SectionHeading
+			id="skills-heading"
+			title="Skills"
+			link={{
+				href: kindPath('skill', data.kinds)!,
+				label: `${formatNumber(data.skills.known)} skills with a known way to learn them`
+			}}
+		/>
+		<CardGrid rows={3}>
+			{#each data.skills.groups as group (group.slug)}
+				<Card href={kindPath('discipline', data.kinds, '#' + group.slug)!}>
+					<span class="group-head"><h3>{group.name}</h3></span>
+					<span class="group-text" data-game>{group.disciplines.join(', ')}</span>
+					<span class="slots" data-ui="slots">
+						{#each [0, 1, 2, 3, 4] as slot (slot)}<IconSlot
+								icon={group.icons[slot] ?? null}
+							/>{/each}
+					</span>
+				</Card>
+			{/each}
+		</CardGrid>
 	</section>
 
 	<section aria-labelledby="ways-heading">

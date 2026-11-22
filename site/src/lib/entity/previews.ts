@@ -15,9 +15,11 @@ export interface ItemPreview {
 	route: string | null;
 }
 
-/** What a skill link's preview shows: the skill's tooltip and its first way to get it. */
+/** What a skill link's preview shows: the skill's tooltip and its first way to get it, per version as items do. */
 export interface SkillPreview {
 	kind: 'skill';
+	versionId: string | null;
+	versions: SkillPreview[];
 	name: string;
 	icon: string | null;
 	description: string | null;
@@ -94,7 +96,7 @@ export async function loadPreview(path: string): Promise<Preview | null> {
 	if (!root) return null;
 	const key = fragment ? decodeURIComponent(fragment) : null;
 	if ('entries' in root) return (key && root.entries[key]) || null;
-	if (root.kind !== 'item' || !key) return root;
+	if (!('versions' in root) || !key) return root;
 	return root.versionId === key
 		? root
 		: (root.versions.find((version) => version.versionId === key) ?? root);

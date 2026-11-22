@@ -50,7 +50,7 @@ public sealed class ItemVersionsTests
             Uses = [new ItemUse(SourceKind.Crafting, "Recipe", CatalogGraph.Reference(a), 1)],
         };
         var grouped = ItemVersions.Group([b, a]);
-        var item = Assert.Single(grouped.Items);
+        var item = Assert.Single(grouped.Entities);
         Assert.Equal(a.Key, item.Key);
         Assert.Equal(2, item.Sources.Count);
         Assert.Equal(2, item.Notes.Count);
@@ -69,8 +69,8 @@ public sealed class ItemVersionsTests
             Item("B", StatVocabulary.Number(Stat.Damage, 24)),
             Item("A", StatVocabulary.Number(Stat.Damage, 12)),
         ]);
-        Assert.Equal(2, grouped.Items.Count);
-        var page = Assert.Single(ItemVersions.Pages(grouped.Items, []));
+        Assert.Equal(2, grouped.Entities.Count);
+        var page = Assert.Single(ItemVersions.Pages(grouped.Entities, []));
         Assert.Equal("a", page.VersionId);
         Assert.Equal("12 Damage", page.VersionLabel);
         Assert.Equal("b", Assert.Single(page.Versions).VersionId);
@@ -128,7 +128,7 @@ public sealed class ItemVersionsTests
             Item("A", StatVocabulary.Number(Stat.Value, 500), StatVocabulary.Number(stat, first)),
             Item("B", StatVocabulary.Number(Stat.Value, 100), StatVocabulary.Number(stat, second)),
         ]);
-        Assert.Equal([firstLabel, secondLabel], grouped.Items.Select(item => item.VersionLabel));
+        Assert.Equal([firstLabel, secondLabel], grouped.Entities.Select(item => item.VersionLabel));
     }
 
     [Theory]
@@ -148,7 +148,7 @@ public sealed class ItemVersionsTests
             Item("A", StatVocabulary.Text(stat, first)),
             Item("B", StatVocabulary.Text(stat, second)),
         ]);
-        Assert.Equal([firstLabel, secondLabel], grouped.Items.Select(item => item.VersionLabel));
+        Assert.Equal([firstLabel, secondLabel], grouped.Entities.Select(item => item.VersionLabel));
     }
 
     [Fact]
@@ -156,11 +156,11 @@ public sealed class ItemVersionsTests
     {
         var a = Item("A", StatVocabulary.Number(Stat.Damage, 12));
         var b = Item("B", StatVocabulary.Number(Stat.Damage, 24)) with { Icon = "another" };
-        Assert.Equal("12 Damage", ItemVersions.Group([a, b]).Items[0].VersionLabel);
+        Assert.Equal("12 Damage", ItemVersions.Group([a, b]).Entities[0].VersionLabel);
         b = b with { Type = "Note" };
         Assert.Equal(
             ["Sword", "Note"],
-            ItemVersions.Group([a, b]).Items.Select(item => item.VersionLabel)
+            ItemVersions.Group([a, b]).Entities.Select(item => item.VersionLabel)
         );
     }
 
@@ -178,10 +178,10 @@ public sealed class ItemVersionsTests
                 Description = "An azure orb. Other words.",
             },
         ]);
-        Assert.All(grouped.Items, item => Assert.Null(item.VersionLabel));
+        Assert.All(grouped.Entities, item => Assert.Null(item.VersionLabel));
         Assert.Equal(
             ["An amber orb", "An azure orb"],
-            grouped.Items.Select(item => item.VersionName)
+            grouped.Entities.Select(item => item.VersionName)
         );
     }
 
@@ -209,7 +209,10 @@ public sealed class ItemVersionsTests
                 Description = "A different description.",
             },
         ]);
-        Assert.Equal([label, "No known source"], grouped.Items.Select(item => item.VersionLabel));
+        Assert.Equal(
+            [label, "No known source"],
+            grouped.Entities.Select(item => item.VersionLabel)
+        );
     }
 
     [Fact]
@@ -227,7 +230,7 @@ public sealed class ItemVersionsTests
         ]);
         Assert.Equal(
             ["Given by Father Linn", "No known source"],
-            grouped.Items.Select(item => item.VersionLabel)
+            grouped.Entities.Select(item => item.VersionLabel)
         );
     }
 
@@ -251,7 +254,7 @@ public sealed class ItemVersionsTests
                         Description = "Other.",
                     },
                 ])
-                .Items[0]
+                .Entities[0]
                 .VersionLabel
         );
         Assert.Equal(
@@ -268,7 +271,7 @@ public sealed class ItemVersionsTests
                         Sources = [Source(SourceKind.Shop, "Ironstich Merchant")],
                     },
                 ])
-                .Items.Select(item => item.VersionLabel)
+                .Entities.Select(item => item.VersionLabel)
         );
     }
 
@@ -282,7 +285,7 @@ public sealed class ItemVersionsTests
                     Item("A", StatVocabulary.Number(Stat.Value, 950)),
                     Item("B", StatVocabulary.Number(Stat.Value, 750)),
                 ])
-                .Items.Select(item => item.VersionLabel)
+                .Entities.Select(item => item.VersionLabel)
         );
         Assert.Throws<InvalidDataException>(() =>
             ItemVersions.Group([Item("A"), Item("B") with { Description = "Other." }])
@@ -319,7 +322,7 @@ public sealed class ItemVersionsTests
             },
             _ => throw new InvalidOperationException(),
         };
-        Assert.Equal(2, ItemVersions.Group([a, b]).Items.Count);
+        Assert.Equal(2, ItemVersions.Group([a, b]).Entities.Count);
     }
 
     [Fact]
@@ -366,7 +369,7 @@ public sealed class ItemVersionsTests
             ],
         };
         var grouped = ItemVersions.Group([duplicate, output, b, a]);
-        var graph = CatalogGraph.Build(grouped.Items, itemReferences: grouped.References);
+        var graph = CatalogGraph.Build(grouped.Entities, itemReferences: grouped.References);
         var source = Assert.Single(graph.Items.Single(item => item.Key == output.Key).Sources);
         Assert.Equal(a.Key, source.Inputs[0].Item.Key);
         Assert.Equal("a", source.Inputs[0].Item.Fragment);
@@ -394,7 +397,7 @@ public sealed class ItemVersionsTests
                         Icon = null,
                     },
                 ])
-                .Items;
+                .Entities;
             var layout = new RecordLayout(directory, 1);
             var result = new CatalogResult(
                 new ItemIndex([], []),

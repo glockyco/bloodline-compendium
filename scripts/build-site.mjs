@@ -46,6 +46,9 @@ async function indexSearch(dataDirectory) {
   const { listPage, listRecords } = await import(
     join(site, "src/lib/items/search-lists.ts")
   );
+  const { skillListRecords } = await import(
+    join(site, "src/lib/skills/search-lists.ts")
+  );
   const { kindPath } = await import(join(site, "src/lib/entities.ts"));
   const read = async (name) =>
     JSON.parse(await readFile(join(dataDirectory, name), "utf8"));
@@ -55,10 +58,11 @@ async function indexSearch(dataDirectory) {
   const pages = await index.addDirectory({ path: join(site, "build") });
   if (pages.errors.length)
     throw new Error("Pagefind failed: " + pages.errors.join(", "));
-  const records = listRecords(
-    await read("items.json"),
-    kindPath("item", kinds),
-  );
+  // Every list with filters gets records, so a search for a category finds its list.
+  const records = [
+    ...listRecords(await read("items.json"), kindPath("item", kinds)),
+    ...skillListRecords(await read("skills.json"), kindPath("skill", kinds)),
+  ];
   for (const record of records) {
     const added = await index.addHTMLFile({
       url: record.url,
@@ -73,7 +77,7 @@ async function indexSearch(dataDirectory) {
   if (written.errors.length)
     throw new Error("Pagefind failed: " + written.errors.join(", "));
   await pagefind.close();
-  return `Search: ${pages.page_count} pages and ${records.length} item lists.`;
+  return `Search: ${pages.page_count} pages and ${records.length} lists.`;
 }
 const assets = await writeSiteAssets({
   site,

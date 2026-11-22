@@ -2,7 +2,10 @@
 	"key": "/Invented/Trees/Emberlore",
 	"slug": "emberlore",
 	"name": "Emberlore",
-	"category": "Magic",
+	"category": {
+		"slug": "magic",
+		"name": "Magic"
+	},
 	"levelName": "Emberlore",
 	"skillRows": [
 		{

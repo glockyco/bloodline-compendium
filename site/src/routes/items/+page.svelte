@@ -4,7 +4,7 @@
 	import { formatNumber } from '#lib/format.js';
 	import { neutralSale } from '#lib/rules/price.js';
 	import SeoHead from '#lib/SeoHead.svelte';
-	import EntityLink from '#lib/ui/EntityLink.svelte';
+	import ListName from '#lib/list/ListName.svelte';
 	import EntityList from '#lib/list/EntityList.svelte';
 	import type { FixedDisplay } from '#lib/list/state.js';
 	import { kindPath } from '#lib/entities.js';
@@ -74,21 +74,5 @@
 	{valueLabel}
 	path={(query) => kindPath('item', data.kinds, query)!}
 >
-	{#snippet name(item: ItemSummary)}<EntityLink
-			class="entity-name"
-			entity={{ ...item, fragment: item.versionId }}
-			>{#if item.icon}<img
-					src={'/icons/' + item.icon + '-48.webp'}
-					alt=""
-					width="32"
-					height="32"
-					loading="lazy"
-				/>{/if}<span data-game>{item.name}</span></EntityLink
-		>{/snippet}
+	{#snippet name(item: ItemSummary)}<ListName row={item} />{/snippet}
 </EntityList>
-
-<style>
-	.list-title {
-		margin-bottom: var(--gap-groups);
-	}
-</style>

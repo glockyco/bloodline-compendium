@@ -16,8 +16,8 @@ public sealed class ReaderCatalogTests
             .Select(item => new ItemFacts([]).Resolve(item, "iron-part"))
             .ToArray();
         var grouped = ItemVersions.Group(pages);
-        Assert.Equal(["iron-part", "iron-part"], grouped.Items.Select(item => item.Slug));
-        Assert.Equal(["Blade", "Pommel"], grouped.Items.Select(item => item.VersionLabel));
+        Assert.Equal(["iron-part", "iron-part"], grouped.Entities.Select(item => item.Slug));
+        Assert.Equal(["Blade", "Pommel"], grouped.Entities.Select(item => item.VersionLabel));
         Assert.Equal("blade", grouped.References[blade.Path].Fragment);
         Assert.Equal("pommel", grouped.References[pommel.Path].Fragment);
         Assert.All(

@@ -42,7 +42,9 @@ internal static class CatalogWriter
                     discipline
                 );
             }
-            foreach (var skill in catalog.Skills.Skills)
+            foreach (
+                var skill in EntityVersions.Pages(catalog.Skills.Skills, SkillProducer.Versions)
+            )
             {
                 CanonicalJson.Write(Path.Combine(staging, "skills", skill.Slug + ".json"), skill);
             }

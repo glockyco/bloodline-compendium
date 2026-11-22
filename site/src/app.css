@@ -155,6 +155,15 @@ label {
 	display: grid;
 	gap: var(--gap-inline);
 }
+/* A list page's title, above its filters or its first group. */
+.list-title {
+	margin-bottom: var(--gap-groups);
+}
+/* Groups of cards one below the other at the page's full width, such as a list's categories. */
+.card-sections {
+	display: grid;
+	gap: var(--gap-section);
+}
 .panel,
 .surface {
 	margin: 0;
@@ -386,6 +395,11 @@ details[open] > summary .show-less {
 	}
 	.item-relations {
 		grid-row: 3;
+	}
+	/* Without an answer, as on a skill page whose sources answer it, the relations take the answer's row, so no empty
+	   row adds a second gap. */
+	.detail-layout:not(:has(> .answer)) .item-relations {
+		grid-row: 2;
 	}
 }
 @media (width < 40rem) {

@@ -24,7 +24,9 @@ function budgetOf(name, lists) {
 }
 
 export async function payloadGate(directory) {
-  const kinds = JSON.parse(await readFile(join(directory, "kinds.json"), "utf8"));
+  const kinds = JSON.parse(
+    await readFile(join(directory, "kinds.json"), "utf8"),
+  );
   const lists = new Set(
     kinds
       .filter((kind) => kind.hasPages)

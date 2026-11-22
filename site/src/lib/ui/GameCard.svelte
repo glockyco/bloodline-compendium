@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	/**
 	 * A card in the game's tooltip frame: the name on a ribbon, the icon beside its stat lines, and the description.
 	 * Item and skill tooltips fill it with the lines their in-game tooltips print.
@@ -9,16 +10,22 @@
 		lines,
 		description,
 		heading = 'h2',
-		slot = true
+		slot = true,
+		children
 	}: {
 		name: string;
 		icon: string | null;
-		/** The stat lines in the game's order, each at the size the game prints it. */
-		lines: { text: string; size: 'large' | 'small' }[];
+		/**
+		 * The stat lines in the game's order, each at the size the game prints it. A line the site writes, such as
+		 * when a passive unlocks, sets game to false, so it reads in the site's typeface and voice.
+		 */
+		lines: { text: string; size: 'large' | 'small'; game?: boolean }[];
 		description: string | null;
 		heading?: 'h2' | 'p';
 		/** Whether the card keeps an icon slot, empty when the icon is unknown, as items do. */
 		slot?: boolean;
+		/** What the card shows between its lines and its description, such as a spellsong's tune. */
+		children?: Snippet;
 	} = $props();
 	// The game shrinks a long name to keep its ribbon on one line. Here it shrinks to body size at most, and a
 	// name still too wide for the card wraps instead of running under the notches.
@@ -39,9 +46,15 @@
 					{#if icon}<img src="/icons/{icon}-160.webp" alt="" width="80" height="80" />{/if}
 				</div>{/if}
 			{#if lines.length}<div class="lines">
-					{#each lines as line, index (index)}<p class={line.size} data-game>{line.text}</p>{/each}
+					{#each lines as line, index (index)}<p
+							class={line.size}
+							data-game={line.game === false ? undefined : true}
+						>
+							{line.text}
+						</p>{/each}
 				</div>{/if}
 		</div>{/if}
+	{#if children}<div class="extra">{@render children()}</div>{/if}
 	{#if description}<p class="description" data-game>{description}</p>{/if}
 </div>
 
@@ -121,5 +134,8 @@
 		font-size: var(--type-1);
 		line-height: var(--leading-snug);
 		text-wrap: pretty;
+	}
+	.extra {
+		padding: 0 var(--inset-loose);
 	}
 </style>

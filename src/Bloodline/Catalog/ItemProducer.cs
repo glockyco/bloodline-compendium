@@ -9,8 +9,7 @@ internal sealed record ItemOutput(
     IReadOnlyList<ItemPage> Items,
     IReadOnlyList<StatusEvidence> Statuses,
     IReadOnlyList<FactClaim> Claims,
-    TooltipReport? Tooltips,
-    IReadOnlyList<PublishedIssue> Issues
+    TooltipReport? Tooltips
 );
 
 /// <summary>
@@ -61,11 +60,10 @@ internal sealed class ItemProducer
 
     /// <summary>The prepared items: pages grouped by shared name and what <see cref="Finish"/> needs.</summary>
     internal sealed record Prepared(
-        VersionedItems Grouped,
+        Versioned<ItemPage> Grouped,
         ItemStatuses Statuses,
         IReadOnlyList<FactClaim> Claims,
-        TooltipReport? Tooltips,
-        IReadOnlyList<PublishedIssue> Issues
+        TooltipReport? Tooltips
     );
 
     public Prepared Prepare(
@@ -181,15 +179,14 @@ internal sealed class ItemProducer
                 TooltipCheck.Describe(difference)
             );
         }
-        var (noted, issues) = KnownIssues.Attach(
+        var noted = KnownIssues.Attach(
             TooltipCheck.WithGameShows(items, tooltips),
             records.Issues,
             tooltips,
             resolver.IgnoredFoodEffects,
-            resolver.UntrainedWeapons,
-            context.SkillTrees.All.Select(tree => tree.Path).ToHashSet(StringComparer.Ordinal)
+            resolver.UntrainedWeapons
         );
-        return new Prepared(ItemVersions.Group(noted), statuses, claims, tooltips, issues);
+        return new Prepared(ItemVersions.Group(noted), statuses, claims, tooltips);
     }
 
     /// <summary>The canonical reference of an item version: its shared-name page when it has one.</summary>
@@ -207,17 +204,6 @@ internal sealed class ItemProducer
     )
     {
         var canonicalItems = graphItems.ToDictionary(item => item.Key, StringComparer.Ordinal);
-        var issues = prepared
-            .Issues.Select(issue =>
-                issue with
-                {
-                    Affected = issue
-                        .Affected.Select(reference => Canonical(prepared, reference))
-                        .Distinct()
-                        .ToArray(),
-                }
-            )
-            .ToArray();
         coverage.RemoveAll(
             GapKind.ItemWithoutSource,
             entry =>
@@ -274,8 +260,7 @@ internal sealed class ItemProducer
                 ))
                 .ToArray(),
             prepared.Claims,
-            prepared.Tooltips,
-            issues
+            prepared.Tooltips
         );
     }
 
