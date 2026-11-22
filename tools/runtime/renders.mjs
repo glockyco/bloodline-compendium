@@ -1,10 +1,22 @@
-// What render-sweep.mjs and publish-renders.mjs share: how a render is named and how runs record renders.
+// What render-sweep.mjs and publish-renders.mjs share: the published items, how a render is named and how runs
+// record renders.
 import { readFile, readdir } from "node:fs/promises";
 import { basename, join } from "node:path";
 
 /** The file name a render of an item keeps in its run, without the extension. */
 export const renderName = (key, body) =>
   key.split(".").at(-1) + (body === "female" ? "-female" : "");
+
+/** Every published item's name and category by class path, from the site data, with the versions that share a page. */
+export async function publishedItems(site) {
+  const items = new Map();
+  for (const file of (await readdir(join(site, "items"))).sort()) {
+    const page = JSON.parse(await readFile(join(site, "items", file), "utf8"));
+    for (const item of [page, ...(page.versions ?? [])])
+      items.set(item.key, { name: item.name, category: item.category.slug });
+  }
+  return items;
+}
 
 /** The bridge encodes an empty Lua table as an object, so lists may arrive as {}. */
 const list = (value) => (Array.isArray(value) ? value : []);

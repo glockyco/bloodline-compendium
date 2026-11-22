@@ -42,6 +42,10 @@ Armor SHALL show what the preview character wears for it, or its own model where
 - **WHEN** Chainmail Hood, whose body mesh does not follow the body, is rendered
 - **THEN** the render shows the hood as it sits on the head
 
+#### Scenario: A part whose class stands in two rows
+- **WHEN** Beveled Copper Shaft, whose class also stands in the smithing table's row of Beveled Iron Shaft, is rendered
+- **THEN** the render shows the copper shaft of the row that carries its name
+
 ### Requirement: Worn armor shows on a character that wears nothing else
 Armor SHALL be rendered on a character that wears nothing else and whose body carries its own colours, so a render does not depend on what was rendered before it. A skin colour that a piece leaves unset where the body would cover it SHALL show as the character's own.
 

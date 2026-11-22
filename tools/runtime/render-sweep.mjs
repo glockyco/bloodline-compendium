@@ -7,9 +7,9 @@
 // to render-failures.json in the runtime directory with its error. When the game stopped answering or the character
 // kept a piece on, the game restarts and the item is tried once more.
 import { execFileSync } from "node:child_process";
-import { readFile, readdir, writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { keptRenders, renderName } from "./renders.mjs";
+import { keptRenders, publishedItems, renderName } from "./renders.mjs";
 
 const build = process.argv[2];
 if (!build)
@@ -31,19 +31,14 @@ const lab = (...args) =>
     stdio: ["ignore", "pipe", "pipe"],
   });
 
-/** Every published item with whether it is armor, including the versions that share a page. */
-async function readItems() {
-  const items = new Map();
-  for (const file of (await readdir(join(site, "items"))).sort()) {
-    const page = JSON.parse(await readFile(join(site, "items", file), "utf8"));
-    for (const item of [page, ...(page.versions ?? [])])
-      items.set(item.key, item.category.slug === "armor");
-  }
-  return items;
-}
-const armor = await readItems();
+const items = await publishedItems(site);
 
-/** The mesh, materials and scale of each weapon part, from its row in WeaponComponentTable. */
+/**
+ * The mesh, materials and scale of each weapon part, from its row in WeaponComponentTable. A class can stand in
+ * several rows that show different parts, because the game lets one item serve for each of them. The item's own row
+ * is then the one that carries the item's name, or else the one named like its class. A class that neither tells
+ * apart is listed as unclear and gets no render.
+ */
 async function readParts() {
   const table = JSON.parse(
     await readFile(
@@ -51,16 +46,40 @@ async function readParts() {
       "utf8",
     ),
   );
-  const parts = new Map();
-  for (const { values } of table.rows) {
-    if (!values.Class?.$ref || !values.ComponentMesh?.$ref) continue;
-    parts.set(values.Class.$ref, {
-      mesh: values.ComponentMesh.$ref,
-      materials: (values.ComponentMaterial ?? []).map((entry) => entry.$ref),
-      scale: values.Scale,
-    });
+  const rows = new Map();
+  for (const row of table.rows) {
+    const key = row.values.Class?.$ref;
+    if (!key || !row.values.ComponentMesh?.$ref) continue;
+    rows.set(key, [...(rows.get(key) ?? []), row]);
   }
-  return parts;
+  const look = ({ values }) => ({
+    mesh: values.ComponentMesh.$ref,
+    materials: (values.ComponentMaterial ?? []).map((entry) => entry.$ref),
+    scale: values.Scale,
+  });
+  const plain = (text) => text.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const parts = new Map();
+  const unclear = new Set();
+  for (const [key, candidates] of rows) {
+    const looks = new Set(candidates.map((row) => JSON.stringify(look(row))));
+    const named = candidates.filter(
+      (row) => row.values.ItemName?.$text === items.get(key)?.name,
+    );
+    const classed = candidates.filter(
+      (row) => plain(`WC_${row.name}_C`) === plain(key.split(".").at(-1)),
+    );
+    const own =
+      looks.size === 1
+        ? candidates[0]
+        : named.length === 1
+          ? named[0]
+          : classed.length === 1
+            ? classed[0]
+            : null;
+    if (own) parts.set(key, look(own));
+    else unclear.add(key);
+  }
+  return { parts, unclear };
 }
 
 function restart() {
@@ -82,7 +101,7 @@ const failuresFile = join(runtime, "render-failures.json");
 const failures = JSON.parse(
   await readFile(failuresFile, "utf8").catch(() => "[]"),
 );
-const parts = await readParts();
+const { parts, unclear } = await readParts();
 const kept = await keptRenders(runtime);
 const done = new Set(
   kept.filter((render) => render.body === body).map((render) => render.item),
@@ -102,7 +121,7 @@ const bodyMeshes = new Set(
     )
     .map((render) => render.item),
 );
-const remaining = [...armor.keys()].filter(
+const remaining = [...items.keys()].filter(
   (key) =>
     (again || (!done.has(key) && !failed.has(key))) &&
     (!only || only.has(key)) &&
@@ -114,10 +133,12 @@ console.log(
 if (remaining.length) restart();
 /** Captures an item's render, and returns the line of the error that tells why it failed or null when it is kept. */
 function capture(key) {
+  if (unclear.has(key))
+    return "Its class stands in several rows of WeaponComponentTable that show different parts, and neither its name nor its class tells which row is its own.";
   const args = {
     item: key,
     name: renderName(key, body),
-    worn: armor.get(key),
+    worn: items.get(key).category === "armor",
   };
   if (parts.has(key)) args.part = parts.get(key);
   let shown;
