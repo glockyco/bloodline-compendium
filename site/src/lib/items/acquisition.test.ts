@@ -8,8 +8,8 @@ import {
 	summaryConditions,
 	summaryContext
 } from './acquisition.js';
-import fixture from '../../fixtures/site-data/items/lanternedge.json';
-import type { ItemPage } from './site-data.js';
+import fixture from '../../../fixtures/site-data/items/lanternedge.json';
+import type { ItemPage } from '../site-data.js';
 const item = fixture as ItemPage;
 
 it('keeps item quantities separate from the chance per container', () => {

@@ -7,15 +7,17 @@ import {
 	shownColumns,
 	sortItems,
 	writeState
-} from './list.js';
-import fixture from '../../fixtures/site-data/items.json';
-import type { ItemIndex, ItemSummary } from './site-data.js';
+} from './state.js';
+import fixture from '../../../fixtures/site-data/items.json';
+import type { ItemIndex, ItemSummary } from '../site-data.js';
+import { itemListModel } from '../items/list.js';
 const index = fixture as unknown as ItemIndex;
-const read = (query = '') => readState(new URLSearchParams(query), index);
+const model = itemListModel(index);
+const read = (query = '') => readState(new URLSearchParams(query), model);
 const names = (items: ItemSummary[]) => items.map((item) => item.name);
 const shown = (query = '') =>
 	sortItems(
-		index.items.filter((item) => matches(item, read(query), index)),
+		index.items.filter((item) => matches(item, read(query), model)),
 		read(query).sort
 	);
 
@@ -31,9 +33,9 @@ it('keeps same-name versions as separate rows and matches their stored labels', 
 		{ ...base, key: '/Invented/BladeA', versionId: 'bladea', versionLabel: '24 Damage' },
 		{ ...base, key: '/Invented/BladeB', versionId: 'bladeb', versionLabel: '12 Damage' }
 	];
-	expect(versions.filter((item) => matches(item, read('name=lanternedge'), index))).toHaveLength(2);
+	expect(versions.filter((item) => matches(item, read('name=lanternedge'), model))).toHaveLength(2);
 	expect(
-		versions.filter((item) => matches(item, read('name=24'), index)).map((item) => item.key)
+		versions.filter((item) => matches(item, read('name=24'), model)).map((item) => item.key)
 	).toEqual(['/Invented/BladeA']);
 });
 
@@ -43,7 +45,7 @@ it('counts each filter value under the other filters and hides values without it
 		index.items,
 		shown('category=weapon'),
 		state,
-		index,
+		model,
 		(_, value) => value
 	);
 	const category = groups.find((group) => group.facet.id === 'category')!;
@@ -58,7 +60,7 @@ it('counts each filter value under the other filters and hides values without it
 	// A filter for weapons appears once the list holds weapons only.
 	expect(groups.map((group) => group.facet.id)).toContain('weaponType');
 	expect(
-		facetGroups(index.items, shown(), read(), index, (_, value) => value).map(
+		facetGroups(index.items, shown(), read(), model, (_, value) => value).map(
 			(group) => group.facet.id
 		)
 	).not.toContain('weaponType');
@@ -66,9 +68,9 @@ it('counts each filter value under the other filters and hides values without it
 
 it('adds the columns of the selected category and of each stat filter', () => {
 	expect(
-		shownColumns(shown('category=weapon'), read('category=weapon'), index).map((c) => c.id)
+		shownColumns(shown('category=weapon'), read('category=weapon'), model).map((c) => c.id)
 	).toEqual(['damage', 'speed']);
-	expect(shownColumns(shown(), read('stat=armor::'), index).map((c) => c.id)).toEqual(['armor']);
+	expect(shownColumns(shown(), read('stat=armor::'), model).map((c) => c.id)).toEqual(['armor']);
 });
 
 it('combines stat filters with every or any and sorts missing values last', () => {
@@ -108,7 +110,7 @@ it('offers shield block facts as generic numeric columns for filtering and sorti
 			}
 		}
 	];
-	const shields: ItemIndex = {
+	const shields = itemListModel({
 		...index,
 		items,
 		columns: [
@@ -116,7 +118,7 @@ it('offers shield block facts as generic numeric columns for filtering and sorti
 			{ id: ids[0], label: 'Blocked Hits', numeric: true, categories: ['weapon'], unit: '%' },
 			{ id: ids[1], label: 'Free Blocks', numeric: true, categories: ['weapon'], unit: null }
 		]
-	};
+	});
 	const state = readState(
 		new URLSearchParams('category=weapon&stat=blockStaminaCost::50&sort=extraFullBlocks'),
 		shields
@@ -136,7 +138,7 @@ it('offers ranged hit columns and sorts their numeric values with absent facts l
 		cells: Object.fromEntries(ids.map((id) => [id, { number, text: null }]))
 	});
 	const items = [ranged('Low', 2), { ...weapon, name: 'Absent', cells: {} }, ranged('High', 10)];
-	const rangedIndex: ItemIndex = {
+	const rangedIndex = itemListModel({
 		...index,
 		items,
 		columns: ids.map((id) => ({
@@ -146,7 +148,7 @@ it('offers ranged hit columns and sorts their numeric values with absent facts l
 			categories: ['weapon'],
 			unit: null
 		}))
-	};
+	});
 	const state = readState(new URLSearchParams('category=weapon'), rangedIndex);
 	expect(shownColumns(items, state, rangedIndex).map((column) => column.id)).toEqual(ids);
 	for (const id of ids) {
@@ -178,7 +180,7 @@ it('offers ranged hit columns and sorts their numeric values with absent facts l
 
 it('writes only what differs from the defaults and reads it back', () => {
 	const query = 'name=lan&category=weapon&stat=damage:5:&sort=damage&dir=asc&unknown=1';
-	expect(writeState(read(query), index).toString()).toBe(
+	expect(writeState(read(query), model).toString()).toBe(
 		'name=lan&category=weapon&stat=damage%3A5%3A&unknown=1&sort=damage&dir=asc'
 	);
 	expect(read('sort=not-a-column').sort).toEqual({ column: 'name', direction: 'asc' });
@@ -212,12 +214,12 @@ it('sorts words by their rank and keeps words of equal rank together', () => {
 
 it('keeps a place filter to the selected ways to get an item and counts places the same way', () => {
 	const sword = index.items.find((item) => item.slug === 'lanternedge')!;
-	const towns = {
+	const towns = itemListModel({
 		...index,
 		facets: index.facets.map((facet) =>
 			facet.id === 'place' ? { ...facet, values: ['Port', 'Town'] } : facet
 		)
-	};
+	});
 	const item = (name: string, placeSources: Record<string, string[]>): ItemSummary => ({
 		...sword,
 		name,

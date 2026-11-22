@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { DetailRow } from './game-card.js';
-	import type { ItemPage } from './site-data.js';
-	import { formatNumber } from './format.js';
+	import type { ItemPage } from '../site-data.js';
+	import { formatNumber } from '../format.js';
 	let {
 		rows,
 		wide = false,

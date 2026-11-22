@@ -2,7 +2,7 @@
 	import { page } from '$app/state';
 	import type { EntityReference } from '#lib/site-data.js';
 	import { entityPath } from '#lib/entities.js';
-	import { previewKinds, previewPath } from '#lib/previews.js';
+	import { previewKinds, previewPath } from '#lib/entity/previews.js';
 	import type { Snippet } from 'svelte';
 	let {
 		entity,

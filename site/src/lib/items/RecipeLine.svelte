@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { Source } from './site-data.js';
-	import { formatNumber } from './format.js';
-	import EntityLink from './ui/EntityLink.svelte';
-	import Conditions from './Conditions.svelte';
+	import type { Source } from '../site-data.js';
+	import { formatNumber } from '../format.js';
+	import EntityLink from '../ui/EntityLink.svelte';
+	import Conditions from '../Conditions.svelte';
 	/** A recipe in full: what it consumes, where it is made, the skill it needs and what it gives. */
 	let { source, id }: { source: Source; id: string } = $props();
 	const recipe = $derived(source.recipe);

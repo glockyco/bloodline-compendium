@@ -44,9 +44,9 @@ test('list rows link and preview the exact version while search returns one name
 	page
 }) => {
 	await page.goto('/items/?name=Twin%20Lantern');
-	await expect(page.locator('.item-name')).toHaveText(['Twin Lantern', 'Twin Lantern']);
+	await expect(page.locator('.entity-name')).toHaveText(['Twin Lantern', 'Twin Lantern']);
 	await expect(page.locator('.version-label')).toHaveCount(0);
-	const second = page.locator('.item-name[href$="#twin_lantern_b"]');
+	const second = page.locator('.entity-name[href$="#twin_lantern_b"]');
 	await second.focus();
 	await expect(page.locator('#entity-preview')).toContainText('Damage: 24');
 	await expect(page.locator('#entity-preview .name')).toHaveText('Twin Lantern');

@@ -1,5 +1,11 @@
-import type { CategorySummary, ItemIndex, ItemPage, ItemSummary, SourceKind } from './site-data.js';
-import { sourceHeadings } from './labels.js';
+import type {
+	CategorySummary,
+	ItemIndex,
+	ItemPage,
+	ItemSummary,
+	SourceKind
+} from '../site-data.js';
+import { sourceHeadings } from '../labels.js';
 
 /** Browse categories shown large on the home page, in this order when they exist. */
 const majorOrder = ['weapon', 'armor', 'weapon-part', 'material', 'food', 'quest-item'];

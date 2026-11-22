@@ -1,7 +1,7 @@
 import { entryText, sortSources, summarize, summaryContext } from './acquisition.js';
-import { formatNumber } from './format.js';
-import { sourceHeadings } from './labels.js';
-import type { ItemPage, ItemStatus, Source, SourceKind } from './site-data.js';
+import { formatNumber } from '../format.js';
+import { sourceHeadings } from '../labels.js';
+import type { ItemPage, ItemStatus, Source, SourceKind } from '../site-data.js';
 
 /** What a page says about an item without a known way to get it, on the page and in its description. */
 export const statusSentence: Record<ItemStatus, string> = {

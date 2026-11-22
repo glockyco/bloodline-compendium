@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 import { listPage, listRecords } from './search-lists.js';
-import type { ItemIndex, ItemSummary } from './site-data.js';
+import type { ItemIndex, ItemSummary } from '../site-data.js';
 
 const weapon = (name: string, type: string, status = 'obtainable'): ItemSummary =>
 	({

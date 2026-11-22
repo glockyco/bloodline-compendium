@@ -1,7 +1,7 @@
 import { expect, it } from 'vitest';
 import { describeItem, isPlural, typePhrase } from './describe.js';
-import fixture from '../../fixtures/site-data/items/lanternedge.json';
-import type { Fact, ItemPage, Source } from './site-data.js';
+import fixture from '../../../fixtures/site-data/items/lanternedge.json';
+import type { Fact, ItemPage, Source } from '../site-data.js';
 const sword = fixture as ItemPage;
 const shop = sword.sources.find((source) => source.kind === 'shop')!;
 const fact = (stat: string, number: number | null, text: string | null = null) =>

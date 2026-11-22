@@ -1,5 +1,5 @@
 <script lang="ts">
-	import ItemTooltip from './ItemTooltip.svelte';
+	import ItemTooltip from '../items/ItemTooltip.svelte';
 	import type { Preview } from './previews.js';
 	/** Shows a preview in its kind's tooltip, as Afallon's presenter picks a tooltip per kind. */
 	let { preview }: { preview: Preview } = $props();

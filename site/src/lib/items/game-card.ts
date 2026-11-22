@@ -1,8 +1,8 @@
-import type { Fact, ItemPage } from './site-data.js';
-import { titleCase } from './labels.js';
-import { factValue } from './stats.js';
-import { formatNumber } from './format.js';
-import { neutralMultiplier, sellPrice } from './rules/price.js';
+import type { Fact, ItemPage } from '../site-data.js';
+import { titleCase } from '../labels.js';
+import { factValue } from '../stats.js';
+import { formatNumber } from '../format.js';
+import { neutralMultiplier, sellPrice } from '../rules/price.js';
 
 export interface CardLine {
 	fact: Fact;

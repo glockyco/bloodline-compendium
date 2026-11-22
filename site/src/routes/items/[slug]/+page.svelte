@@ -5,11 +5,11 @@
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import EntityArticle from '#lib/ui/EntityArticle.svelte';
-	import ItemVersion from '#lib/ItemVersion.svelte';
+	import ItemVersion from '#lib/items/ItemVersion.svelte';
 	import SeoHead from '#lib/SeoHead.svelte';
 	import { entityPath, kindPath } from '#lib/entities.js';
 	import { titleCase } from '#lib/labels.js';
-	import { describeItem } from '#lib/describe.js';
+	import { describeItem } from '#lib/items/describe.js';
 
 	let { data } = $props();
 	const versions = $derived([data.item, ...(data.item.versions ?? [])]);

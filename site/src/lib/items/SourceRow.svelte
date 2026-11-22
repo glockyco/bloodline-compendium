@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { Source } from './site-data.js';
-	import { formatNumber, formatChanceRange } from './format.js';
+	import type { Source } from '../site-data.js';
+	import { formatNumber, formatChanceRange } from '../format.js';
 	import { chanceText, formatAmount, oddsLabel, payPrice, placedKinds } from './acquisition.js';
-	import EntityLink from './ui/EntityLink.svelte';
-	import Conditions from './Conditions.svelte';
-	import UnknownValue from './ui/UnknownValue.svelte';
+	import EntityLink from '../ui/EntityLink.svelte';
+	import Conditions from '../Conditions.svelte';
+	import UnknownValue from '../ui/UnknownValue.svelte';
 	let {
 		source,
 		showAmount = false,

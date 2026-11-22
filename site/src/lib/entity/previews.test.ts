@@ -1,8 +1,8 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { loadPreview, previewPath, type ItemPreview } from './previews.js';
-import { itemPreview } from './server/previews.js';
-import fixture from '../../fixtures/site-data/items/lanternedge.json';
-import type { ItemPage } from './site-data.js';
+import { itemPreview } from '../server/previews.js';
+import fixture from '../../../fixtures/site-data/items/lanternedge.json';
+import type { ItemPage } from '../site-data.js';
 
 afterEach(() => vi.unstubAllGlobals());
 

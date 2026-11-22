@@ -44,7 +44,7 @@ const started = performance.now();
 async function indexSearch(dataDirectory) {
   const pagefind = await import(Bun.resolveSync("pagefind", site));
   const { listPage, listRecords } = await import(
-    join(site, "src/lib/search-lists.ts")
+    join(site, "src/lib/items/search-lists.ts")
   );
   const { kindPath } = await import(join(site, "src/lib/entities.ts"));
   const read = async (name) =>

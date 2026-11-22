@@ -3,7 +3,7 @@
 	import { beforeNavigate } from '$app/navigation';
 	import TooltipPresenter from './TooltipPresenter.svelte';
 	import { loadPreview, type Preview } from './previews.js';
-	import { linkLine, placeBeside } from './floating.js';
+	import { linkLine, placeBeside } from '../floating.js';
 
 	/**
 	 * Shows the tooltip of every link marked data-preview on hover after a short intent, on keyboard focus and on a

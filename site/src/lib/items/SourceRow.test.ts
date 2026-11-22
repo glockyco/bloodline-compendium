@@ -1,8 +1,8 @@
 import { render } from 'svelte/server';
 import { expect, it, vi } from 'vitest';
 import SourceRow from './SourceRow.svelte';
-import fixture from '../../fixtures/site-data/items/lanternedge.json';
-import type { ItemPage, Source } from './site-data.js';
+import fixture from '../../../fixtures/site-data/items/lanternedge.json';
+import type { ItemPage, Source } from '../site-data.js';
 
 vi.mock('$app/state', () => ({ page: { data: { kinds: [] } } }));
 

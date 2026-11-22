@@ -8,7 +8,7 @@
 	import '@fontsource-variable/figtree';
 	import '../app.css';
 	import Search from '#lib/Search.svelte';
-	import EntityPreviews from '#lib/EntityPreviews.svelte';
+	import EntityPreviews from '#lib/entity/EntityPreviews.svelte';
 	import { markHydrated } from '#lib/hydration.js';
 	import ReleaseInfo from '#lib/ReleaseInfo.svelte';
 	import CompendiumSwitcher from '#lib/CompendiumSwitcher.svelte';

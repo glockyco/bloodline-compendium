@@ -3,8 +3,8 @@ import { expect, it } from 'vitest';
 import ItemTooltip from './ItemTooltip.svelte';
 import ItemDetails from './ItemDetails.svelte';
 import { detailRows } from './game-card.js';
-import fixture from '../../fixtures/site-data/items/mosswoven-coat.json';
-import type { Fact, ItemPage } from './site-data.js';
+import fixture from '../../../fixtures/site-data/items/mosswoven-coat.json';
+import type { Fact, ItemPage } from '../site-data.js';
 
 it('shows applied values without tooltip differences or issue links', () => {
 	const damage: Fact = {

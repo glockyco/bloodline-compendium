@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ItemRender, RenderBody } from './site-data.js';
+	import type { ItemRender, RenderBody } from '../site-data.js';
 	let { name, renders }: { name: string; renders: ItemRender[] } = $props();
 	const bodyNames: Record<RenderBody, string> = { male: 'Male', female: 'Female' };
 	let shown = $state<RenderBody>('male');

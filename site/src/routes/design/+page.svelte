@@ -2,7 +2,7 @@
 	import SeoHead from '#lib/SeoHead.svelte';
 	import RelationTable from '#lib/RelationTable.svelte';
 	import Conditions from '#lib/Conditions.svelte';
-	import ItemTooltip from '#lib/ItemTooltip.svelte';
+	import ItemTooltip from '#lib/items/ItemTooltip.svelte';
 	import type { Fact } from '#lib/site-data.js';
 	import ButtonLink from '#lib/ui/ButtonLink.svelte';
 	import Card from '#lib/ui/Card.svelte';

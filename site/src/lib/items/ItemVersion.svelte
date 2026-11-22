@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import SourceRow from '#lib/SourceRow.svelte';
+	import SourceRow from '#lib/items/SourceRow.svelte';
 	import RelationTable from '#lib/RelationTable.svelte';
 	import EntityLink from '#lib/ui/EntityLink.svelte';
 	import Conditions from '#lib/Conditions.svelte';
-	import { bugRows } from '#lib/bugs.js';
+	import { bugRows } from '#lib/items/bugs.js';
 	import Section from '#lib/ui/Section.svelte';
-	import ItemTooltip from '#lib/ItemTooltip.svelte';
-	import ItemDetails from '#lib/ItemDetails.svelte';
-	import ItemModel from '#lib/ItemModel.svelte';
-	import OnHitEffects from '#lib/OnHitEffects.svelte';
-	import { detailRows } from '#lib/game-card.js';
+	import ItemTooltip from '#lib/items/ItemTooltip.svelte';
+	import ItemDetails from '#lib/items/ItemDetails.svelte';
+	import ItemModel from '#lib/items/ItemModel.svelte';
+	import OnHitEffects from '#lib/items/OnHitEffects.svelte';
+	import { detailRows } from '#lib/items/game-card.js';
 	import { sourceColumns, sourceHeadings, sourceIntros } from '#lib/labels.js';
 	import {
 		headingCase,
@@ -20,11 +20,11 @@
 		sortSources,
 		useHeadings,
 		pricePhrase
-	} from '#lib/acquisition.js';
-	import RecipeLine from '#lib/RecipeLine.svelte';
+	} from '#lib/items/acquisition.js';
+	import RecipeLine from '#lib/items/RecipeLine.svelte';
 	import { formatNumber } from '#lib/format.js';
 	import type { ItemPage, Source, SourceKind } from '#lib/site-data.js';
-	import { statusSentence } from '#lib/describe.js';
+	import { statusSentence } from '#lib/items/describe.js';
 	let {
 		item,
 		idPrefix = ''

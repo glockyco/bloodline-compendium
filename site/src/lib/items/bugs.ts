@@ -1,5 +1,5 @@
-import { formatNumber } from './format.js';
-import type { Fact, ItemPage } from './site-data.js';
+import { formatNumber } from '../format.js';
+import type { Fact, ItemPage } from '../site-data.js';
 
 /** A row of an item page's Bugs section: a known issue's sentence about the item, or a tooltip value that no issue on the page explains. */
 export type BugRow =

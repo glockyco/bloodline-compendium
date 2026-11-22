@@ -3,11 +3,11 @@ test('filters items with counted facets, preserves URL state and sorts numeric v
 	page
 }) => {
 	await page.goto('/items/');
-	await expect(page.locator('.item-name[href="/items/hollow-prism/"]')).toHaveCount(0);
+	await expect(page.locator('.entity-name[href="/items/hollow-prism/"]')).toHaveCount(0);
 	const categories = page.getByRole('complementary', { name: 'Item filters' });
 	const weapons = categories.getByRole('checkbox', { name: /^Weapons\s/ });
 	await weapons.check();
-	await expect(page.locator('.item-name')).toHaveText(['Lanternedge']);
+	await expect(page.locator('.entity-name')).toHaveText(['Lanternedge']);
 	await expect(page).toHaveURL(/category=weapon/);
 	await page.reload();
 	// A list opened with a category starts with that group closed, so its own filters come into view.
@@ -17,25 +17,27 @@ test('filters items with counted facets, preserves URL state and sorts numeric v
 	);
 	await categories.locator('summary', { hasText: 'Category' }).click();
 	await expect(weapons).toBeChecked();
-	await expect(page.locator('.item-name')).toHaveText(['Lanternedge']);
+	await expect(page.locator('.entity-name')).toHaveText(['Lanternedge']);
 	await weapons.uncheck();
 	await page.getByRole('button', { name: 'Sells for', exact: true }).click();
 	await expect(page.getByRole('columnheader', { name: 'Sells for' })).toHaveAttribute(
 		'aria-sort',
 		'descending'
 	);
-	await expect(page.locator('.item-name')).toHaveText([
+	await expect(page.locator('.entity-name')).toHaveText([
 		'Mosswoven Coat',
 		'Lanternedge',
 		'Cinderpear'
 	]);
 	await page.getByRole('button', { name: 'Show 3 more without a known way to get them' }).click();
-	await expect(page.locator('.item-name', { hasText: 'Hollow Prism' })).toHaveText('Hollow Prism');
+	await expect(page.locator('.entity-name', { hasText: 'Hollow Prism' })).toHaveText(
+		'Hollow Prism'
+	);
 	await expect(page.locator('tr', { hasText: 'Hollow Prism' })).toContainText('No known source');
-	await expect(page.locator('.item-name img').first()).toHaveAttribute('src', /-48.webp$/);
+	await expect(page.locator('.entity-name img').first()).toHaveAttribute('src', /-48.webp$/);
 	await page.getByRole('button', { name: 'Item', exact: true }).click();
 	await page.getByRole('button', { name: 'Item', exact: true }).click();
-	await expect(page.locator('.item-name').first()).toContainText('Twin Lantern');
+	await expect(page.locator('.entity-name').first()).toContainText('Twin Lantern');
 });
 
 test('name filtering combines with facets and empty results can be cleared', async ({ page }) => {
@@ -45,7 +47,7 @@ test('name filtering combines with facets and empty results can be cleared', asy
 	const name = page.getByRole('searchbox', { name: 'Search by name' });
 	await name.fill('Lantern');
 	await name.press('Enter');
-	await expect(page.locator('.item-name')).toHaveText([
+	await expect(page.locator('.entity-name')).toHaveText([
 		'Lanternedge',
 		'Twin Lantern',
 		'Twin Lantern'
@@ -53,11 +55,11 @@ test('name filtering combines with facets and empty results can be cleared', asy
 	await expect(page).toHaveURL(/name=Lantern/);
 	await name.fill('No invented match');
 	await name.press('Enter');
-	await expect(page.locator('.item-name')).toHaveCount(0);
+	await expect(page.locator('.entity-name')).toHaveCount(0);
 	await expect(page.getByText('No items match these filters.', { exact: false })).toBeVisible();
 	await page.getByRole('button', { name: 'Clear all', exact: true }).click();
 	await expect(name).toHaveValue('');
-	await expect(page.locator('.item-name')).toHaveCount(3);
+	await expect(page.locator('.entity-name')).toHaveCount(3);
 	await expect(page).toHaveURL('/items/');
 });
 
@@ -70,13 +72,16 @@ test('combines filters, restores them from a shared URL and adds stat columns', 
 	await expect(facets.getByRole('checkbox', { name: /^Weapons\s/ })).toBeChecked();
 	await expect(facets.getByRole('checkbox', { name: /^Food\s/ })).toBeChecked();
 	await expect(facets.getByRole('checkbox', { name: /^Sword\s/ })).toBeChecked();
-	await expect(page.locator('.item-name')).toHaveText(['Lanternedge']);
+	await expect(page.locator('.entity-name')).toHaveText(['Lanternedge']);
 	// A list opened from a filtered address shows each row with its own icon.
-	await expect(page.locator('.item-name img')).toHaveAttribute('src', '/icons/lanternedge-48.webp');
+	await expect(page.locator('.entity-name img')).toHaveAttribute(
+		'src',
+		'/icons/lanternedge-48.webp'
+	);
 	await facets.getByRole('checkbox', { name: /^Sword\s/ }).uncheck();
-	await expect(page.locator('.item-name')).toHaveText(['Cinderpear', 'Lanternedge']);
+	await expect(page.locator('.entity-name')).toHaveText(['Cinderpear', 'Lanternedge']);
 	await page.reload();
-	await expect(page.locator('.item-name')).toHaveText(['Cinderpear', 'Lanternedge']);
+	await expect(page.locator('.entity-name')).toHaveText(['Cinderpear', 'Lanternedge']);
 	await page.goto('/items/');
 	await facets.locator('summary', { hasText: 'Stats' }).click();
 	await facets.getByRole('combobox', { name: 'Add a stat filter' }).selectOption('armor');
@@ -84,19 +89,19 @@ test('combines filters, restores them from a shared URL and adds stat columns', 
 		'aria-sort',
 		'descending'
 	);
-	await expect(page.locator('.item-name')).toHaveText(['Mosswoven Coat']);
+	await expect(page.locator('.entity-name')).toHaveText(['Mosswoven Coat']);
 	await expect(page).toHaveURL(/stat=armor/);
 });
 
 test('name search finds items without a known way to get them', async ({ page }) => {
 	await page.goto('/items/?name=prism');
-	await expect(page.locator('.item-name')).toHaveText(['Hollow Prism']);
+	await expect(page.locator('.entity-name')).toHaveText(['Hollow Prism']);
 	await expect(page.locator('tr', { hasText: 'Hollow Prism' })).toContainText('No known source');
 });
 
 test('an item link covers its icon and name, not the rest of its cell', async ({ page }) => {
 	await page.goto('/items/');
-	const link = page.locator('.item-name', { hasText: 'Lanternedge' });
+	const link = page.locator('.entity-name', { hasText: 'Lanternedge' });
 	const linkBox = (await link.boundingBox())!;
 	const cellBox = (await page.locator('td', { has: link }).boundingBox())!;
 	expect(linkBox.width).toBeLessThan(cellBox.width - 40);
@@ -124,7 +129,7 @@ test('phone filters open as a keyboard-accessible sheet and apply without naviga
 	await expect(weapon).toBeChecked();
 	await dialog.getByRole('button', { name: 'Show 1 item', exact: true }).click();
 	await expect(dialog).not.toBeVisible();
-	await expect(page.locator('.item-name')).toHaveText(['Lanternedge']);
+	await expect(page.locator('.entity-name')).toHaveText(['Lanternedge']);
 	await expect(page).toHaveURL(/category=weapon/);
 });
 test('answers acquisition first and exposes facts, quantities and uncertainty', async ({
@@ -220,7 +225,7 @@ test('keeps unconfirmed sources at the end without advertising a way to get the 
 		);
 	}
 	await page.goto('/items/?name=prism');
-	await page.locator('.item-name', { hasText: 'Hollow Prism' }).focus();
+	await page.locator('.entity-name', { hasText: 'Hollow Prism' }).focus();
 	const preview = page.locator('#entity-preview');
 	await expect(preview).toContainText('No known source.');
 	await expect(preview).not.toContainText('The Silent Curator');
@@ -389,7 +394,7 @@ test('leads a type word from the shared search to the filtered item list', async
 		.first()
 		.click();
 	await expect(page).toHaveURL('/items/?category=weapon&weaponType=Sword');
-	await expect(page.locator('.item-name')).toHaveText(['Lanternedge']);
+	await expect(page.locator('.entity-name')).toHaveText(['Lanternedge']);
 });
 test('release labels, provenance and static 404', async ({ page, request }) => {
 	for (const route of ['/', '/items/', '/items/lanternedge/', '/known-issues/', '/missing/page']) {

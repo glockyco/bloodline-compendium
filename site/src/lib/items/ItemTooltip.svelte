@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Fact, ItemPage } from './site-data.js';
+	import type { Fact, ItemPage } from '../site-data.js';
 	import { cardLines, detailRows } from './game-card.js';
 	import ItemDetails from './ItemDetails.svelte';
 	import OnHitEffects from './OnHitEffects.svelte';

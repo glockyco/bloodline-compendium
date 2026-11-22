@@ -2,7 +2,7 @@ import { render } from 'svelte/server';
 import { expect, it } from 'vitest';
 import OnHitEffects from './OnHitEffects.svelte';
 import ItemTooltip from './ItemTooltip.svelte';
-import type { ItemPage } from './site-data.js';
+import type { ItemPage } from '../site-data.js';
 
 const effects: NonNullable<ItemPage['onHitEffects']> = [
 	{

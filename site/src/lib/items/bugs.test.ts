@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 import { bugRows } from './bugs.js';
-import type { Fact } from './site-data.js';
+import type { Fact } from '../site-data.js';
 
 const fact = (
 	stat: Fact['stat'],

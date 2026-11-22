@@ -1,8 +1,8 @@
 import { readItem, readSharedMerchantNames } from './data.js';
 import { entries as itemEntries } from '../../routes/items/[slug]/+page.server.js';
-import { firstRoute } from '../acquisition.js';
+import { firstRoute } from '../items/acquisition.js';
 import { sourceHeadings } from '../labels.js';
-import type { ItemPreview, Preview } from '../previews.js';
+import type { ItemPreview, Preview } from '../entity/previews.js';
 import type { ItemPage, SourceKind } from '../site-data.js';
 
 /** For each kind with previews, the slugs that have one and how a slug's preview is built. */

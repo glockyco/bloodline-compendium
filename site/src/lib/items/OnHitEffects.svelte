@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { ItemPage } from './site-data.js';
-	import { formatNumber } from './format.js';
-	import RelationTable from './RelationTable.svelte';
-	import Section from './ui/Section.svelte';
+	import type { ItemPage } from '../site-data.js';
+	import { formatNumber } from '../format.js';
+	import RelationTable from '../RelationTable.svelte';
+	import Section from '../ui/Section.svelte';
 
 	let { effects, id = 'on-hit-effects' }: { effects?: ItemPage['onHitEffects']; id?: string } =
 		$props();

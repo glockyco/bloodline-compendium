@@ -1,5 +1,6 @@
-import { hiddenAvailability, writeState, type ListState } from './list.js';
-import type { ItemIndex, ItemSummary } from './site-data.js';
+import { hiddenAvailability, writeState, type ListState } from '../list/state.js';
+import type { ItemIndex, ItemSummary } from '../site-data.js';
+import { itemListModel } from './list.js';
 
 /**
  * A search page that leads a category or type word to the filtered item list. Its words carry the highest weight,
@@ -95,7 +96,7 @@ function listUrl(index: ItemIndex, listPath: string, facets: Record<string, stri
 		reveal: false,
 		sort: { column: 'name', direction: 'asc' }
 	};
-	return `${listPath}?${writeState(state, index)}`;
+	return `${listPath}?${writeState(state, itemListModel(index))}`;
 }
 
 const escape = (text: string) =>

@@ -1,4 +1,51 @@
-import type { ItemIndex, ItemSummary, ListColumn, ListFacet } from './site-data.js';
+import type { ListCell, ListColumn, ListFacet } from '../site-data.js';
+
+/**
+ * A row of an entity list. `category` is the row's primary group, which decides the filters and columns that apply
+ * to it. `placeSources` lists, for each value of the row's place facet, the ways to get it there.
+ */
+export interface ListRow {
+	key: string;
+	name: string;
+	status: string;
+	category: string;
+	facets: Record<string, string[]>;
+	cells: Record<string, ListCell>;
+	placeSources: string[][];
+	versionLabel?: string | null;
+}
+
+/** A column every row has, read from the row's own field of the same id, such as an item's type or value. */
+export interface FixedColumn {
+	id: string;
+	numeric: boolean;
+}
+
+/**
+ * How a list shows a fixed column: before or after the category columns, its text for a row, and whether that text
+ * is the game's own wording.
+ */
+export interface FixedDisplay<R> {
+	id: string;
+	label: string;
+	numeric: boolean;
+	position: 'start' | 'end';
+	text: (row: R) => string;
+	game?: boolean;
+}
+
+/** The filters, columns and fixed columns of a list, which address state reads and writes. */
+export interface ListShape {
+	facets: ListFacet[];
+	columns: ListColumn[];
+	fixed: FixedColumn[];
+}
+
+/** What a kind's list offers: its shape, and how it narrows the columns it shows. */
+export interface ListModel<R extends ListRow = ListRow> extends ListShape {
+	/** Removes columns that the shown rows make pointless, applied after the category rules. */
+	prune?: (shown: R[], columns: ListColumn[]) => ListColumn[];
+}
 
 /** A stat filter: a numeric column and its inclusive bounds as typed, where an empty bound is open. */
 export interface StatFilter {
@@ -28,7 +75,7 @@ const bound = (value: string): number | undefined =>
 
 export function readState(
 	params: Pick<URLSearchParams, 'get' | 'getAll'>,
-	index: ItemIndex
+	index: ListShape
 ): ListState {
 	const facets: Record<string, string[]> = {};
 	for (const facet of index.facets) {
@@ -47,7 +94,8 @@ export function readState(
 		.filter((filter) => numeric.has(filter.column));
 	const column = params.get('sort') ?? defaultSort.column;
 	const known =
-		['name', 'type', 'value'].includes(column) ||
+		column === 'name' ||
+		index.fixed.some((entry) => entry.id === column) ||
 		index.columns.some((entry) => entry.id === column);
 	const direction = params.get('dir');
 	return {
@@ -70,7 +118,7 @@ export function readState(
 	};
 }
 
-export function writeState(state: ListState, index: ItemIndex): URLSearchParams {
+export function writeState(state: ListState, index: ListShape): URLSearchParams {
 	const params = new URLSearchParams();
 	if (state.name) params.set('name', state.name);
 	for (const facet of index.facets)
@@ -86,13 +134,14 @@ export function writeState(state: ListState, index: ItemIndex): URLSearchParams 
 }
 
 /** A column's first-click order: A to Z for text, high to low for numbers. */
-export function naturalDirection(column: string, index: ItemIndex): 'asc' | 'desc' {
-	return column === 'value' || index.columns.find((entry) => entry.id === column)?.numeric
+export function naturalDirection(column: string, index: ListShape): 'asc' | 'desc' {
+	return index.fixed.find((entry) => entry.id === column)?.numeric ||
+		index.columns.find((entry) => entry.id === column)?.numeric
 		? 'desc'
 		: 'asc';
 }
 
-function statMatches(item: ItemSummary, filter: StatFilter): boolean {
+function statMatches(item: ListRow, filter: StatFilter): boolean {
 	const value = item.cells[filter.column]?.number;
 	if (value == null) return false;
 	const minimum = bound(filter.min);
@@ -133,10 +182,10 @@ function oneEditApart(a: string, b: string): boolean {
 }
 
 /**
- * An item's values for a facet under the selection of the facets it depends on: with ways to get it selected, only the
+ * A row's values for a facet under the selection of the facets it depends on: with ways to get it selected, only the
  * places where it is got those ways, and with places selected, only the ways to get it there.
  */
-export function facetValues(item: ItemSummary, facet: string, state: ListState): string[] {
+export function facetValues(item: ListRow, facet: string, state: ListState): string[] {
 	const values = item.facets[facet] ?? [];
 	const places = (item.facets.place ?? []).map(
 		(place, index) => [place, item.placeSources[index] ?? []] as const
@@ -157,13 +206,13 @@ export function facetValues(item: ItemSummary, facet: string, state: ListState):
 }
 
 /**
- * Whether an item passes the list's state. `skip` leaves one facet out, so that facet's counts show what each of its
+ * Whether a row passes the list's state. `skip` leaves one facet out, so that facet's counts show what each of its
  * values would add.
  */
-export function matches(
-	item: ItemSummary,
+export function matches<R extends ListRow>(
+	item: R,
 	state: ListState,
-	index: ItemIndex,
+	index: ListModel<R>,
 	skip?: string
 ): boolean {
 	const needle = state.name.trim().toLocaleLowerCase('en');
@@ -193,16 +242,17 @@ export function matches(
 	return true;
 }
 
-function sortValue(item: ItemSummary, column: string): number | string | null {
+/** A column's sort value: the name, a fixed column's own field, or the row's cell. */
+function sortValue(item: ListRow, column: string): number | string | null {
 	if (column === 'name') return item.name;
-	if (column === 'type') return item.type;
-	if (column === 'value') return item.value;
 	const cell = item.cells[column];
-	return cell ? (cell.number ?? cell.text) : null;
+	if (cell) return cell.number ?? cell.text;
+	const own = (item as unknown as Record<string, unknown>)[column];
+	return typeof own === 'number' || typeof own === 'string' ? own : null;
 }
 
 /** Sorts rows by a column, with rows that lack a value last in both directions. */
-export function sortItems(items: ItemSummary[], sort: ListState['sort']): ItemSummary[] {
+export function sortItems<R extends ListRow>(items: R[], sort: ListState['sort']): R[] {
 	const sign = sort.direction === 'asc' ? 1 : -1;
 	return [...items].sort((a, b) => {
 		const left = sortValue(a, sort.column);
@@ -234,11 +284,11 @@ export interface FacetGroup {
  * The filters to show: every general filter, and a filter for some categories once one of them is selected, the list
  * holds only their items, or the filter has a selection. Values without a matching item stay out unless selected.
  */
-export function facetGroups(
-	items: ItemSummary[],
-	shown: ItemSummary[],
+export function facetGroups<R extends ListRow>(
+	items: R[],
+	shown: R[],
 	state: ListState,
-	index: ItemIndex,
+	index: ListModel<R>,
 	label: (facet: ListFacet, value: string) => string
 ): FacetGroup[] {
 	const selectedCategories = state.facets.category ?? [];
@@ -267,40 +317,24 @@ export function facetGroups(
 		.filter((group) => group.options.length > 0);
 }
 
-const specializedWeaponColumns: Record<string, true> = {
-	bodyHitDamage: true,
-	headHitDamage: true,
-	projectilesPerShot: true,
-	blockStaminaCost: true,
-	extraFullBlocks: true,
-	shieldChargeDamage: true
-};
-
 /**
- * The columns after name, type and value: those for the selected categories or for a list of one category's items,
- * and the column of every stat filter. Specialized weapon columns follow the facts present in the shown items.
+ * The columns after the name and the fixed columns: those for the selected categories or for a list of one
+ * category's rows, narrowed by the kind's own rule, and the column of every stat filter.
  */
-export function shownColumns(
-	shown: ItemSummary[],
+export function shownColumns<R extends ListRow>(
+	shown: R[],
 	state: ListState,
-	index: ItemIndex
+	index: ListModel<R>
 ): ListColumn[] {
 	const selected = state.facets.category ?? [];
 	const filtered = new Set(state.stats.map((filter) => filter.column));
-	const weapons = shown.filter((item) => item.category === 'weapon');
-	const noMeleeDamage =
-		weapons.length > 0 &&
-		weapons.every(
-			(item) => !item.cells.damage && (item.cells.bodyHitDamage || item.cells.blockStaminaCost)
-		);
-	return index.columns.filter(
+	const candidates = index.columns.filter(
 		(column) =>
-			filtered.has(column.id) ||
-			((!specializedWeaponColumns[column.id] || shown.some((item) => item.cells[column.id])) &&
-				(column.id !== 'damage' || !noMeleeDamage) &&
-				column.categories.length > 0 &&
-				(selected.length
-					? selected.every((category) => column.categories.includes(category))
-					: shown.length > 0 && shown.every((item) => column.categories.includes(item.category))))
+			column.categories.length > 0 &&
+			(selected.length
+				? selected.every((category) => column.categories.includes(category))
+				: shown.length > 0 && shown.every((item) => column.categories.includes(item.category)))
 	);
+	const kept = new Set(index.prune ? index.prune(shown, candidates) : candidates);
+	return index.columns.filter((column) => filtered.has(column.id) || kept.has(column));
 }

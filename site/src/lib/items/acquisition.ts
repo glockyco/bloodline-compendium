@@ -1,6 +1,6 @@
-import type { Amount, Odds, OddsEvent, Price, Source, SourceKind } from './site-data.js';
-import { formatChanceRange, formatNumber } from './format.js';
-import { buyPrice, neutralMultiplier } from './rules/price.js';
+import type { Amount, Odds, OddsEvent, Price, Source, SourceKind } from '../site-data.js';
+import { formatChanceRange, formatNumber } from '../format.js';
+import { buyPrice, neutralMultiplier } from '../rules/price.js';
 
 /**
  * What the player pays. A trading price is the base value times the multiplier for the player's respect in the
