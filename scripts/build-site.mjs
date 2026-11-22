@@ -33,6 +33,11 @@ if (unaffected.length)
       unaffected.map((entry) => entry.issue.id).join(", ") +
       ". Run the lab's tooltip sweep of this build and catalog again, as README.md describes.",
   );
+// Build links name the planner's keys by short digests, so two keys sharing one would make links ambiguous.
+const { digestIndex } = await import(join(site, "src/lib/planner/link.ts"));
+digestIndex(
+  JSON.parse(await readFile(join(directory, "planner.json"), "utf8")),
+);
 if (production) {
   assertProductionBuild(build, root);
   // A failed production rebuild must not leave an older stage available to publish.

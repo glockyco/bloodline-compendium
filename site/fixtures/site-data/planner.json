@@ -1,0 +1,96 @@
+{
+	"build": 90000001,
+	"disciplines": [
+		{
+			"category": "Magic",
+			"icon": null,
+			"key": "/Invented/Trees/Emberlore",
+			"levelName": "Emberlore",
+			"name": "Emberlore",
+			"passives": [
+				{
+					"anchor": "passive-kindle",
+					"costIncrease": 2,
+					"icon": "cinderpear",
+					"key": "/Invented/Trees/Emberlore:WidgetTree.Kindle",
+					"levelDiscipline": "/Invented/Trees/Emberlore",
+					"name": "Kindle",
+					"pointCost": 2,
+					"ranks": 5,
+					"requiredLevel": 1
+				},
+				{
+					"anchor": "passive-glow",
+					"costIncrease": 1,
+					"icon": null,
+					"key": "/Invented/Trees/Emberlore:WidgetTree.Glow",
+					"levelDiscipline": "/Invented/Trees/Emberlore",
+					"name": "Glow",
+					"pointCost": 1,
+					"ranks": 1,
+					"requiredLevel": 3
+				},
+				{
+					"anchor": "passive-ashen-heart-of-the-long-burning-hearth",
+					"costIncrease": 1,
+					"icon": null,
+					"key": "/Invented/Trees/Emberlore:WidgetTree.Ashen",
+					"levelDiscipline": "/Invented/Trees/Songcraft",
+					"name": "Ashen Heart of the Long Burning Hearth",
+					"pointCost": 3,
+					"ranks": 3,
+					"requiredLevel": 10
+				}
+			],
+			"slots": [
+				{
+					"levelDiscipline": "/Invented/Trees/Emberlore",
+					"requiredLevel": 1,
+					"row": 1,
+					"skill": "/Invented/Skills/CinderFlick"
+				},
+				{
+					"levelDiscipline": "/Invented/Trees/Emberlore",
+					"requiredLevel": 5,
+					"row": 5,
+					"skill": "/Invented/Skills/LanternedgeFlare"
+				}
+			],
+			"slug": "emberlore"
+		},
+		{
+			"category": "Tech/Etc.",
+			"icon": null,
+			"key": "/Invented/Trees/Songcraft",
+			"levelName": "Songcraft",
+			"name": "Songcraft",
+			"passives": [],
+			"slots": [],
+			"slug": "songcraft"
+		}
+	],
+	"format": 1,
+	"skills": [
+		{
+			"icon": "cinderpear",
+			"key": "/Invented/Skills/CinderFlick",
+			"learned": false,
+			"name": "Cinder Flick",
+			"slug": "cinder-flick"
+		},
+		{
+			"icon": "lanternedge",
+			"key": "/Invented/Skills/LanternedgeFlare",
+			"learned": true,
+			"name": "Lanternedge Flare",
+			"slug": "lanternedge-flare"
+		},
+		{
+			"icon": "mosswoven-coat",
+			"key": "/Invented/Skills/MossWard",
+			"learned": true,
+			"name": "Moss Ward",
+			"slug": "moss-ward"
+		}
+	]
+}
