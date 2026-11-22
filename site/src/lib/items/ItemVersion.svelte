@@ -98,8 +98,7 @@
 					<ItemDetails
 						rows={details}
 						projectileGroups={item.projectileGroups}
-						chargedBodyHitDamage={item.facts.find((fact) => fact.stat === 'chargedBodyHitDamage')
-							?.number}
+						charged={item.facts.find((fact) => fact.stat === 'chargedBodyHitDamage')}
 						wide
 					/>
 				</div>

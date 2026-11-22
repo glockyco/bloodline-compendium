@@ -645,7 +645,7 @@ export interface Effect {
 export interface OnHitEffect {
   amount: number | null;
   behavior: string | null;
-  chance: number;
+  chance: number | null;
   durationSeconds: number | null;
   effect: string;
   tickIntervalSeconds: number | null;

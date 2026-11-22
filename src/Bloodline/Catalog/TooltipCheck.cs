@@ -399,6 +399,9 @@ internal static partial class TooltipCheck
                     break;
                 case "Damage" when Find(Stat.BodyHitDamage) is { Number: null }:
                     break;
+                // A weapon that fires nothing has its own known issue, which its tooltip's damage only repeats.
+                case "Damage" when Find(Stat.ProjectilesPerShot) is { Number: 0 }:
+                    break;
                 case "Damage":
                     Number(
                         "Damage",

@@ -63,6 +63,14 @@ public sealed class RangedFactsTests
         };
 
     private static ItemPage Resolve(ClassRecord item, CodeFunction fire, params CodeGap[] gaps) =>
+        Resolve(item, fire, null, gaps);
+
+    private static ItemPage Resolve(
+        ClassRecord item,
+        CodeFunction fire,
+        IReadOnlyList<MeasuredDamage>? measured,
+        params CodeGap[] gaps
+    ) =>
         new ItemFacts(
             [],
             code: CodeIndex.Create(
@@ -102,8 +110,57 @@ public sealed class RangedFactsTests
                     new JsonObject { ["Damage"] = 0 }
                 ),
                 new ClassRecord(Bullet, [], new JsonObject { ["Damage"] = 0 }),
-            ]
+            ],
+            measured: measured
         ).Resolve(item, "invented");
+
+    private static MeasuredDamage Measured(
+        string? projectile,
+        double body,
+        double? fullyDrawn = null
+    ) =>
+        new(
+            "/Game/Invented/Weapon.Weapon_C",
+            projectile,
+            body,
+            body,
+            fullyDrawn,
+            ["Invented run."]
+        );
+
+    [Fact]
+    public void AMeasurementGivesTheDamageThatTheFiringCodeHides()
+    {
+        // The bow's projectile is an explosion, which the catalog does not count as an arrow.
+        var fire = Fire(
+            "Bow",
+            [new FiredProjectile("/Game/Invented/Explosion.Explosion_C", null, true)]
+        );
+        var unknown = Resolve(Weapon("Bow", 75, 35), fire);
+        Assert.Null(Number(unknown, Stat.BodyHitDamage));
+        var page = Resolve(Weapon("Bow", 75, 35), fire, [Measured("seeking arrow", 50, 100)]);
+        Assert.Equal([new ProjectileGroup(1, 50, 50, "seeking arrow")], page.ProjectileGroups);
+        Assert.Equal(100, Number(page, Stat.ChargedBodyHitDamage));
+        Assert.Equal(
+            "Fully drawn",
+            page.Facts.Single(fact => fact.Stat == Stat.ChargedBodyHitDamage).Label
+        );
+        var silent = Resolve(Weapon("Bow", 75, 35), fire, [Measured(null, 0)]);
+        Assert.Equal(0, Number(silent, Stat.ProjectilesPerShot));
+    }
+
+    [Fact]
+    public void AMeasurementOfDamageTheCodeShowsFailsTheCatalog()
+    {
+        // A game update that makes the damage readable needs the measurement compared and removed, not kept.
+        Assert.Throws<InvalidDataException>(() =>
+            Resolve(
+                Weapon("Bow", 75, 35),
+                Fire("Bow", [], replaces: false),
+                [Measured("arrow", 35)]
+            )
+        );
+    }
 
     [Fact]
     public void CrossbowChargeUsesItemDamageAndHeadAddsWeaponDamage()

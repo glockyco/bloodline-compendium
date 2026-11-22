@@ -48,12 +48,77 @@ public sealed class OnHitFactsTests
             ["Numberoftimestoloop"] = 99,
         };
 
+    /// <summary>A code index whose function makes one random roll with the given literal arguments.</summary>
+    /// <summary>
+    /// A weapon without its weapon damage, whose claim needs the damage functions in the code index, so a test of its
+    /// rolls needs only the roll and the effect functions.
+    /// </summary>
+    private static ClassRecord WithoutDamageClaim(ClassRecord item)
+    {
+        item.Properties["WeaponInfo"]!.AsObject().Remove("Damage");
+        return item;
+    }
+
+    /// <summary>The enemy and status functions every on-hit effect cites, which a code index must hold.</summary>
+    private static readonly string[] EffectFunctions =
+    [
+        "/Game/AIBehaviorToolkit/Blueprints/Goblin_Base:Ignite",
+        "/Game/AIBehaviorToolkit/Blueprints/Goblin_Base:Apply Projectile Debuff",
+        "/Game/AIBehaviorToolkit/Blueprints/EnemyStatusEffectManager:Apply Burn Debuff",
+        "/Game/AIBehaviorToolkit/Blueprints/EnemyStatusEffectManager:Begin Burn",
+        "/Game/AIBehaviorToolkit/Blueprints/EnemyStatusEffectManager:Stop Burn",
+        "/Game/AIBehaviorToolkit/Blueprints/EnemyStatusEffectManager:Apply Poison Debuff",
+        "/Game/AIBehaviorToolkit/Blueprints/EnemyStatusEffectManager:Begin Poisoning",
+        "/Game/AIBehaviorToolkit/Blueprints/EnemyStatusEffectManager:Stop Poison",
+    ];
+
+    /// <summary>A code index whose given function makes one random roll with the given literal arguments.</summary>
+    private static CodeIndex Rolls(
+        string package,
+        string name,
+        string function,
+        params double?[] arguments
+    ) =>
+        CodeIndex.Create([
+            new CodeFunction(
+                package,
+                package + "_C",
+                name,
+                false,
+                "fingerprint",
+                CodeParseStatus.Complete,
+                [],
+                [],
+                [],
+                []
+            )
+            {
+                RandomCalls = [new RandomCall(function, arguments)],
+            },
+            .. EffectFunctions.Select(citation => new CodeFunction(
+                citation.Split(':')[0],
+                "/Game/Invented.Owner_C",
+                citation.Split(':')[1],
+                false,
+                "fingerprint",
+                CodeParseStatus.Complete,
+                [],
+                [],
+                [],
+                []
+            )),
+        ]);
+
     [Fact]
     public void PikeReadsConsumedDebuffFieldsAndNotTheOldLoopSettings()
     {
-        var item = Weapon("Spears/PoisonPike");
+        var item = WithoutDamageClaim(Weapon("Spears/PoisonPike"));
         item.Properties["Debuff"] = Debuff("Poison", 17, 12);
-        var page = new ItemFacts([]).Resolve(item, "invented");
+        // Enemy Hit Event poisons when its RandomIntegerInRange(0, 4) returns zero, one value in five.
+        var page = new ItemFacts(
+            [],
+            code: Rolls(Root + "Spears/PoisonPike", "Enemy Hit Event", "RandomIntegerInRange", 0, 4)
+        ).Resolve(item, "invented");
         var effect = Assert.Single(page.OnHitEffects!);
         Assert.Equal("Poison", effect.Effect);
         Assert.Equal(0.2, effect.Chance);
@@ -65,7 +130,16 @@ public sealed class OnHitFactsTests
     [Fact]
     public void TorchUsesItsRollAndIgniteLiteralsRatherThanWeaponDamage()
     {
-        var page = new ItemFacts([]).Resolve(Weapon("1HandedWeapons/Torch"), "invented");
+        var page = new ItemFacts(
+            [],
+            code: Rolls(
+                Root + "1HandedWeapons/Torch",
+                "Enemy Hit Event",
+                "RandomIntegerInRange",
+                0,
+                5
+            )
+        ).Resolve(WithoutDamageClaim(Weapon("1HandedWeapons/Torch")), "invented");
         var effect = Assert.Single(page.OnHitEffects!);
         Assert.Equal("Burn", effect.Effect);
         Assert.Equal(1d / 6, effect.Chance);
@@ -131,12 +205,41 @@ public sealed class OnHitFactsTests
         Assert.Null(effect.DurationSeconds);
     }
 
+    [Fact]
+    public void EmbersnapBurnsAtItsRollsWeight()
+    {
+        // The Emberspark's overlap burns when its RandomBoolWithWeight succeeds, and without that roll the chance
+        // stays unknown rather than a guess.
+        var weapon = WithoutDamageClaim(Weapon("Guns/Embersnap"));
+        var unknown = Assert.Single(new ItemFacts([]).Resolve(weapon, "invented").OnHitEffects!);
+        Assert.Equal(
+            ("Burn", 15d, 5d),
+            (unknown.Effect, unknown.Amount!.Value, unknown.DurationSeconds!.Value)
+        );
+        Assert.Null(unknown.Chance);
+        const string emberspark =
+            "/Game/GabrielAguiarProd/ToonProjectilesVol1/Blueprints/Emberspark";
+        var rolled = Assert.Single(
+            new ItemFacts(
+                [],
+                code: Rolls(
+                    emberspark,
+                    "BndEvt__ProjectileCollider_K2Node_ComponentBoundEvent_1_ComponentBeginOverlapSignature__DelegateSignature",
+                    "RandomBoolWithWeight",
+                    0.25
+                )
+            )
+                .Resolve(weapon, "invented")
+                .OnHitEffects!
+        );
+        Assert.Equal(0.25, rolled.Chance);
+    }
+
     [Theory]
     [InlineData("1HandedWeapons/1H_HAMMER_SturdyWarhammer")]
     [InlineData("2H_Weapons/2HWeapon_GreatMace")]
     [InlineData("2H_Weapons/Greathammer")]
     [InlineData("1HandedWeapons/UndeadMace")]
-    [InlineData("Guns/Embersnap")]
     public void UnappliedDefaultsAndUnsettledPathsDoNotBecomeEffects(string path)
     {
         var item = Weapon(path);

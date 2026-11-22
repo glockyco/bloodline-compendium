@@ -12,6 +12,7 @@
 	function chance(effect: Effect): string {
 		// A trigger the catalog words for players, such as Holy Noose's undead condition, stands as written.
 		if (effect.trigger.startsWith('Every ')) return effect.trigger;
+		if (effect.chance == null) return 'Some hits';
 		if (effect.chance === 1) return 'Every hit';
 		const percent = effect.chance * 100;
 		return Math.abs(percent - Math.round(percent)) < 1e-9

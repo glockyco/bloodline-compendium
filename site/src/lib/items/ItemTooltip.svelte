@@ -42,7 +42,7 @@
 	{#if rows.length || (details && item.projectileGroups?.length)}<ItemDetails
 			{rows}
 			projectileGroups={item.projectileGroups}
-			chargedBodyHitDamage={item.facts.find((fact) => fact.stat === 'chargedBodyHitDamage')?.number}
+			charged={item.facts.find((fact) => fact.stat === 'chargedBodyHitDamage')}
 		/>{/if}
 	{#if details}<OnHitEffects effects={item.onHitEffects} />{/if}
 </div>

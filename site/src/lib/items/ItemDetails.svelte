@@ -1,18 +1,19 @@
 <script lang="ts">
 	import type { DetailRow } from './game-card.js';
-	import type { ItemPage } from '../site-data.js';
+	import type { Fact, ItemPage } from '../site-data.js';
 	import { formatNumber } from '../format.js';
 	import UnknownValue from '../ui/UnknownValue.svelte';
 	let {
 		rows,
 		wide = false,
 		projectileGroups,
-		chargedBodyHitDamage
+		charged
 	}: {
 		rows: DetailRow[];
 		wide?: boolean;
 		projectileGroups?: ItemPage['projectileGroups'];
-		chargedBodyHitDamage?: number | null;
+		/** The damage of a fully charged or drawn shot, labelled as the weapon charges. */
+		charged?: Fact;
 	} = $props();
 </script>
 
@@ -58,10 +59,8 @@
 			</tbody>
 		</table>
 	</div>
-	{#if chargedBodyHitDamage !== undefined}<p>
-			Fully charged by aiming: {chargedBodyHitDamage == null
-				? 'Unknown'
-				: formatNumber(chargedBodyHitDamage)} on the body
+	{#if charged}<p>
+			{charged.label}: {charged.number == null ? 'Unknown' : formatNumber(charged.number)} on the body
 		</p>{/if}
 {/if}
 

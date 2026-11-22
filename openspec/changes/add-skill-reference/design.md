@@ -135,7 +135,7 @@ Prose keeps a measure of 72 characters, inside the 45 to 90 that typography guid
 
 ### Unknown values
 
-A weapon part whose class other rows share, such as Steel Claymore Guard and Steel Skaneguard, takes the rows named like it, because the crafting window lists each row by its own name and takes that row's stats (run parts1). A fact without a value carries the reason, which item pages show on hover, focus and tap. A section's count is a pill beside its heading, so a single entry no longer reads as part of the name, such as "Skill Tree 1".
+A weapon part whose class other rows share, such as Steel Claymore Guard and Steel Skaneguard, takes the rows named like it, because the crafting window lists each row by its own name and takes that row's stats (run parts1). Where the catalog cannot follow a ranged weapon's firing code, such as a bow whose arrow spawns an explosion, `src/Bloodline/Content/measured-damage.json` gives the damage a lab run measured, with the run, and a bow's damage when fully drawn where it differs. A weapon whose damage the code later shows fails the catalog until its measurement is compared and removed. A fact without a value carries the reason, which item pages show on hover, focus and tap. A section's count is a pill beside its heading, so a single entry no longer reads as part of the name, such as "Skill Tree 1".
 
 ### Home and search
 
@@ -156,6 +156,8 @@ Refactor the catalog, then the site, each verified by unchanged item output and 
 
 - How Performance, Song of Hastening and Inferno Strum are learned. No placed note sheet names them, and the Lute window shows every spellsong as unknown on a new character.
 - Where two skill events happen, which the site words only as far as the code shows. Warp Bolt: walking into Karraq's TriggerSphere_1 starts the `Move to Player` timeline, whose end stuns you and unlocks the skill. The sphere stands about 700 m above the level's other triggers (run anvil1), and no place name lies near it. Cloud Catch: The Elderglen Woods' TriggerBox8_3 and its `Ragdoll Checker` start `Screen FX`, which slows time while you fall and calls `Esros Comment on Fall`. The box stands 88 m up, about 106 m from the Abandoned Farmstead and 164 m from the Steps of Esros (run anvil1). A run that plays each event would let the site name the spot.
+
+- Which branch of Thomas Dornscheidt's dialogue gives which of the two items named The Embersnap. One fires Embersparks, and the other, a HandCannon, fired nothing in run ranged4. A run that plays both branches would show whether players can get the broken one, which would make it a known issue.
 
 ## Where Findings Live
 

@@ -55,8 +55,12 @@ internal static class StatVocabulary
         Make(stat, null, null, null, label, reason);
 
     /// <summary>A number, or an unknown value for the reason given, or <see cref="NotInFiles"/> without one.</summary>
-    public static Fact Number(Stat stat, double? value, string? unknown = null) =>
-        Make(stat, value, null, null, unknown: unknown);
+    public static Fact Number(
+        Stat stat,
+        double? value,
+        string? unknown = null,
+        string? label = null
+    ) => Make(stat, value, null, null, label, unknown);
 
     public static Fact Text(Stat stat, string? value) => Make(stat, null, value, null);
 

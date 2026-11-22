@@ -1,0 +1,74 @@
+[
+	{
+		"item": "/Game/BloodlinesAlpha/Interactables/Weapons/Bows/YewShortbow3.YewShortbow3_C",
+		"projectile": "explosion",
+		"body": 100,
+		"head": 100,
+		"fullyDrawn": null,
+		"evidence": [
+			"Runs ranged2 and ranged3, build 24464547: drawn for 1.2 seconds at 300 units, three body hits and two head hits each took 100 Health from a Goblin Brute.",
+			"Code: Custom Shoot Bow Event spawns GeneralExplosionFRIENDLY instead of an arrow, which the catalog does not follow."
+		]
+	},
+	{
+		"item": "/Game/BloodlinesAlpha/Interactables/Weapons/Bows/OneAboveDeath.OneAboveDeath_C",
+		"projectile": "seeking arrow",
+		"body": 50,
+		"head": 50,
+		"fullyDrawn": 100,
+		"evidence": [
+			"Run ranged3, build 24464547: at 300 units, shots drawn for 0.5 and 1 second took 50 Health from a Goblin Brute, body and head alike, and shots drawn for 2, 2.5 and 3 seconds took 100.",
+			"Code: Custom Shoot Bow Event spawns Specific_Target_Seeker with damage 50 or 100, which the catalog does not follow."
+		]
+	},
+	{
+		"item": "/Game/BloodlinesAlpha/Interactables/Weapons/Bows/OneAboveDeath_Fixed.OneAboveDeath_Fixed_C",
+		"projectile": "seeking arrow",
+		"body": 50,
+		"head": 50,
+		"fullyDrawn": 100,
+		"evidence": [
+			"Run ranged4, build 24464547: at 300 units, shots drawn for 0.5 and 1 second took 50 Health from a Goblin Brute, body and head alike, and shots drawn for 2.5 seconds took 100."
+		]
+	},
+	{
+		"item": "/Game/BloodlinesAlpha/Interactables/Weapons/Guns/FlintlockGrenadeLauncher.FlintlockGrenadeLauncher_C",
+		"projectile": "grenade",
+		"body": 100,
+		"head": 100,
+		"fullyDrawn": null,
+		"evidence": [
+			"Runs ranged1 to ranged3, build 24464547: at 300 and 600 units, every body and head hit took 100 Health from a Goblin Brute."
+		]
+	},
+	{
+		"item": "/Game/BloodlinesAlpha/Interactables/Weapons/Guns/Embersnap.Embersnap_C",
+		"projectile": "Emberspark",
+		"body": 25,
+		"head": 25,
+		"fullyDrawn": null,
+		"evidence": [
+			"Runs ranged1 to ranged3, build 24464547: at 200 to 600 units, every hit on the body or head took 25 Health from a Goblin Brute at once. Some hits also set it burning, which took 15 more Health at once and every second after, 75 in all."
+		]
+	},
+	{
+		"item": "/Game/BloodlinesAlpha/Interactables/Weapons/Guns/HandCannon.HandCannon_C",
+		"projectile": null,
+		"body": 0,
+		"head": 0,
+		"fullyDrawn": null,
+		"evidence": [
+			"Run ranged4, build 24464547: at 300 units, six shots with bullets in the inventory fired nothing and took no Health from a Goblin Brute."
+		]
+	},
+	{
+		"item": "/Game/BloodlinesAlpha/Interactables/Weapons/Crossbows/RustyCrossbow.RustyCrossbow_C",
+		"projectile": null,
+		"body": 0,
+		"head": 0,
+		"fullyDrawn": null,
+		"evidence": [
+			"Runs ranged1 to ranged3, build 24464547: at 100, 300 and 600 units, with arrows in the inventory, ten shots fired no bolt and took no Health. The Rusty Crossbow merchants sell hit for 85 in the same run."
+		]
+	}
+]

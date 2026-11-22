@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json.Nodes;
 using Bloodline.Output;
+using Bloodline.Records;
 using static Bloodline.Code.ScriptExpressions;
 
 namespace Bloodline.Code;
@@ -64,6 +65,7 @@ internal sealed class FunctionAnalysis(
             SpawnedDamage = function.Name is "Staff Attack" or "Swing Event" or "Custom Fire Event"
                 ? SpawnDamage(body)
                 : null,
+            RandomCalls = RandomCallsOf(body),
         };
 
         JsonArray Graph(ScriptFunction source, int entry)
@@ -525,5 +527,46 @@ internal sealed class FunctionAnalysis(
                 destination || write && token is not "EX_StructMemberContext"
             );
         }
+    }
+
+    /// <summary>The engine's random rolls the function makes, by function, each with its literal arguments.</summary>
+    private static readonly HashSet<string> RandomFunctions = new(StringComparer.Ordinal)
+    {
+        "RandomBoolWithWeight",
+        "RandomIntegerInRange",
+        "RandomFloatInRange",
+    };
+
+    /// <summary>
+    /// The random rolls in a function's code with their arguments where they are literals, such as the weight of a
+    /// RandomBoolWithWeight that decides whether a hit sets an enemy burning. An argument that is not a literal is
+    /// null.
+    /// </summary>
+    private static IReadOnlyList<RandomCall>? RandomCallsOf(JsonArray body)
+    {
+        var found = ScriptExpressions
+            .Walk(body)
+            .Where(node =>
+                Text(node["Token"]) is "EX_CallMath" or "EX_FinalFunction"
+                && Text(node["StackNode"]?["$object"]) is { } called
+                && RandomFunctions.Contains(called.Split(':', '.')[^1])
+            )
+            .Select(node => new RandomCall(
+                Text(node["StackNode"]?["$object"])!.Split(':', '.')[^1],
+                ((node["Parameters"] as JsonArray) ?? [])
+                    .Select(argument =>
+                        Text(argument?["Token"])
+                            is "EX_FloatConst"
+                                or "EX_DoubleConst"
+                                or "EX_IntConst"
+                                or "EX_IntConstByte"
+                                or "EX_ByteConst"
+                            ? RecordValues.Number(argument?["Value"])
+                            : null
+                    )
+                    .ToArray()
+            ))
+            .ToArray();
+        return found.Length > 0 ? found : null;
     }
 }

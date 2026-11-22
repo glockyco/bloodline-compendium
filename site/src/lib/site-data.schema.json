@@ -1360,7 +1360,10 @@
           ]
         },
         "chance": {
-          "type": "number"
+          "type": [
+            "number",
+            "null"
+          ]
         },
         "durationSeconds": {
           "type": [

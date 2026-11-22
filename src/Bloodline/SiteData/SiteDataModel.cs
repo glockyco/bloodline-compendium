@@ -294,10 +294,14 @@ internal sealed record ProjectileGroup(
     public string? Condition { get; init; }
 }
 
+/// <summary>
+/// An effect a weapon's hits can cause. <see cref="Chance"/> is per hit, or null where the game rolls a chance that
+/// is not known, such as an Emberspark's burn.
+/// </summary>
 internal sealed record OnHitEffect(
     string Effect,
     string Trigger,
-    double Chance,
+    double? Chance,
     double? Amount,
     double? TickIntervalSeconds,
     double? DurationSeconds,

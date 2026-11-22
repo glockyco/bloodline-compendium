@@ -54,7 +54,13 @@ internal sealed record CodeFunction(
     /// <summary>Actors created by this entry and the Damage value assigned to each.</summary>
     public IReadOnlyList<SpawnedDamage>? SpawnedDamage { get; init; }
     public RangedFire? RangedFire { get; init; }
+
+    /// <summary>The engine's random rolls the function makes, with their literal arguments.</summary>
+    public IReadOnlyList<RandomCall>? RandomCalls { get; init; }
 }
+
+/// <summary>A call to one of the engine's random functions, such as RandomBoolWithWeight, and its literal arguments.</summary>
+internal sealed record RandomCall(string Function, IReadOnlyList<double?> Arguments);
 
 /// <summary>A class the code compares a value with and the name it assigns when they are equal.</summary>
 internal sealed record ClassName(string Class, string Name);

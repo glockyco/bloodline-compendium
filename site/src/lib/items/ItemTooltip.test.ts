@@ -141,7 +141,7 @@ it('keeps a conditional bolt and charge damage separate from the ordinary projec
 		props: {
 			rows: detailRows(item.facts, projectileGroups),
 			projectileGroups,
-			chargedBodyHitDamage: 110.5,
+			charged: rangedFact('chargedBodyHitDamage', 'Fully charged', 110.5),
 			wide: true
 		}
 	}).body;
@@ -149,7 +149,7 @@ it('keeps a conditional bolt and charge damage separate from the ordinary projec
 		expect(body.replace(/<!--[\s\S]*?-->/g, '').replace(/\s+/g, ' ')).toContain(
 			'Point blank: 1 extra bolt'
 		);
-		expect(body).toContain('110.5');
+		expect(body).toContain('Fully charged: 110.5 on the body');
 		expect(rows(body, 'dt')).toEqual([]);
 	}
 	const uncharged = render(ItemTooltip, { props: { item: { ...item, facts: [] } } }).body;

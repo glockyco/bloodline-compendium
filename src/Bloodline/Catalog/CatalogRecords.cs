@@ -30,6 +30,9 @@ internal sealed record CatalogRecords(
     /// <summary>The hand-written mechanic pages, which the build copies beside the program.</summary>
     public IReadOnlyList<MechanicContent> Mechanics { get; init; } = [];
 
+    /// <summary>Ranged damage that lab runs measured where the catalog cannot read it from the firing code.</summary>
+    public IReadOnlyList<MeasuredDamage> MeasuredDamage { get; init; } = [];
+
     public static CatalogRecords Load(RecordLayout layout) =>
         new(
             CanonicalJson.Read<BuildRecord>(layout.BuildFile),
@@ -48,6 +51,9 @@ internal sealed record CatalogRecords(
             Issues = KnownIssues.Load(Path.Combine(AppContext.BaseDirectory, "known-issues.json")),
             Mechanics = MechanicProducer.Load(
                 Path.Combine(AppContext.BaseDirectory, "mechanics.json")
+            ),
+            MeasuredDamage = CanonicalJson.Read<MeasuredDamage[]>(
+                Path.Combine(AppContext.BaseDirectory, "measured-damage.json")
             ),
         };
 

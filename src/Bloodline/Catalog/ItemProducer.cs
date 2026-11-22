@@ -39,9 +39,15 @@ internal sealed class ItemProducer
             records.Tables,
             records.Code,
             records.Build.BuildId,
-            records.Classes
+            records.Classes,
+            records.MeasuredDamage
         );
         selected = records.Classes.Where(ItemIdentity.IsInventoryItem).ToArray();
+        foreach (var entry in records.MeasuredDamage)
+            if (!selected.Any(item => item.Path == entry.Item))
+                throw new InvalidDataException(
+                    $"Measured damage names {entry.Item}, which is no item."
+                );
         Initial = selected.ToDictionary(
             item => item.Path,
             item =>

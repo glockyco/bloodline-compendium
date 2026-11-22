@@ -11,7 +11,8 @@ internal sealed class ItemFacts(
     IReadOnlyList<TableRecord>? tables = null,
     CodeIndex? code = null,
     long build = 0,
-    IReadOnlyList<ClassRecord>? classes = null
+    IReadOnlyList<ClassRecord>? classes = null,
+    IReadOnlyList<MeasuredDamage>? measured = null
 )
 {
     private readonly ItemClaims claims = new(code, build);
@@ -485,7 +486,7 @@ internal sealed class ItemFacts(
                 "Stop " + effect
             );
         }
-        void Debuff(ClassRecord? owner, string field, string trigger, double chance)
+        void Debuff(ClassRecord? owner, string field, string trigger, double? chance)
         {
             var debuff = owner?.Properties[field];
             if (debuff is null)
@@ -517,7 +518,7 @@ internal sealed class ItemFacts(
             );
             Manager(effect);
         }
-        void Ignite(string trigger, double chance)
+        void Ignite(string trigger, double? chance)
         {
             // Goblin_Base:Ignite passes literal damage 15 and duration 5 to the burn manager.
             effects.Add(
@@ -535,16 +536,40 @@ internal sealed class ItemFacts(
             Cite(Enemy, "Ignite");
             Cite(StatusManager, "Apply Burn Debuff", "Begin Burn", "Stop Burn");
         }
+        // The chance of a function's one roll: a RandomIntegerInRange succeeds when it returns zero, so one in as many
+        // values as its range holds, and a RandomBoolWithWeight succeeds at its weight. Null when the code index
+        // holds no single roll with literal arguments.
+        double? Roll(string owner, string name, string function)
+        {
+            var rolls = code
+                ?.Functions.SingleOrDefault(candidate =>
+                    candidate.Package == owner && candidate.Name == name
+                )
+                ?.RandomCalls?.Where(call => call.Function == function)
+                .ToArray();
+            return rolls switch
+            {
+                [{ Function: "RandomIntegerInRange", Arguments: [{ } low, { } high] }] => 1
+                    / (high - low + 1),
+                [{ Function: "RandomBoolWithWeight", Arguments: [{ } weight] }] => weight,
+                _ => null,
+            };
+        }
         switch (package)
         {
             case WeaponRoot + "Spears/PoisonPike":
-                // Enemy Hit Event succeeds only when RandomIntegerInRange(0, 4) returns zero.
-                Debuff(item, "Debuff", "Melee Hit", 1d / 5);
+                // Enemy Hit Event succeeds only when its RandomIntegerInRange returns zero.
+                Debuff(
+                    item,
+                    "Debuff",
+                    "Melee Hit",
+                    Roll(package, "Enemy Hit Event", "RandomIntegerInRange")
+                );
                 Cite(package, "Enemy Hit Event");
                 break;
             case WeaponRoot + "1HandedWeapons/Torch":
-                // Enemy Hit Event succeeds only when RandomIntegerInRange(0, 5) returns zero.
-                Ignite("Melee Hit", 1d / 6);
+                // Enemy Hit Event succeeds only when its RandomIntegerInRange returns zero.
+                Ignite("Melee Hit", Roll(package, "Enemy Hit Event", "RandomIntegerInRange"));
                 Cite(package, "Enemy Hit Event");
                 break;
             case WeaponRoot + "Halberds/StaffOfMinorFlames":
@@ -566,6 +591,16 @@ internal sealed class ItemFacts(
                 );
                 Cite(package, "Swing Event");
                 Cite(projectile, "Effect on Enemy Upon Impact");
+                break;
+            case WeaponRoot + "Guns/Embersnap":
+                // The Emberspark's overlap ignites the enemy it hits when its RandomBoolWithWeight succeeds. Runs
+                // ranged1 to ranged3 saw some hits burn and others not.
+                const string emberspark =
+                    "/Game/GabrielAguiarProd/ToonProjectilesVol1/Blueprints/Emberspark";
+                const string overlap =
+                    "BndEvt__ProjectileCollider_K2Node_ComponentBoundEvent_1_ComponentBeginOverlapSignature__DelegateSignature";
+                Ignite("Projectile Impact", Roll(emberspark, overlap, "RandomBoolWithWeight"));
+                Cite(emberspark, overlap);
                 break;
             case WeaponRoot + "Crossbows/HolyNooseCrossbow":
                 // Custom Fire Event ignites the aimed enemy when its actor tags contain Undead, which zombies lack.
@@ -784,17 +819,36 @@ internal sealed class ItemFacts(
             )
                 charged = Applied(projectiles[0], maximum);
         }
+        // A lab run's measurement stands in only where the catalog cannot work out the damage from the firing code, and
+        // a weapon whose damage becomes readable fails the catalog until its measurement is compared and removed.
+        var measurement = measured?.FirstOrDefault(entry =>
+            string.Equals(entry.Item, item.Path, StringComparison.OrdinalIgnoreCase)
+        );
+        if (
+            measurement is not null
+            && projectileGroups?.FirstOrDefault()?.BodyHitDamage is not null
+        )
+            throw new InvalidDataException(
+                $"{item.Path} has measured damage, but the catalog now reads its damage from code. Compare the two and remove the measurement."
+            );
+        if (measurement is not null)
+        {
+            projectileGroups = measurement.Projectile is { } projectile
+                ? [new ProjectileGroup(1, measurement.Body, measurement.Head, projectile)]
+                : [];
+            charged = measurement.FullyDrawn;
+        }
         facts.Add(
             StatVocabulary.Number(
                 Stat.BodyHitDamage,
-                projectileGroups?.FirstOrDefault()?.BodyHitDamage,
+                measurement?.Body ?? projectileGroups?.FirstOrDefault()?.BodyHitDamage,
                 StatVocabulary.ComputedInPlay
             )
         );
         facts.Add(
             StatVocabulary.Number(
                 Stat.HeadHitDamage,
-                projectileGroups?.FirstOrDefault()?.HeadHitDamage,
+                measurement?.Head ?? projectileGroups?.FirstOrDefault()?.HeadHitDamage,
                 StatVocabulary.ComputedInPlay
             )
         );
@@ -805,12 +859,19 @@ internal sealed class ItemFacts(
                 StatVocabulary.ComputedInPlay
             )
         );
-        if (fire?.RangedFire?.MaximumCharge is > 0 && type == "Crossbow")
+        if (
+            (fire?.RangedFire?.MaximumCharge is > 0 && type == "Crossbow")
+            || measurement?.FullyDrawn is not null
+        )
             facts.Add(
                 StatVocabulary.Number(
                     Stat.ChargedBodyHitDamage,
                     charged,
-                    StatVocabulary.ComputedInPlay
+                    StatVocabulary.ComputedInPlay,
+                    // A bow draws rather than aims to charge, so its full draw reads as the game's bows do.
+                    type == "Bow"
+                        ? "Fully drawn"
+                        : null
                 )
             );
         return fire;
