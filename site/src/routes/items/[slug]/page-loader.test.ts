@@ -1,30 +1,20 @@
 import { expect, it, vi } from 'vitest';
 import { entries, load } from './+page.server.js';
-import {
-	readGraph,
-	readIndex,
-	readItem,
-	readKinds,
-	readSharedMerchantNames
-} from '#lib/server/data.js';
+import { readIndex, readItem, readSharedMerchantNames } from '#lib/server/data.js';
 import fixture from '../../../../fixtures/site-data/items/lanternedge.json';
-import registry from '../../../../fixtures/site-data/kinds.json';
-import type { EntityGraph, EntityKindDefinition, ItemIndex, ItemPage } from '#lib/site-data.js';
+import type { ItemIndex, ItemPage } from '#lib/site-data.js';
 
 vi.mock('#lib/server/data.js', () => ({
-	readGraph: vi.fn(),
 	readIndex: vi.fn(),
 	readItem: vi.fn(),
-	readKinds: vi.fn(),
 	readSharedMerchantNames: vi.fn()
 }));
 
-it('prerenders one page per plain slug even when distinct graph items share it', async () => {
-	const entity = { kind: 'item', key: '/Invented/A', slug: 'shared-blade', fragment: 'bladea' };
-	vi.mocked(readKinds).mockResolvedValue(registry as EntityKindDefinition[]);
-	vi.mocked(readGraph).mockResolvedValue({
-		entities: [{ entity }, { entity: { ...entity, key: '/Invented/B', fragment: 'bladeb' } }]
-	} as unknown as EntityGraph);
+it('prerenders one page per plain slug even when distinct items share it', async () => {
+	const item = { kind: 'item', key: '/Invented/A', slug: 'shared-blade', versionId: 'bladea' };
+	vi.mocked(readIndex).mockResolvedValue({
+		items: [item, { ...item, key: '/Invented/B', versionId: 'bladeb' }]
+	} as unknown as ItemIndex);
 	expect(await entries()).toEqual([{ slug: 'shared-blade' }]);
 });
 

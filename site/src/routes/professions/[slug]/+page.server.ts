@@ -1,8 +1,10 @@
 import { readProfessions } from '#lib/server/data.js';
+import { entityRoute } from '#lib/server/entity-route.js';
 import { professionPage } from '#lib/server/professions.js';
 
-export async function entries() {
-	return (await readProfessions()).professions.map((profession) => ({ slug: profession.slug }));
-}
-
-export const load = ({ params }: { params: { slug: string } }) => professionPage(params.slug, null);
+export const { entries, load } = entityRoute({
+	name: 'Profession',
+	index: readProfessions,
+	slugs: (index) => index.professions.map((profession) => profession.slug),
+	load: (slug) => professionPage(slug, null)
+});

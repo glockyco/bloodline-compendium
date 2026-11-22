@@ -2,25 +2,10 @@
 	import SeoHead from '#lib/SeoHead.svelte';
 	import Search from '#lib/Search.svelte';
 	import ReleaseInfo from '#lib/ReleaseInfo.svelte';
-	import { formatNumber, plural } from '#lib/format.js';
 	import ButtonLink from '#lib/ui/ButtonLink.svelte';
 	import IconTile from '#lib/ui/IconTile.svelte';
 	import Section from '#lib/ui/Section.svelte';
-	import { entityPath, kindPath } from '#lib/entities.js';
 	let { data } = $props();
-	const itemsPath = $derived(kindPath('item', data.kinds)!);
-	const skillsPath = $derived(kindPath('skill', data.kinds)!);
-	const disciplinePath = (discipline: (typeof data.skills.disciplines)[number]) =>
-		entityPath(
-			{
-				kind: 'discipline',
-				key: discipline.key,
-				name: discipline.name,
-				slug: discipline.slug,
-				icon: null
-			},
-			data.kinds
-		)!;
 </script>
 
 <SeoHead
@@ -51,8 +36,10 @@
 			<Search variant="hero" placeholder="Search items, skills and more" />
 		</div>
 		<div class="actions">
-			<ButtonLink href={itemsPath}>Browse Items</ButtonLink>
-			<ButtonLink href={skillsPath} secondary>Browse Skills</ButtonLink>
+			{#each data.actions as action, index (action.href)}<ButtonLink
+					href={action.href}
+					secondary={index > 0}>{action.label}</ButtonLink
+				>{/each}
 		</div>
 		<p class="links">
 			<a href="https://store.steampowered.com/app/1159290/The_Bloodline/" rel="external"
@@ -64,35 +51,20 @@
 </section>
 
 <div class="content">
-	<Section id="items-heading" title="Items"
-		>{#snippet action()}<a href={itemsPath}>All {formatNumber(data.count)} items</a>{/snippet}
-		<ul class="tile-grid">
-			{#each data.categories as category (category.slug)}<li>
-					<IconTile
-						href={kindPath('item', data.kinds, `?category=${category.slug}`)!}
-						icon={category.icon}
-						name={category.name}
-						meta={plural(category.count, 'item', 'items')}
-					/>
-				</li>{/each}
-		</ul>
-	</Section>
-
-	<Section id="disciplines-heading" title="Disciplines"
-		>{#snippet action()}<a href={skillsPath}>All {formatNumber(data.skills.known)} skills</a
-			>{/snippet}
-		<ul class="tile-grid">
-			{#each data.skills.disciplines as discipline (discipline.key)}<li>
-					<IconTile
-						href={disciplinePath(discipline)}
-						icon={discipline.icon ?? null}
-						name={discipline.name}
-						meta={`${discipline.category.name} ·\u00a0${(discipline.skills ? plural(discipline.skills, 'skill', 'skills') : plural(discipline.spellsongs, 'spellsong', 'spellsongs')).replace(' ', '\u00a0')}`}
-						game
-					/>
-				</li>{/each}
-		</ul>
-	</Section>
+	{#each data.sections as section (section.kind)}<Section id={section.id} title={section.title}
+			>{#snippet action()}<a href={section.all.href}>{section.all.text}</a>{/snippet}
+			<ul class="tile-grid">
+				{#each section.tiles as tile (tile.href)}<li>
+						<IconTile
+							href={tile.href}
+							icon={tile.icon}
+							name={tile.name}
+							meta={tile.meta}
+							game={tile.game}
+						/>
+					</li>{/each}
+			</ul>
+		</Section>{/each}
 </div>
 
 <style>

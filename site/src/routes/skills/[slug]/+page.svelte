@@ -1,18 +1,14 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
-	import EntityArticle from '#lib/ui/EntityArticle.svelte';
+	import EntityPage from '#lib/entity/EntityPage.svelte';
 	import EntityVersions from '#lib/entity/EntityVersions.svelte';
 	import SkillVersion from '#lib/skills/SkillVersion.svelte';
-	import SeoHead from '#lib/SeoHead.svelte';
-	import { entityPath, kindPath } from '#lib/entities.js';
+	import { kindPath } from '#lib/entities.js';
 	import { titleCase } from '#lib/labels.js';
 	import { skillStatus } from '#lib/skills/describe.js';
 	let { data } = $props();
 	const versions = $derived([data.skill, ...(data.skill.versions ?? [])]);
 	let selected = $state(0);
 	const skill = $derived(versions[selected] ?? data.skill);
-	const kind = $derived(data.kinds.find((entry) => entry.kind === skill.kind)!);
-	const listPath = $derived(kindPath(skill.kind, data.kinds)!);
 	const tree = $derived(skill.sources.find((source) => source.kind === 'skillTree'));
 	const description = $derived(
 		tree
@@ -28,27 +24,13 @@
 	});
 </script>
 
-<SeoHead
-	title={skill.name + ' Skill | The Bloodline Compendium'}
-	{description}
+<EntityPage
 	entity={reference}
-	{kind}
-	breadcrumbs={[
-		{ name: 'Home', path: '/' },
-		{ name: 'Skills', path: listPath },
-		{ name: skill.name, path: entityPath(reference, data.kinds)! }
-	]}
-/>
-<nav class="breadcrumbs" aria-label="Breadcrumb">
-	<ol>
-		<li><a href={resolve('/')}>Home</a></li>
-		<li><a href={listPath}>Skills</a></li>
-		<li aria-current="page" data-game>{skill.name}</li>
-	</ol>
-</nav>
-<EntityArticle
-	{kind}
-	name={data.skill.name}
+	kinds={data.kinds}
+	title={skill.name + ' Skill'}
+	{description}
+	game
+	searchName={data.skill.name}
 	icon={data.skill.icon}
 	detail={titleCase(data.category.name) + (tree ? ' · ' + tree.name : '')}
 >
@@ -67,4 +49,4 @@
 		{/snippet}
 		{#snippet panel(version, idPrefix)}<SkillVersion skill={version} {idPrefix} />{/snippet}
 	</EntityVersions>
-</EntityArticle>
+</EntityPage>

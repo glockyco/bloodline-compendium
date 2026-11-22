@@ -1,17 +1,12 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
-	import SeoHead from '#lib/SeoHead.svelte';
-	import EntityArticle from '#lib/ui/EntityArticle.svelte';
+	import EntityPage from '#lib/entity/EntityPage.svelte';
 	import LinkedText from '#lib/ui/LinkedText.svelte';
 	import EntityLink from '#lib/ui/EntityLink.svelte';
 	import Section from '#lib/ui/Section.svelte';
 	import RelationTable from '#lib/RelationTable.svelte';
-	import { entityPath, kindPath } from '#lib/entities.js';
 	import { plainText } from '#lib/links.js';
 	let { data } = $props();
 	const mechanic = $derived(data.mechanic);
-	const kind = $derived(data.kinds.find((entry) => entry.kind === mechanic.kind)!);
-	const listPath = $derived(kindPath(mechanic.kind, data.kinds)!);
 	// A column of numbers aligns right, as numbers do in every table of the site.
 	const numericColumns = (table: { headings: string[]; rows: string[][] }) =>
 		table.headings.map((_, column) =>
@@ -26,25 +21,12 @@
 	});
 </script>
 
-<SeoHead
-	title={mechanic.name + ' | The Bloodline Compendium'}
-	description={plainText(mechanic.intro)}
+<EntityPage
 	entity={reference}
-	{kind}
-	breadcrumbs={[
-		{ name: 'Home', path: '/' },
-		{ name: 'Mechanics', path: listPath },
-		{ name: mechanic.name, path: entityPath(reference, data.kinds)! }
-	]}
-/>
-<nav class="breadcrumbs" aria-label="Breadcrumb">
-	<ol>
-		<li><a href={resolve('/')}>Home</a></li>
-		<li><a href={listPath}>Mechanics</a></li>
-		<li aria-current="page">{mechanic.name}</li>
-	</ol>
-</nav>
-<EntityArticle {kind} name={mechanic.name}>
+	kinds={data.kinds}
+	title={mechanic.name}
+	description={plainText(mechanic.intro)}
+>
 	<header class="page-heading">
 		<h1>{mechanic.name}</h1>
 		<p class="intro"><LinkedText text={mechanic.intro} /></p>
@@ -106,7 +88,7 @@
 			</details>
 		</div>
 	</div>
-</EntityArticle>
+</EntityPage>
 
 <style>
 	.text-layout {

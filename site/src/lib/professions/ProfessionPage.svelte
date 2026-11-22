@@ -1,13 +1,11 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
-	import SeoHead from '#lib/SeoHead.svelte';
-	import EntityArticle from '#lib/ui/EntityArticle.svelte';
+	import EntityPage from '#lib/entity/EntityPage.svelte';
 	import EntityLink from '#lib/ui/EntityLink.svelte';
 	import IconSlot from '#lib/ui/IconSlot.svelte';
 	import Section from '#lib/ui/Section.svelte';
 	import RelationTable from '#lib/RelationTable.svelte';
 	import Ingredients from '#lib/items/Ingredients.svelte';
-	import { entityPath, kindPath } from '#lib/entities.js';
+	import { entityPath } from '#lib/entities.js';
 	import { formatNumber } from '#lib/format.js';
 	import type { professionPage } from '#lib/server/professions.js';
 	import type { EntityKindDefinition } from '#lib/site-data.js';
@@ -18,8 +16,6 @@
 		data: Awaited<ReturnType<typeof professionPage>> & { kinds: EntityKindDefinition[] };
 	} = $props();
 	const profession = $derived(data.profession);
-	const kind = $derived(data.kinds.find((entry) => entry.kind === profession.kind)!);
-	const listPath = $derived(kindPath(profession.kind, data.kinds)!);
 	const reference = $derived({
 		kind: profession.kind,
 		key: profession.key,
@@ -61,25 +57,13 @@
 	);
 </script>
 
-<SeoHead
-	title={profession.name + bandTitle + ' | The Bloodline Compendium'}
-	{description}
+<EntityPage
 	entity={reference}
-	{kind}
-	breadcrumbs={[
-		{ name: 'Home', path: '/' },
-		{ name: 'Professions', path: listPath },
-		{ name: profession.name, path }
-	]}
-/>
-<nav class="breadcrumbs" aria-label="Breadcrumb">
-	<ol>
-		<li><a href={resolve('/')}>Home</a></li>
-		<li><a href={listPath}>Professions</a></li>
-		<li aria-current="page">{profession.name}</li>
-	</ol>
-</nav>
-<EntityArticle {kind} name={profession.name} {icon} detail={null}>
+	kinds={data.kinds}
+	title={profession.name + bandTitle}
+	{description}
+	{icon}
+>
 	<header class="item-heading icon-heading">
 		<IconSlot {icon} />
 		<div>
@@ -153,7 +137,7 @@
 			>
 		</Section>
 	</div>
-</EntityArticle>
+</EntityPage>
 
 <style>
 	h1 {

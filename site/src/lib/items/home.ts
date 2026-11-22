@@ -1,4 +1,13 @@
-import type { CategorySummary, ItemIndex, ItemSummary, SourceKind } from '../site-data.js';
+import { kindPath } from '../entities.js';
+import type { HomeSectionBody } from '../entity/home.js';
+import { formatNumber, plural } from '../format.js';
+import type {
+	CategorySummary,
+	EntityKindDefinition,
+	ItemIndex,
+	ItemSummary,
+	SourceKind
+} from '../site-data.js';
 
 /** Item categories in the order the home page leads with, before the rest by size. */
 const leadOrder = ['weapon', 'armor', 'weapon-part', 'material', 'food', 'quest-item'];
@@ -72,5 +81,20 @@ export function homeData(index: ItemIndex): HomeData {
 				};
 			})
 			.filter((category) => category.count > 0)
+	};
+}
+
+/** The home page's item section: a tile per category that filters the item list. */
+export function itemHomeSection(index: ItemIndex, kinds: EntityKindDefinition[]): HomeSectionBody {
+	const data = homeData(index);
+	return {
+		all: { href: kindPath('item', kinds)!, text: `All ${formatNumber(data.count)} items` },
+		tiles: data.categories.map((category) => ({
+			href: kindPath('item', kinds, `?category=${category.slug}`)!,
+			icon: category.icon,
+			name: category.name,
+			meta: plural(category.count, 'item', 'items'),
+			game: false
+		}))
 	};
 }
