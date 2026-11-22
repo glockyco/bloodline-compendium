@@ -15,7 +15,7 @@
 
 - [x] 3.1 Build the link codec with digests, size limits, version checks and unresolved keys, and fail publication on digest collisions
 - [x] 3.2 Build "Copy as text"
-- [ ] 3.3 Build the browser store with explicit actions, previews and failure reporting
+- [x] 3.3 Build the browser store with explicit actions, previews and failure reporting
 
 ## 4. Interface
 
