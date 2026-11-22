@@ -628,17 +628,22 @@ test('Pagefind searches with the registry kind filter', async ({ page, request }
 	expect(count).toBeGreaterThan(0);
 });
 
-test('shows an item render above the game card and switches the body where it has two', async ({
+test('shows an item render above Details and switches the body where it has two', async ({
 	page
 }) => {
 	await page.goto('/items/mosswoven-coat/');
-	const side = page.getByRole('complementary', { name: 'Game card' });
-	const render = side.locator('figure img');
+	const figure = page.locator('figure.item-model');
+	const render = figure.locator('img');
 	await expect(render).toHaveAttribute('alt', 'Mosswoven Coat on the male body');
+	const renderBox = await figure.boundingBox();
+	const detailsBox = await page
+		.getByRole('heading', { name: 'Details', exact: true })
+		.boundingBox();
+	expect(renderBox!.y + renderBox!.height).toBeLessThanOrEqual(detailsBox!.y);
 	const male = await render.getAttribute('src');
-	await side.getByRole('button', { name: 'Female' }).click();
+	await figure.getByRole('button', { name: 'Female' }).click();
 	await expect(render).toHaveAttribute('alt', 'Mosswoven Coat on the female body');
-	await expect(side.getByRole('button', { name: 'Female' })).toHaveAttribute(
+	await expect(figure.getByRole('button', { name: 'Female' })).toHaveAttribute(
 		'aria-pressed',
 		'true'
 	);

@@ -11,7 +11,7 @@
 		<img
 			src={`/renders/${current.hash}-320.webp`}
 			srcset={`/renders/${current.hash}-320.webp 320w, /renders/${current.hash}-640.webp 640w`}
-			sizes="(width < 40rem) 100vw, 20rem"
+			sizes="(width < 40rem) 100vw, 40rem"
 			alt={renders.length > 1 ? `${name} on the ${current.body} body` : name}
 			width={current.width}
 			height={current.height}

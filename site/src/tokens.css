@@ -152,7 +152,7 @@
 	--size-chevron: 0.875rem;
 	--size-filter-sheet: 26rem;
 	--size-item-side: 20rem;
-	/* A tall render, such as a spear, stays short enough that the game card below it shows on the first screen. */
+	/* A tall render, such as a spear, stays short enough that Details below it starts on the first screen. */
 	--size-render: 18rem;
 	--size-relation-number: 7.5rem;
 	--size-gap-columns: 17rem;

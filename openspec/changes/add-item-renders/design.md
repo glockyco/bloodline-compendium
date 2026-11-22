@@ -51,7 +51,7 @@ The depth pass marks opaque surfaces, but translucent materials, such as slime m
 
 ### On the page
 
-The render stands above the game card in the side column, as large wikis show an item's picture at the top of the infobox, such as the OSRS Wiki's detailed images. Where the item has a render on each body, Male and Female buttons switch it, with the male body first as character creation starts with it. The approved placement is recorded below once decided.
+The render opens the main column above Details, at most 18rem tall, and the game card stays alone in the side column and starts level with the render. This was decided in Plannotator over the other option, above the game card as large wikis show an item's picture at the top of the infobox, because the side column will hold other content later. Where the item has a render on each body, Male and Female buttons switch it, with the male body first as character creation starts with it.
 
 ## Risks / Trade-offs
 

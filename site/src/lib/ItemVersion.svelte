@@ -176,6 +176,7 @@
 
 <div class="detail-layout">
 	<div class="answer" data-pagefind-ignore="all">
+		<ItemModel name={item.name} renders={item.renders} />
 		{#if details.length || item.projectileGroups?.length}<Section
 				id={idPrefix + 'details'}
 				title="Details"
@@ -197,7 +198,6 @@
 			</Section>{/if}
 	</div>
 	<aside class="item-side" aria-label="Game card">
-		<ItemModel name={item.name} renders={item.renders} />
 		<ItemTooltip {item} details={false} />
 	</aside>
 	<div class="item-relations" data-pagefind-ignore="all">
