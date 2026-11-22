@@ -11,7 +11,7 @@
 --   front. The item's actor is built in the frame of the socket that holds it, so the socket tells which way the
 --   item points and which side is up.
 -- - A weapon part draws the mesh, materials and scale its row in WeaponComponentTable names, given as args.part,
---   and stands like a weapon, with the end farther from its mesh's origin up.
+--   and stands as it sits in a weapon that stands with its tip up.
 -- - Any other item is its own actor, as it lies in the world, seen three quarters from above.
 -- The capture takes the preview's light and its scene colour without tonemapping, which the sheet shows as it is.
 -- Two captures go to args.directory: <args.file>-color.png and <args.file>-mask.png, the depth that marks the
@@ -353,11 +353,20 @@ local function capture()
       -- LoadAsset returns more than the object, so the call keeps only its first value.
       for index, path in ipairs(args.part.materials or {}) do copy:SetMaterial(index - 1, (LoadAsset(path))) end
       if args.part.scale then copy:SetWorldScale3D(args.part.scale) end
-      -- A part has no hand. The end farther from its mesh's origin, where it joins the weapon, is up, and its
-      -- thinnest side faces the camera.
+      -- A part's mesh is modelled as it sits in a weapon that points up its Z axis: on every part mesh the socket
+      -- where a blade or a head joins the handle lies at its lower end, a pommel's at its upper end, and a grip's
+      -- socket for the pommel below the one for the guard. So Z is up and the thinner of the two level sides faces
+      -- the camera. A part that is thinnest along Z, such as a crossguard or a plate the blade passes through,
+      -- shows that face from the blade's side instead, with its longer side level, as a guard lies across a weapon.
       local low, high = localBounds(mesh, args.part.scale)
       local long, _, thin = ranked(low, high)
-      local images = complete({ [long] = scale(up, high[long] >= -low[long] and 1 or -1), [thin] = front })
+      local images
+      if thin == "Z" then
+        images = { [long] = right, Z = front }
+      else
+        images = { Z = up, [thin] = front }
+      end
+      complete(images)
       copyActor:K2_SetActorRotation(math3:MakeRotationFromAxes(images.X, images.Y, images.Z), false)
       centre(copyActor, { copy })
       shown[1] = copy

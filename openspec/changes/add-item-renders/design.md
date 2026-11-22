@@ -64,6 +64,18 @@ A firearm, a crossbow, a shield and a bow are measured by their largest mesh alo
 
 Reading the held copy's pose at each capture was tried and dropped. An equipped item hangs on the first-person and on the third-person body at different sockets, the pose depends on what the other hand holds (a shield without a weapon beside it hangs at the side with its top forward), and a body the game does not draw keeps its rest pose. The socket's axes are the same for every item it holds.
 
+### Which way a weapon part stands
+
+A part first stood on its longest side with the end farther from its mesh's origin up, on the assumption that the origin is where the part joins the weapon. It is not: the origin of Gold Kilji Blade's mesh lies nearer its tip, so the blade stood on its tip, as did Kora and Yataghan blades, and pommels stood upside down. Parts of one kind also differed: 25 of 46 axe heads are longest across the shaft and stood with the blade's edge up, and most crossguards stood on end.
+
+The game joins parts at sockets on their meshes. `tools/runtime/checks/part-sockets.lua` read the box and the sockets of all 385 part meshes (run `2026-11-22T02-11-31-811Z-sockets1`), and every mesh is modelled as it sits in a weapon that points up its Z axis:
+- The `HandleSocket` of every blade, dagger blade, greatblade, rapier blade and spear head lies in the lower half of its box, mostly at the very end.
+- Every shaft's `HandleSocket` or `PommelSocket` lies below its `BladeSocket`, and every grip's `PommelSocket` below its `GuardSocket`.
+- No guard's `HandleSocket` lies above its `BladeSocket`.
+- The socket of every pommel and every wand focus, which hangs under the shaft as a pommel does, lies in the upper half, except on one mesh that also serves as a guard.
+
+So a part stands with its mesh's Z axis up and the thinner of its two level sides toward the camera, which shows every part as it sits in a weapon that stands with its tip up. Of the 762 parts with a mesh, 83 are thinnest along Z: crossguards, plates that the blade passes through, and some flat pommels, mace heads, hammer heads and wand foci. Edge-on they would show a sliver, so they show their face from the blade's side with their longer side level, as a guard lies across a weapon.
+
 ### Textures
 
 The lab game runs render mode with `-NoTextureStreaming`. A capture is taken two frames after an item appears, and with streaming an item's textures were often still loading: Warpwood Bolter's first capture of a session came out grey (mean colour 133, 135, 105) and its second green (145, 144, 92). With textures loaded whole, the first and the second capture of a session match.

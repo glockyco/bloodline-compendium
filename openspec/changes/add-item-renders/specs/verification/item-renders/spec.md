@@ -79,6 +79,25 @@ A weapon SHALL stand with the end farther from the hand up, and a bow with its b
 - **WHEN** Acolyte's Soulstaff, which the hand holds at its middle, is rendered
 - **THEN** its hooked end is up, as the hand holds it
 
+### Requirement: Weapon parts stand as in a weapon
+A weapon part SHALL stand as it sits in a weapon that stands with its tip up, with its thinner side toward the viewer, so parts of one kind stand the same way. A part that is thinnest along the weapon SHALL show its face from the blade's side with its longer side level.
+
+#### Scenario: A blade whose mesh starts near its tip
+- **WHEN** Gold Kilji Blade, whose mesh has its origin nearer the tip than the tang, is rendered
+- **THEN** its tip is up
+
+#### Scenario: A pommel
+- **WHEN** Iron Ring Pommel is rendered
+- **THEN** the end that joins the grip is up and the ring hangs below it
+
+#### Scenario: An axe head that is longest across the shaft
+- **WHEN** Dwarven Tomahawk Head is rendered
+- **THEN** its edge points to the side, as on a shaft that stands
+
+#### Scenario: A crossguard
+- **WHEN** a crossguard, which is thinnest along the blade, is rendered
+- **THEN** it lies level and shows the face that the blade passes through
+
 ### Requirement: Both bodies where they differ
 Armor whose render shows body meshes SHALL also be rendered on the female body, because the game draws a female counterpart of each body mesh. Other items SHALL have one render.
 
