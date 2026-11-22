@@ -1404,6 +1404,39 @@
 				"fragment": null
 			},
 			"relations": []
+		},
+		{
+			"entity": {
+				"kind": "profession",
+				"key": "Profession:Starsmithing",
+				"name": "Starsmithing",
+				"slug": "starsmithing",
+				"icon": null,
+				"fragment": null
+			},
+			"relations": []
+		},
+		{
+			"entity": {
+				"kind": "mechanic",
+				"key": "Mechanic:Skill Points",
+				"name": "Skill Points",
+				"slug": "skill-points",
+				"icon": null,
+				"fragment": null
+			},
+			"relations": []
+		},
+		{
+			"entity": {
+				"kind": "mechanic",
+				"key": "Mechanic:Proficiency Points",
+				"name": "Proficiency Points",
+				"slug": "proficiency-points",
+				"icon": null,
+				"fragment": null
+			},
+			"relations": []
 		}
 	],
 	"relations": [

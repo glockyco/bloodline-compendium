@@ -367,6 +367,17 @@ internal static partial class KnownIssues
                     .Where(page => page.Notes.Any(note => note.Issue == issue.Id))
                     .Select(page => page.Reference)
                     .Distinct()
+                    // Versions of one item share its page, so the list names the page once. When more than one
+                    // version is affected, it links the page rather than one version of it.
+                    .GroupBy(reference => (reference.Kind, reference.Slug ?? reference.Key))
+                    .Select(versions =>
+                        versions.Count() == 1
+                            ? versions.First()
+                            : versions.First() with
+                            {
+                                Fragment = null,
+                            }
+                    )
                     .OrderBy(reference => reference.Name, StringComparer.OrdinalIgnoreCase)
                     .ThenBy(reference => reference.Key, StringComparer.Ordinal)
                     .ToArray()

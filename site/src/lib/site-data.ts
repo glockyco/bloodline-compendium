@@ -26,7 +26,8 @@ export type EntityKind =
   | "skill"
   | "passive"
   | "spellsong"
-  | "profession";
+  | "profession"
+  | "mechanic";
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "ConditionKind".
@@ -154,6 +155,10 @@ export interface SiteDataFiles {
   links: {
     [k: string]: EntityReference;
   };
+  mechanic: MechanicPage;
+  mechanics: MechanicIndex;
+  profession: ProfessionPage;
+  professions: ProfessionIndex;
   skill: SkillPage;
   skills: SkillIndex;
   [k: string]: unknown;
@@ -712,6 +717,7 @@ export interface CategorySummary {
  * via the `definition` "ListColumn".
  */
 export interface ListColumn {
+  ascending?: boolean;
   categories: string[];
   id: string;
   label: string;
@@ -791,11 +797,110 @@ export interface EntityKindDefinition {
     | "passive"
     | "spellsong"
     | "profession"
+    | "mechanic"
     | null;
   kind: EntityKind;
   route: string | null;
   searchFilter: string;
   structuredDataType: string;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "MechanicPage".
+ */
+export interface MechanicPage {
+  evidence: string[];
+  intro: string;
+  key: string;
+  kind: EntityKind;
+  name: string;
+  sections: MechanicSection[];
+  slug: string;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "MechanicSection".
+ */
+export interface MechanicSection {
+  anchor?: string | null;
+  heading: string;
+  paragraphs: string[];
+  table?: MechanicTable | null;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "MechanicTable".
+ */
+export interface MechanicTable {
+  headings: string[];
+  rows: string[][];
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "MechanicIndex".
+ */
+export interface MechanicIndex {
+  mechanics: MechanicSummary[];
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "MechanicSummary".
+ */
+export interface MechanicSummary {
+  intro: string;
+  key: string;
+  name: string;
+  slug: string;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "ProfessionPage".
+ */
+export interface ProfessionPage {
+  key: string;
+  kind: EntityKind;
+  name: string;
+  rows: ProfessionRow[];
+  slug: string;
+  stations: EntityReference[];
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "ProfessionRow".
+ */
+export interface ProfessionRow {
+  experience: number | null;
+  kind: SourceKind;
+  level: number | null;
+  product: EntityReference;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "ProfessionIndex".
+ */
+export interface ProfessionIndex {
+  professions: ProfessionSummary[];
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "ProfessionSummary".
+ */
+export interface ProfessionSummary {
+  count: number;
+  icon?: string | null;
+  key: string;
+  maxLevel?: number | null;
+  minLevel?: number | null;
+  name: string;
+  slug: string;
+  stations: EntityReference[];
   [k: string]: unknown;
 }
 /**

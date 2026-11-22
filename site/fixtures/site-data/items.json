@@ -84,7 +84,8 @@
 				"source": ["shop", "currencyShop", "crafting", "containerLoot", "pickup"],
 				"availability": ["obtainable"],
 				"weaponType": ["Sword"],
-				"place": ["Glass Reach"]
+				"place": ["Glass Reach"],
+				"profession": ["Starsmithing"]
 			},
 			"cells": {
 				"damage": {
@@ -94,6 +95,10 @@
 				"speed": {
 					"number": 3,
 					"text": "Average"
+				},
+				"professionLevel": {
+					"number": 12,
+					"text": null
 				}
 			},
 			"placeSources": [["shop", "crafting", "containerLoot", "pickup"]]
@@ -114,11 +119,16 @@
 				"category": ["armour"],
 				"source": ["enemyDrop"],
 				"availability": ["obtainable"],
-				"place": ["Glass Reach"]
+				"place": ["Glass Reach"],
+				"profession": ["Starsmithing"]
 			},
 			"cells": {
 				"armor": {
 					"number": 0,
+					"text": null
+				},
+				"professionLevel": {
+					"number": 12,
 					"text": null
 				}
 			},
@@ -142,7 +152,12 @@
 				"availability": ["noKnownSource"],
 				"weaponType": ["Sword"]
 			},
-			"cells": { "damage": { "number": 12, "text": null } },
+			"cells": {
+				"damage": {
+					"number": 12,
+					"text": null
+				}
+			},
 			"placeSources": []
 		},
 		{
@@ -163,7 +178,12 @@
 				"availability": ["noKnownSource"],
 				"weaponType": ["Sword"]
 			},
-			"cells": { "damage": { "number": 24, "text": null } },
+			"cells": {
+				"damage": {
+					"number": 24,
+					"text": null
+				}
+			},
 			"placeSources": []
 		}
 	],
@@ -218,6 +238,13 @@
 				"obtainable": "A way to get it is known",
 				"noKnownSource": "No known way to get it"
 			}
+		},
+		{
+			"id": "profession",
+			"label": "Profession",
+			"categories": [],
+			"values": ["Starsmithing"],
+			"labels": {}
 		}
 	],
 	"columns": [
@@ -234,6 +261,14 @@
 			"categories": ["weapon"],
 			"numeric": false,
 			"unit": null
+		},
+		{
+			"categories": [],
+			"id": "professionLevel",
+			"label": "Profession Level",
+			"numeric": true,
+			"unit": null,
+			"ascending": true
 		},
 		{
 			"id": "armor",

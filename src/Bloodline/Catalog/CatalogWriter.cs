@@ -34,6 +34,23 @@ internal static class CatalogWriter
                 catalog.Skills.DisciplineIndex
             );
             CanonicalJson.Write(Path.Combine(staging, "skills.json"), catalog.Skills.SkillIndex);
+            CanonicalJson.Write(
+                Path.Combine(staging, "professions.json"),
+                catalog.Professions.Index
+            );
+            CanonicalJson.Write(Path.Combine(staging, "mechanics.json"), catalog.Mechanics.Index);
+            Directory.CreateDirectory(Path.Combine(staging, "mechanics"));
+            foreach (var mechanic in catalog.Mechanics.Pages)
+                CanonicalJson.Write(
+                    Path.Combine(staging, "mechanics", mechanic.Slug + ".json"),
+                    mechanic
+                );
+            Directory.CreateDirectory(Path.Combine(staging, "professions"));
+            foreach (var profession in catalog.Professions.Pages)
+                CanonicalJson.Write(
+                    Path.Combine(staging, "professions", profession.Slug + ".json"),
+                    profession
+                );
             Directory.CreateDirectory(Path.Combine(staging, "disciplines"));
             Directory.CreateDirectory(Path.Combine(staging, "skills"));
             foreach (var discipline in catalog.Skills.Disciplines)

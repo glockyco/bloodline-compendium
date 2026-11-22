@@ -1,0 +1,23 @@
+{
+	"professions": [
+		{
+			"key": "Profession:Starsmithing",
+			"slug": "starsmithing",
+			"name": "Starsmithing",
+			"count": 3,
+			"icon": "lanternedge",
+			"stations": [
+				{
+					"kind": "activity",
+					"key": "/Invented/Stations/StarAnvil",
+					"name": "Star Anvil",
+					"slug": null,
+					"icon": null,
+					"fragment": null
+				}
+			],
+			"minLevel": 12,
+			"maxLevel": 12
+		}
+	]
+}

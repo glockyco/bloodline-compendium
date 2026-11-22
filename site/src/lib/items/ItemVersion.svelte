@@ -158,6 +158,7 @@
 									type="number"
 									inputmode="numeric"
 									min="0"
+									placeholder="Any level"
 									bind:value={useLevel}
 								/></label
 							>{/if}

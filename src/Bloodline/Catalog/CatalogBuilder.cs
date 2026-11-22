@@ -19,6 +19,10 @@ internal sealed record CatalogResult(
     /// <summary>The known game issues, each with the published pages that note it.</summary>
     public IReadOnlyList<PublishedIssue> Issues { get; init; } = [];
 
+    public ProfessionOutput Professions { get; init; } = new(new ProfessionIndex([]), []);
+
+    public MechanicOutput Mechanics { get; init; } = new(new MechanicIndex([]), []);
+
     /// <summary>The link targets that text written for the site uses, as <c>links.json</c>.</summary>
     public IReadOnlyDictionary<string, EntityReference> Links { get; init; } =
         new Dictionary<string, EntityReference>();
@@ -113,7 +117,8 @@ internal static class CatalogBuilder
         }
         var graphResult = CatalogGraph.Build(
             prepared.Grouped.Entities,
-            context.Places.All,
+            // Mechanic pages are written by hand, so the graph learns them from their content.
+            context.Places.All.Concat(records.Mechanics.Select(MechanicProducer.Reference)),
             prepared.Grouped.References,
             skillsPrepared.GraphEntities
         );
@@ -124,6 +129,7 @@ internal static class CatalogBuilder
             SourceGaps(CatalogGraph.Reference(item), item.Name, item.Sources, coverage);
         var skills = skillProducer.Finish(skillsPrepared, graphResult);
         SkillTooltipCheck.Compare(skills.Entries, records.SkillTooltips, coverage);
+        var professions = ProfessionProducer.Produce(items.Items);
         // The Known Issues page lists every page of every kind that notes an issue.
         var issues = KnownIssues.Publish(
             records.Issues,
@@ -162,19 +168,45 @@ internal static class CatalogBuilder
             Claims = items.Claims,
             Tooltips = items.Tooltips,
             Issues = issues,
-            Links = KnownIssues.Links(
-                records.Issues,
-                LinkedText.Targets([
+            Professions = professions,
+            Mechanics = MechanicProducer.Produce(records.Mechanics),
+            Links = Links(
+                records,
+                [
                     .. items.Items.Select(CatalogGraph.Reference),
-                    .. skills.Disciplines.Select(SkillProducer.DisciplineReference),
                     .. skills.Skills.Select(skill =>
                         EntityVersions.Reference(skill, EntityKind.Skill)
                     ),
-                    .. Professions.All,
-                ])
+                ],
+                [
+                    .. skills.Disciplines.Select(SkillProducer.DisciplineReference),
+                    .. professions.Pages.Select(page => Professions.Reference(page.Name)),
+                    .. records.Mechanics.Select(MechanicProducer.Reference),
+                ]
             ),
             Skills = skills,
         };
+    }
+
+    /// <summary>
+    /// The link targets text written for the site uses. Issue and mechanic text is checked here, and every target it
+    /// uses is listed. The site's own text, such as section intros, links overview pages, so every discipline,
+    /// profession and mechanic is listed too, and the site fails on a target the list lacks.
+    /// </summary>
+    private static IReadOnlyDictionary<string, EntityReference> Links(
+        CatalogRecords records,
+        IReadOnlyList<EntityReference> entities,
+        IReadOnlyList<EntityReference> overviews
+    )
+    {
+        var targets = LinkedText.Targets([.. entities, .. overviews]);
+        var used = new SortedDictionary<string, EntityReference>(StringComparer.Ordinal);
+        foreach (var (target, reference) in KnownIssues.Links(records.Issues, targets))
+            used[target] = reference;
+        MechanicProducer.Links(records.Mechanics, targets, used);
+        foreach (var overview in overviews)
+            used[LinkedText.Target(overview)] = overview;
+        return used;
     }
 
     /// <summary>

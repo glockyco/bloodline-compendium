@@ -48,10 +48,7 @@
 			500 skills to unlock. This wiki is generated from the game's files.
 		</p>
 		<div class="hero-search">
-			<Search
-				variant="hero"
-				placeholder="Search items, skills and more, for example {data.example}"
-			/>
+			<Search variant="hero" placeholder="Search items, skills and more" />
 		</div>
 		<div class="actions">
 			<ButtonLink href={itemsPath}>Browse Items</ButtonLink>
@@ -71,7 +68,7 @@
 		<SectionHeading
 			id="items-heading"
 			title="Items"
-			link={{ href: itemsPath, label: `All ${formatNumber(data.known)} items` }}
+			link={{ href: itemsPath, label: `All ${formatNumber(data.count)} items` }}
 		/>
 		<ul class="tile-grid">
 			{#each data.categories as category (category.slug)}<li>
@@ -97,7 +94,7 @@
 						href={disciplinePath(discipline)}
 						icon={discipline.icon ?? null}
 						name={discipline.name}
-						meta={`${discipline.category.name} · ${discipline.skills ? plural(discipline.skills, 'skill', 'skills') : plural(discipline.spellsongs, 'spellsong', 'spellsongs')}`}
+						meta={`${discipline.category.name} ·\u00a0${(discipline.skills ? plural(discipline.skills, 'skill', 'skills') : plural(discipline.spellsongs, 'spellsong', 'spellsongs')).replace(' ', '\u00a0')}`}
 						game
 					/>
 				</li>{/each}

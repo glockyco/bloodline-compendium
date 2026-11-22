@@ -1,10 +1,50 @@
 {
+	"discipline:emberlore": {
+		"kind": "discipline",
+		"key": "/Invented/Trees/Emberlore",
+		"name": "Emberlore",
+		"slug": "emberlore",
+		"icon": null,
+		"fragment": null
+	},
+	"discipline:songcraft": {
+		"kind": "discipline",
+		"key": "/Invented/Trees/Songcraft",
+		"name": "Songcraft",
+		"slug": "songcraft",
+		"icon": null,
+		"fragment": null
+	},
 	"item:mosswoven-coat": {
 		"icon": "mosswoven-coat",
 		"key": "/Invented/Items/MosswovenCoat",
 		"kind": "item",
 		"name": "Mosswoven Coat",
 		"slug": "mosswoven-coat",
+		"fragment": null
+	},
+	"mechanic:proficiency-points": {
+		"kind": "mechanic",
+		"key": "Mechanic:Proficiency Points",
+		"name": "Proficiency Points",
+		"slug": "proficiency-points",
+		"icon": null,
+		"fragment": null
+	},
+	"mechanic:skill-points": {
+		"kind": "mechanic",
+		"key": "Mechanic:Skill Points",
+		"name": "Skill Points",
+		"slug": "skill-points",
+		"icon": null,
+		"fragment": null
+	},
+	"profession:starsmithing": {
+		"kind": "profession",
+		"key": "Profession:Starsmithing",
+		"name": "Starsmithing",
+		"slug": "starsmithing",
+		"icon": null,
 		"fragment": null
 	}
 }

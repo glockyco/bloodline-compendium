@@ -22,7 +22,13 @@ internal static class Professions
 
     private static readonly Dictionary<string, EntityReference> ByName = Names.ToDictionary(
         name => name,
-        name => new EntityReference(EntityKind.Profession, "Profession:" + name, name, null, null),
+        name => new EntityReference(
+            EntityKind.Profession,
+            "Profession:" + name,
+            name,
+            ItemIdentity.Slug(name),
+            null
+        ),
         StringComparer.OrdinalIgnoreCase
     );
 
@@ -37,4 +43,22 @@ internal static class Professions
         ByName.TryGetValue(name, out var reference)
             ? reference
             : throw new InvalidOperationException($"{name} is not a known profession.");
+
+    /// <summary>
+    /// The profession each confirmed source of an item needs, with the level it sets: a recipe's profession and level,
+    /// or a profession level condition, as a crop's Farming level.
+    /// </summary>
+    public static IEnumerable<(Source Source, EntityReference Profession, int? Level)> Of(
+        ItemPage item
+    )
+    {
+        foreach (var source in item.Sources.Where(source => !source.Unconfirmed))
+        {
+            var condition = source.Conditions.FirstOrDefault(condition =>
+                condition.Kind == ConditionKind.ProficiencyLevel
+            );
+            if ((source.Recipe?.Profession ?? condition?.Entity) is { Key: not null } profession)
+                yield return (source, profession, source.Recipe?.Level ?? (int?)condition?.Value);
+        }
+    }
 }

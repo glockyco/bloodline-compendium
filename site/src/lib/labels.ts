@@ -42,7 +42,7 @@ export const sourceIntros: Partial<Record<SourceKind, string>> = {
 	settlementDelivery:
 		'Completed buildings in your settlement add resources every game week. Collect them under Resources Ready in the settlement overview.',
 	skillTree:
-		'A skill costs 1 skill point once its discipline reaches the required level. Clicking it again refunds the point.'
+		'A skill costs 1 [skill point](mechanic:skill-points) once its discipline reaches the required level. Clicking it again refunds the point.'
 };
 /** The level a source kind's rows need, shown as its own column, such as the discipline level of a skill tree. */
 export const sourceLevels: Partial<

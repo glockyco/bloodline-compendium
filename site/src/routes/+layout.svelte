@@ -18,6 +18,8 @@
 	let { data, children } = $props();
 	// Every kind with pages, in the registry's order, leads from the header and the footer.
 	const browse = $derived(browseKinds(data.kinds));
+	// The header fits three lists on a phone, so it holds the main reference kinds and the footer lists every kind.
+	const headerKinds = ['item', 'discipline', 'skill'];
 	// Home opens with the game's art, so its header sits on the art and its search sits in the hero.
 	const home = $derived(page.url.pathname === '/');
 	// A list with its own name search drops the header's below desktop width, to reach its results sooner.
@@ -67,8 +69,9 @@
 			>
 		</a>
 		<nav aria-label="Main">
-			{#each browse as entry (entry.path)}<a href={entry.path} aria-current={current(entry.path)}
-					>{entry.label}</a
+			{#each browse.filter((entry) => headerKinds.includes(entry.kind)) as entry (entry.path)}<a
+					href={entry.path}
+					aria-current={current(entry.path)}>{entry.label}</a
 				>{/each}
 		</nav>
 		{#if !home}<div class="header-search" class:on-list={list}><Search /></div>{/if}

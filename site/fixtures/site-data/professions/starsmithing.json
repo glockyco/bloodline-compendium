@@ -1,0 +1,57 @@
+{
+	"key": "Profession:Starsmithing",
+	"slug": "starsmithing",
+	"name": "Starsmithing",
+	"kind": "profession",
+	"stations": [
+		{
+			"kind": "activity",
+			"key": "/Invented/Stations/StarAnvil",
+			"name": "Star Anvil",
+			"slug": null,
+			"icon": null,
+			"fragment": null
+		}
+	],
+	"rows": [
+		{
+			"product": {
+				"kind": "item",
+				"key": "/Invented/Items/Lanternedge",
+				"name": "Lanternedge",
+				"slug": "lanternedge",
+				"icon": "lanternedge",
+				"fragment": null
+			},
+			"kind": "smithing",
+			"level": 12,
+			"experience": 40
+		},
+		{
+			"product": {
+				"kind": "item",
+				"key": "/Invented/Items/MosswovenCoat",
+				"name": "Mosswoven Coat",
+				"slug": "mosswoven-coat",
+				"icon": "mosswoven-coat",
+				"fragment": null
+			},
+			"kind": "smithing",
+			"level": 12,
+			"experience": null
+		},
+		{
+			"product": {
+				"kind": "item",
+				"key": "/Invented/Items/Twin_Lantern_B",
+				"name": "Twin Lantern",
+				"slug": "twin-lantern",
+				"icon": "lanternedge",
+				"fragment": null
+			},
+			"kind": "smithing",
+			"level": null,
+			"experience": 15
+		}
+	]
+}

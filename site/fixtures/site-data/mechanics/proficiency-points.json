@@ -1,0 +1,15 @@
+{
+	"key": "Mechanic:Proficiency Points",
+	"slug": "proficiency-points",
+	"name": "Proficiency Points",
+	"kind": "mechanic",
+	"intro": "Each discipline has its own proficiency points.",
+	"sections": [
+		{
+			"heading": "Spending Proficiency Points",
+			"paragraphs": ["Ranks of an [Emberlore](discipline:emberlore) passive cost more each time."],
+			"anchor": "spending-proficiency-points"
+		}
+	],
+	"evidence": ["Invented run two."]
+}

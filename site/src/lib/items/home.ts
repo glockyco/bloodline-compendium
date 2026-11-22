@@ -27,7 +27,6 @@ export interface HomeCategory {
 export interface HomeData {
 	count: number;
 	known: number;
-	example: string;
 	categories: HomeCategory[];
 }
 
@@ -62,7 +61,6 @@ export function homeData(index: ItemIndex): HomeData {
 	return {
 		count: items.length,
 		known: items.filter((item) => sourcesOf(item).length > 0).length,
-		example: (items.find((item) => item.slug === 'yew-shortbow') ?? items[0])?.name ?? '',
 		categories: ordered
 			.map((category) => {
 				const members = listed(category.slug);

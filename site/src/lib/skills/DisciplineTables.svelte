@@ -97,6 +97,7 @@
 					>{#each statColumns as column (column.stat)}<td
 							class="numeric"
 							class:absent={factOf(slot.skill.key, column.stat)?.number == null}
+							class:one={factOf(slot.skill.key, column.stat)?.number === 1}
 							>{cell(slot.skill.key, column.stat)}</td
 						>{/each}</tr
 				>{/snippet}</RelationTable
@@ -124,11 +125,17 @@
 				</Card>{/each}
 		</CardGrid>
 	</Section>{/if}
-{#if passives.length}<Section id="passives" title="Passives" count={passives.length}>
+{#if passives.length}<Section
+		id="passives"
+		title="Passives"
+		count={passives.length}
+		line="You buy passives with this discipline's [proficiency points](mechanic:proficiency-points)."
+	>
 		<RelationTable
 			items={passives}
 			label="Passives"
-			headings={['Passive', { label: 'Cost per Rank', unit: 'points' }]}
+			stackPairs
+			headings={['Passive', 'Points per Rank']}
 			collapse={false}
 			>{#snippet row(
 				{ row, passive },

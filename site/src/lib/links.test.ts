@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { linkParts } from './links.js';
+import { linkParts, plainText } from './links.js';
 
 const coat = {
 	kind: 'item' as const,
@@ -9,16 +9,21 @@ const coat = {
 	icon: null
 };
 
-it('splits text into runs and links each resolved target', () => {
+it('splits text into runs and links each target the catalog lists', () => {
 	expect(
-		linkParts('The [coat](item:mosswoven-coat) and [Blood Levels](mechanic:blood-levels) differ.', {
-			'item:mosswoven-coat': coat
-		})
+		linkParts('The [coat](item:mosswoven-coat) is warm.', { 'item:mosswoven-coat': coat })
 	).toEqual([
 		{ text: 'The ', entity: null },
 		{ text: 'coat', entity: coat },
-		{ text: ' and ', entity: null },
-		{ text: 'Blood Levels', entity: null },
-		{ text: ' differ.', entity: null }
+		{ text: ' is warm.', entity: null }
 	]);
+	expect(plainText('Lower the [Blood Levels](mechanic:blood-levels).')).toBe(
+		'Lower the Blood Levels.'
+	);
+});
+
+it('fails on a target the catalog does not list', () => {
+	expect(() => linkParts('Lower the [Blood Levels](mechanic:blod-levels).', {})).toThrow(
+		'mechanic:blod-levels'
+	);
 });

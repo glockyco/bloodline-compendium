@@ -145,6 +145,12 @@
 	--size-card-narrow: 13rem;
 	/* The narrowest icon tile, two to a phone screen. */
 	--size-tile: 10rem;
+	/* A profession level's badge beside the items it unlocks. */
+	--size-level-badge: 4.5rem;
+	/* The narrowest item chip of a level, its icon and a name of a few words. */
+	--size-chip-name: 13rem;
+	/* A Show or Hide toggle, wide enough for either word, so switching does not move what sits beside it. */
+	--size-toggle: 2.5rem;
 	--size-filters: 15.5rem;
 	/* Compact controls of lists and filters, after Afallon's: an option row, a chip and a control in a sheet. */
 	--size-option: 1.85rem;

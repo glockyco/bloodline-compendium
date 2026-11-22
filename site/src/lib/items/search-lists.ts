@@ -105,14 +105,20 @@ function nounsOf(items: ItemSummary[], nouns: Set<string>): string[] {
 		.map(([noun]) => noun);
 }
 
-function listUrl(index: ItemIndex, listPath: string, facets: Record<string, string[]>): string {
+/** The item list's address with these filters, written as the list itself writes its state. */
+export function listUrl(
+	index: ItemIndex,
+	listPath: string,
+	facets: Record<string, string[]>,
+	options: Partial<Pick<ListState, 'stats' | 'sort'>> = {}
+): string {
 	const state: ListState = {
 		name: '',
 		facets,
-		stats: [],
+		stats: options.stats ?? [],
 		match: 'all',
 		reveal: false,
-		sort: { column: 'name', direction: 'asc' }
+		sort: options.sort ?? { column: 'name', direction: 'asc' }
 	};
 	return `${listPath}?${writeState(state, itemListModel(index))}`;
 }

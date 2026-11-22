@@ -1,12 +1,14 @@
 <script lang="ts" generics="T">
 	import type { Snippet } from 'svelte';
-	import StaticMore from './StaticMore.svelte';
+	import MoreToggle from './MoreToggle.svelte';
+	import { isHydrated } from './hydration.js';
 	let {
 		items,
 		label,
 		headings,
 		numeric = true,
 		stackOnMobile = true,
+		stackPairs = false,
 		collapse = true,
 		row
 	}: {
@@ -17,34 +19,46 @@
 		/** Whether the columns after the first hold numbers, which align right with their heading, one flag per column. */
 		numeric?: boolean | boolean[];
 		stackOnMobile?: boolean;
+		/** Whether a two-column table stacks on a phone too, when its first column holds long text, such as a description. */
+		stackPairs?: boolean;
 		/** Whether a long table shows its first rows behind a button, which a table read as a whole turns off. */
 		collapse?: boolean;
 		row: Snippet<[T, number]>;
 	} = $props();
 	const preview = $derived(collapse && items.length > 10 ? 8 : items.length);
+	// Rows past the preview stay in the same table, so their columns line up with the rows above.
+	// The static page carries every entry, so a reader without JavaScript can open them.
+	let shown = $state(!isHydrated());
 	const parts = $derived(
 		headings.map((heading) =>
 			typeof heading === 'string' ? { label: heading, unit: null } : heading
 		)
 	);
 	// By default, a phone stacks tables with three or more columns, labelling each value after the name. With no
-	// heading above them, a value carries its column's unit after it, as the game writes "4 seconds".
+	// heading above them, a value carries its column's unit after it, as the game writes "4 seconds". A column
+	// without a unit defines no unit, so its cells have no empty unit that would take a gap beside the value.
 	const labels = $derived(
 		parts
 			.slice(1)
 			.flatMap((heading, index) => [
 				`--label-${index + 2}: ${JSON.stringify(heading.label)}`,
-				`--unit-${index + 2}: ${JSON.stringify(heading.unit ? ' ' + heading.unit : '')}`
+				...(heading.unit
+					? [
+							`--unit-${index + 2}: ${JSON.stringify(' ' + heading.unit)}`,
+							// A cell holding exactly 1, which marks itself "one", reads the unit in the singular.
+							`--unit-one-${index + 2}: ${JSON.stringify(' ' + heading.unit.replace(/s$/, ''))}`
+						]
+					: [])
 			])
 			.join('; ')
 	);
 </script>
 
-{#snippet table(entries: T[], offset: number)}
+<div class="relation-panel">
 	<table
 		class="relation-table"
-		class:stacked={stackOnMobile && headings.length > 2}
-		aria-label={label + (offset ? ' continued' : '')}
+		class:stacked={stackOnMobile && (headings.length > 2 || (stackPairs && headings.length === 2))}
+		aria-label={label}
 		style={labels}
 	>
 		<thead
@@ -57,17 +71,24 @@
 			></thead
 		>
 		<tbody
-			>{#each entries as item, index (index)}{@render row(item, index + offset)}{/each}</tbody
+			>{#each items.slice(0, preview) as item, index (index)}{@render row(
+					item,
+					index
+				)}{/each}</tbody
 		>
+		{#if items.length > preview && shown}<tbody class="more"
+				>{#each items.slice(preview) as item, index (index)}{@render row(
+						item,
+						index + preview
+					)}{/each}</tbody
+			>{/if}
 	</table>
-{/snippet}
-<div class="relation-panel">
-	{@render table(items.slice(0, preview), 0)}
-	{#if items.length > preview}
-		<StaticMore more={`Show ${items.length - preview} more`} less="Show fewer" {label}
-			>{@render table(items.slice(preview), preview)}</StaticMore
-		>
-	{/if}
+	{#if items.length > preview}<MoreToggle
+			more={`Show ${items.length - preview} more`}
+			less="Show fewer"
+			{label}
+			onshow={(value) => (shown = value)}
+		/>{/if}
 </div>
 
 <style>
@@ -104,6 +125,10 @@
 	}
 	.relation-panel :global(tbody tr:first-child :is(th, td)) {
 		border-top: 0;
+	}
+	/* The rows past the preview continue the rows above, divided as they are. */
+	.relation-panel :global(tbody.more tr:first-child :is(th, td)) {
+		border-top: var(--border-width) solid var(--border);
 	}
 	.relation-panel :global(tbody tr:hover) {
 		background: var(--surface-hover);
@@ -148,7 +173,8 @@
 			gap: var(--gap-line) 0;
 			padding: var(--inset-cell) 0;
 		}
-		.relation-panel :global(.stacked tbody tr + tr) {
+		.relation-panel :global(.stacked tbody tr + tr),
+		.relation-panel :global(.stacked tbody.more tr:first-child) {
 			border-top: var(--border-width) solid var(--border);
 		}
 		.relation-panel :global(.stacked tr > :is(th, td)) {
@@ -157,6 +183,13 @@
 		}
 		.relation-panel :global(.stacked tr > :first-child) {
 			flex-basis: 100%;
+		}
+		/* A group heading is one band from edge to edge: the row carries no padding and its cell keeps a cell's own. */
+		.relation-panel :global(.stacked tr.group-heading) {
+			padding: 0;
+		}
+		.relation-panel :global(.stacked tr.group-heading > th) {
+			padding: var(--inset-cell) var(--inset);
 		}
 		/* Each value takes its own line, its label on the left and the value with its unit on the right. */
 		.relation-panel :global(.stacked td:nth-child(n + 2)) {
@@ -201,6 +234,22 @@
 		.relation-panel :global(.stacked td:nth-child(5)::after) {
 			content: var(--unit-5);
 			white-space: pre;
+		}
+		/* A unit follows its value after one space, not the gap between the label and the value. */
+		.relation-panel :global(.stacked td:nth-child(n + 2)::after) {
+			margin-left: calc(-1 * var(--gap-inline));
+		}
+		.relation-panel :global(.stacked td.one:nth-child(2)::after) {
+			content: var(--unit-one-2);
+		}
+		.relation-panel :global(.stacked td.one:nth-child(3)::after) {
+			content: var(--unit-one-3);
+		}
+		.relation-panel :global(.stacked td.one:nth-child(4)::after) {
+			content: var(--unit-one-4);
+		}
+		.relation-panel :global(.stacked td.one:nth-child(5)::after) {
+			content: var(--unit-one-5);
 		}
 		/* A value the row lacks or the game does not tell has no unit to carry. */
 		.relation-panel :global(.stacked td.absent::after) {

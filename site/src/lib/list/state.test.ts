@@ -262,3 +262,8 @@ it('finds names the game misspells by one letter and words in any order', () => 
 	expect(nameMatches('Iron Ingot', 'irn')).toBe(false);
 	expect(nameMatches('Copper Ore', 'iron')).toBe(false);
 });
+
+it('sorts a requirement such as a level lowest first, and other numbers highest first', () => {
+	expect(read('sort=professionLevel').sort.direction).toBe('asc');
+	expect(read('sort=damage').sort.direction).toBe('desc');
+});

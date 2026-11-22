@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { formatNumber } from '../format.js';
+	import LinkedText from './LinkedText.svelte';
 	/**
 	 * A section of a page, as in Afallon: a heading with its count and one optional action above one body. The body
 	 * spaces its blocks by the block gap, and sections space each other by the section gap of their container.
@@ -17,7 +18,7 @@
 		id: string;
 		title: string;
 		count?: number;
-		/** One sentence that states what every row shares. */
+		/** One sentence that states what every row shares. It may link concepts as text written for the site does. */
 		line?: string;
 		action?: Snippet;
 		class?: string;
@@ -38,7 +39,7 @@
 			</h2>
 			{#if action}<div class="action">{@render action()}</div>{/if}
 		</div>
-		{#if line}<p class="line">{line}</p>{/if}
+		{#if line}<p class="line"><LinkedText text={line} /></p>{/if}
 	</header>
 	<div class="body">{@render children()}</div>
 </section>

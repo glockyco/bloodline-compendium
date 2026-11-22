@@ -11,7 +11,11 @@ import type {
 	DisciplineIndex,
 	DisciplinePage,
 	SkillIndex,
-	SkillPage
+	SkillPage,
+	ProfessionIndex,
+	ProfessionPage,
+	MechanicIndex,
+	MechanicPage
 } from '#lib/site-data.js';
 const directory = resolve(process.env.BLOODLINE_SITE_DATA || 'fixtures/site-data');
 // Every page reads the same few files, and graph.json alone is large, so each file is parsed once until it changes.
@@ -38,6 +42,11 @@ export const readDiscipline = (slug: string) =>
 	json<DisciplinePage>('disciplines/' + slug + '.json');
 export const readSkills = () => json<SkillIndex>('skills.json');
 export const readSkill = (slug: string) => json<SkillPage>('skills/' + slug + '.json');
+export const readMechanics = () => json<MechanicIndex>('mechanics.json');
+export const readMechanic = (slug: string) => json<MechanicPage>('mechanics/' + slug + '.json');
+export const readProfessions = () => json<ProfessionIndex>('professions.json');
+export const readProfession = (slug: string) =>
+	json<ProfessionPage>('professions/' + slug + '.json');
 /**
  * The merchant names that several merchants share, such as Shopkeeper. Such a name is a role, which a sentence
  * writes with "the", while a person's name stands alone.

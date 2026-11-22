@@ -23,7 +23,10 @@ internal static class ItemList
         bool Numeric,
         string? Unit,
         Func<ItemPage, ListCell?> Cell
-    );
+    )
+    {
+        public bool Ascending { get; init; }
+    }
 
     /// <summary>What every list's Availability filter calls each status, items and skills alike.</summary>
     internal static readonly IReadOnlyDictionary<ItemStatus, string> Availability = new Dictionary<
@@ -71,6 +74,12 @@ internal static class ItemList
                     .Select(place => place.Name)
         ),
         new("availability", "Availability", [], item => [Camel(item.Status.ToString())]),
+        new(
+            "profession",
+            "Profession",
+            [],
+            item => Professions.Of(item).Select(entry => entry.Profession.Name)
+        ),
     ];
 
     private static readonly ColumnRule[] Columns =
@@ -125,6 +134,10 @@ internal static class ItemList
             item => Number(item, Stat.ShieldChargeDamage)
         ),
         new("speed", "Speed", ["weapon"], false, null, Speed),
+        new("professionLevel", "Profession Level", [], true, null, ProfessionLevel)
+        {
+            Ascending = true,
+        },
         new(
             "magazineSize",
             "Magazine Size",
@@ -241,7 +254,10 @@ internal static class ItemList
                 rule.Categories,
                 rule.Numeric,
                 rule.Unit
-            ))
+            )
+            {
+                Ascending = rule.Ascending,
+            })
             .ToArray();
 
     // A facet that belongs to some categories holds values only for their items.
@@ -294,6 +310,13 @@ internal static class ItemList
     private static ListCell? Number(ItemPage item, Stat stat) =>
         item.Facts.FirstOrDefault(fact => fact.Stat == stat) is { } fact
             ? new ListCell(fact.Number, fact.Number is null ? fact.Text : null)
+            : null;
+
+    /// <summary>The lowest profession level any confirmed way to make the item needs, when one sets a level.</summary>
+    private static ListCell? ProfessionLevel(ItemPage item) =>
+        Professions.Of(item).Select(entry => entry.Level).Where(level => level is not null).Min()
+            is { } level
+            ? new ListCell(level, null)
             : null;
 
     private static ListCell? Word(ItemPage item, Stat stat) =>

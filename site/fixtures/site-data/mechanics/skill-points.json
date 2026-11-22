@@ -1,0 +1,22 @@
+{
+	"key": "Mechanic:Skill Points",
+	"slug": "skill-points",
+	"name": "Skill Points",
+	"kind": "mechanic",
+	"intro": "You spend skill points to unlock skills in a [discipline](discipline:emberlore)'s tree.",
+	"sections": [
+		{
+			"heading": "Earning Skill Points",
+			"paragraphs": ["You get 1 skill point each level."],
+			"anchor": "earning-skill-points"
+		},
+		{
+			"heading": "A Heading Long Enough to Wrap Across Two Lines on a Phone",
+			"paragraphs": [
+				"Clicking a skill again refunds the point. Clicking a skill again refunds the point. Clicking a skill again refunds the point. Clicking a skill again refunds the point. "
+			],
+			"anchor": "a-heading-long-enough-to-wrap-across-two-lines-on-a-phone"
+		}
+	],
+	"evidence": ["Invented run one: each level added 1 skill point."]
+}

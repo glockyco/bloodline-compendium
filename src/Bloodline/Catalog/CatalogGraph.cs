@@ -128,6 +128,13 @@ internal static class CatalogGraph
                         }
                         : original.Price,
                     Conditions = Conditions(original.Conditions),
+                    // A recipe's profession is an entity the graph and its pages know, as a condition's is.
+                    Recipe = original.Recipe is { Profession: { } profession } recipe
+                        ? recipe with
+                        {
+                            Profession = Resolve(profession),
+                        }
+                        : original.Recipe,
                 };
                 var id = Id(source.Kind.ToString(), source.Entity, target, source);
                 source = source with { RelationId = id };

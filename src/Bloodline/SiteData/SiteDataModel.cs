@@ -24,6 +24,7 @@ internal enum EntityKind
     Passive,
     Spellsong,
     Profession,
+    Mechanic,
 }
 
 /// <summary>
@@ -171,7 +172,9 @@ internal sealed record ListFacet(
 
 /// <summary>
 /// A column of the item list. <see cref="Categories"/> names the category slugs that show it by default, none when
-/// empty. A <see cref="Numeric"/> column can also become a stat filter.
+/// empty. A <see cref="Numeric"/> column can also become a stat filter. A numeric column sorts highest first, as
+/// more damage reads as better, unless <see cref="Ascending"/> marks a requirement, such as a level, which reads lowest
+/// first.
 /// </summary>
 internal sealed record ListColumn(
     string Id,
@@ -179,7 +182,10 @@ internal sealed record ListColumn(
     IReadOnlyList<string> Categories,
     bool Numeric,
     string? Unit
-);
+)
+{
+    public bool Ascending { get; init; }
+}
 
 /// <summary>A cell of the item list, with the number it sorts and filters by when it has one.</summary>
 internal sealed record ListCell(double? Number, string? Text);
@@ -664,6 +670,99 @@ internal sealed record ArmorQuality(
     IReadOnlyDictionary<string, double> ArmorByClass
 );
 
+/// <summary>
+/// A hand-written explanation of how a part of the game works, from <c>src/Bloodline/Content/mechanics.json</c>. Its text
+/// may link entities as text written for the site does. <see cref="Evidence"/> names the runs and code each fact rests on.
+/// </summary>
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
+internal sealed record MechanicContent(
+    string Name,
+    string Intro,
+    IReadOnlyList<MechanicSection> Sections,
+    IReadOnlyList<string> Evidence
+);
+
+/// <summary>A titled part of a mechanic page. The catalog sets <see cref="Anchor"/>, its fragment, from the heading.</summary>
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
+internal sealed record MechanicSection(string Heading, IReadOnlyList<string> Paragraphs)
+{
+    public string? Anchor { get; init; }
+
+    /// <summary>Numbers a player compares, shown after the paragraphs. Cells may link as paragraphs do.</summary>
+    public MechanicTable? Table { get; init; }
+}
+
+/// <summary>A small table of a mechanic section, with a heading per column and the cells of each row.</summary>
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
+internal sealed record MechanicTable(
+    IReadOnlyList<string> Headings,
+    IReadOnlyList<IReadOnlyList<string>> Rows
+);
+
+/// <summary>A mechanic page. Written as <c>mechanics/&lt;slug&gt;.json</c>.</summary>
+internal sealed record MechanicPage(
+    string Key,
+    string Slug,
+    string Name,
+    string Intro,
+    IReadOnlyList<MechanicSection> Sections,
+    IReadOnlyList<string> Evidence
+)
+{
+    [JsonRequired]
+    public EntityKind Kind { get; init; } = EntityKind.Mechanic;
+}
+
+/// <summary>The mechanic pages in their file's order. Written as <c>mechanics.json</c>.</summary>
+internal sealed record MechanicIndex(IReadOnlyList<MechanicSummary> Mechanics);
+
+internal sealed record MechanicSummary(string Key, string Slug, string Name, string Intro);
+
+/// <summary>The professions in the order <c>Professions</c> lists them. Written as <c>professions.json</c>.</summary>
+internal sealed record ProfessionIndex(IReadOnlyList<ProfessionSummary> Professions);
+
+/// <summary>
+/// A profession as the profession list shows it: where its work is done, the lowest and highest level its items need
+/// when the game sets levels, how many items it gives and the icon of one.
+/// </summary>
+internal sealed record ProfessionSummary(string Key, string Slug, string Name, int Count)
+{
+    public string? Icon { get; init; }
+
+    [JsonRequired]
+    public IReadOnlyList<EntityReference> Stations { get; init; } = [];
+
+    public int? MinLevel { get; init; }
+    public int? MaxLevel { get; init; }
+}
+
+/// <summary>
+/// Everything a profession page shows: where its work is done and what it makes, gathers or catches, by the level
+/// it needs. Written as <c>professions/&lt;slug&gt;.json</c>.
+/// </summary>
+internal sealed record ProfessionPage(
+    string Key,
+    string Slug,
+    string Name,
+    IReadOnlyList<EntityReference> Stations,
+    IReadOnlyList<ProfessionRow> Rows
+)
+{
+    [JsonRequired]
+    public EntityKind Kind { get; init; } = EntityKind.Profession;
+}
+
+/// <summary>
+/// One thing a profession gives: the item, the way it is made, gathered or caught, the profession level it needs when
+/// the game sets one, and the profession experience it gives when the game says.
+/// </summary>
+internal sealed record ProfessionRow(
+    EntityReference Product,
+    SourceKind Kind,
+    int? Level,
+    double? Experience
+);
+
 /// <summary>The disciplines in the skill window's order. Written as <c>disciplines.json</c>.</summary>
 internal sealed record DisciplineIndex(IReadOnlyList<DisciplineSummary> Disciplines);
 
@@ -872,5 +971,9 @@ internal sealed record SiteDataFiles(
     DisciplineIndex Disciplines,
     DisciplinePage Discipline,
     SkillIndex Skills,
-    SkillPage Skill
+    SkillPage Skill,
+    ProfessionIndex Professions,
+    ProfessionPage Profession,
+    MechanicIndex Mechanics,
+    MechanicPage Mechanic
 );

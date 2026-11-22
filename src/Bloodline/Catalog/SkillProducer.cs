@@ -86,7 +86,7 @@ internal sealed class SkillProducer
         new(EntityKind.Discipline, tree.Path, tree.Name, ItemIdentity.Slug(tree.Name), null);
 
     public static EntityReference DisciplineReference(DisciplinePage page) =>
-        new(EntityKind.Discipline, page.Key, page.Name, page.Slug, null);
+        new(EntityKind.Discipline, page.Key, page.Name, page.Slug, page.Icon);
 
     /// <summary>
     /// The discipline whose level an entry checks, found by the level name the game tracks, such as Bow for Bows &amp;
@@ -532,7 +532,10 @@ internal sealed class SkillProducer
                 Facets = Facets(summaries, counted, disciplines),
                 Columns =
                 [
-                    new ListColumn("requiredLevel", "Required Level", slugs, true, null),
+                    new ListColumn("requiredLevel", "Required Level", slugs, true, null)
+                    {
+                        Ascending = true,
+                    },
                     .. NumericColumns.Select(column => new ListColumn(
                         column.Id,
                         StatVocabulary.Number(column.Stat, null).Label,

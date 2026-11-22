@@ -126,5 +126,19 @@
 		"searchFilter": "Spellsongs",
 		"structuredDataType": "Thing",
 		"host": "discipline"
+	},
+	{
+		"kind": "profession",
+		"hasPages": true,
+		"route": "professions",
+		"searchFilter": "Professions",
+		"structuredDataType": "Thing"
+	},
+	{
+		"kind": "mechanic",
+		"hasPages": true,
+		"route": "mechanics",
+		"searchFilter": "Mechanics",
+		"structuredDataType": "Thing"
 	}
 ]

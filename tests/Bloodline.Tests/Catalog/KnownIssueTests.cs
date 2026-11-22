@@ -164,7 +164,15 @@ public sealed class KnownIssueTests
             ),
         ];
         var items = cases
-            .Select(test => template with { Key = test.Key, Name = test.Key, Type = "Staff" })
+            .Select(test =>
+                template with
+                {
+                    Key = test.Key,
+                    Name = test.Key,
+                    Slug = ItemIdentity.Slug(test.Key),
+                    Type = "Staff",
+                }
+            )
             .ToArray();
         var registry = new KnownIssueRegistry([
             Issue(KnownIssues.NoFireballs),

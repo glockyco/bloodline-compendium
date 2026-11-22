@@ -1,0 +1,16 @@
+{
+	"mechanics": [
+		{
+			"key": "Mechanic:Skill Points",
+			"slug": "skill-points",
+			"name": "Skill Points",
+			"intro": "You spend skill points to unlock skills in a [discipline](discipline:emberlore)'s tree."
+		},
+		{
+			"key": "Mechanic:Proficiency Points",
+			"slug": "proficiency-points",
+			"name": "Proficiency Points",
+			"intro": "Each discipline has its own proficiency points."
+		}
+	]
+}

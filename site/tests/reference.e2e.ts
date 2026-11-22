@@ -566,7 +566,12 @@ test('each public page has production identity, social metadata and generated br
 			'/skills/forgotten-spark/',
 			'/skills/lanternedge-flare/',
 			'/skills/lost-chant/',
-			'/skills/moss-ward/'
+			'/skills/moss-ward/',
+			'/professions/',
+			'/professions/starsmithing/',
+			'/mechanics/',
+			'/mechanics/skill-points/',
+			'/mechanics/proficiency-points/'
 		]
 			.map((route) => origin + route)
 			.sort()

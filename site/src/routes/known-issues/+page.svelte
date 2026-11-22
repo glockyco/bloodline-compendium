@@ -79,7 +79,10 @@
 								<dd>
 									<ul class="citations">
 										{#each issue.citations as citation (citation)}<li>
-												<code>{citation}</code>
+												<code
+													>{#each citation.split(/(?<=[/:.])/) as part, index (index)}{part}<wbr
+														/>{/each}</code
+												>
 											</li>{/each}
 									</ul>
 								</dd>
@@ -152,18 +155,8 @@
 		display: block;
 		padding-inline: 0;
 	}
-	/* Steps and developer details stay one click away, so an entry shows what the bug does and what to do. */
-	.disclosure {
-		padding-top: var(--gap-block);
-		border-top: var(--border-width) solid var(--border);
-	}
 	dd {
 		color: var(--text-soft);
-	}
-	.disclosure summary {
-		cursor: pointer;
-		color: var(--text-soft);
-		font-weight: var(--weight-strong);
 	}
 	.steps {
 		margin: var(--gap-block) 0 0;
@@ -173,8 +166,8 @@
 		gap: var(--gap-block);
 		margin: var(--gap-block) 0 0;
 	}
+	/* A function path breaks only after a slash, colon or dot, where each part of it ends. */
 	.citations {
 		padding-left: var(--inset);
-		overflow-wrap: anywhere;
 	}
 </style>

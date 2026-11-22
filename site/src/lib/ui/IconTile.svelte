@@ -30,10 +30,12 @@
 </a>
 
 <style>
+	/* Tiles of one row share its height, as their names and lines wrap differently. */
 	.tile {
 		display: grid;
+		height: 100%;
 		grid-template-columns: auto minmax(0, 1fr);
-		align-items: center;
+		align-items: start;
 		gap: var(--gap-block);
 		padding: var(--inset-cell);
 		border: var(--border-width) solid var(--border);
@@ -57,9 +59,11 @@
 	.name {
 		font-weight: var(--weight-strong);
 		overflow-wrap: anywhere;
+		text-wrap: balance;
 	}
 	.meta {
 		color: var(--text-muted);
+		text-wrap: pretty;
 		font-size: var(--type-meta);
 		line-height: var(--leading-meta);
 	}

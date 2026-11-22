@@ -360,7 +360,8 @@
         "skill",
         "passive",
         "spellsong",
-        "profession"
+        "profession",
+        "mechanic"
       ],
       "title": "EntityKind"
     },
@@ -388,6 +389,7 @@
             "passive",
             "spellsong",
             "profession",
+            "mechanic",
             null
           ]
         },
@@ -1071,6 +1073,9 @@
     },
     "ListColumn": {
       "properties": {
+        "ascending": {
+          "type": "boolean"
+        },
         "categories": {
           "items": {
             "type": "string"
@@ -1138,6 +1143,149 @@
         "labels"
       ],
       "title": "ListFacet",
+      "type": "object"
+    },
+    "MechanicIndex": {
+      "properties": {
+        "mechanics": {
+          "items": {
+            "$ref": "#/$defs/MechanicSummary"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "mechanics"
+      ],
+      "title": "MechanicIndex",
+      "type": "object"
+    },
+    "MechanicPage": {
+      "properties": {
+        "evidence": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "intro": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/EntityKind"
+        },
+        "name": {
+          "type": "string"
+        },
+        "sections": {
+          "items": {
+            "$ref": "#/$defs/MechanicSection"
+          },
+          "type": "array"
+        },
+        "slug": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "slug",
+        "name",
+        "intro",
+        "sections",
+        "evidence",
+        "kind"
+      ],
+      "title": "MechanicPage",
+      "type": "object"
+    },
+    "MechanicSection": {
+      "additionalProperties": false,
+      "properties": {
+        "anchor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "heading": {
+          "type": "string"
+        },
+        "paragraphs": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "table": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MechanicTable"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "heading",
+        "paragraphs"
+      ],
+      "title": "MechanicSection",
+      "type": "object"
+    },
+    "MechanicSummary": {
+      "properties": {
+        "intro": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "slug",
+        "name",
+        "intro"
+      ],
+      "title": "MechanicSummary",
+      "type": "object"
+    },
+    "MechanicTable": {
+      "additionalProperties": false,
+      "properties": {
+        "headings": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "rows": {
+          "items": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "headings",
+        "rows"
+      ],
+      "title": "MechanicTable",
       "type": "object"
     },
     "Odds": {
@@ -1391,6 +1539,138 @@
         "trading"
       ],
       "title": "PriceRule"
+    },
+    "ProfessionIndex": {
+      "properties": {
+        "professions": {
+          "items": {
+            "$ref": "#/$defs/ProfessionSummary"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "professions"
+      ],
+      "title": "ProfessionIndex",
+      "type": "object"
+    },
+    "ProfessionPage": {
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/EntityKind"
+        },
+        "name": {
+          "type": "string"
+        },
+        "rows": {
+          "items": {
+            "$ref": "#/$defs/ProfessionRow"
+          },
+          "type": "array"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "stations": {
+          "items": {
+            "$ref": "#/$defs/EntityReference"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "key",
+        "slug",
+        "name",
+        "stations",
+        "rows",
+        "kind"
+      ],
+      "title": "ProfessionPage",
+      "type": "object"
+    },
+    "ProfessionRow": {
+      "properties": {
+        "experience": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "kind": {
+          "$ref": "#/$defs/SourceKind"
+        },
+        "level": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "product": {
+          "$ref": "#/$defs/EntityReference"
+        }
+      },
+      "required": [
+        "product",
+        "kind",
+        "level",
+        "experience"
+      ],
+      "title": "ProfessionRow",
+      "type": "object"
+    },
+    "ProfessionSummary": {
+      "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "icon": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "key": {
+          "type": "string"
+        },
+        "maxLevel": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "minLevel": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "stations": {
+          "items": {
+            "$ref": "#/$defs/EntityReference"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "key",
+        "slug",
+        "name",
+        "count",
+        "stations"
+      ],
+      "title": "ProfessionSummary",
+      "type": "object"
     },
     "ProjectileGroup": {
       "properties": {
@@ -2311,6 +2591,18 @@
       },
       "type": "object"
     },
+    "mechanic": {
+      "$ref": "#/$defs/MechanicPage"
+    },
+    "mechanics": {
+      "$ref": "#/$defs/MechanicIndex"
+    },
+    "profession": {
+      "$ref": "#/$defs/ProfessionPage"
+    },
+    "professions": {
+      "$ref": "#/$defs/ProfessionIndex"
+    },
     "skill": {
       "$ref": "#/$defs/SkillPage"
     },
@@ -2330,7 +2622,11 @@
     "disciplines",
     "discipline",
     "skills",
-    "skill"
+    "skill",
+    "professions",
+    "profession",
+    "mechanics",
+    "mechanic"
   ],
   "title": "SiteDataFiles",
   "type": "object"

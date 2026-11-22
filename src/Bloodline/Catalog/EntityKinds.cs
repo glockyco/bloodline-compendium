@@ -25,6 +25,7 @@ internal static class EntityKinds
         {
             Host = EntityKind.Discipline,
         },
-        new(EntityKind.Profession, false, null, "Professions", "Thing"),
+        new(EntityKind.Profession, true, "professions", "Professions", "Thing"),
+        new(EntityKind.Mechanic, true, "mechanics", "Mechanics", "Thing"),
     ];
 }

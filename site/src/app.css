@@ -49,12 +49,16 @@ strong,
 b {
 	font-weight: var(--weight-strong);
 }
+/* Headings set numbers as lining figures, so "100" never reads as "1oo", and balance their lines, so no word is
+   left alone on the last one. */
 h1,
 h2,
 h3 {
 	font-family: var(--font-heading);
 	font-weight: var(--weight-heading);
+	font-variant-numeric: lining-nums;
 	overflow-wrap: anywhere;
+	text-wrap: balance;
 }
 h1 {
 	font-size: var(--type-5);
@@ -114,11 +118,13 @@ label {
 	display: grid;
 	gap: var(--gap-inline);
 }
+/* An intro is one or two lines, so its lines balance instead of leaving a short last one. */
 .intro {
 	max-width: var(--size-measure-intro);
 	color: var(--text-muted);
 	font-size: var(--type-intro);
 	line-height: var(--leading-intro);
+	text-wrap: balance;
 }
 .eyebrow {
 	color: var(--text-muted);
@@ -147,8 +153,7 @@ label {
 	margin-bottom: var(--gap-line);
 }
 /* Prose ends without a stranded last word, and a list of separate thoughts spaces its items apart. */
-.sections p,
-.intro {
+.sections p:not(.intro) {
 	text-wrap: pretty;
 }
 .sections > section > :is(ul, ol) {
@@ -233,6 +238,25 @@ small {
 	display: grid;
 	gap: var(--gap-line);
 	margin-bottom: var(--gap-section);
+}
+/* Steps and developer details stay one click away below what a reader needs first, ruled off from it. */
+.disclosure {
+	padding-top: var(--gap-block);
+	border-top: var(--border-width) solid var(--border);
+}
+.disclosure > summary {
+	cursor: pointer;
+	color: var(--text-soft);
+	font-weight: var(--weight-strong);
+}
+.disclosure > :not(summary) {
+	margin-top: var(--gap-block);
+}
+/* A page title beside its icon in a slot, as a profession's or a discipline's. */
+.icon-heading {
+	grid-template-columns: auto minmax(0, 1fr);
+	align-items: center;
+	gap: var(--gap-block);
 }
 .item-heading h1 {
 	margin: 0;
@@ -355,6 +379,10 @@ small {
 	font-size: var(--type-meta);
 	font-weight: var(--weight-strong);
 	line-height: var(--leading-meta);
+}
+/* Without JavaScript, a list's or table's entries past its preview show while the disclosure after it is open. */
+:has(+ .more-entries:not([open])) > .more {
+	display: none;
 }
 .more-entries summary {
 	padding: var(--inset-cell) var(--inset);

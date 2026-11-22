@@ -4,6 +4,7 @@
 	import SeoHead from '#lib/SeoHead.svelte';
 	import DisciplineTables from '#lib/skills/DisciplineTables.svelte';
 	import BugsSection from '#lib/entity/BugsSection.svelte';
+	import IconSlot from '#lib/ui/IconSlot.svelte';
 	import { entityPath, kindPath } from '#lib/entities.js';
 	import { disciplineContents } from '#lib/skills/describe.js';
 	let { data } = $props();
@@ -54,13 +55,16 @@
 	icon={discipline.icon ?? null}
 	detail={discipline.category.name}
 >
-	<div class="item-heading">
-		<h1 data-game>{discipline.name}</h1>
-		<p class="identity">
-			<a href={kindPath(discipline.kind, data.kinds, '#' + discipline.category.slug)!}
-				>{discipline.category.name}</a
-			>
-		</p>
+	<div class="item-heading icon-heading">
+		<IconSlot icon={discipline.icon ?? null} />
+		<div>
+			<h1 data-game>{discipline.name}</h1>
+			<p class="identity">
+				<a href={kindPath(discipline.kind, data.kinds, '#' + discipline.category.slug)!}
+					>{discipline.category.name}</a
+				>
+			</p>
+		</div>
 	</div>
 	<div class="item-relations" data-pagefind-ignore="all">
 		<DisciplineTables {discipline} skillFacts={data.skillFacts} />

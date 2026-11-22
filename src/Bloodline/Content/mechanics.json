@@ -1,0 +1,118 @@
+[
+	{
+		"name": "Skill Points",
+		"intro": "Skill points unlock skills in the skill trees. You get one each time your character levels up.",
+		"sections": [
+			{
+				"heading": "How You Get Them",
+				"paragraphs": [
+					"You get 1 skill point each time your character levels up. Leveling a discipline, such as [Pyromancy](discipline:pyromancy), gives no skill points."
+				]
+			},
+			{
+				"heading": "How You Spend Them",
+				"paragraphs": [
+					"Each skill costs 1 skill point. You can unlock it once you reach the level its skill tree shows for it. Click the skill again to get the point back."
+				]
+			}
+		],
+		"evidence": [
+			"Run progression2, build 24464547: each character level up added 1 to Skill Points.",
+			"Runs grants1 and progression3, build 24464547: discipline level ups left Skill Points unchanged.",
+			"Run passives1, build 24464547: unlocking a skill took 1 skill point, and pressing it again returned it."
+		]
+	},
+	{
+		"name": "Proficiency Points",
+		"intro": "Proficiency points buy passives. Each discipline has its own, which you get by leveling that discipline.",
+		"sections": [
+			{
+				"heading": "How You Get Them",
+				"paragraphs": [
+					"Each time a discipline levels up, you get proficiency points for that discipline."
+				],
+				"table": {
+					"headings": [
+						"Discipline",
+						"Points per Level"
+					],
+					"rows": [
+						[
+							"Most disciplines",
+							"1"
+						],
+						[
+							"[Necromancy](discipline:necromancy)",
+							"2"
+						],
+						[
+							"[Focuses](discipline:focuses) and [Vampirism](discipline:vampirism)",
+							"None after the first level"
+						],
+						[
+							"[Blood Magic](discipline:blood-magic)",
+							"Set by [Blood Levels](mechanic:blood-levels)"
+						]
+					]
+				}
+			},
+			{
+				"heading": "How You Spend Them",
+				"paragraphs": [
+					"A passive costs points of its own discipline. A passive with ranks costs more for each rank you buy. Lasting Servitude costs 2 points for its first rank, then 4, 6, 8 and 10, so all five ranks cost 30.",
+					"Each discipline page lists what every rank of its passives costs."
+				]
+			}
+		],
+		"evidence": [
+			"Run grants1, build 24464547: a discipline level up added 1 proficiency point of that discipline, Necromancy 2, and Focuses, whose level the game names Staff, and Vampirism none after the first.",
+			"Run passives1, build 24464547: Lasting Servitude's ranks cost 2, 4, 6, 8 and 10 points, and Lingering Souls' 1 to 5."
+		]
+	},
+	{
+		"name": "Blood Levels",
+		"intro": "Blood Levels is a video setting that changes how much blood you see and how many [Blood Magic](discipline:blood-magic) points you get. To change it, open Settings from the pause menu and choose Video and Effect Settings.",
+		"sections": [
+			{
+				"heading": "Blood Magic Points",
+				"paragraphs": [
+					"Each time Blood Magic levels up, your Blood Magic points are set to the number for your setting. They replace the points you had, so points you saved are lost."
+				],
+				"table": {
+					"headings": [
+						"Setting",
+						"Points After Each Level"
+					],
+					"rows": [
+						[
+							"No blood",
+							"2"
+						],
+						[
+							"A bit of blood",
+							"3"
+						],
+						[
+							"Default Amount",
+							"4"
+						],
+						[
+							"BLOODBATH",
+							"6"
+						]
+					]
+				}
+			},
+			{
+				"heading": "Getting the Most Points",
+				"paragraphs": [
+					"Set Blood Levels to BLOODBATH before Blood Magic levels up, and spend your points before its next level."
+				]
+			}
+		],
+		"evidence": [
+			"Run rowgate1, build 24464547: with the settings window set to No blood, A bit of blood, Default Amount and BLOODBATH, the next Blood Magic level up left 2, 3, 4 and 6 points, and after spending 2 of 3 points a level up restored 3.",
+			"Code: Blood Magic Level Tracking sets the points to the game instance's Blood Level plus 1, which SettingsWindow1's Blood selection writes."
+		]
+	}
+]

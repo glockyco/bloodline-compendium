@@ -36,9 +36,10 @@ for (const width of [1280, 390]) {
 					await expect(
 						page.getByRole('button', { name: 'Show fewer in Sold by', exact: true })
 					).toHaveAttribute('aria-expanded', 'true');
-					await expect(
-						page.getByRole('table', { name: 'Sold by continued', exact: true })
-					).toBeVisible();
+					// The revealed rows continue the same table, under its one header row.
+					const table = page.getByRole('table', { name: 'Sold by', exact: true });
+					await expect(table.locator('.source-row')).toHaveCount(13);
+					await expect(table.locator('thead tr')).toHaveCount(1);
 				}
 				await expect(page.locator('details > summary').first()).toBeVisible();
 				for (const summary of await page.locator('details > summary').all()) {

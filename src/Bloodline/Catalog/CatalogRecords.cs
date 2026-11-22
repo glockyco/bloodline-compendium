@@ -27,6 +27,9 @@ internal sealed record CatalogRecords(
     /// <summary>The repository's known game defects, which the build copies beside the program.</summary>
     public KnownIssueRegistry Issues { get; init; } = new([]);
 
+    /// <summary>The hand-written mechanic pages, which the build copies beside the program.</summary>
+    public IReadOnlyList<MechanicContent> Mechanics { get; init; } = [];
+
     public static CatalogRecords Load(RecordLayout layout) =>
         new(
             CanonicalJson.Read<BuildRecord>(layout.BuildFile),
@@ -43,6 +46,9 @@ internal sealed record CatalogRecords(
             Tooltips = TooltipCheck.Load(layout.RuntimeDirectory),
             SkillTooltips = SkillTooltipCheck.Load(layout.RuntimeDirectory),
             Issues = KnownIssues.Load(Path.Combine(AppContext.BaseDirectory, "known-issues.json")),
+            Mechanics = MechanicProducer.Load(
+                Path.Combine(AppContext.BaseDirectory, "mechanics.json")
+            ),
         };
 
     private static T[] ReadDirectory<T>(string directory) =>

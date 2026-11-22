@@ -17,6 +17,11 @@
       CopyToOutputDirectory="PreserveNewest"
     />
     <Content
+      Include="Content/mechanics.json"
+      Link="mechanics.json"
+      CopyToOutputDirectory="PreserveNewest"
+    />
+    <Content
       Include="../../issues/known-issues.json"
       Link="known-issues.json"
       CopyToOutputDirectory="PreserveNewest"

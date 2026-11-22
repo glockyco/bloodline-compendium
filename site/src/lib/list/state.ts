@@ -135,10 +135,11 @@ export function writeState(state: ListState, index: ListShape): URLSearchParams 
 
 /** A column's first-click order: A to Z for text, high to low for numbers. */
 export function naturalDirection(column: string, index: ListShape): 'asc' | 'desc' {
-	return index.fixed.find((entry) => entry.id === column)?.numeric ||
-		index.columns.find((entry) => entry.id === column)?.numeric
-		? 'desc'
-		: 'asc';
+	const found =
+		index.fixed.find((entry) => entry.id === column) ??
+		index.columns.find((entry) => entry.id === column);
+	// Numbers read best first, except a requirement such as a level, whose column marks itself ascending.
+	return found?.numeric && !('ascending' in found && found.ascending) ? 'desc' : 'asc';
 }
 
 function statMatches(item: ListRow, filter: StatFilter): boolean {

@@ -308,7 +308,9 @@
       "expected": "Each item shows its own name, such as an earth orb named for earth.",
       "observed": "The tooltips of the wood axe, the Bonemetal blade, the earth orb, the breeze stone and the geo wand core show the names Askillian Gladus, Bonemetal Grip, Bolt-Orb, Earthshard Heart and Stormbound Wand Core, each the name of another item, above descriptions of what they are.",
       "cause": "Each item's ItemInfo carries another item's ItemName, which the inventory tooltip shows.",
-      "citations": ["/Game/BloodlinesAlpha/UI/Inventory/UI_InventoryItem_2:OnMouseEnter"],
+      "citations": [
+        "/Game/BloodlinesAlpha/UI/Inventory/UI_InventoryItem_2:OnMouseEnter"
+      ],
       "builds": [24464547],
       "report": "notReported",
       "reportUrl": null
@@ -358,11 +360,11 @@
     {
       "id": "blood-magic-points-follow-blood-setting",
       "title": "Blood Magic points follow the blood setting",
-      "effect": "Each [Blood Magic](discipline:blood-magic) level sets your Blood Magic proficiency points to the Blood Levels setting plus one, from 2 with No blood to 6 with BLOODBATH. Points you spent before the level come back, and points you did not spend do not add up.",
+      "effect": "Each time [Blood Magic](discipline:blood-magic) levels up, your Blood Magic points are set to 2, 3, 4 or 6, depending on your [Blood Levels](mechanic:blood-levels) setting. They replace the points you had, so points you saved are lost.",
       "notes": {
-        "/Game/UltimateSkillSystem/SkillsData/BloodMagicLBSkillTree.BloodMagicLBSkillTree_C": "Each Blood Magic level sets your Blood Magic points to the Blood Levels setting plus one: 2 with No blood, 3 with A bit of blood, 4 with Default Amount and 6 with BLOODBATH. Points you spent come back with the next level."
+        "/Game/UltimateSkillSystem/SkillsData/BloodMagicLBSkillTree.BloodMagicLBSkillTree_C": "Each time Blood Magic levels up, your Blood Magic points are set to 2, 3, 4 or 6, depending on your [Blood Levels](mechanic:blood-levels) setting. Points you saved are lost."
       },
-      "workaround": "Set Blood Levels to BLOODBATH before you gain a Blood Magic level to receive 6 points.",
+      "workaround": "Set Blood Levels to BLOODBATH in the pause menu under Settings, Video and Effect Settings before Blood Magic levels up, and spend your points before its next level.",
       "steps": [
         "Open Settings from the pause menu, choose Video and Effect Settings and set Blood Levels to No blood.",
         "Gain a Blood Magic level and open the Blood Magic skill tree. Blood Magic Proficiency Points shows 2.",
