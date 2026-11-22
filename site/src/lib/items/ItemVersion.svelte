@@ -38,13 +38,18 @@
 			(a, b) => a.item.name.localeCompare(b.item.name, 'en') || a.name.localeCompare(b.name, 'en')
 		)
 	);
-	// A merchant that takes the item as payment sells something for it, which is not a recipe, so payments get their
-	// own table with the merchant and the price.
-	const uses = $derived(sortedUses.filter((use) => use.kind !== 'currencyShop'));
-	const payments = $derived(sortedUses.filter((use) => use.kind === 'currencyShop'));
 	// The skill level a use needs shows in its own column, so the condition that states it does not repeat.
-	const levelOf = (use: (typeof uses)[number]) =>
+	const levelOf = (use: ItemPage['uses'][number]) =>
 		use.conditions.find((condition) => condition.kind === 'proficiencyLevel')?.value ?? null;
+	// A merchant that takes the item as payment sells something for it, which is not a recipe, so payments get their
+	// own table with the merchant and the price. Uses run from the lowest level they need, as a crafter unlocks them,
+	// and uses without a level follow.
+	const uses = $derived(
+		sortedUses
+			.filter((use) => use.kind !== 'currencyShop')
+			.sort((a, b) => (levelOf(a) ?? Infinity) - (levelOf(b) ?? Infinity))
+	);
+	const payments = $derived(sortedUses.filter((use) => use.kind === 'currencyShop'));
 	const otherConditions = (use: (typeof uses)[number]) =>
 		use.conditions.filter((condition) => condition.kind !== 'proficiencyLevel');
 	// A long list of uses filters by product name, profession, product type and the level a player has.
