@@ -152,9 +152,17 @@ local function capture()
     end
 
     local shown, meshes, actors = {}, {}, {}
-    -- A spawned item actor goes away after the capture with every actor attached to it. Its own lights, such as a
-    -- lantern's or a lute's glow, would light the preview's later captures too, as a sweep found when every render
-    -- after the Acorn Lute came out nearly white, so they are switched off.
+    -- Every capture is lit by the preview's own light alone. An item's lights would light other captures too:
+    -- Altarlight Pauldrons' candles stay on the preview character until another shoulder piece takes their place,
+    -- and a sweep found every render after them nearly white. So the lights of whatever the character wears and of
+    -- every actor spawned for a capture are switched off.
+    local function unlit(actor)
+      for _, light in ipairs(components(actor, "/Script/Engine.LightComponent")) do light:SetVisibility(false, true) end
+    end
+    local wearing = {}
+    preview:GetAttachedActors(wearing, true)
+    for _, entry in ipairs(wearing) do unlit(entry.get and entry:get() or entry) end
+    -- A spawned item actor goes away after the capture with every actor attached to it.
     local function own(actor)
       local list = { actor }
       local attached = {}
@@ -162,7 +170,7 @@ local function capture()
       for _, entry in ipairs(attached) do list[#list + 1] = entry.get and entry:get() or entry end
       for _, each in ipairs(list) do
         actors[#actors + 1] = each
-        for _, light in ipairs(components(each, "/Script/Engine.LightComponent")) do light:SetVisibility(false, true) end
+        unlit(each)
       end
     end
     local function asObject()
