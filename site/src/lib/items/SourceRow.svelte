@@ -99,8 +99,10 @@
 		{/if}
 	</td>
 	{#if levelCondition}<td class="numeric"
-			>{#if level?.value != null}{formatNumber(level.value)}{:else}<span class="muted">Unknown</span
-				>{/if}</td
+			>{#if level?.value == null}<span class="muted">Unknown</span
+				>{:else if level.entity && level.entity.key !== source.entity?.key}<EntityLink
+					entity={level.entity}
+				/>{` level ${formatNumber(level.value)}`}{:else}{formatNumber(level.value)}{/if}</td
 		>{/if}
 	{#if showAmount}<td class="numeric"
 			>{source.amount ? formatAmount(source.amount) : 'Unknown'}<small

@@ -21,7 +21,14 @@
 						"fragment": null
 					},
 					"requiredLevel": 1,
-					"checkedLevel": "Emberlore"
+					"levelDiscipline": {
+						"kind": "discipline",
+						"key": "/Invented/Trees/Emberlore",
+						"name": "Emberlore",
+						"slug": "emberlore",
+						"icon": null,
+						"fragment": null
+					}
 				}
 			]
 		},
@@ -38,7 +45,14 @@
 						"fragment": null
 					},
 					"requiredLevel": 5,
-					"checkedLevel": "Emberlore"
+					"levelDiscipline": {
+						"kind": "discipline",
+						"key": "/Invented/Trees/Emberlore",
+						"name": "Emberlore",
+						"slug": "emberlore",
+						"icon": null,
+						"fragment": null
+					}
 				}
 			]
 		}
@@ -53,7 +67,14 @@
 					"name": "Kindle",
 					"description": "Your fire skills deal more damage.",
 					"requiredLevel": 1,
-					"checkedLevel": "Emberlore",
+					"levelDiscipline": {
+						"kind": "discipline",
+						"key": "/Invented/Trees/Emberlore",
+						"name": "Emberlore",
+						"slug": "emberlore",
+						"icon": null,
+						"fragment": null
+					},
 					"pointCost": 2,
 					"costIncrease": 2,
 					"ranks": 5,
@@ -71,7 +92,14 @@
 					"name": "Glow",
 					"description": "You give off a faint light.",
 					"requiredLevel": 3,
-					"checkedLevel": "Emberlore",
+					"levelDiscipline": {
+						"kind": "discipline",
+						"key": "/Invented/Trees/Emberlore",
+						"name": "Emberlore",
+						"slug": "emberlore",
+						"icon": null,
+						"fragment": null
+					},
 					"pointCost": 1,
 					"costIncrease": 1,
 					"ranks": 1,
@@ -89,7 +117,14 @@
 					"name": "Ashen Heart of the Long Burning Hearth",
 					"description": null,
 					"requiredLevel": 10,
-					"checkedLevel": "Emberlore",
+					"levelDiscipline": {
+						"kind": "discipline",
+						"key": "/Invented/Trees/Songcraft",
+						"name": "Songcraft",
+						"slug": "songcraft",
+						"icon": null,
+						"fragment": null
+					},
 					"pointCost": 3,
 					"costIncrease": 1,
 					"ranks": 3,

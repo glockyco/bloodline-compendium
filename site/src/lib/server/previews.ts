@@ -69,7 +69,7 @@ export const previewSources: {
 								name: passive.name,
 								icon: passive.icon,
 								description: passive.description,
-								unlocks: `${passive.checkedLevel} level ${passive.requiredLevel}`,
+								unlocks: `${passive.levelDiscipline.name} level ${passive.requiredLevel}`,
 								costs: rankCosts(passive)
 							}
 						])

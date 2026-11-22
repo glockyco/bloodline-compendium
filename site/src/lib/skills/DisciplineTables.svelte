@@ -1,5 +1,11 @@
 <script lang="ts">
-	import type { DisciplinePage, Fact, RelationCondition, Stat } from '../site-data.js';
+	import type {
+		DisciplinePage,
+		EntityReference,
+		Fact,
+		RelationCondition,
+		Stat
+	} from '../site-data.js';
 	import RelationTable from '../RelationTable.svelte';
 	import Section from '../ui/Section.svelte';
 	import EntityLink from '../ui/EntityLink.svelte';
@@ -23,7 +29,6 @@
 		/** Comparison only: how spellsongs lay out. Removed once the layout is chosen. */
 		songLayout?: 'table' | 'cards' | 'compact';
 	} = $props();
-	const level = $derived(discipline.levelName ?? discipline.name);
 	// The relations each entry shows, by the key of the entity at their other end, so the static page carries them.
 	const relationIds = $derived(
 		Map.groupBy(discipline.relations, (relation) => relation.entity.key ?? '')
@@ -56,15 +61,17 @@
 		if (!found) return 'None';
 		return found.number == null ? 'Unknown' : formatNumber(found.number);
 	}
-	// An entry whose own level differs from its row's label says the level it needs, as a condition.
-	function ownLevel(required: number, checked: string, row: number): RelationCondition[] {
-		return required !== row || checked !== level
+	// An entry whose own level differs from its row's label says the level it needs, as a condition. One that checks
+	// another discipline's level links to it.
+	function ownLevel(required: number, checked: EntityReference, row: number): RelationCondition[] {
+		const other = checked.key !== discipline.key;
+		return required !== row || other
 			? [
 					{
 						kind: 'disciplineLevel',
-						entity: null,
+						entity: other ? checked : null,
 						value: required,
-						label: `Unlocks at ${checked} level ${formatNumber(required)}`
+						label: `Unlocks at ${checked.name} level ${formatNumber(required)}`
 					}
 				]
 			: [];
@@ -81,7 +88,8 @@
 			>{#snippet row({ row, slot }, index)}{#if index === 0 || slots[index - 1].row !== row}<tr
 						class="group-heading"
 						><th colspan={statColumns.length + 1} scope="colgroup"
-							>{level} Level {formatNumber(row)}</th
+							>{discipline.levelName ? discipline.name + ' Level' : 'Level'}
+							{formatNumber(row)}</th
 						></tr
 					>{/if}<tr
 					id={'skill-' + slot.skill.slug}
@@ -89,7 +97,7 @@
 					data-relation-direction="outgoing"
 					><td
 						><EntityLink entity={slot.skill} icon /><Conditions
-							conditions={ownLevel(slot.requiredLevel, slot.checkedLevel, row)}
+							conditions={ownLevel(slot.requiredLevel, slot.levelDiscipline, row)}
 						/></td
 					>{#each statColumns as column (column.stat)}<td class="numeric"
 							>{cell(slot.skill.key, column.stat)}</td
@@ -181,7 +189,7 @@
 									loading="lazy"
 								/>{/if}<span data-game>{passive.name}</span></span
 						>{#if passive.description}<small data-game>{passive.description}</small>{/if}<Conditions
-							conditions={ownLevel(passive.requiredLevel, passive.checkedLevel, row)}
+							conditions={ownLevel(passive.requiredLevel, passive.levelDiscipline, row)}
 						/></td
 					><td class="numeric">{rankCosts(passive).map(formatNumber).join(', ')}</td></tr
 				>{/snippet}</RelationTable

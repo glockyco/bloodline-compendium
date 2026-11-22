@@ -711,21 +711,23 @@ internal sealed record DisciplinePage(
 internal sealed record SkillRow(int Level, IReadOnlyList<SkillSlotEntry> Slots);
 
 /// <summary>
-/// A skill slot: its skill, and the level of <see cref="CheckedLevel"/>, a discipline's level name, that unlocks it.
+/// A skill slot: its skill, and the level of <see cref="LevelDiscipline"/> that unlocks it. That discipline is
+/// usually the slot's own, but a slot can check another's.
 /// </summary>
 internal sealed record SkillSlotEntry(
     EntityReference Skill,
     int RequiredLevel,
-    string CheckedLevel
+    EntityReference LevelDiscipline
 );
 
 /// <summary>A row of the tree's proficiency panel: the level its label shows and its passives in order.</summary>
 internal sealed record PassiveRow(int Level, IReadOnlyList<PassiveEntry> Passives);
 
 /// <summary>
-/// A passive of a discipline. <see cref="Anchor"/> is its fragment on the discipline page. Rank k costs
-/// <see cref="PointCost"/> plus k - 1 times <see cref="CostIncrease"/>, for <see cref="Ranks"/> ranks.
-/// <see cref="RankName"/> is the name the game gives its later ranks, when it has one.
+/// A passive of a discipline. <see cref="Anchor"/> is its fragment on the discipline page. It unlocks at
+/// <see cref="RequiredLevel"/> in <see cref="LevelDiscipline"/>. Rank k costs <see cref="PointCost"/> plus k - 1
+/// times <see cref="CostIncrease"/>, for <see cref="Ranks"/> ranks. <see cref="RankName"/> is the name the game gives
+/// its later ranks, when it has one.
 /// </summary>
 internal sealed record PassiveEntry(
     string Key,
@@ -733,7 +735,7 @@ internal sealed record PassiveEntry(
     string Name,
     string? Description,
     int RequiredLevel,
-    string CheckedLevel,
+    EntityReference LevelDiscipline,
     int PointCost,
     int CostIncrease,
     int Ranks,

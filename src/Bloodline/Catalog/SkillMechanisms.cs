@@ -19,7 +19,10 @@ internal sealed class SkillTreeMechanism : ISourceMechanism
                 if (RecordValues.AnyReference(slot.Properties["Skill"]) is not { } skill)
                     continue;
                 var level = SkillProducer.Integer(slot.Properties["Required Level"]) ?? 0;
-                var checkedLevel = SkillProducer.CheckedLevel(slot) ?? tree.LevelName ?? tree.Name;
+                var checkedDiscipline = SkillProducer.LevelDiscipline(
+                    context.SkillTrees.All,
+                    SkillProducer.CheckedLevel(slot) ?? tree.LevelName ?? tree.Name
+                );
                 yield return new EntitySource(
                     skill,
                     new Source(SourceKind.SkillTree, tree.Name, [], null, null, [], [])
@@ -29,9 +32,9 @@ internal sealed class SkillTreeMechanism : ISourceMechanism
                         [
                             new RelationCondition(
                                 ConditionKind.DisciplineLevel,
-                                null,
+                                checkedDiscipline,
                                 level,
-                                $"{checkedLevel} level {level}"
+                                $"{checkedDiscipline.Name} level {level}"
                             ),
                         ],
                         Cost = new PointCost(1, PointKind.SkillPoint),

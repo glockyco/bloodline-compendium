@@ -100,7 +100,7 @@ internal sealed partial class SkillTrees
                         Rows(tree, PassiveClass)
                     )
                     {
-                        LevelName = LevelName(tree),
+                        LevelName = LevelChecks(tree)?.Name,
                         SpellsongTable = (context.Records.Code?.Functions ?? [])
                             .Where(function => function.Owner == tree.Path)
                             .SelectMany(function => function.Reads)
@@ -123,10 +123,29 @@ internal sealed partial class SkillTrees
                 );
             }
         }
+        // A level name belongs to the tree whose entries check it most, as Spear belongs to Spears although Utility
+        // Gadgets' two slots check it too. A tree that owns none has no level of its own.
+        var owners = trees
+            .Where(tree => tree.LevelName is not null)
+            .GroupBy(tree => tree.LevelName!, StringComparer.Ordinal)
+            .ToDictionary(
+                group => group.Key,
+                group =>
+                    group.MaxBy(tree => LevelChecks(widgetClasses[tree.Path])!.Value.Count)!.Path,
+                StringComparer.Ordinal
+            );
         All = trees
             .OrderBy(tree => Order[tree.Path].Category, PositionComparer.Instance)
             .ThenBy(tree => Order[tree.Path].Button, PositionComparer.Instance)
-            .Select((tree, index) => tree with { Order = index })
+            .Select(
+                (tree, index) =>
+                    tree with
+                    {
+                        Order = index,
+                        LevelName =
+                            tree.LevelName is { } name && owners[name] == tree.Path ? name : null,
+                    }
+            )
             .ToArray();
     }
 
@@ -257,19 +276,15 @@ internal sealed partial class SkillTrees
         return entry with { Properties = properties };
     }
 
-    /// <summary>The level name that most of a tree's entries check, such as Pyromancy.</summary>
-    private string? LevelName(ClassRecord tree) =>
+    /// <summary>The level name that most of a tree's entries check, such as Pyromancy, and how many check it.</summary>
+    private (string Name, int Count)? LevelChecks(ClassRecord tree) =>
         tree.Widgets!.Where(IsEntry)
-            .Select(widget =>
-                RecordValues.Text(widget.Properties["Level To Check"]) ?? EnumText(widget)
-            )
+            .Select(SkillProducer.CheckedLevel)
             .OfType<string>()
             .GroupBy(name => name, StringComparer.Ordinal)
             .OrderByDescending(group => group.Count())
-            .Select(group => group.Key)
+            .Select(group => ((string Name, int Count)?)(group.Key, group.Count()))
             .FirstOrDefault();
-
-    private static string? EnumText(WidgetRecord widget) => SkillProducer.CheckedLevel(widget);
 
     [GeneratedRegex(@"(\d+)\s*:?\s*$")]
     private static partial Regex LevelNumber();

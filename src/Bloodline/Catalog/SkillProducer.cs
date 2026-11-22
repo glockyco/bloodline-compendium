@@ -88,6 +88,22 @@ internal sealed class SkillProducer
     public static EntityReference DisciplineReference(DisciplinePage page) =>
         new(EntityKind.Discipline, page.Key, page.Name, page.Slug, null);
 
+    /// <summary>
+    /// The discipline whose level an entry checks, found by the level name the game tracks, such as Bow for Bows &amp;
+    /// Crossbows. An entry can check another discipline than its own tree's, as one Druidism skill checks Unarmed.
+    /// </summary>
+    public static EntityReference LevelDiscipline(
+        IReadOnlyList<SkillTree> trees,
+        string levelName
+    ) =>
+        trees.Where(tree => (tree.LevelName ?? tree.Name) == levelName).ToArray() switch
+        {
+            [var tree] => DisciplineReference(tree),
+            var found => throw new InvalidOperationException(
+                $"{found.Length} disciplines track the level {levelName}, so an entry that checks it has no discipline."
+            ),
+        };
+
     public static int? Integer(JsonNode? node) =>
         node is JsonValue value && value.TryGetValue<double>(out var number) ? (int)number : null;
 
@@ -221,7 +237,7 @@ internal sealed class SkillProducer
                         name,
                         RecordValues.Text(widget.Properties["Passive Description"]),
                         Integer(widget.Properties["Required Level"]) ?? 0,
-                        CheckedLevel(widget) ?? tree.LevelName ?? tree.Name,
+                        LevelDiscipline(trees, CheckedLevel(widget) ?? tree.LevelName ?? tree.Name),
                         Integer(widget.Properties["Point Cost"]) ?? 0,
                         Integer(widget.Properties["Point Increase Per Level"]) ?? 0,
                         widget.Properties["MultiLevel"]?.GetValue<bool>() == true
@@ -282,7 +298,10 @@ internal sealed class SkillProducer
                                     RecordValues.AnyReference(slot.Properties["Skill"])!
                                 ],
                                 level,
-                                CheckedLevel(slot) ?? tree.LevelName ?? tree.Name
+                                LevelDiscipline(
+                                    trees,
+                                    CheckedLevel(slot) ?? tree.LevelName ?? tree.Name
+                                )
                             );
                         })
                         .ToArray()

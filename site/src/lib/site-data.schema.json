@@ -1226,9 +1226,6 @@
         "anchor": {
           "type": "string"
         },
-        "checkedLevel": {
-          "type": "string"
-        },
         "costIncrease": {
           "type": "integer"
         },
@@ -1246,6 +1243,9 @@
         },
         "key": {
           "type": "string"
+        },
+        "levelDiscipline": {
+          "$ref": "#/$defs/EntityReference"
         },
         "name": {
           "type": "string"
@@ -1272,7 +1272,7 @@
         "name",
         "description",
         "requiredLevel",
-        "checkedLevel",
+        "levelDiscipline",
         "pointCost",
         "costIncrease",
         "ranks",
@@ -1844,8 +1844,8 @@
     },
     "SkillSlotEntry": {
       "properties": {
-        "checkedLevel": {
-          "type": "string"
+        "levelDiscipline": {
+          "$ref": "#/$defs/EntityReference"
         },
         "requiredLevel": {
           "type": "integer"
@@ -1857,7 +1857,7 @@
       "required": [
         "skill",
         "requiredLevel",
-        "checkedLevel"
+        "levelDiscipline"
       ],
       "title": "SkillSlotEntry",
       "type": "object"

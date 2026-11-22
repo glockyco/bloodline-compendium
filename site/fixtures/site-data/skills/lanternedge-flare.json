@@ -44,7 +44,14 @@
 			"conditions": [
 				{
 					"kind": "disciplineLevel",
-					"entity": null,
+					"entity": {
+						"kind": "discipline",
+						"key": "/Invented/Trees/Emberlore",
+						"name": "Emberlore",
+						"slug": "emberlore",
+						"icon": null,
+						"fragment": null
+					},
 					"value": 5,
 					"label": "Emberlore level 5"
 				}

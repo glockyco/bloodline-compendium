@@ -310,11 +310,11 @@ export interface PassiveRow {
  */
 export interface PassiveEntry {
   anchor: string;
-  checkedLevel: string;
   costIncrease: number;
   description: string | null;
   icon: string | null;
   key: string;
+  levelDiscipline: EntityReference;
   name: string;
   pointCost: number;
   rankName: string | null;
@@ -360,7 +360,7 @@ export interface SkillRow {
  * via the `definition` "SkillSlotEntry".
  */
 export interface SkillSlotEntry {
-  checkedLevel: string;
+  levelDiscipline: EntityReference;
   requiredLevel: number;
   skill: EntityReference;
   [k: string]: unknown;
