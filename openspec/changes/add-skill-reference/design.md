@@ -139,10 +139,7 @@ Refactor the catalog, then the site, each verified by unchanged item output and 
 ## Open Questions
 
 - How Performance, Song of Hastening and Inferno Strum are learned. No placed note sheet names them, and the Lute window shows every spellsong as unknown on a new character.
-- Whether a recipe whose row sets no Weaponsmithing level, such as Moonstone Sword's, can be made at level 1. Profession pages show these under "Level None" until a run crafts one.
-- What starts three skill events, which the site words only as far as the code shows. No function calls them, so a level binding or a timeline fires them, which the code index does not record. Warp Bolt comes from Karraq's `Move to Player` timeline. Blood Rain comes from The Collapsed Crag's `Reward Bloodrain Skill`. Cloud Catch comes from The Elderglen Woods' `Esros Comment on Fall`, in a level that holds the Steps of Esros and three stages of floating fires, which suggests a jumping challenge that a run has yet to play.
-- Whether a discipline has a highest level. In run progression2, Necromancy passed level 5,700 without stopping.
-- From the persona trials, left for later changes: Used For cannot sort or take a level range, an "Unknown" stat does not say why, and skill pages head a single source "Skill Tree 1", a count new players read as a tree number.
+- Where two skill events happen, which the site words only as far as the code shows. Warp Bolt: walking into Karraq's TriggerSphere_1 starts the `Move to Player` timeline, whose end stuns you and unlocks the skill. The sphere stands about 700 m above the level's other triggers (run anvil1), and no place name lies near it. Cloud Catch: The Elderglen Woods' TriggerBox8_3 and its `Ragdoll Checker` start `Screen FX`, which slows time while you fall and calls `Esros Comment on Fall`. The box stands 88 m up, about 106 m from the Abandoned Farmstead and 164 m from the Steps of Esros (run anvil1). A run that plays each event would let the site name the spot.
 
 ## Where Findings Live
 

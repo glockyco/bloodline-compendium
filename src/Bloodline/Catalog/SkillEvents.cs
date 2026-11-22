@@ -57,7 +57,9 @@ internal sealed class SkillEventMechanism : ISourceMechanism
             "/Game/Overworld/OpenWorldAreas/TheCollapsedCrag:Reward Bloodrain Skill",
             "ad10564a8c47e720",
             "/Game/UltimateSkillSystem/SkillSystemSkill/Skill_BloodRain.Skill_BloodRain_C",
-            "A reward in The Collapsed Crag"
+            // The Crag's ReceiveBeginPlay binds the blood pool's Survived Ritual, which Bloodpool_Ritualsite sends
+            // after a ritual that starts when you step into its pool.
+            "Surviving the blood pool ritual in The Collapsed Crag"
         ),
         new(
             "/Game/Overworld/OpenWorldAreas/TheElderglenWoods:Esros Comment on Fall",
