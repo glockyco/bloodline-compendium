@@ -111,6 +111,14 @@ internal static class CatalogCommand
                         ? $"Skill tooltip check: {skillTooltips} compared, {catalog.Report.Gaps.Where(gap => gap.Kind == GapKind.TooltipDifference).SelectMany(gap => gap.Entries).Count(entry => entry.Entity?.Kind == EntityKind.Skill)} differences."
                         : $"Skill tooltip check: no lab run of build {buildId} read skill tooltips."
                 );
+                var trees = records.Trees.Count(entry =>
+                    catalog.Skills.Disciplines.Any(page => page.Key == entry.Tree)
+                );
+                Console.WriteLine(
+                    trees > 0
+                        ? $"Tree check: {trees} slots and passives compared, {catalog.Report.Gaps.Where(gap => gap.Kind == GapKind.TreeDifference).SelectMany(gap => gap.Entries).Count()} differences."
+                        : $"Tree check: no lab run of build {buildId} listed the skill trees."
+                );
                 return 0;
             }
             catch (Exception error)

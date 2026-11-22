@@ -30,6 +30,9 @@ internal sealed record CatalogRecords(
     /// <summary>The hand-written mechanic pages, which the build copies beside the program.</summary>
     public IReadOnlyList<MechanicContent> Mechanics { get; init; } = [];
 
+    /// <summary>The skill windows that the latest skill-trees run of the build built, empty without one.</summary>
+    public IReadOnlyList<TreeEntry> Trees { get; init; } = [];
+
     /// <summary>Ranged damage that lab runs measured where the catalog cannot read it from the firing code.</summary>
     public IReadOnlyList<MeasuredDamage> MeasuredDamage { get; init; } = [];
 
@@ -48,6 +51,7 @@ internal sealed record CatalogRecords(
             Code = CanonicalJson.Read<CodeIndex>(layout.CodeIndexFile),
             Tooltips = TooltipCheck.Load(layout.RuntimeDirectory),
             SkillTooltips = SkillTooltipCheck.Load(layout.RuntimeDirectory),
+            Trees = TreeCheck.Load(layout.RuntimeDirectory),
             Issues = KnownIssues.Load(Path.Combine(AppContext.BaseDirectory, "known-issues.json")),
             Mechanics = MechanicProducer.Load(
                 Path.Combine(AppContext.BaseDirectory, "mechanics.json")

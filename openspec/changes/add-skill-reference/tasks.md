@@ -28,13 +28,13 @@
 - [x] 4.4 Add source mechanisms for tree slots, skill books, dialogue unlocks and code grants, with the reviewed table of event wording and its fingerprint check
 - [x] 4.5 Assign statuses to skills without a source, distinguishing older trees from no reference
 - [x] 4.6 Produce passives with rank costs and spellsongs with their note sheet sources, and observe in the lab how tunes map to note directions
-- [ ] 4.7 Compare the tree records with the latest `skill-trees.lua` run in the maintainer report
+- [x] 4.7 Compare the tree records with the latest `skill-trees.lua` run in the maintainer report
 - [x] 4.8 Read every tree skill's in-game tooltip in the lab and compare it with the skill's facts
 - [x] 4.9 Add producer tests on invented records for reachability, layout, sources, statuses and rank costs
 
 ## 5. Rules and issues
 
-- [ ] 5.1 Add proficiency point and passive rank cost rules with worded steps, citations and recorded vectors from grants1 and passives1, and extend `rules:check`
+- [x] 5.1 Add proficiency point and passive rank cost rules with worded steps, citations and recorded vectors from grants1 and passives1, and extend `rules:check`
 - [x] 5.2 Reproduce the Blood Magic points defect through the settings window, and record it in `issues/known-issues.json` with its check in `tools/runtime/checks/issues.sh` if it reproduces
 
 ## 6. Pages

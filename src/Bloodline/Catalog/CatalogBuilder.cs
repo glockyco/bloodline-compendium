@@ -129,6 +129,7 @@ internal static class CatalogBuilder
             SourceGaps(CatalogGraph.Reference(item), item.Name, item.Sources, coverage);
         var skills = skillProducer.Finish(skillsPrepared, graphResult);
         SkillTooltipCheck.Compare(skills.Entries, records.SkillTooltips, coverage);
+        TreeCheck.Compare(skills.Disciplines, skills.References, records.Trees, coverage);
         var professions = ProfessionProducer.Produce(items.Items);
         // The Known Issues page lists every page of every kind that notes an issue.
         var issues = KnownIssues.Publish(

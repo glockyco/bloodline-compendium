@@ -305,6 +305,66 @@ public sealed class SkillCatalogTests
         );
         Assert.Empty(agreeing.Report([]).Gaps);
     }
+
+    [Fact]
+    public void ReportsATreeWhoseWindowDiffersFromThePublishedRows()
+    {
+        var skills = Build().Skills;
+        var page = skills.Disciplines.First(page =>
+            page.SkillRows.Count > 0 && page.PassiveRows.Count > 0
+        );
+        TreeEntry Slot(SkillSlotEntry slot) =>
+            new(
+                page.Key,
+                "WidgetTree.Slot",
+                slot.Skill.Key,
+                null,
+                slot.RequiredLevel,
+                page.LevelName,
+                null,
+                null,
+                null,
+                "run"
+            );
+        TreeEntry Passive(PassiveEntry passive) =>
+            new(
+                page.Key,
+                passive.Key[(page.Key.Length + 1)..],
+                null,
+                passive.Name,
+                passive.RequiredLevel,
+                page.LevelName,
+                passive.PointCost,
+                passive.CostIncrease,
+                passive.Ranks,
+                "run"
+            );
+        var built = page
+            .SkillRows.SelectMany(row => row.Slots)
+            .Where(slot => slot.LevelDiscipline.Key == page.Key)
+            .Select(Slot)
+            .Concat(
+                page.PassiveRows.SelectMany(row => row.Passives)
+                    .Where(passive => passive.LevelDiscipline.Key == page.Key)
+                    .Select(Passive)
+            )
+            .ToArray();
+        var agreeing = new Coverage();
+        TreeCheck.Compare([page], skills.References, built, agreeing);
+        Assert.Empty(agreeing.Report([]).Gaps);
+        // A game update that raises a passive's first rank shows as a difference.
+        var changed = built
+            .Select(entry =>
+                entry.Skill is null ? entry with { PointCost = entry.PointCost + 1 } : entry
+            )
+            .ToArray();
+        var coverage = new Coverage();
+        TreeCheck.Compare([page], skills.References, changed, coverage);
+        Assert.Contains(
+            coverage.Report([]).Gaps.Single(gap => gap.Kind == GapKind.TreeDifference).Entries,
+            entry => entry.Detail!.Contains("point cost", StringComparison.Ordinal)
+        );
+    }
 }
 
 public sealed class SkillVersionTests

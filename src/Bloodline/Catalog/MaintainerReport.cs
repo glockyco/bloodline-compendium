@@ -55,6 +55,9 @@ internal enum GapKind
 
     /// <summary>Skill table rows the catalog does not publish: rows without a class, or a class's later rows.</summary>
     UnreadSkillRow,
+
+    /// <summary>Tree slots and passives whose published values differ from the skill window a lab run built.</summary>
+    TreeDifference,
 }
 
 /// <summary>
