@@ -42,6 +42,8 @@ The views were decided on sample renders in Plannotator (`artifacts/design/proce
 - Shields: face-on, turned 15 degrees. In the samples most shields showed as objects from above.
 - Other items: as they lie, 25 degrees to the left and 35 degrees above, because their top is what a player sees when the item lies on the ground.
 
+The full set was reviewed again in Plannotator (`artifacts/design/process/trial/45-render-results.md`): firearms, crossbows and shields as they are now, weapon parts as they sit in a weapon that stands tip up, worn armor as the game draws it on the body without the copy of the item's world model that five pieces keep inside the character, and no render for an item without a model. An item whose model is shared with items of other names, such as Beef's gold key, gets no render, because that model says nothing true about it. `publish-renders.mjs` finds them by comparing renders and lists them in `check.json` as stand-ins.
+
 ### Which way a held item points
 
 The first renders turned a weapon by its largest mesh alone: the longest axis upright or lying, the end farther from the mesh's origin up or to the right. That end was the wrong one for a mesh modelled the other way round or held near its middle, which showed copper daggers and a soulstaff upside down, two crossbows on end and guns pointing both ways.

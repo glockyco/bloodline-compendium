@@ -122,7 +122,7 @@ Armor whose render shows body meshes SHALL also be rendered on the female body, 
 - **THEN** each render shows the mesh the game draws on that body
 
 ### Requirement: A render is checked before it is published
-A render SHALL be published only when it has a transparent background, is at least 64 pixels on its shorter side, draws the item on at least 3% of its area and draws nothing on its outer edge. A render that fails SHALL be listed with its reason, and so SHALL every item the lab could not render, with the error the game reported.
+A render SHALL be published only when it has a transparent background, is at least 64 pixels on its shorter side, draws the item on at least 3% of its area and draws nothing on its outer edge. An item that is neither worn, held nor a weapon part SHALL NOT be published when its render shows the same model as an item of another name. A render that fails SHALL be listed with its reason, and so SHALL every stand-in and every item the lab could not render, with the error the game reported.
 
 #### Scenario: A cut-off render
 - **WHEN** a render draws pixels on its outer edge
@@ -131,6 +131,10 @@ A render SHALL be published only when it has a transparent background, is at lea
 #### Scenario: An item without a model
 - **WHEN** the game draws no mesh for an item, such as a ring
 - **THEN** the item has no render and the check lists it with the game's reason
+
+#### Scenario: A model shared by many items
+- **WHEN** Beef, whose model is the gold key that Bag of Gold and Gold Key also carry, is rendered
+- **THEN** Beef has no render and the check lists it as a stand-in
 
 ### Requirement: Renders follow the build
 Renders SHALL be taken in the lab copy of the build the site describes, and SHALL NOT enter the repository. A sweep SHALL render every published item, resume where an earlier sweep stopped, and render items again on request after a view changes.
