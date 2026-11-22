@@ -855,7 +855,8 @@ async function writeModel({ pixels, out, box }, target) {
 /**
  * The frame that fits the subject a capture showed, from its pixels and the capture's frame: the subject's middle
  * becomes the centre, and its longer side, with a tenth to spare, the diameter. A subject cut off at the edge
- * extends beyond what the capture shows, so its frame doubles.
+ * extends beyond what the capture shows, so its frame grows by half. A frame twice as large would show a subject
+ * that only just reached the edge at less than half the capture, which counts as too small again.
  */
 function refinedFrame({ out, box }, frame) {
   const size = out.width;
@@ -882,7 +883,7 @@ function refinedFrame({ out, box }, frame) {
       Y: frame.center.Y + shift[0].Y + shift[1].Y,
       Z: frame.center.Z + shift[0].Z + shift[1].Z,
     },
-    radius: cut ? frame.radius * 2 : (extent / 2) * 1.1,
+    radius: cut ? frame.radius * 1.5 : (extent / 2) * 1.1,
   };
 }
 

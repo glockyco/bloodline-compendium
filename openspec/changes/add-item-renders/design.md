@@ -76,6 +76,8 @@ Every capture is lit by the preview's own light alone. The lights an item carrie
 
 The camera first frames the engine bounds of the subject. Some skeletal parts, such as pauldrons, report bounds far larger than what they draw, which left the item a few pixels wide. `lab.mjs` therefore measures the subject's pixels in each capture and, when the subject is cut off or fills less than half the frame, captures again in the frame those pixels give, at most three more times.
 
+A frame that cut the subject off grows by half. It first doubled, and Bard's Hat then never fitted: seen from the nearer camera of the frame its pixels gave, the hat's near side grew past the edge, the doubled frame showed it at 44% of the capture, which counted as too small, and the next frame cut it off again.
+
 ### Coverage
 
 The depth pass marks opaque surfaces, but translucent materials, such as slime metal, write no depth. The colour pass stores the inverse of the drawn opacity in its alpha, so a sample counts as the subject where the depth marks it or as far as that alpha says something was drawn. A surface that only glows, such as Anointed Halo's ring with the material `M_GoodSky_Sun_Emissive`, writes neither. When both find nothing and the capture's border shows one colour, a sample counts where its colour differs from that backdrop.
