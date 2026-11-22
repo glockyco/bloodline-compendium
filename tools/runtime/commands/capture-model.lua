@@ -483,13 +483,12 @@ local function capture()
     }
     for _, actor in ipairs(actors) do actor:K2_DestroyActor() end
     local sky = live("Ultra_Dynamic_Sky_C")
-    -- The preview character's own body mesh tells which body it shows.
-    local bodyMesh = meshOf(body)
-    local female = bodyMesh and bodyMesh:GetFName():ToString():find("Female", 1, true) ~= nil
+    -- The player's own Male? flag tells which body the preview shows. By it the game chooses each piece's mesh,
+    -- and the preview's body mesh is the same for both.
     return {
       item = args.item,
       kind = subject,
-      body = female and "female" or "male",
+      body = requirePlayer()["Male?"] and "male" or "female",
       meshes = meshes,
       timeOfDay = sky and sky["Time of Day"] or nil,
       frame = frame,
