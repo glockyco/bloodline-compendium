@@ -410,6 +410,20 @@ public sealed class SkillCatalogTests
         );
         Assert.Contains("Point Cost", error.Message);
     }
+
+    [Fact]
+    public void ThePlannerNamesEverySlotsSkillAndMarksSkillsLearnedOutsideTheTrees()
+    {
+        var planner = SkillProducer.Planner(7, Build().Skills);
+        Assert.Equal(7, planner.Build);
+        var skills = planner.Skills.ToDictionary(skill => skill.Key, StringComparer.Ordinal);
+        Assert.All(
+            planner.Disciplines.SelectMany(discipline => discipline.Slots),
+            slot => Assert.Contains(slot.Skill, skills.Keys)
+        );
+        Assert.True(planner.Skills.Single(skill => skill.Name == "Booked").Learned);
+        Assert.False(planner.Skills.Single(skill => skill.Name == "Ember").Learned);
+    }
 }
 
 public sealed class SkillVersionTests

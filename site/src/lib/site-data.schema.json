@@ -1479,6 +1479,193 @@
       "title": "PassiveRow",
       "type": "object"
     },
+    "PlannerData": {
+      "properties": {
+        "build": {
+          "type": "integer"
+        },
+        "disciplines": {
+          "items": {
+            "$ref": "#/$defs/PlannerDiscipline"
+          },
+          "type": "array"
+        },
+        "format": {
+          "type": "integer"
+        },
+        "skills": {
+          "items": {
+            "$ref": "#/$defs/PlannerSkill"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "build",
+        "format",
+        "disciplines",
+        "skills"
+      ],
+      "title": "PlannerData",
+      "type": "object"
+    },
+    "PlannerDiscipline": {
+      "properties": {
+        "category": {
+          "type": "string"
+        },
+        "icon": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "key": {
+          "type": "string"
+        },
+        "levelName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "passives": {
+          "items": {
+            "$ref": "#/$defs/PlannerPassive"
+          },
+          "type": "array"
+        },
+        "slots": {
+          "items": {
+            "$ref": "#/$defs/PlannerSlot"
+          },
+          "type": "array"
+        },
+        "slug": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "slug",
+        "name",
+        "icon",
+        "category",
+        "levelName",
+        "slots",
+        "passives"
+      ],
+      "title": "PlannerDiscipline",
+      "type": "object"
+    },
+    "PlannerPassive": {
+      "properties": {
+        "anchor": {
+          "type": "string"
+        },
+        "costIncrease": {
+          "type": "integer"
+        },
+        "icon": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "key": {
+          "type": "string"
+        },
+        "levelDiscipline": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "pointCost": {
+          "type": "integer"
+        },
+        "ranks": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "requiredLevel": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "key",
+        "anchor",
+        "name",
+        "icon",
+        "requiredLevel",
+        "levelDiscipline",
+        "pointCost",
+        "costIncrease",
+        "ranks"
+      ],
+      "title": "PlannerPassive",
+      "type": "object"
+    },
+    "PlannerSkill": {
+      "properties": {
+        "icon": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "key": {
+          "type": "string"
+        },
+        "learned": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "slug",
+        "name",
+        "icon",
+        "learned"
+      ],
+      "title": "PlannerSkill",
+      "type": "object"
+    },
+    "PlannerSlot": {
+      "properties": {
+        "levelDiscipline": {
+          "type": "string"
+        },
+        "requiredLevel": {
+          "type": "integer"
+        },
+        "row": {
+          "type": "integer"
+        },
+        "skill": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "row",
+        "skill",
+        "requiredLevel",
+        "levelDiscipline"
+      ],
+      "title": "PlannerSlot",
+      "type": "object"
+    },
     "PointCost": {
       "properties": {
         "amount": {
@@ -2630,6 +2817,9 @@
     "mechanics": {
       "$ref": "#/$defs/MechanicIndex"
     },
+    "planner": {
+      "$ref": "#/$defs/PlannerData"
+    },
     "profession": {
       "$ref": "#/$defs/ProfessionPage"
     },
@@ -2659,7 +2849,8 @@
     "professions",
     "profession",
     "mechanics",
-    "mechanic"
+    "mechanic",
+    "planner"
   ],
   "title": "SiteDataFiles",
   "type": "object"

@@ -35,6 +35,10 @@ internal static class CatalogWriter
             );
             CanonicalJson.Write(Path.Combine(staging, "skills.json"), catalog.Skills.SkillIndex);
             CanonicalJson.Write(
+                Path.Combine(staging, "planner.json"),
+                SkillProducer.Planner(build.BuildId, catalog.Skills)
+            );
+            CanonicalJson.Write(
                 Path.Combine(staging, "professions.json"),
                 catalog.Professions.Index
             );

@@ -6,16 +6,19 @@ import { gzipSync } from "node:zlib";
 // What a reader downloads and parses for one page: its document, and the data a client navigation fetches instead.
 // Raw bytes bound parsing on a phone, and gzip bytes bound the transfer. A kind's list carries every entity's
 // summary, so lists have their own, larger budget. The lists are the routes of the kinds with pages in the built
-// kinds.json.
+// kinds.json, and the planner, which loads its whole input payload, has its own.
 const KiB = 1024;
 const budgets = {
   page: { raw: 512 * KiB, gzip: 96 * KiB },
   pageData: { raw: 256 * KiB, gzip: 64 * KiB },
   list: { raw: 2048 * KiB, gzip: 256 * KiB },
   listData: { raw: 2048 * KiB, gzip: 384 * KiB },
+  // The planner loads every discipline's rows and passives and every learnable skill at once.
+  planner: { raw: 768 * KiB, gzip: 128 * KiB },
 };
 
 function budgetOf(name, lists) {
+  if (name.startsWith("planner/")) return ["planner", budgets.planner];
   const list = lists.has(name);
   const data = name.endsWith("__data.json");
   return list

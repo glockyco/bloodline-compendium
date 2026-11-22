@@ -624,6 +624,68 @@ internal sealed class SkillProducer
         }
     }
 
+    /// <summary>The planner's input format. Raise it when a field of the planner data changes meaning.</summary>
+    public const int PlannerFormat = 1;
+
+    /// <summary>
+    /// The planner's inputs from the published disciplines and skills. Every slot and passive names its skill and its
+    /// checked discipline by key, and a skill counts as learned outside the trees when a confirmed source other than a
+    /// tree teaches it.
+    /// </summary>
+    public static PlannerData Planner(long build, SkillOutput skills) =>
+        new(
+            build,
+            PlannerFormat,
+            [
+                .. skills.Disciplines.Select(page => new PlannerDiscipline(
+                    page.Key,
+                    page.Slug,
+                    page.Name,
+                    page.Icon,
+                    page.Category.Name,
+                    page.LevelName,
+                    [
+                        .. page.SkillRows.SelectMany(row =>
+                            row.Slots.Select(slot => new PlannerSlot(
+                                row.Level,
+                                slot.Skill.Key!,
+                                slot.RequiredLevel,
+                                slot.LevelDiscipline.Key!
+                            ))
+                        ),
+                    ],
+                    [
+                        .. page
+                            .PassiveRows.SelectMany(row => row.Passives)
+                            .Select(passive => new PlannerPassive(
+                                passive.Key,
+                                passive.Anchor,
+                                passive.Name,
+                                passive.Icon,
+                                passive.RequiredLevel,
+                                passive.LevelDiscipline.Key!,
+                                passive.PointCost,
+                                passive.CostIncrease,
+                                passive.Ranks
+                            )),
+                    ]
+                )),
+            ],
+            [
+                .. skills
+                    .Skills.Where(skill => skill.Status == ItemStatus.Obtainable)
+                    .Select(skill => new PlannerSkill(
+                        skill.Key,
+                        skill.Slug,
+                        skill.Name,
+                        skill.Icon,
+                        skill.Sources.Any(source =>
+                            !source.Unconfirmed && source.Kind != SourceKind.SkillTree
+                        )
+                    )),
+            ]
+        );
+
     private static readonly (string Id, Stat Stat)[] NumericColumns =
     [
         ("baseDamage", Stat.BaseDamage),

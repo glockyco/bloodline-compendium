@@ -157,6 +157,7 @@ export interface SiteDataFiles {
   };
   mechanic: MechanicPage;
   mechanics: MechanicIndex;
+  planner: PlannerData;
   profession: ProfessionPage;
   professions: ProfessionIndex;
   skill: SkillPage;
@@ -853,6 +854,71 @@ export interface MechanicIndex {
 export interface MechanicSummary {
   intro: string;
   key: string;
+  name: string;
+  slug: string;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "PlannerData".
+ */
+export interface PlannerData {
+  build: number;
+  disciplines: PlannerDiscipline[];
+  format: number;
+  skills: PlannerSkill[];
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "PlannerDiscipline".
+ */
+export interface PlannerDiscipline {
+  category: string;
+  icon: string | null;
+  key: string;
+  levelName: string | null;
+  name: string;
+  passives: PlannerPassive[];
+  slots: PlannerSlot[];
+  slug: string;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "PlannerPassive".
+ */
+export interface PlannerPassive {
+  anchor: string;
+  costIncrease: number;
+  icon: string | null;
+  key: string;
+  levelDiscipline: string;
+  name: string;
+  pointCost: number;
+  ranks: number | null;
+  requiredLevel: number;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "PlannerSlot".
+ */
+export interface PlannerSlot {
+  levelDiscipline: string;
+  requiredLevel: number;
+  row: number;
+  skill: string;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "PlannerSkill".
+ */
+export interface PlannerSkill {
+  icon: string | null;
+  key: string;
+  learned: boolean;
   name: string;
   slug: string;
   [k: string]: unknown;

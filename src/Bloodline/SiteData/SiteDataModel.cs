@@ -989,5 +989,72 @@ internal sealed record SiteDataFiles(
     ProfessionIndex Professions,
     ProfessionPage Profession,
     MechanicIndex Mechanics,
-    MechanicPage Mechanic
+    MechanicPage Mechanic,
+    PlannerData Planner
+);
+
+/// <summary>
+/// The skill planner's inputs, which only the planner loads: every discipline's rows and passives and every skill a
+/// character can learn, by catalog key. <see cref="Format"/> changes when a field changes meaning, so a stored build
+/// can tell it was planned against other inputs. <see cref="Build"/> is the game build the inputs come from.
+/// </summary>
+internal sealed record PlannerData(
+    long Build,
+    int Format,
+    IReadOnlyList<PlannerDiscipline> Disciplines,
+    IReadOnlyList<PlannerSkill> Skills
+);
+
+/// <summary>
+/// A discipline as the planner edits it. <see cref="LevelName"/> is the level the game tracks for it, which the
+/// proficiency rule reads, or null for a tree without a level of its own.
+/// </summary>
+internal sealed record PlannerDiscipline(
+    string Key,
+    string Slug,
+    string Name,
+    string? Icon,
+    string Category,
+    string? LevelName,
+    IReadOnlyList<PlannerSlot> Slots,
+    IReadOnlyList<PlannerPassive> Passives
+);
+
+/// <summary>
+/// A skill slot of a discipline's tree: the row it shows in, the skill's key, and the level of
+/// <see cref="LevelDiscipline"/> it needs.
+/// </summary>
+internal sealed record PlannerSlot(
+    int Row,
+    string Skill,
+    int RequiredLevel,
+    string LevelDiscipline
+);
+
+/// <summary>
+/// A passive as the planner buys its ranks. <see cref="Ranks"/> is null when the game's files do not give its maximum
+/// rank, so the planner offers only the ranks it knows.
+/// </summary>
+internal sealed record PlannerPassive(
+    string Key,
+    string Anchor,
+    string Name,
+    string? Icon,
+    int RequiredLevel,
+    string LevelDiscipline,
+    int PointCost,
+    int CostIncrease,
+    int? Ranks
+);
+
+/// <summary>
+/// A skill the planner can place on the hotbar. <see cref="Learned"/> is true for a skill a book, conversation or
+/// event teaches, which costs no skill point, and false for one only a tree holds.
+/// </summary>
+internal sealed record PlannerSkill(
+    string Key,
+    string Slug,
+    string Name,
+    string? Icon,
+    bool Learned
 );
