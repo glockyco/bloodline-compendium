@@ -6,8 +6,10 @@
 -- - "discipline": calls the passive stat component's args.function, or "<args.discipline> Level Tracking", with
 --   args.exp experience args.times times, the amount multiplied by args.grow after each call, and lists what each
 --   call changed.
+-- - "grant": calls the passive stat component's own Add Proficiency Points once with each name in args.names, and
+--   lists what each call changed.
 -- - "passive": presses the passive button args.widget of the open tree args.tree args.times times, and lists the
---   button's cost, rank and state and every number that changed after each press.
+--   button's cost, increase, rank and state and every number that changed after each press.
 -- - "skill": presses the skill slot args.widget of the open tree args.tree twice, and lists what each press changed.
 -- - "attributes": opens the level up window through the passive stat component's own Level Up and presses each
 --   button in args.buttons once, listing what each press changed.
@@ -102,11 +104,16 @@ elseif args.action == "discipline" then
     component[name](component, amount)
     amount = amount * (args.grow or 1)
   end)
+elseif args.action == "grant" then
+  -- One call of the passive stat component's own Add Proficiency Points per name in args.names, the string a
+  -- discipline's level tracking passes, so each step shows the points that discipline's level up grants.
+  times = #args.names
+  step(1, function(index) component["Add Proficiency Points"](component, args.names[index]) end)
 elseif args.action == "passive" then
   local button = inTree("PassiveSkillButton_C", args.widget)
   local click = clickButton(button)
   local function describe()
-    return { cost = button["Point Cost"], unlocked = button.Unlocked, available = button.Available, locked = button.Locked, multi = button.MultiLevel, max = button["Max MultiLevel"] }
+    return { cost = button["Point Cost"], increase = button["Point Increase Per Level"], unlocked = button.Unlocked, available = button.Available, locked = button.Locked, multi = button.MultiLevel, max = button["Max MultiLevel"] }
   end
   steps[1] = { widget = describe() }
   step(1, function() press(button, click) end, describe)

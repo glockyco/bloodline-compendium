@@ -18,6 +18,8 @@ Evidence comes from build 24464547: the extracted records, the code index in `re
 - A discipline level grants 1 proficiency point of that discipline, Necromancy 2 (run grants1). Necromancy's tracking adds one besides `Add Proficiency Points`.
 - Each Blood Magic level up sets the Blood Magic points to the game instance's `Blood Level` plus 1, whatever was spent. `Blood Level` is the "Blood Levels" option of the video settings window, which `SettingsWindow1`'s Blood selection writes and enemies read to bleed. In run rowgate1 the window's own box chose "No blood", "A bit of blood", "Default Amount" and "BLOODBATH", and the next level up left 2, 3, 4 and 6 points. After spending 2 of 3 points, a level up restored 3. Blood pool rituals and necromancer shrines also grant points through `Grant Bloodmagic Proficiency Point` and `Grant Necromancy Proficiency Point`.
 - Staff and Vampirism level ups grant no points after the first. Neither tree has passives.
+- A new character starts every discipline, and every profession the game tracks, at level 1, with 0 skill points and 0 proficiency points (run facts1).
+- L opens the skill window, and Tab opens the radial menu, whose Skill Tree button does the same: `IMC_InGameActions` maps L to `IA_OpenCloseSkillTree` and Tab to `IA_OpenCloseRadialMenu` (run facts1, `tools/runtime/checks/input-keys.lua`). The menu draws "Skill Tree" with an L beside it (run radial1).
 
 ### Where skills come from
 
@@ -137,6 +139,9 @@ Refactor the catalog, then the site, each verified by unchanged item output and 
 ## Open Questions
 
 - How Performance, Song of Hastening and Inferno Strum are learned. No placed note sheet names them, and the Lute window shows every spellsong as unknown on a new character.
+- Whether a recipe whose row sets no Weaponsmithing level, such as Moonstone Sword's, can be made at level 1. Profession pages show these under "Level None" until a run crafts one.
+- Whether a discipline has a highest level. In run progression2, Necromancy passed level 5,700 without stopping.
+- From the persona trials, left for later changes: Used For cannot sort or take a level range, an "Unknown" stat does not say why, and skill pages head a single source "Skill Tree 1", a count new players read as a tree number.
 
 ## Where Findings Live
 
