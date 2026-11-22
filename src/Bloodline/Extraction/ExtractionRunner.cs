@@ -254,7 +254,12 @@ internal sealed class ExtractionRunner
                     new DefaultLayer(zero, encoder.Properties(cdo.Properties, generated)),
                 ])
             );
-            var record = new ClassRecord(path, ancestors, properties);
+            var record = new ClassRecord(
+                path,
+                ancestors,
+                properties,
+                asset.AssetClass.Text == "WidgetBlueprint" ? Widgets(package, path) : null
+            );
             merged.Add(path, record);
             return record;
         }
@@ -267,6 +272,55 @@ internal sealed class ExtractionRunner
         {
             loading.Remove(path);
         }
+    }
+
+    /// <summary>
+    /// The widgets of a widget Blueprint's widget tree whose class is a Blueprint class, keyed by their path below
+    /// the generated class, such as <c>WidgetTree.BlazingFire</c>, each with only the values the tree sets on it.
+    /// </summary>
+    private IReadOnlyList<InnerObjectRecord>? Widgets(IPackage package, string path)
+    {
+        var generatedName = path.Split('.')[^1];
+        var widgets = new List<InnerObjectRecord>();
+        for (var i = 0; i < package.ExportsLazy.Length; i++)
+        {
+            var info = package.ResolvePackageIndex(new FPackageIndex(package, i + 1));
+            var tree = info?.Outer;
+            if (
+                info == null
+                || tree?.Name.Text != "WidgetTree"
+                || tree.Outer?.Name.Text != generatedName
+            )
+                continue;
+            var classPath = info.Class?.GetPathName();
+            if (classPath == null || !classes.ContainsKey(classPath))
+                continue;
+            if (
+                gaps.TryRead(
+                    path,
+                    info.GetPathName(),
+                    () =>
+                    {
+                        var widget = package.ExportsLazy[i].Value;
+                        return new InnerObjectRecord(
+                            $"WidgetTree.{info.Name.Text}",
+                            classPath,
+                            DefaultChain.Placement(
+                                Class(classPath).Properties,
+                                widget.Class?.Load() is UStruct declaration
+                                    ? encoder.Properties(widget.Properties, declaration)
+                                    : encoder.Properties(widget.Properties)
+                            )
+                        );
+                    },
+                    out var record
+                )
+            )
+                widgets.Add(record!);
+        }
+        return widgets.Count == 0
+            ? null
+            : widgets.OrderBy(widget => widget.Path, StringComparer.Ordinal).ToArray();
     }
 
     private TableRecord Table(UDataTable table, string path)
@@ -456,6 +510,8 @@ internal sealed class ExtractionRunner
         {
             case ClassRecord generated:
                 Properties(generated.Path, generated.Properties);
+                foreach (var widget in generated.Widgets ?? [])
+                    Properties($"{generated.Path}:{widget.Path}", widget.Properties);
                 break;
             case TableRecord table:
                 for (var index = 0; index < table.Rows.Count; index++)

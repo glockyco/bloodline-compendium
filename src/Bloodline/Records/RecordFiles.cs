@@ -1,4 +1,5 @@
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 
 namespace Bloodline.Records;
 
@@ -13,12 +14,18 @@ internal sealed record GapRecord(string Package, string? Object, string Error);
 
 /// <summary>
 /// A Blueprint class with its merged class defaults. <see cref="Ancestors"/> runs from the parent to the
-/// first native class, which ends the chain because native defaults are not in the files.
+/// first native class, which ends the chain because native defaults are not in the files. A widget Blueprint
+/// also lists the widgets of its widget tree whose class is a Blueprint class, such as the skill slots of a skill
+/// tree. Like a placed actor, each widget holds only the values the tree sets on it, so a reader takes every other
+/// value from the widget class's defaults. Native widgets, such as text blocks and images, hold no game data and are
+/// left out.
 /// </summary>
 internal sealed record ClassRecord(
     string Path,
     IReadOnlyList<string> Ancestors,
-    JsonObject Properties
+    JsonObject Properties,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        IReadOnlyList<InnerObjectRecord>? Widgets = null
 );
 
 /// <summary>A DataTable with its rows in stored order.</summary>
