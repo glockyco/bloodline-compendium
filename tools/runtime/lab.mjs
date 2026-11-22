@@ -411,7 +411,8 @@ async function waitFor(check, seconds, what) {
   while (Date.now() < deadline) {
     const value = await check();
     if (value) return value;
-    await new Promise((done) => setTimeout(done, 250));
+    // A sweep sends thousands of requests, so the wait between two looks is short beside the game's own 100 ms.
+    await new Promise((done) => setTimeout(done, 25));
   }
   throw new Error(`Timed out after ${seconds} s waiting for ${what}.`);
 }
