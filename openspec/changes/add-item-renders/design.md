@@ -19,9 +19,10 @@ Non-goals:
 
 The subject follows what the game draws:
 - Armor is equipped and rendered as the preview character wears it, by itself, in the body's rest pose. The preview's idle animation bent the sleeves at the elbow and hunched the torso, and the Erenshor project's item renders (`erenshor-data-mining`, change `show-item-pictures-by-role`, D2) show worn pieces on a hidden body in its rest pose for the same reason. Body meshes come from `ArmorInfo`, and pieces carried at a socket, such as helmets and pauldrons, come from the item's attached actor. Every equip attaches one more copy, and the newest may still be scaled to almost nothing, so the largest copy counts.
-  Building armor from its meshes without equipping was tried and dropped. Every modular body mesh carries the same `ModularFantasyHeroCharacters` material, the item's class and its own actor name no colours, and a mesh set on a separate actor, even one following the preview body's pose and taking its material, rendered blue-grey where the equipped Copper Cuirass shows brown leather, in a T-pose, and with magenta skin. Calling the player's or the preview's `EquipItem` directly put on helmets and pauldrons but no body meshes. Equipping through the inventory slot is therefore the one way that shows armor in the colours the game gives it.
-- Armor the preview wears without drawing anything, such as Assassin's Belt, is rendered as its own actor instead.
-- A weapon is its own actor, spawned in the diorama, so it no longer depends on the preview carrying it. Rendering the carried copy failed for daggers, spears, staves and halberds, which the preview did not show. The largest mesh decides how the actor turns, and every visible mesh of the actor shows, so a staff keeps its orb and The Embersnap its pipe and cog.
+  Building armor from its meshes without equipping was tried and dropped. Every modular body mesh carries the same `ModularFantasyHeroCharacters` material, the item's class and its own actor name no colours, and a mesh set on a separate actor, even one following the preview body's pose and taking its material, rendered blue-grey where the equipped Heavy Iron Cuirass shows brown leather, in a T-pose, and with magenta skin. Calling the player's or the preview's `EquipItem` directly put on helmets and pauldrons but no body meshes. Equipping through the inventory slot is therefore the one way that shows armor in the colours the game gives it. The attempt was made before captures loaded textures whole (see "Textures") and was not repeated afterwards.
+- Armor the preview wears without drawing anything is rendered as its own actor instead.
+- A mesh that an item hangs on another character is left out. Assassin's Belt, lying in the world, hangs one of its daggers on the player's body, which stretched the frame over the whole level and left no subject in it. Without that mesh the belt renders as the preview wears it.
+- What a hand holds, which is whatever fills the Primary, Secondary or Shield slot, is its own actor, spawned in the diorama, so it does not depend on the preview carrying it. Rendering the carried copy failed for daggers, spears, staves and halberds, which the preview did not show. Every visible mesh of the actor shows, so a staff keeps its orb and The Embersnap its pipe and cog. All 369 weapons fill one of these slots and no other item does. Choosing by weapon type had left the 32 shields without one to show as objects from above.
 - A weapon part is the mesh, materials and scale of its `WeaponComponentTable` row, because its own actor draws nothing. Cores have no mesh in that row and get no render.
 - Any other item is its own actor, as it lies in the world.
 
@@ -29,7 +30,47 @@ Of the 2,072 published items, a survey of every item actor (`tools/runtime/check
 
 ### Views
 
-Worn armor keeps the three-quarter view from the front, weapons and parts stand face-on turned 15 degrees, and firearms, which now include guns, and crossbows lie on their side. Objects are seen from 25 degrees to the left and 35 degrees above, because their top is what a player sees when the item lies on the ground. The views for each category and slot are approved in Plannotator on sample renders.
+The views were decided on sample renders in Plannotator (`artifacts/design/process/trial/44-renders.md`):
+- Worn armor: each piece by itself, three quarters from the front, 25 degrees to the left and 12 degrees above.
+- Pieces worn on the back, such as wings and packs: from behind.
+- Melee weapons, staves and weapon parts: standing, grip down, face-on, turned 15 degrees so the thickness shows.
+- Bows: standing, seen from the side, with the nocked arrow where the model has one.
+- Crossbows and firearms: lying, with the muzzle to the left. The samples had the muzzle to the right and some pointing the other way.
+- Shields: face-on, turned 15 degrees. In the samples most shields showed as objects from above.
+- Other items: as they lie, 25 degrees to the left and 35 degrees above, because their top is what a player sees when the item lies on the ground.
+
+### Which way a held item points
+
+The first renders turned a weapon by its largest mesh alone: the longest axis upright or lying, the end farther from the mesh's origin up or to the right. That end was the wrong one for a mesh modelled the other way round or held near its middle, which showed copper daggers and a soulstaff upside down, two crossbows on end and guns pointing both ways.
+
+The game attaches a held item's actor to a socket of the hand without turning it (relative rotation and location are zero), so the actor is built in the socket's frame. `tools/runtime/checks/hand-frame.lua` reads the direction the player looks and the direction that is up in that frame for each item the first-person body holds (run `2026-11-22T00-32-05-749Z-handframe1`):
+
+| Held | Socket | The player looks along | Up |
+|---|---|---|---|
+| Gun, pistol | Gun | +Y | +Z |
+| Crossbow | Crossbow | +Z | +Y |
+| Bow | Bow2 | -X | +Z |
+| Shield beside a sword | KiteshieldSlot | the eye is on the -Y side | +Z |
+| Shield beside a spear | SpearShield | +Y | +Z |
+
+The largest mesh still lends its axes, so the picture is square to the item, and the socket decides between an axis's two ends:
+- A firearm's longest axis is its barrel and its thinnest its width. The end toward the socket's +Y lies to the left and the side toward +Z is up. Lonland Rifle, Undead Rifle and Dwarven Grenade Launcher are modelled along other axes than the common muskets and now point the same way.
+- A crossbow's thinnest axis is its height and faces the camera with its +Y side, so it shows from above. Of the other two, the one along the socket's Z is the barrel, because the limbs of Light Crossbow and Thorn Crossbow span more than their length.
+- A shield's thinnest axis faces the camera with its +Y side, the side away from the player's eye, and the axis along the socket's Z is up. Lonland Shield's mesh is turned around in its blueprint, which the mesh alone cannot tell. An item whose thinnest axis is the socket's Z lies flat in the hand, as the six open spellbooks do, and shows as an object. Wings of the Wall lies on its side because its blueprint turns it so.
+- A bow stands along the socket's Z axis, because Warpwood Bolter is two staves that each lean, and its -X side, where the arrow flies, lies to the left.
+- Any other weapon stands along its longest axis with the end farther from the hand up, measured over all of its meshes from the actor's own place, so a blade on a separate hilt counts. Where the hand holds the weapon within a tenth of its length from the middle, the end toward the socket's +Z is up, along which these sockets hold their weapons. On the sheets of all 33 spears and all 25 staves, which the hand mostly holds near the middle, the head is up. The six lutes of the game's weapon class Lute hang from the hand by the neck, so their end toward +Z is up too. The plain Lute is a one-handed weapon of the class Shortsword that the hand holds by the neck with the body up, and stands like that.
+
+A firearm, a crossbow, a shield and a bow are measured by their largest mesh alone, because what is fitted to it reaches sideways: The Embersnap's pipe made the pistol show from above.
+
+Reading the held copy's pose at each capture was tried and dropped. An equipped item hangs on the first-person and on the third-person body at different sockets, the pose depends on what the other hand holds (a shield without a weapon beside it hangs at the side with its top forward), and a body the game does not draw keeps its rest pose. The socket's axes are the same for every item it holds.
+
+### Textures
+
+The lab game runs render mode with `-NoTextureStreaming`. A capture is taken two frames after an item appears, and with streaming an item's textures were often still loading: Warpwood Bolter's first capture of a session came out grey (mean colour 133, 135, 105) and its second green (145, 144, 92). With textures loaded whole, the first and the second capture of a session match.
+
+### Lights
+
+Every capture is lit by the preview's own light alone. The lights an item carries are switched off, both on an actor spawned for a capture and on whatever the preview character wears, because a worn item stays on the character until another takes its slot. Altarlight Pauldrons' two candle lights lit every capture after them: in a sweep the mean brightness of renders rose from about 100 to about 230 from the pauldrons onwards. An earlier fix had blamed the Acorn Lute, which a sweep renders just before them.
 
 ### Framing
 

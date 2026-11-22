@@ -5,10 +5,13 @@
 --   parts that draw the meshes of its ArmorInfo and its own actor where it hangs at a socket, such as a helmet, in
 --   the preview's pose, seen three quarters from the front. A female character shows the female meshes. Armor the
 --   preview does not draw, such as a belt with its own meshes, shows as an object.
--- - A weapon is its own actor, as the hand carries it, standing upright with its grip down and seen face-on.
---   Firearms and crossbows lie on their side with the muzzle to the right.
+-- - What a hand holds is its own actor, turned by its largest mesh and seen face-on with its thinnest side toward
+--   the camera. A weapon stands with the end farther from the hand up, and a bow with its back to the left. A
+--   firearm lies on its side and a crossbow on its back, both with the muzzle to the left. A shield shows its
+--   front. The item's actor is built in the frame of the socket that holds it, so the socket tells which way the
+--   item points and which side is up.
 -- - A weapon part draws the mesh, materials and scale its row in WeaponComponentTable names, given as args.part,
---   and stands like a weapon.
+--   and stands like a weapon, with the end farther from its mesh's origin up.
 -- - Any other item is its own actor, as it lies in the world, seen three quarters from above.
 -- The capture takes the preview's light and its scene colour without tonemapping, which the sheet shows as it is.
 -- Two captures go to args.directory: <args.file>-color.png and <args.file>-mask.png, the depth that marks the
@@ -23,11 +26,13 @@ local itemClass = LoadAsset(args.item)
 if not itemClass or not itemClass:IsValid() then error("Class " .. args.item .. " did not load") end
 local defaults = itemClass:GetCDO()
 local armor = defaults:IsA(LoadAsset("/Game/BloodlinesAlpha/Interactables/Armor/BP_BaseArmor.BP_BaseArmor_C"))
--- E_AttackType 0 is None: an item without a weapon type is no weapon.
+-- E_SlotType 6 is Primary, 7 Secondary and 8 Shield, the slots of what a hand holds. E_AttackType 2 is Bow,
+-- 8 Crossbow, 9 Gun and 10 Pistol. WeaponTypes 20 is Lute.
+local slot = itemInfo(defaults.ItemInfo, "ItemSlot")
 local weaponType = itemInfo(defaults.ItemInfo, "WeaponType")
 -- args.subject = "object" shows armor as its own actor, for armor that the preview wears without drawing it.
 local subject = args.part and "part" or args.subject == "object" and "object" or armor and "worn"
-  or (weaponType and weaponType ~= 0) and "carried" or "object"
+  or (slot == 6 or slot == 7 or slot == 8) and "carried" or "object"
 -- A capture taken again in a refined frame finds the armor already equipped, as the first capture left it.
 if subject == "worn" and not args.again then commands["equip"]({ item = args.item }) end
 local posed = subject == "worn"
@@ -128,27 +133,19 @@ local function capture()
       actor:K2_SetActorLocation(add(actor:K2_GetActorLocation(), add(chest, scale(add(low, high), -0.5))), false, {}, false)
     end
 
-    -- The world directions that a mesh's local X, Y and Z should take so it stands upright with the end farther
-    -- from its origin, where the hand holds it, at the top, or lies on its side with that end to the right. Its
-    -- thinnest axis faces the camera, so the broad face of a blade and the curve of a bow show.
-    local function standing(mesh, size, lying)
-      local low, high = localBounds(mesh, size)
-      local names = { "X", "Y", "Z" }
-      table.sort(names, function(a, b) return (high[a] - low[a]) > (high[b] - low[b]) end)
-      local long, thin = names[1], names[3]
-      local along = lying and right or up
-      local function axes(face)
-        local images = { [long] = high[long] >= -low[long] and along or scale(along, -1), [thin] = face }
-        -- Local X, Y and Z keep their handedness in the turned copy: X = Y x Z, Y = Z x X, Z = X x Y.
-        if not images.X then images.X = math3:Cross_VectorVector(images.Y, images.Z)
-        elseif not images.Y then images.Y = math3:Cross_VectorVector(images.Z, images.X)
-        else images.Z = math3:Cross_VectorVector(images.X, images.Y) end
-        return images
-      end
-      local images = axes(front)
-      -- A lying weapon keeps the mesh's own top up, so it shows the other side when that would turn it over.
-      if lying and long ~= "Z" and thin ~= "Z" and math3:Dot_VectorVector(images.Z, up) < 0 then images = axes(scale(front, -1)) end
+    -- The third of a mesh's axes from the two that have their directions. Local X, Y and Z keep their handedness
+    -- in the turned copy: X = Y x Z, Y = Z x X, Z = X x Y.
+    local function complete(images)
+      if not images.X then images.X = math3:Cross_VectorVector(images.Y, images.Z)
+      elseif not images.Y then images.Y = math3:Cross_VectorVector(images.Z, images.X)
+      else images.Z = math3:Cross_VectorVector(images.X, images.Y) end
       return images
+    end
+    -- The axes of a box from its longest to its thinnest.
+    local function ranked(low, high)
+      local names = { "X", "Y", "Z" }
+      table.sort(names, function(a, b) return math.abs(high[a] - low[a]) > math.abs(high[b] - low[b]) end)
+      return names[1], names[2], names[3]
     end
 
     local shown, meshes, actors = {}, {}, {}
@@ -225,23 +222,100 @@ local function capture()
       own(actor)
       local visible = visibleMeshes(actor)
       if #visible == 0 then error("The item's own actor draws no mesh: " .. args.item) end
-      -- The largest mesh decides how the weapon stands, and the actor turns so that mesh's axes take their places.
-      local source, extentSum = nil, -1
+      -- The game attaches the actor to a socket of the hand without turning it, so the unturned actor shows each
+      -- mesh's axes in the socket's frame, and the actor's own place is the hand's.
+      local hand = actor:K2_GetActorLocation()
+      local function axesOf(component)
+        return { X = component:GetForwardVector(), Y = component:GetRightVector(), Z = component:GetUpVector() }
+      end
+      -- Every corner of every mesh's box, from the hand.
+      local corners = {}
       for _, component in ipairs(visible) do
-        local low, high = localBounds(meshOf(component))
-        local sum = (high.X - low.X) + (high.Y - low.Y) + (high.Z - low.Z)
-        if sum > extentSum then source, extentSum = component, sum end
+        local a, b = localBounds(meshOf(component))
+        local transform = component:K2_GetComponentToWorld()
+        for _, x in ipairs({ a.X, b.X }) do
+          for _, y in ipairs({ a.Y, b.Y }) do
+            for _, z in ipairs({ a.Z, b.Z }) do
+              corners[#corners + 1] = add(math3:TransformLocation(transform, { X = x, Y = y, Z = z }), scale(hand, -1))
+            end
+          end
+        end
       end
-      -- E_AttackType 8 is Crossbow, which rifles share, 9 is Gun and 10 is Pistol.
-      local images = standing(meshOf(source), nil, weaponType == 8 or weaponType == 9 or weaponType == 10)
-      -- The actor stands unturned, so the mesh's axes in world space are its axes within the actor.
-      local inActor = { X = source:GetForwardVector(), Y = source:GetRightVector(), Z = source:GetUpVector() }
-      local function image(axis)
-        local v = { X = 0, Y = 0, Z = 0 }
-        for _, name in ipairs({ "X", "Y", "Z" }) do v = add(v, scale(images[name], inActor[name][axis])) end
-        return v
+      -- The box around all of the item's meshes along a set of axes, measured from the hand.
+      local function boxAlong(axes)
+        local low, high = {}, {}
+        for _, corner in ipairs(corners) do
+          for name, axis in pairs(axes) do
+            local along = math3:Dot_VectorVector(corner, axis)
+            low[name] = math.min(low[name] or along, along)
+            high[name] = math.max(high[name] or along, along)
+          end
+        end
+        return low, high
       end
-      actor:K2_SetActorRotation(math3:MakeRotationFromAxes(image("X"), image("Y"), image("Z")), false)
+      -- The largest mesh lends the item its axes, and the actor turns so those axes take their places.
+      local source, largest = nil, -1
+      for _, component in ipairs(visible) do
+        local low, high = localBounds(meshOf(component), component:K2_GetComponentScale())
+        local size = math.abs(high.X - low.X) + math.abs(high.Y - low.Y) + math.abs(high.Z - low.Z)
+        if size > largest then source, largest = component, size end
+      end
+      local inSocket = axesOf(source)
+      local kind = slot == 8 and "shield" or weaponType == 8 and "crossbow"
+        or (weaponType == 9 or weaponType == 10) and "firearm" or weaponType == 2 and "bow" or "weapon"
+      -- A firearm, a crossbow, a shield and a bow are measured by their largest mesh alone, because what is fitted
+      -- to it, such as The Embersnap's pipe or a nocked arrow, reaches sideways. A standing weapon is measured as a
+      -- whole from the hand, so a blade on a separate hilt counts.
+      local low, high = localBounds(meshOf(source), source:K2_GetComponentScale())
+      if kind == "weapon" then low, high = boxAlong(inSocket) end
+      local function toward(name, socketAxis) return inSocket[name][socketAxis] < 0 and -1 or 1 end
+      local long, mid, thin = ranked(low, high)
+      -- tools/runtime/checks/hand-frame.lua measures where the player looks and what is up in each socket's frame.
+      local images
+      if kind == "shield" and math.abs(inSocket[thin].Z) > math.abs(inSocket[thin].Y) then
+        -- The shield sockets' Z axis points up. An item whose thinnest side faces up lies flat in the hand, as an
+        -- open spellbook does, and shows as it lies.
+        subject = "object"
+        actor:K2_SetActorRotation(math3:MakeRotFromXZ(front, up), false)
+      elseif kind == "shield" then
+        -- The shield sockets' Y axis points away from the arm, so that side is the front.
+        local top = math.abs(inSocket[long].Z) >= math.abs(inSocket[mid].Z) and long or mid
+        images = { [thin] = scale(front, toward(thin, "Y")), [top] = scale(up, toward(top, "Z")) }
+      elseif kind == "crossbow" then
+        -- The Crossbow socket's Z axis points where the player aims and its Y axis up. A crossbow's thinnest side
+        -- is its height, so it shows from above, and its limbs can span more than its length.
+        local barrel = math.abs(inSocket[long].Z) >= math.abs(inSocket[mid].Z) and long or mid
+        images = { [barrel] = scale(right, -toward(barrel, "Z")), [thin] = scale(front, toward(thin, "Y")) }
+      elseif kind == "firearm" then
+        -- The Gun socket's Y axis points where the player aims and its Z axis up. A firearm's longest side is its
+        -- barrel and its thinnest its width, so it shows from the side.
+        images = { [long] = scale(right, -toward(long, "Y")), [mid] = scale(up, toward(mid, "Z")) }
+      elseif kind == "bow" then
+        -- The Bow socket holds a bow along its Z axis, with its X axis pointing back at the archer. A bow stands
+        -- along that Z axis instead of its largest mesh's, because a bow can be two limbs that each lean, as
+        -- Warpwood Bolter's are. The mesh's thinnest side, turned level, still tells the bow's sides apart. The
+        -- bow's back faces left, where its arrow flies.
+        local across = math3:Normal({ X = inSocket[thin].X, Y = inSocket[thin].Y, Z = 0 }, 0.0001)
+        inSocket = { X = math3:Cross_VectorVector(across, up), Y = across, Z = up }
+        images = { Z = up, X = scale(right, toward("X", "X")) }
+      else
+        -- The end farther from the hand is up. A hand at the middle, within a tenth of the length, has no farther
+        -- end, and a lute hangs from the hand by its neck. For both, the end toward the socket's Z axis is up,
+        -- along which the sockets of these weapons hold them.
+        local far = high[long] >= -low[long] and 1 or -1
+        local centred = math.abs(high[long] + low[long]) < 0.1 * (high[long] - low[long])
+        if centred or defaults["Weapon Class"] == 20 then far = toward(long, "Z") end
+        images = { [long] = scale(up, far), [thin] = front }
+      end
+      if images then
+        complete(images)
+        local function image(axis)
+          local v = { X = 0, Y = 0, Z = 0 }
+          for _, name in ipairs({ "X", "Y", "Z" }) do v = add(v, scale(images[name], inSocket[name][axis])) end
+          return v
+        end
+        actor:K2_SetActorRotation(math3:MakeRotationFromAxes(image("X"), image("Y"), image("Z")), false)
+      end
       centre(actor, visible)
       for _, component in ipairs(visible) do shown[#shown + 1] = component end
     elseif subject == "part" then
@@ -256,7 +330,11 @@ local function capture()
       -- LoadAsset returns more than the object, so the call keeps only its first value.
       for index, path in ipairs(args.part.materials or {}) do copy:SetMaterial(index - 1, (LoadAsset(path))) end
       if args.part.scale then copy:SetWorldScale3D(args.part.scale) end
-      local images = standing(mesh, args.part.scale, false)
+      -- A part has no hand. The end farther from its mesh's origin, where it joins the weapon, is up, and its
+      -- thinnest side faces the camera.
+      local low, high = localBounds(mesh, args.part.scale)
+      local long, _, thin = ranked(low, high)
+      local images = complete({ [long] = scale(up, high[long] >= -low[long] and 1 or -1), [thin] = front })
       copyActor:K2_SetActorRotation(math3:MakeRotationFromAxes(images.X, images.Y, images.Z), false)
       centre(copyActor, { copy })
       shown[1] = copy

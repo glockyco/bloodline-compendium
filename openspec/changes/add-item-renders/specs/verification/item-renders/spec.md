@@ -5,14 +5,22 @@ Defines how the lab renders item models, which renders are published and which i
 ## ADDED Requirements
 
 ### Requirement: Renders show what the game draws
-A render SHALL show only what the game draws for the item, alone on a transparent background, lit as the character sheet's preview lights equipment at a clear noon. Translucent surfaces SHALL be part of the render.
+A render SHALL show only what the game draws for the item, alone on a transparent background, lit as the character sheet's preview lights equipment at a clear noon. Translucent surfaces and surfaces that only glow SHALL be part of the render. Textures SHALL show at full detail, whenever in a session the render is taken.
 
 #### Scenario: A slime-metal blade
 - **WHEN** a weapon part whose material is translucent is rendered
 - **THEN** the render shows the part, partly transparent where its material is
 
+#### Scenario: A glowing ring
+- **WHEN** Anointed Halo, whose ring only glows, is rendered
+- **THEN** the render shows the ring
+
+#### Scenario: The first render of a session
+- **WHEN** an item is rendered right after the game starts and again later in the session
+- **THEN** both renders show the same colours
+
 ### Requirement: The subject by kind of item
-Armor SHALL show what the preview character wears for it, or its own model where the preview wears it without drawing it. A weapon SHALL show its own model, a weapon part the mesh, materials and scale that its smithing table row names, and any other item its own model as it lies in the world.
+Armor SHALL show what the preview character wears for it, or its own model where the preview wears it without drawing it. What a hand holds SHALL show its own model, a weapon part the mesh, materials and scale that its smithing table row names, and any other item its own model as it lies in the world. A mesh that an item hangs on another character SHALL NOT be part of its render.
 
 #### Scenario: Heavy Iron Cuirass
 - **WHEN** Heavy Iron Cuirass is rendered
@@ -22,12 +30,43 @@ Armor SHALL show what the preview character wears for it, or its own model where
 - **WHEN** a staff whose model holds an orb is rendered
 - **THEN** the render shows the staff with its orb
 
+#### Scenario: Assassin's Belt
+- **WHEN** Assassin's Belt is rendered
+- **THEN** the render shows the sheath and the bottle the preview character wears at the hip
+
 ### Requirement: Views by kind
-Every render of one kind SHALL be taken from the same view: worn armor three quarters from the front, weapons and weapon parts face-on and upright with the grip down, firearms and crossbows lying on their side with the muzzle to the right, and other items three quarters from above. The subject SHALL fill the picture with a margin of 5% of its longer side.
+Every render of one kind SHALL be taken from the same view: worn armor three quarters from the front, pieces worn on the back from behind, weapons and weapon parts face-on and upright, firearms and crossbows lying with the muzzle to the left, shields from the front, and other items three quarters from above. The subject SHALL fill the picture with a margin of 5% of its longer side.
 
 #### Scenario: A musket
 - **WHEN** a gun is rendered
-- **THEN** it lies on its side with its muzzle to the right
+- **THEN** it lies on its side with its muzzle to the left and its lock up
+
+#### Scenario: A crossbow wider than it is long
+- **WHEN** Light Crossbow, whose limbs span more than its length, is rendered
+- **THEN** it shows from above with its limbs to the left
+
+#### Scenario: An open spellbook
+- **WHEN** a spellbook that lies open in the off hand is rendered
+- **THEN** it shows as it lies, three quarters from above
+
+### Requirement: Held items follow the hand
+A weapon SHALL stand with the end farther from the hand up, and a bow with its back to the left. A firearm SHALL show its side with its top up, a crossbow its top and a shield its front with its top up. Which end of a held item is its muzzle, its front or its top SHALL come from the socket of the hand that holds it in the game, as a measurement in the running game gives it.
+
+#### Scenario: A gun whose mesh points backward
+- **WHEN** Undead Rifle, whose barrel runs against its mesh's axis, is rendered
+- **THEN** its muzzle lies to the left like every other gun's
+
+#### Scenario: A shield whose mesh faces backward
+- **WHEN** Lonland Shield, whose mesh is turned around in its blueprint, is rendered
+- **THEN** the render shows its front, as the renders of other shields do
+
+#### Scenario: A dagger of two meshes
+- **WHEN** Copper Daggers, a hilt mesh and a blade mesh, is rendered
+- **THEN** the blade is up
+
+#### Scenario: A staff held at its middle
+- **WHEN** Acolyte's Soulstaff, which the hand holds at its middle, is rendered
+- **THEN** its hooked end is up, as the hand holds it
 
 ### Requirement: Both bodies where they differ
 Armor whose render shows body meshes SHALL also be rendered on the female body, because the game draws a female counterpart of each body mesh. Other items SHALL have one render.
