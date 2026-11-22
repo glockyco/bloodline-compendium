@@ -9,6 +9,11 @@ export function titleCase(value: string): string {
 
 /** The one name of each way to get an item: its item-page heading, filter, Home row and search description. */
 export const sourceHeadings: Record<SourceKind, string> = {
+	// Only skills and spellsongs come from these, and a skill tree is how most skills are learned, so it leads.
+	skillTree: 'Learned in a Skill Tree',
+	skillBook: 'Learned from a Skill Book',
+	noteSheet: 'Learned from a Note Sheet',
+	event: 'Unlocked by an Event',
 	shop: 'Sold by',
 	currencyShop: 'Sold for Special Currency',
 	smithing: 'Made by Smithing',
@@ -30,16 +35,14 @@ export const sourceHeadings: Record<SourceKind, string> = {
 	archaeology: 'Dug Up',
 	reward: 'Rewarded',
 	// Random loot names no place or chance, so it follows the ways that do.
-	randomLoot: 'Found as Random Loot',
-	skillTree: 'In a Skill Tree',
-	skillBook: 'Learned from a Skill Book',
-	noteSheet: 'Learned from a Note Sheet',
-	event: 'Unlocked by an Event'
+	randomLoot: 'Found as Random Loot'
 };
 
 export const sourceIntros: Partial<Record<SourceKind, string>> = {
 	settlementDelivery:
-		'Completed buildings in your settlement add resources every game week. Collect them under Resources Ready in the settlement overview.'
+		'Completed buildings in your settlement add resources every game week. Collect them under Resources Ready in the settlement overview.',
+	skillTree:
+		'Learning a skill costs 1 skill point once the discipline reaches the level shown. Clicking the skill again refunds the point.'
 };
 /** What a source table's first column lists for each way of getting an item. */
 export const sourceColumns: Record<SourceKind, string> = {

@@ -38,7 +38,7 @@
 			All {formatNumber(data.count)} items in The Bloodline, with their sources, recipes and uses.
 		</p>
 		<div class="hero-search">
-			<Search variant="hero" placeholder="Search items, for example {data.example}" />
+			<Search variant="hero" placeholder="Search items, skills and more, for example {data.example}" />
 		</div>
 		<div class="actions">
 			<ButtonLink href={itemsPath}>Browse Items</ButtonLink>

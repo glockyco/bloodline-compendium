@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import SourceRow from '#lib/items/SourceRow.svelte';
+	import SourceSections from '#lib/entity/SourceSections.svelte';
+	import UnconfirmedSources from '#lib/entity/UnconfirmedSources.svelte';
 	import RelationTable from '#lib/RelationTable.svelte';
 	import EntityLink from '#lib/ui/EntityLink.svelte';
 	import Conditions from '#lib/Conditions.svelte';
@@ -11,19 +12,11 @@
 	import ItemModel from '#lib/items/ItemModel.svelte';
 	import OnHitEffects from '#lib/items/OnHitEffects.svelte';
 	import { detailRows } from '#lib/items/game-card.js';
-	import { sourceColumns, sourceHeadings, sourceIntros } from '#lib/labels.js';
-	import {
-		headingCase,
-		oddsLabel,
-		placedKinds,
-		recipeKinds,
-		sortSources,
-		useHeadings,
-		pricePhrase
-	} from '#lib/items/acquisition.js';
+	import { sourceHeadings } from '#lib/labels.js';
+	import { recipeKinds, sortSources, useHeadings, pricePhrase } from '#lib/items/acquisition.js';
 	import RecipeLine from '#lib/items/RecipeLine.svelte';
 	import { formatNumber } from '#lib/format.js';
-	import type { ItemPage, Source, SourceKind } from '#lib/site-data.js';
+	import type { ItemPage, SourceKind } from '#lib/site-data.js';
 	import { statusSentence } from '#lib/items/describe.js';
 	let {
 		item,
@@ -35,89 +28,12 @@
 	// Details keep mixed projectile hits together beside the game card.
 	const details = $derived(detailRows(item.facts, item.projectileGroups));
 	const confirmedSources = $derived(item.sources.filter((source) => !source.unconfirmed));
-	// Unconfirmed sources of one name and place share a row, which keeps each source's relation. One sentence says
-	// why none is confirmed.
-	const unconfirmedSources = $derived.by(() => {
-		const key = (source: Source) =>
-			source.name + '|' + source.places.map((place) => place.name).join(',');
-		const sources = item.sources.filter((candidate) => candidate.unconfirmed);
-		return sources
-			.filter((source, index) => sources.findIndex((other) => key(other) === key(source)) === index)
-			.map((source) => ({
-				source,
-				relationIds: sources
-					.filter((other) => key(other) === key(source))
-					.map((other) => other.relationId)
-			}));
-	});
-	const unconfirmedSentence = $derived(
-		`The game files list these ways to get ${item.name}, but no ${
-			unconfirmedSources.some(({ source }) => source.kind === 'dialogue')
-				? 'place or person'
-				: 'place'
-		} in the world uses them.`
-	);
 	const bugs = $derived(bugRows(item));
-	const groups = $derived(
+	// Recipes show as recipe lines of their own, smithing first as the source sections order their kinds.
+	const recipes = $derived(
 		(Object.keys(sourceHeadings) as SourceKind[])
-			.map((kind) => {
-				const listed = sortSources(confirmedSources.filter((source) => source.kind === kind));
-				// Sources share a place heading where several stand in the same place. A source in several places
-				// would sit under one of them while naming the others, so such groups list places in their rows.
-				const places = listed.map(placeOf);
-				// Picked Up rows are their places, so they never share a place heading.
-				const byPlace =
-					kind !== 'pickup' &&
-					listed.every((source) => source.places.length <= 1) &&
-					new Set(places).size > 1 &&
-					places.some((place, index) => places.indexOf(place) !== index);
-				// Places follow the order of their best source, so the likeliest place leads as the likeliest row would.
-				const order = [...new Set(listed.map(placeOf))];
-				const sources = byPlace
-					? [...listed].sort((a, b) => order.indexOf(placeOf(a)) - order.indexOf(placeOf(b)))
-					: listed;
-				const showAmount = sources.some(
-					(source) => source.amount && (source.amount.min !== 1 || source.amount.max !== 1)
-				);
-				const showContext = sources.some((source) => source.price || source.odds);
-				const showSpawn =
-					kind === 'containerLoot' &&
-					sources.some((source) => source.spawn && source.spawn.min < 1);
-				// A note comes from accepting its quest, which has no place of its own, so such rows name none.
-				const showPlaces = kind !== 'bountyNote';
-				// A chance names its event once in the heading when every row shares it.
-				const events = [
-					...new Set(
-						sources.flatMap((source) =>
-							source.odds?.chance != null ? [oddsLabel(source.odds, source.kind)] : []
-						)
-					)
-				];
-				const sharedUnit = !sources.some((source) => source.price) && events.length === 1;
-				const contextHeading = sources.some((source) => source.price)
-					? 'Price'
-					: sharedUnit
-						? `Chance ${headingCase(events[0])}`
-						: 'Chance';
-				return {
-					kind,
-					sources,
-					byPlace,
-					showPlaces,
-					recipe: recipeKinds.has(kind),
-					showAmount,
-					showSpawn,
-					showContext,
-					sharedUnit,
-					headings: [
-						sourceColumns[kind],
-						...(showAmount ? ['Quantity'] : []),
-						...(showSpawn ? ['Spawns'] : []),
-						...(showContext ? [contextHeading] : [])
-					]
-				};
-			})
-			.filter((group) => group.sources.length)
+			.filter((kind) => recipeKinds.has(kind))
+			.flatMap((kind) => sortSources(confirmedSources.filter((source) => source.kind === kind)))
 	);
 	const sortedUses = $derived(
 		[...item.uses].sort(
@@ -128,10 +44,6 @@
 	// own table with the merchant and the price.
 	const uses = $derived(sortedUses.filter((use) => use.kind !== 'currencyShop'));
 	const payments = $derived(sortedUses.filter((use) => use.kind === 'currencyShop'));
-	const recipes = $derived(
-		groups.filter((group) => group.recipe).flatMap((group) => group.sources)
-	);
-	const sourceGroups = $derived(groups.filter((group) => !group.recipe));
 	// The skill level a use needs shows in its own column, so the condition that states it does not repeat.
 	const levelOf = (use: (typeof uses)[number]) =>
 		use.conditions.find((condition) => condition.kind === 'proficiencyLevel')?.value ?? null;
@@ -163,12 +75,8 @@
 				(useLevel == null || (levelOf(use) ?? 0) <= useLevel)
 		);
 	});
-	function placeOf(source: Source): string | null {
-		if (source.places[0]) return source.places[0].name;
-		if (source.settlement) return 'Your settlement';
-		// Random loot and crops stand nowhere in particular, so only ways that stand somewhere miss a place.
-		return placedKinds.has(source.kind) ? 'Location unknown' : null;
-	}
+	// An item without a confirmed way to get it says so, which every source section would otherwise answer.
+	const unsourced = $derived(!confirmedSources.length);
 	function useLabel(kind: SourceKind): string {
 		return useHeadings[kind] ?? sourceHeadings[kind];
 	}
@@ -193,7 +101,7 @@
 			</Section>{/if}
 		<OnHitEffects effects={item.onHitEffects} id={idPrefix + 'on-hit-effects'} />
 		<!-- The ways to get an item follow as their own sections, and only an item without one says so here. -->
-		{#if !groups.length}<Section id={idPrefix + 'how-to-get-it'} title="How to Get It">
+		{#if unsourced}<Section id={idPrefix + 'how-to-get-it'} title="How to Get It">
 				<p class="surface">{statusSentence[item.status]}</p>
 			</Section>{/if}
 	</div>
@@ -213,39 +121,7 @@
 						/>{/each}
 				</Section>
 			</div>{/if}
-		{#each sourceGroups as group (group.kind)}
-			<Section
-				class="source-group"
-				id={idPrefix + 'source-' + group.kind}
-				title={sourceHeadings[group.kind]}
-				count={group.sources.length}
-				line={sourceIntros[group.kind]}
-			>
-				<RelationTable
-					items={group.sources}
-					label={sourceHeadings[group.kind]}
-					headings={group.headings}
-					>{#snippet row(
-						source,
-						index
-					)}{#if group.byPlace && (index === 0 || placeOf(group.sources[index - 1]) !== placeOf(source))}<tr
-								class="place-heading"
-								><th colspan={group.headings.length} scope="colgroup" data-game
-									>{placeOf(source)}</th
-								></tr
-							>{/if}<SourceRow
-							{source}
-							showAmount={group.showAmount}
-							showSpawn={group.showSpawn}
-							showContext={group.showContext}
-							showUnit={!group.sharedUnit}
-							showPlaces={!group.byPlace && group.showPlaces}
-							placeFirst={group.kind === 'pickup'}
-							id={`${idPrefix}source-${group.kind}-${index + 1}`}
-						/>{/snippet}</RelationTable
-				>
-			</Section>
-		{/each}
+		<SourceSections sources={item.sources} {idPrefix} />
 		{#if uses.length}<Section
 				id={idPrefix + 'used-for'}
 				title="Used For"
@@ -327,33 +203,7 @@
 						>{/snippet}</RelationTable
 				>
 			</Section>{/if}
-		{#if unconfirmedSources.length}<Section
-				id={idPrefix + 'only-in-game-files'}
-				title="Only in the Game Files"
-				count={unconfirmedSources.length}
-				line={unconfirmedSentence}
-			>
-				<RelationTable
-					items={unconfirmedSources}
-					label="Only in the Game Files"
-					headings={['Source']}
-					numeric={false}
-					>{#snippet row({ source, relationIds }, index)}<tr
-							id={`${idPrefix}unconfirmed-source-${index + 1}`}
-							data-relation-id={relationIds.join(' ')}
-							data-relation-direction="incoming"
-							><td
-								><span class="relation-name"
-									><EntityLink entity={source.entity}>{source.name}</EntityLink></span
-								>{#if source.places.length}<p class="source-places">
-										{#each source.places as place, index (index)}{index ? ', ' : ''}<EntityLink
-												entity={place}
-											/>{/each}
-									</p>{/if}</td
-							></tr
-						>{/snippet}</RelationTable
-				>
-			</Section>{/if}
+		<UnconfirmedSources sources={item.sources} name={item.name} {idPrefix} />
 		{#if bugs.length}
 			<Section id={idPrefix + 'bugs'} title="Bugs" count={bugs.length}>
 				<ul class="surface bug-rows">

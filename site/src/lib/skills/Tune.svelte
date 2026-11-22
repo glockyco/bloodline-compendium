@@ -18,11 +18,11 @@
 	.tune {
 		display: inline-flex;
 		flex-wrap: wrap;
-		gap: var(--gap-hair);
+		gap: var(--gap-line);
 	}
 	svg {
-		width: var(--size-note);
-		height: var(--size-note);
+		width: var(--size-icon-inline);
+		height: var(--size-icon-inline);
 		fill: var(--accent);
 	}
 </style>

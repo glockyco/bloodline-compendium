@@ -63,9 +63,7 @@ export type Preview = ItemPreview | SkillPreview | PassivePreview | SpellsongPre
 
 /** A preview resource: one entity's preview, or the previews of a hosted kind's entries on one page. */
 export type PreviewResource =
-	| Preview
-	| HostedPreviews<PassivePreview>
-	| HostedPreviews<SpellsongPreview>;
+	Preview | HostedPreviews<PassivePreview> | HostedPreviews<SpellsongPreview>;
 
 /** The kinds whose links show a preview. Links to other kinds lead straight to their page. */
 export const previewKinds: ReadonlySet<EntityKind> = new Set<Preview['kind']>([

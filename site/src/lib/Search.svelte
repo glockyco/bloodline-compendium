@@ -5,7 +5,7 @@
 	import { kindPath } from './entities.js';
 	let {
 		variant = 'header',
-		placeholder = 'Search items'
+		placeholder = 'Search the compendium'
 	}: { variant?: 'header' | 'hero'; placeholder?: string } = $props();
 	onMount(() => {
 		void import('@pagefind/component-ui');
@@ -16,7 +16,7 @@
 	<pagefind-searchbox
 		bundle-path="/pagefind/"
 		{placeholder}
-		aria-label="Search items"
+		aria-label="Search the compendium"
 		shortcut="/"
 		max-results="8"
 		hide-shortcut

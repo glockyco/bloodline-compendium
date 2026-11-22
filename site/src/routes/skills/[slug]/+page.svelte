@@ -1,32 +1,21 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import EntityArticle from '#lib/ui/EntityArticle.svelte';
-	import EntityLink from '#lib/ui/EntityLink.svelte';
+	import Section from '#lib/ui/Section.svelte';
+	import SourceSections from '#lib/entity/SourceSections.svelte';
+	import UnconfirmedSources from '#lib/entity/UnconfirmedSources.svelte';
 	import SeoHead from '#lib/SeoHead.svelte';
 	import SkillTooltip from '#lib/skills/SkillTooltip.svelte';
 	import { entityPath, kindPath } from '#lib/entities.js';
-	import { sourceHeadings } from '#lib/labels.js';
-	import { formatNumber } from '#lib/format.js';
-	import type { Source, SourceKind } from '#lib/site-data.js';
+	import { titleCase } from '#lib/labels.js';
+	import { skillStatusSentence } from '#lib/skills/describe.js';
 	let { data } = $props();
 	const skill = $derived(data.skill);
 	const kind = $derived(data.kinds.find((entry) => entry.kind === skill.kind)!);
 	const listPath = $derived(kindPath(skill.kind, data.kinds)!);
-	const groups = $derived(
-		Object.entries(
-			Object.groupBy(
-				skill.sources.filter((source) => !source.unconfirmed),
-				(source) => source.kind
-			)
-		) as [SourceKind, Source[]][]
-	);
-	const unconfirmed = $derived(skill.sources.filter((source) => source.unconfirmed));
+	// A skill without a confirmed way to learn it says so, which every source section would otherwise answer.
 	const status = $derived(
-		skill.status === 'notInNormalPlay'
-			? 'Cannot be obtained in normal play.'
-			: skill.status === 'noKnownSource'
-				? 'No known source.'
-				: null
+		skill.sources.some((source) => !source.unconfirmed) ? null : skillStatusSentence[skill.status]
 	);
 	const tree = $derived(skill.sources.find((source) => source.kind === 'skillTree'));
 	const description = $derived(
@@ -44,7 +33,9 @@
 </script>
 
 <SeoHead
-	title={skill.name + (skill.qualifier ? ' (' + skill.qualifier + ')' : '') + ' Skill | The Bloodline Compendium'}
+	title={skill.name +
+		(skill.qualifier ? ' (' + skill.qualifier + ')' : '') +
+		' Skill | The Bloodline Compendium'}
 	{description}
 	entity={reference}
 	{kind}
@@ -62,81 +53,31 @@
 	</ol>
 </nav>
 <EntityArticle {kind}>
-	<h1 data-pagefind-meta="title" data-game>{skill.name}</h1>
-	<div class="layout">
-		<div class="main">
-			{#if status}<p class="status">{status}</p>{/if}
-			{#each groups as [sourceKind, sources] (sourceKind)}
-				<section aria-labelledby={'how-' + sourceKind}>
-					<h2 id={'how-' + sourceKind}>{sourceHeadings[sourceKind]}</h2>
-					<ul>
-						{#each sources as source (source.relationId)}
-							<li data-relation-id={source.relationId} data-relation-direction="incoming">
-								{#if source.kind === 'skillTree'}<EntityLink entity={source.entity} />, {source
-										.conditions[0]?.label}, {formatNumber(source.cost?.amount ?? 1)} skill point
-								{:else if source.places.length}<EntityLink entity={source.entity} />{#if source.kind === 'dialogue'}
-										in {#each source.places as place, index (place.key ?? place.name)}{index
-												? ', '
-												: ''}<EntityLink entity={place} />{/each}{/if}
-								{:else}<EntityLink entity={source.entity} />{/if}
-							</li>
-						{/each}
-					</ul>
-				</section>
-			{/each}
-			{#if unconfirmed.length}
-				<section aria-labelledby="how-unconfirmed">
-					<h2 id="how-unconfirmed">Named in the Game Files</h2>
-					<p class="status">The game files name these, but whether they give the skill in play is unknown.</p>
-					<ul>
-						{#each unconfirmed as source (source.relationId)}
-							<li data-relation-id={source.relationId} data-relation-direction="incoming">
-								<EntityLink entity={source.entity} />
-							</li>
-						{/each}
-					</ul>
-				</section>
-			{/if}
-		</div>
-		<aside class="side">
+	<div class="item-heading">
+		<h1 data-pagefind-meta="title" data-game>{skill.name}</h1>
+		<p class="identity">
+			<a
+				href={kindPath(
+					skill.kind,
+					data.kinds,
+					`?category=${encodeURIComponent(data.category.slug)}`
+				)!}>{titleCase(data.category.name)}</a
+			>{#if tree}<span aria-hidden="true">·</span><span data-game>{tree.name}</span>{/if}
+		</p>
+	</div>
+	<div class="detail-layout">
+		<!-- Only a skill without a confirmed way to learn it opens with an answer, which its sources give otherwise. -->
+		{#if status}<div class="answer" data-pagefind-ignore="all">
+				<Section id="how-to-get-it" title="How to Get It">
+					<p class="surface">{status}</p>
+				</Section>
+			</div>{/if}
+		<aside class="item-side" aria-label="Game card">
 			<SkillTooltip skill={{ ...skill }} heading="p" />
 		</aside>
+		<div class="item-relations" data-pagefind-ignore="all">
+			<SourceSections sources={skill.sources} />
+			<UnconfirmedSources sources={skill.sources} name={skill.name} />
+		</div>
 	</div>
 </EntityArticle>
-
-<style>
-	.layout {
-		display: grid;
-		gap: var(--gap-section);
-		align-items: start;
-	}
-	@media (width >= 64rem) {
-		.layout {
-			grid-template-columns: minmax(0, 1fr) var(--size-item-side);
-		}
-		.side {
-			grid-row: 1;
-			grid-column: 2;
-		}
-	}
-	.main {
-		display: grid;
-		gap: var(--gap-groups);
-	}
-	section {
-		display: grid;
-		gap: var(--gap-inline);
-	}
-	h2 {
-		margin: 0;
-		font-size: var(--type-section);
-	}
-	ul {
-		margin: 0;
-		padding-left: var(--inset);
-	}
-	.status {
-		margin: 0;
-		color: var(--text-soft);
-	}
-</style>

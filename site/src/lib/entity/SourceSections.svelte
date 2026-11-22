@@ -1,0 +1,125 @@
+<script lang="ts">
+	import SourceRow from '#lib/items/SourceRow.svelte';
+	import RelationTable from '#lib/RelationTable.svelte';
+	import Section from '#lib/ui/Section.svelte';
+	import { sourceColumns, sourceHeadings, sourceIntros } from '#lib/labels.js';
+	import {
+		headingCase,
+		oddsLabel,
+		placedKinds,
+		recipeKinds,
+		sortSources
+	} from '#lib/items/acquisition.js';
+	import type { Source, SourceKind } from '#lib/site-data.js';
+	/**
+	 * The confirmed ways to get an entity, one section per kind of source in a table. Recipes are not among them,
+	 * because an item page shows them as recipe lines of their own.
+	 */
+	let {
+		sources,
+		idPrefix = ''
+	}: {
+		sources: Source[];
+		idPrefix?: string;
+	} = $props();
+	const confirmedSources = $derived(sources.filter((source) => !source.unconfirmed));
+	const groups = $derived(
+		(Object.keys(sourceHeadings) as SourceKind[])
+			.filter((kind) => !recipeKinds.has(kind))
+			.map((kind) => {
+				const listed = sortSources(confirmedSources.filter((source) => source.kind === kind));
+				// Sources share a place heading where several stand in the same place. A source in several places
+				// would sit under one of them while naming the others, so such groups list places in their rows.
+				const places = listed.map(placeOf);
+				// Picked Up rows are their places, so they never share a place heading.
+				const byPlace =
+					kind !== 'pickup' &&
+					listed.every((source) => source.places.length <= 1) &&
+					new Set(places).size > 1 &&
+					places.some((place, index) => places.indexOf(place) !== index);
+				// Places follow the order of their best source, so the likeliest place leads as the likeliest row would.
+				const order = [...new Set(listed.map(placeOf))];
+				const sorted = byPlace
+					? [...listed].sort((a, b) => order.indexOf(placeOf(a)) - order.indexOf(placeOf(b)))
+					: listed;
+				const showAmount = sorted.some(
+					(source) => source.amount && (source.amount.min !== 1 || source.amount.max !== 1)
+				);
+				const showContext = sorted.some((source) => source.price || source.odds);
+				const showSpawn =
+					kind === 'containerLoot' && sorted.some((source) => source.spawn && source.spawn.min < 1);
+				// A note comes from accepting its quest, which has no place of its own, so such rows name none.
+				const showPlaces = kind !== 'bountyNote';
+				// A chance names its event once in the heading when every row shares it.
+				const events = [
+					...new Set(
+						sorted.flatMap((source) =>
+							source.odds?.chance != null ? [oddsLabel(source.odds, source.kind)] : []
+						)
+					)
+				];
+				const sharedUnit = !sorted.some((source) => source.price) && events.length === 1;
+				const contextHeading = sorted.some((source) => source.price)
+					? 'Price'
+					: sharedUnit
+						? `Chance ${headingCase(events[0])}`
+						: 'Chance';
+				return {
+					kind,
+					sources: sorted,
+					byPlace,
+					showPlaces,
+					showAmount,
+					showSpawn,
+					showContext,
+					sharedUnit,
+					headings: [
+						sourceColumns[kind],
+						...(showAmount ? ['Quantity'] : []),
+						...(showSpawn ? ['Spawns'] : []),
+						...(showContext ? [contextHeading] : [])
+					]
+				};
+			})
+			.filter((group) => group.sources.length)
+	);
+	function placeOf(source: Source): string | null {
+		if (source.places[0]) return source.places[0].name;
+		if (source.settlement) return 'Your settlement';
+		// Random loot and crops stand nowhere in particular, so only ways that stand somewhere miss a place.
+		return placedKinds.has(source.kind) ? 'Location unknown' : null;
+	}
+</script>
+
+{#each groups as group (group.kind)}
+	<Section
+		class="source-group"
+		id={idPrefix + 'source-' + group.kind}
+		title={sourceHeadings[group.kind]}
+		count={group.sources.length}
+		line={sourceIntros[group.kind]}
+	>
+		<RelationTable
+			items={group.sources}
+			label={sourceHeadings[group.kind]}
+			headings={group.headings}
+			>{#snippet row(
+				source,
+				index
+			)}{#if group.byPlace && (index === 0 || placeOf(group.sources[index - 1]) !== placeOf(source))}<tr
+						class="place-heading"
+						><th colspan={group.headings.length} scope="colgroup" data-game>{placeOf(source)}</th
+						></tr
+					>{/if}<SourceRow
+					{source}
+					showAmount={group.showAmount}
+					showSpawn={group.showSpawn}
+					showContext={group.showContext}
+					showUnit={!group.sharedUnit}
+					showPlaces={!group.byPlace && group.showPlaces}
+					placeFirst={group.kind === 'pickup'}
+					id={`${idPrefix}source-${group.kind}-${index + 1}`}
+				/>{/snippet}</RelationTable
+		>
+	</Section>
+{/each}

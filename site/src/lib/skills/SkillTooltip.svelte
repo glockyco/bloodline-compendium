@@ -25,11 +25,5 @@
 </script>
 
 <div data-ui="tooltip">
-	<GameCard
-		name={skill.name}
-		icon={skill.icon}
-		description={skill.description}
-		{heading}
-		{lines}
-	/>
+	<GameCard name={skill.name} icon={skill.icon} description={skill.description} {heading} {lines} />
 </div>

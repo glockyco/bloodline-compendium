@@ -35,7 +35,11 @@
 								>
 									<EntityLink class="entity-name" entity={slot.skill} icon />
 									{#if slot.requiredLevel !== row.level || slot.checkedLevel !== level}
-										<small>Unlocks at {slot.checkedLevel} level {formatNumber(slot.requiredLevel)}</small>
+										<small
+											>Unlocks at {slot.checkedLevel} level {formatNumber(
+												slot.requiredLevel
+											)}</small
+										>
 									{/if}
 								</li>
 							{/each}
@@ -61,7 +65,9 @@
 						<p class="meta">
 							{#if song.sources.length}Note sheet in {#each song.sources as source, index (source.relationId)}{index
 										? ', '
-										: ''}<span data-relation-id={source.relationId} data-relation-direction="incoming"
+										: ''}<span
+										data-relation-id={source.relationId}
+										data-relation-direction="incoming"
 										>{source.places[0]?.name ?? 'an unknown place'}</span
 									>{/each}{:else}No known source{/if}
 						</p>
@@ -94,7 +100,8 @@
 									<p class="meta">
 										{costs.length === 1
 											? `${formatNumber(costs[0])} ${costs[0] === 1 ? 'point' : 'points'}`
-											: `${formatNumber(costs.length)} ranks: ${costs.map(formatNumber).join(', ')} points`}{#if passive.requiredLevel !== row.level}, unlocks at {passive.checkedLevel}
+											: `${formatNumber(costs.length)} ranks: ${costs.map(formatNumber).join(', ')} points`}{#if passive.requiredLevel !== row.level},
+											unlocks at {passive.checkedLevel}
 											level {formatNumber(passive.requiredLevel)}{/if}
 									</p>
 								</li>
