@@ -139,16 +139,22 @@ const stuck =
   /Timed out|not running|No session|Still equipped|not equipped|No inventory slot/i;
 let count = 0;
 for (const key of remaining) {
+  // An item that is rendered again leaves its earlier failure behind.
+  const before = failures.length;
+  for (let i = failures.length - 1; i >= 0; i--)
+    if (failures[i].item === key && failures[i].body === body)
+      failures.splice(i, 1);
   let message = capture(key);
   if (message && stuck.test(message)) {
     console.log(`${key} failed: ${message} Trying once more on a new game.`);
     restart();
     message = capture(key);
   }
+  if (message) failures.push({ item: key, body, error: message });
+  if (message || failures.length !== before)
+    await writeFile(failuresFile, JSON.stringify(failures, null, 2) + "\n");
   if (message) {
     console.log(`${key} failed: ${message}`);
-    failures.push({ item: key, body, error: message });
-    await writeFile(failuresFile, JSON.stringify(failures, null, 2) + "\n");
     if (stuck.test(message)) restart();
     continue;
   }
