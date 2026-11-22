@@ -53,7 +53,7 @@ dotnet run --project src/Bloodline -- catalog
 
 The tooltip sweep reads every item's tooltip in the running game, and cataloging uses those readings to name the items each known issue affects. A site build stops when a known issue affects no item, which means the sweep did not run for the build. Save names are at most 20 characters.
 
-The render sweeps start their own render-mode games and render every item's model, then the armor with female meshes on the female body, in about four hours. Both resume where they stopped. `publish-renders.mjs` checks every render and exits 1 when one fails, and its `check.json` beside the build's renders lists each failed render and each item without a render with its reason. Review that list before publishing, and render items again with `render-sweep.mjs <build> --items <class path>,... --again` after a view changes.
+The render sweeps start their own render-mode games and render every item's model, then the armor with female meshes on the female body, in about an hour and a half. Both resume where they stopped. `publish-renders.mjs` checks every render and exits 1 when one fails, and its `check.json` beside the build's renders lists each failed render and each item without a render with its reason. Review that list before publishing, and render items again with `render-sweep.mjs <build> --items <class path>,... --again` after a view changes.
 
 After a game update, review and add the build's entry in [releases.json](releases.json), repeat extraction and cataloging, compare the new output with the previous build, recheck every known issue as the [game-issues skill](.agent/skills/game-issues/SKILL.md) describes, and review the catalog's `report.json` beside the site data before publishing.
 

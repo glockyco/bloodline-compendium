@@ -14,12 +14,12 @@
 
 ## 3. Review
 
-- [ ] 3.1 Decide the views for each category and slot, including bows and shields, and the render's place on the item page in Plannotator, and apply the answers
-- [ ] 3.2 Render every item on both bodies, publish the renders, and review every failed render and unrendered item, with each decision recorded
+- [x] 3.1 Decide the views for each category and slot, including bows and shields, and the render's place on the item page in Plannotator, and apply the answers
+- [x] 3.2 Render every item on both bodies, publish the renders, and review every failed render and unrendered item, with each decision recorded
 
 ## 4. Site
 
-- [x] 4.1 Show the render above the game card with a Male and Female choice where an item has both, and verify it with invented fixture renders
+- [x] 4.1 Show the render above Details in the main column with a Male and Female choice where an item has both, and verify it with invented fixture renders
 - [x] 4.2 Preview a shared item link with its render, and verify the share image and card type
 - [x] 4.3 Document the sweep, the female body and the publish step in the runtime-checks skill and the README's update workflow
 
