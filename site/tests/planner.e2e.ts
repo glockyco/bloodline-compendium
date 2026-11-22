@@ -60,7 +60,11 @@ test('a link opens the build as a preview, and saving keeps it as a character', 
 	await level(page).fill('4');
 	await level(page).press('Enter');
 	await page.getByLabel('Moss Ward').check();
-	await page.getByLabel('Row 1, slot 3').selectOption({ label: 'Moss Ward' });
+	await page.getByRole('button', { name: 'Row 1, slot 3: empty' }).click();
+	await page
+		.getByRole('group', { name: 'Skills for Row 1, slot 3' })
+		.getByRole('button', { name: 'Moss Ward' })
+		.click();
 	await page.getByRole('button', { name: 'Copy Link' }).click();
 	const link = await page.getByLabel('Build link').inputValue();
 	expect(link).toMatch(/\/planner\/\?build=v1\./);
@@ -80,7 +84,7 @@ test('a link opens the build as a preview, and saving keeps it as a character', 
 	await expect(page.locator('.planner[data-ready]')).toBeAttached();
 	await expect(page.getByText('This is a shared build.')).toBeVisible();
 	await expect(level(page)).toHaveValue('4');
-	await expect(page.getByLabel('Row 1, slot 3')).toHaveValue(/MossWard/);
+	await expect(page.getByRole('button', { name: 'Row 1, slot 3: Moss Ward' })).toBeVisible();
 	await expect(page.getByLabel('Saved Character')).toHaveValue('');
 	await page.getByLabel('Name').fill('Warden');
 	await page.getByRole('button', { name: 'Save as New' }).click();

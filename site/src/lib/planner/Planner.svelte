@@ -110,6 +110,7 @@
 				const decoded = await decodeBuild(shared, data);
 				plan = decoded.state;
 				preview = true;
+				showLeading();
 				if (decoded.unresolved.length)
 					notice = `${decoded.unresolved.length} choices of this build name things this game version lacks. They stay in the build, marked.`;
 			} catch (error) {
@@ -119,6 +120,13 @@
 		}
 		const current = activeCharacter(store);
 		if (current) plan = current.state;
+		showLeading();
+	}
+
+	// The planner opens on the discipline the character has the highest level in, the one it plans most.
+	function showLeading() {
+		const [leading] = Object.entries(plan.disciplines).sort((a, b) => b[1] - a[1]);
+		if (leading && data.disciplines.some((entry) => entry.key === leading[0])) chosen = leading[0];
 	}
 
 	function describe(diagnostic: Diagnostic): string {
@@ -303,11 +311,7 @@
 				</ul>
 			</Section>{/if}
 		<Section id="skill-bar" title="Skill Bar">
-			<Hotbar
-				state={plan}
-				{data}
-				place={(slot, skill) => apply(placeOnHotbar(plan, slot, skill))}
-			/>
+			<Hotbar {plan} {data} place={(slot, skill) => apply(placeOnHotbar(plan, slot, skill))} />
 		</Section>
 		<Section id="disciplines" title="Disciplines">
 			<label
@@ -360,6 +364,7 @@
 	.planner {
 		display: grid;
 		gap: var(--gap-section);
+		margin-top: var(--gap-section);
 	}
 	@media (width >= 64rem) {
 		.planner {
