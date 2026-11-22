@@ -110,6 +110,13 @@ public sealed class SkillCatalogTests
                     2,
                     """{"Passive Name":{"$text":"Early"},"Required Level":3,"Point Cost":1,"Point Increase Per Level":1,"MultiLevel":false,"Max MultiLevel":5,"Level To Check":"Fire"}"""
                 ),
+                Widget(
+                    "Kindle",
+                    Passive,
+                    "Row2",
+                    3,
+                    """{"Passive Name":{"$text":"Kindle"},"Required Level":5,"MultiLevel":true,"Level To Check":"Fire"}"""
+                ),
             ]
         );
         var old = Widgets(
@@ -174,7 +181,13 @@ public sealed class SkillCatalogTests
                 menu,
                 categories,
                 new ClassRecord(Slot, [], new JsonObject()),
-                new ClassRecord(Passive, [], new JsonObject()),
+                new ClassRecord(
+                    Passive,
+                    [],
+                    Json(
+                        """{"Point Cost":1,"Point Increase Per Level":1,"MultiLevel":false,"Max MultiLevel":5,"Required Level":0}"""
+                    )
+                ),
                 new ClassRecord(Book, [], new JsonObject()),
                 .. new[] { "Ember", "Spark", "Forgotten", "Lost", "Booked" }.Select(
                     name => new ClassRecord(Skill(name), [], Json($$"""{"SkillId":"{{name}}"}"""))
@@ -223,6 +236,11 @@ public sealed class SkillCatalogTests
             (burn.RequiredLevel, burn.PointCost, burn.CostIncrease, burn.Ranks)
         );
         Assert.Equal((3, 1), (passives[1].RequiredLevel, passives[1].Ranks));
+        // An entry that leaves a value at its class's default costs what the game reads from the class.
+        Assert.Equal(
+            (1, 1, 5),
+            (passives[2].PointCost, passives[2].CostIncrease, passives[2].Ranks)
+        );
         Assert.Contains(
             result.Report.Gaps.Single(gap => gap.Kind == GapKind.RowLevelDifference).Entries,
             entry => entry.Label == "Fire: Early"

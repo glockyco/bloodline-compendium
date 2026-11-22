@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using Bloodline.Code;
 using Bloodline.Records;
@@ -226,7 +227,7 @@ internal sealed partial class SkillTrees
                 found = (int.Parse(LevelNumber().Match(label).Groups[1].Value), []);
                 rows.Add(row, found);
             }
-            found.Entries.Add((order, entry));
+            found.Entries.Add((order, Effective(entry)));
         }
         return rows
             .Values.OrderBy(row => row.Level)
@@ -240,6 +241,20 @@ internal sealed partial class SkillTrees
                     .ToArray()
             ))
             .ToArray();
+    }
+
+    /// <summary>
+    /// An entry with the values the game reads: its own overrides over its class's defaults. A passive that sets only
+    /// its level, such as Fire Affinity, costs the class's 1 point, rising by 1, over its 5 ranks.
+    /// </summary>
+    private WidgetRecord Effective(WidgetRecord entry)
+    {
+        if (context.Classes.GetValueOrDefault(entry.Class) is not { } type)
+            return entry;
+        var properties = (JsonObject)type.Properties.DeepClone();
+        foreach (var (name, value) in entry.Properties)
+            properties[name] = value?.DeepClone();
+        return entry with { Properties = properties };
     }
 
     /// <summary>The level name that most of a tree's entries check, such as Pyromancy.</summary>
