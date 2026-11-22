@@ -232,7 +232,7 @@ internal sealed class CraftingMechanism : ISourceMechanism
                 conditions.Add(
                     new(
                         skill is null ? ConditionKind.Unknown : ConditionKind.ProficiencyLevel,
-                        null,
+                        skill is null ? null : Professions.Reference(skill),
                         level,
                         skill is null
                             ? $"Requires skill level {level}"
@@ -294,7 +294,9 @@ internal sealed class CraftingMechanism : ISourceMechanism
                     Conditions = conditions,
                     Recipe = new Recipe(
                         Stations.For(focus ? "Focus crafting" : typeName),
-                        focus ? "Focus crafting" : typeName,
+                        focus ? Professions.Reference("Focus crafting")
+                            : typeName is null ? null
+                            : Professions.Reference(typeName),
                         requiredLevel is >= 0 and <= int.MaxValue ? (int)requiredLevel.Value : null,
                         RecordValues.Number(row.Values["EXPrewardforcrafting"]),
                         amount,

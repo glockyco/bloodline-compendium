@@ -288,7 +288,7 @@ internal static class WorldSourceData
                 result.Add(
                     new(
                         level is null ? ConditionKind.Unknown : ConditionKind.ProficiencyLevel,
-                        null,
+                        level is null ? null : Professions.Reference("Fishing"),
                         level,
                         level is null
                             ? "The required fishing level is unknown"

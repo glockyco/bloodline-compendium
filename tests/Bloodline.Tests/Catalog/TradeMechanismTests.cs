@@ -92,7 +92,7 @@ public sealed class TradeMechanismTests
             ("Anvil", "Weaponsmithing", 9, 12d, 4),
             (
                 recipe.Station!.Name,
-                recipe.Discipline,
+                recipe.Profession?.Name,
                 recipe.Level,
                 recipe.Experience,
                 recipe.Output
@@ -225,7 +225,7 @@ public sealed class TradeMechanismTests
         Assert.Equal(ingot.Path, source.Key);
         Assert.Equal(
             ("Smelting", 3),
-            (source.Source.Recipe!.Discipline, Assert.Single(source.Source.Inputs).Quantity)
+            (source.Source.Recipe!.Profession?.Name, Assert.Single(source.Source.Inputs).Quantity)
         );
         Assert.Equal(
             new ClassName(orphan.Path, "AtacmiteIngot"),
@@ -234,7 +234,7 @@ public sealed class TradeMechanismTests
     }
 
     [Fact]
-    public void NonSmithingJoinedRecipesKeepTheirCraftingType()
+    public void UnknownCraftingTypeFailsInsteadOfShowingUnlinkedText()
     {
         var item = Item("CarvedObject");
         var context = Context(
@@ -255,13 +255,11 @@ public sealed class TradeMechanismTests
                 ),
             ]
         );
-        var source = Assert.Single(new CraftingMechanism().FindSources(context)).Source;
-        Assert.Equal(SourceKind.Crafting, source.Kind);
-        // A discipline without a known station keeps its name and no station.
-        Assert.Equal(
-            ("Carving", null, 2),
-            (source.Recipe!.Discipline, source.Recipe.Station, source.Recipe.Output)
+        // A craft that is not a known profession would show as unlinked text, so the catalog stops.
+        var error = Assert.Throws<InvalidOperationException>(() =>
+            new CraftingMechanism().FindSources(context).ToArray()
         );
+        Assert.Contains("Carving", error.Message);
     }
 
     [Fact]
@@ -298,7 +296,7 @@ public sealed class TradeMechanismTests
             ("Cooking Fire", "Cooking", 3d),
             (
                 found.Source.Recipe!.Station!.Name,
-                found.Source.Recipe.Discipline,
+                found.Source.Recipe.Profession?.Name,
                 found.Source.Recipe.Experience
             )
         );

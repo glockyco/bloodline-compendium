@@ -221,7 +221,13 @@ internal static class CatalogGraph
                     {
                         RelationId = id,
                         Conditions = source.Conditions,
-                        Discipline = source.Recipe?.Discipline,
+                        Profession =
+                            source.Recipe?.Profession
+                            ?? source
+                                .Conditions.FirstOrDefault(condition =>
+                                    condition.Kind == ConditionKind.ProficiencyLevel
+                                )
+                                ?.Entity,
                         OutputCategory =
                             target.Key is { } output && outputs.TryGetValue(output, out var made)
                                 ? made.Category.Name

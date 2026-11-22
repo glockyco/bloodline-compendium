@@ -3,7 +3,7 @@
 	import { formatNumber } from '../format.js';
 	import EntityLink from '../ui/EntityLink.svelte';
 	import Conditions from '../Conditions.svelte';
-	/** A recipe in full: what it consumes, where it is made, the skill it needs and what it gives. */
+	/** A recipe in full: what it consumes, where it is made, the profession it needs and what it gives. */
 	let { source, id }: { source: Source; id: string } = $props();
 	const recipe = $derived(source.recipe);
 	// The recipe's own level shows in its facts, so only other requirements stay as conditions.
@@ -32,10 +32,12 @@
 				<dt>Made at</dt>
 				<dd>{recipe.station.name}</dd>
 			</div>{/if}
-		{#if recipe?.discipline}<div>
-				<dt>Skill</dt>
+		{#if recipe?.profession}<div>
+				<dt>Profession</dt>
 				<dd>
-					{recipe.discipline}{#if recipe.level != null}, level {formatNumber(recipe.level)}{/if}
+					<EntityLink
+						entity={recipe.profession}
+					/>{#if recipe.level != null}{`, level ${formatNumber(recipe.level)}`}{/if}
 				</dd>
 			</div>{/if}
 		<div>

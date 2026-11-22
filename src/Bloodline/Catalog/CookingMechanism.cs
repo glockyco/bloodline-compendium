@@ -49,7 +49,7 @@ internal sealed class CookingMechanism : ISourceMechanism
                     ),
                     Recipe = new Recipe(
                         Stations.For("Cooking"),
-                        "Cooking",
+                        Professions.Reference("Cooking"),
                         null,
                         RecordValues.Number(row.Values["EXPReward"]),
                         1,

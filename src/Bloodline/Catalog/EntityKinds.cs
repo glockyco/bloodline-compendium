@@ -25,5 +25,6 @@ internal static class EntityKinds
         {
             Host = EntityKind.Discipline,
         },
+        new(EntityKind.Profession, false, null, "Professions", "Thing"),
     ];
 }

@@ -47,11 +47,13 @@
 		use.conditions.find((condition) => condition.kind === 'proficiencyLevel')?.value ?? null;
 	const otherConditions = (use: (typeof uses)[number]) =>
 		use.conditions.filter((condition) => condition.kind !== 'proficiencyLevel');
-	// A long list of uses filters by product name, skill, product type and the level a player has.
+	// A long list of uses filters by product name, profession, product type and the level a player has.
 	const useFilters = $derived(
 		uses.length > 10
 			? {
-					disciplines: [...new Set(uses.map((use) => use.discipline ?? useLabel(use.kind)))].sort(),
+					professions: [
+						...new Set(uses.map((use) => use.profession?.name ?? useLabel(use.kind)))
+					].sort(),
 					types: [
 						...new Set(uses.map((use) => use.outputType).filter((value) => value != null))
 					].sort(),
@@ -60,7 +62,7 @@
 			: null
 	);
 	let useName = $state('');
-	let useDiscipline = $state('');
+	let useProfession = $state('');
 	let useType = $state('');
 	let useLevel = $state<number | null>(null);
 	const shownUses = $derived.by(() => {
@@ -68,7 +70,7 @@
 		return uses.filter(
 			(use) =>
 				(!needle || use.item.name.toLocaleLowerCase('en').includes(needle)) &&
-				(!useDiscipline || (use.discipline ?? useLabel(use.kind)) === useDiscipline) &&
+				(!useProfession || (use.profession?.name ?? useLabel(use.kind)) === useProfession) &&
 				(!useType || use.outputType === useType) &&
 				(useLevel == null || (levelOf(use) ?? 0) <= useLevel)
 		);
@@ -136,11 +138,11 @@
 								placeholder="Find what it makes"
 							/></label
 						>
-						{#if useFilters.disciplines.length > 1}<label
-								><span class="field-label">Profession</span><select bind:value={useDiscipline}
+						{#if useFilters.professions.length > 1}<label
+								><span class="field-label">Profession</span><select bind:value={useProfession}
 									><option value="">All</option
-									>{#each useFilters.disciplines as discipline (discipline)}<option
-											value={discipline}>{discipline}</option
+									>{#each useFilters.professions as profession (profession)}<option
+											value={profession}>{profession}</option
 										>{/each}</select
 								></label
 							>{/if}
@@ -176,8 +178,10 @@
 										conditions={otherConditions(use)}
 									/></td
 								><td
-									>{use.discipline ?? useLabel(use.kind)}{#if levelOf(use) != null}<span
-											class="muted">{` ${formatNumber(levelOf(use)!)}`}</span
+									>{#if use.profession}<EntityLink entity={use.profession} />{:else}{useLabel(
+											use.kind
+										)}{/if}{#if levelOf(use) != null}<span class="muted"
+											>{` ${formatNumber(levelOf(use)!)}`}</span
 										>{/if}</td
 								><td class="numeric">{formatNumber(use.quantity)}</td></tr
 							>{/snippet}</RelationTable

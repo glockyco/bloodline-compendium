@@ -25,7 +25,8 @@ export type EntityKind =
   | "discipline"
   | "skill"
   | "passive"
-  | "spellsong";
+  | "spellsong"
+  | "profession";
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "ConditionKind".
@@ -471,11 +472,11 @@ export interface Quote {
  * via the `definition` "Recipe".
  */
 export interface Recipe {
-  discipline: string | null;
   experience: number | null;
   learned: string | null;
   level: number | null;
   output: number;
+  profession: EntityReference | null;
   station: EntityReference | null;
   [k: string]: unknown;
 }
@@ -671,12 +672,12 @@ export interface ItemRender {
  */
 export interface ItemUse {
   conditions: RelationCondition[];
-  discipline?: string | null;
   item: EntityReference;
   kind: SourceKind;
   name: string;
   outputCategory?: string | null;
   outputType?: string | null;
+  profession?: EntityReference | null;
   quantity: number;
   relationId: string;
   [k: string]: unknown;
@@ -786,6 +787,7 @@ export interface EntityKindDefinition {
     | "skill"
     | "passive"
     | "spellsong"
+    | "profession"
     | null;
   kind: EntityKind;
   route: string | null;

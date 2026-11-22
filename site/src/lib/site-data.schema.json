@@ -359,7 +359,8 @@
         "discipline",
         "skill",
         "passive",
-        "spellsong"
+        "spellsong",
+        "profession"
       ],
       "title": "EntityKind"
     },
@@ -386,6 +387,7 @@
             "skill",
             "passive",
             "spellsong",
+            "profession",
             null
           ]
         },
@@ -915,12 +917,6 @@
           },
           "type": "array"
         },
-        "discipline": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
         "item": {
           "$ref": "#/$defs/EntityReference"
         },
@@ -940,6 +936,16 @@
           "type": [
             "string",
             "null"
+          ]
+        },
+        "profession": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EntityReference"
+            },
+            {
+              "type": "null"
+            }
           ]
         },
         "quantity": {
@@ -1475,12 +1481,6 @@
     },
     "Recipe": {
       "properties": {
-        "discipline": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
         "experience": {
           "type": [
             "number",
@@ -1502,6 +1502,16 @@
         "output": {
           "type": "integer"
         },
+        "profession": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EntityReference"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "station": {
           "anyOf": [
             {
@@ -1515,7 +1525,7 @@
       },
       "required": [
         "station",
-        "discipline",
+        "profession",
         "level",
         "experience",
         "output",

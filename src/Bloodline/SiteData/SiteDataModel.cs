@@ -23,6 +23,7 @@ internal enum EntityKind
     Skill,
     Passive,
     Spellsong,
+    Profession,
 }
 
 /// <summary>
@@ -358,8 +359,8 @@ internal sealed record ItemUse(SourceKind Kind, string Name, EntityReference Ite
     [JsonRequired]
     public IReadOnlyList<RelationCondition> Conditions { get; init; } = [];
 
-    /// <summary>The discipline that consumes the item, such as Weaponsmithing, for filtering long use lists.</summary>
-    public string? Discipline { get; init; }
+    /// <summary>The profession that consumes the item, such as Weaponsmithing, for filtering long use lists.</summary>
+    public EntityReference? Profession { get; init; }
 
     /// <summary>The category of what the use makes, such as Weapon Part.</summary>
     public string? OutputCategory { get; init; }
@@ -524,12 +525,12 @@ internal sealed record Odds(OddsEvent Event, double? Chance, double? Expected, s
 internal sealed record ChanceRange(double Min, double Max);
 
 /// <summary>
-/// A recipe's context. <see cref="Station"/> names where it is made, <see cref="Level"/> the discipline level it
-/// needs, <see cref="Output"/> how many it makes, and <see cref="Learned"/> how the recipe becomes available.
+/// A recipe's context. <see cref="Station"/> names where it is made, <see cref="Level"/> the level of
+/// <see cref="Profession"/> it needs, <see cref="Output"/> how many it makes, and <see cref="Learned"/> how the recipe becomes available.
 /// </summary>
 internal sealed record Recipe(
     EntityReference? Station,
-    string? Discipline,
+    EntityReference? Profession,
     int? Level,
     double? Experience,
     int Output,

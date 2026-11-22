@@ -61,7 +61,7 @@ internal sealed class FarmingMechanism : ISourceMechanism
                                 [
                                     new RelationCondition(
                                         ConditionKind.ProficiencyLevel,
-                                        null,
+                                        Professions.Reference("Farming"),
                                         level,
                                         FormattableString.Invariant(
                                             $"Requires Farming level {level}"
