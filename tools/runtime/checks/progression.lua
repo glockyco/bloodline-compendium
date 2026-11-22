@@ -12,7 +12,8 @@
 --   button's cost, increase, rank and state and every number that changed after each press.
 -- - "skill": presses the skill slot args.widget of the open tree args.tree twice, and lists what each press changed.
 -- - "attributes": opens the level up window through the passive stat component's own Level Up and presses each
---   button in args.buttons once, listing what each press changed.
+--   button in args.buttons once, listing what each press changed and, as its widget, every text the window shows,
+--   such as the side panel's pickup strength and EXP bonuses, which no field holds.
 -- - "hotbar": the slots of the player's skill bar.
 -- - "open": opens the skill window and the tree of args.button in the menu of args.category, as a player does, and
 --   hides the menus that stay on top of the tree.
@@ -124,12 +125,26 @@ elseif args.action == "skill" then
   step(1, function() press(slot, click) end, function() return { unlocked = slot.Unlocked, available = slot["Is Available"], known = #pawn.UnlockedSkills } end)
 elseif args.action == "attributes" then
   component["Level Up"](component)
-  ExecuteInGameThreadAfterFrames(30, function()
+  -- After many level ups the window can take seconds to open, so the check waits for it rather than asking again,
+  -- since a second Level Up while it opens leaves it closed.
+  local waited = 0
+  local function pressAll()
     local popup = live("BaseStatIncreasePopup_C")
-    if not popup then return finish(nil, "The level up window did not open") end
+    if not popup then
+      waited = waited + 10
+      if waited >= 1200 then return finish(nil, "The level up window did not open") end
+      return ExecuteInGameThreadAfterFrames(10, pressAll)
+    end
     times = #args.buttons
-    step(1, function(index) press(popup, args.buttons[index]) end)
-  end)
+    -- Each press records the window's texts and every attribute's level, since the texts are not labelled.
+    local fields = { Strength = "Strength Level", Intelligence = "Agility Level", Dexterity = "Dexterity Level", Endurance = "Endurance Level", Fortitude = "Fortitude Level", Constitution = "Constitution Level", Vitality = "Vitality Level", Wisdom = "Wisdom Level", Willpower = "Willpower Level" }
+    step(1, function(index) press(popup, args.buttons[index]) end, function()
+      local levels = {}
+      for attribute, field in pairs(fields) do levels[attribute] = component[field] end
+      return { texts = (texts(popup)), levels = levels }
+    end)
+  end
+  ExecuteInGameThreadAfterFrames(10, pressAll)
 elseif args.action == "hotbar" then
   local rows = {}
   for _, bar in ipairs(liveAll("W_SkillBar_C")) do
