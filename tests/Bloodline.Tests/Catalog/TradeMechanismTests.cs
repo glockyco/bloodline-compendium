@@ -234,6 +234,85 @@ public sealed class TradeMechanismTests
     }
 
     [Fact]
+    public void TheCraftingWindowsTiersSetTheLevelAndWhereAWholeItemIsMade()
+    {
+        var ore = Item("Iron Ore");
+        var ingot = Item("Iron Ingot");
+        var gear = Item("Rune Gear");
+        var cannon = Item("Cannon");
+        var window = new ClassRecord(
+            "/Game/BloodlinesAlpha/Crafting.Crafting_C",
+            [],
+            Properties(
+                $$"""{"Smelting Level 2":[{"$ref":"{{ingot.Path}}"}],"Smelting Level 3":[{"$ref":"{{ingot.Path}}"}],"Engineer Level 7":[{"$ref":"{{gear.Path}}"}]}"""
+            )
+        );
+        TableRow Row(string name, string type, string display) =>
+            new(
+                name,
+                Properties(
+                    $$"""{"Item1":{"$ref":"{{ore.Path}}"},"QtyReqItem1":1,"CraftAmount":1,"CraftingType":{"$enum":"CraftingTypes::{{type}}","display":"{{display}}"},"EXPrewardforcrafting":10}"""
+                )
+            );
+        var records = new CatalogRecords(
+            new BuildRecord(1159290, 1, []),
+            [ore, ingot, gear, cannon, window],
+            [
+                Table(
+                    "ItemRecipes",
+                    Row("IronIngot", "NewEnumerator4", "Smelting"),
+                    Row("RuneGear", "NewEnumerator0", "Weaponsmithing"),
+                    Row("Cannon", "NewEnumerator5", "Engineering")
+                ),
+            ],
+            [],
+            [],
+            [],
+            [],
+            []
+        )
+        {
+            Code = CodeIndex.Create([
+                new CodeFunction(
+                    "/Game/BloodlinesAlpha/Crafting",
+                    "/Game/BloodlinesAlpha/Crafting.Crafting_C",
+                    "Get Correct Item",
+                    true,
+                    "fingerprint",
+                    CodeParseStatus.Complete,
+                    [],
+                    [],
+                    [],
+                    []
+                )
+                {
+                    ClassNames =
+                    [
+                        new ClassName(ingot.Path, "IronIngot"),
+                        new ClassName(gear.Path, "RuneGear"),
+                        new ClassName(cannon.Path, "Cannon"),
+                    ],
+                },
+            ]),
+        };
+        var pages = CatalogBuilder.Build(records, [], []).Items.ToDictionary(item => item.Key);
+        var sources = new CraftingMechanism()
+            .FindSources(new CatalogContext(records, pages, []))
+            .ToDictionary(source => source.Key, source => source.Source);
+        // An item in two tiers needs the lower one.
+        Assert.Equal(("Smelting", 2), Made(sources[ingot.Path]));
+        // The window's list decides where a whole item is made, over the type its row names.
+        Assert.Equal(("Engineering", 7), Made(sources[gear.Path]));
+        Assert.Equal(SourceKind.Crafting, sources[gear.Path].Kind);
+        // A whole item that no tier lists cannot be made in the window.
+        Assert.True(sources[cannon.Path].Unconfirmed);
+        Assert.Null(sources[cannon.Path].Recipe!.Level);
+
+        static (string?, int?) Made(Source source) =>
+            (source.Recipe!.Profession?.Name, source.Recipe.Level);
+    }
+
+    [Fact]
     public void UnknownCraftingTypeFailsInsteadOfShowingUnlinkedText()
     {
         var item = Item("CarvedObject");

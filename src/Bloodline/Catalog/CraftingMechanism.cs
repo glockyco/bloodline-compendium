@@ -160,8 +160,58 @@ internal sealed class CraftingMechanism : ISourceMechanism
         }
     }
 
+    /// <summary>
+    /// The crafting window that the anvil, the engineer's workbench and the smelting oven open. Its class lists what
+    /// each profession's window offers in seven tiers, which no recipe row holds.
+    /// </summary>
+    private const string CraftingWindow = "/Game/BloodlinesAlpha/Crafting.Crafting_C";
+
+    /// <summary>
+    /// The window's tier lists per profession, with the function that shows them. Each function opens tier N from the
+    /// profession's level N, and tier 1 from the start (run tiers1).
+    /// </summary>
+    private static readonly (string Profession, string List)[] TierLists =
+    [
+        ("Weaponsmithing", "WeaponsmithingLevel{0}"),
+        ("Engineering", "Engineer Level {0}"),
+        ("Smelting", "Smelting Level {0}"),
+    ];
+
+    private const int Tiers = 7;
+
+    /// <summary>
+    /// The profession and level at which the crafting window offers each item it lists, or null without the window's
+    /// record. An item in two tiers needs the lower one.
+    /// </summary>
+    private static Dictionary<string, (string Profession, int Level)>? WindowTiers(
+        CatalogContext context
+    )
+    {
+        if (!context.Classes.TryGetValue(CraftingWindow, out var window))
+        {
+            return null;
+        }
+        var tiers = new Dictionary<string, (string, int)>(StringComparer.OrdinalIgnoreCase);
+        foreach (var (profession, list) in TierLists)
+        {
+            for (var tier = Tiers; tier >= 1; tier--)
+            {
+                var name = string.Format(CultureInfo.InvariantCulture, list, tier);
+                foreach (var entry in RecordValues.Elements(window.Properties[name]))
+                {
+                    if (RecordValues.AnyReference(entry) is { } path)
+                    {
+                        tiers[path] = (profession, tier);
+                    }
+                }
+            }
+        }
+        return tiers;
+    }
+
     public IEnumerable<EntitySource> FindSources(CatalogContext context)
     {
+        var window = WindowTiers(context);
         var renamed = RenamedProducts(context)
             .Select(recipe => recipe.Recipe)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -189,9 +239,6 @@ internal sealed class CraftingMechanism : ISourceMechanism
             var type =
                 RecordValues.EnumDisplay(row.Values["CraftingType"])
                 ?? RecordValues.EnumValue(row.Values["CraftingType"]);
-            var smithing =
-                type is "Weaponsmithing" or "Armorsmithing"
-                || type is "CraftingTypes::NewEnumerator0" or "CraftingTypes::NewEnumerator1";
             var notes = new List<string>();
             var conditions = new List<RelationCondition>();
             var typeName =
@@ -211,6 +258,27 @@ internal sealed class CraftingMechanism : ISourceMechanism
                         _ => null,
                     }
                 );
+            // A whole item that the crafting window lists is made where its tier list says, at the tier's level, even
+            // when its row names another type, as Rune-Tempered Gear's row names Weaponsmithing. One that the window
+            // does not list cannot be made there.
+            var listed =
+                output is null && window?.TryGetValue(item, out var found) == true
+                    ? found
+                    : default;
+            var unlisted =
+                output is null
+                && window is not null
+                && listed.Profession is null
+                && typeName is not null
+                && TierLists.Any(entry => entry.Profession == typeName);
+            if (listed.Profession is not null)
+            {
+                typeName = listed.Profession;
+            }
+            var smithing = listed.Profession is { } profession
+                ? profession == "Weaponsmithing"
+                : type is "Weaponsmithing" or "Armorsmithing"
+                    || type is "CraftingTypes::NewEnumerator0" or "CraftingTypes::NewEnumerator1";
             var part = output is null ? null : RecordValues.EnumValue(output.Values["Part"]);
             // Magical components use focus crafting despite the shared table field's name.
             var focus =
@@ -218,17 +286,18 @@ internal sealed class CraftingMechanism : ISourceMechanism
                 is "WeaponParts::NewEnumerator17"
                     or "WeaponParts::NewEnumerator18"
                     or "WeaponParts::NewEnumerator19";
-            var requiredLevel = output is null
-                ? null
-                : RecordValues.Integer(output.Values["WeaponsmithingLevelRequired"]);
+            var requiredLevel =
+                output is not null
+                    ? RecordValues.Integer(output.Values["WeaponsmithingLevelRequired"])
+                : listed.Profession is not null ? listed.Level
+                : null;
             if (requiredLevel is { } level)
             {
-                var skill = part switch
-                {
-                    _ when focus => "Focus Crafting",
-                    null => null,
-                    _ => "Weaponsmithing",
-                };
+                var skill =
+                    output is null ? listed.Profession
+                    : focus ? "Focus Crafting"
+                    : part is null ? null
+                    : "Weaponsmithing";
                 conditions.Add(
                     new(
                         skill is null ? ConditionKind.Unknown : ConditionKind.ProficiencyLevel,
@@ -292,6 +361,7 @@ internal sealed class CraftingMechanism : ISourceMechanism
                         name ?? context.ItemLink(item).Name
                     ),
                     Conditions = conditions,
+                    Unconfirmed = unlisted,
                     Recipe = new Recipe(
                         Stations.For(focus ? "Focus crafting" : typeName),
                         focus ? Professions.Reference("Focus crafting")
