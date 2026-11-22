@@ -382,6 +382,26 @@
       "builds": [24464547],
       "report": "notReported",
       "reportUrl": null
+    },
+    {
+      "id": "rusty-crossbow-fires-nothing",
+      "title": "Rusty Crossbows from merchants and Squalls End fire nothing",
+      "effect": "The Rusty Crossbow that merchants sell, and the one lying in Squalls End, fire no bolt and deal no damage.",
+      "workaround": "Choose Crossbow when Geoffrey Woodkin offers you a ranged weapon in Harbinger Stronghold. The Rusty Crossbow he gives works. A crate at Parford Lake sometimes holds one too.",
+      "steps": [
+        "Buy a Rusty Crossbow from the shopkeeper in Squalls End and keep arrows in your inventory.",
+        "Equip and draw it. The crossbow is in your hands.",
+        "Fire at an enemy. No bolt leaves the crossbow, and the enemy's health stays the same."
+      ],
+      "expected": "Firing shoots a bolt that hits for the crossbow's damage.",
+      "observed": "Ten shots at 100 to 600 units fired no bolt and took no health from a Goblin Brute. The shopkeepers of Squalls End and Elderglen stock this crossbow. The other Rusty Crossbow, which crates and Geoffrey Woodkin give, hit the same Goblin Brute for 85. In run geoffrey1, Geoffrey Woodkin in Harbinger Stronghold used the dialogue whose Crossbow choice gives it.",
+      "cause": "Merchants and the placed crossbow in Squalls End give the class RustyCrossbow, which derives from BP_BasicSword rather than Crossbow, so it has none of Crossbow's firing functions. The Rusty Crossbow that crates and Geoffrey Woodkin give is Rusty_Crossbow, which derives from Crossbow.",
+      "citations": [
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Crossbows/Crossbow:Custom Fire Event"
+      ],
+      "builds": [24464547],
+      "report": "notReported",
+      "reportUrl": null
     }
   ]
 }

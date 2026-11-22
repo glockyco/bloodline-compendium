@@ -115,6 +115,16 @@ internal static partial class KnownIssues
         "/Game/BloodlinesAlpha/Interactables/Crafting_Items/WeaponComponents/WC_BonemetalBlade.WC_BonemetalBlade_C",
     };
 
+    /// <summary>A crossbow whose class is no crossbow, so firing it does nothing.</summary>
+    public const string SilentCrossbow = "rusty-crossbow-fires-nothing";
+
+    /// <summary>
+    /// The Rusty Crossbow that merchants sell and Squalls End holds, which runs ranged1 to ranged3 saw fire nothing and
+    /// run shops1 found in the stock of the shopkeepers of Squalls End and Elderglen.
+    /// </summary>
+    private const string RustyCrossbow =
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Crossbows/RustyCrossbow.RustyCrossbow_C";
+
     /// <summary>Placed items that disappear once another placed item with their Tag is taken.</summary>
     public const string SharedTag = "shared-save-tags";
 
@@ -292,6 +302,10 @@ internal static partial class KnownIssues
             if (TwinItems.Contains(item.Key))
             {
                 notes[item.Key].Add(SharedTag);
+            }
+            if (item.Key == RustyCrossbow)
+            {
+                notes[item.Key].Add(SilentCrossbow);
             }
         }
         // An item's Bugs rows follow the order of the Known Issues page, which is the registry's.

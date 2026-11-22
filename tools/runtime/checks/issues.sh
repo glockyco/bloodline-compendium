@@ -225,4 +225,15 @@ lab eval "$progression" '{"action":"passive","tree":"BloodMagicLBSkillTree","wid
 lab eval "$progression" '{"action":"close"}'
 lab eval "$blood" '{"index":4}'
 blood_tree spent
+# rusty-crossbow-fires-nothing: the Rusty Crossbow that merchants sell and Squalls End holds, then the one crates
+# give, each fired at a Goblin Brute at 300 units, with a screenshot after each shot.
+ranged=$(dirname "$0")/ranged.lua
+crossbows=$item/Weapons/Crossbows
+lab give "{\"items\":[\"$item/Crafting_Items/Arrow_Item.Arrow_Item_C\"],\"count\":20}"
+for crossbow in RustyCrossbow Rusty_Crossbow; do
+  lab eval "$ranged" "{\"action\":\"equip\",\"item\":\"$crossbows/$crossbow.${crossbow}_C\"}"
+  lab eval "$ranged" '{"action":"target","distance":300,"pitch":-1}'
+  lab eval "$ranged" '{"action":"attack","seconds":3}'
+  lab capture-screen "crossbow-$crossbow"
+done
 fi
