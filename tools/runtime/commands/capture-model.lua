@@ -15,8 +15,8 @@
 -- - Any other item is its own actor, as it lies in the world, seen three quarters from above.
 -- The capture takes the preview's light and its scene colour without tonemapping, which the sheet shows as it is.
 -- Two captures go to args.directory: <args.file>-color.png and <args.file>-mask.png, the depth that marks the
--- subject's pixels. lab.mjs combines them into a transparent picture. Armor must be in the inventory, and the
--- character sheet must be open.
+-- subject's pixels. lab.mjs combines them into a transparent picture. Armor must be in the inventory of a character
+-- that wears nothing, and the character sheet must be open.
 local world = UEHelpers.GetWorld()
 local rendering = StaticFindObject("/Script/Engine.Default__KismetRenderingLibrary")
 local math3 = StaticFindObject("/Script/Engine.Default__KismetMathLibrary")
@@ -150,9 +150,9 @@ local function capture()
 
     local shown, meshes, actors = {}, {}, {}
     -- Every capture is lit by the preview's own light alone. An item's lights would light other captures too:
-    -- Altarlight Pauldrons' candles stay on the preview character until another shoulder piece takes their place,
-    -- and a sweep found every render after them nearly white. So the lights of whatever the character wears and of
-    -- every actor spawned for a capture are switched off.
+    -- Altarlight Pauldrons' candles stay on the preview character until the next piece of armor is captured, and a
+    -- sweep found every render after them nearly white. So the lights of whatever the character wears and of every
+    -- actor spawned for a capture are switched off.
     local function unlit(actor)
       for _, light in ipairs(components(actor, "/Script/Engine.LightComponent")) do light:SetVisibility(false, true) end
     end
@@ -194,9 +194,32 @@ local function capture()
           wanted[(meshName:gsub("_Male_", "_Female_"))] = true
         end
       end
+      -- A piece that colours its body parts leaves the skin colours it has no use for at the material's default, a
+      -- bright pink, where the body hides them, as inside the collar of Askillian Soldier Cuirass. Shown alone, a
+      -- piece would show that pink, so every skin colour it left at the default takes the character's own.
+      local own = requirePlayer()["Dynamic Material"]
+      local dynamic = StaticFindObject("/Script/Engine.MaterialInstanceDynamic")
+      local materials = StaticFindObject("/Script/Engine.Default__KismetMaterialLibrary")
+      local function ownSkin(part)
+        for index = 0, part:GetNumMaterials() - 1 do
+          local material = part:GetMaterial(index)
+          if material and material:IsValid() and material:IsA(dynamic) and material:GetFullName() ~= own:GetFullName() then
+            local unset = materials:CreateDynamicMaterialInstance(world, material.Parent, FName("None"), 0)
+            for _, name in ipairs({ "Color_Skin", "Color_Stubble", "Color_Scar" }) do
+              local colour, default = material:K2_GetVectorParameterValue(FName(name)), unset:K2_GetVectorParameterValue(FName(name))
+              if math.abs(colour.R - default.R) + math.abs(colour.G - default.G) + math.abs(colour.B - default.B) < 0.01 then
+                material:SetVectorParameterValue(FName(name), own:K2_GetVectorParameterValue(FName(name)))
+              end
+            end
+          end
+        end
+      end
       for _, part in ipairs(components(preview, "/Script/Engine.SkeletalMeshComponent")) do
         local mesh = meshOf(part)
-        if mesh and wanted[mesh:GetFName():ToString()] and part:IsVisible() then shown[#shown + 1] = part end
+        if mesh and wanted[mesh:GetFName():ToString()] and part:IsVisible() then
+          ownSkin(part)
+          shown[#shown + 1] = part
+        end
       end
       -- The item's own actor where the preview character carries it at a socket, such as a helmet or pauldrons.
       -- Every equip attaches one more, and a copy attached last may still be scaled down to almost nothing, so the

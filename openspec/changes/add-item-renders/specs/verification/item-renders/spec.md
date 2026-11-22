@@ -34,6 +34,17 @@ Armor SHALL show what the preview character wears for it, or its own model where
 - **WHEN** Assassin's Belt is rendered
 - **THEN** the render shows the sheath and the bottle the preview character wears at the hip
 
+### Requirement: Worn armor shows on a character that wears nothing else
+Armor SHALL be rendered on a character that wears nothing else and whose body carries its own colours, so a render does not depend on what was rendered before it. A skin colour that a piece leaves unset where the body would cover it SHALL show as the character's own.
+
+#### Scenario: A skirt after greaves
+- **WHEN** Bandit's Armored Skirt, which has no colours of its own, is rendered after Askillian Greaves, which colour the hips
+- **THEN** the skirt shows the same colours as when it is rendered first
+
+#### Scenario: A collar that the head covers
+- **WHEN** Askillian Soldier Cuirass, which leaves the colour inside its collar unset, is rendered
+- **THEN** the collar shows the character's skin colours
+
 ### Requirement: Views by kind
 Every render of one kind SHALL be taken from the same view: worn armor three quarters from the front, pieces worn on the back from behind, weapons and weapon parts face-on and upright, firearms and crossbows lying with the muzzle to the left, shields from the front, and other items three quarters from above. The subject SHALL fill the picture with a margin of 5% of its longer side.
 

@@ -904,6 +904,10 @@ async function captureModel(config, lab, args) {
     // An item that is not worn needs no inventory slot, only the preview's light, which an open sheet keeps on.
     await game(config, lab, "open-sheet", {});
   } else {
+    // A piece colours the body parts it covers, and those colours stay on the body when another piece takes its
+    // place, so the character first takes off everything it wears, which gives the body its own colours back.
+    await game(config, lab, "open-sheet", {});
+    await game(config, lab, "unequip-all", {});
     // The sheet creates slots only for the items in its visible area, so the inventory holds nothing but the item.
     await game(config, lab, "clear-tooltips", {});
     await game(config, lab, "give", { items: [args.item] });

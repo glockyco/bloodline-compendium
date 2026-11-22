@@ -70,7 +70,17 @@ The lab game runs render mode with `-NoTextureStreaming`. A capture is taken two
 
 ### Lights
 
-Every capture is lit by the preview's own light alone. The lights an item carries are switched off, both on an actor spawned for a capture and on whatever the preview character wears, because a worn item stays on the character until another takes its slot. Altarlight Pauldrons' two candle lights lit every capture after them: in a sweep the mean brightness of renders rose from about 100 to about 230 from the pauldrons onwards. An earlier fix had blamed the Acorn Lute, which a sweep renders just before them.
+Every capture is lit by the preview's own light alone. The lights an item carries are switched off, both on an actor spawned for a capture and on whatever the preview character wears, because a worn piece stays on the character until the next piece of armor is captured. Altarlight Pauldrons' two candle lights lit every capture after them: in a sweep the mean brightness of renders rose from about 100 to about 230 from the pauldrons onwards. An earlier fix had blamed the Acorn Lute, which a sweep renders just before them.
+
+The preview's point light keeps the intensity the game gives it, 2000. It clips the brightest surfaces to white: the flat faces of silver and steel weapon parts and the character's skin. At 700 the share of pure white on Curved Silver Axe Head fell from 69% to 1%, but the part still showed as one pale face, and an apple, a shield, an ingot and a cuirass barely changed. The game's sheet shows the character's skin as pale as the renders do, and the sample renders that the views were decided on had the same white, so the game's light stays.
+
+### Colours of worn armor
+
+183 armor classes colour the body themselves: on `ReceiveBeginPlay` each makes a dynamic material from `ModularFantasyHeroCharacters`, sets its colours and puts it on the body parts it covers. The other armor classes set no material, so their parts show whatever material the body carries. On a new character that is the character's own. After a piece that colours the same parts, it is that piece's: Bandit's Armored Skirt rendered after Askillian Greaves showed the greaves' purple and bright pink skin, because the greaves cover the legs and leave the skin colour unset. A sweep renders items by name with the slots mixed, and four of its first 148 armor renders had such pink skin (Forearm Straps, Curdstompers, Bandit's Armored Skirt, Cloth Foot Wraps). This was first put down to textures still loading, which it was not.
+
+Clicking an equipment slot, as a player does to take a piece off, puts the character's own material back on that piece's parts, on the first-person body and on the preview. `unequip-all` clicks every slot that holds an item, and `lab.mjs` runs it before each worn capture, so every piece shows as on a new character that wears nothing else. Seventeen pieces rendered in one order and then in the reverse order had the same mean colour both times and no pink.
+
+The material's defaults for the three skin colours, `Color_Skin`, `Color_Stubble` and `Color_Scar`, are a bright pink. A piece that colours its parts sets the ones it shows and leaves the others at the default where the body hides them: inside the collar of Askillian Soldier Cuirass, which the head covers, the render showed a pink patch. A render shows the piece without the body, so each of these colours that a shown part's material left at the default takes the character's own. A colour the piece set stays.
 
 ### Framing
 
