@@ -498,4 +498,24 @@ public sealed class KnownIssueTests
             KnownIssues.Links(new KnownIssueRegistry([issue]), LinkedText.Targets([BloodMagic]))
         );
     }
+
+    [Fact]
+    public void APageThatNamesAnEntityWithoutLinkingItAnywhereIsReported()
+    {
+        IEnumerable<EntityReference> Unlinked(params string[] texts) =>
+            LinkedText.Unlinked(texts, [BloodMagic]);
+        Assert.Equal([BloodMagic], Unlinked("Your Blood Magic points reset."));
+        // One link anywhere on the page covers its other mentions.
+        Assert.Empty(
+            Unlinked(
+                "Your Blood Magic points reset.",
+                "Open [Blood Magic](discipline:blood-magic)."
+            )
+        );
+        // A sentence's first word may be a common noun, and a longer name names something else.
+        Assert.Empty(Unlinked("Blood Magic resets. It ends.", "Cast Blood Magic Bolt twice."));
+        Assert.Empty(
+            LinkedText.Unlinked(["Your Blood Magic points reset."], [BloodMagic], BloodMagic)
+        );
+    }
 }

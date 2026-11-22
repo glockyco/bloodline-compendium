@@ -63,4 +63,38 @@ internal static partial class LinkedText
                 );
         }
     }
+
+    /// <summary>
+    /// The entities of <paramref name="named"/> whose name the texts of one page show without the page linking them
+    /// anywhere, apart from <paramref name="self"/>. A name joined to another capitalized word, such as "Arcane" in
+    /// "Arcane Bolt", names something else, unless that word only starts the sentence. A name
+    /// that starts a sentence may be a common noun, such as "Daggers" for the weapons, so neither counts.
+    /// </summary>
+    public static IEnumerable<EntityReference> Unlinked(
+        IReadOnlyList<string> texts,
+        IEnumerable<EntityReference> named,
+        EntityReference? self = null
+    )
+    {
+        var linked = texts
+            .SelectMany(text => Link().Matches(text))
+            .Select(link => link.Groups["target"].Value)
+            .ToHashSet(StringComparer.Ordinal);
+        var plain = texts.Select(text => Link().Replace(text, "")).ToArray();
+        foreach (var reference in named)
+        {
+            if (
+                self is not null && Target(self) == Target(reference)
+                || linked.Contains(Target(reference))
+            )
+                continue;
+            var name = new Regex(
+                @"(?<![\w'-])(?<!^)(?<![.!?:] )(?<!(?<!^|[.!?:] )[A-Z][\w'-]* )"
+                    + Regex.Escape(reference.Name)
+                    + @"(?![\w'-]| [A-Z])"
+            );
+            if (plain.Any(name.IsMatch))
+                yield return reference;
+        }
+    }
 }

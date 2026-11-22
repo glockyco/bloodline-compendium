@@ -49,10 +49,10 @@
 
 ## 6A. Links between pages
 
-- [ ] 6A.1 Add typed references for professions, settings, progression concepts, stats and stations, and resolve every condition and name to one
-- [ ] 6A.2 Resolve Markdown links with typed targets in text written for the site, failing the catalog on an unknown target, and report unreferenced mentions
-- [ ] 6A.3 Publish pages for professions, Blood Levels, and skill and proficiency points from recorded facts
-- [ ] 6A.4 Head the Used For column and filter "Profession" and link its values
+- [x] 6A.1 Add typed references for professions, settings, progression concepts, stats and stations, and resolve every condition and name to one
+- [x] 6A.2 Resolve Markdown links with typed targets in text written for the site, failing the catalog on an unknown target, and report unreferenced mentions
+- [x] 6A.3 Publish pages for professions, Blood Levels, and skill and proficiency points from recorded facts
+- [x] 6A.4 Head the Used For column and filter "Profession" and link its values
 
 ## 7. Ship
 

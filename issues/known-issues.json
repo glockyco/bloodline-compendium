@@ -280,7 +280,7 @@
       ],
       "expected": "Each hit adds EXP to a passive level, as hits with other melee weapons do.",
       "observed": "Hits with Lonland Halberd, Standard Greataxe, Fairy Staff and each other affected weapon add no EXP to any passive level. A hit with Bloodforged Blade adds 2 EXP to One-Handed Weapons, a hit with Copper Battleaxe 2 EXP to Two-Handed Weapons, and hits with staves such as Moonstone Staff add EXP to Focuses.",
-      "cause": "A melee hit passes the weapon's WeaponInfo.AttackType to Add Proper Weapon EXP. One-handed, dagger, spear and two-handed attacks each add EXP to their passive level. A halberd attack adds Staff EXP, which Detailed Stats shows as Focuses, only when the weapon's Weapon Class is Staff, and nothing for any other class. Copper Battleaxe swings like a halberd but passes the two-handed attack type, so it trains Two-Handed Weapons.",
+      "cause": "A melee hit passes the weapon's WeaponInfo.AttackType to Add Proper Weapon EXP. One-handed, dagger, spear and two-handed attacks each add EXP to their passive level. A halberd attack adds Staff EXP, which Detailed Stats shows as [Focuses](discipline:focuses), only when the weapon's Weapon Class is Staff, and nothing for any other class. Copper Battleaxe swings like a halberd but passes the two-handed attack type, so it trains Two-Handed Weapons.",
       "citations": [
         "/Game/AIBehaviorToolkit/Blueprints/Goblin_Base:Damage From Player Melee",
         "/Game/BloodlinesAlpha/UI/CharacterSheet/PlayerPassiveLevelStatComponent:Add Proper Weapon EXP"
@@ -373,7 +373,7 @@
       ],
       "expected": "Each Blood Magic level adds Blood Magic points to the ones you have, as levels of other disciplines do.",
       "observed": "After a Blood Magic level the tree shows the Blood Levels setting plus one: 2 with No blood, 3 with A bit of blood, 4 with Default Amount and 6 with BLOODBATH. After spending 2 of 3 points, the next level restored 3.",
-      "cause": "Add Proficiency Points sets Bloodmagic Points to the game instance's Blood Level plus one instead of adding to them. Blood Level holds the Blood Levels option of the video settings window, which its Blood selection writes and enemies read when they bleed.",
+      "cause": "The game's function Add Proficiency Points sets Bloodmagic Points to the game instance's Blood Level plus one instead of adding to them. Blood Level holds the Blood Levels option of the video settings window, which its Blood selection writes and enemies read when they bleed.",
       "citations": [
         "/Game/BloodlinesAlpha/UI/CharacterSheet/PlayerPassiveLevelStatComponent:Add Proficiency Points",
         "/Game/BloodlinesAlpha/UI/CharacterSheet/PlayerPassiveLevelStatComponent:Blood Magic Level Tracking",

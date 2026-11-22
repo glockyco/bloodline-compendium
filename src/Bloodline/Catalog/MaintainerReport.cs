@@ -58,6 +58,11 @@ internal enum GapKind
 
     /// <summary>Tree slots and passives whose published values differ from the skill window a lab run built.</summary>
     TreeDifference,
+
+    /// <summary>
+    /// Pages of text written for the site that name a discipline, profession or mechanic without linking it anywhere.
+    /// </summary>
+    UnlinkedMention,
 }
 
 /// <summary>

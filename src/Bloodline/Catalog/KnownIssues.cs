@@ -414,21 +414,26 @@ internal static partial class KnownIssues
             // A title is a heading and a table of contents entry, which hold no links.
             if (LinkedText.Link().IsMatch(issue.Title))
                 throw new InvalidDataException($"Known issue {issue.Id} links from its title.");
-            IEnumerable<string?> texts =
-            [
-                issue.Effect,
-                issue.Workaround,
-                .. issue.Steps,
-                issue.Expected,
-                issue.Observed,
-                issue.Cause,
-                .. issue.Notes?.Values ?? [],
-            ];
-            foreach (var text in texts.OfType<string>())
+            foreach (var text in Texts(issue))
                 LinkedText.Resolve("Known issue " + issue.Id, text, targets, used);
         }
         return used;
     }
+
+    /// <summary>Every text of an issue that a reader sees apart from its title, where links may stand.</summary>
+    public static IEnumerable<string> Texts(KnownIssue issue) =>
+        (
+            (IEnumerable<string?>)
+                [
+                    issue.Effect,
+                    issue.Workaround,
+                    .. issue.Steps,
+                    issue.Expected,
+                    issue.Observed,
+                    issue.Cause,
+                    .. issue.Notes?.Values ?? [],
+                ]
+        ).OfType<string>();
 
     private static string WeaponDamageNote(ItemPage item)
     {

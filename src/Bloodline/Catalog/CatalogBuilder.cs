@@ -167,6 +167,13 @@ internal static class CatalogBuilder
                 skill.Sources,
                 coverage
             );
+        EntityReference[] overviews =
+        [
+            .. skills.Disciplines.Select(SkillProducer.DisciplineReference),
+            .. professions.Pages.Select(page => Professions.Reference(page.Name)),
+            .. records.Mechanics.Select(MechanicProducer.Reference),
+        ];
+        UnlinkedMentions(records, overviews, coverage);
         return new CatalogResult(
             items.Index,
             items.Items,
@@ -188,14 +195,47 @@ internal static class CatalogBuilder
                         EntityVersions.Reference(skill, EntityKind.Skill)
                     ),
                 ],
-                [
-                    .. skills.Disciplines.Select(SkillProducer.DisciplineReference),
-                    .. professions.Pages.Select(page => Professions.Reference(page.Name)),
-                    .. records.Mechanics.Select(MechanicProducer.Reference),
-                ]
+                overviews
             ),
             Skills = skills,
         };
+    }
+
+    /// <summary>
+    /// Lists every page of text written for the site that names a discipline, profession or mechanic without linking
+    /// it, so a writer links the first mention. Skill and item names stay out, because many are everyday words.
+    /// </summary>
+    private static void UnlinkedMentions(
+        CatalogRecords records,
+        IReadOnlyList<EntityReference> named,
+        Coverage coverage
+    )
+    {
+        IEnumerable<(string Page, IReadOnlyList<string> Texts, EntityReference? Self)> pages =
+        [
+            .. records.Issues.Issues.Select(issue =>
+                (
+                    "Known issue " + issue.Id,
+                    (IReadOnlyList<string>)[.. KnownIssues.Texts(issue)],
+                    (EntityReference?)null
+                )
+            ),
+            .. records.Mechanics.Select(page =>
+                (
+                    "Mechanic " + page.Name,
+                    (IReadOnlyList<string>)[.. MechanicProducer.Texts(page)],
+                    (EntityReference?)MechanicProducer.Reference(page)
+                )
+            ),
+        ];
+        foreach (var (page, texts, self) in pages)
+        foreach (var mention in LinkedText.Unlinked(texts, named, self))
+            coverage.Add(
+                GapKind.UnlinkedMention,
+                page,
+                mention,
+                $"Names {mention.Name} without linking it."
+            );
     }
 
     /// <summary>

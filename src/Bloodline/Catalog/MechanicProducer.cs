@@ -85,14 +85,6 @@ internal static class MechanicProducer
     {
         foreach (var page in content)
         {
-            IEnumerable<string> texts =
-            [
-                page.Intro,
-                .. page.Sections.SelectMany(section => section.Paragraphs),
-                .. page.Sections.SelectMany(section =>
-                    section.Table?.Rows.SelectMany(row => row) ?? []
-                ),
-            ];
             // A heading and a page name are titles, which hold no links.
             if (
                 page
@@ -103,8 +95,18 @@ internal static class MechanicProducer
                 throw new InvalidDataException(
                     $"The mechanic page {page.Name} links from a title."
                 );
-            foreach (var text in texts)
+            foreach (var text in Texts(page))
                 LinkedText.Resolve("The mechanic page " + page.Name, text, targets, used);
         }
     }
+
+    /// <summary>Every sentence a mechanic page shows apart from its titles, where links may stand.</summary>
+    public static IEnumerable<string> Texts(MechanicContent page) =>
+        [
+            page.Intro,
+            .. page.Sections.SelectMany(section => section.Paragraphs),
+            .. page.Sections.SelectMany(section =>
+                section.Table?.Rows.SelectMany(row => row) ?? []
+            ),
+        ];
 }
