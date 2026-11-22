@@ -113,17 +113,33 @@ The catalog compares the tree records with the latest `skill-trees.lua` run of t
 
 ### Level references
 
-An entry's level is a reference to the discipline whose level it checks, not a level name, because a few entries check another discipline's level, such as Roanan's Call on Druidism checking Unarmed. A level name belongs to the tree whose entries check it most, and a tree that owns none, such as Utility Gadgets, has no level of its own. Discipline pages head rows "Level 5" for skills and passives alike, and an entry that checks another discipline adds "Unlocks at Spears level 1" with a link.
+An entry's level is a reference to the discipline whose level it checks, not a level name, because a few entries check another discipline's level, such as Roanan's Call on Druidism checking Unarmed. A level name belongs to the tree whose entries check it most, and a tree that owns none, such as Utility Gadgets, has no level of its own. Discipline pages head rows "Level 5" for skills and passives alike, and group passives by the level that unlocks each rather than the row the skill window shows them in, because the game checks that level (run rowgate1) and the window's rows misled both build planners in the trials. An entry that checks another discipline adds "Unlocks at Spears level 1" with a link.
 
 ### Links between pages
 
 Every name the site shows for something in the game is a typed reference in the data, whether or not its kind has pages, so a kind that gains pages turns every mention into a link without rewriting text. This change adds pages for professions, Blood Levels, and skill and proficiency points. Stats and crafting stations get references without pages. Text written for the site marks a reference as a Markdown link with a typed target, such as `[Blood Levels](setting:blood-levels)`, and the catalog resolves it and fails on an unknown target. The game's own text stays as the game shows it, without links, because matching names in it links the wrong sense, such as "frozen ground" in Path of Ice.
 
-Weaponsmithing, Cooking, Engineering, Focus Crafting, Smelting and Farming are professions, as large RPG wikis call leveled crafts. Used For heads their column "Profession", with values such as "Weaponsmithing 12".
+Weaponsmithing, Cooking, Engineering, Focus Crafting, Smelting and Farming are professions, as large RPG wikis call leveled crafts. Used For heads their column "Profession", with values such as "Weaponsmithing 12", and lists uses from the lowest level they need, because a crafter unlocks them in that order.
+
+### Professions and mechanics
+
+A profession page answers what each level lets you make and what it takes, so it lists every recipe in one table under level headings, with its ingredients and the experience it gives, and leads to the item list for sorting and filtering. A profession row carries its inputs and output count from the item's source, so the page reads no item pages. Whole items, such as weapons, guns and ingots, have no level in their recipe row. The crafting window that the anvil, the engineer's workbench and the smelting oven open lists them in seven tiers per profession, such as WeaponsmithingLevel1 to WeaponsmithingLevel7, and its `Get Player <Profession> Level and Set Available Items` functions open tier N from level N (run tiers1). The catalog gives such an item the profession and level of the first tier that lists it, over the type its row names, as Rune-Tempered Gear's row names Weaponsmithing while the engineer's workbench offers it. A whole item that no tier lists, such as Cannon, cannot be made there, so its recipe is unconfirmed.
+
+The profession and mechanic lists are cards three to a row, because six professions and a few mechanics read as a table of two columns with most of the page empty. A profession card shows where you work, its levels, its item count and six examples spread from its lowest level to its highest.
+
+Discipline Levels is a mechanic page for what new players asked in the trials: how a discipline levels, that it starts at level 1 and has no highest level, and which key opens the skill tree. Discipline pages link to it.
+
+### Text pages and measure
+
+Prose keeps a measure of 72 characters, inside the 45 to 90 that typography guides recommend and under WCAG's 80. Tables, panels and side columns use the page's width. About, Known Issues and the mechanic pages share a text layout with a side column for the page's contents and related pages, as GOV.UK's two-thirds layout does, so wide screens use the width beside the prose.
+
+### Unknown values
+
+A weapon part whose class other rows share, such as Steel Claymore Guard and Steel Skaneguard, takes the rows named like it, because the crafting window lists each row by its own name and takes that row's stats (run parts1). A fact without a value carries the reason, which item pages show on hover, focus and tap. A section's count is a pill beside its heading, so a single entry no longer reads as part of the name, such as "Skill Tree 1".
 
 ### Home and search
 
-The home page leads with two buttons, Browse Items and Browse Skills, and shows item categories and disciplines as icon tiles with a count, the disciplines in one grid with their skill window category in each tile's line. The site's own search shows each result's icon, name and a line with its kind and context, such as "Skill · Magic · Pyromancy", in one list ranked by best match.
+The header lists Items, Disciplines, Skills and Professions, the kinds players browse most, and the footer lists every kind. A line under each discipline's title says how disciplines level and links Discipline Levels. The home page leads with two buttons, Browse Items and Browse Skills, and shows item categories and disciplines as icon tiles with a count, the disciplines in one grid with their skill window category in each tile's line. The site's own search shows each result's icon, name and a line with its kind and context, such as "Skill · Magic · Pyromancy", in one list ranked by best match.
 
 ## Risks / Trade-offs
 
