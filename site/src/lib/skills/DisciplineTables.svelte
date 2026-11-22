@@ -84,9 +84,7 @@
 			collapse={false}
 			>{#snippet row({ row, slot }, index)}{#if index === 0 || slots[index - 1].row !== row}<tr
 						class="group-heading"
-						><th colspan={statColumns.length + 1} scope="colgroup"
-							>{discipline.levelName ? discipline.name + ' Level' : 'Level'}
-							{formatNumber(row)}</th
+						><th colspan={statColumns.length + 1} scope="colgroup">Level {formatNumber(row)}</th
 						></tr
 					>{/if}<tr
 					id={'skill-' + slot.skill.slug}
@@ -136,7 +134,7 @@
 				{ row, passive },
 				index
 			)}{#if index === 0 || passives[index - 1].row !== row}<tr class="group-heading"
-						><th colspan="2" scope="colgroup">Proficiency Level {formatNumber(row)}</th></tr
+						><th colspan="2" scope="colgroup">Level {formatNumber(row)}</th></tr
 					>{/if}<tr id={passive.anchor}
 					><td
 						><span class="relation-name passive-name"

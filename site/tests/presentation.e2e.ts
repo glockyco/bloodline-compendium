@@ -43,7 +43,7 @@ test('keeps a wrapping section count beside the final word', async ({ page }) =>
 test.describe('planted defects on the fixture page', () => {
 	test.use({ viewport: { width: 1280, height: 900 } });
 	for (const [defect, css, message] of [
-		['content leaving a card', '[data-ui=slots] { width: 150%; }', 'leaves'],
+		['content leaving a card', '[data-ui=card] .card-text { width: 150%; }', 'leaves'],
 		[
 			'misaligned card rows',
 			'[data-ui=card]:first-child > * { display: flex; flex-direction: column; }',

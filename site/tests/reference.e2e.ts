@@ -233,8 +233,10 @@ test('keeps unconfirmed sources at the end without advertising a way to get the 
 	await expect(preview).not.toContainText('Unplaced prism');
 	await page.keyboard.press('Escape');
 	await page.goto('/');
-	await page.locator('pagefind-searchbox input').fill('Hollow');
-	const result = page.locator('pagefind-searchbox').getByRole('option', { name: /Hollow Prism/ });
+	await page.getByRole('combobox', { name: 'Search the compendium' }).fill('Hollow');
+	const result = page
+		.getByRole('listbox', { name: 'Search results' })
+		.getByRole('option', { name: /Hollow Prism/ });
 	await expect(result).toBeVisible();
 	await expect(result).not.toContainText('The Silent Curator');
 	await expect(result).not.toContainText('Unplaced prism');
@@ -377,20 +379,20 @@ test('a preview docked at the top of a phone screen is not hidden under the head
 });
 test('finds items by word prefix from the shared search', async ({ page }) => {
 	await page.goto('/');
-	const search = page.locator('pagefind-searchbox input');
+	const search = page.getByRole('combobox', { name: 'Search the compendium' });
 	await search.fill('Lanter');
 	await expect(
 		page
-			.locator('pagefind-searchbox')
+			.getByRole('listbox', { name: 'Search results' })
 			.getByRole('option', { name: /Lanternedge/ })
 			.first()
 	).toBeVisible();
 });
 test('leads a type word from the shared search to the filtered item list', async ({ page }) => {
 	await page.goto('/');
-	await page.locator('pagefind-searchbox input').fill('swords');
+	await page.getByRole('combobox', { name: 'Search the compendium' }).fill('swords');
 	await page
-		.locator('pagefind-searchbox')
+		.getByRole('listbox', { name: 'Search results' })
 		.getByRole('option', { name: /Weapons: Sword/ })
 		.first()
 		.click();
@@ -413,7 +415,7 @@ test('release labels, provenance and static 404', async ({ page, request }) => {
 	expect(
 		await page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)
 	).not.toBe('rgba(0, 0, 0, 0)');
-	await expect(page.locator('pagefind-searchbox input')).toBeVisible();
+	await expect(page.getByRole('combobox', { name: 'Search the compendium' })).toBeVisible();
 	const missing = await request.get('/missing/page');
 	expect(missing.status()).toBe(404);
 	expect((await request.get('/coverage/')).status()).toBe(404);

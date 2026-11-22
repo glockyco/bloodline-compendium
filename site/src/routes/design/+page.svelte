@@ -13,33 +13,36 @@
 	import CardGrid from '#lib/ui/CardGrid.svelte';
 	import Count from '#lib/ui/Count.svelte';
 	import EntityLink from '#lib/ui/EntityLink.svelte';
-	import IconSlot from '#lib/ui/IconSlot.svelte';
+	import IconTile from '#lib/ui/IconTile.svelte';
 	import SectionHeading from '#lib/ui/SectionHeading.svelte';
 	import { formatNumber } from '#lib/format.js';
 	let { data } = $props();
 	const icons = $derived(data.icons);
-	// Invented content at the extremes each primitive must survive: one line beside three lines, empty
-	// slots, single digits beside five, long unbroken names and unknown values.
+	// Invented content at the extremes each primitive must survive: one line beside three lines, a missing icon,
+	// single digits beside five, long unbroken names and unknown values.
 	const cards = $derived([
-		{ title: 'Short', count: 1, text: 'One line.', icons: icons },
+		{ title: 'Short', count: 1, text: 'One line.' },
 		{
 			title: 'Three Lines of Description',
 			count: 12345,
-			text: 'A description long enough to wrap onto three lines in a narrow card, so its icon row must still line up with the cards beside it.',
-			icons: icons.slice(0, 2)
+			text: 'A description long enough to wrap onto three lines in a narrow card, so its rows must still line up with the cards beside it.'
 		},
 		{
 			title: 'A Title Long Enough to Wrap Across Two Lines',
 			count: 42,
-			text: 'Two empty slots.',
-			icons: []
+			text: 'Two lines of title.'
 		},
 		{
 			title: 'Unbroken',
 			count: 7,
-			text: 'Supercalifragilisticexpialidociousness',
-			icons: icons.slice(0, 1)
+			text: 'Supercalifragilisticexpialidociousness'
 		}
+	]);
+	const tiles = $derived([
+		{ name: 'Short', meta: '1 item', icon: icons[0] ?? null },
+		{ name: 'A Name Long Enough to Wrap in a Tile', meta: '12,345 items', icon: icons[1] ?? null },
+		{ name: 'No Icon', meta: '42 skills', icon: null },
+		{ name: 'Supercalifragilisticexpialidociousness', meta: '7 skills', icon: icons[2] ?? null }
 	]);
 	const rows = [
 		{ name: 'A merchant with an extraordinarily long name that must wrap', price: 1234567 },
@@ -106,12 +109,18 @@
 					<Count value={card.count} /></span
 				>
 				<span class="card-text" data-ui="row">{card.text}</span>
-				<span class="slots" data-ui="slots">
-					{#each [0, 1, 2, 3, 4] as slot (slot)}<IconSlot icon={card.icons[slot] ?? null} />{/each}
-				</span>
 			</Card>
 		{/each}
 	</CardGrid>
+</section>
+
+<section aria-labelledby="tiles">
+	<SectionHeading id="tiles" title="Tiles" count={tiles.length} />
+	<ul class="tile-grid">
+		{#each tiles as tile (tile.name)}<li>
+				<IconTile href="#tiles" icon={tile.icon} name={tile.name} meta={tile.meta} />
+			</li>{/each}
+	</ul>
 </section>
 
 <section aria-labelledby="small">
@@ -123,6 +132,7 @@
 		<Count value={1} />
 		<Count value={123456} />
 		<ButtonLink href="#small">Browse Items</ButtonLink>
+		<ButtonLink href="#small" secondary>Browse Skills</ButtonLink>
 	</div>
 	<p>
 		Linked: <EntityLink entity={data.item} />. Without a page: <EntityLink
@@ -242,12 +252,6 @@
 		color: var(--text-muted);
 		line-height: var(--leading-snug);
 		overflow-wrap: anywhere;
-	}
-	.slots {
-		display: grid;
-		grid-template-columns: repeat(5, minmax(0, 1fr));
-		gap: var(--gap-inline);
-		align-self: end;
 	}
 	.row {
 		display: flex;

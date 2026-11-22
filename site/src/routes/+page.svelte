@@ -2,16 +2,25 @@
 	import SeoHead from '#lib/SeoHead.svelte';
 	import Search from '#lib/Search.svelte';
 	import ReleaseInfo from '#lib/ReleaseInfo.svelte';
-	import { formatNumber } from '#lib/format.js';
+	import { formatNumber, plural } from '#lib/format.js';
 	import ButtonLink from '#lib/ui/ButtonLink.svelte';
-	import Card from '#lib/ui/Card.svelte';
-	import CardGrid from '#lib/ui/CardGrid.svelte';
-	import Count from '#lib/ui/Count.svelte';
-	import IconSlot from '#lib/ui/IconSlot.svelte';
+	import IconTile from '#lib/ui/IconTile.svelte';
 	import SectionHeading from '#lib/ui/SectionHeading.svelte';
-	import { browseKinds, kindPath } from '#lib/entities.js';
+	import { entityPath, kindPath } from '#lib/entities.js';
 	let { data } = $props();
 	const itemsPath = $derived(kindPath('item', data.kinds)!);
+	const skillsPath = $derived(kindPath('skill', data.kinds)!);
+	const disciplinePath = (discipline: (typeof data.skills.disciplines)[number]) =>
+		entityPath(
+			{
+				kind: 'discipline',
+				key: discipline.key,
+				name: discipline.name,
+				slug: discipline.slug,
+				icon: null
+			},
+			data.kinds
+		)!;
 </script>
 
 <SeoHead
@@ -35,8 +44,8 @@
 	<div class="hero-body">
 		<h1 id="title">The Bloodline Compendium</h1>
 		<p class="lede">
-			All {formatNumber(data.count)} items and {formatNumber(data.skills.known)} skills in The Bloodline,
-			with where to get them and what they do.
+			The Bloodline is a sandbox fantasy RPG where nearly everything you do has a level, with over
+			500 skills to unlock. This wiki is generated from the game's files.
 		</p>
 		<div class="hero-search">
 			<Search
@@ -45,13 +54,14 @@
 			/>
 		</div>
 		<div class="actions">
-			{#each browseKinds(data.kinds) as entry (entry.path)}<ButtonLink href={entry.path}
-					>Browse {entry.label}</ButtonLink
-				>{/each}
+			<ButtonLink href={itemsPath}>Browse Items</ButtonLink>
+			<ButtonLink href={skillsPath} secondary>Browse Skills</ButtonLink>
+		</div>
+		<p class="links">
 			<a href="https://store.steampowered.com/app/1159290/The_Bloodline/" rel="external"
 				>The Bloodline on Steam</a
 			>
-		</div>
+		</p>
 		<ReleaseInfo release={data.release} />
 	</div>
 </section>
@@ -61,59 +71,37 @@
 		<SectionHeading
 			id="items-heading"
 			title="Items"
-			link={{ href: itemsPath, label: `${formatNumber(data.known)} items with a known source` }}
+			link={{ href: itemsPath, label: `All ${formatNumber(data.known)} items` }}
 		/>
-		<CardGrid rows={3}>
-			{#each data.groups as group (group.slug)}
-				<Card href={kindPath('item', data.kinds, `?category=${group.slug}`)!}>
-					<span class="group-head"
-						><h3>{group.name}</h3>
-						<Count value={group.count} /></span
-					>
-					<span class="group-text">{group.description}</span>
-					<!-- Five slots in every card, empty where a category has fewer icons, so rows keep one rhythm. -->
-					<span class="slots" data-ui="slots">
-						{#each [0, 1, 2, 3, 4] as slot (slot)}<IconSlot
-								icon={group.icons[slot] ?? null}
-							/>{/each}
-					</span>
-				</Card>
-			{/each}
-		</CardGrid>
-		{#if data.minor.length}<p class="minor">
-				<span>Also</span>
-				{#each data.minor as category (category.slug)}<a
+		<ul class="tile-grid">
+			{#each data.categories as category (category.slug)}<li>
+					<IconTile
 						href={kindPath('item', data.kinds, `?category=${category.slug}`)!}
-						>{category.plural} <Count value={category.count} /></a
-					>{/each}
-			</p>{/if}
+						icon={category.icon}
+						name={category.name}
+						meta={plural(category.count, 'item', 'items')}
+					/>
+				</li>{/each}
+		</ul>
 	</section>
 
-	<section aria-labelledby="skills-heading">
+	<section aria-labelledby="disciplines-heading">
 		<SectionHeading
-			id="skills-heading"
-			title="Skills"
-			link={{
-				href: kindPath('skill', data.kinds)!,
-				label: `${formatNumber(data.skills.known)} skills with a known way to learn them`
-			}}
+			id="disciplines-heading"
+			title="Disciplines"
+			link={{ href: skillsPath, label: `All ${formatNumber(data.skills.known)} skills` }}
 		/>
-		<CardGrid rows={3} columns={4}>
-			{#each data.skills.groups as group (group.slug)}
-				<Card href={kindPath('discipline', data.kinds, '#' + group.slug)!}>
-					<span class="group-head"
-						><h3>{group.name}</h3>
-						<Count value={group.count} /></span
-					>
-					<span class="group-text" data-game>{group.disciplines.join(', ')}</span>
-					<span class="slots" data-ui="slots">
-						{#each [0, 1, 2, 3, 4] as slot (slot)}<IconSlot
-								icon={group.icons[slot] ?? null}
-							/>{/each}
-					</span>
-				</Card>
-			{/each}
-		</CardGrid>
+		<ul class="tile-grid">
+			{#each data.skills.disciplines as discipline (discipline.key)}<li>
+					<IconTile
+						href={disciplinePath(discipline)}
+						icon={discipline.icon ?? null}
+						name={discipline.name}
+						meta={`${discipline.category.name} · ${discipline.skills ? plural(discipline.skills, 'skill', 'skills') : plural(discipline.spellsongs, 'spellsong', 'spellsongs')}`}
+						game
+					/>
+				</li>{/each}
+		</ul>
 	</section>
 </div>
 
@@ -183,33 +171,8 @@
 	.content > section {
 		margin: var(--gap-section) 0 0;
 	}
-	.group-head {
-		display: flex;
-		align-items: baseline;
-		justify-content: space-between;
-		gap: var(--gap-block);
-	}
-	h3 {
-		margin: 0;
-		font-size: var(--type-sub);
-		line-height: var(--leading-heading);
-	}
-	.group-text {
-		color: var(--text-muted);
-		line-height: var(--leading-snug);
-	}
-	.slots {
-		display: grid;
-		grid-template-columns: repeat(5, minmax(0, 1fr));
-		gap: var(--gap-inline);
-		align-self: end;
-	}
-	.minor {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--gap-inline) var(--gap-groups);
-		margin: var(--gap-inline) 0 0;
-		color: var(--text-muted);
+	.links {
+		margin: 0 0 var(--gap-block);
 	}
 
 	@media (width < 64rem) {

@@ -159,10 +159,17 @@ label {
 .list-title {
 	margin-bottom: var(--gap-groups);
 }
-/* Groups of cards one below the other at the page's full width, such as a list's categories. */
-.card-sections {
+/* Tiles four to a full-width line, as the sibling compendiums' category tiles, and two on a phone. */
+.tile-grid {
 	display: grid;
-	gap: var(--gap-section);
+	grid-template-columns: repeat(
+		auto-fill,
+		minmax(max(var(--size-tile), calc((100% - 3 * var(--gap-block)) / 4)), 1fr)
+	);
+	gap: var(--gap-block);
+	margin: 0;
+	padding: 0;
+	list-style: none;
 }
 .panel,
 .surface {

@@ -56,9 +56,11 @@ test('list rows link and preview the exact version while search returns one name
 		'true'
 	);
 	await page.goto('/');
-	await page.locator('pagefind-searchbox input').fill('Twin Lantern');
+	await page.getByRole('combobox', { name: 'Search the compendium' }).fill('Twin Lantern');
 	await expect(
-		page.locator('pagefind-searchbox').getByRole('option', { name: /Twin Lantern/ })
+		page
+			.getByRole('listbox', { name: 'Search results' })
+			.getByRole('option', { name: /Twin Lantern/ })
 	).toHaveCount(1);
 });
 

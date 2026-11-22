@@ -24,26 +24,35 @@
 
 - [x] 4.1 Find live trees from the subcategory menus' button handlers, with category, order and the label the game shows
 - [x] 4.2 Produce disciplines with skill and passive rows from the widget layout, reporting entries whose level differs from their row
-- [ ] 4.3 Produce skills from the skills table and live trees, establish in the lab which row the game reads for the three classes with two rows, and report the rest
+- [x] 4.3 Produce skills from the skills table and live trees, establish in the lab which row the game reads for the three classes with two rows, and report the rest
 - [x] 4.4 Add source mechanisms for tree slots, skill books, dialogue unlocks and code grants, with the reviewed table of event wording and its fingerprint check
 - [x] 4.5 Assign statuses to skills without a source, distinguishing older trees from no reference
-- [ ] 4.6 Produce passives with rank costs and spellsongs with their note sheet sources, and observe in the lab how tunes map to note directions
+- [x] 4.6 Produce passives with rank costs and spellsongs with their note sheet sources, and observe in the lab how tunes map to note directions
 - [ ] 4.7 Compare the tree records with the latest `skill-trees.lua` run in the maintainer report
-- [ ] 4.8 Read every tree skill's in-game tooltip in the lab and compare it with the skill's facts
+- [x] 4.8 Read every tree skill's in-game tooltip in the lab and compare it with the skill's facts
 - [x] 4.9 Add producer tests on invented records for reachability, layout, sources, statuses and rank costs
 
 ## 5. Rules and issues
 
 - [ ] 5.1 Add proficiency point and passive rank cost rules with worded steps, citations and recorded vectors from grants1 and passives1, and extend `rules:check`
-- [ ] 5.2 Reproduce the Blood Magic points defect through the settings window, and record it in `issues/known-issues.json` with its check in `tools/runtime/checks/issues.sh` if it reproduces
+- [x] 5.2 Reproduce the Blood Magic points defect through the settings window, and record it in `issues/known-issues.json` with its check in `tools/runtime/checks/issues.sh` if it reproduces
 
 ## 6. Pages
 
-- [ ] 6.1 Compare discipline page layouts in Plannotator with the game's tree window screenshots, at both widths
+- [x] 6.1 Compare discipline page layouts in Plannotator with the game's tree window screenshots, at both widths
 - [ ] 6.2 Build discipline pages with skill rows, proficiency rows, Lute's spellsongs, facts and Bugs
-- [ ] 6.3 Compare skill page, skill tooltip, passive and spellsong tooltip designs and status wording in Plannotator
+- [x] 6.3 Compare skill page, skill tooltip, passive and spellsong tooltip designs and status wording in Plannotator
 - [ ] 6.4 Build skill pages, the skill list with its filters and reveal, and passive and spellsong anchors and tooltips
 - [ ] 6.5 Add fixtures with extreme content for every new kind and browser tests for the list, pages, anchors and tooltips
+- [x] 6.6 Link every entry to the discipline whose level it checks, and head discipline rows "Level 5"
+- [x] 6.7 Rebuild home and search as icon tiles and the site's own result rows, with two home buttons
+
+## 6A. Links between pages
+
+- [ ] 6A.1 Add typed references for professions, settings, progression concepts, stats and stations, and resolve every condition and name to one
+- [ ] 6A.2 Resolve Markdown links with typed targets in text written for the site, failing the catalog on an unknown target, and report unreferenced mentions
+- [ ] 6A.3 Publish pages for professions, Blood Levels, and skill and proficiency points from recorded facts
+- [ ] 6A.4 Head the Used For column and filter "Profession" and link its values
 
 ## 7. Ship
 

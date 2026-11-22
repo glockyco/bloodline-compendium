@@ -21,25 +21,30 @@ export function skillListRecords(index: SkillIndex, listPath: string): ListRecor
 		return `${listPath}?${writeState(state, skillListModel(index))}`;
 	};
 	const records: ListRecord[] = [];
+	const entry = (members: SkillIndex['skills']) => ({
+		words: [],
+		detail: `${members.length} ${members.length === 1 ? 'skill' : 'skills'}`,
+		icon: members.find((skill) => skill.icon)?.icon ?? null
+	});
 	for (const category of index.categories) {
-		const count = browsed.filter((skill) => skill.category === category.slug).length;
-		if (!count || category.slug === 'other') continue;
+		const members = browsed.filter((skill) => skill.category === category.slug);
+		if (!members.length || category.slug === 'other') continue;
 		records.push({
 			url: url({ category: [category.slug] }),
 			title: `${category.name} Skills`,
-			words: [],
-			summary: `All ${count} ${category.name.toLocaleLowerCase('en')} skills in the skill list.`
+			summary: `All ${members.length} ${category.name.toLocaleLowerCase('en')} skills in the skill list.`,
+			...entry(members)
 		});
 	}
 	const discipline = index.facets.find((facet) => facet.id === 'discipline');
 	for (const value of discipline?.values ?? []) {
-		const count = browsed.filter((skill) => skill.facets.discipline?.includes(value)).length;
-		if (!count) continue;
+		const members = browsed.filter((skill) => skill.facets.discipline?.includes(value));
+		if (!members.length) continue;
 		records.push({
 			url: url({ discipline: [value] }),
 			title: `${value} Skills`,
-			words: [],
-			summary: `All ${count} ${value} skills in the skill list.`
+			summary: `All ${members.length} ${value} skills in the skill list.`,
+			...entry(members)
 		});
 	}
 	return records;

@@ -46,7 +46,12 @@
 		<li aria-current="page" data-game>{skill.name}</li>
 	</ol>
 </nav>
-<EntityArticle {kind} name={data.skill.name}>
+<EntityArticle
+	{kind}
+	name={data.skill.name}
+	icon={data.skill.icon}
+	detail={titleCase(data.category.name) + (tree ? ' · ' + tree.name : '')}
+>
 	<EntityVersions {versions} name={skill.name} bind:selected>
 		{#snippet heading()}
 			<h1 data-game>{skill.name}</h1>

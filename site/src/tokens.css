@@ -128,6 +128,7 @@
 	--size-icon-row: 1.75rem;
 	--size-icon-inline: 1.5rem;
 	--size-icon-version: 3rem;
+	--size-icon-tile: 3rem;
 	--size-version-slot: 7.5rem;
 	--size-icon-title: 5rem;
 	--size-page: 75rem;
@@ -142,6 +143,8 @@
 	--size-hero-search: 40rem;
 	--size-card: 20rem;
 	--size-card-narrow: 13rem;
+	/* The narrowest icon tile, two to a phone screen. */
+	--size-tile: 10rem;
 	--size-filters: 15.5rem;
 	/* Compact controls of lists and filters, after Afallon's: an option row, a chip and a control in a sheet. */
 	--size-option: 1.85rem;
@@ -197,6 +200,8 @@
 		--gutter: var(--space-4);
 		--gap-page: var(--space-6);
 		--size-icon-title: 3.5rem;
+		/* Two tiles share a phone's width, so a smaller icon leaves their names room for a whole word. */
+		--size-icon-tile: 2.25rem;
 		--size-relation-number: 5.5rem;
 	}
 }

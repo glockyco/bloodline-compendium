@@ -109,6 +109,20 @@ Proficiency points per discipline level and passive rank cost become rules in `s
 
 The catalog compares the tree records with the latest `skill-trees.lua` run of the build when one exists, as it compares tooltips, and lists each difference in the maintainer report. A game update therefore shows when the records and the game's built windows part.
 
+### Level references
+
+An entry's level is a reference to the discipline whose level it checks, not a level name, because a few entries check another discipline's level, such as Roanan's Call on Druidism checking Unarmed. A level name belongs to the tree whose entries check it most, and a tree that owns none, such as Utility Gadgets, has no level of its own. Discipline pages head rows "Level 5" for skills and passives alike, and an entry that checks another discipline adds "Unlocks at Spears level 1" with a link.
+
+### Links between pages
+
+Every name the site shows for something in the game is a typed reference in the data, whether or not its kind has pages, so a kind that gains pages turns every mention into a link without rewriting text. This change adds pages for professions, Blood Levels, and skill and proficiency points. Stats and crafting stations get references without pages. Text written for the site marks a reference as a Markdown link with a typed target, such as `[Blood Levels](setting:blood-levels)`, and the catalog resolves it and fails on an unknown target. The game's own text stays as the game shows it, without links, because matching names in it links the wrong sense, such as "frozen ground" in Path of Ice.
+
+Weaponsmithing, Cooking, Engineering, Focus Crafting, Smelting and Farming are professions, as large RPG wikis call leveled crafts. Used For heads their column "Profession", with values such as "Weaponsmithing 12".
+
+### Home and search
+
+The home page leads with two buttons, Browse Items and Browse Skills, and shows item categories and disciplines as icon tiles with a count, the disciplines in one grid with their skill window category in each tile's line. The site's own search shows each result's icon, name and a line with its kind and context, such as "Skill · Magic · Pyromancy", in one list ranked by best match.
+
 ## Risks / Trade-offs
 
 - Moving items onto kinds can change item output silently. The file-by-file comparison and the existing tests guard it.

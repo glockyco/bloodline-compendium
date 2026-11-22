@@ -262,6 +262,7 @@ export interface WeaponFamily {
  */
 export interface DisciplinePage {
   category: CategoryLink;
+  icon?: string | null;
   key: string;
   kind: EntityKind;
   levelName: string | null;
@@ -501,6 +502,7 @@ export interface DisciplineIndex {
  */
 export interface DisciplineSummary {
   category: CategoryLink;
+  icon?: string | null;
   key: string;
   name: string;
   passives: number;

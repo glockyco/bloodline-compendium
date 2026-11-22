@@ -48,7 +48,12 @@
 		<li aria-current="page" data-game>{discipline.name}</li>
 	</ol>
 </nav>
-<EntityArticle {kind} name={discipline.name}>
+<EntityArticle
+	{kind}
+	name={discipline.name}
+	icon={discipline.icon ?? null}
+	detail={discipline.category.name}
+>
 	<div class="item-heading">
 		<h1 data-game>{discipline.name}</h1>
 		<p class="identity">

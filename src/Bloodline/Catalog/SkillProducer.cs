@@ -357,6 +357,17 @@ internal sealed class SkillProducer
                 )
                 {
                     Notes = KnownIssues.RegistryNotes(context.Records.Issues, tree.Path),
+                    // The game draws no icon of its own for a tree, so its first skill's, or else its first passive's,
+                    // stands for it in lists and search.
+                    Icon =
+                        skillRows
+                            .SelectMany(row => row.Slots)
+                            .Select(slot => slot.Skill.Icon)
+                            .FirstOrDefault(icon => icon is not null)
+                        ?? passiveRows
+                            .SelectMany(row => row.Passives)
+                            .Select(passive => passive.Icon)
+                            .FirstOrDefault(icon => icon is not null),
                 }
             );
         }
@@ -509,7 +520,10 @@ internal sealed class SkillProducer
                         page.SkillRows.Sum(row => row.Slots.Count),
                         page.PassiveRows.Sum(row => row.Passives.Count),
                         page.Spellsongs.Count
-                    ))
+                    )
+                    {
+                        Icon = page.Icon,
+                    })
                     .ToArray()
             ),
             disciplines,

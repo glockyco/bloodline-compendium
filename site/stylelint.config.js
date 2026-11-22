@@ -44,8 +44,8 @@ export default {
 		'unit-allowed-list': ['%', 'fr', 'deg', 'ms', 's', 'rem', 'px', 'em', 'ch', 'vw', 'vh', 'dvh'],
 		'declaration-property-unit-allowed-list': { '/.*/': ['%', 'fr', 'deg', 'ms', 's'] },
 		'media-feature-name-value-allowed-list': { width: ['40rem', '64rem'] },
-		// Components may only map Pagefind's own variables, and only to tokens.
-		'property-disallowed-list': ['/^--(?!pf-)/', 'letter-spacing'],
+		// Components use the tokens and never define their own variables.
+		'property-disallowed-list': ['/^--/', 'letter-spacing'],
 		'declaration-property-value-disallowed-list': { 'text-transform': ['uppercase'] },
 		'declaration-property-value-allowed-list': {
 			'/^(margin|padding|gap|row-gap|column-gap|inset|top|right|bottom|left|scroll-margin)/': [
@@ -57,8 +57,7 @@ export default {
 			'font-weight': [token('weight'), 'inherit'],
 			'font-family': [token('font'), 'inherit'],
 			'/^border(-[a-z]+)*-radius$/': ['0', token('radius')],
-			'z-index': [token('layer')],
-			'/^--pf-/': ['/^var\\(--[a-z0-9-]+\\)$/', 'none', 'transparent', '100%']
+			'z-index': [token('layer')]
 		}
 	},
 	ignoreFiles: ['build/**', '.svelte-kit/**', 'node_modules/**', 'test-results/**']

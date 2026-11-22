@@ -12,6 +12,20 @@ export interface ListRecord {
 	/** The nouns its item names end with, in the plural, as players search for them. */
 	words: string[];
 	summary: string;
+	/** The line a search result shows under the title, such as "12 items". */
+	detail: string;
+	/** An icon of one of its entries, so its result reads like an entity's. */
+	icon: string | null;
+}
+
+/** The icon of the most valuable item with one, which stands for a list of them. */
+function iconOf(items: ItemSummary[]): string | null {
+	return (
+		[...items]
+			.filter((item) => item.icon)
+			.sort((a, b) => (b.value ?? -1) - (a.value ?? -1) || a.name.localeCompare(b.name, 'en'))[0]
+			?.icon ?? null
+	);
 }
 
 /** Filters whose values name a kind of item, such as Dagger or Head, as opposed to effects, sources or places. */
@@ -41,7 +55,9 @@ export function listRecords(index: ItemIndex, listPath: string): ListRecord[] {
 			url: listUrl(index, listPath, { category: [slug] }),
 			title: plural,
 			words: [],
-			summary: `All ${items.length} ${plural.toLocaleLowerCase('en')} in the item list.`
+			summary: `All ${items.length} ${plural.toLocaleLowerCase('en')} in the item list.`,
+			detail: `${items.length} ${items.length === 1 ? 'item' : 'items'}`,
+			icon: iconOf(items)
 		});
 	}
 	for (const facet of index.facets.filter((entry) => typeFacets.includes(entry.id))) {
@@ -55,7 +71,9 @@ export function listRecords(index: ItemIndex, listPath: string): ListRecord[] {
 				url: listUrl(index, listPath, { category: categories, [facet.id]: [value] }),
 				title: `${plural}: ${label}`,
 				words: nounFacets.includes(facet.id) ? nounsOf(items, nouns) : [],
-				summary: `All ${items.length} ${plural.toLocaleLowerCase('en')} of the ${facet.label.toLocaleLowerCase('en')} ${label} in the item list.`
+				summary: `All ${items.length} ${plural.toLocaleLowerCase('en')} of the ${facet.label.toLocaleLowerCase('en')} ${label} in the item list.`,
+				detail: `${items.length} ${items.length === 1 ? 'item' : 'items'}`,
+				icon: iconOf(items)
 			});
 		}
 	}
@@ -115,6 +133,9 @@ export function listPage(record: ListRecord): string {
 	return (
 		`<html lang="en"><body><main data-pagefind-body>` +
 		`<h1 data-pagefind-meta="title" data-pagefind-weight="10">${escape(title)}</h1>` +
+		`<span hidden data-pagefind-meta="kind">List</span>` +
+		`<span hidden data-pagefind-meta="detail">${escape(record.detail)}</span>` +
+		(record.icon ? `<span hidden data-pagefind-meta="icon">${escape(record.icon)}</span>` : '') +
 		`${words}<p>${escape(record.summary)}</p></main></body></html>`
 	);
 }

@@ -678,7 +678,11 @@ internal sealed record DisciplineSummary(
     int Skills,
     int Passives,
     int Spellsongs
-);
+)
+{
+    /// <summary>The discipline's icon, as <see cref="DisciplinePage.Icon"/>.</summary>
+    public string? Icon { get; init; }
+}
 
 /// <summary>
 /// Everything a discipline page shows, laid out as the game's tree window. Written as
@@ -705,6 +709,12 @@ internal sealed record DisciplinePage(
     /// <summary>Known issues that affect what this page shows.</summary>
     [JsonRequired]
     public IReadOnlyList<IssueNote> Notes { get; init; } = [];
+
+    /// <summary>
+    /// The icon that stands for the discipline in lists and search: its first skill's, or its first passive's when it
+    /// has no skills, because the game draws no icon of its own for a tree.
+    /// </summary>
+    public string? Icon { get; init; }
 }
 
 /// <summary>A row of the tree's skill panel: the level its label shows and its slots in the game's order.</summary>

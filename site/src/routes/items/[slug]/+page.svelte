@@ -45,7 +45,15 @@
 		<li aria-current="page" data-game>{item.name}</li>
 	</ol>
 </nav>
-<EntityArticle {kind} name={data.item.name}>
+<EntityArticle
+	{kind}
+	name={data.item.name}
+	icon={data.item.icon}
+	detail={titleCase(data.item.category.name) +
+		(data.item.type.toLocaleLowerCase('en') !== data.item.category.name.toLocaleLowerCase('en')
+			? ' · ' + titleCase(data.item.type)
+			: '')}
+>
 	<EntityVersions {versions} name={item.name} bind:selected>
 		{#snippet heading()}
 			<h1 data-game>{item.name}</h1>

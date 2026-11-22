@@ -137,7 +137,7 @@
 							/></label
 						>
 						{#if useFilters.disciplines.length > 1}<label
-								><span class="field-label">Skill</span><select bind:value={useDiscipline}
+								><span class="field-label">Profession</span><select bind:value={useDiscipline}
 									><option value="">All</option
 									>{#each useFilters.disciplines as discipline (discipline)}<option
 											value={discipline}>{discipline}</option
@@ -165,7 +165,7 @@
 					</p>{:else}<RelationTable
 						items={shownUses}
 						label="Used for"
-						headings={['Makes', 'Skill', 'Needed']}
+						headings={['Makes', 'Profession', 'Needed']}
 						numeric={[false, true]}
 						>{#snippet row(use, index)}<tr
 								id={`${idPrefix}use-${index + 1}`}

@@ -1,45 +1,16 @@
-import type { DisciplineIndex, SkillIndex } from '../site-data.js';
-
-/** A skill window category on the home page: its disciplines, its skills with a known way to learn them, and icons. */
-export interface HomeSkillGroup {
-	slug: string;
-	name: string;
-	count: number;
-	disciplines: string[];
-	icons: string[];
-}
+import type { DisciplineIndex, DisciplineSummary, SkillIndex } from '../site-data.js';
 
 export interface HomeSkills {
-	/** Skills with a known way to learn them. */
+	/** Skills with a known way to learn them, as the skill list shows them first. */
 	known: number;
-	groups: HomeSkillGroup[];
+	/** Every discipline in the skill window's order, which the home page groups by category. */
+	disciplines: DisciplineSummary[];
 }
 
-/**
- * The home page's skill groups, one per category of the skill window in its order, each with the first five skill
- * icons of its list, as the item groups show theirs.
- */
+/** The home page's skill count and disciplines. */
 export function homeSkills(disciplines: DisciplineIndex, skills: SkillIndex): HomeSkills {
-	const categories = [
-		...new Map(
-			disciplines.disciplines.map((entry) => [entry.category.slug, entry.category])
-		).values()
-	];
 	return {
 		known: skills.skills.filter((skill) => skill.status === 'obtainable').length,
-		groups: categories.map((category) => ({
-			slug: category.slug,
-			name: category.name,
-			count: skills.skills.filter(
-				(skill) => skill.category === category.slug && skill.status === 'obtainable'
-			).length,
-			disciplines: disciplines.disciplines
-				.filter((entry) => entry.category.slug === category.slug)
-				.map((entry) => entry.name),
-			icons: skills.skills
-				.filter((skill) => skill.category === category.slug && skill.icon)
-				.slice(0, 5)
-				.map((skill) => skill.icon!)
-		}))
+		disciplines: disciplines.disciplines
 	};
 }
