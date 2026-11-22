@@ -1,9 +1,14 @@
 import { readGraph, readKinds } from '#lib/server/data.js';
+import { professionBandEntries } from '#lib/server/professions.js';
 import { entityPath, kindPath } from '#lib/entities.js';
 import { SITE_ORIGIN } from '#lib/seo.js';
 export const prerender = true;
 export async function GET() {
-	const [graph, kinds] = await Promise.all([readGraph(), readKinds()]);
+	const [graph, kinds, bands] = await Promise.all([
+		readGraph(),
+		readKinds(),
+		professionBandEntries()
+	]);
 	const paths = [
 		'/',
 		'/known-issues/',
@@ -11,7 +16,9 @@ export async function GET() {
 		...kinds.map((kind) => kindPath(kind.kind, kinds)).filter((path) => path !== null),
 		...graph.entities
 			.map(({ entity }) => entityPath({ ...entity, fragment: null }, kinds))
-			.filter((path) => path !== null)
+			.filter((path) => path !== null),
+		// A long profession's later levels are pages of their own.
+		...bands.map(({ slug, band }) => `${kindPath('profession', kinds)}${slug}/${band}/`)
 	];
 	return new Response(
 		'<?xml version="1.0" encoding="UTF-8"?>\n' +

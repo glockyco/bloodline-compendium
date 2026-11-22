@@ -1607,10 +1607,22 @@
             "null"
           ]
         },
+        "inputs": {
+          "items": {
+            "$ref": "#/$defs/ItemAmount"
+          },
+          "type": "array"
+        },
         "kind": {
           "$ref": "#/$defs/SourceKind"
         },
         "level": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "output": {
           "type": [
             "integer",
             "null"
@@ -1624,7 +1636,9 @@
         "product",
         "kind",
         "level",
-        "experience"
+        "experience",
+        "inputs",
+        "output"
       ],
       "title": "ProfessionRow",
       "type": "object"
@@ -1633,6 +1647,12 @@
       "properties": {
         "count": {
           "type": "integer"
+        },
+        "examples": {
+          "items": {
+            "$ref": "#/$defs/EntityReference"
+          },
+          "type": "array"
         },
         "icon": {
           "type": [
@@ -1673,7 +1693,8 @@
         "slug",
         "name",
         "count",
-        "stations"
+        "stations",
+        "examples"
       ],
       "title": "ProfessionSummary",
       "type": "object"

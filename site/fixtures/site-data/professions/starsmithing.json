@@ -25,7 +25,32 @@
 			},
 			"kind": "smithing",
 			"level": 12,
-			"experience": 40
+			"experience": 40,
+			"inputs": [
+				{
+					"item": {
+						"kind": "item",
+						"key": "/Invented/Items/Cinderpear",
+						"name": "Cinderpear",
+						"slug": "cinderpear",
+						"icon": "cinderpear",
+						"fragment": null
+					},
+					"quantity": 3
+				},
+				{
+					"item": {
+						"kind": "item",
+						"key": "/Invented/Items/HollowPrism",
+						"name": "Hollow Prism",
+						"slug": "hollow-prism",
+						"icon": null,
+						"fragment": null
+					},
+					"quantity": 1
+				}
+			],
+			"output": 1
 		},
 		{
 			"product": {
@@ -38,7 +63,21 @@
 			},
 			"kind": "smithing",
 			"level": 12,
-			"experience": null
+			"experience": null,
+			"inputs": [
+				{
+					"item": {
+						"kind": "item",
+						"key": "/Invented/Items/Cinderpear",
+						"name": "Cinderpear",
+						"slug": "cinderpear",
+						"icon": "cinderpear",
+						"fragment": null
+					},
+					"quantity": 12
+				}
+			],
+			"output": 2
 		},
 		{
 			"product": {
@@ -51,7 +90,9 @@
 			},
 			"kind": "smithing",
 			"level": null,
-			"experience": 15
+			"experience": 15,
+			"inputs": [],
+			"output": null
 		}
 	]
 }

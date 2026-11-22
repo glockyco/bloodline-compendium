@@ -27,7 +27,9 @@ internal static class ProfessionProducer
                     CatalogGraph.Reference(item),
                     source.Kind,
                     level,
-                    source.Recipe?.Experience
+                    source.Recipe?.Experience,
+                    source.Inputs,
+                    source.Recipe?.Output
                 )
             );
             if (source.Recipe?.Station is { Key: { } station } reference)
@@ -69,7 +71,9 @@ internal static class ProfessionProducer
                         page.Slug,
                         page.Name,
                         // An item made two ways, such as at two levels, counts once, as the page lists it once.
-                        page.Rows.Select(row => (row.Product.Key, row.Product.Fragment)).Distinct().Count()
+                        page.Rows.Select(row => (row.Product.Key, row.Product.Fragment))
+                            .Distinct()
+                            .Count()
                     )
                     {
                         Icon = page
@@ -78,10 +82,33 @@ internal static class ProfessionProducer
                         Stations = page.Stations,
                         MinLevel = page.Rows.Min(row => row.Level),
                         MaxLevel = page.Rows.Max(row => row.Level),
+                        Examples = Examples(page.Rows),
                     })
                     .ToArray()
             ),
             pages
         );
+    }
+
+    /// <summary>How many examples a profession's summary shows.</summary>
+    private const int ExampleCount = 6;
+
+    /// <summary>
+    /// Things with an icon spread evenly over the profession's rows, which run from its lowest level to its highest,
+    /// so the examples show its range rather than only its first level. Things that share an icon count once, as
+    /// many wand parts do, so no two examples look the same.
+    /// </summary>
+    private static EntityReference[] Examples(IReadOnlyList<ProfessionRow> rows)
+    {
+        var products = rows.Select(row => row.Product)
+            .Where(product => product.Icon is not null)
+            .DistinctBy(product => product.Icon)
+            .ToArray();
+        return products.Length <= ExampleCount
+            ? products
+            : Enumerable
+                .Range(0, ExampleCount)
+                .Select(index => products[index * (products.Length - 1) / (ExampleCount - 1)])
+                .ToArray();
     }
 }

@@ -876,8 +876,10 @@ export interface ProfessionPage {
  */
 export interface ProfessionRow {
   experience: number | null;
+  inputs: ItemAmount[];
   kind: SourceKind;
   level: number | null;
+  output: number | null;
   product: EntityReference;
   [k: string]: unknown;
 }
@@ -895,6 +897,7 @@ export interface ProfessionIndex {
  */
 export interface ProfessionSummary {
   count: number;
+  examples: EntityReference[];
   icon?: string | null;
   key: string;
   maxLevel?: number | null;

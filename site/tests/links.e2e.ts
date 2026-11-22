@@ -27,30 +27,26 @@ test('text written for the site links the entities it marks', async ({ page }) =
 	);
 });
 
-test('a profession page shows what each level unlocks and leads to its items in the list', async ({
+test('a profession page lists every recipe under the level that unlocks it, with what it takes', async ({
 	page
 }) => {
 	await page.goto('/professions/starsmithing/');
 	await expect(page.getByRole('heading', { level: 1 })).toHaveText('Starsmithing');
-	const groups = page.locator('.level-group');
-	await expect(groups).toHaveCount(2);
-	await expect(groups.first()).toContainText('Level12');
-	await expect(groups.first()).toContainText('2 items');
-	await expect(groups.first().getByRole('link', { name: 'Lanternedge' })).toBeVisible();
-	await expect(groups.last()).toContainText('LevelNone');
-	await page.getByRole('link', { name: 'All 3 in the item list' }).click();
+	const table = page.getByRole('table', { name: 'Recipes' });
+	await expect(table.locator('tr.group-heading')).toHaveText(['Level 12 2', 'Level None 1']);
+	const row = table
+		.getByRole('row')
+		.filter({ has: page.getByRole('link', { name: 'Lanternedge' }) });
+	await expect(row.getByRole('list', { name: 'Ingredients' }).getByRole('link')).toHaveText([
+		'3 Cinderpear',
+		'1 Hollow Prism'
+	]);
+	await expect(row.getByRole('cell').last()).toHaveText('40');
+	await expect(
+		table.getByRole('row').filter({ has: page.getByRole('link', { name: 'Mosswoven Coat' }) })
+	).toContainText('Makes 2');
+	await page.getByRole('link', { name: 'Sort and filter in the item list' }).click();
 	await expect(page).toHaveURL(/\/items\/\?.*profession=Starsmithing.*sort=professionLevel/);
-});
-
-test('a phone collapses profession levels until a reader opens one', async ({ browser }) => {
-	const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
-	const page = await context.newPage();
-	await page.goto('/professions/starsmithing/');
-	const level = page.locator('.level-group').first();
-	await expect(level.getByRole('link', { name: 'Lanternedge' })).toBeHidden();
-	await level.getByRole('button', { name: /^Show/ }).click();
-	await expect(level.getByRole('link', { name: 'Lanternedge' })).toBeVisible();
-	await context.close();
 });
 
 test('a mechanic page links what it explains, and section intros link the mechanic', async ({

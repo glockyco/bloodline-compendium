@@ -737,6 +737,10 @@ internal sealed record ProfessionSummary(string Key, string Slug, string Name, i
 
     public int? MinLevel { get; init; }
     public int? MaxLevel { get; init; }
+
+    /// <summary>A few things the profession gives, from its lowest level to its highest, to show what it makes.</summary>
+    [JsonRequired]
+    public IReadOnlyList<EntityReference> Examples { get; init; } = [];
 }
 
 /// <summary>
@@ -757,13 +761,16 @@ internal sealed record ProfessionPage(
 
 /// <summary>
 /// One thing a profession gives: the item, the way it is made, gathered or caught, the profession level it needs when
-/// the game sets one, and the profession experience it gives when the game says.
+/// the game sets one, the profession experience it gives when the game says, what it uses up, such as a recipe's
+/// ingredients or a planted seed, and how many a recipe makes.
 /// </summary>
 internal sealed record ProfessionRow(
     EntityReference Product,
     SourceKind Kind,
     int? Level,
-    double? Experience
+    double? Experience,
+    IReadOnlyList<ItemAmount> Inputs,
+    int? Output
 );
 
 /// <summary>The disciplines in the skill window's order. Written as <c>disciplines.json</c>.</summary>

@@ -17,7 +17,25 @@
 				}
 			],
 			"minLevel": 12,
-			"maxLevel": 12
+			"maxLevel": 12,
+			"examples": [
+				{
+					"kind": "item",
+					"key": "/Invented/Items/Lanternedge",
+					"name": "Lanternedge",
+					"slug": "lanternedge",
+					"icon": "lanternedge",
+					"fragment": null
+				},
+				{
+					"kind": "item",
+					"key": "/Invented/Items/MosswovenCoat",
+					"name": "Mosswoven Coat",
+					"slug": "mosswoven-coat",
+					"icon": "mosswoven-coat",
+					"fragment": null
+				}
+			]
 		}
 	]
 }

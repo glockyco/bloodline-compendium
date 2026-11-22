@@ -55,6 +55,11 @@ export default defineConfig({
 				handleHttpError: ({ path, message }) => {
 					if (generatedImage.test(path)) return;
 					throw new Error(message);
+				},
+				// A profession splits its levels over pages only when it is long, so a build may have none.
+				handleUnseenRoutes: ({ routes }) => {
+					const unseen = routes.filter((route) => route !== '/professions/[slug]/[band]');
+					if (unseen.length) throw new Error('Routes not prerendered: ' + unseen.join(', '));
 				}
 			}
 		})
