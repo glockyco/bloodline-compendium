@@ -99,7 +99,7 @@ The in-game skill tooltip is compared with the page's facts for every tree skill
 
 The game shows passives and spellsongs only inside their tree window, so they get no pages of their own. Each is an entity with a key, a tooltip and an anchor on its discipline's page, and a link to one leads there. The kind registry gains a host kind for such kinds, which routes, the sitemap and publication checks honour.
 
-A passive's key is its tree class and widget name. Its facts are its name, description as game text, required level, cost per rank and number of ranks, from the passive rule. A spellsong's key is its table row. Its facts are name, description, tune, charges and experience, and its sources are the placed objects that name it.
+A passive's key is its tree class and widget name. Its facts are its name, description as game text, required level, cost per rank and number of ranks, from the passive rule. A spellsong's key is its table row. Its facts are name, description, tune, charges and experience, and its sources are the placed objects that name it. The game draws a tune's notes as arrows: 1 up, 2 down, 3 right and 4 left, as its own note sheet built them for the tune 1,2,3,4 (`tools/runtime/checks/spellsong-arrows.lua`).
 
 ### Progression rules
 
@@ -122,9 +122,7 @@ Refactor the catalog, then the site, each verified by unchanged item output and 
 
 ## Open Questions
 
-- Which row the game reads for classes with two rows.
-- How a spellsong's tune maps to the four note directions the game draws, observed in the lab.
-- Whether the Blood Magic defect reproduces through the settings window, which decides the known issue.
+- How Performance, Song of Hastening and Inferno Strum are learned. No placed note sheet names them, and the Lute window shows every spellsong as unknown on a new character.
 
 ## Where Findings Live
 
