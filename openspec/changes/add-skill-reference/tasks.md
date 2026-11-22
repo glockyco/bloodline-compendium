@@ -58,6 +58,6 @@
 
 - [ ] 7.1 Run the full check suite and the real-data build
 - [ ] 7.2 Review every page kind on real data at 1440 and 390 px and record the review in the commit bodies
-- [ ] 7.3 Update the README and the runtime-checks skill for new commands and checks
+- [x] 7.3 Update the README and the runtime-checks skill for new commands and checks
 - [ ] 7.4 Push, wait for CI, deploy to staging and production, and pass the smoke checks
 - [ ] 7.5 Validate, archive and sync the specs
