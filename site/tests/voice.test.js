@@ -35,6 +35,15 @@ it.each([
 	});
 });
 
+it('accepts picking up an item but rejects a loot table pick', async () => {
+	await page('<p>You pick up the crossbow in Squalls End.</p>', async (directory) => {
+		expect((await voiceGate(directory)).pages).toBe(1);
+	});
+	await page('<p>Each crate makes 3 picks.</p>', async (directory) => {
+		await expect(voiceGate(directory)).rejects.toThrow('Pipeline words');
+	});
+});
+
 it('leaves game text marked with data-game alone', async () => {
 	await page(
 		'<p data-game>"Just toss these at undead!"</p><p>Given in conversation.</p>',
