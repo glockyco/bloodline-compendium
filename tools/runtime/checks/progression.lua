@@ -144,14 +144,19 @@ elseif args.action == "open" then
     end)
     if not ok then return finish(nil, problem) end
     ExecuteInGameThreadAfterFrames(10, function()
-      local menu
+      -- An earlier category's menu stays visible behind the new one, so press the first shown menu that binds the
+      -- button.
+      local failures = {}
       for _, widget in ipairs(liveAll("UserWidget")) do
-        if widget:GetClass():GetFName():ToString():find("Subcategor", 1, true) and widget:IsVisible() then menu = widget end
+        if widget:GetClass():GetFName():ToString():find("Subcategor", 1, true) and widget:IsVisible() then
+          local pressed, failure = pcall(press, widget, args.button)
+          if pressed then
+            return ExecuteInGameThreadAfterFrames(10, function() finish({ opened = args.button }) end)
+          end
+          failures[#failures + 1] = failure
+        end
       end
-      if not menu then return finish(nil, "No discipline menu is shown") end
-      local pressed, failure = pcall(press, menu, args.button)
-      if not pressed then return finish(nil, failure) end
-      ExecuteInGameThreadAfterFrames(10, function() finish({ opened = args.button }) end)
+      finish(nil, #failures == 0 and "No discipline menu is shown" or table.concat(failures, "; "))
     end)
   end)
 else
