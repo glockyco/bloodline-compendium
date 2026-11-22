@@ -49,7 +49,7 @@
       "id": "knee-armor-not-counted",
       "title": "Knee armor counts only after another piece is equipped",
       "effect": "Knee armor, such as Broad Knee Guards, adds no armor when it is the last armor you equip. It counts once you equip another armor piece.",
-      "itemNotes": {
+      "notes": {
         "/Game/BloodlinesAlpha/Interactables/Armor/Knees/Knee_Armor_01.Knee_Armor_01_C": "Broad Knee Guards' 7 armor counts only after you equip another piece of armor.",
         "/Game/BloodlinesAlpha/Interactables/Armor/Knees/Knee_Armor_StandardCaps.Knee_Armor_StandardCaps_C": "Standard Cap Guards' 6 armor counts only after you equip another piece of armor."
       },
@@ -76,7 +76,7 @@
       "id": "food-without-row",
       "title": "Some foods do nothing when eaten",
       "effect": "Steak, Soup, Turkey Leg, Cooked Red Wrangler, Red Wrangler Sandwich and Potato Seeds are consumed without any effect, although their descriptions say they restore health.",
-      "itemNotes": {
+      "notes": {
         "/Game/BloodlinesAlpha/Interactables/Steak.Steak_C": "Despite its description, Steak restores no health when eaten.",
         "/Game/BloodlinesAlpha/Interactables/Soup.Soup_C": "Despite its description, Soup restores no health when eaten.",
         "/Game/BloodlinesAlpha/Interactables/TukeyLeg.TukeyLeg_C": "Despite its description, Turkey Leg restores no health when eaten.",
@@ -104,7 +104,7 @@
       "id": "food-effect-not-applied",
       "title": "Druid's Stew does not boost foraging experience",
       "effect": "Druid's Stew grants Druidsight but not the foraging experience boost it lists.",
-      "itemNotes": {
+      "notes": {
         "/Game/BloodlinesAlpha/Interactables/Crafting_Items/GeneralFoodItems/DruidsStew.DruidsStew_C": "Despite its description, Druid's Stew does not boost foraging experience. It still gives Druidsight."
       },
       "workaround": null,
@@ -126,7 +126,7 @@
       "id": "food-description-mismatch",
       "title": "Some foods restore different amounts than their descriptions say",
       "effect": "Buttered Bread restores 15 health and 30 mana, the reverse of its description, and Spud Colossus restores 200 health and no stamina, while its description says 200 stamina.",
-      "itemNotes": {
+      "notes": {
         "/Game/BloodlinesAlpha/Interactables/Crafting_Items/GeneralFoodItems/ButteredBread.ButteredBread_C": "Despite its description, Buttered Bread restores 15 health and 30 mana when eaten.",
         "/Game/BloodlinesAlpha/Interactables/Crafting_Items/SpudColossus.SpudColossus_C": "Despite its description, Spud Colossus restores 200 health and no stamina when eaten."
       },
@@ -150,7 +150,7 @@
       "id": "potions-without-effect",
       "title": "Some potions do nothing when used",
       "effect": "Health Potion, Mana Potion and Castleside Cider do nothing when used, and Dwarfs Flaggon only restores 60 stamina.",
-      "itemNotes": {
+      "notes": {
         "/Game/BloodlinesAlpha/Interactables/HealthPotion.HealthPotion_C": "Despite its description, Health Potion restores no health when used.",
         "/Game/ManaPotion.ManaPotion_C": "Despite its description, Mana Potion restores no mana when used.",
         "/Game/BloodlinesAlpha/Interactables/CastlesideCider.CastlesideCider_C": "Castleside Cider does nothing when used.",
@@ -178,7 +178,7 @@
       "id": "staves-without-fireballs",
       "title": "Some staves launch no fireballs",
       "effect": "Despite their descriptions, Fairy Staff, Gripclaw Staff and the two staves named Soulstaff launch no fireballs and use no mana.",
-      "itemNotes": {
+      "notes": {
         "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/FairyStaff.FairyStaff_C": "Despite its description, Fairy Staff launches no fireballs and uses no mana.",
         "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/NecroStaff.NecroStaff_C": "Despite its description, Gripclaw Staff launches no fireballs and uses no mana.",
         "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/DeathsGrasp_Soulstaff.DeathsGrasp_Soulstaff_C": "Despite its description, Soulstaff launches no fireballs, uses no mana and deals no damage.",
@@ -210,7 +210,7 @@
       "id": "staff-point-blank-damage",
       "title": "Some staves deal 100 damage at close range",
       "effect": "The projectiles of Walking Stick, Acolyte Geomancer Staff and Moonstone Staff deal 100 damage instead of 12, 20 and 35 if they hit an enemy as they leave the staff. Attacking from close range can make this happen.",
-      "itemNotes": {
+      "notes": {
         "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/WalkingStick.WalkingStick_C": "Walking Stick's projectile deals 100 damage instead of 12 if it hits an enemy as it leaves the staff. Attacking from close range can make this happen.",
         "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/AcolyteGeomancerStaff.AcolyteGeomancerStaff_C": "Acolyte Geomancer Staff's projectile deals 100 damage instead of 20 if it hits an enemy as it leaves the staff. Attacking from close range can make this happen.",
         "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/MoonstoneStaff.MoonstoneStaff_C": "Moonstone Staff's projectile deals 100 damage instead of 35 if it hits an enemy as it leaves the staff. Attacking from close range can make this happen."
@@ -293,7 +293,7 @@
       "id": "copied-item-names",
       "title": "Some items show another item's name",
       "effect": "Five items show the name of another item: a wood axe named Askillian Gladus, a blade named Bonemetal Grip, an earth orb named Bolt-Orb, a breeze stone named Earthshard Heart and a geo wand core named Stormbound Wand Core.",
-      "itemNotes": {
+      "notes": {
         "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/EarthOrb.EarthOrb_C": "Despite its name, this Bolt-Orb is an earth orb, as its description says.",
         "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/Whisperquartz.Whisperquartz_C": "Despite its name, this Earthshard Heart is a stone that emits a breeze, as its description says.",
         "/Game/BloodlinesAlpha/Interactables/Crafting_Items/WeaponComponents/WC_TerrashardWandCore.WC_TerrashardWandCore_C": "Despite its name, this Stormbound Wand Core is a geo-attuned wand core, as its description says.",
@@ -317,7 +317,7 @@
       "id": "shared-save-tags",
       "title": "Some items disappear when you take a matching item",
       "effect": "Some items lie in pairs, such as two Emberglass in the Hills of Delvenaugh. Taking one makes the other disappear when the area loads again. Taking Stone or Ulfberht Blade in Whitebrook Haven, Lifebinder Ring or Webspinner Gauntlets in Drakthul Fjord or Spark Bottoms in the Glennheim Hills makes the others of these five disappear.",
-      "itemNotes": {
+      "notes": {
         "/Game/BloodlinesAlpha/Interactables/Weapons/2H_Weapons/TwoHanded_Tool_Weapons/MiningPickaxe.MiningPickaxe_C": "Some Mining Picks in the Glennheim Hills lie in pairs. Taking one makes the other disappear when the area loads again.",
         "/Game/BloodlinesAlpha/Interactables/BagOfGold100gp.BagOfGold100gp_C": "Some Bags of Gold in the Glennheim Hills lie in pairs. Taking one makes the other disappear when the area loads again.",
         "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/Emberglass.Emberglass_C": "Some Emberglass in the Hills of Delvenaugh lies in pairs. Taking one makes the other disappear when the area loads again.",
@@ -350,6 +350,32 @@
       "citations": [
         "/Game/BloodlinesAlpha/Interactables/TagBasedInteractionObject:Take Item",
         "/Game/BloodlinesAlpha/Interactables/TagBasedInteractionObject:ReceiveBeginPlay"
+      ],
+      "builds": [24464547],
+      "report": "notReported",
+      "reportUrl": null
+    },
+    {
+      "id": "blood-magic-points-follow-blood-setting",
+      "title": "Blood Magic points follow the blood setting",
+      "effect": "Each Blood Magic level sets your Blood Magic proficiency points to the Blood Levels setting plus one, from 2 with No blood to 6 with BLOODBATH. Points you spent before the level come back, and points you did not spend do not add up.",
+      "notes": {
+        "/Game/UltimateSkillSystem/SkillsData/BloodMagicLBSkillTree.BloodMagicLBSkillTree_C": "Each Blood Magic level sets your Blood Magic points to the Blood Levels setting plus one: 2 with No blood, 3 with A bit of blood, 4 with Default Amount and 6 with BLOODBATH. Points you spent come back with the next level."
+      },
+      "workaround": "Set Blood Levels to BLOODBATH before you gain a Blood Magic level to receive 6 points.",
+      "steps": [
+        "Open Settings from the pause menu, choose Video and Effect Settings and set Blood Levels to No blood.",
+        "Gain a Blood Magic level and open the Blood Magic skill tree. Blood Magic Proficiency Points shows 2.",
+        "Set Blood Levels to BLOODBATH and gain another Blood Magic level. The tree shows 6 points.",
+        "Spend points on a passive and gain another Blood Magic level. The tree shows 6 points again."
+      ],
+      "expected": "Each Blood Magic level adds Blood Magic points to the ones you have, as levels of other disciplines do.",
+      "observed": "After a Blood Magic level the tree shows the Blood Levels setting plus one: 2 with No blood, 3 with A bit of blood, 4 with Default Amount and 6 with BLOODBATH. After spending 2 of 3 points, the next level restored 3.",
+      "cause": "Add Proficiency Points sets Bloodmagic Points to the game instance's Blood Level plus one instead of adding to them. Blood Level holds the Blood Levels option of the video settings window, which its Blood selection writes and enemies read when they bleed.",
+      "citations": [
+        "/Game/BloodlinesAlpha/UI/CharacterSheet/PlayerPassiveLevelStatComponent:Add Proficiency Points",
+        "/Game/BloodlinesAlpha/UI/CharacterSheet/PlayerPassiveLevelStatComponent:Blood Magic Level Tracking",
+        "/Game/fantasy_gui_4/widgets/templates/popup/SettingsWindow1:BndEvt__Blood_K2Node_ComponentBoundEvent_0_OnSelectionChangedEvent__DelegateSignature"
       ],
       "builds": [24464547],
       "report": "notReported",

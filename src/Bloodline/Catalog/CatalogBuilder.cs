@@ -113,6 +113,22 @@ internal static class CatalogBuilder
             SourceGaps(CatalogGraph.Reference(item), item.Name, item.Sources, coverage);
         var skills = skillProducer.Finish(skillsPrepared, graphResult);
         SkillTooltipCheck.Compare(skills.Skills, records.SkillTooltips, coverage);
+        var issues = items
+            .Issues.Select(issue =>
+                issue with
+                {
+                    Affected =
+                    [
+                        .. issue.Affected,
+                        .. skills
+                            .Disciplines.Where(page =>
+                                page.Notes.Any(note => note.Issue == issue.Issue.Id)
+                            )
+                            .Select(page => SkillProducer.DisciplineReference(page)),
+                    ],
+                }
+            )
+            .ToArray();
         foreach (var skill in skills.Skills)
             SourceGaps(
                 new EntityReference(
@@ -136,7 +152,7 @@ internal static class CatalogBuilder
         {
             Claims = items.Claims,
             Tooltips = items.Tooltips,
-            Issues = items.Issues,
+            Issues = issues,
             Skills = skills,
         };
     }

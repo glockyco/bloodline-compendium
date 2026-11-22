@@ -332,8 +332,11 @@ internal sealed record KnownIssue(
     string? ReportUrl
 )
 {
-    /// <summary>Optional item-specific sentences keyed by the class paths of items that note this issue.</summary>
-    public IReadOnlyDictionary<string, string>? ItemNotes { get; init; }
+    /// <summary>
+    /// Optional sentences for the pages that note this issue, keyed by the entity key of each, such as an item's or a
+    /// discipline's class path. A discipline notes an issue only through this entry.
+    /// </summary>
+    public IReadOnlyDictionary<string, string>? Notes { get; init; }
 }
 
 /// <summary>The registry of reproduced game defects, <c>issues/known-issues.json</c>.</summary>

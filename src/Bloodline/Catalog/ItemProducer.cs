@@ -186,7 +186,8 @@ internal sealed class ItemProducer
             records.Issues,
             tooltips,
             resolver.IgnoredFoodEffects,
-            resolver.UntrainedWeapons
+            resolver.UntrainedWeapons,
+            context.SkillTrees.All.Select(tree => tree.Path).ToHashSet(StringComparer.Ordinal)
         );
         return new Prepared(ItemVersions.Group(noted), statuses, claims, tooltips, issues);
     }

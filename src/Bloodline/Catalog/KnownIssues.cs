@@ -185,7 +185,8 @@ internal static partial class KnownIssues
         KnownIssueRegistry registry,
         TooltipReport? tooltips,
         IReadOnlySet<string> ignoredFoodEffects,
-        IReadOnlySet<string> untrainedWeapons
+        IReadOnlySet<string> untrainedWeapons,
+        IReadOnlySet<string>? otherKeys = null
     )
     {
         var issues = registry.Issues.ToDictionary(issue => issue.Id, StringComparer.Ordinal);
@@ -296,12 +297,15 @@ internal static partial class KnownIssues
         }
         foreach (var issue in registry.Issues)
         {
-            foreach (var key in issue.ItemNotes?.Keys ?? [])
+            foreach (var key in issue.Notes?.Keys ?? [])
             {
+                // Pages of other kinds, such as disciplines, note an issue only through this entry.
+                if (otherKeys?.Contains(key) == true)
+                    continue;
                 if (!notes.TryGetValue(key, out var itemNotes) || !itemNotes.Contains(issue.Id))
                 {
                     throw new InvalidDataException(
-                        $"Known issue {issue.Id} has an itemNotes entry for {key}, which does not note this issue."
+                        $"Known issue {issue.Id} has a notes entry for {key}, which does not note this issue."
                     );
                 }
             }
@@ -325,7 +329,7 @@ internal static partial class KnownIssues
                                     $"Wearing {item.Name} adds no armor.",
                                 NoProficiency => $"{item.Name} trains no weapon proficiency.",
                                 WeaponTooltipDamage => WeaponDamageNote(item),
-                                _ => issue.ItemNotes?.GetValueOrDefault(item.Key) ?? issue.Effect,
+                                _ => issue.Notes?.GetValueOrDefault(item.Key) ?? issue.Effect,
                             }
                         )
                         {

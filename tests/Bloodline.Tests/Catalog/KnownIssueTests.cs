@@ -67,7 +67,7 @@ public sealed class KnownIssueTests
     {
         var issue = Issue(KnownIssues.KneeArmor) with
         {
-            ItemNotes = new Dictionary<string, string>
+            Notes = new Dictionary<string, string>
             {
                 [KneeGuards().Path] = "Invented item-specific effect.",
             },
@@ -88,7 +88,7 @@ public sealed class KnownIssueTests
     {
         var issue = Issue("unrelated-issue") with
         {
-            ItemNotes = new Dictionary<string, string> { [key] = "Invented item-specific effect." },
+            Notes = new Dictionary<string, string> { [key] = "Invented item-specific effect." },
         };
 
         var error = Assert.Throws<InvalidDataException>(() =>

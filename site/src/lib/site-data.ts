@@ -553,7 +553,7 @@ export interface KnownIssue {
   effect: string;
   expected: string;
   id: string;
-  itemNotes?: {
+  notes?: {
     [k: string]: string;
   } | null;
   observed: string;

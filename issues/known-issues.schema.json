@@ -27,7 +27,7 @@
         "id": {
           "type": "string"
         },
-        "itemNotes": {
+        "notes": {
           "additionalProperties": {
             "type": "string"
           },

@@ -50,6 +50,9 @@ internal sealed class SkillProducer
     public static EntityReference DisciplineReference(SkillTree tree) =>
         new(EntityKind.Discipline, tree.Path, tree.Name, ItemIdentity.Slug(tree.Name), null);
 
+    public static EntityReference DisciplineReference(DisciplinePage page) =>
+        new(EntityKind.Discipline, page.Key, page.Name, page.Slug, null);
+
     public static int? Integer(JsonNode? node) =>
         node is JsonValue value && value.TryGetValue<double>(out var number) ? (int)number : null;
 
@@ -291,6 +294,15 @@ internal sealed class SkillProducer
                     passiveRows,
                     spellsongs
                 )
+                {
+                    // A discipline notes an issue whose registry entry names it, in the registry's order.
+                    Notes = context
+                        .Records.Issues.Issues.Where(issue =>
+                            issue.Notes?.ContainsKey(tree.Path) == true
+                        )
+                        .Select(issue => new IssueNote(issue.Id, issue.Notes![tree.Path]))
+                        .ToArray(),
+                }
             );
         }
         return new Prepared(disciplines, skills, entities);

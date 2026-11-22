@@ -207,4 +207,22 @@ lab eval "$pickups" "{\"open\":\"$delvenaugh\"}"
 sleep 90
 lab eval "$pickups" '{}'
 lab capture-screen shared-tags-after
+# blood-magic-points-follow-blood-setting: a Blood Magic level after No blood, then after BLOODBATH, then after
+# spending points, each followed by the Blood Magic tree, whose header shows the points.
+blood=$(dirname "$0")/blood-setting.lua
+progression=$(dirname "$0")/progression.lua
+blood_tree() {
+  lab eval "$progression" '{"action":"open","category":"Magic_BTN","button":"BloodMagic"}'
+  lab capture-screen "blood-$1"
+  lab eval "$progression" '{"action":"close"}'
+}
+lab eval "$blood" '{"index":0}'
+blood_tree none
+lab eval "$blood" '{"index":4}'
+blood_tree bloodbath
+lab eval "$progression" '{"action":"open","category":"Magic_BTN","button":"BloodMagic"}'
+lab eval "$progression" '{"action":"passive","tree":"BloodMagicLBSkillTree","widget":"BloodScent","times":1}'
+lab eval "$progression" '{"action":"close"}'
+lab eval "$blood" '{"index":4}'
+blood_tree spent
 fi

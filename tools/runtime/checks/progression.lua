@@ -12,7 +12,9 @@
 -- - "attributes": opens the level up window through the passive stat component's own Level Up and presses each
 --   button in args.buttons once, listing what each press changed.
 -- - "hotbar": the slots of the player's skill bar.
--- - "open": opens the skill window and the tree of args.button in the menu of args.category, as a player does.
+-- - "open": opens the skill window and the tree of args.button in the menu of args.category, as a player does, and
+--   hides the menus that stay on top of the tree.
+-- - "close": closes the skill window.
 -- Every change is listed as the field's owner and name with its value before and after, so a reader needs no list of
 -- field names. Waits between steps let the game's own delays run.
 local pawn = requirePlayer()
@@ -151,7 +153,17 @@ elseif args.action == "open" then
         if widget:GetClass():GetFName():ToString():find("Subcategor", 1, true) and widget:IsVisible() then
           local pressed, failure = pcall(press, widget, args.button)
           if pressed then
-            return ExecuteInGameThreadAfterFrames(10, function() finish({ opened = args.button }) end)
+            return ExecuteInGameThreadAfterFrames(10, function()
+              -- The category and discipline menus stay on top of the opened tree, so they are hidden as a player
+              -- sees the tree after choosing it.
+              for _, menu in ipairs(liveAll("UserWidget")) do
+                local name = menu:GetClass():GetFName():ToString()
+                if (name:find("CategorySelection", 1, true) or name:find("Subcategor", 1, true)) and menu:IsVisible() then
+                  menu:SetVisibility(2)
+                end
+              end
+              finish({ opened = args.button })
+            end)
           end
           failures[#failures + 1] = failure
         end
@@ -159,6 +171,10 @@ elseif args.action == "open" then
       finish(nil, #failures == 0 and "No discipline menu is shown" or table.concat(failures, "; "))
     end)
   end)
+elseif args.action == "close" then
+  -- Closes the skill window through the player's own toggle.
+  if pawn["Skill Window Open?"] then pawn["Open/close Skill Window"](pawn) end
+  finish({ open = pawn["Skill Window Open?"] })
 else
   error("Unknown action " .. tostring(args.action))
 end
