@@ -4,8 +4,9 @@ import { fileURLToPath } from "node:url";
 import { gzipSync } from "node:zlib";
 
 // What a reader downloads and parses for one page: its document, and the data a client navigation fetches instead.
-// Raw bytes bound parsing on a phone, and gzip bytes bound the transfer. The item list carries every item's
-// summary, so it has its own, larger budget.
+// Raw bytes bound parsing on a phone, and gzip bytes bound the transfer. A kind's list carries every entity's
+// summary, so lists have their own, larger budget. The lists are the routes of the kinds with pages in the built
+// kinds.json.
 const KiB = 1024;
 const budgets = {
   page: { raw: 512 * KiB, gzip: 96 * KiB },
@@ -14,8 +15,8 @@ const budgets = {
   listData: { raw: 2048 * KiB, gzip: 384 * KiB },
 };
 
-function budgetOf(name) {
-  const list = name === "items/index.html" || name === "items/__data.json";
+function budgetOf(name, lists) {
+  const list = lists.has(name);
   const data = name.endsWith("__data.json");
   return list
     ? [data ? "listData" : "list", budgets[data ? "listData" : "list"]]
@@ -23,6 +24,15 @@ function budgetOf(name) {
 }
 
 export async function payloadGate(directory) {
+  const kinds = JSON.parse(await readFile(join(directory, "kinds.json"), "utf8"));
+  const lists = new Set(
+    kinds
+      .filter((kind) => kind.hasPages)
+      .flatMap((kind) => {
+        const route = kind.route.replace(/^\/+|\/+$/g, "");
+        return [`${route}/index.html`, `${route}/__data.json`];
+      }),
+  );
   const largest = {};
   const over = [];
   async function walk(dir) {
@@ -33,7 +43,7 @@ export async function payloadGate(directory) {
         const name = relative(directory, path).replaceAll("\\", "/");
         const bytes = await readFile(path);
         const size = { raw: bytes.length, gzip: gzipSync(bytes).length };
-        const [kind, budget] = budgetOf(name);
+        const [kind, budget] = budgetOf(name, lists);
         if (!largest[kind] || size.raw > largest[kind].raw)
           largest[kind] = { name, ...size };
         if (size.raw > budget.raw || size.gzip > budget.gzip)

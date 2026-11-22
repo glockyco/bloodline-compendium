@@ -1,0 +1,64 @@
+{
+	"key": "/Invented/Skills/MossWard",
+	"slug": "moss-ward",
+	"name": "Moss Ward",
+	"description": "Wrap yourself in moss.",
+	"icon": "mosswoven-coat",
+	"facts": [
+		{
+			"stat": "cooldown",
+			"label": "Cooldown",
+			"number": 30,
+			"text": null,
+			"effect": null,
+			"tooltipLabel": "Cooldown",
+			"unit": "seconds"
+		},
+		{
+			"stat": "manaCost",
+			"label": "Mana Cost",
+			"number": 0,
+			"text": null,
+			"effect": null,
+			"tooltipLabel": "Mana Cost",
+			"unit": null
+		}
+	],
+	"sources": [
+		{
+			"kind": "dialogue",
+			"name": "Old Hermit",
+			"places": [
+				{
+					"kind": "place",
+					"key": "/Invented/Levels/Ashford",
+					"name": "Ashford",
+					"slug": null,
+					"icon": null,
+					"fragment": null
+				}
+			],
+			"price": null,
+			"amount": null,
+			"inputs": [],
+			"notes": [],
+			"entity": {
+				"kind": "person",
+				"key": "/Invented/Dialogue/Hermit",
+				"name": "Old Hermit",
+				"slug": null,
+				"icon": null,
+				"fragment": null
+			},
+			"conditions": [],
+			"unconfirmed": false,
+			"settlement": false,
+			"quotes": [],
+			"relationId": "28bb2c15d500ac14f7265fb5d7626e71f203662c612a9bd2393f7adf951bf28e"
+		}
+	],
+	"kind": "skill",
+	"status": "obtainable",
+	"relations": [],
+	"notes": []
+}

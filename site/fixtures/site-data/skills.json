@@ -1,0 +1,193 @@
+{
+	"categories": [
+		{
+			"slug": "magic",
+			"name": "Magic",
+			"plural": "Magic",
+			"count": 2
+		},
+		{
+			"slug": "other",
+			"name": "Other",
+			"plural": "Other",
+			"count": 3
+		}
+	],
+	"skills": [
+		{
+			"key": "/Invented/Skills/CinderFlick",
+			"slug": "cinder-flick",
+			"name": "Cinder Flick",
+			"icon": "cinderpear",
+			"category": "magic",
+			"status": "obtainable",
+			"kind": "skill",
+			"facets": {
+				"category": ["magic"],
+				"availability": ["obtainable"],
+				"discipline": ["Emberlore"],
+				"source": ["skillTree"]
+			},
+			"cells": {
+				"cooldown": {
+					"number": 2,
+					"text": null
+				},
+				"requiredLevel": {
+					"number": 1,
+					"text": null
+				}
+			},
+			"placeSources": []
+		},
+		{
+			"key": "/Invented/Skills/ForgottenSpark",
+			"slug": "forgotten-spark",
+			"name": "Forgotten Spark",
+			"icon": null,
+			"category": "other",
+			"status": "notInNormalPlay",
+			"kind": "skill",
+			"facets": {
+				"category": ["other"],
+				"availability": ["notInNormalPlay"]
+			},
+			"cells": {
+				"cooldown": {
+					"number": null,
+					"text": null
+				}
+			},
+			"placeSources": []
+		},
+		{
+			"key": "/Invented/Skills/LanternedgeFlare",
+			"slug": "lanternedge-flare",
+			"name": "Lanternedge Flare",
+			"icon": "lanternedge",
+			"category": "magic",
+			"status": "obtainable",
+			"kind": "skill",
+			"facets": {
+				"category": ["magic"],
+				"availability": ["obtainable"],
+				"discipline": ["Emberlore"],
+				"source": ["skillBook", "skillTree"],
+				"place": ["Ashford"]
+			},
+			"cells": {
+				"cooldown": {
+					"number": 12.5,
+					"text": null
+				},
+				"requiredLevel": {
+					"number": 5,
+					"text": null
+				}
+			},
+			"placeSources": [["skillBook"]]
+		},
+		{
+			"key": "/Invented/Skills/LostChant",
+			"slug": "lost-chant",
+			"name": "Lost Chant",
+			"icon": null,
+			"category": "other",
+			"status": "noKnownSource",
+			"kind": "skill",
+			"facets": {
+				"category": ["other"],
+				"availability": ["noKnownSource"]
+			},
+			"cells": {
+				"cooldown": {
+					"number": 8,
+					"text": null
+				}
+			},
+			"placeSources": []
+		},
+		{
+			"key": "/Invented/Skills/MossWard",
+			"slug": "moss-ward",
+			"name": "Moss Ward",
+			"icon": "mosswoven-coat",
+			"category": "other",
+			"status": "obtainable",
+			"kind": "skill",
+			"facets": {
+				"category": ["other"],
+				"availability": ["obtainable"],
+				"source": ["dialogue"],
+				"place": ["Ashford"]
+			},
+			"cells": {
+				"cooldown": {
+					"number": 30,
+					"text": null
+				}
+			},
+			"placeSources": [["dialogue"]]
+		}
+	],
+	"facets": [
+		{
+			"id": "category",
+			"label": "Category",
+			"categories": [],
+			"values": ["magic", "other"],
+			"labels": {
+				"magic": "Magic",
+				"other": "Other"
+			}
+		},
+		{
+			"id": "discipline",
+			"label": "Discipline",
+			"categories": [],
+			"values": ["Emberlore"],
+			"labels": {}
+		},
+		{
+			"id": "source",
+			"label": "How to Get",
+			"categories": [],
+			"values": ["dialogue", "skillTree", "skillBook"],
+			"labels": {}
+		},
+		{
+			"id": "place",
+			"label": "Where to Get",
+			"categories": [],
+			"values": ["Ashford"],
+			"labels": {}
+		},
+		{
+			"id": "availability",
+			"label": "Availability",
+			"categories": [],
+			"values": ["obtainable", "noKnownSource", "notInNormalPlay"],
+			"labels": {
+				"obtainable": "A way to get it is known",
+				"noKnownSource": "No known source",
+				"notInNormalPlay": "Not in normal play"
+			}
+		}
+	],
+	"columns": [
+		{
+			"id": "requiredLevel",
+			"label": "Required Level",
+			"categories": ["magic", "other"],
+			"numeric": true,
+			"unit": null
+		},
+		{
+			"id": "cooldown",
+			"label": "Cooldown",
+			"categories": ["magic", "other"],
+			"numeric": true,
+			"unit": "seconds"
+		}
+	]
+}

@@ -813,6 +813,11 @@ internal sealed record SkillPage(
     [JsonRequired]
     public ItemStatus Status { get; init; } = ItemStatus.Obtainable;
 
+    /// <summary>
+    /// What tells this skill apart from others of its name, such as its discipline, null when its name is its own.
+    /// </summary>
+    public string? Qualifier { get; init; }
+
     [JsonRequired]
     public IReadOnlyList<EntityRelation> Relations { get; init; } = [];
 

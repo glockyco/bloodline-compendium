@@ -1,11 +1,19 @@
 <script lang="ts">
 	import ItemTooltip from '../items/ItemTooltip.svelte';
+	import SkillTooltip from '../skills/SkillTooltip.svelte';
+	import PassiveTooltip from '../skills/PassiveTooltip.svelte';
+	import SpellsongTooltip from '../skills/SpellsongTooltip.svelte';
 	import type { Preview } from './previews.js';
 	/** Shows a preview in its kind's tooltip, as Afallon's presenter picks a tooltip per kind. */
 	let { preview }: { preview: Preview } = $props();
 </script>
 
 {#if preview.kind === 'item'}<ItemTooltip item={preview} heading="p" />
+	{#if preview.route}<p class="route">{preview.route}</p>{/if}
+{:else if preview.kind === 'skill'}<SkillTooltip skill={preview} heading="p" />
+	{#if preview.route}<p class="route">{preview.route}</p>{/if}
+{:else if preview.kind === 'passive'}<PassiveTooltip passive={preview} />
+{:else if preview.kind === 'spellsong'}<SpellsongTooltip song={preview} />
 	{#if preview.route}<p class="route">{preview.route}</p>{/if}{/if}
 
 <style>

@@ -4,83 +4,127 @@
 		"hasPages": true,
 		"route": "items",
 		"searchFilter": "Items",
-		"structuredDataType": "Thing"
+		"structuredDataType": "Thing",
+		"host": null
 	},
 	{
 		"kind": "merchant",
 		"hasPages": false,
 		"route": null,
 		"searchFilter": "Merchant",
-		"structuredDataType": "Thing"
+		"structuredDataType": "Thing",
+		"host": null
 	},
 	{
 		"kind": "person",
 		"hasPages": false,
 		"route": null,
 		"searchFilter": "Person",
-		"structuredDataType": "Thing"
+		"structuredDataType": "Thing",
+		"host": null
 	},
 	{
 		"kind": "creature",
 		"hasPages": false,
 		"route": null,
 		"searchFilter": "Creature",
-		"structuredDataType": "Thing"
+		"structuredDataType": "Thing",
+		"host": null
 	},
 	{
 		"kind": "place",
 		"hasPages": false,
 		"route": null,
 		"searchFilter": "Place",
-		"structuredDataType": "Thing"
+		"structuredDataType": "Thing",
+		"host": null
 	},
 	{
 		"kind": "container",
 		"hasPages": false,
 		"route": null,
 		"searchFilter": "Container",
-		"structuredDataType": "Thing"
+		"structuredDataType": "Thing",
+		"host": null
 	},
 	{
 		"kind": "recipe",
 		"hasPages": false,
 		"route": null,
 		"searchFilter": "Recipe",
-		"structuredDataType": "Thing"
+		"structuredDataType": "Thing",
+		"host": null
 	},
 	{
 		"kind": "building",
 		"hasPages": false,
 		"route": null,
 		"searchFilter": "Building",
-		"structuredDataType": "Thing"
+		"structuredDataType": "Thing",
+		"host": null
 	},
 	{
 		"kind": "calendarEvent",
 		"hasPages": false,
 		"route": null,
 		"searchFilter": "Calendarevent",
-		"structuredDataType": "Thing"
+		"structuredDataType": "Thing",
+		"host": null
 	},
 	{
 		"kind": "quest",
 		"hasPages": false,
 		"route": null,
 		"searchFilter": "Quest",
-		"structuredDataType": "Thing"
+		"structuredDataType": "Thing",
+		"host": null
 	},
 	{
 		"kind": "resource",
 		"hasPages": false,
 		"route": null,
 		"searchFilter": "Resource",
-		"structuredDataType": "Thing"
+		"structuredDataType": "Thing",
+		"host": null
 	},
 	{
 		"kind": "activity",
 		"hasPages": false,
 		"route": null,
 		"searchFilter": "Activity",
-		"structuredDataType": "Thing"
+		"structuredDataType": "Thing",
+		"host": null
+	},
+	{
+		"kind": "discipline",
+		"hasPages": true,
+		"route": "disciplines",
+		"searchFilter": "Disciplines",
+		"structuredDataType": "Thing",
+		"host": null
+	},
+	{
+		"kind": "skill",
+		"hasPages": true,
+		"route": "skills",
+		"searchFilter": "Skills",
+		"structuredDataType": "Thing",
+		"host": null
+	},
+	{
+		"kind": "passive",
+		"hasPages": false,
+		"route": null,
+		"searchFilter": "Passives",
+		"structuredDataType": "Thing",
+		"host": "discipline"
+	},
+	{
+		"kind": "spellsong",
+		"hasPages": false,
+		"route": null,
+		"searchFilter": "Spellsongs",
+		"structuredDataType": "Thing",
+		"host": "discipline"
 	}
 ]

@@ -29,8 +29,12 @@ it('previews the exact linked version while fetching the grouped resource once',
 	const fetcher = vi.fn().mockResolvedValue({ ok: true, json: async () => root });
 	vi.stubGlobal('fetch', fetcher);
 	const path = previewPath('item', 'preview-shared-blade', null);
-	expect((await loadPreview(path + '#bladeb'))?.icon).toBe('second');
-	expect((await loadPreview(path + '#bladea'))?.icon).toBe('first');
+	const icon = async (fragment: string) => {
+		const found = await loadPreview(path + '#' + fragment);
+		return found?.kind === 'item' ? found.icon : undefined;
+	};
+	expect(await icon('bladeb')).toBe('second');
+	expect(await icon('bladea')).toBe('first');
 	expect((await loadPreview(path))?.name).toBe('Shared Blade');
 	expect(fetcher).toHaveBeenCalledExactlyOnceWith(path);
 });
@@ -39,6 +43,26 @@ it('uses the root preview for an unknown fragment', async () => {
 	const root = preview(null, 'ordinary');
 	vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => root }));
 	expect(await loadPreview(previewPath('item', 'ordinary-preview', 'missing'))).toEqual(root);
+});
+
+it('previews a hosted entry by its anchor from its host page resource', async () => {
+	const resource = {
+		kind: 'passive',
+		entries: {
+			'passive-burn': {
+				kind: 'passive',
+				name: 'Burn',
+				icon: null,
+				description: null,
+				unlocks: 'Fire level 5',
+				costs: [2, 4]
+			}
+		}
+	};
+	vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => resource }));
+	const path = previewPath('passive', 'fire', null);
+	expect((await loadPreview(path + '#passive-burn'))?.name).toBe('Burn');
+	expect(await loadPreview(path + '#passive-missing')).toBeNull();
 });
 
 it("publishes plain names and each version's own tooltip in one preview", () => {

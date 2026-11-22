@@ -1,0 +1,75 @@
+{
+	"key": "/Invented/Skills/CinderFlick",
+	"slug": "cinder-flick",
+	"name": "Cinder Flick",
+	"description": "Throw a small cinder that sets its target alight.",
+	"icon": "cinderpear",
+	"facts": [
+		{
+			"stat": "baseDamage",
+			"label": "Base Damage",
+			"number": 15,
+			"text": null,
+			"effect": null,
+			"tooltipLabel": "Base Damage",
+			"unit": null
+		},
+		{
+			"stat": "cooldown",
+			"label": "Cooldown",
+			"number": 2,
+			"text": null,
+			"effect": null,
+			"tooltipLabel": "Cooldown",
+			"unit": "seconds"
+		},
+		{
+			"stat": "manaCost",
+			"label": "Mana Cost",
+			"number": 10,
+			"text": null,
+			"effect": null,
+			"tooltipLabel": "Mana Cost",
+			"unit": null
+		}
+	],
+	"sources": [
+		{
+			"kind": "skillTree",
+			"name": "Emberlore",
+			"places": [],
+			"price": null,
+			"amount": null,
+			"inputs": [],
+			"notes": [],
+			"entity": {
+				"kind": "discipline",
+				"key": "/Invented/Trees/Emberlore",
+				"name": "Emberlore",
+				"slug": "emberlore",
+				"icon": null,
+				"fragment": null
+			},
+			"conditions": [
+				{
+					"kind": "disciplineLevel",
+					"entity": null,
+					"value": 1,
+					"label": "Emberlore level 1"
+				}
+			],
+			"unconfirmed": false,
+			"settlement": false,
+			"quotes": [],
+			"cost": {
+				"amount": 1,
+				"points": "skillPoint"
+			},
+			"relationId": "c0d436d385e1a672e4c3ee253be71be01a825f6efea9901464c36c5e2dab81fc"
+		}
+	],
+	"kind": "skill",
+	"status": "obtainable",
+	"relations": [],
+	"notes": []
+}

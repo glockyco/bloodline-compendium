@@ -7,6 +7,14 @@
 				"kind": "item",
 				"name": "Mosswoven Coat",
 				"slug": "mosswoven-coat"
+			},
+			{
+				"kind": "discipline",
+				"key": "/Invented/Trees/Emberlore",
+				"name": "Emberlore",
+				"slug": "emberlore",
+				"icon": null,
+				"fragment": null
 			}
 		],
 		"issue": {

@@ -1,0 +1,32 @@
+{
+	"key": "/Invented/Skills/LostChant",
+	"slug": "lost-chant",
+	"name": "Lost Chant",
+	"description": "A chant no one remembers.",
+	"icon": null,
+	"facts": [
+		{
+			"stat": "cooldown",
+			"label": "Cooldown",
+			"number": 8,
+			"text": null,
+			"effect": null,
+			"tooltipLabel": "Cooldown",
+			"unit": "seconds"
+		},
+		{
+			"stat": "manaCost",
+			"label": "Mana Cost",
+			"number": 5,
+			"text": null,
+			"effect": null,
+			"tooltipLabel": "Mana Cost",
+			"unit": null
+		}
+	],
+	"sources": [],
+	"kind": "skill",
+	"status": "noKnownSource",
+	"relations": [],
+	"notes": []
+}

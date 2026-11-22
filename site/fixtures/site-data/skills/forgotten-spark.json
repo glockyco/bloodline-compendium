@@ -1,0 +1,32 @@
+{
+	"key": "/Invented/Skills/ForgottenSpark",
+	"slug": "forgotten-spark",
+	"name": "Forgotten Spark",
+	"description": null,
+	"icon": null,
+	"facts": [
+		{
+			"stat": "cooldown",
+			"label": "Cooldown",
+			"number": null,
+			"text": null,
+			"effect": null,
+			"tooltipLabel": "Cooldown",
+			"unit": "seconds"
+		},
+		{
+			"stat": "manaCost",
+			"label": "Mana Cost",
+			"number": null,
+			"text": null,
+			"effect": null,
+			"tooltipLabel": "Mana Cost",
+			"unit": null
+		}
+	],
+	"sources": [],
+	"kind": "skill",
+	"status": "notInNormalPlay",
+	"relations": [],
+	"notes": []
+}

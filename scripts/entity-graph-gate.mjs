@@ -102,11 +102,16 @@ export async function entityGraphGate(directory, pages) {
     const entity = document.entity;
     reference(entity);
     const kind = registry.get(entity.kind);
-    const path = kind.hasPages
+    // A hosted kind's entity is an anchored entry on its host's page, which must carry its anchor and relations.
+    const owner = kind.host ? entity.host : entity;
+    const ownerKind = kind.host ? registry.get(kind.host) : kind;
+    if (kind.host && (!owner || owner.kind !== kind.host || !entity.fragment))
+      throw new Error("Hosted entity without its host and anchor: " + entity.key);
+    const path = ownerKind.hasPages
       ? "/" +
-        kind.route.replace(/^\/+|\/+$/g, "") +
+        ownerKind.route.replace(/^\/+|\/+$/g, "") +
         "/" +
-        encodeURIComponent(entity.slug) +
+        encodeURIComponent(owner.slug) +
         "/"
       : null;
     const page = path ? pages.get(path) : null;

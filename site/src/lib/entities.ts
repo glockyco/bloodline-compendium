@@ -16,10 +16,18 @@ export function kindPath(
 	return ('/' + route + '/' + suffix) as ResolvedPathname;
 }
 
+/**
+ * The page of an entity. An entity of a hosted kind, such as a passive, has no page of its own and leads to its
+ * host's page at its anchor.
+ */
 export function entityPath(
 	entity: EntityReference,
 	kinds: EntityKindDefinition[]
 ): ResolvedPathname | null {
+	if (entity.key && entity.host && entity.fragment) {
+		const host = entityPath({ ...entity.host, fragment: null }, kinds);
+		return host && ((host + '#' + encodeURIComponent(entity.fragment)) as ResolvedPathname);
+	}
 	if (!entity.key || !entity.slug) return null;
 	return kindPath(
 		entity.kind,

@@ -16,12 +16,17 @@
 	import { kindPath } from '#lib/entities.js';
 	import { wrongFactHref } from '#lib/seo.js';
 	let { data, children } = $props();
-	const itemsPath = $derived(kindPath('item', data.kinds)!);
+	// Every kind with pages, in the registry's order, leads from the header and the footer.
+	const browse = $derived(
+		data.kinds
+			.filter((kind) => kind.hasPages)
+			.map((kind) => ({ label: kind.searchFilter, path: kindPath(kind.kind, data.kinds)! }))
+	);
 	// Home opens with the game's art, so its header sits on the art and its search sits in the hero.
 	const home = $derived(page.url.pathname === '/');
-	// The item list has its own name search, so below desktop width it drops the header's search to reach its
-	// results sooner.
-	const list = $derived(page.url.pathname === itemsPath);
+	// A list has its own name search, so below desktop width it drops the header's search to reach its results
+	// sooner.
+	const list = $derived(browse.some((entry) => page.url.pathname === entry.path));
 	const current = (path: string) => (page.url.pathname.startsWith(path) ? 'page' : undefined);
 	const reportHref = $derived(wrongFactHref(page.url.pathname));
 	function revealFragment() {
@@ -67,7 +72,9 @@
 			>
 		</a>
 		<nav aria-label="Main">
-			<a href={itemsPath} aria-current={current(itemsPath)}>Items</a>
+			{#each browse as entry (entry.path)}<a href={entry.path} aria-current={current(entry.path)}
+					>{entry.label}</a
+				>{/each}
 		</nav>
 		{#if !home}<div class="header-search" class:on-list={list}><Search /></div>{/if}
 		<div class="tools">
@@ -84,7 +91,7 @@
 		<section aria-labelledby="footer-site">
 			<h3 id="footer-site">This Site</h3>
 			<ul>
-				<li><a href={itemsPath}>Items</a></li>
+				{#each browse as entry (entry.path)}<li><a href={entry.path}>{entry.label}</a></li>{/each}
 				<li><a href={resolve('known-issues/')}>Known Issues</a></li>
 				<li><a href={resolve('about/')}>About</a></li>
 			</ul>

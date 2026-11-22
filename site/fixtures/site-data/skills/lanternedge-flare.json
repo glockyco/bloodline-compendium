@@ -1,0 +1,97 @@
+{
+	"key": "/Invented/Skills/LanternedgeFlare",
+	"slug": "lanternedge-flare",
+	"name": "Lanternedge Flare",
+	"description": "A flare that lights the way and burns what it touches, with a description long enough to wrap across several lines in a tooltip.",
+	"icon": "lanternedge",
+	"facts": [
+		{
+			"stat": "cooldown",
+			"label": "Cooldown",
+			"number": 12.5,
+			"text": null,
+			"effect": null,
+			"tooltipLabel": "Cooldown",
+			"unit": "seconds"
+		},
+		{
+			"stat": "staminaCost",
+			"label": "Stamina Cost",
+			"number": 25,
+			"text": null,
+			"effect": null,
+			"tooltipLabel": "Stamina Cost",
+			"unit": null
+		}
+	],
+	"sources": [
+		{
+			"kind": "skillTree",
+			"name": "Emberlore",
+			"places": [],
+			"price": null,
+			"amount": null,
+			"inputs": [],
+			"notes": [],
+			"entity": {
+				"kind": "discipline",
+				"key": "/Invented/Trees/Emberlore",
+				"name": "Emberlore",
+				"slug": "emberlore",
+				"icon": null,
+				"fragment": null
+			},
+			"conditions": [
+				{
+					"kind": "disciplineLevel",
+					"entity": null,
+					"value": 5,
+					"label": "Emberlore level 5"
+				}
+			],
+			"unconfirmed": false,
+			"settlement": false,
+			"quotes": [],
+			"cost": {
+				"amount": 1,
+				"points": "skillPoint"
+			},
+			"relationId": "ef79e31ab1729cd0d0181c54da0bb8b7bfe1bf4b109d46e3b09d4158f728590e"
+		},
+		{
+			"kind": "skillBook",
+			"name": "Skill book",
+			"places": [
+				{
+					"kind": "place",
+					"key": "/Invented/Levels/Ashford",
+					"name": "Ashford",
+					"slug": null,
+					"icon": null,
+					"fragment": null
+				}
+			],
+			"price": null,
+			"amount": null,
+			"inputs": [],
+			"notes": [],
+			"entity": {
+				"kind": "place",
+				"key": "/Invented/Levels/Ashford",
+				"name": "Ashford",
+				"slug": null,
+				"icon": null,
+				"fragment": null
+			},
+			"conditions": [],
+			"unconfirmed": false,
+			"settlement": false,
+			"quotes": [],
+			"relationId": "da59fe544328a498edffa6090b1511907007c05bf82ca5a6d3cc1ef46fc59b50"
+		}
+	],
+	"kind": "skill",
+	"status": "obtainable",
+	"relations": [],
+	"notes": []
+}

@@ -1017,6 +1017,393 @@
 					"conditions": []
 				}
 			]
+		},
+		{
+			"entity": {
+				"kind": "skill",
+				"key": "/Invented/Skills/CinderFlick",
+				"name": "Cinder Flick",
+				"slug": "cinder-flick",
+				"icon": "cinderpear",
+				"fragment": null
+			},
+			"relations": [
+				{
+					"id": "c0d436d385e1a672e4c3ee253be71be01a825f6efea9901464c36c5e2dab81fc",
+					"kind": "SkillTree",
+					"direction": "incoming",
+					"entity": {
+						"kind": "discipline",
+						"key": "/Invented/Trees/Emberlore",
+						"name": "Emberlore",
+						"slug": "emberlore",
+						"icon": null,
+						"fragment": null
+					},
+					"label": "In the tree of",
+					"conditions": [
+						{
+							"kind": "disciplineLevel",
+							"entity": null,
+							"value": 1,
+							"label": "Emberlore level 1"
+						}
+					]
+				}
+			]
+		},
+		{
+			"entity": {
+				"kind": "discipline",
+				"key": "/Invented/Trees/Emberlore",
+				"name": "Emberlore",
+				"slug": "emberlore",
+				"icon": null,
+				"fragment": null
+			},
+			"relations": [
+				{
+					"id": "c0d436d385e1a672e4c3ee253be71be01a825f6efea9901464c36c5e2dab81fc",
+					"kind": "SkillTree",
+					"direction": "outgoing",
+					"entity": {
+						"kind": "skill",
+						"key": "/Invented/Skills/CinderFlick",
+						"name": "Cinder Flick",
+						"slug": "cinder-flick",
+						"icon": "cinderpear",
+						"fragment": null
+					},
+					"label": "Holds",
+					"conditions": [
+						{
+							"kind": "disciplineLevel",
+							"entity": null,
+							"value": 1,
+							"label": "Emberlore level 1"
+						}
+					]
+				},
+				{
+					"id": "ef79e31ab1729cd0d0181c54da0bb8b7bfe1bf4b109d46e3b09d4158f728590e",
+					"kind": "SkillTree",
+					"direction": "outgoing",
+					"entity": {
+						"kind": "skill",
+						"key": "/Invented/Skills/LanternedgeFlare",
+						"name": "Lanternedge Flare",
+						"slug": "lanternedge-flare",
+						"icon": "lanternedge",
+						"fragment": null
+					},
+					"label": "Holds",
+					"conditions": [
+						{
+							"kind": "disciplineLevel",
+							"entity": null,
+							"value": 5,
+							"label": "Emberlore level 5"
+						}
+					]
+				}
+			]
+		},
+		{
+			"entity": {
+				"kind": "skill",
+				"key": "/Invented/Skills/LanternedgeFlare",
+				"name": "Lanternedge Flare",
+				"slug": "lanternedge-flare",
+				"icon": "lanternedge",
+				"fragment": null
+			},
+			"relations": [
+				{
+					"id": "ef79e31ab1729cd0d0181c54da0bb8b7bfe1bf4b109d46e3b09d4158f728590e",
+					"kind": "SkillTree",
+					"direction": "incoming",
+					"entity": {
+						"kind": "discipline",
+						"key": "/Invented/Trees/Emberlore",
+						"name": "Emberlore",
+						"slug": "emberlore",
+						"icon": null,
+						"fragment": null
+					},
+					"label": "In the tree of",
+					"conditions": [
+						{
+							"kind": "disciplineLevel",
+							"entity": null,
+							"value": 5,
+							"label": "Emberlore level 5"
+						}
+					]
+				},
+				{
+					"id": "da59fe544328a498edffa6090b1511907007c05bf82ca5a6d3cc1ef46fc59b50",
+					"kind": "SkillBook",
+					"direction": "incoming",
+					"entity": {
+						"kind": "place",
+						"key": "/Invented/Levels/Ashford",
+						"name": "Ashford",
+						"slug": null,
+						"icon": null,
+						"fragment": null
+					},
+					"label": "Taught by",
+					"conditions": []
+				}
+			]
+		},
+		{
+			"entity": {
+				"kind": "place",
+				"key": "/Invented/Levels/Ashford",
+				"name": "Ashford",
+				"slug": null,
+				"icon": null,
+				"fragment": null
+			},
+			"relations": [
+				{
+					"id": "da59fe544328a498edffa6090b1511907007c05bf82ca5a6d3cc1ef46fc59b50",
+					"kind": "SkillBook",
+					"direction": "outgoing",
+					"entity": {
+						"kind": "skill",
+						"key": "/Invented/Skills/LanternedgeFlare",
+						"name": "Lanternedge Flare",
+						"slug": "lanternedge-flare",
+						"icon": "lanternedge",
+						"fragment": null
+					},
+					"label": "Teaches",
+					"conditions": []
+				},
+				{
+					"id": "45cfa1609b961202ed26bb1e13151c8cc088494045dbfcf191a02c1c6fe7668a",
+					"kind": "NoteSheet",
+					"direction": "outgoing",
+					"entity": {
+						"kind": "spellsong",
+						"key": "/Invented/Songs:1243",
+						"name": "Ember Ballad",
+						"slug": null,
+						"icon": null,
+						"fragment": "spellsong-ember-ballad",
+						"host": {
+							"kind": "discipline",
+							"key": "/Invented/Trees/Songcraft",
+							"name": "Songcraft",
+							"slug": "songcraft",
+							"icon": null,
+							"fragment": null
+						}
+					},
+					"label": "Teaches",
+					"conditions": []
+				}
+			]
+		},
+		{
+			"entity": {
+				"kind": "skill",
+				"key": "/Invented/Skills/MossWard",
+				"name": "Moss Ward",
+				"slug": "moss-ward",
+				"icon": "mosswoven-coat",
+				"fragment": null
+			},
+			"relations": [
+				{
+					"id": "28bb2c15d500ac14f7265fb5d7626e71f203662c612a9bd2393f7adf951bf28e",
+					"kind": "Dialogue",
+					"direction": "incoming",
+					"entity": {
+						"kind": "person",
+						"key": "/Invented/Dialogue/Hermit",
+						"name": "Old Hermit",
+						"slug": null,
+						"icon": null,
+						"fragment": null
+					},
+					"label": "Given by",
+					"conditions": []
+				}
+			]
+		},
+		{
+			"entity": {
+				"kind": "person",
+				"key": "/Invented/Dialogue/Hermit",
+				"name": "Old Hermit",
+				"slug": null,
+				"icon": null,
+				"fragment": null
+			},
+			"relations": [
+				{
+					"id": "28bb2c15d500ac14f7265fb5d7626e71f203662c612a9bd2393f7adf951bf28e",
+					"kind": "Dialogue",
+					"direction": "outgoing",
+					"entity": {
+						"kind": "skill",
+						"key": "/Invented/Skills/MossWard",
+						"name": "Moss Ward",
+						"slug": "moss-ward",
+						"icon": "mosswoven-coat",
+						"fragment": null
+					},
+					"label": "Gives",
+					"conditions": []
+				}
+			]
+		},
+		{
+			"entity": {
+				"kind": "skill",
+				"key": "/Invented/Skills/ForgottenSpark",
+				"name": "Forgotten Spark",
+				"slug": "forgotten-spark",
+				"icon": null,
+				"fragment": null
+			},
+			"relations": []
+		},
+		{
+			"entity": {
+				"kind": "skill",
+				"key": "/Invented/Skills/LostChant",
+				"name": "Lost Chant",
+				"slug": "lost-chant",
+				"icon": null,
+				"fragment": null
+			},
+			"relations": []
+		},
+		{
+			"entity": {
+				"kind": "passive",
+				"key": "/Invented/Trees/Emberlore:WidgetTree.Kindle",
+				"name": "Kindle",
+				"slug": null,
+				"icon": "cinderpear",
+				"fragment": "passive-kindle",
+				"host": {
+					"kind": "discipline",
+					"key": "/Invented/Trees/Emberlore",
+					"name": "Emberlore",
+					"slug": "emberlore",
+					"icon": null,
+					"fragment": null
+				}
+			},
+			"relations": []
+		},
+		{
+			"entity": {
+				"kind": "passive",
+				"key": "/Invented/Trees/Emberlore:WidgetTree.Glow",
+				"name": "Glow",
+				"slug": null,
+				"icon": null,
+				"fragment": "passive-glow",
+				"host": {
+					"kind": "discipline",
+					"key": "/Invented/Trees/Emberlore",
+					"name": "Emberlore",
+					"slug": "emberlore",
+					"icon": null,
+					"fragment": null
+				}
+			},
+			"relations": []
+		},
+		{
+			"entity": {
+				"kind": "passive",
+				"key": "/Invented/Trees/Emberlore:WidgetTree.Ashen",
+				"name": "Ashen Heart of the Long Burning Hearth",
+				"slug": null,
+				"icon": null,
+				"fragment": "passive-ashen-heart-of-the-long-burning-hearth",
+				"host": {
+					"kind": "discipline",
+					"key": "/Invented/Trees/Emberlore",
+					"name": "Emberlore",
+					"slug": "emberlore",
+					"icon": null,
+					"fragment": null
+				}
+			},
+			"relations": []
+		},
+		{
+			"entity": {
+				"kind": "spellsong",
+				"key": "/Invented/Songs:1243",
+				"name": "Ember Ballad",
+				"slug": null,
+				"icon": null,
+				"fragment": "spellsong-ember-ballad",
+				"host": {
+					"kind": "discipline",
+					"key": "/Invented/Trees/Songcraft",
+					"name": "Songcraft",
+					"slug": "songcraft",
+					"icon": null,
+					"fragment": null
+				}
+			},
+			"relations": [
+				{
+					"id": "45cfa1609b961202ed26bb1e13151c8cc088494045dbfcf191a02c1c6fe7668a",
+					"kind": "NoteSheet",
+					"direction": "incoming",
+					"entity": {
+						"kind": "place",
+						"key": "/Invented/Levels/Ashford",
+						"name": "Ashford",
+						"slug": null,
+						"icon": null,
+						"fragment": null
+					},
+					"label": "Taught by",
+					"conditions": []
+				}
+			]
+		},
+		{
+			"entity": {
+				"kind": "spellsong",
+				"key": "/Invented/Songs:2211",
+				"name": "Quiet Hymn",
+				"slug": null,
+				"icon": null,
+				"fragment": "spellsong-quiet-hymn",
+				"host": {
+					"kind": "discipline",
+					"key": "/Invented/Trees/Songcraft",
+					"name": "Songcraft",
+					"slug": "songcraft",
+					"icon": null,
+					"fragment": null
+				}
+			},
+			"relations": []
+		},
+		{
+			"entity": {
+				"kind": "discipline",
+				"key": "/Invented/Trees/Songcraft",
+				"name": "Songcraft",
+				"slug": "songcraft",
+				"icon": null,
+				"fragment": null
+			},
+			"relations": []
 		}
 	],
 	"relations": [
@@ -2230,6 +2617,302 @@
 			"reverseLabel": "Requires",
 			"conditions": [],
 			"attributes": null
+		},
+		{
+			"id": "c0d436d385e1a672e4c3ee253be71be01a825f6efea9901464c36c5e2dab81fc",
+			"kind": "SkillTree",
+			"source": {
+				"kind": "discipline",
+				"key": "/Invented/Trees/Emberlore",
+				"name": "Emberlore",
+				"slug": "emberlore",
+				"icon": null,
+				"fragment": null
+			},
+			"target": {
+				"kind": "skill",
+				"key": "/Invented/Skills/CinderFlick",
+				"name": "Cinder Flick",
+				"slug": "cinder-flick",
+				"icon": "cinderpear",
+				"fragment": null
+			},
+			"forwardLabel": "Holds",
+			"reverseLabel": "In the tree of",
+			"conditions": [
+				{
+					"kind": "disciplineLevel",
+					"entity": null,
+					"value": 1,
+					"label": "Emberlore level 1"
+				}
+			],
+			"attributes": {
+				"kind": "skillTree",
+				"name": "Emberlore",
+				"places": [],
+				"price": null,
+				"amount": null,
+				"inputs": [],
+				"notes": [],
+				"entity": {
+					"kind": "discipline",
+					"key": "/Invented/Trees/Emberlore",
+					"name": "Emberlore",
+					"slug": "emberlore",
+					"icon": null,
+					"fragment": null
+				},
+				"conditions": [
+					{
+						"kind": "disciplineLevel",
+						"entity": null,
+						"value": 1,
+						"label": "Emberlore level 1"
+					}
+				],
+				"unconfirmed": false,
+				"settlement": false,
+				"quotes": [],
+				"cost": {
+					"amount": 1,
+					"points": "skillPoint"
+				},
+				"relationId": "c0d436d385e1a672e4c3ee253be71be01a825f6efea9901464c36c5e2dab81fc"
+			}
+		},
+		{
+			"id": "ef79e31ab1729cd0d0181c54da0bb8b7bfe1bf4b109d46e3b09d4158f728590e",
+			"kind": "SkillTree",
+			"source": {
+				"kind": "discipline",
+				"key": "/Invented/Trees/Emberlore",
+				"name": "Emberlore",
+				"slug": "emberlore",
+				"icon": null,
+				"fragment": null
+			},
+			"target": {
+				"kind": "skill",
+				"key": "/Invented/Skills/LanternedgeFlare",
+				"name": "Lanternedge Flare",
+				"slug": "lanternedge-flare",
+				"icon": "lanternedge",
+				"fragment": null
+			},
+			"forwardLabel": "Holds",
+			"reverseLabel": "In the tree of",
+			"conditions": [
+				{
+					"kind": "disciplineLevel",
+					"entity": null,
+					"value": 5,
+					"label": "Emberlore level 5"
+				}
+			],
+			"attributes": {
+				"kind": "skillTree",
+				"name": "Emberlore",
+				"places": [],
+				"price": null,
+				"amount": null,
+				"inputs": [],
+				"notes": [],
+				"entity": {
+					"kind": "discipline",
+					"key": "/Invented/Trees/Emberlore",
+					"name": "Emberlore",
+					"slug": "emberlore",
+					"icon": null,
+					"fragment": null
+				},
+				"conditions": [
+					{
+						"kind": "disciplineLevel",
+						"entity": null,
+						"value": 5,
+						"label": "Emberlore level 5"
+					}
+				],
+				"unconfirmed": false,
+				"settlement": false,
+				"quotes": [],
+				"cost": {
+					"amount": 1,
+					"points": "skillPoint"
+				},
+				"relationId": "ef79e31ab1729cd0d0181c54da0bb8b7bfe1bf4b109d46e3b09d4158f728590e"
+			}
+		},
+		{
+			"id": "da59fe544328a498edffa6090b1511907007c05bf82ca5a6d3cc1ef46fc59b50",
+			"kind": "SkillBook",
+			"source": {
+				"kind": "place",
+				"key": "/Invented/Levels/Ashford",
+				"name": "Ashford",
+				"slug": null,
+				"icon": null,
+				"fragment": null
+			},
+			"target": {
+				"kind": "skill",
+				"key": "/Invented/Skills/LanternedgeFlare",
+				"name": "Lanternedge Flare",
+				"slug": "lanternedge-flare",
+				"icon": "lanternedge",
+				"fragment": null
+			},
+			"forwardLabel": "Teaches",
+			"reverseLabel": "Taught by",
+			"conditions": [],
+			"attributes": {
+				"kind": "skillBook",
+				"name": "Skill book",
+				"places": [
+					{
+						"kind": "place",
+						"key": "/Invented/Levels/Ashford",
+						"name": "Ashford",
+						"slug": null,
+						"icon": null,
+						"fragment": null
+					}
+				],
+				"price": null,
+				"amount": null,
+				"inputs": [],
+				"notes": [],
+				"entity": {
+					"kind": "place",
+					"key": "/Invented/Levels/Ashford",
+					"name": "Ashford",
+					"slug": null,
+					"icon": null,
+					"fragment": null
+				},
+				"conditions": [],
+				"unconfirmed": false,
+				"settlement": false,
+				"quotes": [],
+				"relationId": "da59fe544328a498edffa6090b1511907007c05bf82ca5a6d3cc1ef46fc59b50"
+			}
+		},
+		{
+			"id": "28bb2c15d500ac14f7265fb5d7626e71f203662c612a9bd2393f7adf951bf28e",
+			"kind": "Dialogue",
+			"source": {
+				"kind": "person",
+				"key": "/Invented/Dialogue/Hermit",
+				"name": "Old Hermit",
+				"slug": null,
+				"icon": null,
+				"fragment": null
+			},
+			"target": {
+				"kind": "skill",
+				"key": "/Invented/Skills/MossWard",
+				"name": "Moss Ward",
+				"slug": "moss-ward",
+				"icon": "mosswoven-coat",
+				"fragment": null
+			},
+			"forwardLabel": "Gives",
+			"reverseLabel": "Given by",
+			"conditions": [],
+			"attributes": {
+				"kind": "dialogue",
+				"name": "Old Hermit",
+				"places": [
+					{
+						"kind": "place",
+						"key": "/Invented/Levels/Ashford",
+						"name": "Ashford",
+						"slug": null,
+						"icon": null,
+						"fragment": null
+					}
+				],
+				"price": null,
+				"amount": null,
+				"inputs": [],
+				"notes": [],
+				"entity": {
+					"kind": "person",
+					"key": "/Invented/Dialogue/Hermit",
+					"name": "Old Hermit",
+					"slug": null,
+					"icon": null,
+					"fragment": null
+				},
+				"conditions": [],
+				"unconfirmed": false,
+				"settlement": false,
+				"quotes": [],
+				"relationId": "28bb2c15d500ac14f7265fb5d7626e71f203662c612a9bd2393f7adf951bf28e"
+			}
+		},
+		{
+			"id": "45cfa1609b961202ed26bb1e13151c8cc088494045dbfcf191a02c1c6fe7668a",
+			"kind": "NoteSheet",
+			"source": {
+				"kind": "place",
+				"key": "/Invented/Levels/Ashford",
+				"name": "Ashford",
+				"slug": null,
+				"icon": null,
+				"fragment": null
+			},
+			"target": {
+				"kind": "spellsong",
+				"key": "/Invented/Songs:1243",
+				"name": "Ember Ballad",
+				"slug": null,
+				"icon": null,
+				"fragment": "spellsong-ember-ballad",
+				"host": {
+					"kind": "discipline",
+					"key": "/Invented/Trees/Songcraft",
+					"name": "Songcraft",
+					"slug": "songcraft",
+					"icon": null,
+					"fragment": null
+				}
+			},
+			"forwardLabel": "Teaches",
+			"reverseLabel": "Taught by",
+			"conditions": [],
+			"attributes": {
+				"kind": "noteSheet",
+				"name": "Note sheet",
+				"places": [
+					{
+						"kind": "place",
+						"key": "/Invented/Levels/Ashford",
+						"name": "Ashford",
+						"slug": null,
+						"icon": null,
+						"fragment": null
+					}
+				],
+				"price": null,
+				"amount": null,
+				"inputs": [],
+				"notes": [],
+				"entity": {
+					"kind": "place",
+					"key": "/Invented/Levels/Ashford",
+					"name": "Ashford",
+					"slug": null,
+					"icon": null,
+					"fragment": null
+				},
+				"conditions": [],
+				"unconfirmed": false,
+				"settlement": false,
+				"quotes": [],
+				"relationId": "45cfa1609b961202ed26bb1e13151c8cc088494045dbfcf191a02c1c6fe7668a"
+			}
 		}
 	]
 }

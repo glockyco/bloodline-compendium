@@ -803,6 +803,7 @@ export interface SkillPage {
   kind: EntityKind;
   name: string;
   notes: IssueNote[];
+  qualifier?: string | null;
   relations: EntityRelation[];
   slug: string;
   sources: Source[];

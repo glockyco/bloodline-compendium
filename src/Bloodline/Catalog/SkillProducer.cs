@@ -106,34 +106,83 @@ internal sealed class SkillProducer
                 null,
                 "No skill's SkillId names this row."
             );
+        // A row with an empty name names nothing a player can read, so the skill takes its class's readable name.
         var named = keys.Select(key =>
-                (Key: key, Name: RecordValues.Text(rowOf[key]?.Values["Name"]))
+                (
+                    Key: key,
+                    Name: RecordValues.Text(rowOf[key]?.Values["Name"]) is { Length: > 0 } name
+                        ? name
+                        : null
+                )
             )
             .ToArray();
-        var slugs = Slugs(named.Select(entry => (entry.Key, entry.Name ?? Readable(entry.Key))));
+        var resolved = named
+            .Select(entry =>
+            {
+                var sources = CatalogContext.MergeSources(
+                    candidates[(EntityKind.Skill, entry.Key)],
+                    context.ExcludedLevels
+                );
+                var confirmed = sources.Count(source => !source.Unconfirmed);
+                var status =
+                    confirmed > 0 ? ItemStatus.Obtainable
+                    : olderTreeSkills.Contains(entry.Key) ? ItemStatus.NotInNormalPlay
+                    : ItemStatus.NoKnownSource;
+                return (
+                    entry.Key,
+                    entry.Name,
+                    Shown: entry.Name ?? Readable(entry.Key),
+                    Sources: sources,
+                    Status: status
+                );
+            })
+            .ToArray();
+        // Skills that share a name are told apart by their discipline, or else by their status, as players tell them
+        // apart in game. An ordinal follows only where those match too.
+        var qualifiers = resolved
+            .GroupBy(entry => entry.Shown, StringComparer.OrdinalIgnoreCase)
+            .Where(group => group.Count() > 1)
+            .SelectMany(group =>
+                group.Select(entry =>
+                    (
+                        entry.Key,
+                        Qualifier: entry
+                            .Sources.Where(source => source.Kind == SourceKind.SkillTree)
+                            .Select(source => source.Name)
+                            .FirstOrDefault()
+                            ?? (
+                                entry.Status == ItemStatus.Obtainable ? "Outside the trees"
+                                : entry.Status == ItemStatus.NotInNormalPlay ? "Unused"
+                                : "No known source"
+                            )
+                    )
+                )
+            )
+            .ToDictionary(entry => entry.Key, entry => entry.Qualifier, StringComparer.Ordinal);
+        var slugs = Slugs(
+            resolved.Select(entry =>
+                (
+                    entry.Key,
+                    qualifiers.TryGetValue(entry.Key, out var qualifier)
+                        ? entry.Shown + " " + qualifier
+                        : entry.Shown
+                )
+            )
+        );
         var skills = new List<SkillPage>();
         var entities = new List<GraphEntity>();
-        foreach (var (key, name) in named)
+        foreach (var (key, name, shown, sources, status) in resolved)
         {
             var row = rowOf[key];
             var reference = new EntityReference(
                 EntityKind.Skill,
                 key,
-                name ?? Readable(key),
+                shown,
                 slugs[key],
                 Icon(row?.Values["Icon"])
             );
             if (name is null)
                 coverage.Add(GapKind.UnknownFact, reference.Name, reference, "Name");
-            var sources = CatalogContext.MergeSources(
-                candidates[(EntityKind.Skill, key)],
-                context.ExcludedLevels
-            );
-            var confirmed = sources.Count(source => !source.Unconfirmed);
-            var status =
-                confirmed > 0 ? ItemStatus.Obtainable
-                : olderTreeSkills.Contains(key) ? ItemStatus.NotInNormalPlay
-                : ItemStatus.NoKnownSource;
             skills.Add(
                 new SkillPage(
                     key,
@@ -146,10 +195,11 @@ internal sealed class SkillProducer
                 )
                 {
                     Status = status,
+                    Qualifier = qualifiers.GetValueOrDefault(key),
                 }
             );
             entities.Add(new GraphEntity(reference, sources));
-            if (confirmed == 0)
+            if (sources.All(source => source.Unconfirmed))
                 coverage.Add(GapKind.EntityWithoutSource, reference.Name, reference);
         }
         var skillReferences = entities.ToDictionary(

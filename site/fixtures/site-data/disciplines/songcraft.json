@@ -1,0 +1,66 @@
+{
+	"key": "/Invented/Trees/Songcraft",
+	"slug": "songcraft",
+	"name": "Songcraft",
+	"category": "Tech/Etc.",
+	"levelName": "Songcraft",
+	"skillRows": [],
+	"passiveRows": [],
+	"spellsongs": [
+		{
+			"key": "/Invented/Songs:1243",
+			"anchor": "spellsong-ember-ballad",
+			"name": "Ember Ballad",
+			"description": "Fire a bolt of warm music.",
+			"tune": [1, 2, 4, 3],
+			"charges": 3,
+			"experience": 5,
+			"sources": [
+				{
+					"kind": "noteSheet",
+					"name": "Note sheet",
+					"places": [
+						{
+							"kind": "place",
+							"key": "/Invented/Levels/Ashford",
+							"name": "Ashford",
+							"slug": null,
+							"icon": null,
+							"fragment": null
+						}
+					],
+					"price": null,
+					"amount": null,
+					"inputs": [],
+					"notes": [],
+					"entity": {
+						"kind": "place",
+						"key": "/Invented/Levels/Ashford",
+						"name": "Ashford",
+						"slug": null,
+						"icon": null,
+						"fragment": null
+					},
+					"conditions": [],
+					"unconfirmed": false,
+					"settlement": false,
+					"quotes": [],
+					"relationId": "45cfa1609b961202ed26bb1e13151c8cc088494045dbfcf191a02c1c6fe7668a"
+				}
+			]
+		},
+		{
+			"key": "/Invented/Songs:2211",
+			"anchor": "spellsong-quiet-hymn",
+			"name": "Quiet Hymn",
+			"description": null,
+			"tune": [2, 2, 1, 1],
+			"charges": 1,
+			"experience": 0,
+			"sources": []
+		}
+	],
+	"kind": "discipline",
+	"relations": [],
+	"notes": []
+}

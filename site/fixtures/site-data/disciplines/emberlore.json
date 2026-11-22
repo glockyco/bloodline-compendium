@@ -1,0 +1,154 @@
+{
+	"key": "/Invented/Trees/Emberlore",
+	"slug": "emberlore",
+	"name": "Emberlore",
+	"category": "Magic",
+	"levelName": "Emberlore",
+	"skillRows": [
+		{
+			"level": 1,
+			"slots": [
+				{
+					"skill": {
+						"kind": "skill",
+						"key": "/Invented/Skills/CinderFlick",
+						"name": "Cinder Flick",
+						"slug": "cinder-flick",
+						"icon": "cinderpear",
+						"fragment": null
+					},
+					"requiredLevel": 1,
+					"checkedLevel": "Emberlore"
+				}
+			]
+		},
+		{
+			"level": 5,
+			"slots": [
+				{
+					"skill": {
+						"kind": "skill",
+						"key": "/Invented/Skills/LanternedgeFlare",
+						"name": "Lanternedge Flare",
+						"slug": "lanternedge-flare",
+						"icon": "lanternedge",
+						"fragment": null
+					},
+					"requiredLevel": 5,
+					"checkedLevel": "Emberlore"
+				}
+			]
+		}
+	],
+	"passiveRows": [
+		{
+			"level": 1,
+			"passives": [
+				{
+					"key": "/Invented/Trees/Emberlore:WidgetTree.Kindle",
+					"anchor": "passive-kindle",
+					"name": "Kindle",
+					"description": "Your fire skills deal more damage.",
+					"requiredLevel": 1,
+					"checkedLevel": "Emberlore",
+					"pointCost": 2,
+					"costIncrease": 2,
+					"ranks": 5,
+					"rankName": null,
+					"icon": "cinderpear"
+				}
+			]
+		},
+		{
+			"level": 5,
+			"passives": [
+				{
+					"key": "/Invented/Trees/Emberlore:WidgetTree.Glow",
+					"anchor": "passive-glow",
+					"name": "Glow",
+					"description": "You give off a faint light.",
+					"requiredLevel": 3,
+					"checkedLevel": "Emberlore",
+					"pointCost": 1,
+					"costIncrease": 1,
+					"ranks": 1,
+					"rankName": null,
+					"icon": null
+				}
+			]
+		},
+		{
+			"level": 10,
+			"passives": [
+				{
+					"key": "/Invented/Trees/Emberlore:WidgetTree.Ashen",
+					"anchor": "passive-ashen-heart-of-the-long-burning-hearth",
+					"name": "Ashen Heart of the Long Burning Hearth",
+					"description": null,
+					"requiredLevel": 10,
+					"checkedLevel": "Emberlore",
+					"pointCost": 3,
+					"costIncrease": 1,
+					"ranks": 3,
+					"rankName": null,
+					"icon": null
+				}
+			]
+		}
+	],
+	"spellsongs": [],
+	"kind": "discipline",
+	"relations": [
+		{
+			"id": "c0d436d385e1a672e4c3ee253be71be01a825f6efea9901464c36c5e2dab81fc",
+			"kind": "SkillTree",
+			"direction": "outgoing",
+			"entity": {
+				"kind": "skill",
+				"key": "/Invented/Skills/CinderFlick",
+				"name": "Cinder Flick",
+				"slug": "cinder-flick",
+				"icon": "cinderpear",
+				"fragment": null
+			},
+			"label": "Holds",
+			"conditions": [
+				{
+					"kind": "disciplineLevel",
+					"entity": null,
+					"value": 1,
+					"label": "Emberlore level 1"
+				}
+			]
+		},
+		{
+			"id": "ef79e31ab1729cd0d0181c54da0bb8b7bfe1bf4b109d46e3b09d4158f728590e",
+			"kind": "SkillTree",
+			"direction": "outgoing",
+			"entity": {
+				"kind": "skill",
+				"key": "/Invented/Skills/LanternedgeFlare",
+				"name": "Lanternedge Flare",
+				"slug": "lanternedge-flare",
+				"icon": "lanternedge",
+				"fragment": null
+			},
+			"label": "Holds",
+			"conditions": [
+				{
+					"kind": "disciplineLevel",
+					"entity": null,
+					"value": 5,
+					"label": "Emberlore level 5"
+				}
+			]
+		}
+	],
+	"notes": [
+		{
+			"issue": "invented-coat-armor",
+			"effect": "An invented note that shows how a discipline lists a known issue.",
+			"tooltipValues": null
+		}
+	]
+}

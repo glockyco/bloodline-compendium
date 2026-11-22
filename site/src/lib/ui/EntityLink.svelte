@@ -33,8 +33,8 @@
 		href={path}
 		class={[className, shownIcon && 'with-icon']}
 		data-game
-		data-preview={previewKinds.has(entity.kind) && entity.slug
-			? previewPath(entity.kind, entity.slug, entity.fragment ?? null)
+		data-preview={previewKinds.has(entity.kind) && (entity.slug ?? entity.host?.slug)
+			? previewPath(entity.kind, (entity.slug ?? entity.host?.slug)!, entity.fragment ?? null)
 			: undefined}>{@render content()}</a
 	>{:else}<span class={[className, shownIcon && 'with-icon']} data-game>{@render content()}</span
 	>{/if}
