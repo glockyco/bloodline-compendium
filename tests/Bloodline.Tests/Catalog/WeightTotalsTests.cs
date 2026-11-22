@@ -40,7 +40,7 @@ public sealed class WeightTotalsTests
         Assert.Equal(1.3, WeightTotals.Sum(JsonNode.Parse("[0.1,0.2,1]")!.AsArray()));
     }
 
-    private static ItemSource[] Sources(PickCount? picks)
+    private static EntitySource[] Sources(PickCount? picks)
     {
         var records = new CatalogRecords(new BuildRecord(1, 1, []), [], [], [], [], [], [], []);
         var context = new CatalogContext(records, new Dictionary<string, ItemPage>(), []);

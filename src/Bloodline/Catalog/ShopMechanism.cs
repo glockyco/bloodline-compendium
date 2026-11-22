@@ -6,7 +6,7 @@ namespace Bloodline.Catalog;
 
 internal sealed class ShopMechanism : ISourceMechanism
 {
-    public IEnumerable<ItemSource> FindSources(CatalogContext context)
+    public IEnumerable<EntitySource> FindSources(CatalogContext context)
     {
         var shops = context
             .Records.Tables.Where(table => ItemIdentity.ClassName(table.Path) == "DT_AllShops")
@@ -156,7 +156,7 @@ internal sealed class ShopMechanism : ISourceMechanism
         "Woodhurst",
     };
 
-    private static ItemSource Sale(
+    private static EntitySource Sale(
         CatalogContext context,
         string item,
         EntityReference entity,
@@ -172,7 +172,7 @@ internal sealed class ShopMechanism : ISourceMechanism
         var city = places.FirstOrDefault(place =>
             place.Key is { } key && RespectLevels.Contains(key.Split('/')[^1].Split('.')[0])
         );
-        return new ItemSource(
+        return new EntitySource(
             item,
             new Source(
                 SourceKind.Shop,

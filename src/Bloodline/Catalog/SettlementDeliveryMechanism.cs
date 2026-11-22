@@ -5,7 +5,7 @@ namespace Bloodline.Catalog;
 
 internal sealed class SettlementDeliveryMechanism : ISourceMechanism
 {
-    public IEnumerable<ItemSource> FindSources(CatalogContext context)
+    public IEnumerable<EntitySource> FindSources(CatalogContext context)
     {
         foreach (
             var (table, row) in context
@@ -29,7 +29,7 @@ internal sealed class SettlementDeliveryMechanism : ISourceMechanism
             );
             foreach (var (item, weight) in WorldSourceData.Pool(row.Values["LootTable"]))
             {
-                yield return new ItemSource(
+                yield return new EntitySource(
                     item,
                     new Source(
                         SourceKind.SettlementDelivery,

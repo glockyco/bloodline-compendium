@@ -57,7 +57,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
         ("WheatField_Volume_C", "Wheat Ref"),
     ];
 
-    public IEnumerable<ItemSource> FindSources(CatalogContext context)
+    public IEnumerable<EntitySource> FindSources(CatalogContext context)
     {
         foreach (var source in BespokeSources(context))
         {
@@ -137,7 +137,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
             : "Selected Loot Table";
     }
 
-    private static IEnumerable<ItemSource> Sources(
+    private static IEnumerable<EntitySource> Sources(
         CatalogContext context,
         string path,
         JsonObject properties,
@@ -166,7 +166,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
             foreach (var (item, weight) in WorldSourceData.Pool(properties[pool]))
             {
                 var perPick = WeightTotals.Chance(weight);
-                yield return new ItemSource(
+                yield return new EntitySource(
                     item,
                     new Source(
                         SourceKind.Gathering,
@@ -216,7 +216,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
                     .GroupBy(item => item!, StringComparer.OrdinalIgnoreCase)
             )
             {
-                yield return new ItemSource(
+                yield return new EntitySource(
                     group.Key,
                     new Source(
                         SourceKind.Gathering,
@@ -335,7 +335,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
             ]
         : WorldSourceData.Conditions(context, properties, levelPath);
 
-    private static IEnumerable<ItemSource> BespokeSources(CatalogContext context)
+    private static IEnumerable<EntitySource> BespokeSources(CatalogContext context)
     {
         foreach (var (className, field) in BespokeGrants)
         {
@@ -366,7 +366,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
                         yield return source;
                     }
                 }
-                ItemSource? Create(JsonObject properties, IReadOnlyList<EntityReference> places)
+                EntitySource? Create(JsonObject properties, IReadOnlyList<EntityReference> places)
                 {
                     if (RecordValues.AnyReference(properties[field]) is not { } item)
                     {
@@ -377,7 +377,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
                             RecordValues.At(output.Properties, "ItemInfo.Quantity")
                         )
                         : null;
-                    return new ItemSource(
+                    return new EntitySource(
                         item,
                         new Source(
                             SourceKind.Gathering,

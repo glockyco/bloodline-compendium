@@ -275,13 +275,15 @@ internal sealed class ExtractionRunner
     }
 
     /// <summary>
-    /// The widgets of a widget Blueprint's widget tree whose class is a Blueprint class, keyed by their path below
-    /// the generated class, such as <c>WidgetTree.BlazingFire</c>, each with only the values the tree sets on it.
+    /// The widgets of a widget Blueprint's widget tree that hold game data, keyed by their path below the generated
+    /// class, such as <c>WidgetTree.BlazingFire</c>: those whose class is a Blueprint class, and text widgets with
+    /// their text. Each holds only the values the tree sets on it, with the panel that holds it and its index among
+    /// that panel's children.
     /// </summary>
-    private IReadOnlyList<InnerObjectRecord>? Widgets(IPackage package, string path)
+    private IReadOnlyList<WidgetRecord>? Widgets(IPackage package, string path)
     {
         var generatedName = path.Split('.')[^1];
-        var widgets = new List<InnerObjectRecord>();
+        var widgets = new List<WidgetRecord>();
         for (var i = 0; i < package.ExportsLazy.Length; i++)
         {
             var info = package.ResolvePackageIndex(new FPackageIndex(package, i + 1));
@@ -293,8 +295,11 @@ internal sealed class ExtractionRunner
             )
                 continue;
             var classPath = info.Class?.GetPathName();
-            if (classPath == null || !classes.ContainsKey(classPath))
+            if (classPath == null)
                 continue;
+            // Blueprint widgets and text widgets hold what a player reads. Other native widgets, such as panels,
+            // keep only their place, so a reader can follow a widget up to the row that holds it.
+            var holdsData = classes.ContainsKey(classPath) || TextWidgets.Contains(classPath);
             if (
                 gaps.TryRead(
                     path,
@@ -302,15 +307,35 @@ internal sealed class ExtractionRunner
                     () =>
                     {
                         var widget = package.ExportsLazy[i].Value;
-                        return new InnerObjectRecord(
+                        var values = widget.Class?.Load() is UStruct declaration
+                            ? encoder.Properties(widget.Properties, declaration)
+                            : encoder.Properties(widget.Properties);
+                        // A widget's slot names the panel that holds it, and the panel's slot list gives its order.
+                        var slot = widget
+                            .GetOrDefault<FPackageIndex?>("Slot")
+                            ?.ResolvedObject?.Load();
+                        var panel = slot
+                            ?.GetOrDefault<FPackageIndex?>("Parent")
+                            ?.ResolvedObject?.Load();
+                        int? position = null;
+                        if (panel != null && slot != null)
+                        {
+                            var slots = panel.GetOrDefault<FPackageIndex[]>("Slots", []);
+                            var index = Array.FindIndex(
+                                slots,
+                                candidate => candidate.ResolvedObject?.Name.Text == slot.Name
+                            );
+                            position = index < 0 ? null : index;
+                        }
+                        return new WidgetRecord(
                             $"WidgetTree.{info.Name.Text}",
                             classPath,
-                            DefaultChain.Placement(
-                                Class(classPath).Properties,
-                                widget.Class?.Load() is UStruct declaration
-                                    ? encoder.Properties(widget.Properties, declaration)
-                                    : encoder.Properties(widget.Properties)
-                            )
+                            !holdsData ? []
+                                : classes.ContainsKey(classPath)
+                                    ? DefaultChain.Placement(Class(classPath).Properties, values)
+                                : values,
+                            panel == null ? null : $"WidgetTree.{panel.Name}",
+                            position
                         );
                     },
                     out var record
@@ -318,10 +343,17 @@ internal sealed class ExtractionRunner
             )
                 widgets.Add(record!);
         }
-        return widgets.Count == 0
+        return widgets.All(widget => widget.Properties.Count == 0)
             ? null
             : widgets.OrderBy(widget => widget.Path, StringComparer.Ordinal).ToArray();
     }
+
+    /// <summary>Native widget classes whose text a player reads, such as a tree row's level label.</summary>
+    private static readonly HashSet<string> TextWidgets = new(StringComparer.Ordinal)
+    {
+        "/Script/UMG.TextBlock",
+        "/Script/UMG.RichTextBlock",
+    };
 
     private TableRecord Table(UDataTable table, string path)
     {

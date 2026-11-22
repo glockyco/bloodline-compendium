@@ -4,13 +4,13 @@ namespace Bloodline.Catalog;
 
 internal sealed class PickupMechanism : ISourceMechanism
 {
-    public IEnumerable<ItemSource> FindSources(CatalogContext context)
+    public IEnumerable<EntitySource> FindSources(CatalogContext context)
     {
         foreach (var placement in context.Placements)
         {
             if (context.Items.ContainsKey(placement.Actor.Class))
             {
-                yield return new ItemSource(
+                yield return new EntitySource(
                     placement.Actor.Class,
                     new Source(
                         SourceKind.Pickup,

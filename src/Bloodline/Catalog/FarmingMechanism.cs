@@ -5,7 +5,7 @@ namespace Bloodline.Catalog;
 
 internal sealed class FarmingMechanism : ISourceMechanism
 {
-    public IEnumerable<ItemSource> FindSources(CatalogContext context)
+    public IEnumerable<EntitySource> FindSources(CatalogContext context)
     {
         foreach (
             var (table, row) in context
@@ -34,7 +34,7 @@ internal sealed class FarmingMechanism : ISourceMechanism
             }
             foreach (var (item, weight) in WorldSourceData.Pool(values["HarvestItems"]))
             {
-                yield return new ItemSource(
+                yield return new EntitySource(
                     item,
                     new Source(
                         SourceKind.Farming,

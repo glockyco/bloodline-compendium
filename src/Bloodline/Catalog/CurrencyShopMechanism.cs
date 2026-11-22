@@ -5,7 +5,7 @@ namespace Bloodline.Catalog;
 
 internal sealed class CurrencyShopMechanism : ISourceMechanism
 {
-    public IEnumerable<ItemSource> FindSources(CatalogContext context)
+    public IEnumerable<EntitySource> FindSources(CatalogContext context)
     {
         foreach (var (placement, dialogue, instance, properties) in ShopMechanism.Events(context))
         {
@@ -66,7 +66,7 @@ internal sealed class CurrencyShopMechanism : ISourceMechanism
                 {
                     continue;
                 }
-                yield return new ItemSource(
+                yield return new EntitySource(
                     item,
                     new Source(
                         SourceKind.CurrencyShop,

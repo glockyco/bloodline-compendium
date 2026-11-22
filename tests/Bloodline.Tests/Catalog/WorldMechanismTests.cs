@@ -65,7 +65,7 @@ public sealed class WorldMechanismTests
             """
         );
         var result = Assert.Single(new FarmingMechanism().FindSources(Context(tables: [table])));
-        Assert.Equal("/Invented/Plant.Plant_C", result.ItemClass);
+        Assert.Equal("/Invented/Plant.Plant_C", result.Key);
         Assert.Equal(new Odds(OddsEvent.Pick, 0.4, 0.4, null), result.Source.Odds);
         Assert.Null(result.Source.Amount);
         Assert.Equal("Seed", Assert.Single(result.Source.Inputs).Item.Name);
@@ -95,7 +95,7 @@ public sealed class WorldMechanismTests
         var result = Assert.Single(
             new BountyNoteMechanism().FindSources(Context([note], [table], enums: [enumType]))
         );
-        Assert.Equal(note.Path, result.ItemClass);
+        Assert.Equal(note.Path, result.Key);
         Assert.Equal(new Amount(2, 2), result.Source.Amount);
         Assert.Empty(result.Source.Inputs);
         Assert.Equal("Invented bounty", result.Source.Name);
@@ -163,7 +163,7 @@ public sealed class WorldMechanismTests
                 Context([grant, npc], levels: [Level(npc)], dialogues: [dialogue])
             )
         );
-        Assert.Equal("/Invented/Gift.Gift_C", result.ItemClass);
+        Assert.Equal("/Invented/Gift.Gift_C", result.Key);
         Assert.Equal(new Amount(3, 3), result.Source.Amount);
         Assert.Equal("Invented storyteller", result.Source.Name);
         Assert.Equal("/Invented/Coast", Assert.Single(result.Source.Places).Key);
@@ -538,12 +538,12 @@ public sealed class WorldMechanismTests
             .FindSources(Context([spot, minigame], levels: [placement]))
             .ToArray();
         var result = Assert.Single(sources, source => source.Source.Places.Count > 0);
-        Assert.Equal("/Invented/Fish.Fish_C", result.ItemClass);
+        Assert.Equal("/Invented/Fish.Fish_C", result.Key);
         Assert.Equal(new Odds(OddsEvent.Catch, 0.8, 0.8, null), result.Source.Odds);
         Assert.Equal(new[] { 1d, 5d }, NoteNumbers(result.Source));
         Assert.DoesNotContain(
             sources,
-            source => source.ItemClass.Contains("Dud", StringComparison.Ordinal)
+            source => source.Key.Contains("Dud", StringComparison.Ordinal)
         );
     }
 
@@ -562,7 +562,7 @@ public sealed class WorldMechanismTests
             new FishingMechanism().FindSources(Context([spot, minigame], levels: [Level(spot)])),
             source => source.Source.Places.Count > 0
         );
-        Assert.Equal("/Invented/Medium.Medium_C", result.ItemClass);
+        Assert.Equal("/Invented/Medium.Medium_C", result.Key);
         Assert.Equal(new Odds(OddsEvent.Catch, 1, 1, null), result.Source.Odds);
         var lava = Assert.Single(
             new FishingMechanism().FindSources(
@@ -570,7 +570,7 @@ public sealed class WorldMechanismTests
             ),
             source => source.Source.Places.Count > 0
         );
-        Assert.Equal("/Invented/Lava.Lava_C", lava.ItemClass);
+        Assert.Equal("/Invented/Lava.Lava_C", lava.Key);
         Assert.Equal(
             new Odds(OddsEvent.Catch, null, null, "How lava fishing chooses its catch is unknown."),
             lava.Source.Odds
@@ -594,8 +594,8 @@ public sealed class WorldMechanismTests
             .FindSources(Context([gatherer], levels: [Level(gatherer)], enums: [enumType]))
             .ToArray();
         var result = Assert.Single(sources, source => source.Source.Places.Count > 0);
-        Assert.Equal("/Invented/Ore.Ore_C", result.ItemClass);
-        Assert.Single(sources, source => source.ItemClass == "/Invented/Ore.Ore_C");
+        Assert.Equal("/Invented/Ore.Ore_C", result.Key);
+        Assert.Single(sources, source => source.Key == "/Invented/Ore.Ore_C");
         Assert.Equal(new Odds(OddsEvent.Pick, 0.4, 0.4, null), result.Source.Odds);
         Assert.Equal(new[] { 0d }, NoteNumbers(result.Source));
         Assert.True(result.Source.Unconfirmed);
@@ -604,10 +604,10 @@ public sealed class WorldMechanismTests
         Assert.Equal(gatherer.Path + "#Iron Deposit", result.Source.Entity.Key);
         Assert.DoesNotContain(
             sources,
-            source => source.ItemClass.Contains("Dud", StringComparison.Ordinal)
+            source => source.Key.Contains("Dud", StringComparison.Ordinal)
         );
         var unused = Assert
-            .Single(sources, source => source.ItemClass == "/Invented/Other.Other_C")
+            .Single(sources, source => source.Key == "/Invented/Other.Other_C")
             .Source;
         Assert.Empty(unused.Places);
         Assert.True(unused.Unconfirmed);
@@ -655,14 +655,12 @@ public sealed class WorldMechanismTests
             )
             .ToArray();
         var placed = Assert.Single(sources, source => source.Source.Places.Count > 0);
-        Assert.Equal("/Invented/Crystal.Crystal_C", placed.ItemClass);
+        Assert.Equal("/Invented/Crystal.Crystal_C", placed.Key);
         Assert.Equal(2.0 / 3, placed.Source.Odds!.Chance);
         Assert.False(placed.Source.Unconfirmed);
-        Assert.DoesNotContain(sources, source => source.ItemClass == "/Invented/Old.Old_C");
+        Assert.DoesNotContain(sources, source => source.Key == "/Invented/Old.Old_C");
         Assert.Empty(
-            Assert
-                .Single(sources, source => source.ItemClass == "/Invented/Bone.Bone_C")
-                .Source.Places
+            Assert.Single(sources, source => source.Key == "/Invented/Bone.Bone_C").Source.Places
         );
     }
 
@@ -786,7 +784,7 @@ public sealed class WorldMechanismTests
         var source = Assert.Single(
             new GatheringMechanism().FindSources(Context([gatherer, output], levels: [level]))
         );
-        Assert.Equal(output.Path, source.ItemClass);
+        Assert.Equal(output.Path, source.Key);
         Assert.Equal(new Amount(3, 3), source.Source.Amount);
         Assert.Equal("/Invented/Coast", Assert.Single(source.Source.Places).Key);
         Assert.False(source.Source.Unconfirmed);

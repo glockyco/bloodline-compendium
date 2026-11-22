@@ -90,7 +90,7 @@ public sealed class PickupObjectMechanismTests
         var source = Assert.Single(
             new PickupObjectMechanism().FindSources(Context(defaults, placed))
         );
-        Assert.Equal(Item, source.ItemClass);
+        Assert.Equal(Item, source.Key);
         Assert.Equal(new Amount(3, 3), source.Source.Amount);
     }
 

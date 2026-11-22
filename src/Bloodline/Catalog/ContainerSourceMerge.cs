@@ -23,11 +23,11 @@ internal sealed record ContainerDetails(
 internal static class ContainerSourceMerge
 {
     public static IEnumerable<Source> Merge(
-        IEnumerable<ItemSource> candidates,
+        IEnumerable<EntitySource> candidates,
         IReadOnlySet<string> excludedLevels
     )
     {
-        var groups = new Dictionary<string, List<ItemSource>>(StringComparer.Ordinal);
+        var groups = new Dictionary<string, List<EntitySource>>(StringComparer.Ordinal);
         foreach (var candidate in candidates)
         {
             var source = candidate.Source;
@@ -51,7 +51,7 @@ internal static class ContainerSourceMerge
                 var key = CanonicalJson.Serialize(
                     new
                     {
-                        candidate.ItemClass,
+                        candidate.Key,
                         Loose = candidate.Container?.Loose ?? false,
                         Source = located with
                         {
@@ -79,7 +79,7 @@ internal static class ContainerSourceMerge
                 CanonicalJson.Serialize(
                     new
                     {
-                        candidate.ItemClass,
+                        candidate.Key,
                         Loose = candidate.Container?.Loose ?? false,
                         Source = candidate.Source with
                         {
@@ -116,7 +116,7 @@ internal static class ContainerSourceMerge
         }
     }
 
-    private static ItemSource MergePlace(IReadOnlyList<ItemSource> group)
+    private static EntitySource MergePlace(IReadOnlyList<EntitySource> group)
     {
         // Same-named containers are indistinguishable in play, even when their Blueprint classes differ.
         var first = group.MinBy(candidate => candidate.Source.Entity.Key, StringComparer.Ordinal)!;
@@ -145,7 +145,7 @@ internal static class ContainerSourceMerge
         };
     }
 
-    private static Odds? MergeOdds(IReadOnlyList<ItemSource> group)
+    private static Odds? MergeOdds(IReadOnlyList<EntitySource> group)
     {
         var odds = group.Select(candidate => candidate.Source.Odds).ToArray();
         if (odds.All(value => value is null))
@@ -170,7 +170,7 @@ internal static class ContainerSourceMerge
         };
     }
 
-    private static List<string> MergeNotes(IReadOnlyList<ItemSource> group) =>
+    private static List<string> MergeNotes(IReadOnlyList<EntitySource> group) =>
         group
             .SelectMany(candidate => candidate.Source.Notes)
             .Distinct(StringComparer.Ordinal)

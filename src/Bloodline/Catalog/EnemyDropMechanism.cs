@@ -14,7 +14,7 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
         "Enemy Type",
     ];
 
-    public IEnumerable<ItemSource> FindSources(CatalogContext context)
+    public IEnumerable<EntitySource> FindSources(CatalogContext context)
     {
         var spawnedPlaces = new Dictionary<string, List<EntityReference>>(
             StringComparer.OrdinalIgnoreCase

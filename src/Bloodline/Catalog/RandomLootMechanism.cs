@@ -5,7 +5,7 @@ namespace Bloodline.Catalog;
 
 internal sealed class RandomLootMechanism : ISourceMechanism
 {
-    public IEnumerable<ItemSource> FindSources(CatalogContext context)
+    public IEnumerable<EntitySource> FindSources(CatalogContext context)
     {
         foreach (
             var table in context.Records.Tables.Where(table =>
@@ -19,7 +19,7 @@ internal sealed class RandomLootMechanism : ISourceMechanism
                 || RecordValues.Number(row.Values["BaseSpawnRate"]) is not > 0
             )
                 continue;
-            yield return new ItemSource(
+            yield return new EntitySource(
                 item,
                 new Source(
                     SourceKind.RandomLoot,

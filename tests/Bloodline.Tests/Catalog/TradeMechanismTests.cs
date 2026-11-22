@@ -75,7 +75,7 @@ public sealed class TradeMechanismTests
             .FindSources(Context([input, output], [recipes, components]))
             .ToArray();
         var source = Assert.Single(found);
-        Assert.Equal(output.Path, source.ItemClass);
+        Assert.Equal(output.Path, source.Key);
         Assert.Equal(SourceKind.Smithing, source.Source.Kind);
         Assert.Equal("OddOutput", source.Source.Name);
         Assert.Equal(new Amount(4, 4), source.Source.Amount);
@@ -222,7 +222,7 @@ public sealed class TradeMechanismTests
         var pages = CatalogBuilder.Build(records, [], []).Items.ToDictionary(item => item.Key);
         var context = new CatalogContext(records, pages, []);
         var source = Assert.Single(new CraftingMechanism().FindSources(context));
-        Assert.Equal(ingot.Path, source.ItemClass);
+        Assert.Equal(ingot.Path, source.Key);
         Assert.Equal(
             ("Smelting", 3),
             (source.Source.Recipe!.Discipline, Assert.Single(source.Source.Inputs).Quantity)
@@ -284,7 +284,7 @@ public sealed class TradeMechanismTests
             ]
         );
         var found = Assert.Single(new CookingMechanism().FindSources(context));
-        Assert.Equal(food.Path, found.ItemClass);
+        Assert.Equal(food.Path, found.Key);
         Assert.Equal(2, Assert.Single(found.Source.Inputs).Quantity);
         Assert.Equal(new Amount(1, 1), found.Source.Amount);
         Assert.Equal("Root stew", found.Source.Name);
@@ -354,7 +354,7 @@ public sealed class TradeMechanismTests
             [dialogue]
         );
         var found = Assert.Single(new ShopMechanism().FindSources(context));
-        Assert.Equal(stock.Path, found.ItemClass);
+        Assert.Equal(stock.Path, found.Key);
         Assert.Equal("Placed name", found.Source.Name);
         Assert.Equal(17, found.Source.Price!.Amount);
         Assert.Equal("/Game/Invented/Town", Assert.Single(found.Source.Places).Key);
@@ -530,7 +530,7 @@ public sealed class TradeMechanismTests
             dialogues: [dialogue]
         );
         var found = Assert.Single(new CurrencyShopMechanism().FindSources(context));
-        Assert.Equal(stock.Path, found.ItemClass);
+        Assert.Equal(stock.Path, found.Key);
         Assert.Equal(8, found.Source.Price!.Amount);
         Assert.Equal("Token", found.Source.Price.Currency!.Name);
         Assert.Equal(new Amount(1, 1), found.Source.Amount);
@@ -578,7 +578,7 @@ public sealed class TradeMechanismTests
             ]
         );
         var found = Assert.Single(new ShopMechanism().FindSources(context));
-        Assert.Equal(item.Path, found.ItemClass);
+        Assert.Equal(item.Path, found.Key);
         Assert.Equal("Keeper", found.Source.Name);
     }
 
@@ -636,7 +636,7 @@ public sealed class TradeMechanismTests
         var found = Assert.Single(
             new ShopMechanism().FindSources(Context([item, unnamed, building]))
         );
-        Assert.Equal(item.Path, found.ItemClass);
+        Assert.Equal(item.Path, found.Key);
         Assert.Equal(name, found.Source.Name);
         Assert.Equal(new Amount(1, 1), found.Source.Amount);
         Assert.Equal(
@@ -756,7 +756,7 @@ public sealed class TradeMechanismTests
                 )
         );
         var found = sources[0];
-        Assert.Equal(item.Path, found.ItemClass);
+        Assert.Equal(item.Path, found.Key);
         Assert.Equal(SourceKind.Dialogue, found.Source.Kind);
         Assert.Equal(new Amount(3, 3), found.Source.Amount);
         Assert.Equal("Speaker", found.Source.Name);

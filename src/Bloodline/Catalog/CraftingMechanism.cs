@@ -160,7 +160,7 @@ internal sealed class CraftingMechanism : ISourceMechanism
         }
     }
 
-    public IEnumerable<ItemSource> FindSources(CatalogContext context)
+    public IEnumerable<EntitySource> FindSources(CatalogContext context)
     {
         var renamed = RenamedProducts(context)
             .Select(recipe => recipe.Recipe)
@@ -272,7 +272,7 @@ internal sealed class CraftingMechanism : ISourceMechanism
             {
                 continue;
             }
-            yield return new ItemSource(
+            yield return new EntitySource(
                 item,
                 new Source(
                     smithing ? SourceKind.Smithing : SourceKind.Crafting,

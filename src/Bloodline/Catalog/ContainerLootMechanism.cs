@@ -12,7 +12,7 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
     internal const string LooseRoot =
         "/Game/Overworld/Villages/VillageBuildings/GenericDungeon_StructuresAndEvents/Lootables/Dungeon_Generic_Lootable_Item_Placer.Dungeon_Generic_Lootable_Item_Placer_C";
 
-    public IEnumerable<ItemSource> FindSources(CatalogContext context)
+    public IEnumerable<EntitySource> FindSources(CatalogContext context)
     {
         var enumValues = context
             .Records.Enums.SelectMany(type => type.Entries)
@@ -291,7 +291,7 @@ internal static class LootRecords
     /// its share of the total weight. <paramref name="picks"/> null leaves the odds unknown for
     /// <paramref name="unknownPicks"/>.
     /// </summary>
-    internal static IEnumerable<ItemSource> Pool(
+    internal static IEnumerable<EntitySource> Pool(
         CatalogContext context,
         JsonNode? pool,
         SourceKind kind,
@@ -316,7 +316,7 @@ internal static class LootRecords
                 || total <= 0
             )
                 continue;
-            yield return new ItemSource(
+            yield return new EntitySource(
                 item,
                 new Source(
                     kind,

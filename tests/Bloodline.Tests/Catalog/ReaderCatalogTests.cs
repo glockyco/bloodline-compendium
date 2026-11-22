@@ -108,9 +108,9 @@ public sealed class ReaderCatalogTests
     private sealed class Sources(string ingredient, string currency, string output)
         : ISourceMechanism
     {
-        public IEnumerable<ItemSource> FindSources(CatalogContext context)
+        public IEnumerable<EntitySource> FindSources(CatalogContext context)
         {
-            yield return new ItemSource(
+            yield return new EntitySource(
                 output,
                 new Source(
                     SourceKind.Crafting,
@@ -122,7 +122,7 @@ public sealed class ReaderCatalogTests
                     []
                 )
             );
-            yield return new ItemSource(
+            yield return new EntitySource(
                 output,
                 new Source(
                     SourceKind.CurrencyShop,

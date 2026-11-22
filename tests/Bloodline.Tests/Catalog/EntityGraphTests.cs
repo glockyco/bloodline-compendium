@@ -367,9 +367,9 @@ public sealed class EntityGraphTests
 
     private sealed class UnknownGrant : ISourceMechanism
     {
-        public IEnumerable<ItemSource> FindSources(CatalogContext context)
+        public IEnumerable<EntitySource> FindSources(CatalogContext context)
         {
-            yield return new ItemSource(
+            yield return new EntitySource(
                 Item.Key!,
                 new Source(
                     SourceKind.Dialogue,

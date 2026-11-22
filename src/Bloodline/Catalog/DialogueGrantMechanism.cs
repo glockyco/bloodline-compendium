@@ -5,7 +5,7 @@ namespace Bloodline.Catalog;
 
 internal sealed class DialogueGrantMechanism : ISourceMechanism
 {
-    public IEnumerable<ItemSource> FindSources(CatalogContext context)
+    public IEnumerable<EntitySource> FindSources(CatalogContext context)
     {
         var dialoguePaths = context
             .Records.Dialogues.Select(dialogue => dialogue.Path.Split('.')[0])
@@ -155,7 +155,7 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
                 }
                 foreach (var (name, place, generated, entity) in users)
                 {
-                    yield return new ItemSource(
+                    yield return new EntitySource(
                         item,
                         new Source(
                             SourceKind.Dialogue,

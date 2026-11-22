@@ -46,7 +46,7 @@ internal sealed class PickupObjectMechanism : ISourceMechanism
     ];
 
     // An object without its own name is the item lying there, so it takes the item's name.
-    public IEnumerable<ItemSource> FindSources(CatalogContext context)
+    public IEnumerable<EntitySource> FindSources(CatalogContext context)
     {
         foreach (var (path, properties, places) in LootRecords.Instances(context, IsPickupObject))
         {
@@ -128,7 +128,7 @@ internal sealed class PickupObjectMechanism : ISourceMechanism
         || type.Ancestors.Contains(LootItem)
         || Collectibles.Any(rule => type.Path == rule.Class || type.Ancestors.Contains(rule.Class));
 
-    private static ItemSource Grant(
+    private static EntitySource Grant(
         string item,
         Amount? amount,
         IReadOnlyList<EntityReference> places,

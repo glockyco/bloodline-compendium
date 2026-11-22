@@ -15,7 +15,7 @@ internal sealed class FishingMechanism : ISourceMechanism
         "Expert Loot Table",
     ];
 
-    public IEnumerable<ItemSource> FindSources(CatalogContext context)
+    public IEnumerable<EntitySource> FindSources(CatalogContext context)
     {
         var defaults = context.Classes.Values.FirstOrDefault(type =>
             ItemIdentity.ClassName(type.Path) == "Fishing_Minigame"
@@ -171,7 +171,7 @@ internal sealed class FishingMechanism : ISourceMechanism
             _ => "Lava fishing",
         };
 
-    private static IEnumerable<ItemSource> Sources(
+    private static IEnumerable<EntitySource> Sources(
         JsonNode? pool,
         string name,
         IReadOnlyList<EntityReference> places,
@@ -184,7 +184,7 @@ internal sealed class FishingMechanism : ISourceMechanism
         foreach (var (item, weight) in WorldSourceData.Pool(pool))
         {
             var chance = WeightTotals.Chance(weight);
-            yield return new ItemSource(
+            yield return new EntitySource(
                 item,
                 new Source(SourceKind.Fishing, name, places, null, null, [], notes)
                 {

@@ -5,7 +5,7 @@ namespace Bloodline.Catalog;
 
 internal sealed class BountyNoteMechanism : ISourceMechanism
 {
-    public IEnumerable<ItemSource> FindSources(CatalogContext context)
+    public IEnumerable<EntitySource> FindSources(CatalogContext context)
     {
         foreach (
             var (table, row) in context
@@ -24,7 +24,7 @@ internal sealed class BountyNoteMechanism : ISourceMechanism
             var quantity = context.Classes.TryGetValue(note, out var type)
                 ? WorldSourceData.Integer(RecordValues.At(type.Properties, "ItemInfo.Quantity"))
                 : null;
-            yield return new ItemSource(
+            yield return new EntitySource(
                 note,
                 new Source(
                     SourceKind.BountyNote,

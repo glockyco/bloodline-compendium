@@ -7,19 +7,19 @@ namespace Bloodline.Catalog;
 
 internal interface ISourceMechanism
 {
-    IEnumerable<ItemSource> FindSources(CatalogContext context);
+    IEnumerable<EntitySource> FindSources(CatalogContext context);
 }
 
 /// <summary>
-/// A source of an item as a mechanism finds it. <see cref="Unresolved"/> holds requirements the catalog could not
-/// resolve into anything a player can act on, which go to the maintainer report instead of the page.
+/// A source of an entity as a mechanism finds it: <see cref="Key"/> is the key of the entity of
+/// <see cref="Kind"/> that the source gives, such as an item's class path. <see cref="Unresolved"/> holds
+/// requirements the catalog could not resolve into anything a player can act on, which go to the maintainer report
+/// instead of the page.
 /// </summary>
-internal sealed record ItemSource(
-    string ItemClass,
-    Source Source,
-    ContainerDetails? Container = null
-)
+internal sealed record EntitySource(string Key, Source Source, ContainerDetails? Container = null)
 {
+    public EntityKind Kind { get; init; } = EntityKind.Item;
+
     public IReadOnlyList<string> Unresolved { get; init; } = [];
 }
 
@@ -130,7 +130,7 @@ internal sealed class CatalogContext
             );
 
     public static IReadOnlyList<Source> MergeSources(
-        IEnumerable<ItemSource> candidates,
+        IEnumerable<EntitySource> candidates,
         IReadOnlySet<string> excludedLevels
     ) => MergeKnownPlaces(ContainerSourceMerge.Merge(candidates, excludedLevels));
 

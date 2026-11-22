@@ -619,7 +619,7 @@ public sealed class CatalogTests
                 Source(1, "/Game/Test"),
                 Source(2, "/Game/A", "/Game/Test"),
                 Source(3, "/Game/A"),
-            }.Select(source => new ItemSource("/Invented/Item.Item_C", source)),
+            }.Select(source => new EntitySource("/Invented/Item.Item_C", source)),
             new HashSet<string>(["/Game/Test"], StringComparer.OrdinalIgnoreCase)
         );
         Assert.Equal(2, sources.Count);

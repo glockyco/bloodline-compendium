@@ -5,7 +5,7 @@ namespace Bloodline.Tests.Catalog;
 
 public sealed class ContainerSourceMergeTests
 {
-    private static ItemSource Container(
+    private static EntitySource Container(
         string level,
         double? appearance = null,
         double chance = 0.552,
@@ -13,7 +13,7 @@ public sealed class ContainerSourceMergeTests
     )
     {
         var details = new ContainerDetails(appearance, new Amount(1, 5), Loose: loose);
-        return new ItemSource(
+        return new EntitySource(
             "/Invented/Item.Item_C",
             new Source(
                 loose ? SourceKind.Pickup : SourceKind.ContainerLoot,

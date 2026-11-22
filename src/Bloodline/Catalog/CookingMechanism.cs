@@ -5,7 +5,7 @@ namespace Bloodline.Catalog;
 
 internal sealed class CookingMechanism : ISourceMechanism
 {
-    public IEnumerable<ItemSource> FindSources(CatalogContext context)
+    public IEnumerable<EntitySource> FindSources(CatalogContext context)
     {
         foreach (
             var (table, row) in context
@@ -26,7 +26,7 @@ internal sealed class CookingMechanism : ISourceMechanism
                 .GroupBy(path => path, StringComparer.OrdinalIgnoreCase)
                 .Select(group => new ItemAmount(context.ItemLink(group.Key), group.Count()))
                 .ToArray();
-            yield return new ItemSource(
+            yield return new EntitySource(
                 item,
                 new Source(
                     SourceKind.Cooking,
