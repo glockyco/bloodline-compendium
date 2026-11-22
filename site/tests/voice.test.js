@@ -35,6 +35,15 @@ it.each([
 	});
 });
 
+it('accepts armor weight reduction from the level up window but rejects a loot weight', async () => {
+	await page('<p>Armor Weight Reduction: 1.96%</p>', async (directory) => {
+		expect((await voiceGate(directory)).pages).toBe(1);
+	});
+	await page('<p>Each item has a weight of 3.</p>', async (directory) => {
+		await expect(voiceGate(directory)).rejects.toThrow('Pipeline words');
+	});
+});
+
 it('accepts picking up an item but rejects a loot table pick', async () => {
 	await page('<p>You pick up the crossbow in Squalls End.</p>', async (directory) => {
 		expect((await voiceGate(directory)).pages).toBe(1);
