@@ -97,6 +97,8 @@ Clicking an equipment slot, as a player does to take a piece off, puts the chara
 
 Taking a piece off does not clear every part the piece coloured. Archer's Straps and Single-Arm Chain Sleeve colour the two elbow parts, which kept that material after the piece came off (run `2026-11-22T03-55-11-665Z-oddities1`). Pauldrons draw their right half on an elbow part too, so in a sweep Spiked Pauldrons and Standard Pauldrons showed the sleeve's brown leather inside one pauldron. `capture-model` therefore gives every part of the player's bodies and of the preview the character's own material before the piece goes on. Sixteen pieces, these among them, then rendered alike in both orders.
 
+A second sweep of all armor with that reset changed more than the pauldrons. Leather Breastplate, which sets no colours of its own, had shown another piece's brown leather and shows the character's grey now, and 43 armor renders differ visibly between the two sweeps.
+
 The material's defaults for the three skin colours, `Color_Skin`, `Color_Stubble` and `Color_Scar`, are a bright pink. A piece that colours its parts sets the ones it shows and leaves the others at the default where the body hides them: inside the collar of Askillian Soldier Cuirass, which the head covers, the render showed a pink patch. A render shows the piece without the body, so each of these colours that a shown part's material left at the default takes the character's own. A colour the piece set stays.
 
 ### Framing
@@ -111,11 +113,13 @@ The depth pass marks opaque surfaces, but translucent materials, such as slime m
 
 ### The female body
 
-`new-save <name> female` presses the character creator's own Female button before creating the character. The female sweep renders only armor whose male render showed `SK_Chr_*_Male_*` body meshes, because only those have female counterparts. The capture reports which body the preview showed, from the preview's own body mesh.
+`new-save <name> female` presses the character creator's own Female button before creating the character. The female sweep renders only armor whose male render showed `SK_Chr_*_Male_*` body meshes, because only those have female counterparts. The capture reports the body from the player's `Male?` flag, by which the game chooses each piece's mesh. It first read the name of the preview's body mesh, which is the same for both bodies, so a whole female sweep reported the male body and none of its renders counted. The sweep now stops when a capture reports another body than the one it sweeps.
 
 ### Sweep, check and publication
 
-`render-sweep.mjs` renders every published item and keeps each render under the item's class name in the run. It resumes from the run records, records failures with the game's error and restarts the game only when it stopped answering. `--again` renders chosen items again after a view changes.
+`render-sweep.mjs` renders every published item and keeps each render under the item's class name in the run. It resumes from the run records and records failures with the game's error. When the game stopped answering or the character kept a piece on, it restarts the game and tries the item once more. `--again` renders chosen items again after a view changes, and a render taken again replaces the item's earlier failure.
+
+Two weapons failed their first capture and rendered on a second: Apprentice's Soulstaff drew no mesh a moment before the game stopped answering, and Chitin Shield's capture showed nothing. In a new game both rendered at once, and the first and second capture of 46 items matched. A second sweep then rendered all 1,267 held items, parts and objects again. Apart from the 17 parts whose row changed, the two renders of an item differ only where the model's glow moves, on seven wand shafts with orbs, spirals or gems, Ethereal Claymore and Ethereal Slicer.
 
 `publish-renders.mjs` takes the latest render of each item and body, refuses one without a transparent background, smaller than 64 pixels, covering less than 3% or drawing on its edge, and writes passing renders as WebP of at most 640 pixels to `artifacts/<build>/renders/`, named by hash, with `index.json` and `check.json`. The catalog reads the index, publishes `renders` on each item page with each render's size, and copies the files into the site data, as it does icons. The site writes 320 and 640 pixel versions and a 1200 by 630 share image per render.
 
