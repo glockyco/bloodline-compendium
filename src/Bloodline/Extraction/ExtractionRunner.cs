@@ -10,6 +10,7 @@ using CUE4Parse.UE4.AssetRegistry.Objects;
 using CUE4Parse.UE4.Assets;
 using CUE4Parse.UE4.Assets.Exports;
 using CUE4Parse.UE4.Assets.Exports.Engine;
+using CUE4Parse.UE4.Assets.Objects;
 using CUE4Parse.UE4.Objects.Engine;
 using CUE4Parse.UE4.Objects.UObject;
 using CUE4Parse.UE4.Versions;
@@ -85,7 +86,11 @@ internal sealed class ExtractionRunner
         counts["functions"] = codeIndex.Functions.Count;
         var icons = Icons.IconExtractor.Extract(
             provider,
-            ItemIconTexturePaths(runner.merged.Values),
+            ItemIconTexturePaths(runner.merged.Values)
+                .Concat(runner.iconTextures)
+                .Distinct(StringComparer.Ordinal)
+                .Order(StringComparer.Ordinal)
+                .ToArray(),
             Path.Combine(root, "icons")
         );
         CanonicalJson.Write(Path.Combine(root, "textures.json"), icons.Textures);
@@ -254,12 +259,16 @@ internal sealed class ExtractionRunner
                     new DefaultLayer(zero, encoder.Properties(cdo.Properties, generated)),
                 ])
             );
+            var widget = asset.AssetClass.Text == "WidgetBlueprint";
             var record = new ClassRecord(
                 path,
                 ancestors,
                 properties,
-                asset.AssetClass.Text == "WidgetBlueprint" ? Widgets(package, path) : null
-            );
+                widget ? Widgets(package, path) : null
+            )
+            {
+                Bindings = widget ? Bindings(generated) : null,
+            };
             merged.Add(path, record);
             return record;
         }
@@ -272,6 +281,46 @@ internal sealed class ExtractionRunner
         {
             loading.Remove(path);
         }
+    }
+
+    /// <summary>
+    /// The functions a widget Blueprint binds to its widgets' events, such as a button's click, which name the
+    /// button and the handler that the game runs for it. Handler names alone can mislead, because the editor keeps
+    /// a copied handler's old name.
+    /// </summary>
+    private static IReadOnlyList<DelegateBinding>? Bindings(UClass generated)
+    {
+        var bindings = new List<DelegateBinding>();
+        foreach (
+            var owner in generated
+                .GetOrDefault<FPackageIndex[]>("DynamicBindingObjects", [])
+                .Select(index => index.ResolvedObject?.Load())
+                .OfType<UObject>()
+        )
+        {
+            foreach (
+                var entry in owner
+                    .GetOrDefault<FScriptStruct[]>("ComponentDelegateBindings", [])
+                    .Select(element => element.StructType)
+                    .OfType<FStructFallback>()
+            )
+            {
+                bindings.Add(
+                    new DelegateBinding(
+                        entry.GetOrDefault<FName>("ComponentPropertyName").Text,
+                        entry.GetOrDefault<FName>("DelegatePropertyName").Text,
+                        entry.GetOrDefault<FName>("FunctionNameToBind").Text
+                    )
+                );
+            }
+        }
+        return bindings.Count == 0
+            ? null
+            : bindings
+                .OrderBy(binding => binding.Component, StringComparer.Ordinal)
+                .ThenBy(binding => binding.Event, StringComparer.Ordinal)
+                .ThenBy(binding => binding.Function, StringComparer.Ordinal)
+                .ToArray();
     }
 
     /// <summary>
@@ -341,7 +390,17 @@ internal sealed class ExtractionRunner
                     out var record
                 )
             )
-                widgets.Add(record!);
+            {
+                // A widget's Icon Image brush is the picture it shows, such as a passive's icon in a skill tree.
+                if (
+                    record!
+                        .Properties["Icon Image"]
+                        ?["ResourceObject"]?[RecordFormat.Reference]?.GetValue<string>() is
+                    { } icon
+                )
+                    iconTextures.Add(icon);
+                widgets.Add(record);
+            }
         }
         return widgets.All(widget => widget.Properties.Count == 0)
             ? null
@@ -364,22 +423,32 @@ internal sealed class ExtractionRunner
         code.RegisterTable(path, pointer?.ResolvedObject?.GetPathName() ?? table.RowStructName);
         var defaults =
             scriptStruct == null ? new JsonObject() : encoder.StructDefaults(scriptStruct);
+        var rows = table
+            .RowMap.Select(row => new TableRow(
+                row.Key.Text,
+                RecordMerge.OverlayProperties(
+                    defaults,
+                    scriptStruct == null
+                        ? encoder.Properties(row.Value.Properties)
+                        : encoder.Properties(row.Value.Properties, scriptStruct)
+                )
+            ))
+            .ToArray();
+        // A row's Icon is the picture the game shows for it, such as a skill's icon on the skill bar.
+        foreach (var row in rows)
+        {
+            if (row.Values["Icon"]?[RecordFormat.Reference]?.GetValue<string>() is { } icon)
+                iconTextures.Add(icon);
+        }
         return new TableRecord(
             path,
             pointer?.ResolvedObject?.GetPathName() ?? table.RowStructName,
-            table
-                .RowMap.Select(row => new TableRow(
-                    row.Key.Text,
-                    RecordMerge.OverlayProperties(
-                        defaults,
-                        scriptStruct == null
-                            ? encoder.Properties(row.Value.Properties)
-                            : encoder.Properties(row.Value.Properties, scriptStruct)
-                    )
-                ))
-                .ToArray()
+            rows
         );
     }
+
+    /// <summary>Icon textures besides item images: table rows' Icon fields and widgets' Icon Image brushes.</summary>
+    private readonly HashSet<string> iconTextures = new(StringComparer.Ordinal);
 
     private LevelRecord Level(IPackage package, FAssetData asset)
     {

@@ -17,7 +17,8 @@ internal sealed record GapRecord(string Package, string? Object, string Error);
 /// first native class, which ends the chain because native defaults are not in the files. A widget Blueprint
 /// also lists every widget of its widget tree with its place. Widgets whose class is a Blueprint class, such as the
 /// skill slots of a skill tree, and text widgets, such as a row's label, also hold their values. Other native
-/// widgets, such as panels, hold none, because only their place matters to a reader.
+/// widgets, such as panels, hold none, because only their place matters to a reader. <see cref="Bindings"/> lists
+/// the functions it binds to its widgets' events.
 /// </summary>
 internal sealed record ClassRecord(
     string Path,
@@ -25,7 +26,14 @@ internal sealed record ClassRecord(
     JsonObject Properties,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         IReadOnlyList<WidgetRecord>? Widgets = null
-);
+)
+{
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public IReadOnlyList<DelegateBinding>? Bindings { get; init; }
+}
+
+/// <summary>A function bound to a widget's event, such as <c>OnClicked</c> of the button <c>Lute</c>.</summary>
+internal sealed record DelegateBinding(string Component, string Event, string Function);
 
 /// <summary>A DataTable with its rows in stored order.</summary>
 internal sealed record TableRecord(string Path, string? RowStruct, IReadOnlyList<TableRow> Rows);
