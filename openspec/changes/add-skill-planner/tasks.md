@@ -1,9 +1,9 @@
 ## 1. Lab
 
-- [ ] 1.1 Observe whether learning a skill from a book or conversation costs a skill point
-- [ ] 1.2 Observe whether passive ranks can be refunded in the tree window
-- [ ] 1.3 Measure attributes at high point counts and below their starting value, and what the level up window's Health button does for a player
-- [ ] 1.4 Record character level and attribute vectors for the rule check
+- [x] 1.1 Observe whether learning a skill from a book or conversation costs a skill point
+- [x] 1.2 Observe whether passive ranks can be refunded in the tree window
+- [x] 1.3 Measure attributes at high point counts and below their starting value, and what the level up window's Health button does for a player
+- [x] 1.4 Record character level and attribute vectors for the rule check
 
 ## 2. Rules and inputs
 

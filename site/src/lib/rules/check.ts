@@ -1,7 +1,7 @@
 import type { Rule } from './rule.js';
 import { experienceRequirement } from './experience.js';
 import { buyPrice, respectDiscount, sellPrice } from './price.js';
-import { proficiencyPointsPerLevel, rankCosts } from './progression.js';
+import { characterLevelGrant, proficiencyPointsPerLevel, rankCosts } from './progression.js';
 
 /** Every rule that has game results to compare against. */
 export const rules = [experienceRequirement, respectDiscount, buyPrice, sellPrice];
@@ -118,6 +118,35 @@ export function rankCostMismatches(
 					`next-rank-cost for ${record.args.widget} rank ${rank + 1}: rule ${costs[rank]}, game ${amount}`
 				);
 		});
+	}
+	return { compared, problems };
+}
+
+/**
+ * The character level ups where the skill points or level up points the game added differ from the level grant rule.
+ * Only a step that raised the level by one counts, so a step that crossed several levels cannot blur the amounts.
+ */
+export function levelGrantMismatches(records: ProgressionRecord[]): {
+	compared: number;
+	problems: string[];
+} {
+	let compared = 0;
+	const problems: string[] = [];
+	for (const record of records) {
+		if (record.args.action !== 'levels') continue;
+		for (const step of record.steps) {
+			const changed = step.changed ?? {};
+			const level = changed['instance.Player Level'];
+			if (!level || level[1] - level[0] !== 1) continue;
+			const gained = (key: string) => (changed[key] ? changed[key][1] - changed[key][0] : 0);
+			compared++;
+			const skill = gained('instance.Skill Points');
+			const points = gained('instance.Level Up Points');
+			if (skill !== characterLevelGrant.skillPoints || points !== characterLevelGrant.levelUpPoints)
+				problems.push(
+					`level-grant for level ${level[0]}: rule ${characterLevelGrant.skillPoints} skill and ${characterLevelGrant.levelUpPoints} level up points, game ${skill} and ${points}`
+				);
+		}
 	}
 	return { compared, problems };
 }

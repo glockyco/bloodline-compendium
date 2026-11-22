@@ -74,3 +74,15 @@ export function proficiencyPointsPerLevel(
 		]
 	};
 }
+
+/** What one character level up grants: skill points for the skill trees and level up points for attributes. */
+export interface LevelGrant {
+	skillPoints: number;
+	levelUpPoints: number;
+}
+
+/**
+ * The points a character gets for each character level. The player's Level Up adds 1 skill point and 3 level up
+ * points, at every level that runs passives1, progression2, treeshots1, planner1 and attributes2 recorded.
+ */
+export const characterLevelGrant: LevelGrant = { skillPoints: 1, levelUpPoints: 3 };

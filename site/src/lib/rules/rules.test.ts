@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { experienceRequirement } from './experience.js';
-import { proficiencyMismatches, rankCostMismatches, ruleMismatches } from './check.js';
+import {
+	levelGrantMismatches,
+	proficiencyMismatches,
+	rankCostMismatches,
+	ruleMismatches
+} from './check.js';
 import { proficiencyPointsPerLevel } from './progression.js';
 
 describe('experience requirement', () => {
@@ -70,6 +75,25 @@ describe('proficiency points per level', () => {
 		]);
 		expect(result.compared).toBe(2);
 		expect(result.problems).toEqual(['proficiency-points for Necromancy level 9: rule 2, game 1']);
+	});
+});
+
+describe('character level grants against level ups', () => {
+	it('compares each single level up with the grant and skips steps over several levels', () => {
+		const step = (level: number, to: number, skill: number, points: number) => ({
+			changed: {
+				'instance.Player Level': [level, to] as [number, number],
+				'instance.Skill Points': [0, skill] as [number, number],
+				'instance.Level Up Points': [0, points] as [number, number]
+			}
+		});
+		const result = levelGrantMismatches([
+			{ args: { action: 'levels' }, steps: [step(1, 2, 1, 3), step(2, 5, 3, 9), step(5, 6, 1, 2)] }
+		]);
+		expect(result.compared).toBe(2);
+		expect(result.problems).toEqual([
+			'level-grant for level 5: rule 1 skill and 3 level up points, game 1 and 2'
+		]);
 	});
 });
 
