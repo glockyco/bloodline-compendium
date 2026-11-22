@@ -18,7 +18,7 @@
 - [x] 3.2 Extract the shared list from `routes/items/+page.svelte` and keep the item list's behaviour, covered by the existing browser tests
 - [x] 3.3 Extract the page shell and route factory, and register tooltips per kind in the presenter
 - [x] 3.4 Read the Browse menu, footer lists, home entries, search lists and missing-page links from the kind registry
-- [ ] 3.5 Review the item list and an item page at 1440 and 390 px on real data against production
+- [x] 3.5 Review the item list and an item page at 1440 and 390 px on real data against production
 
 ## 4. Skills in the catalog
 
