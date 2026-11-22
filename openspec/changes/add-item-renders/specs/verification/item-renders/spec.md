@@ -20,7 +20,7 @@ A render SHALL show only what the game draws for the item, alone on a transparen
 - **THEN** both renders show the same colours
 
 ### Requirement: The subject by kind of item
-Armor SHALL show what the preview character wears for it, or its own model where the preview wears it without drawing it. What a hand holds SHALL show its own model, a weapon part the mesh, materials and scale that its smithing table row names, and any other item its own model as it lies in the world. A mesh that an item hangs on another character SHALL NOT be part of its render.
+Armor SHALL show what the preview character wears for it, or its own model where the preview wears it without drawing it. What a hand holds SHALL show its own model, a weapon part the mesh, materials and scale that its smithing table row names, and any other item its own model as it lies in the world. A mesh that an item hangs on another character SHALL NOT be part of its render, nor SHALL a mesh of worn armor that lies apart from the body, at no socket of it.
 
 #### Scenario: Heavy Iron Cuirass
 - **WHEN** Heavy Iron Cuirass is rendered
@@ -34,6 +34,14 @@ Armor SHALL show what the preview character wears for it, or its own model where
 - **WHEN** Assassin's Belt is rendered
 - **THEN** the render shows the sheath and the bottle the preview character wears at the hip
 
+#### Scenario: Leather Bracers
+- **WHEN** Leather Bracers, whose own model lies at the feet of the character that wears them, is rendered
+- **THEN** the render shows the two arms and no third bracer
+
+#### Scenario: Chainmail Hood
+- **WHEN** Chainmail Hood, whose body mesh does not follow the body, is rendered
+- **THEN** the render shows the hood as it sits on the head
+
 ### Requirement: Worn armor shows on a character that wears nothing else
 Armor SHALL be rendered on a character that wears nothing else and whose body carries its own colours, so a render does not depend on what was rendered before it. A skin colour that a piece leaves unset where the body would cover it SHALL show as the character's own.
 
@@ -44,6 +52,10 @@ Armor SHALL be rendered on a character that wears nothing else and whose body ca
 #### Scenario: A collar that the head covers
 - **WHEN** Askillian Soldier Cuirass, which leaves the colour inside its collar unset, is rendered
 - **THEN** the collar shows the character's skin colours
+
+#### Scenario: Pauldrons after a sleeve
+- **WHEN** Spiked Pauldrons are rendered after Single-Arm Chain Sleeve, which colours the elbow parts
+- **THEN** the pauldrons show the same colours as when they are rendered first
 
 ### Requirement: Views by kind
 Every render of one kind SHALL be taken from the same view: worn armor three quarters from the front, pieces worn on the back from behind, weapons and weapon parts face-on and upright, firearms and crossbows lying with the muzzle to the left, shields from the front, and other items three quarters from above. The subject SHALL fill the picture with a margin of 5% of its longer side.

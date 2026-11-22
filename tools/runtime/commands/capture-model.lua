@@ -33,8 +33,6 @@ local weaponType = itemInfo(defaults.ItemInfo, "WeaponType")
 -- args.subject = "object" shows armor as its own actor, for armor that the preview wears without drawing it.
 local subject = args.part and "part" or args.subject == "object" and "object" or armor and "worn"
   or (slot == 6 or slot == 7 or slot == 8) and "carried" or "object"
--- A capture taken again in a refined frame finds the armor already equipped, as the first capture left it.
-if subject == "worn" and not args.again then commands["equip"]({ item = args.item }) end
 local posed = subject == "worn"
 
 local function scale(v, s) return { X = v.X * s, Y = v.Y * s, Z = v.Z * s } end
@@ -52,6 +50,27 @@ local function components(actor, class)
     found[#found + 1] = entry.get and entry:get() or entry
   end
   return found
+end
+-- Taking a piece off gives the body parts it covered the character's own material back, but not every part the
+-- piece coloured: an elbow part kept the leather of an arm piece and showed through the pauldrons rendered after
+-- it. So before a piece goes on, every part of the player's bodies and of the preview takes the character's own
+-- material where it carries another piece's. A capture taken again in a refined frame finds the armor already
+-- equipped, as the first capture left it.
+if subject == "worn" and not args.again then
+  local pawn = requirePlayer()
+  local own = pawn["Dynamic Material"]
+  local dynamic = StaticFindObject("/Script/Engine.MaterialInstanceDynamic")
+  for _, actor in ipairs({ pawn, preview }) do
+    for _, part in ipairs(components(actor, "/Script/Engine.SkeletalMeshComponent")) do
+      local material = part:GetMaterial(0)
+      -- The preview's own body is hidden and keeps the material the game gave it.
+      if part:GetFullName() ~= preview.SkeletalMesh:GetFullName() and material and material:IsValid()
+        and material:IsA(dynamic) and material:GetFullName() ~= own:GetFullName() then
+        part:SetMaterial(0, own)
+      end
+    end
+  end
+  commands["equip"]({ item = args.item })
 end
 local function meshOf(component)
   local mesh
@@ -214,16 +233,41 @@ local function capture()
           end
         end
       end
+      -- A part whose mesh was made for another skeleton does not follow the body: the part that draws Chainmail
+      -- Hood's mesh lies at the level's origin. So a part counts when its bounds meet the body's.
+      local bodyLow, bodyHigh = boundsOf({ body })
+      local function onBody(part)
+        local low, high = boundsOf({ part })
+        for _, axis in ipairs({ "X", "Y", "Z" }) do
+          if low[axis] > bodyHigh[axis] or high[axis] < bodyLow[axis] then return false end
+        end
+        return true
+      end
       for _, part in ipairs(components(preview, "/Script/Engine.SkeletalMeshComponent")) do
         local mesh = meshOf(part)
-        if mesh and wanted[mesh:GetFName():ToString()] and part:IsVisible() then
+        if mesh and wanted[mesh:GetFName():ToString()] and part:IsVisible() and onBody(part) then
           ownSkin(part)
           shown[#shown + 1] = part
         end
       end
-      -- The item's own actor where the preview character carries it at a socket, such as a helmet or pauldrons.
-      -- Every equip attaches one more, and a copy attached last may still be scaled down to almost nothing, so the
-      -- largest copy stands for all.
+      -- The item's own actor where the preview character carries it, such as a helmet or pauldrons. Every equip
+      -- attaches one more, and a copy attached last may still be scaled down to almost nothing, so the largest
+      -- copy stands for all. Of its meshes, those count that hang at a socket of the body, by themselves or with
+      -- the actor. The others keep the place they have where the item lies in the world: Leather Bracers' actor
+      -- hangs at no socket and lies at the character's feet with a third bracer, and Gale Runners' actor stands
+      -- in the legs with a second pair of boots, while its wings hang at the calves.
+      local function atSocket(component)
+        local at = component
+        for _ = 1, 16 do
+          local parent = at:GetAttachParent()
+          if not (parent and parent:IsValid()) then return false end
+          if parent:GetOwner():GetFullName() == preview:GetFullName() then
+            return at:GetAttachSocketName():ToString() ~= "None"
+          end
+          at = parent
+        end
+        return false
+      end
       local list = {}
       preview:GetAttachedActors(list, true)
       local carried, largest = nil, -1
@@ -235,7 +279,9 @@ local function capture()
           if size > largest then carried, largest = actor, size end
         end
       end
-      for _, component in ipairs(carried and visibleMeshes(carried) or {}) do shown[#shown + 1] = component end
+      for _, component in ipairs(carried and visibleMeshes(carried) or {}) do
+        if atSocket(component) then shown[#shown + 1] = component end
+      end
       if #shown == 0 then
         subject = "object"
         asObject()
