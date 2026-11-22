@@ -634,7 +634,11 @@ internal sealed class SkillProducer
     private IReadOnlyList<Fact> Facts(string skill, TableRow? row)
     {
         if (row is null)
-            return [StatVocabulary.Unknown(Stat.Cooldown), StatVocabulary.Unknown(Stat.ManaCost)];
+            return
+            [
+                StatVocabulary.Unknown(Stat.Cooldown, StatVocabulary.NotInFiles),
+                StatVocabulary.Unknown(Stat.ManaCost, StatVocabulary.NotInFiles),
+            ];
         var stamina =
             context.Classes.TryGetValue(skill, out var type)
             && type.Properties["Uses Stamina"]?.GetValue<bool>() == true;

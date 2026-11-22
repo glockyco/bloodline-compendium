@@ -50,7 +50,11 @@ const restoration = (number: number): Fact => ({
 });
 // The labels and values of the rows below the game card, in order.
 const rows = (body: string, tag: 'dt' | 'dd') =>
-	[...body.matchAll(new RegExp(`<${tag}[^>]*>([^<]*)</${tag}>`, 'g'))].map((match) => match[1]);
+	[
+		...body
+			.replace(/<!--[\s\S]*?-->/g, '')
+			.matchAll(new RegExp(`<${tag}[^>]*>([^<]*)</${tag}>`, 'g'))
+	].map((match) => match[1].trim());
 
 it('lists effects in one row and leaves out the restoration amount they already carry', () => {
 	const item = {

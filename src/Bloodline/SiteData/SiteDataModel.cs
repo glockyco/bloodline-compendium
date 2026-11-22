@@ -393,6 +393,9 @@ internal sealed record Fact(Stat Stat, string Label, double? Number, string? Tex
 
     /// <summary>The known issue that explains this tooltip difference, when one has been reproduced.</summary>
     public string? GameShowsIssue { get; init; }
+
+    /// <summary>Why the value is unknown, for a fact without a number, text or effect.</summary>
+    public string? Unknown { get; init; }
 }
 
 /// <summary>

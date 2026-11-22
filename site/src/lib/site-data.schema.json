@@ -560,6 +560,12 @@
             "string",
             "null"
           ]
+        },
+        "unknown": {
+          "type": [
+            "string",
+            "null"
+          ]
         }
       },
       "required": [

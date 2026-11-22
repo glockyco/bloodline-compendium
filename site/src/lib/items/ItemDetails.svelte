@@ -2,6 +2,7 @@
 	import type { DetailRow } from './game-card.js';
 	import type { ItemPage } from '../site-data.js';
 	import { formatNumber } from '../format.js';
+	import UnknownValue from '../ui/UnknownValue.svelte';
 	let {
 		rows,
 		wide = false,
@@ -18,7 +19,12 @@
 <dl class="details" class:wide>
 	{#each rows as row (row.key)}<div class:prose={row.prose}>
 			<dt>{row.label}</dt>
-			{#each row.values as value, index (index)}<dd>{value}</dd>{/each}
+			{#each row.values as value, index (index)}<dd>
+					{#if value.unknown}<UnknownValue
+							reason={value.unknown}
+							id={'unknown-' + row.key + '-' + index}
+						/>{:else}{value.text}{/if}
+				</dd>{/each}
 		</div>{/each}
 </dl>
 {#if projectileGroups?.length}

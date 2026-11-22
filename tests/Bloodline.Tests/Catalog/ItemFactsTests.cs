@@ -286,6 +286,28 @@ public sealed class ItemFactsTests
         Assert.Equal("0", page.Facts.Single(fact => fact.Label == "Speed contribution").Value);
     }
 
+    [Fact]
+    public void APartSharingItsClassWithOtherRowsTakesTheRowOfItsOwnName()
+    {
+        var item = Item();
+        TableRow Row(string row, string name, double damage, double speed) =>
+            ComponentRow(
+                item,
+                $$$"""
+                {"Part":{"$enum":"InventedParts::Guard","display":"Guard"},"ItemName":{"$text":"{{{name}}}"},"Damage":{{{damage}}},"Speed":{{{speed}}}}
+                """,
+                row
+            );
+        var own = Row("InventedItem", "Invented Item", 6, -0.075);
+        var other = Row("OtherGuard", "Other Guard", 4, 0);
+
+        var page = new ItemFacts([], [Components(other, own)]).Resolve(item, "invented");
+
+        // The crafting window lists each row by its own name and takes that row's stats (run parts1).
+        Assert.Equal("6", page.Facts.Single(fact => fact.Label == "Damage contribution").Value);
+        Assert.Equal("-0.075", page.Facts.Single(fact => fact.Label == "Speed contribution").Value);
+    }
+
     [Theory]
     [InlineData("Part", "Component part")]
     [InlineData("Damage", "Damage contribution")]

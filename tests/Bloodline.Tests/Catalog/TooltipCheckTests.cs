@@ -150,7 +150,7 @@ public sealed class TooltipCheckTests
         var weapon = Sword with
         {
             Type = "Gun",
-            Facts = [StatVocabulary.Unknown(Stat.BodyHitDamage)],
+            Facts = [StatVocabulary.Unknown(Stat.BodyHitDamage, StatVocabulary.NotInFiles)],
         };
         Assert.Empty(Differences(weapon, Tooltip(weapon, "Damage: 100")));
     }

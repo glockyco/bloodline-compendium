@@ -625,6 +625,7 @@ export interface Fact {
   text: string | null;
   tooltipLabel?: string | null;
   unit?: string | null;
+  unknown?: string | null;
   [k: string]: unknown;
 }
 /**

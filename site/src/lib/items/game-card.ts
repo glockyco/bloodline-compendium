@@ -35,12 +35,23 @@ export function cardLines(facts: Fact[]): { first: CardLine | null; second: Card
 	return { first: null, second: null };
 }
 
+/** A value a row shows, with the reason when it is unknown. */
+export interface DetailValue {
+	text: string;
+	unknown: string | null;
+}
+
 export interface DetailRow {
 	key: string;
 	label: string;
-	values: string[];
+	values: DetailValue[];
 	prose: boolean;
 }
+
+const detailValue = (fact: Fact): DetailValue => ({
+	text: factValue(fact) ?? 'Unknown',
+	unknown: factValue(fact) == null ? (fact.unknown ?? null) : null
+});
 
 const effectStats = new Set(['effect', 'effects']);
 
@@ -66,7 +77,7 @@ export function detailRows(
 				))
 	);
 	const effects = shown.filter((fact) => effectStats.has(fact.stat));
-	const values = effects.map((fact) => factValue(fact) ?? 'Unknown');
+	const values = effects.map(detailValue);
 	return shown.flatMap((fact) => {
 		if (effectStats.has(fact.stat))
 			return fact === effects[0] ? [{ key: 'effects', label: 'Effects', values, prose: true }] : [];
@@ -80,7 +91,7 @@ export function detailRows(
 				{
 					key: 'sells-for',
 					label: 'Sells for',
-					values: [`${formatNumber(sale.value)} gold`],
+					values: [{ text: `${formatNumber(sale.value)} gold`, unknown: null }],
 					prose: false
 				}
 			];
@@ -90,8 +101,8 @@ export function detailRows(
 				label: titleCase(fact.label),
 				values: [
 					fact.stat === 'blockStaminaCost' && fact.number === 50
-						? "cost half the attack's damage in stamina"
-						: (factValue(fact) ?? 'Unknown')
+						? { text: "cost half the attack's damage in stamina", unknown: null }
+						: detailValue(fact)
 				],
 				prose: fact.number == null || fact.stat === 'blockStaminaCost'
 			}

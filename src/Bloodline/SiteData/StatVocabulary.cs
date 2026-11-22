@@ -44,11 +44,19 @@ internal static class StatVocabulary
         [Stat.StaminaCost] = new("Stamina Cost", "Stamina Cost"),
     };
 
-    /// <summary>A fact whose value the game files do not determine.</summary>
-    public static Fact Unknown(Stat stat, string? label = null) =>
-        Make(stat, null, null, null, label);
+    /// <summary>Why a value is unknown when the game files lack it.</summary>
+    public const string NotInFiles = "The game files do not include this.";
 
-    public static Fact Number(Stat stat, double? value) => Make(stat, value, null, null);
+    /// <summary>Why a value is unknown when the game computes it in code the catalog does not evaluate.</summary>
+    public const string ComputedInPlay = "The game calculates this while you play.";
+
+    /// <summary>A fact whose value the game files do not determine, for the reason given.</summary>
+    public static Fact Unknown(Stat stat, string reason, string? label = null) =>
+        Make(stat, null, null, null, label, reason);
+
+    /// <summary>A number, or an unknown value for the reason given, or <see cref="NotInFiles"/> without one.</summary>
+    public static Fact Number(Stat stat, double? value, string? unknown = null) =>
+        Make(stat, value, null, null, unknown: unknown);
 
     public static Fact Text(Stat stat, string? value) => Make(stat, null, value, null);
 
@@ -60,7 +68,8 @@ internal static class StatVocabulary
         double? number,
         string? text,
         Effect? effect,
-        string? label = null
+        string? label = null,
+        string? unknown = null
     )
     {
         var term = Terms[stat];
@@ -68,6 +77,8 @@ internal static class StatVocabulary
         {
             TooltipLabel = term.TooltipLabel,
             Unit = term.Unit,
+            Unknown =
+                number is null && text is null && effect is null ? unknown ?? NotInFiles : null,
         };
     }
 

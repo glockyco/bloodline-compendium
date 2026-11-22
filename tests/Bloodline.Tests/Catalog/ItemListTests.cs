@@ -95,7 +95,7 @@ public sealed class ItemListTests
 
         var part = Page("Blade", "weapon-part", "Blade") with
         {
-            Facts = [StatVocabulary.Unknown(Stat.DamageContribution)],
+            Facts = [StatVocabulary.Unknown(Stat.DamageContribution, StatVocabulary.NotInFiles)],
         };
         Assert.Equal(new ListCell(null, null), ItemList.CellsOf(part)["damageContribution"]);
     }

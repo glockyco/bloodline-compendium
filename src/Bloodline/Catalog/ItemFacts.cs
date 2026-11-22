@@ -245,17 +245,26 @@ internal sealed class ItemFacts(
         Add(Stat.Value, "ItemInfo.ItemValue");
         if (category is null)
         {
-            facts.Add(StatVocabulary.Unknown(Stat.Category));
+            facts.Add(StatVocabulary.Unknown(Stat.Category, StatVocabulary.NotInFiles));
         }
         if (component is not null)
         {
             // Crafting's component selector and Retrieve Component Stats read these table fields.
             // They are contributions, not the item's inherited weapon defaults or final weapon stats.
+            var own = OwnComponentRows(component, name);
             facts.Add(
-                StatVocabulary.Number(Stat.DamageContribution, ComponentNumber(component, "Damage"))
+                StatVocabulary.Number(
+                    Stat.DamageContribution,
+                    ComponentNumber(own, "Damage"),
+                    ConflictingRows
+                )
             );
             facts.Add(
-                StatVocabulary.Number(Stat.SpeedContribution, ComponentNumber(component, "Speed"))
+                StatVocabulary.Number(
+                    Stat.SpeedContribution,
+                    ComponentNumber(own, "Speed"),
+                    ConflictingRows
+                )
             );
         }
         else if (category == "Weapon")
@@ -303,7 +312,11 @@ internal sealed class ItemFacts(
             else if (projectileDamage)
             {
                 facts.Add(
-                    StatVocabulary.Number(Stat.Damage, NormalProjectileDamage(projectileFunction))
+                    StatVocabulary.Number(
+                        Stat.Damage,
+                        NormalProjectileDamage(projectileFunction),
+                        StatVocabulary.ComputedInPlay
+                    )
                 );
                 // A staff hits only through the projectile its Staff Attack spawns. One that spawns none deals no
                 // damage, which the staff-damage-1 lab run saw for both Soulstaffs.
@@ -353,7 +366,13 @@ internal sealed class ItemFacts(
             }
             if (hasSeparateProjectile)
             {
-                facts.Add(StatVocabulary.Number(Stat.ProjectileDamage, separateDamage));
+                facts.Add(
+                    StatVocabulary.Number(
+                        Stat.ProjectileDamage,
+                        separateDamage,
+                        StatVocabulary.ComputedInPlay
+                    )
+                );
             }
             // Tooltips show the authored speed word, not a universal attack-rate number.
             Add(Stat.Speed, "ItemInfo.Speed");
@@ -768,23 +787,32 @@ internal sealed class ItemFacts(
         facts.Add(
             StatVocabulary.Number(
                 Stat.BodyHitDamage,
-                projectileGroups?.FirstOrDefault()?.BodyHitDamage
+                projectileGroups?.FirstOrDefault()?.BodyHitDamage,
+                StatVocabulary.ComputedInPlay
             )
         );
         facts.Add(
             StatVocabulary.Number(
                 Stat.HeadHitDamage,
-                projectileGroups?.FirstOrDefault()?.HeadHitDamage
+                projectileGroups?.FirstOrDefault()?.HeadHitDamage,
+                StatVocabulary.ComputedInPlay
             )
         );
         facts.Add(
             StatVocabulary.Number(
                 Stat.ProjectilesPerShot,
-                projectileGroups?.Where(group => group.Condition is null).Sum(group => group.Count)
+                projectileGroups?.Where(group => group.Condition is null).Sum(group => group.Count),
+                StatVocabulary.ComputedInPlay
             )
         );
         if (fire?.RangedFire?.MaximumCharge is > 0 && type == "Crossbow")
-            facts.Add(StatVocabulary.Number(Stat.ChargedBodyHitDamage, charged));
+            facts.Add(
+                StatVocabulary.Number(
+                    Stat.ChargedBodyHitDamage,
+                    charged,
+                    StatVocabulary.ComputedInPlay
+                )
+            );
         return fire;
     }
 
@@ -820,8 +848,8 @@ internal sealed class ItemFacts(
         var slot = Display(RecordValues.At(properties, "ItemInfo.ItemSlot"));
         if (slot is null || armorRows is null)
         {
-            facts.Add(StatVocabulary.Unknown(Stat.ArmorType));
-            facts.Add(StatVocabulary.Unknown(Stat.ArmorRating));
+            facts.Add(StatVocabulary.Unknown(Stat.ArmorType, StatVocabulary.NotInFiles));
+            facts.Add(StatVocabulary.Unknown(Stat.ArmorRating, StatVocabulary.NotInFiles));
         }
         else if (!ArmoredSlots.Contains(slot))
         {
@@ -856,7 +884,7 @@ internal sealed class ItemFacts(
     {
         if (foodRows is null)
         {
-            facts.Add(StatVocabulary.Unknown(Stat.Effects));
+            facts.Add(StatVocabulary.Unknown(Stat.Effects, StatVocabulary.NotInFiles));
             return;
         }
         var row =
@@ -954,6 +982,27 @@ internal sealed class ItemFacts(
         return value;
     }
 
+    /// <summary>Why a weapon part's contribution is unknown when its rows disagree.</summary>
+    private const string ConflictingRows = "The game gives this part more than one value.";
+
+    /// <summary>
+    /// The rows of a part's class that describe this part. Several rows can share a class under other names, such as
+    /// Steel Skaneguard on the Steel Claymore Guard's class. The crafting window lists each row by its own name and
+    /// takes that row's stats (run parts1), so the rows named like the item describe it, and all rows count when
+    /// none is.
+    /// </summary>
+    private static IReadOnlyList<TableRow> OwnComponentRows(
+        IReadOnlyList<TableRow> rows,
+        string name
+    )
+    {
+        var own = rows.Where(row =>
+                CraftingMechanism.SameName(name, RecordValues.Text(row.Values["ItemName"]))
+            )
+            .ToArray();
+        return own.Length > 0 ? own : rows;
+    }
+
     private static double? ComponentNumber(IReadOnlyList<TableRow> rows, string field)
     {
         var value = RecordValues.Number(rows[0].Values[field]);
@@ -980,7 +1029,7 @@ internal sealed class ItemFacts(
     {
         if (potionEffectNames is null || potion is null)
         {
-            facts.Add(StatVocabulary.Unknown(Stat.Effects));
+            facts.Add(StatVocabulary.Unknown(Stat.Effects, StatVocabulary.NotInFiles));
             return;
         }
         var count = 0;
