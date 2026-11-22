@@ -13,6 +13,7 @@ export async function GET() {
 		'/',
 		'/known-issues/',
 		'/about/',
+		'/planner/',
 		...kinds.map((kind) => kindPath(kind.kind, kinds)).filter((path) => path !== null),
 		...graph.entities
 			.map(({ entity }) => entityPath({ ...entity, fragment: null }, kinds))

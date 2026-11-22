@@ -15,7 +15,8 @@ import type {
 	ProfessionIndex,
 	ProfessionPage,
 	MechanicIndex,
-	MechanicPage
+	MechanicPage,
+	PlannerData
 } from '#lib/site-data.js';
 const directory = resolve(process.env.BLOODLINE_SITE_DATA || 'fixtures/site-data');
 // Every page reads the same few files, and graph.json alone is large, so each file is parsed once until it changes.
@@ -41,6 +42,8 @@ export const readDisciplines = () => json<DisciplineIndex>('disciplines.json');
 export const readDiscipline = (slug: string) =>
 	json<DisciplinePage>('disciplines/' + slug + '.json');
 export const readSkills = () => json<SkillIndex>('skills.json');
+/** The skill planner's inputs, which only the planner route reads. */
+export const readPlanner = () => json<PlannerData>('planner.json');
 export const readSkill = (slug: string) => json<SkillPage>('skills/' + slug + '.json');
 export const readMechanics = () => json<MechanicIndex>('mechanics.json');
 export const readMechanic = (slug: string) => json<MechanicPage>('mechanics/' + slug + '.json');

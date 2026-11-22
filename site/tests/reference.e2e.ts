@@ -554,6 +554,7 @@ test('each public page has production identity, social metadata and generated br
 			'/known-issues/',
 			'/items/cinderpear/',
 			'/about/',
+			'/planner/',
 			'/items/hollow-prism/',
 			'/items/lanternedge/',
 			'/items/mosswoven-coat/',
