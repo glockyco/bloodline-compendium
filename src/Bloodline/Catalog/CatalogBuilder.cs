@@ -130,6 +130,8 @@ internal static class CatalogBuilder
         var skills = skillProducer.Finish(skillsPrepared, graphResult);
         SkillTooltipCheck.Compare(skills.Entries, records.SkillTooltips, coverage);
         TreeCheck.Compare(skills.Disciplines, skills.References, records.Trees, coverage);
+        var skillClaims = new FactClaims(records.Code, records.Build.BuildId);
+        SkillProducer.Claim(skills, skillClaims);
         var professions = ProfessionProducer.Produce(items.Items);
         // The Known Issues page lists every page of every kind that notes an issue.
         var issues = KnownIssues.Publish(
@@ -166,7 +168,7 @@ internal static class CatalogBuilder
             graphResult.Graph
         )
         {
-            Claims = items.Claims,
+            Claims = [.. items.Claims, .. skillClaims.Claims],
             Tooltips = items.Tooltips,
             Issues = issues,
             Professions = professions,

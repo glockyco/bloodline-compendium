@@ -15,7 +15,7 @@ internal sealed class ItemFacts(
     IReadOnlyList<MeasuredDamage>? measured = null
 )
 {
-    private readonly ItemClaims claims = new(code, build);
+    private readonly FactClaims claims = new(code, build);
     public IReadOnlyList<FactClaim> Claims => claims.Claims;
 
     private readonly HashSet<string> ignoredFoodEffects = new(StringComparer.Ordinal);

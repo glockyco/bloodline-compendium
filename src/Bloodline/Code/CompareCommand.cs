@@ -3,10 +3,12 @@ using System.Text.Json;
 using Bloodline.Catalog;
 using Bloodline.Output;
 using Bloodline.Records;
+using Bloodline.SiteData;
 
 namespace Bloodline.Code;
 
-internal sealed record CitedFact(string Item, string Fact);
+/// <summary>A published fact that cites a changed function: its entity's kind and key and the fact's name.</summary>
+internal sealed record CitedFact(EntityKind Kind, string Key, string Fact);
 
 internal sealed record CitationChange(
     string Function,
@@ -27,7 +29,7 @@ internal static class CompareCommand
     public static BuildComparison Compare(string previousDirectory, string currentDirectory)
     {
         var previous = CanonicalJson.Read<ClaimReport>(
-            Path.Combine(previousDirectory, "item-claims.json")
+            Path.Combine(previousDirectory, "claims.json")
         );
         var current = CanonicalJson.Read<BuildRecord>(
             Path.Combine(currentDirectory, "records", "build.json")
@@ -66,9 +68,14 @@ internal static class CompareCommand
                         after?.Fingerprint,
                         after?.ParseStatus,
                         group
-                            .Select(entry => new CitedFact(entry.Fact.Item, entry.Fact.Fact))
+                            .Select(entry => new CitedFact(
+                                entry.Fact.Kind,
+                                entry.Fact.Key,
+                                entry.Fact.Fact
+                            ))
                             .Distinct()
-                            .OrderBy(fact => fact.Item, StringComparer.Ordinal)
+                            .OrderBy(fact => fact.Kind)
+                            .ThenBy(fact => fact.Key, StringComparer.Ordinal)
                             .ThenBy(fact => fact.Fact, StringComparer.Ordinal)
                             .ToArray()
                     );

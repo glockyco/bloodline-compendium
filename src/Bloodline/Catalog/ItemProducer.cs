@@ -165,7 +165,7 @@ internal sealed class ItemProducer
                 null,
                 recipe + ": built on " + context.ItemLink(item).Name
             );
-        var claims = resolver.Claims.Where(claim => !context.IsExcludedClass(claim.Item)).ToArray();
+        var claims = resolver.Claims.Where(claim => !context.IsExcludedClass(claim.Key)).ToArray();
         var tooltips =
             records.Tooltips.Count == 0
                 ? null

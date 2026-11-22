@@ -14,8 +14,13 @@ internal enum ClaimType
 
 internal sealed record CodeCitation(string Function, string Fingerprint);
 
+/// <summary>
+/// What a published fact rests on, for the entity of <see cref="Kind"/> with <see cref="Key"/>: the record fields it
+/// reads and the game functions that consume them, so <c>compare</c> lists the facts to review when a function changes.
+/// </summary>
 internal sealed record FactClaim(
-    string Item,
+    EntityKind Kind,
+    string Key,
     string Fact,
     ClaimType Type,
     long Build,
@@ -63,7 +68,7 @@ internal static class ClaimCitations
     }
 }
 
-internal sealed class ItemClaims(CodeIndex? code, long build)
+internal sealed class FactClaims(CodeIndex? code, long build)
 {
     private readonly List<FactClaim> claims = [];
     private readonly Dictionary<string, IReadOnlyList<CodeCitation>> evidence = new(
@@ -74,6 +79,32 @@ internal sealed class ItemClaims(CodeIndex? code, long build)
     ).ToDictionary(function => function.Citation, StringComparer.Ordinal);
     public IReadOnlyList<FactClaim> Claims => claims;
 
+    /// <summary>
+    /// Records a fact that the cited functions read from <paramref name="inputs"/>, or an unknown fact without
+    /// citations.
+    /// </summary>
+    public void Record(
+        EntityKind kind,
+        string key,
+        string fact,
+        bool known,
+        IReadOnlyList<string> inputs,
+        IEnumerable<string> citations
+    ) =>
+        claims.Add(
+            new FactClaim(
+                kind,
+                key,
+                fact,
+                known ? ClaimType.Extracted : ClaimType.Unknown,
+                build,
+                inputs,
+                code is null || !known
+                    ? []
+                    : ClaimCitations.Resolve(key + ":" + fact, citations, functions)
+            )
+        );
+
     public void RecordOnHit(
         string item,
         IEnumerable<string> inputs,
@@ -81,6 +112,7 @@ internal sealed class ItemClaims(CodeIndex? code, long build)
     ) =>
         claims.Add(
             new FactClaim(
+                EntityKind.Item,
                 item,
                 "On-Hit Effects",
                 ClaimType.Formula,
@@ -136,6 +168,7 @@ internal sealed class ItemClaims(CodeIndex? code, long build)
             {
                 claims.Add(
                     new FactClaim(
+                        EntityKind.Item,
                         item,
                         fact.Label,
                         ClaimType.Extracted,
@@ -166,6 +199,7 @@ internal sealed class ItemClaims(CodeIndex? code, long build)
                         : "/Game/Widgets/AbsoluteBlockWidget:Check if player has a shield equipped";
                 claims.Add(
                     new FactClaim(
+                        EntityKind.Item,
                         item,
                         fact.Label,
                         ClaimType.Formula,
@@ -229,6 +263,7 @@ internal sealed class ItemClaims(CodeIndex? code, long build)
                 );
                 claims.Add(
                     new FactClaim(
+                        EntityKind.Item,
                         item,
                         fact.Label,
                         fact.Number is null ? ClaimType.Unknown : ClaimType.Formula,
@@ -248,6 +283,7 @@ internal sealed class ItemClaims(CodeIndex? code, long build)
             {
                 claims.Add(
                     new FactClaim(
+                        EntityKind.Item,
                         item,
                         fact.Label,
                         fact.Number is null ? ClaimType.Unknown : ClaimType.Extracted,
@@ -306,6 +342,7 @@ internal sealed class ItemClaims(CodeIndex? code, long build)
                 );
             claims.Add(
                 new FactClaim(
+                    EntityKind.Item,
                     item,
                     fact,
                     !known ? ClaimType.Unknown

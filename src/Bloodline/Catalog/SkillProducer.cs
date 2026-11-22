@@ -551,6 +551,71 @@ internal sealed class SkillProducer
         );
     }
 
+    /// <summary>
+    /// Records what every skill's and passive's facts rest on: the skills table fields the skill slot's tooltip reads,
+    /// and the passive button fields that unlocking and raising a passive read.
+    /// </summary>
+    public static void Claim(SkillOutput skills, FactClaims claims)
+    {
+        const string tooltip = "/Game/SkillSlot:HandleTooltip";
+        const string button = "/Game/UltimateSkillSystem/SkillsData/PassiveSkillButton";
+        foreach (var skill in skills.Entries)
+        foreach (var fact in skill.Facts)
+            claims.Record(
+                EntityKind.Skill,
+                skill.Key,
+                fact.Label,
+                fact.Unknown is null,
+                fact.Stat switch
+                {
+                    Stat.BaseDamage => ["S_SkillInfo.Damage"],
+                    Stat.Cooldown => ["S_SkillInfo.Cooldown"],
+                    Stat.ManaCost or Stat.StaminaCost =>
+                    [
+                        "S_SkillInfo.ManaCost",
+                        "Skill.Uses Stamina",
+                    ],
+                    _ => throw new InvalidOperationException("No claim inputs for " + fact.Stat),
+                },
+                [tooltip]
+            );
+        foreach (var page in skills.Disciplines)
+        {
+            foreach (var slot in page.SkillRows.SelectMany(row => row.Slots))
+                claims.Record(
+                    EntityKind.Skill,
+                    slot.Skill.Key!,
+                    "Required level in " + page.Name,
+                    true,
+                    ["SkillSlot.Required Level", "SkillSlot.Level To Check"],
+                    ["/Game/SkillSlot:Get Current Level In Category"]
+                );
+            foreach (var passive in page.PassiveRows.SelectMany(row => row.Passives))
+            {
+                claims.Record(
+                    EntityKind.Passive,
+                    passive.Key,
+                    "Required level",
+                    true,
+                    ["PassiveSkillButton.Required Level", "PassiveSkillButton.Level To Check"],
+                    [button + ":Get Current Level In Category"]
+                );
+                claims.Record(
+                    EntityKind.Passive,
+                    passive.Key,
+                    "Cost",
+                    true,
+                    [
+                        "PassiveSkillButton.Point Cost",
+                        "PassiveSkillButton.Point Increase Per Level",
+                        "PassiveSkillButton.Max MultiLevel",
+                    ],
+                    [button + ":Check for Prof Point", button + ":Increase Passive Level"]
+                );
+            }
+        }
+    }
+
     private static readonly (string Id, Stat Stat)[] NumericColumns =
     [
         ("baseDamage", Stat.BaseDamage),

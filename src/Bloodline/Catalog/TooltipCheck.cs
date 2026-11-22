@@ -176,7 +176,8 @@ internal static partial class TooltipCheck
     {
         var read = tooltips.ToDictionary(tooltip => tooltip.Item, StringComparer.OrdinalIgnoreCase);
         var citations = claims
-            .GroupBy(claim => (claim.Item, claim.Fact))
+            .Where(claim => claim.Kind == EntityKind.Item)
+            .GroupBy(claim => (Item: claim.Key, claim.Fact))
             .ToDictionary(group => group.Key, group => group.First().Citations);
         var unread = new List<TooltipUnread>();
         var differences = new List<TooltipDifference>();

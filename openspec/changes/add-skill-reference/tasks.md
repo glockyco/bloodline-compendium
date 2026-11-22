@@ -8,7 +8,7 @@
 - [x] 2.1 Save the current real-data site data, claims and report as the comparison baseline outside Git
 - [x] 2.2 Introduce kind producers, move item selection, facts, icons, versions and tooltip comparison into `ItemProducer`, and make `CatalogBuilder` an orchestrator
 - [x] 2.3 Make source mechanisms return sources for an entity reference, and move merging, statuses, gaps and status evidence to every kind with sources
-- [ ] 2.4 Make claims one file keyed by entity reference, read by `compare`, and make the writer write every kind's index and pages
+- [x] 2.4 Make claims one file keyed by entity reference, read by `compare`, and make the writer write every kind's index and pages
 - [ ] 2.5 Add host kinds to the registry, with link targets, sitemap and graph checks for anchored entries
 - [x] 2.6 Regenerate schema and types, update fixtures and C# tests, and confirm the real-data item output matches the baseline file by file
 

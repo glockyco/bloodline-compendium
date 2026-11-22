@@ -4,6 +4,7 @@ using Bloodline.Catalog;
 using Bloodline.Code;
 using Bloodline.Output;
 using Bloodline.Records;
+using Bloodline.SiteData;
 
 namespace Bloodline.Tests.Catalog;
 
@@ -160,6 +161,7 @@ public sealed class ClaimTests
                 10,
                 [
                     new FactClaim(
+                        EntityKind.Item,
                         "invented-sword",
                         "Damage",
                         ClaimType.Extracted,
@@ -168,7 +170,8 @@ public sealed class ClaimTests
                         [new CodeCitation(changed.Citation, changed.Fingerprint)]
                     ),
                     new FactClaim(
-                        "invented-bow",
+                        EntityKind.Skill,
+                        "invented-bolt",
                         "Damage",
                         ClaimType.Extracted,
                         10,
@@ -176,6 +179,7 @@ public sealed class ClaimTests
                         [new CodeCitation(changed.Citation, changed.Fingerprint)]
                     ),
                     new FactClaim(
+                        EntityKind.Item,
                         "invented-sword",
                         "Value",
                         ClaimType.Extracted,
@@ -211,8 +215,8 @@ public sealed class ClaimTests
             Assert.Equal("after", citation.CurrentFingerprint);
             Assert.Equal(
                 [
-                    new CitedFact("invented-bow", "Damage"),
-                    new CitedFact("invented-sword", "Damage"),
+                    new CitedFact(EntityKind.Item, "invented-sword", "Damage"),
+                    new CitedFact(EntityKind.Skill, "invented-bolt", "Damage"),
                 ],
                 citation.Facts
             );
@@ -230,6 +234,7 @@ public sealed class ClaimTests
             1,
             [
                 new FactClaim(
+                    EntityKind.Item,
                     "invented",
                     "Damage",
                     ClaimType.Extracted,

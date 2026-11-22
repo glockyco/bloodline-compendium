@@ -68,6 +68,26 @@ public sealed class SkillCatalogTests
             []
         );
 
+    /// <summary>The functions that skill and passive claims cite, which every build's code index holds.</summary>
+    private static readonly CodeFunction[] Consumers =
+    [
+        .. new[] { "HandleTooltip", "Get Current Level In Category" }.Select(name =>
+            Opens("/Game/SkillSlot.SkillSlot_C", name, "/Game/SkillSlot")
+        ),
+        .. new[]
+        {
+            "Get Current Level In Category",
+            "Check for Prof Point",
+            "Increase Passive Level",
+        }.Select(name =>
+            Opens(
+                "/Game/UltimateSkillSystem/SkillsData/PassiveSkillButton.PassiveSkillButton_C",
+                name,
+                "/Game/UltimateSkillSystem/SkillsData/PassiveSkillButton"
+            )
+        ),
+    ];
+
     /// <summary>
     /// A category button opens a menu, whose button opens the Fire tree. The Fire tree has a skill row of level 1 with
     /// two slots in boxes, placed in the opposite order of their names, and a proficiency row of level 5 whose second
@@ -204,6 +224,7 @@ public sealed class SkillCatalogTests
             Code = CodeIndex.Create([
                 Opens(Categories, "OpenMagic", Menu),
                 Opens(Menu, "OpenFire", Fire),
+                .. Consumers,
                 .. extraCode,
             ]),
         };
