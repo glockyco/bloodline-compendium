@@ -374,6 +374,37 @@ internal static partial class KnownIssues
             .ToArray();
     }
 
+    /// <summary>
+    /// The link targets that issue text uses, each resolved to its reference. Every sentence a player or a
+    /// maintainer reads is checked, and the notes that pages show come from the registry, so this covers them too.
+    /// </summary>
+    public static IReadOnlyDictionary<string, EntityReference> Links(
+        KnownIssueRegistry registry,
+        IReadOnlyDictionary<string, EntityReference?> targets
+    )
+    {
+        var used = new SortedDictionary<string, EntityReference>(StringComparer.Ordinal);
+        foreach (var issue in registry.Issues)
+        {
+            // A title is a heading and a table of contents entry, which hold no links.
+            if (LinkedText.Link().IsMatch(issue.Title))
+                throw new InvalidDataException($"Known issue {issue.Id} links from its title.");
+            IEnumerable<string?> texts =
+            [
+                issue.Effect,
+                issue.Workaround,
+                .. issue.Steps,
+                issue.Expected,
+                issue.Observed,
+                issue.Cause,
+                .. issue.Notes?.Values ?? [],
+            ];
+            foreach (var text in texts.OfType<string>())
+                LinkedText.Resolve("Known issue " + issue.Id, text, targets, used);
+        }
+        return used;
+    }
+
     private static string WeaponDamageNote(ItemPage item)
     {
         string Damage(Stat stat) =>

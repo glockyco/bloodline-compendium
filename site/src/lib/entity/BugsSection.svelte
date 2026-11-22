@@ -2,6 +2,7 @@
 	import { resolve } from '$app/paths';
 	import Section from '../ui/Section.svelte';
 	import { bugRows } from './bugs.js';
+	import LinkedText from '../ui/LinkedText.svelte';
 	import type { Fact, IssueNote } from '../site-data.js';
 	/**
 	 * An entity page's Bugs: its known issues with a link to each, then every tooltip value no issue explains. The
@@ -24,7 +25,7 @@
 					{#if row.kind === 'issue'}<span
 							>{#each row.sentence.split(name) as part, index (index)}{#if index}<span data-game
 										>{name}</span
-									>{/if}{part}{/each}</span
+									>{/if}<LinkedText text={part} />{/each}</span
 						><small
 							><!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- the resolved issue page with its section. -->
 							<a href={resolve('known-issues/') + '#' + row.issue}>Read about this issue</a></small

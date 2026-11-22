@@ -358,7 +358,7 @@
     {
       "id": "blood-magic-points-follow-blood-setting",
       "title": "Blood Magic points follow the blood setting",
-      "effect": "Each Blood Magic level sets your Blood Magic proficiency points to the Blood Levels setting plus one, from 2 with No blood to 6 with BLOODBATH. Points you spent before the level come back, and points you did not spend do not add up.",
+      "effect": "Each [Blood Magic](discipline:blood-magic) level sets your Blood Magic proficiency points to the Blood Levels setting plus one, from 2 with No blood to 6 with BLOODBATH. Points you spent before the level come back, and points you did not spend do not add up.",
       "notes": {
         "/Game/UltimateSkillSystem/SkillsData/BloodMagicLBSkillTree.BloodMagicLBSkillTree_C": "Each Blood Magic level sets your Blood Magic points to the Blood Levels setting plus one: 2 with No blood, 3 with A bit of blood, 4 with Default Amount and 6 with BLOODBATH. Points you spent come back with the next level."
       },

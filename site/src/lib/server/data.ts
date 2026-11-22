@@ -6,6 +6,7 @@ import type {
 	ItemPage,
 	EntityKindDefinition,
 	EntityGraph,
+	EntityReference,
 	PublishedIssue,
 	DisciplineIndex,
 	DisciplinePage,
@@ -30,6 +31,8 @@ export const readItem = (slug: string) => json<ItemPage>('items/' + slug + '.jso
 export const readKinds = () => json<EntityKindDefinition[]>('kinds.json');
 export const readGraph = () => json<EntityGraph>('graph.json');
 export const readIssues = () => json<PublishedIssue[]>('issues.json');
+/** The references that text written for the site links to, by their target, such as discipline:blood-magic. */
+export const readLinks = () => json<Record<string, EntityReference>>('links.json');
 export const readDisciplines = () => json<DisciplineIndex>('disciplines.json');
 export const readDiscipline = (slug: string) =>
 	json<DisciplinePage>('disciplines/' + slug + '.json');

@@ -426,4 +426,68 @@ public sealed class KnownIssueTests
         );
         Assert.NotEmpty(registry.Issues);
     }
+
+    private static readonly EntityReference BloodMagic = new(
+        EntityKind.Discipline,
+        "/Game/Invented/BloodMagicTree",
+        "Blood Magic",
+        "blood-magic",
+        null
+    );
+
+    [Fact]
+    public void IssueTextLinksResolveToTheirEntity()
+    {
+        var issue = Issue("linked") with
+        {
+            Effect = "Each [Blood Magic](discipline:blood-magic) level resets your points.",
+        };
+        var links = KnownIssues.Links(
+            new KnownIssueRegistry([issue]),
+            LinkedText.Targets([BloodMagic])
+        );
+        Assert.Equal(
+            BloodMagic,
+            Assert.Single(links, pair => pair.Key == "discipline:blood-magic").Value
+        );
+    }
+
+    [Fact]
+    public void IssueTextLinkToNothingFailsTheCatalog()
+    {
+        var issue = Issue("dead") with
+        {
+            Workaround = "Lower the [Blood Levels](mechanic:blood-levels).",
+        };
+        var error = Assert.Throws<InvalidDataException>(() =>
+            KnownIssues.Links(new KnownIssueRegistry([issue]), LinkedText.Targets([BloodMagic]))
+        );
+        Assert.Contains("mechanic:blood-levels", error.Message);
+    }
+
+    [Fact]
+    public void IssueTextLinkToASharedNameFailsTheCatalog()
+    {
+        var other = BloodMagic with { Key = "/Game/Invented/OtherBloodMagicTree" };
+        var issue = Issue("shared") with
+        {
+            Steps = ["Open [Blood Magic](discipline:blood-magic)."],
+        };
+        var error = Assert.Throws<InvalidDataException>(() =>
+            KnownIssues.Links(
+                new KnownIssueRegistry([issue]),
+                LinkedText.Targets([BloodMagic, other])
+            )
+        );
+        Assert.Contains("several entities", error.Message);
+    }
+
+    [Fact]
+    public void IssueTitleWithALinkFailsTheCatalog()
+    {
+        var issue = Issue("titled") with { Title = "[Blood Magic](discipline:blood-magic) resets" };
+        Assert.Throws<InvalidDataException>(() =>
+            KnownIssues.Links(new KnownIssueRegistry([issue]), LinkedText.Targets([BloodMagic]))
+        );
+    }
 }

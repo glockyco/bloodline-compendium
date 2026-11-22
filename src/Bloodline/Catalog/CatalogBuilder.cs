@@ -19,6 +19,10 @@ internal sealed record CatalogResult(
     /// <summary>The known game issues, each with the published pages that note it.</summary>
     public IReadOnlyList<PublishedIssue> Issues { get; init; } = [];
 
+    /// <summary>The link targets that text written for the site uses, as <c>links.json</c>.</summary>
+    public IReadOnlyDictionary<string, EntityReference> Links { get; init; } =
+        new Dictionary<string, EntityReference>();
+
     /// <summary>Disciplines and skills with their lists.</summary>
     public SkillOutput Skills { get; init; } =
         new(
@@ -158,6 +162,17 @@ internal static class CatalogBuilder
             Claims = items.Claims,
             Tooltips = items.Tooltips,
             Issues = issues,
+            Links = KnownIssues.Links(
+                records.Issues,
+                LinkedText.Targets([
+                    .. items.Items.Select(CatalogGraph.Reference),
+                    .. skills.Disciplines.Select(SkillProducer.DisciplineReference),
+                    .. skills.Skills.Select(skill =>
+                        EntityVersions.Reference(skill, EntityKind.Skill)
+                    ),
+                    .. Professions.All,
+                ])
+            ),
             Skills = skills,
         };
     }

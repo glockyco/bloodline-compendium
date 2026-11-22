@@ -151,6 +151,9 @@ export interface SiteDataFiles {
   item: ItemPage;
   items: ItemIndex;
   kinds: EntityKindDefinition[];
+  links: {
+    [k: string]: EntityReference;
+  };
   skill: SkillPage;
   skills: SkillIndex;
   [k: string]: unknown;

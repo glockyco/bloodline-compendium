@@ -707,10 +707,9 @@ test('notes a known issue on the affected item and explains it on a linked, sear
 	await expect(page).toHaveURL(/\/known-issues\/#invented-coat-armor$/);
 	const entry = page.locator('#invented-coat-armor');
 	await expect(entry).toBeInViewport();
-	await expect(entry.getByRole('link', { name: 'Mosswoven Coat' })).toHaveAttribute(
-		'href',
-		'/items/mosswoven-coat/'
-	);
+	await expect(
+		entry.locator('.affected-list').getByRole('link', { name: 'Mosswoven Coat' })
+	).toHaveAttribute('href', '/items/mosswoven-coat/');
 	await expect(entry.getByText('Confirmed on')).toBeHidden();
 	await entry.getByText('For Developers').click();
 	await expect(entry.getByText('Confirmed on')).toBeVisible();

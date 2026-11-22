@@ -14,3 +14,15 @@ test('an entry that checks another discipline names and links it', async ({ page
 		0
 	);
 });
+
+test('text written for the site links the entities it marks', async ({ page }) => {
+	await page.goto('/known-issues/');
+	const effect = page.locator('#invented-coat-armor .effect');
+	await expect(effect).toHaveText(
+		'The Mosswoven Coat adds no armor when worn, although its tooltip shows armor.'
+	);
+	await expect(effect.getByRole('link', { name: 'Mosswoven Coat' })).toHaveAttribute(
+		'href',
+		'/items/mosswoven-coat/'
+	);
+});

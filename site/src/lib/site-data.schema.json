@@ -2305,6 +2305,12 @@
       },
       "type": "array"
     },
+    "links": {
+      "additionalProperties": {
+        "$ref": "#/$defs/EntityReference"
+      },
+      "type": "object"
+    },
     "skill": {
       "$ref": "#/$defs/SkillPage"
     },
@@ -2319,6 +2325,7 @@
     "kinds",
     "graph",
     "issues",
+    "links",
     "crafting",
     "disciplines",
     "discipline",

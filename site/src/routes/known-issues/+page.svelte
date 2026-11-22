@@ -1,6 +1,7 @@
 <script lang="ts">
 	import EntityLink from '#lib/ui/EntityLink.svelte';
 	import Section from '#lib/ui/Section.svelte';
+	import LinkedText from '#lib/ui/LinkedText.svelte';
 	import ExpandableList from '#lib/ExpandableList.svelte';
 	import SeoHead from '#lib/SeoHead.svelte';
 	import { formatNumber } from '#lib/format.js';
@@ -41,10 +42,10 @@
 		<div class="issue-anchor" id={issue.id}>
 			<Section id={issue.id + '-title'} title={issue.title}>
 				<div class="surface issue">
-					<p class="effect">{issue.effect}</p>
+					<p class="effect"><LinkedText text={issue.effect} /></p>
 					{#if issue.workaround}<div class="field">
 							<h3 class="field-label">Workaround</h3>
-							<p>{issue.workaround}</p>
+							<p><LinkedText text={issue.workaround} /></p>
 						</div>{/if}
 					{#if affected.length}<div class="field">
 							<h3 class="field-label">
@@ -63,7 +64,7 @@
 					<details class="disclosure">
 						<summary>Steps to Reproduce</summary>
 						<ol class="steps">
-							{#each issue.steps as step, index (index)}<li>{step}</li>{/each}
+							{#each issue.steps as step, index (index)}<li><LinkedText text={step} /></li>{/each}
 						</ol>
 					</details>
 					<details class="disclosure" data-developer>
@@ -71,7 +72,7 @@
 						<dl>
 							<div class="field">
 								<dt class="field-label">Cause</dt>
-								<dd>{issue.cause}</dd>
+								<dd><LinkedText text={issue.cause} /></dd>
 							</div>
 							<div class="field">
 								<dt class="field-label">Functions</dt>

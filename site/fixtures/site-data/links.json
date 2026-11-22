@@ -1,0 +1,10 @@
+{
+	"item:mosswoven-coat": {
+		"icon": "mosswoven-coat",
+		"key": "/Invented/Items/MosswovenCoat",
+		"kind": "item",
+		"name": "Mosswoven Coat",
+		"slug": "mosswoven-coat",
+		"fragment": null
+	}
+}

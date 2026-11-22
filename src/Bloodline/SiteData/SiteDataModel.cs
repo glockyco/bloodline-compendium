@@ -867,6 +867,7 @@ internal sealed record SiteDataFiles(
     IReadOnlyList<EntityKindDefinition> Kinds,
     EntityGraph Graph,
     IReadOnlyList<PublishedIssue> Issues,
+    IReadOnlyDictionary<string, EntityReference> Links,
     CraftingData Crafting,
     DisciplineIndex Disciplines,
     DisciplinePage Discipline,

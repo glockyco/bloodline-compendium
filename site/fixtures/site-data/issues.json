@@ -24,7 +24,7 @@
 				"/Game/Invented/Blueprints/Wardrobe:Get Armor Slot",
 				"/Invented/Blueprints/A_Package_With_A_Very_Long_Path_That_Must_Wrap/Inside/Narrow/Columns:Retrieve Player Armor"
 			],
-			"effect": "The Mosswoven Coat adds no armor when worn, although its tooltip shows armor.",
+			"effect": "The [Mosswoven Coat](item:mosswoven-coat) adds no armor when worn, although its tooltip shows armor.",
 			"expected": "Armor rises by the value the tooltip shows.",
 			"id": "invented-coat-armor",
 			"observed": "Armor stays the same.",
