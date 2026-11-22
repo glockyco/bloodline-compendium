@@ -47,8 +47,16 @@ const commonArguments = [
 const modes = {
   // No renderer and no window: Blueprints and widgets run, which suffices for checks that read values.
   headless: ["-nullrhi"],
-  // Draws into an off-screen buffer without showing a window, for screenshots and model captures.
-  render: ["-RenderOffScreen", "-windowed", "-ResX=1600", "-ResY=900"],
+  // Draws into an off-screen buffer without showing a window, for screenshots and model captures. Textures load
+  // whole instead of streaming in, because a capture taken two frames after an item appears showed it in the
+  // blurred colours of a texture still loading.
+  render: [
+    "-RenderOffScreen",
+    "-windowed",
+    "-ResX=1600",
+    "-ResY=900",
+    "-NoTextureStreaming",
+  ],
   // Shows a window that takes the real cursor, for checks of what hovering shows. It comes to the front.
   window: ["-windowed", "-ResX=1600", "-ResY=900"],
 };
