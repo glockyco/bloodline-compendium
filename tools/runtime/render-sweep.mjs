@@ -120,9 +120,9 @@ function capture(key) {
     worn: armor.get(key),
   };
   if (parts.has(key)) args.part = parts.get(key);
+  let shown;
   try {
-    lab("capture-model", JSON.stringify(args));
-    return null;
+    shown = JSON.parse(lab("capture-model", JSON.stringify(args))).body;
   } catch (error) {
     const lines = String(error.stderr || error.message).split("\n");
     return (
@@ -131,6 +131,12 @@ function capture(key) {
       ) ?? lines[0]
     ).trim();
   }
+  // A render counts only for the body its capture reports, so a sweep on the other body would keep nothing.
+  if (shown !== body)
+    throw new Error(
+      `The game showed the ${shown} body in a sweep of the ${body} body.`,
+    );
+  return null;
 }
 
 // An error about the item's own model leaves the game as it was. A game that stopped answering, or a character that
