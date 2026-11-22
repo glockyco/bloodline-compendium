@@ -177,6 +177,8 @@
 	--size-filter-control: 8rem;
 	/* A row's note lines up with the name beside its icon. */
 	--inset-note: calc(var(--size-icon-row) + var(--gap-inline));
+	/* A line under a table name with its inline icon starts under the name's text. */
+	--inset-icon-text: calc(var(--size-icon-inline) + var(--gap-inline));
 	--inset-ribbon: calc(var(--size-ribbon-notch) + var(--inset));
 	/* The game card beside the main column starts level with the first section's panel, below its heading. */
 	--inset-below-heading: calc(var(--type-section) * var(--leading-heading) + var(--gap-heading));

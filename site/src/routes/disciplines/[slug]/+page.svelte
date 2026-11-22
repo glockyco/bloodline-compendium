@@ -5,6 +5,7 @@
 	import DisciplineTables from '#lib/skills/DisciplineTables.svelte';
 	import BugsSection from '#lib/entity/BugsSection.svelte';
 	import IconSlot from '#lib/ui/IconSlot.svelte';
+	import LinkedText from '#lib/ui/LinkedText.svelte';
 	import { entityPath, kindPath } from '#lib/entities.js';
 	import { disciplineContents } from '#lib/skills/describe.js';
 	let { data } = $props();
@@ -65,9 +66,21 @@
 				>
 			</p>
 		</div>
+		<p class="intro discipline-intro">
+			<LinkedText
+				text="A discipline [levels up as you use it](mechanic:discipline-levels): fight with its weapons or cast its spells. Its level unlocks the skills below, and each level gives [proficiency points](mechanic:proficiency-points) for its passives."
+			/>
+		</p>
 	</div>
 	<div class="item-relations" data-pagefind-ignore="all">
 		<DisciplineTables {discipline} skillFacts={data.skillFacts} />
 		<BugsSection notes={discipline.notes} name={discipline.name} />
 	</div>
 </EntityArticle>
+
+<style>
+	/* The intro spans the heading under the icon and the title, as a phone has no room beside the icon. */
+	.discipline-intro {
+		grid-column: 1 / -1;
+	}
+</style>

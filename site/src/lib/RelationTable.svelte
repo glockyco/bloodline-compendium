@@ -142,6 +142,15 @@
 	.relation-panel :global(.numeric small) {
 		white-space: normal;
 	}
+	/* A name with its icon opening a cell is a row of its own, so no text line adds space under it, and the lines
+	   that follow start under the name's text, where they read as part of it. */
+	.relation-panel :global(td > .with-icon:first-child) {
+		display: flex;
+		width: fit-content;
+	}
+	.relation-panel :global(td > .with-icon:first-child ~ :is(small, .relation-conditions)) {
+		padding-left: var(--inset-icon-text);
+	}
 	.relation-panel :global(td small) {
 		display: block;
 		margin-top: var(--gap-line);

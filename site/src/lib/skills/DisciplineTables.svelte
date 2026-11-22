@@ -35,10 +35,13 @@
 	const slots = $derived(
 		discipline.skillRows.flatMap((row) => row.slots.map((slot) => ({ row: row.level, slot })))
 	);
+	// Passives group by the level that unlocks each, which the game checks, rather than the row its window shows
+	// them in (run rowgate1).
 	const passives = $derived(
-		discipline.passiveRows.flatMap((row) =>
-			row.passives.map((passive) => ({ row: row.level, passive }))
-		)
+		discipline.passiveRows
+			.flatMap((row) => row.passives)
+			.map((passive) => ({ row: passive.requiredLevel, passive }))
+			.sort((a, b) => a.row - b.row)
 	);
 	const factOf = (key: string | null, stat: Stat) =>
 		(skillFacts[key ?? ''] ?? []).find((entry) => entry.stat === stat);
@@ -144,7 +147,7 @@
 						><th colspan="2" scope="colgroup">Level {formatNumber(row)}</th></tr
 					>{/if}<tr id={passive.anchor}
 					><td
-						><span class="relation-name passive-name"
+						><span class="relation-name passive-name with-icon"
 							>{#if passive.icon}<img
 									src="/icons/{passive.icon}-48.webp"
 									alt=""
@@ -162,7 +165,6 @@
 
 <style>
 	.passive-name {
-		display: inline-flex;
 		align-items: center;
 		gap: var(--gap-inline);
 	}

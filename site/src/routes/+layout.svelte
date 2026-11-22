@@ -16,10 +16,10 @@
 	import { browseKinds } from '#lib/entities.js';
 	import { wrongFactHref } from '#lib/seo.js';
 	let { data, children } = $props();
-	// Every kind with pages, in the registry's order, leads from the header and the footer.
+	// Every kind with pages, in the registry's order, leads from the footer, and the kinds players browse most lead
+	// from the header too.
 	const browse = $derived(browseKinds(data.kinds));
-	// The header fits three lists on a phone, so it holds the main reference kinds and the footer lists every kind.
-	const headerKinds = ['item', 'discipline', 'skill'];
+	const headerKinds = ['item', 'discipline', 'skill', 'profession'];
 	// Home opens with the game's art, so its header sits on the art and its search sits in the hero.
 	const home = $derived(page.url.pathname === '/');
 	// A list with its own name search drops the header's below desktop width, to reach its results sooner.
@@ -350,7 +350,8 @@
 			display: none;
 		}
 	}
-	/* A phone keeps the brand and navigation on one row above the search. Support stays in the footer. */
+	/* A phone puts the brand and its tools on the first row, the navigation across the second, as one bar of
+	   destinations, and the search on the third. Support stays in the footer. */
 	@media (width < 40rem) {
 		.footer-inner .others {
 			grid-template-columns: minmax(0, 1fr);
@@ -361,12 +362,15 @@
 		.bar {
 			gap: var(--gap-line) var(--gap-groups);
 		}
-		.bar > nav {
-			margin-left: auto;
-		}
 		.tools,
 		.header-search + .tools {
-			margin-left: 0;
+			order: 2;
+			margin-left: auto;
+		}
+		.bar > nav {
+			order: 3;
+			flex-basis: 100%;
+			justify-content: space-between;
 		}
 		.support {
 			display: none;

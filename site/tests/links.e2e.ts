@@ -8,11 +8,12 @@ test('an entry that checks another discipline names and links it', async ({ page
 		'href',
 		'/disciplines/songcraft/'
 	);
-	// An entry of the page's own discipline needs no link to the page it is on.
-	await expect(page.locator('#passive-glow')).toContainText('Unlocks at Emberlore level 3');
-	await expect(page.locator('#passive-glow').getByRole('link', { name: 'Emberlore' })).toHaveCount(
-		0
-	);
+	// An entry of the page's own discipline sits under the level that unlocks it, so it needs no note.
+	const glow = page.locator('#passive-glow');
+	await expect(
+		glow.locator('xpath=preceding-sibling::tr[contains(@class, "group-heading")][1]')
+	).toHaveText('Level 3');
+	await expect(glow).not.toContainText('Unlocks at');
 });
 
 test('text written for the site links the entities it marks', async ({ page }) => {
