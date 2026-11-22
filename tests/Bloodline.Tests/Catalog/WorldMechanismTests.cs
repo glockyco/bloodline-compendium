@@ -28,7 +28,8 @@ public sealed class WorldMechanismTests
         TableRecord[]? tables = null,
         LevelRecord[]? levels = null,
         AssetRecord[]? dialogues = null,
-        EnumRecord[]? enums = null
+        EnumRecord[]? enums = null,
+        GatheringLevels? gatheringLevels = null
     ) =>
         new(
             new CatalogRecords(
@@ -40,7 +41,10 @@ public sealed class WorldMechanismTests
                 dialogues ?? [],
                 [],
                 []
-            ),
+            )
+            {
+                GatheringLevels = gatheringLevels ?? new([], []),
+            },
             new Dictionary<string, ItemPage>(),
             []
         );
@@ -599,7 +603,8 @@ public sealed class WorldMechanismTests
         Assert.Equal(new Odds(OddsEvent.Pick, 0.4, 0.4, null), result.Source.Odds);
         Assert.Equal(new[] { 0d }, NoteNumbers(result.Source));
         Assert.True(result.Source.Unconfirmed);
-        Assert.Equal(3, Assert.Single(result.Source.Conditions).Value);
+        // The game sets the required level by a custom preset's name, so a preset's recorded level restricts nothing.
+        Assert.Empty(result.Source.Conditions);
         // Every gathering node shares this class, so the node is told apart by the name it shows.
         Assert.Equal(gatherer.Path + "#Iron Deposit", result.Source.Entity.Key);
         Assert.DoesNotContain(
@@ -612,6 +617,43 @@ public sealed class WorldMechanismTests
         Assert.Empty(unused.Places);
         Assert.True(unused.Unconfirmed);
         Assert.Contains("No gathering spot in the world is known to give it.", unused.Notes);
+    }
+
+    [Fact]
+    public void AHarvestRequiresTheLevelItsPresetNameMeasured()
+    {
+        var gatherer = Type(
+            "HarvestableInteractionObject",
+            """
+            {"Custom Preset":true,"Custom Preset Name":"Iron","Required level":1,"Iron Deposit Loot":{"$map":[[{"$ref":"/Invented/Ore.Ore_C"},1]]}}
+            """
+        );
+        var levels = new GatheringLevels(
+            [],
+            [new GatheringLevel("Iron", "Mining", 10), new GatheringLevel("Coal", "Mining", 1)]
+        );
+        IReadOnlyList<RelationCondition> Conditions(string placement) =>
+            new GatheringMechanism()
+                .FindSources(
+                    Context(
+                        [gatherer],
+                        levels: [Level(gatherer, placement)],
+                        gatheringLevels: levels
+                    )
+                )
+                .Single(source => source.Source.Places.Count > 0)
+                .Source.Conditions;
+        var iron = Assert.Single(Conditions("{\"Required level\":3}"));
+        Assert.Equal("Requires Mining level 10", iron.Label);
+        Assert.Equal(10, iron.Value);
+        // Every character is at least level 1, so a level 1 preset shows no requirement.
+        Assert.Empty(
+            Conditions(
+                """
+                {"Custom Preset Name":"Coal","Selected Loot Table":{"$map":[[{"$ref":"/Invented/Ore.Ore_C"},1]]}}
+                """
+            )
+        );
     }
 
     [Fact]

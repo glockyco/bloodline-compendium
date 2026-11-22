@@ -115,6 +115,10 @@ The catalog compares the tree records with the latest `skill-trees.lua` run of t
 
 An entry's level is a reference to the discipline whose level it checks, not a level name, because a few entries check another discipline's level, such as Roanan's Call on Druidism checking Unarmed. A level name belongs to the tree whose entries check it most, and a tree that owns none, such as Utility Gadgets, has no level of its own. Discipline pages head rows "Level 5" for skills and passives alike, and group passives by the level that unlocks each rather than the row the skill window shows them in, because the game checks that level (run rowgate1) and the window's rows misled both build planners in the trials. An entry that checks another discipline adds "Unlocks at Spears level 1" with a link.
 
+### Gathering levels
+
+A harvestable's required level comes from `src/Bloodline/Content/gathering-levels.json`, not from its placement, because `Check Player Level` sets `Required level` and the level it checks from the preset's name each time it runs (run harvest1). Pine needs Woodcutting 1, Birch 5 and Ash 20, Iron needs Mining 10, and Beetle needs Foraging 2. Its evidence names the runs, and the catalog fails when the harvestable class's Woodcutting, Mining and Foraging lists name other presets than the file. A table-drawn preset picks its name in play, so it gets no requirement. Sources say "Requires Mining level 10" as recipes say "Requires Weaponsmithing level 12".
+
 ### Links between pages
 
 Every name the site shows for something in the game is a typed reference in the data, whether or not its kind has pages, so a kind that gains pages turns every mention into a link without rewriting text. This change adds pages for professions, Blood Levels, and skill and proficiency points. Stats and crafting stations get references without pages. Text written for the site marks a reference as a Markdown link with a typed target, such as `[Blood Levels](setting:blood-levels)`, and the catalog resolves it and fails on an unknown target. The game's own text stays as the game shows it, without links, because matching names in it links the wrong sense, such as "frozen ground" in Path of Ice.
@@ -158,6 +162,8 @@ Refactor the catalog, then the site, each verified by unchanged item output and 
 - Where two skill events happen, which the site words only as far as the code shows. Warp Bolt: walking into Karraq's TriggerSphere_1 starts the `Move to Player` timeline, whose end stuns you and unlocks the skill. The sphere stands about 700 m above the level's other triggers (run anvil1), and no place name lies near it. Cloud Catch: The Elderglen Woods' TriggerBox8_3 and its `Ragdoll Checker` start `Screen FX`, which slows time while you fall and calls `Esros Comment on Fall`. The box stands 88 m up, about 106 m from the Abandoned Farmstead and 164 m from the Steps of Esros (run anvil1). A run that plays each event would let the site name the spot.
 
 - Which branch of Thomas Dornscheidt's dialogue gives which of the two items named The Embersnap. One fires Embersparks, and the other, a HandCannon, fired nothing in run ranged4. A run that plays both branches would show whether players can get the broken one, which would make it a known issue.
+
+- Which items the harvest presets give that the records do not name. 1,339 placed harvestables draw their preset from a table, and 249 more name a preset whose items the game picks in code the catalog does not read, such as 121 Birch trees, so Birch Log, Ash Log and Skullcap Mushroom list no gathering source. The maintainer report lists each preset. A run that gives one harvestable each preset name, runs its construction and reads its loot would supply the items, as run harvest1 did for the levels.
 
 ## Where Findings Live
 

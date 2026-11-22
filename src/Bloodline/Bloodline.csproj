@@ -27,6 +27,11 @@
       CopyToOutputDirectory="PreserveNewest"
     />
     <Content
+      Include="Content/gathering-levels.json"
+      Link="gathering-levels.json"
+      CopyToOutputDirectory="PreserveNewest"
+    />
+    <Content
       Include="../../issues/known-issues.json"
       Link="known-issues.json"
       CopyToOutputDirectory="PreserveNewest"

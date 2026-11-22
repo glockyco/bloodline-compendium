@@ -59,6 +59,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
 
     public IEnumerable<EntitySource> FindSources(CatalogContext context)
     {
+        CheckLevels(context);
         foreach (var source in BespokeSources(context))
         {
             yield return source;
@@ -99,6 +100,39 @@ internal sealed class GatheringMechanism : ISourceMechanism
             }
         }
     }
+
+    /// <summary>
+    /// The harvest presets whose placements give items the records do not name, with how many placements each has. A
+    /// table-drawn preset picks its name in play, and a named preset other than Iron, Copper and Pine takes its items
+    /// from the placement's own loot table, which most placements leave empty.
+    /// </summary>
+    public static IEnumerable<(string Preset, int Placements)> UnreadPresets(
+        CatalogContext context
+    ) =>
+        context
+            .Placements.Where(placement =>
+                !context.IsExcludedClass(placement.Actor.Class)
+                && WorldSourceData.IsClass(
+                    context,
+                    placement.Actor.Class,
+                    "HarvestableInteractionObject_C"
+                )
+                && (
+                    SelectedPool(context, placement.Actor.Class, placement.Properties)
+                        is not { } pool
+                    || !WorldSourceData.Pool(placement.Properties[pool]).Any()
+                )
+            )
+            .GroupBy(
+                placement =>
+                    RecordValues.Boolean(placement.Properties["Table Based Preset?"]) == true
+                        ? "drawn from a table"
+                        : RecordValues.String(placement.Properties["Custom Preset Name"])
+                            ?? "without a name",
+                StringComparer.Ordinal
+            )
+            .Select(group => (group.Key, group.Count()))
+            .OrderBy(group => group.Key, StringComparer.Ordinal);
 
     private static bool IsGatherer(CatalogContext context, string path) =>
         WorldSourceData.IsClass(context, path, "HarvestableInteractionObject_C")
@@ -306,34 +340,75 @@ internal sealed class GatheringMechanism : ISourceMechanism
         CatalogContext context,
         JsonObject properties,
         string? levelPath
-    ) =>
-        // Every character is at least level 1, so that requirement restricts nothing.
-        RecordValues.Number(properties["Required level"])
-            is > 1
-                and var level
+    )
+    {
+        var conditions = WorldSourceData.Conditions(context, properties, levelPath);
+        // Check Player Level sets the required level by the preset name and ignores the level a placement records.
+        // Only a custom preset that no table draws names itself in the records, and every character is at least
+        // level 1, so that requirement restricts nothing.
+        return
+            RecordValues.Boolean(properties["Custom Preset"]) == true
+            && RecordValues.Boolean(properties["Table Based Preset?"]) != true
+            && RecordValues.String(properties["Custom Preset Name"]) is { } preset
+            && context.Records.GatheringLevels.Levels.FirstOrDefault(level =>
+                level.Preset == preset
+            )
+                is { Level: > 1 } gathering
             ?
             [
-                .. WorldSourceData.Conditions(context, properties, levelPath),
+                .. conditions,
                 new RelationCondition(
                     ConditionKind.GameState,
                     null,
-                    level,
-                    FormattableString.Invariant($"Requires level {level}")
+                    gathering.Level,
+                    FormattableString.Invariant(
+                        $"Requires {gathering.Checks} level {gathering.Level}"
+                    )
                 ),
             ]
-        : properties.ContainsKey("Required level")
-        && RecordValues.Number(properties["Required level"]) is null
-            ?
-            [
-                .. WorldSourceData.Conditions(context, properties, levelPath),
-                new RelationCondition(
-                    ConditionKind.Unknown,
-                    null,
-                    null,
-                    "The required gathering level could not be read"
-                ),
-            ]
-        : WorldSourceData.Conditions(context, properties, levelPath);
+            : conditions;
+    }
+
+    /// <summary>
+    /// Fails when the harvestable class's level lists and the measured levels name different presets, because a game
+    /// update that adds or moves a preset needs a new run.
+    /// </summary>
+    public static void CheckLevels(CatalogContext context)
+    {
+        var type = context.Classes.Values.SingleOrDefault(type =>
+            ItemIdentity.ClassName(type.Path) == "HarvestableInteractionObject_C"
+        );
+        if (type is null)
+            return;
+        var listed = GatheringLevels
+            .Lists.SelectMany(list =>
+                RecordValues
+                    .Elements(type.Properties[list.Key])
+                    .Select(RecordValues.String)
+                    .OfType<string>()
+                    .Select(name => (Preset: name, Checks: list.Value))
+            )
+            .ToHashSet();
+        var measured = context
+            .Records.GatheringLevels.Levels.Select(level => (level.Preset, level.Checks))
+            .ToHashSet();
+        if (!listed.SetEquals(measured))
+            throw new InvalidDataException(
+                "gathering-levels.json and HarvestableInteractionObject's level lists differ: "
+                    + string.Join(
+                        ", ",
+                        listed
+                            .Except(measured)
+                            .Select(entry => $"{entry.Preset} ({entry.Checks}) unmeasured")
+                    )
+                    + string.Join(
+                        ", ",
+                        measured
+                            .Except(listed)
+                            .Select(entry => $"{entry.Preset} ({entry.Checks}) not listed")
+                    )
+            );
+    }
 
     private static IEnumerable<EntitySource> BespokeSources(CatalogContext context)
     {

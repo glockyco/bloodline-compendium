@@ -109,6 +109,13 @@ internal static class CatalogBuilder
                 null,
                 gap.Package + ": " + gap.Error
             );
+        foreach (var (preset, placements) in GatheringMechanism.UnreadPresets(context))
+            coverage.Add(
+                GapKind.UnreadObject,
+                "Harvest preset " + preset,
+                null,
+                $"{placements} placed harvestables give items that no record names: the game picks them by the preset in code the catalog does not read."
+            );
         // Issue causes cite code as facts do, so they fail on the same missing or partly parsed functions.
         if (records.Code is { } code)
         {

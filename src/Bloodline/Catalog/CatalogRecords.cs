@@ -36,6 +36,9 @@ internal sealed record CatalogRecords(
     /// <summary>Ranged damage that lab runs measured where the catalog cannot read it from the firing code.</summary>
     public IReadOnlyList<MeasuredDamage> MeasuredDamage { get; init; } = [];
 
+    /// <summary>The gathering level each harvestable preset requires, which lab runs measured.</summary>
+    public GatheringLevels GatheringLevels { get; init; } = new([], []);
+
     public static CatalogRecords Load(RecordLayout layout) =>
         new(
             CanonicalJson.Read<BuildRecord>(layout.BuildFile),
@@ -58,6 +61,9 @@ internal sealed record CatalogRecords(
             ),
             MeasuredDamage = CanonicalJson.Read<MeasuredDamage[]>(
                 Path.Combine(AppContext.BaseDirectory, "measured-damage.json")
+            ),
+            GatheringLevels = CanonicalJson.Read<GatheringLevels>(
+                Path.Combine(AppContext.BaseDirectory, "gathering-levels.json")
             ),
         };
 
