@@ -59,7 +59,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
 
     public IEnumerable<EntitySource> FindSources(CatalogContext context)
     {
-        CheckLevels(context);
+        CheckPresets(context);
         foreach (var source in BespokeSources(context))
         {
             yield return source;
@@ -73,10 +73,31 @@ internal sealed class GatheringMechanism : ISourceMechanism
             var placements = context
                 .Placements.Where(placement => placement.Actor.Class == type.Path)
                 .ToArray();
+            var spawned =
+                ItemIdentity.ClassName(type.Path) == "HarvestableInteractionObject"
+                    ? SpawnedHarvestables(context, type).ToArray()
+                    : [];
             // Compare resource identifiers before converting them to display names.
             var placedPools = placements
                 .Select(placement => SelectedPool(context, type.Path, placement.Properties))
                 .ToHashSet(StringComparer.Ordinal);
+            // A placed preset with a pool's name and loot, such as Pine and Pine Tree Loot (run presets2), gives that
+            // pool's items, so the pool needs no unplaced row. Hetrum's loot differs from Hetrum Deposit Loot's.
+            var placedPresets = placements
+                .Select(placement => placement.Properties)
+                .Concat(spawned.Select(spot => spot.Properties))
+                .SelectMany(properties => PresetNames(properties).OfType<string>())
+                .Distinct(StringComparer.Ordinal)
+                .Select(name => Preset(context, name))
+                .ToArray();
+            placedPools.UnionWith(
+                HarvestPools.Values.Where(pool =>
+                    placedPresets.Any(preset =>
+                        PresetName(preset) == SourceName(pool)
+                        && SameLoot(preset, WorldSourceData.Pool(type.Properties[pool]))
+                    )
+                )
+            );
             foreach (
                 var source in Sources(context, type.Path, type.Properties, [], false, placedPools)
             )
@@ -98,18 +119,38 @@ internal sealed class GatheringMechanism : ISourceMechanism
                     yield return source;
                 }
             }
+            foreach (var spot in spawned)
+            {
+                foreach (
+                    var source in Sources(
+                        context,
+                        type.Path,
+                        spot.Properties,
+                        [context.Places.Get(spot.Level)],
+                        true
+                    )
+                )
+                {
+                    yield return source;
+                }
+            }
         }
     }
 
     /// <summary>
-    /// The harvest presets whose placements give items the records do not name, with how many placements each has. A
-    /// table-drawn preset picks its name in play, and a named preset other than Iron, Copper and Pine takes its items
-    /// from the placement's own loot table, which most placements leave empty.
+    /// The custom presets each level can hold in play, placed or spawned, by level path, which the harvest check
+    /// compares with the harvestables a census run found.
     /// </summary>
-    public static IEnumerable<(string Preset, int Placements)> UnreadPresets(
+    public static IReadOnlyDictionary<string, IReadOnlySet<string>> PresetsByLevel(
         CatalogContext context
-    ) =>
-        context
+    )
+    {
+        var harvestable = context.Classes.Values.SingleOrDefault(type =>
+            ItemIdentity.ClassName(type.Path) == "HarvestableInteractionObject"
+        );
+        if (harvestable is null)
+            return new Dictionary<string, IReadOnlySet<string>>();
+        return context
             .Placements.Where(placement =>
                 !context.IsExcludedClass(placement.Actor.Class)
                 && WorldSourceData.IsClass(
@@ -117,22 +158,134 @@ internal sealed class GatheringMechanism : ISourceMechanism
                     placement.Actor.Class,
                     "HarvestableInteractionObject_C"
                 )
-                && (
-                    SelectedPool(context, placement.Actor.Class, placement.Properties)
-                        is not { } pool
-                    || !WorldSourceData.Pool(placement.Properties[pool]).Any()
+            )
+            .Select(placement => (placement.Properties, placement.Level))
+            .Concat(SpawnedHarvestables(context, harvestable))
+            .GroupBy(spot => spot.Level, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                group => group.Key,
+                group =>
+                    (IReadOnlySet<string>)
+                        group
+                            .SelectMany(spot => PresetNames(spot.Properties).OfType<string>())
+                            .ToHashSet(StringComparer.Ordinal),
+                StringComparer.OrdinalIgnoreCase
+            );
+    }
+
+    /// <summary>
+    /// The harvestables that spawners place in play, each as the harvestable class's defaults with the preset the
+    /// spawner gives it, and the level of its spawner. A spawner box draws each harvestable's preset from the General
+    /// Mushroom Spawn Table or General Ore Spawn Table when its flag is set, and from its own Custom Preset Table
+    /// otherwise, as every box in run census2 held once it had spawned. Boxes that do not spawn on their own spawn when
+    /// the level, a cave or an event calls their Spawn. An open-world populator with an Ore (Iron) Count spawns that
+    /// many Iron deposits (run outcrops1), and its tree, stone and copper counts spawned nothing in the runs, so they give
+    /// no harvestables here. A dungeon populator spawns outcrops from its Ore Chances when its Outcrop Spawn Chances is
+    /// above zero, and trees from its Tree Chances when its Tree Spawn Chances is, each taking the preset its type names
+    /// first, such as Iron for Iron Deposit.
+    /// </summary>
+    private static IEnumerable<(JsonObject Properties, string Level)> SpawnedHarvestables(
+        CatalogContext context,
+        ClassRecord harvestable
+    )
+    {
+        foreach (var placement in context.Placements)
+        {
+            if (context.IsExcludedClass(placement.Actor.Class))
+                continue;
+            JsonObject? spawned = null;
+            if (
+                WorldSourceData.IsClass(
+                    context,
+                    placement.Actor.Class,
+                    "Harvestable_Item_Spawner_Box_C"
                 )
             )
-            .GroupBy(
-                placement =>
-                    RecordValues.Boolean(placement.Properties["Table Based Preset?"]) == true
-                        ? "drawn from a table"
-                        : RecordValues.String(placement.Properties["Custom Preset Name"])
-                            ?? "without a name",
-                StringComparer.Ordinal
+            {
+                var properties = placement.Properties;
+                var table =
+                    RecordValues.Boolean(properties["General Mushroom Spawn Rates"]) == true
+                        ? properties["General Mushroom Spawn Table"]
+                    : RecordValues.Boolean(properties["General Ore Spawn Rates"]) == true
+                        ? properties["General Ore Spawn Table"]
+                    : properties["Custom Preset Table"];
+                spawned = new JsonObject
+                {
+                    ["Custom Preset"] = true,
+                    ["Table Based Preset?"] = true,
+                    ["Custom Preset Table"] = table?.DeepClone(),
+                };
+            }
+            else if (
+                WorldSourceData.IsClass(context, placement.Actor.Class, "OpenWorld_Populator_C")
+                && RecordValues.Number(placement.Properties["Ore (Iron) Count"]) is > 0
             )
-            .Select(group => (group.Key, group.Count()))
-            .OrderBy(group => group.Key, StringComparer.Ordinal);
+            {
+                spawned = new JsonObject
+                {
+                    ["Custom Preset"] = true,
+                    ["Table Based Preset?"] = false,
+                    ["Custom Preset Name"] = "Iron",
+                };
+            }
+            if (
+                WorldSourceData.IsClass(
+                    context,
+                    placement.Actor.Class,
+                    "RepeatableDungeonPopulator_C"
+                )
+            )
+            {
+                foreach (
+                    var (chance, table) in new[]
+                    {
+                        ("Outcrop Spawn Chances", "Ore Chances"),
+                        ("Tree Spawn Chances", "Tree Chances"),
+                    }
+                )
+                {
+                    if (RecordValues.Number(placement.Properties[chance]) is not > 0)
+                        continue;
+                    // An outcrop takes the preset its ore type names first, as Iron Deposit spawned Iron (run census3).
+                    var presets = new JsonArray([
+                        .. RecordValues
+                            .MapEntries(placement.Properties[table])
+                            .Where(entry => RecordValues.Number(entry.Value) is > 0)
+                            .Select(entry => new JsonArray(
+                                (
+                                    entry.Key?[RecordFormat.EnumDisplay]?.GetValue<string>() ?? ""
+                                ).Split(' ')[0],
+                                entry.Value?.DeepClone()
+                            )),
+                    ]);
+                    if (presets.Count == 0)
+                        continue;
+                    yield return (
+                        RecordMerge.OverlayProperties(
+                            harvestable.Properties,
+                            new JsonObject
+                            {
+                                ["Custom Preset"] = true,
+                                ["Table Based Preset?"] = true,
+                                ["Custom Preset Table"] = new JsonObject
+                                {
+                                    [RecordFormat.Map] = presets,
+                                },
+                            }
+                        ),
+                        placement.Level
+                    );
+                }
+            }
+            if (spawned is not null)
+            {
+                yield return (
+                    RecordMerge.OverlayProperties(harvestable.Properties, spawned),
+                    placement.Level
+                );
+            }
+        }
+    }
 
     private static bool IsGatherer(CatalogContext context, string path) =>
         WorldSourceData.IsClass(context, path, "HarvestableInteractionObject_C")
@@ -144,17 +297,8 @@ internal sealed class GatheringMechanism : ISourceMechanism
         var harvest = WorldSourceData.IsClass(context, path, "HarvestableInteractionObject_C");
         if (harvest && RecordValues.Boolean(properties["Custom Preset"]) == true)
         {
-            if (RecordValues.Boolean(properties["Table Based Preset?"]) == true)
-            {
-                return null;
-            }
-            return RecordValues.String(properties["Custom Preset Name"]) switch
-            {
-                "Iron" => "Iron Deposit Loot",
-                "Copper" => "Copper Deposit Loot",
-                "Pine" => "Pine Tree Loot",
-                _ => "Selected Loot Table",
-            };
+            // A custom preset's loot comes from harvest-presets.json, not from a pool the records name.
+            return null;
         }
         var index = WorldSourceData.EnumIndex(
             context,
@@ -186,6 +330,14 @@ internal sealed class GatheringMechanism : ISourceMechanism
         var pools = harvest
             ? HarvestPools.Values.Append("Selected Loot Table")
             : GatherPools.Values;
+        if (harvest && RecordValues.Boolean(properties["Custom Preset"]) == true)
+        {
+            foreach (var source in PresetSources(context, path, properties, places, placed))
+            {
+                yield return source;
+            }
+            yield break;
+        }
         foreach (var pool in pools.Distinct(StringComparer.Ordinal))
         {
             if ((placed && selected != pool) || (!placed && placedPools?.Contains(pool) == true))
@@ -296,6 +448,115 @@ internal sealed class GatheringMechanism : ISourceMechanism
         }
     }
 
+    /// <summary>
+    /// The loot of a custom preset, from harvest-presets.json. A placement whose preset a table draws can become any
+    /// preset of the table in play, so it gives the loot of each, with a note that not every spot is that one.
+    /// </summary>
+    private static IEnumerable<EntitySource> PresetSources(
+        CatalogContext context,
+        string path,
+        JsonObject properties,
+        IReadOnlyList<EntityReference> places,
+        bool placed
+    )
+    {
+        var drawn = RecordValues.Boolean(properties["Table Based Preset?"]) == true;
+        foreach (var name in PresetNames(properties).OfType<string>())
+        {
+            var preset = Preset(context, name);
+            var sourceName = PresetName(preset);
+            var notes = HarvestNotes(properties).ToList();
+            if (!placed)
+            {
+                notes.Add("No gathering spot in the world is known to give it.");
+            }
+            if (drawn)
+            {
+                notes.Add(
+                    "The game chooses at random what each of these spots is, so only some of them give it."
+                );
+            }
+            var total = preset.Loot.Sum(loot => loot.Weight);
+            foreach (var loot in preset.Loot)
+            {
+                yield return new EntitySource(
+                    loot.Item,
+                    new Source(SourceKind.Gathering, sourceName, places, null, null, [], notes)
+                    {
+                        Unconfirmed =
+                            !placed
+                            || RecordValues.Number(
+                                properties["Maximum amount of items that can be harvested"]
+                            )
+                                is <= 0,
+                        Entity = WorldSourceData.Reference(EntityKind.Resource, path, sourceName),
+                        Conditions = HarvestConditions(
+                            context,
+                            properties,
+                            places.Count == 1 ? places[0].Key : null,
+                            preset
+                        ),
+                        // A gather picks once, and gathering bonuses can add picks.
+                        Odds =
+                            total > 0
+                                ? LootOdds.Of(
+                                    OddsEvent.Pick,
+                                    (double)(loot.Weight / total),
+                                    PickCount.Fixed(1)
+                                )
+                                : null,
+                    }
+                );
+            }
+        }
+    }
+
+    /// <summary>
+    /// The presets a custom-preset placement can become: its name, or each name of the table it draws from. A missing
+    /// name is null, so the check can report it.
+    /// </summary>
+    private static IEnumerable<string?> PresetNames(JsonObject properties) =>
+        RecordValues.Boolean(properties["Custom Preset"]) != true ? []
+        : RecordValues.Boolean(properties["Table Based Preset?"]) == true
+            ? RecordValues
+                .MapEntries(properties["Custom Preset Table"])
+                .Select(entry => RecordValues.String(entry.Key))
+                .Distinct(StringComparer.Ordinal)
+        : [RecordValues.String(properties["Custom Preset Name"])];
+
+    private static HarvestPreset Preset(CatalogContext context, string name) =>
+        context.Records.HarvestPresets.Presets.First(preset => preset.Preset == name);
+
+    /// <summary>Whether a preset gives each item of a pool with the same chance, and nothing else.</summary>
+    private static bool SameLoot(
+        HarvestPreset preset,
+        IEnumerable<(string Item, Weight Weight)> pool
+    )
+    {
+        var total = preset.Loot.Sum(loot => loot.Weight);
+        var chances = pool.ToDictionary(
+            entry => entry.Item,
+            entry => WeightTotals.Chance(entry.Weight),
+            StringComparer.OrdinalIgnoreCase
+        );
+        return total > 0
+            && chances.Count == preset.Loot.Count
+            && preset.Loot.All(loot =>
+                chances.TryGetValue(loot.Item, out var chance)
+                && chance is { } value
+                && Math.Abs(value - (double)(loot.Weight / total)) < 1e-6
+            );
+    }
+
+    /// <summary>A tree for a Woodcutting preset and a deposit for a Mining one, as the game's own pools name Pine Tree and Iron Deposit.</summary>
+    private static string PresetName(HarvestPreset preset) =>
+        preset.Checks switch
+        {
+            "Woodcutting" => preset.Preset + " Tree",
+            "Mining" => preset.Preset + " Deposit",
+            _ => preset.Preset,
+        };
+
     private static string SourceName(string resource) =>
         resource switch
         {
@@ -339,48 +600,40 @@ internal sealed class GatheringMechanism : ISourceMechanism
     private static IReadOnlyList<RelationCondition> HarvestConditions(
         CatalogContext context,
         JsonObject properties,
-        string? levelPath
+        string? levelPath,
+        HarvestPreset? preset = null
     )
     {
         var conditions = WorldSourceData.Conditions(context, properties, levelPath);
         // Check Player Level sets the required level by the preset name and ignores the level a placement records.
-        // Only a custom preset that no table draws names itself in the records, and every character is at least
-        // level 1, so that requirement restricts nothing.
-        return
-            RecordValues.Boolean(properties["Custom Preset"]) == true
-            && RecordValues.Boolean(properties["Table Based Preset?"]) != true
-            && RecordValues.String(properties["Custom Preset Name"]) is { } preset
-            && context.Records.GatheringLevels.Levels.FirstOrDefault(level =>
-                level.Preset == preset
-            )
-                is { Level: > 1 } gathering
+        // Every character is at least level 1, so that requirement restricts nothing.
+        return preset is { Level: > 1 }
             ?
             [
                 .. conditions,
                 new RelationCondition(
                     ConditionKind.GameState,
                     null,
-                    gathering.Level,
-                    FormattableString.Invariant(
-                        $"Requires {gathering.Checks} level {gathering.Level}"
-                    )
+                    preset.Level,
+                    FormattableString.Invariant($"Requires {preset.Checks} level {preset.Level}")
                 ),
             ]
             : conditions;
     }
 
     /// <summary>
-    /// Fails when the harvestable class's level lists and the measured levels name different presets, because a game
-    /// update that adds or moves a preset needs a new run.
+    /// Fails when the harvestable class's level lists and the measured presets name different presets, or a placement
+    /// names or draws a preset that was not measured, because a game update that adds or moves a preset needs a new
+    /// run.
     /// </summary>
-    public static void CheckLevels(CatalogContext context)
+    public static void CheckPresets(CatalogContext context)
     {
         var type = context.Classes.Values.SingleOrDefault(type =>
             ItemIdentity.ClassName(type.Path) == "HarvestableInteractionObject"
         );
         if (type is null)
             return;
-        var listed = GatheringLevels
+        var listed = HarvestPresets
             .Lists.SelectMany(list =>
                 RecordValues
                     .Elements(type.Properties[list.Key])
@@ -390,23 +643,45 @@ internal sealed class GatheringMechanism : ISourceMechanism
             )
             .ToHashSet();
         var measured = context
-            .Records.GatheringLevels.Levels.Select(level => (level.Preset, level.Checks))
+            .Records.HarvestPresets.Presets.Select(preset => (preset.Preset, preset.Checks))
             .ToHashSet();
         if (!listed.SetEquals(measured))
             throw new InvalidDataException(
-                "gathering-levels.json and HarvestableInteractionObject's level lists differ: "
+                "harvest-presets.json and HarvestableInteractionObject's level lists differ: "
                     + string.Join(
                         ", ",
                         listed
                             .Except(measured)
                             .Select(entry => $"{entry.Preset} ({entry.Checks}) unmeasured")
+                            .Concat(
+                                measured
+                                    .Except(listed)
+                                    .Select(entry => $"{entry.Preset} ({entry.Checks}) not listed")
+                            )
                     )
-                    + string.Join(
-                        ", ",
-                        measured
-                            .Except(listed)
-                            .Select(entry => $"{entry.Preset} ({entry.Checks}) not listed")
-                    )
+            );
+        var names = measured.Select(entry => entry.Preset).ToHashSet(StringComparer.Ordinal);
+        var unmeasured = context
+            .Placements.Where(placement =>
+                !context.IsExcludedClass(placement.Actor.Class)
+                && WorldSourceData.IsClass(
+                    context,
+                    placement.Actor.Class,
+                    "HarvestableInteractionObject_C"
+                )
+            )
+            .Select(placement => placement.Properties)
+            .Concat(SpawnedHarvestables(context, type).Select(spot => spot.Properties))
+            .SelectMany(PresetNames)
+            .Where(name => name is null || !names.Contains(name))
+            .Select(name => name ?? "a preset without a name")
+            .Distinct(StringComparer.Ordinal)
+            .Order(StringComparer.Ordinal)
+            .ToArray();
+        if (unmeasured.Length > 0)
+            throw new InvalidDataException(
+                "Placed harvestables name presets that harvest-presets.json does not measure: "
+                    + string.Join(", ", unmeasured)
             );
     }
 

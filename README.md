@@ -43,6 +43,7 @@ bun tools/runtime/lab.mjs launch
 bun tools/runtime/lab.mjs new-save <name>
 bun tools/runtime/lab.mjs close-tutorials
 bun tools/runtime/tooltip-sweep.mjs <build>
+bun tools/runtime/harvest-sweep.mjs <build>
 bun tools/runtime/lab.mjs quit
 bun tools/runtime/render-sweep.mjs <build>
 bun tools/runtime/render-sweep.mjs <build> female
@@ -51,13 +52,13 @@ bun tools/runtime/publish-renders.mjs <build>
 dotnet run --project src/Bloodline -- catalog
 ```
 
-The tooltip sweep reads every item's tooltip in the running game, and cataloging uses those readings to name the items each known issue affects. A site build stops when a known issue affects no item, which means the sweep did not run for the build. Save names are at most 20 characters.
+The tooltip sweep reads every item's tooltip in the running game, and cataloging uses those readings to name the items each known issue affects. A site build stops when a known issue affects no item, which means the sweep did not run for the build. Save names are at most 20 characters. The harvest sweep opens every level that places harvestables or their spawners, in about an hour, and reads the harvestables in play, which cataloging compares with what it says each level gives.
 
 The render sweeps start their own render-mode games and render every item's model, then the armor with female meshes on the female body, in about an hour and a half. Both resume where they stopped. `publish-renders.mjs` checks every render and exits 1 when one fails, and its `check.json` beside the build's renders lists each failed render and each item without a render with its reason. Review that list before publishing, and render items again with `render-sweep.mjs <build> --items <class path>,... --again` after a view changes.
 
 After a game update, review and add the build's entry in [releases.json](releases.json), repeat extraction and cataloging, compare the new output with the previous build, recheck every known issue as the [game-issues skill](.agent/skills/game-issues/SKILL.md) describes, run the skill and gathering checks again as the [runtime-checks skill](.agent/skills/runtime-checks/SKILL.md) lists them, run `bun run rules:check <build>`, and review the catalog's `report.json` beside the site data before publishing. `rules:check` compares the site's rules, such as prices, experience and proficiency points, with every result the build's lab runs recorded.
 
-Extraction writes the Blueprint function cross-reference to each build's `records/code/index.json`. Cataloging writes the type, inputs and function citations of every published item, skill and passive fact, keyed by kind and entity key, to `claims.json` beside `site/`, without adding them to site data. When lab runs of the build have read item tooltips, cataloging also compares every item's facts with its tooltip, writes each difference and its known cause to `tooltip-check.json`, and lists differences without a known cause in `report.json`. With the latest runs of `skill-tooltips.lua` and `skill-trees.lua`, it compares every skill's facts and every tree's slots and passives with what the game built in the same way, and it fails when the harvest presets of `src/Bloodline/Content/gathering-levels.json` differ from the game's. After extracting a new build, list the facts whose cited code needs review:
+Extraction writes the Blueprint function cross-reference to each build's `records/code/index.json`. Cataloging writes the type, inputs and function citations of every published item, skill and passive fact, keyed by kind and entity key, to `claims.json` beside `site/`, without adding them to site data. When lab runs of the build have read item tooltips, cataloging also compares every item's facts with its tooltip, writes each difference and its known cause to `tooltip-check.json`, and lists differences without a known cause in `report.json`. With the latest runs of `skill-tooltips.lua` and `skill-trees.lua`, it compares every skill's facts and every tree's slots and passives with what the game built in the same way, with the latest harvest sweep it compares every level's harvestables in play with the presets it gives there, and it fails when the game's harvest presets differ from `src/Bloodline/Content/harvest-presets.json`, which gives each preset's loot and gathering level. After extracting a new build, list the facts whose cited code needs review:
 
 ```sh
 dotnet run --project src/Bloodline -- compare artifacts/<previous-build> artifacts/<current-build>

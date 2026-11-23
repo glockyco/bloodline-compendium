@@ -63,6 +63,12 @@ internal enum GapKind
     /// Pages of text written for the site that name a discipline, profession or mechanic without linking it anywhere.
     /// </summary>
     UnlinkedMention,
+
+    /// <summary>
+    /// Harvestables a census run found in play that the catalog does not give in their level, or whose loot differs
+    /// from their preset's measured loot.
+    /// </summary>
+    HarvestDifference,
 }
 
 /// <summary>

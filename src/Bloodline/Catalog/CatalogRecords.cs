@@ -36,8 +36,11 @@ internal sealed record CatalogRecords(
     /// <summary>Ranged damage that lab runs measured where the catalog cannot read it from the firing code.</summary>
     public IReadOnlyList<MeasuredDamage> MeasuredDamage { get; init; } = [];
 
-    /// <summary>The gathering level each harvestable preset requires, which lab runs measured.</summary>
-    public GatheringLevels GatheringLevels { get; init; } = new([], []);
+    /// <summary>The harvestables in play in each level, from the latest census run of the build, empty without one.</summary>
+    public IReadOnlyList<HarvestCensus> Censuses { get; init; } = [];
+
+    /// <summary>What each harvestable preset gives and the gathering level it requires, which lab runs measured.</summary>
+    public HarvestPresets HarvestPresets { get; init; } = new([], []);
 
     public static CatalogRecords Load(RecordLayout layout) =>
         new(
@@ -55,6 +58,7 @@ internal sealed record CatalogRecords(
             Tooltips = TooltipCheck.Load(layout.RuntimeDirectory),
             SkillTooltips = SkillTooltipCheck.Load(layout.RuntimeDirectory),
             Trees = TreeCheck.Load(layout.RuntimeDirectory),
+            Censuses = HarvestCheck.Load(layout.RuntimeDirectory),
             Issues = KnownIssues.Load(Path.Combine(AppContext.BaseDirectory, "known-issues.json")),
             Mechanics = MechanicProducer.Load(
                 Path.Combine(AppContext.BaseDirectory, "mechanics.json")
@@ -62,8 +66,8 @@ internal sealed record CatalogRecords(
             MeasuredDamage = CanonicalJson.Read<MeasuredDamage[]>(
                 Path.Combine(AppContext.BaseDirectory, "measured-damage.json")
             ),
-            GatheringLevels = CanonicalJson.Read<GatheringLevels>(
-                Path.Combine(AppContext.BaseDirectory, "gathering-levels.json")
+            HarvestPresets = CanonicalJson.Read<HarvestPresets>(
+                Path.Combine(AppContext.BaseDirectory, "harvest-presets.json")
             ),
         };
 

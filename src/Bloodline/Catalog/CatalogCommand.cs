@@ -119,6 +119,11 @@ internal static class CatalogCommand
                         ? $"Tree check: {trees} slots and passives compared, {catalog.Report.Gaps.Where(gap => gap.Kind == GapKind.TreeDifference).SelectMany(gap => gap.Entries).Count()} differences."
                         : $"Tree check: no lab run of build {buildId} listed the skill trees."
                 );
+                Console.WriteLine(
+                    records.Censuses.Count > 0
+                        ? $"Harvest check: {records.Censuses.Count} levels compared, {catalog.Report.Gaps.Where(gap => gap.Kind == GapKind.HarvestDifference).SelectMany(gap => gap.Entries).Count()} differences."
+                        : $"Harvest check: no lab run of build {buildId} read the harvestables in play."
+                );
                 return 0;
             }
             catch (Exception error)

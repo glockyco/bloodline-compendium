@@ -1,0 +1,557 @@
+{
+	"evidence": [
+		"Run harvest1, build 24464547: giving one harvestable each name of its Woodcutting Items, Mining Items and Foraging EXP Items lists as its Custom Preset Name and calling Check Player Level set the level and the level to check listed here.",
+		"Run harvest1, build 24464547: in The Elderglen Woods, Check Player Level set the same values on 422 placed harvestables, whatever level their placement recorded, and with every gathering level at 1 it refused Iron, Birch and Beetle and allowed Coal, Pine and Fly Agaric.",
+		"Code: Check Player Level calls Set Required Level WOODCUTTING ITEMS, MINING ITEMS and FORAGING ITEMS, which write Required level, so the level a placement records is not the one the game checks.",
+		"Run presets2, build 24464547: giving one harvestable each preset name and calling NewFunction_0, which its construction script and Begin Play call, filled Selected Loot Table with the loot listed here. Choose Loot gives one item per gather, picking each with its weight over the table's sum.",
+		"Run presets2, build 24464547: a harvestable whose preset a table draws picked Iron 513, Copper 706, Stone 783, Coal 868, Gold 44 and Silver 86 times in 3,000 calls of its Choose Preset, against 534, 699, 822, 822, 41 and 82 for each weight over the table's sum."
+	],
+	"presets": [
+		{
+			"preset": "Birch",
+			"checks": "Woodcutting",
+			"level": 5,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Birch_Log.Birch_Log_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Pine",
+			"checks": "Woodcutting",
+			"level": 1,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Pine_Log.Pine_Log_C",
+					"weight": 2.0
+				},
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/BundleOfTwigs.BundleOfTwigs_C",
+					"weight": 0.5
+				}
+			]
+		},
+		{
+			"preset": "Ash",
+			"checks": "Woodcutting",
+			"level": 20,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ash_Log.Ash_Log_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Palm",
+			"checks": "Woodcutting",
+			"level": 30,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Palm_Log.Palm_Log_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Oak",
+			"checks": "Woodcutting",
+			"level": 10,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Oak_Log.Oak_Log_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Coal",
+			"checks": "Mining",
+			"level": 1,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/ChunkOfCoal.ChunkOfCoal_C",
+					"weight": 0.75
+				},
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Blaststone.Blaststone_C",
+					"weight": 0.1
+				},
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/Stone.Stone_C",
+					"weight": 0.15
+				},
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/Hollowstone.Hollowstone_C",
+					"weight": 0.1
+				},
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Generic_Loot/Tier1ArmorRune.Tier1ArmorRune_C",
+					"weight": 0.15
+				}
+			]
+		},
+		{
+			"preset": "Iron",
+			"checks": "Mining",
+			"level": 10,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/IronOre.IronOre_C",
+					"weight": 1.0
+				},
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/EtherealArchstone.EtherealArchstone_C",
+					"weight": 0.1
+				}
+			]
+		},
+		{
+			"preset": "Copper",
+			"checks": "Mining",
+			"level": 5,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/CopperOre.CopperOre_C",
+					"weight": 1.0
+				},
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/EtherealArchstone.EtherealArchstone_C",
+					"weight": 0.1
+				}
+			]
+		},
+		{
+			"preset": "Hetrum",
+			"checks": "Mining",
+			"level": 20,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/HetrumOre.HetrumOre_C",
+					"weight": 1.0
+				},
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Generic_Loot/Tier3ArmorRune.Tier3ArmorRune_C",
+					"weight": 0.1
+				},
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Generic_Loot/Tier2ArmorRune.Tier2ArmorRune_C",
+					"weight": 0.35
+				},
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Generic_Loot/Tier1ArmorRune.Tier1ArmorRune_C",
+					"weight": 0.4
+				}
+			]
+		},
+		{
+			"preset": "Stone",
+			"checks": "Mining",
+			"level": 1,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/Stone.Stone_C",
+					"weight": 1.0
+				},
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/Hollowstone.Hollowstone_C",
+					"weight": 0.1
+				},
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Generic_Loot/Tier1ArmorRune.Tier1ArmorRune_C",
+					"weight": 0.1
+				}
+			]
+		},
+		{
+			"preset": "Gold",
+			"checks": "Mining",
+			"level": 20,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/GoldOore.GoldOore_C",
+					"weight": 1.0
+				},
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Generic_Loot/Tier2ArmorRune.Tier2ArmorRune_C",
+					"weight": 0.4
+				},
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Generic_Loot/Tier3ArmorRune.Tier3ArmorRune_C",
+					"weight": 0.3
+				}
+			]
+		},
+		{
+			"preset": "Silver",
+			"checks": "Mining",
+			"level": 15,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/SilverOre.SilverOre_C",
+					"weight": 1.0
+				},
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Generic_Loot/Tier2ArmorRune.Tier2ArmorRune_C",
+					"weight": 0.4
+				},
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Generic_Loot/Tier3ArmorRune.Tier3ArmorRune_C",
+					"weight": 0.2
+				}
+			]
+		},
+		{
+			"preset": "Astral Ore",
+			"checks": "Mining",
+			"level": 15,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/AstralOre.AstralOre_C",
+					"weight": 1.0
+				},
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Generic_Loot/Tier3ArmorRune.Tier3ArmorRune_C",
+					"weight": 0.3
+				}
+			]
+		},
+		{
+			"preset": "Moonstone",
+			"checks": "Mining",
+			"level": 12,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/MoonstoneOre.MoonstoneOre_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Atacamite",
+			"checks": "Mining",
+			"level": 10,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/AtacamiteOre.AtacamiteOre_C",
+					"weight": 1.0
+				},
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Generic_Loot/Tier2ArmorRune.Tier2ArmorRune_C",
+					"weight": 0.4
+				},
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Generic_Loot/Tier1ArmorRune.Tier1ArmorRune_C",
+					"weight": 0.25
+				}
+			]
+		},
+		{
+			"preset": "Sandstone",
+			"checks": "Mining",
+			"level": 10,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/SandstoneOre.SandstoneOre_C",
+					"weight": 1.0
+				},
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Generic_Loot/Tier3ArmorRune.Tier3ArmorRune_C",
+					"weight": 0.2
+				},
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Generic_Loot/Tier2ArmorRune.Tier2ArmorRune_C",
+					"weight": 0.3
+				}
+			]
+		},
+		{
+			"preset": "Fly Agaric",
+			"checks": "Foraging",
+			"level": 1,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Mushrooms/FlyAgaric_Mushroom.FlyAgaric_Mushroom_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Maple Entoloma",
+			"checks": "Foraging",
+			"level": 1,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Mushrooms/MapleEntoloma_Mushroom.MapleEntoloma_Mushroom_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Azure Lover",
+			"checks": "Foraging",
+			"level": 5,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Mushrooms/AzureLover_Mushroom.AzureLover_Mushroom_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Lily Pad",
+			"checks": "Foraging",
+			"level": 1,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Herbs_And_Roots/LilyPad.LilyPad_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Beetle",
+			"checks": "Foraging",
+			"level": 2,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/UnyieldingChitin.UnyieldingChitin_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Gilded Boletus",
+			"checks": "Foraging",
+			"level": 4,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Mushrooms/GildedBoletus_Mushroom.GildedBoletus_Mushroom_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Sanguine Russula",
+			"checks": "Foraging",
+			"level": 2,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Mushrooms/SanguineRussula_Mushroom.SanguineRussula_Mushroom_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Moonglow Indigo",
+			"checks": "Foraging",
+			"level": 2,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Herbs_And_Roots/MoonglowIndigo.MoonglowIndigo_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Witches' Knell",
+			"checks": "Foraging",
+			"level": 3,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Herbs_And_Roots/WitchesKnell.WitchesKnell_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Banshee Lily",
+			"checks": "Foraging",
+			"level": 3,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Herbs_And_Roots/BansheeLily.BansheeLily_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Reeds",
+			"checks": "Foraging",
+			"level": 1,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Herbs_And_Roots/CommonReed.CommonReed_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Branch Blossom",
+			"checks": "Foraging",
+			"level": 4,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Herbs_And_Roots/BranchBlossom.BranchBlossom_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Buff Shroom",
+			"checks": "Foraging",
+			"level": 1,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Mushrooms/Buffshroom_Mushroom.Buffshroom_Mushroom_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Jet Shroom",
+			"checks": "Foraging",
+			"level": 1,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Mushrooms/JetShroom_Mushroom.JetShroom_Mushroom_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Lumber Conopilus",
+			"checks": "Foraging",
+			"level": 1,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Mushrooms/LumberConopilus_Mushroom.LumberConopilus_Mushroom_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Druidsight Cap",
+			"checks": "Foraging",
+			"level": 1,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Mushrooms/DruidsightCap_Mushroom.DruidsightCap_Mushroom_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Love Me Not",
+			"checks": "Foraging",
+			"level": 1,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Herbs_And_Roots/LoveMeNotFlower.LoveMeNotFlower_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Rose Daisy",
+			"checks": "Foraging",
+			"level": 1,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Herbs_And_Roots/RoseDaisey.RoseDaisey_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Skullcap Mushroom",
+			"checks": "Foraging",
+			"level": 1,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Mushrooms/Skullcap_Mushroom.Skullcap_Mushroom_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Goblin Mold",
+			"checks": "Foraging",
+			"level": 1,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Mushrooms/GoblinMold.GoblinMold_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Shrink Shroom",
+			"checks": "Foraging",
+			"level": 3,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Mushrooms/ShrinkShroom.ShrinkShroom_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Grow Gloom",
+			"checks": "Foraging",
+			"level": 3,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Mushrooms/GrowGloom.GrowGloom_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Mouseshroom",
+			"checks": "Foraging",
+			"level": 3,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Mushrooms/Mouseshroom_Mushroom.Mouseshroom_Mushroom_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Aloe",
+			"checks": "Foraging",
+			"level": 5,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/GeneralFoodItems/Aloe.Aloe_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Golden Barrel Cactus",
+			"checks": "Foraging",
+			"level": 6,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/GeneralFoodItems/GoldenBarrelCactus.GoldenBarrelCactus_C",
+					"weight": 1.0
+				}
+			]
+		},
+		{
+			"preset": "Coconut",
+			"checks": "Foraging",
+			"level": 1,
+			"loot": [
+				{
+					"item": "/Game/BloodlinesAlpha/Interactables/Crafting_Items/GeneralFoodItems/Coconut.Coconut_C",
+					"weight": 1.0
+				}
+			]
+		}
+	]
+}

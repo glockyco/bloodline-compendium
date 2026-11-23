@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using Bloodline.Catalog;
+using Bloodline.Output;
 using Bloodline.Records;
 using Bloodline.SiteData;
 
@@ -29,7 +30,7 @@ public sealed class WorldMechanismTests
         LevelRecord[]? levels = null,
         AssetRecord[]? dialogues = null,
         EnumRecord[]? enums = null,
-        GatheringLevels? gatheringLevels = null
+        HarvestPresets? harvestPresets = null
     ) =>
         new(
             new CatalogRecords(
@@ -43,7 +44,7 @@ public sealed class WorldMechanismTests
                 []
             )
             {
-                GatheringLevels = gatheringLevels ?? new([], []),
+                HarvestPresets = harvestPresets ?? new([], []),
             },
             new Dictionary<string, ItemPage>(),
             []
@@ -620,50 +621,195 @@ public sealed class WorldMechanismTests
     }
 
     [Fact]
-    public void AHarvestRequiresTheLevelItsPresetNameMeasured()
+    public void ACustomPresetGivesItsMeasuredLootAndLevel()
     {
         var gatherer = Type(
             "HarvestableInteractionObject",
-            """
-            {"Mining Items":["Iron","Coal"],"Custom Preset":true,"Custom Preset Name":"Iron","Required level":1,"Iron Deposit Loot":{"$map":[[{"$ref":"/Invented/Ore.Ore_C"},1]]}}
-            """
+            """{"Mining Items":["Iron","Coal"],"Iron Deposit Loot":{"$map":[[{"$ref":"/Invented/Old.Old_C"},1]]}}"""
         );
-        var levels = new GatheringLevels(
+        var presets = new HarvestPresets(
             [],
-            [new GatheringLevel("Iron", "Mining", 10), new GatheringLevel("Coal", "Mining", 1)]
+            [
+                new HarvestPreset(
+                    "Iron",
+                    "Mining",
+                    10,
+                    [new("/Invented/Ore.Ore_C", 3), new("/Invented/Gem.Gem_C", 1)]
+                ),
+                new HarvestPreset("Coal", "Mining", 1, [new("/Invented/Coal.Coal_C", 1)]),
+            ]
         );
-        IReadOnlyList<RelationCondition> Conditions(string placement) =>
+        EntitySource[] Sources(string placement) =>
             new GatheringMechanism()
                 .FindSources(
                     Context(
                         [gatherer],
                         levels: [Level(gatherer, placement)],
-                        gatheringLevels: levels
+                        harvestPresets: presets
                     )
                 )
-                .Single(source => source.Source.Places.Count > 0)
-                .Source.Conditions;
-        var iron = Assert.Single(Conditions("{\"Required level\":3}"));
-        Assert.Equal("Requires Mining level 10", iron.Label);
-        Assert.Equal(10, iron.Value);
-        // Every character is at least level 1, so a level 1 preset shows no requirement.
-        Assert.Empty(
-            Conditions(
-                """
-                {"Custom Preset Name":"Coal","Selected Loot Table":{"$map":[[{"$ref":"/Invented/Ore.Ore_C"},1]]}}
-                """
-            )
+                .Where(source => source.Source.Places.Count > 0)
+                .ToArray();
+
+        // The game sets the required level by the preset's name, whatever level the placement records.
+        var named = Sources(
+            """{"Custom Preset":true,"Custom Preset Name":"Iron","Required level":3}"""
         );
+        Assert.DoesNotContain(named, source => source.Key == "/Invented/Old.Old_C");
+        var ore = Assert.Single(named, source => source.Key == "/Invented/Ore.Ore_C").Source;
+        Assert.Equal(0.75, ore.Odds!.Chance);
+        Assert.Equal("Iron Deposit", ore.Name);
+        Assert.Equal(gatherer.Path + "#Iron Deposit", ore.Entity.Key);
+        Assert.Equal("Requires Mining level 10", Assert.Single(ore.Conditions).Label);
+        Assert.Equal(
+            0.25,
+            Assert.Single(named, source => source.Key == "/Invented/Gem.Gem_C").Source.Odds!.Chance
+        );
+
+        // A drawn spot can become any preset of its table, so it gives each preset's loot with that preset's level.
+        var drawn = Sources(
+            """{"Custom Preset":true,"Table Based Preset?":true,"Custom Preset Table":{"$map":[["Iron",1],["Coal",2]]}}"""
+        );
+        Assert.Equal(3, drawn.Length);
+        var coal = Assert.Single(drawn, source => source.Key == "/Invented/Coal.Coal_C").Source;
+        Assert.Equal("Coal Deposit", coal.Name);
+        Assert.Equal(1, coal.Odds!.Chance);
+        // Every character is at least level 1, so a level 1 preset shows no requirement.
+        Assert.Empty(coal.Conditions);
+        var drawnOre = Assert.Single(drawn, source => source.Key == "/Invented/Ore.Ore_C").Source;
+        Assert.Equal("Requires Mining level 10", Assert.Single(drawnOre.Conditions).Label);
+        // Rows merge when everything but their places matches, so its note keeps a drawn spot's row apart from the row
+        // of spots that are always that preset.
+        Assert.NotEqual(
+            CanonicalJson.Serialize(ore with { Places = [] }),
+            CanonicalJson.Serialize(drawnOre with { Places = [] })
+        );
+
+        var unmeasured = Assert.Throws<InvalidDataException>(() =>
+            Sources("""{"Custom Preset":true,"Custom Preset Name":"Gold"}""")
+        );
+        Assert.Contains("Gold", unmeasured.Message, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void TheCatalogFailsWhenTheGameListsAPresetTheLevelsDoNotMeasure()
+    public void ASpawnerBoxGivesThePresetsOfTheTableItSpawnsFrom()
+    {
+        var harvestable = Type(
+            "HarvestableInteractionObject",
+            """{"Woodcutting Items":["Birch","Pine"],"Foraging EXP Items":["Fly Agaric"]}"""
+        );
+        var box = Type(
+            "Harvestable_Item_Spawner_Box",
+            """{"Custom Preset Table":{"$map":[["Birch",1]]},"General Mushroom Spawn Rates":false,"General Mushroom Spawn Table":{"$map":[["Fly Agaric",1]]},"General Ore Spawn Rates":false,"General Ore Spawn Table":{"$map":[]}}"""
+        );
+        var presets = new HarvestPresets(
+            [],
+            [
+                new HarvestPreset("Birch", "Woodcutting", 5, [new("/Invented/Birch.Birch_C", 1)]),
+                new HarvestPreset("Pine", "Woodcutting", 1, [new("/Invented/Pine.Pine_C", 1)]),
+                new HarvestPreset(
+                    "Fly Agaric",
+                    "Foraging",
+                    1,
+                    [new("/Invented/Agaric.Agaric_C", 1)]
+                ),
+            ]
+        );
+        EntitySource[] Sources(string placement) =>
+            new GatheringMechanism()
+                .FindSources(
+                    Context(
+                        [harvestable, box],
+                        levels: [Level(box, placement)],
+                        harvestPresets: presets
+                    )
+                )
+                .Where(source => source.Source.Places.Count > 0)
+                .ToArray();
+
+        var trees = Sources("{}");
+        var birch = Assert.Single(trees).Source;
+        Assert.Equal("Birch Tree", birch.Name);
+        Assert.Equal("/Invented/Coast", Assert.Single(birch.Places).Key);
+        Assert.Equal("Requires Woodcutting level 5", Assert.Single(birch.Conditions).Label);
+
+        // A box flagged for general mushroom rates spawns from that table instead of its own.
+        var mushrooms = Sources("""{"General Mushroom Spawn Rates":true}""");
+        Assert.Equal("/Invented/Agaric.Agaric_C", Assert.Single(mushrooms).Key);
+    }
+
+    [Fact]
+    public void TheHarvestCheckReportsWhatThePlayedLevelHoldsThatTheCatalogDoesNotGive()
+    {
+        var harvestable = Type(
+            "HarvestableInteractionObject",
+            """{"Mining Items":["Iron","Coal"]}"""
+        );
+        var presets = new HarvestPresets(
+            [],
+            [
+                new HarvestPreset("Iron", "Mining", 10, [new("/Invented/Ore.Ore_C", 1)]),
+                new HarvestPreset("Coal", "Mining", 1, [new("/Invented/Coal.Coal_C", 1)]),
+            ]
+        );
+        var context = Context(
+            [harvestable],
+            levels:
+            [
+                new LevelRecord(
+                    "/Invented/Coast",
+                    [],
+                    [
+                        new ActorRecord(
+                            "Placed",
+                            harvestable.Path,
+                            Parse("""{"Custom Preset":true,"Custom Preset Name":"Iron"}""")
+                        ),
+                    ]
+                ),
+            ],
+            harvestPresets: presets
+        );
+        IReadOnlyList<GapEntry> Gaps(CensusHarvestable harvestable)
+        {
+            var coverage = new Coverage();
+            HarvestCheck.Compare(
+                context,
+                [new HarvestCensus("Coast", [harvestable], "run")],
+                coverage
+            );
+            return coverage
+                    .Report([])
+                    .Gaps.SingleOrDefault(gap => gap.Kind == GapKind.HarvestDifference)
+                    ?.Entries
+                ?? [];
+        }
+
+        Assert.Empty(Gaps(new("Placed", true, "Iron", [new("/Invented/Ore.Ore_C", 1)])));
+        Assert.Contains(
+            "Coal",
+            Assert
+                .Single(Gaps(new("Spawned", true, "Coal", [new("/Invented/Coal.Coal_C", 1)])))
+                .Label
+        );
+        Assert.Contains(
+            "loot",
+            Assert.Single(Gaps(new("Placed", true, "Iron", [new("/Invented/Gem.Gem_C", 1)]))).Detail
+        );
+        Assert.Single(Gaps(new("Spawned", false, null, [])));
+    }
+
+    [Fact]
+    public void TheCatalogFailsWhenTheGameListsAPresetThatWasNotMeasured()
     {
         var gatherer = Type("HarvestableInteractionObject", """{"Mining Items":["Iron","Gold"]}""");
-        var levels = new GatheringLevels([], [new GatheringLevel("Iron", "Mining", 10)]);
+        var presets = new HarvestPresets(
+            [],
+            [new HarvestPreset("Iron", "Mining", 10, [new("/Invented/Ore.Ore_C", 1)])]
+        );
         var error = Assert.Throws<InvalidDataException>(() =>
             new GatheringMechanism()
-                .FindSources(Context([gatherer], gatheringLevels: levels))
+                .FindSources(Context([gatherer], harvestPresets: presets))
                 .ToArray()
         );
         Assert.Contains("Gold", error.Message, StringComparison.Ordinal);
@@ -792,28 +938,6 @@ public sealed class WorldMechanismTests
             source => source.Source.Places.Count > 0
         );
         Assert.Equal(2.0 / 3, placed.Source.Odds!.Chance);
-    }
-
-    [Theory]
-    [InlineData("Iron", "Iron Deposit Loot")]
-    [InlineData("Copper", "Copper Deposit Loot")]
-    [InlineData("Pine", "Pine Tree Loot")]
-    public void GatheringCustomPresetsUseAuthoredResourceMaps(string preset, string field)
-    {
-        var gatherer = Type("HarvestableInteractionObject", """{"Custom Preset":true}""");
-        gatherer.Properties["Custom Preset Name"] = preset;
-        gatherer.Properties[field] = Parse(
-            """{"$map":[[{"$ref":"/Invented/Resource.Resource_C"},1]]}"""
-        );
-        Assert.Single(
-            new GatheringMechanism().FindSources(Context([gatherer], levels: [Level(gatherer)])),
-            source => source.Source.Places.Count > 0
-        );
-        gatherer.Properties["Table Based Preset?"] = true;
-        Assert.DoesNotContain(
-            new GatheringMechanism().FindSources(Context([gatherer], levels: [Level(gatherer)])),
-            source => source.Source.Places.Count > 0
-        );
     }
 
     [Theory]

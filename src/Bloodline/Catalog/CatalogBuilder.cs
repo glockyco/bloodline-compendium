@@ -109,13 +109,6 @@ internal static class CatalogBuilder
                 null,
                 gap.Package + ": " + gap.Error
             );
-        foreach (var (preset, placements) in GatheringMechanism.UnreadPresets(context))
-            coverage.Add(
-                GapKind.UnreadObject,
-                "Harvest preset " + preset,
-                null,
-                $"{placements} placed harvestables give items that no record names: the game picks them by the preset in code the catalog does not read."
-            );
         // Issue causes cite code as facts do, so they fail on the same missing or partly parsed functions.
         if (records.Code is { } code)
         {
@@ -137,6 +130,7 @@ internal static class CatalogBuilder
         var skills = skillProducer.Finish(skillsPrepared, graphResult);
         SkillTooltipCheck.Compare(skills.Entries, records.SkillTooltips, coverage);
         TreeCheck.Compare(skills.Disciplines, skills.References, records.Trees, coverage);
+        HarvestCheck.Compare(context, records.Censuses, coverage);
         var skillClaims = new FactClaims(records.Code, records.Build.BuildId);
         SkillProducer.Claim(skills, skillClaims);
         var professions = ProfessionProducer.Produce(items.Items);

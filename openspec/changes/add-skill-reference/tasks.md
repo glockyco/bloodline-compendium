@@ -54,6 +54,13 @@
 - [x] 6A.3 Publish pages for professions, Blood Levels, and skill and proficiency points from recorded facts
 - [x] 6A.4 Head the Used For column and filter "Profession" and link its values
 
+## 6B. Gathering spots
+
+- [x] 6B.1 Give placed harvestables the loot and level of their preset, named or drawn from a table, from a lab run
+- [x] 6B.2 Add the harvestables that spawner boxes, open-world and dungeon populators, small event areas and the Harbinger tutorial create at runtime, with the place of each spawner
+- [ ] 6B.3 Compare every level's live harvestables with what the catalog says the level gives, from a census run, and fail on a difference without a known cause
+- [ ] 6B.4 Compare the gathering source rows, names and notes in Plannotator on real item pages
+
 ## 7. Ship
 
 - [ ] 7.1 Run the full check suite and the real-data build

@@ -27,8 +27,8 @@
       CopyToOutputDirectory="PreserveNewest"
     />
     <Content
-      Include="Content/gathering-levels.json"
-      Link="gathering-levels.json"
+      Include="Content/harvest-presets.json"
+      Link="harvest-presets.json"
       CopyToOutputDirectory="PreserveNewest"
     />
     <Content
