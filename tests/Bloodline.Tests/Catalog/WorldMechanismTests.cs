@@ -625,7 +625,7 @@ public sealed class WorldMechanismTests
         var gatherer = Type(
             "HarvestableInteractionObject",
             """
-            {"Custom Preset":true,"Custom Preset Name":"Iron","Required level":1,"Iron Deposit Loot":{"$map":[[{"$ref":"/Invented/Ore.Ore_C"},1]]}}
+            {"Mining Items":["Iron","Coal"],"Custom Preset":true,"Custom Preset Name":"Iron","Required level":1,"Iron Deposit Loot":{"$map":[[{"$ref":"/Invented/Ore.Ore_C"},1]]}}
             """
         );
         var levels = new GatheringLevels(
@@ -654,6 +654,19 @@ public sealed class WorldMechanismTests
                 """
             )
         );
+    }
+
+    [Fact]
+    public void TheCatalogFailsWhenTheGameListsAPresetTheLevelsDoNotMeasure()
+    {
+        var gatherer = Type("HarvestableInteractionObject", """{"Mining Items":["Iron","Gold"]}""");
+        var levels = new GatheringLevels([], [new GatheringLevel("Iron", "Mining", 10)]);
+        var error = Assert.Throws<InvalidDataException>(() =>
+            new GatheringMechanism()
+                .FindSources(Context([gatherer], gatheringLevels: levels))
+                .ToArray()
+        );
+        Assert.Contains("Gold", error.Message, StringComparison.Ordinal);
     }
 
     [Fact]

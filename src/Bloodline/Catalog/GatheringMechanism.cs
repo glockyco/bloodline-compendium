@@ -376,7 +376,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
     public static void CheckLevels(CatalogContext context)
     {
         var type = context.Classes.Values.SingleOrDefault(type =>
-            ItemIdentity.ClassName(type.Path) == "HarvestableInteractionObject_C"
+            ItemIdentity.ClassName(type.Path) == "HarvestableInteractionObject"
         );
         if (type is null)
             return;
