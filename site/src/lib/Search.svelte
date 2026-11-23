@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tick } from 'svelte';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { browseKinds } from './entities.js';
@@ -46,12 +47,18 @@
 			open = true;
 			const step = event.key === 'ArrowDown' ? 1 : -1;
 			active = (active + step + results.length) % results.length;
+			// Only the arrow keys scroll, so a hovered half-visible result never moves under the pointer.
+			void tick().then(reveal);
 		} else if (event.key === 'Enter' && open && results[active]) {
 			event.preventDefault();
 			choose(results[active]);
 		} else if (event.key === 'Escape') {
 			open = false;
 		}
+	}
+
+	function reveal() {
+		document.getElementById(`${id}-option-${active}`)?.scrollIntoView({ block: 'nearest' });
 	}
 
 	function choose(result: SearchResult) {
@@ -136,7 +143,7 @@
 									choose(result);
 								}}
 							>
-								<IconSlot icon={result.icon} size="row" />
+								<IconSlot icon={result.icon} />
 								<span class="text">
 									<span class="name" data-game>{result.title}</span>
 									<span class="detail"
