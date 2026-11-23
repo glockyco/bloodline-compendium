@@ -65,9 +65,9 @@ test('a link opens the build as a preview, and saving keeps it as a character', 
 	await level(page).fill('4');
 	await level(page).press('Enter');
 	await tab(page, 'Skill Bars');
-	await page.getByRole('button', { name: 'Row 1, slot 3: empty' }).click();
+	await page.getByRole('button', { name: 'Row 1, slot 3: empty', exact: true }).click();
 	await page
-		.getByRole('group', { name: 'Skills for Row 1, slot 3' })
+		.getByRole('group', { name: 'Skills for Row 1, slot 3', exact: true })
 		.getByRole('button', { name: 'Moss Ward' })
 		.click();
 	await page.getByRole('button', { name: 'Copy Link' }).click();
@@ -90,7 +90,9 @@ test('a link opens the build as a preview, and saving keeps it as a character', 
 	await expect(page.getByText('This is a shared build.')).toBeVisible();
 	await expect(level(page)).toHaveValue('4');
 	await tab(page, 'Skill Bars');
-	await expect(page.getByRole('button', { name: 'Row 1, slot 3: Moss Ward' })).toBeVisible();
+	await expect(
+		page.getByRole('button', { name: 'Row 1, slot 3: Moss Ward', exact: true })
+	).toBeVisible();
 	await expect(page.getByLabel('Saved Character')).toHaveValue('');
 	await page.getByLabel('Name').fill('Warden');
 	await page.getByRole('button', { name: 'Save as New' }).click();
@@ -103,17 +105,20 @@ test('a link opens the build as a preview, and saving keeps it as a character', 
 test('the skill bar works from the keyboard and places taught skills', async ({ page }) => {
 	await open(page);
 	await tab(page, 'Skill Bars');
-	const slot = page.getByRole('button', { name: 'Row 2, slot 1: empty' });
+	const slot = page.getByRole('button', { name: 'Row 2, slot 1: empty', exact: true });
 	await slot.press('Enter');
 	// Opening a slot moves focus to its search field, Enter places the first match, and focus returns to the slot.
 	const search = page.getByRole('searchbox', { name: 'Search skills' });
 	await expect(search).toBeFocused();
-	const chooser = page.getByRole('group', { name: 'Skills for Row 2, slot 1' });
+	const chooser = page.getByRole('group', { name: 'Skills for Row 2, slot 1', exact: true });
 	await expect(chooser.getByRole('heading', { name: 'Taught by a Book or Event' })).toBeVisible();
 	await search.fill('flare');
 	await expect(chooser.getByRole('button')).toHaveText(['Lanternedge Flare']);
 	await search.press('Enter');
-	const placed = page.getByRole('button', { name: 'Row 2, slot 1: Lanternedge Flare' });
+	const placed = page.getByRole('button', {
+		name: 'Row 2, slot 1: Lanternedge Flare',
+		exact: true
+	});
 	await expect(placed).toBeFocused();
 	// A taught skill on the bar costs no skill point, so the build stays valid at level 1.
 	await expect(page.locator('section[aria-labelledby="problems"]')).toHaveCount(0);
@@ -131,7 +136,10 @@ test('each section is a tab with its own address, and a phone switches between s
 	await expect(page.locator('.planner[data-ready]')).toBeAttached();
 	const bars = page.getByRole('tab', { name: 'Skill Bars' });
 	await expect(bars).toHaveAttribute('aria-selected', 'true');
-	await expect(page.getByRole('button', { name: 'Row 1, slot 1: empty' })).toBeVisible();
+	await expect(
+		page.getByRole('button', { name: 'Row 1, slot 1: empty', exact: true })
+	).toBeVisible();
+	await expect(page.getByRole('button', { name: 'Offhand row 1, slot 1: empty' })).toBeVisible();
 	await bars.press('ArrowLeft');
 	await expect(page.getByRole('tab', { name: 'Skills' })).toBeFocused();
 	await expect(page).toHaveURL(/#skills$/);

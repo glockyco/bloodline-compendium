@@ -44,7 +44,10 @@ const build: PlannerState = {
 		disciplines: { '/Invented/FireTree': 6 },
 		unlocked: ['/Invented/Ember']
 	},
-	skillBars: { main: ['/Invented/Ember', null, null, null, null, null, null, null, null, null] }
+	skillBars: {
+		offhand: [null, null, null, null, null, null, null, null, null, '/Invented/Ember'],
+		main: ['/Invented/Ember', null, null, null, null, null, null, null, null, null]
+	}
 };
 
 async function raw(json: string) {

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { tick } from 'svelte';
 	import type { PlannerData } from '../site-data.js';
-	import { hotbarSlots, type PlannerState } from './state.js';
+	import { hotbarSlots, type PlannerState, type SkillBar } from './state.js';
 	/**
 	 * The game's skill bar, two rows of five slots, drawn as the game draws it: an icon tile with the slot's key, and
 	 * the skill's name below. Choosing a slot opens a chooser with a search field, listing the skills the character
@@ -12,12 +12,17 @@
 	let {
 		plan,
 		data,
+		bar = 'main',
 		place
 	}: {
 		plan: PlannerState;
 		data: PlannerData;
+		/** Which of the game's two bars this edits. */
+		bar?: SkillBar;
 		place: (slot: number, skill: string | null) => void;
 	} = $props();
+	const slots = $derived(plan.skillBars[bar]);
+	const pickerId = $derived(`${bar}-bar-picker`);
 	type Choice = { key: string; name: string; icon: string | null };
 	const skills = $derived(new Map(data.skills.map((skill) => [skill.key, skill])));
 	const byName = (a: Choice, b: Choice) => a.name.localeCompare(b.name, 'en');
@@ -51,7 +56,7 @@
 	const slotButtons: HTMLButtonElement[] = $state([]);
 	let search: HTMLInputElement | undefined = $state();
 	const label = (slot: number) =>
-		`Row ${Math.floor(slot / perRow) + 1}, slot ${(slot % perRow) + 1}`;
+		`${bar === 'offhand' ? 'Offhand row' : 'Row'} ${Math.floor(slot / perRow) + 1}, slot ${(slot % perRow) + 1}`;
 	async function toggle(slot: number) {
 		open = open === slot ? null : slot;
 		query = '';
@@ -75,7 +80,7 @@
 <div class="bar">
 	{#each [0, 1] as row (row)}<div class="row" role="group" aria-label="Row {row + 1}">
 			{#each Array.from({ length: perRow }, (_, index) => row * perRow + index) as slot (slot)}
-				{@const key = plan.skillBars.main[slot]}
+				{@const key = slots[slot]}
 				{@const skill = key ? skills.get(key) : undefined}<button
 					type="button"
 					class="slot"
@@ -86,7 +91,7 @@
 						? (skill?.name ?? 'a skill this game version lacks')
 						: 'empty'}"
 					aria-expanded={open === slot}
-					aria-controls={open === slot ? 'hotbar-picker' : undefined}
+					aria-controls={open === slot ? pickerId : undefined}
 					onclick={() => toggle(slot)}
 					><span class="tile"
 						><span class="number">{(slot % perRow) + 1}</span>{#if skill?.icon}<img
@@ -103,7 +108,7 @@
 		</div>{/each}
 	{#if open !== null}<div
 			class="picker"
-			id="hotbar-picker"
+			id={pickerId}
 			role="group"
 			aria-label="Skills for {label(open)}"
 		>
@@ -122,17 +127,15 @@
 						event.preventDefault();
 						choose(first.key);
 					}}
-				/>{#if plan.skillBars.main[open]}<button
-						type="button"
-						onkeydown={keydown}
-						onclick={() => choose(null)}>Empty This Slot</button
+				/>{#if slots[open]}<button type="button" onkeydown={keydown} onclick={() => choose(null)}
+						>Empty This Slot</button
 					>{/if}
 			</div>
 			{#each groups as group (group.title)}<h3 class="group-title">{group.title}</h3>
 				<div class="choices">
 					{#each group.entries as entry (entry.key)}<button
 							type="button"
-							aria-pressed={plan.skillBars.main[open] === entry.key}
+							aria-pressed={slots[open] === entry.key}
 							onkeydown={keydown}
 							onclick={() => choose(entry.key)}
 							>{#if entry.icon}<img

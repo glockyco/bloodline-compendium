@@ -175,4 +175,21 @@ describe('planner', () => {
 		expect(evaluate(state, data).skillPoints.spent).toBe(0);
 		expect(placeOnHotbar(state, 3, 'Ember').refused).toBeDefined();
 	});
+
+	it('lets a skill sit on both bars, and a refunded skill leaves both', () => {
+		const state = apply(
+			(s) => setLevel(s, 2),
+			(s) => toggleSkill(s, data, 'Ember'),
+			(s) => placeOnHotbar(s, 0, 'Ember'),
+			(s) => placeOnHotbar(s, 4, 'Ember', 'offhand')
+		);
+		expect(state.skillBars.main[0]).toBe('Ember');
+		expect(state.skillBars.offhand[4]).toBe('Ember');
+		const refunded = apply(
+			() => ({ state }),
+			(s) => toggleSkill(s, data, 'Ember')
+		);
+		expect(refunded.skillBars.main).not.toContain('Ember');
+		expect(refunded.skillBars.offhand).not.toContain('Ember');
+	});
 });

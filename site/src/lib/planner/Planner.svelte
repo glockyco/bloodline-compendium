@@ -27,7 +27,8 @@
 		toggleLearned,
 		toggleSkill,
 		type Edit,
-		type PlannerState
+		type PlannerState,
+		type SkillBar
 	} from './state.js';
 	import {
 		activeCharacter,
@@ -127,18 +128,22 @@
 
 	// A taught skill is marked known when it goes on the bar and unmarked when it leaves it, since the bar is the only
 	// place a known skill counts.
-	function place(slot: number, skill: string | null) {
+	function place(slot: number, skill: string | null, bar: SkillBar = 'main') {
 		let state = plan;
 		if (skill && !state.skills.unlocked.includes(skill) && !state.skills.learned.includes(skill)) {
 			const learned = toggleLearned(state, data, skill);
 			if (learned.refused) return apply(learned);
 			state = learned.state;
 		}
-		const placed = placeOnHotbar(state, slot, skill);
+		const placed = placeOnHotbar(state, slot, skill, bar);
 		if (placed.refused) return apply(placed);
 		state = placed.state;
 		for (const key of state.skills.learned)
-			if (!state.skillBars.main.includes(key) && !state.skills.unlocked.includes(key))
+			if (
+				!state.skillBars.main.includes(key) &&
+				!state.skillBars.offhand.includes(key) &&
+				!state.skills.unlocked.includes(key)
+			)
 				state = toggleLearned(state, data, key).state;
 		apply({ state });
 	}
@@ -201,7 +206,7 @@
 			case 'unresolved':
 				return 'A choice names something this game version lacks.';
 			case 'hotbar':
-				return `Slot ${(diagnostic.slot % 5) + 1} of row ${Math.floor(diagnostic.slot / 5) + 1} holds a skill the character does not know.`;
+				return `Slot ${(diagnostic.slot % 5) + 1} of ${diagnostic.bar === 'offhand' ? 'offhand ' : ''}row ${Math.floor(diagnostic.slot / 5) + 1} holds a skill the character does not know.`;
 		}
 	}
 
@@ -457,6 +462,18 @@
 		>
 			<Section id="skill-bar" title="Skill Bar">
 				<Hotbar {plan} {data} {place} />
+			</Section>
+			<Section
+				id="offhand-bar"
+				title="Offhand Spells Bar"
+				line="The Activate Offhand Spell Bar key, Caps Lock unless you change it, shows these ten slots."
+			>
+				<Hotbar
+					{plan}
+					{data}
+					bar="offhand"
+					place={(slot, skill) => place(slot, skill, 'offhand')}
+				/>
 			</Section>
 		</div>
 	</div>

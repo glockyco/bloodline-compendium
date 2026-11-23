@@ -23,7 +23,7 @@ export type Diagnostic =
 	| { kind: 'overspent'; balance: string; by: number }
 	| { kind: 'attribute'; attribute: string; level: number }
 	| { kind: 'unresolved'; entry: string }
-	| { kind: 'hotbar'; entry: string; slot: number };
+	| { kind: 'hotbar'; entry: string; slot: number; bar: 'main' | 'offhand' };
 
 export interface Evaluation {
 	skillPoints: KnownBalance;
@@ -148,14 +148,15 @@ export function evaluate(state: PlannerState, data: PlannerData): Evaluation {
 				level: state.attributes.points[attribute as keyof typeof state.attributes.points]
 			});
 
-	state.skillBars.main.forEach((skill, slot) => {
-		if (
-			skill !== null &&
-			!state.skills.unlocked.includes(skill) &&
-			!state.skills.learned.includes(skill)
-		)
-			diagnostics.push({ kind: 'hotbar', entry: skill, slot });
-	});
+	for (const bar of ['main', 'offhand'] as const)
+		state.skillBars[bar].forEach((skill, slot) => {
+			if (
+				skill !== null &&
+				!state.skills.unlocked.includes(skill) &&
+				!state.skills.learned.includes(skill)
+			)
+				diagnostics.push({ kind: 'hotbar', entry: skill, slot, bar });
+		});
 
 	return {
 		skillPoints,

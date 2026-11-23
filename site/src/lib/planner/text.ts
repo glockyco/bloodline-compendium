@@ -20,15 +20,18 @@ export function buildText(
 		.map((discipline) => [discipline.name, state.skills.disciplines[discipline.key] ?? 1] as const)
 		.filter(([, level]) => level > 1)
 		.sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'en'));
-	const bar = state.skillBars.main.flatMap((key, slot) => {
-		if (key === null) return [];
-		const skill = skills.get(key);
-		return [
-			skill
-				? `${slot + 1}. ${skill.name}: ${skillUrl(skill.slug)}`
-				: `${slot + 1}. A skill this game version lacks`
-		];
-	});
+	const listed = (keys: (string | null)[]) =>
+		keys.flatMap((key, slot) => {
+			if (key === null) return [];
+			const skill = skills.get(key);
+			return [
+				skill
+					? `${slot + 1}. ${skill.name}: ${skillUrl(skill.slug)}`
+					: `${slot + 1}. A skill this game version lacks`
+			];
+		});
+	const bar = listed(state.skillBars.main);
+	const offhand = listed(state.skillBars.offhand);
 	return [
 		`The Bloodline build, game build ${state.build}`,
 		`Level ${state.attributes.level}`,
@@ -40,6 +43,7 @@ export function buildText(
 			? 'Disciplines: ' + disciplines.map(([name, level]) => `${name} ${level}`).join(', ')
 			: 'Disciplines: all at 1',
 		...(bar.length ? ['Skill bar:', ...bar] : []),
+		...(offhand.length ? ['Offhand spells bar:', ...offhand] : []),
 		`Build: ${link}`
 	].join('\n');
 }

@@ -61,8 +61,8 @@ interface Compact {
 		p?: [string, number][];
 		m?: number;
 	};
-	/** Skill Bars: the main bar's ten slots, 0 for an empty one. */
-	r?: { m?: (string | 0)[] };
+	/** Skill Bars: the skill bar's and the Offhand Spells Bar's ten slots, 0 for an empty one. */
+	r?: { m?: (string | 0)[]; o?: (string | 0)[] };
 }
 
 const knownSections = new Set(['b', 'a', 's', 'r']);
@@ -88,8 +88,12 @@ function compact(state: PlannerState): Compact & Record<string, unknown> {
 	if (passives.length) skills.p = passives.map(([key, ranks]) => [short(key), ranks]);
 	if (state.skills.bloodMagicPoints !== null) skills.m = state.skills.bloodMagicPoints;
 	if (Object.keys(skills).length) result.s = skills;
-	if (state.skillBars.main.some((slot) => slot !== null))
-		result.r = { m: state.skillBars.main.map((slot) => (slot === null ? 0 : short(slot))) };
+	const bars: NonNullable<Compact['r']> = {};
+	const written = (bar: (string | null)[]) => bar.map((slot) => (slot === null ? 0 : short(slot)));
+	if (state.skillBars.main.some((slot) => slot !== null)) bars.m = written(state.skillBars.main);
+	if (state.skillBars.offhand.some((slot) => slot !== null))
+		bars.o = written(state.skillBars.offhand);
+	if (Object.keys(bars).length) result.r = bars;
 	return result;
 }
 
@@ -213,10 +217,13 @@ export async function decodeBuild(
 		(skills.k !== undefined && !isDigests(skills.k)) ||
 		(skills.m !== undefined && !isCount(skills.m)) ||
 		!isObject(bars) ||
-		(bars.m !== undefined &&
-			(!Array.isArray(bars.m) ||
-				bars.m.length !== hotbarSlots ||
-				!bars.m.every((slot) => slot === 0 || typeof slot === 'string')))
+		![bars.m, bars.o].every(
+			(bar) =>
+				bar === undefined ||
+				(Array.isArray(bar) &&
+					bar.length === hotbarSlots &&
+					bar.every((slot) => slot === 0 || typeof slot === 'string'))
+		)
 	)
 		throw new LinkError('malformed', 'The link is not a build.');
 	const index = digestIndex(data);
@@ -228,6 +235,7 @@ export async function decodeBuild(
 		return unresolvedPrefix + short;
 	};
 	const points = c.a.p;
+	const read = (slot: string | 0) => (slot === 0 ? null : key(slot));
 	const state: PlannerState = {
 		build: c.b,
 		attributes: {
@@ -246,9 +254,8 @@ export async function decodeBuild(
 			bloodMagicPoints: skills.m ?? null
 		},
 		skillBars: {
-			main: bars.m
-				? bars.m.map((slot) => (slot === 0 ? null : key(slot)))
-				: Array(hotbarSlots).fill(null)
+			main: bars.m ? bars.m.map(read) : Array(hotbarSlots).fill(null),
+			offhand: bars.o ? bars.o.map(read) : Array(hotbarSlots).fill(null)
 		},
 		later: Object.fromEntries(Object.entries(c).filter(([name]) => !knownSections.has(name)))
 	};

@@ -41,7 +41,7 @@ Builds are shared as prose with the attribute split, the disciplines, and the ho
 
 ### A character planner built from sections
 
-The planner is the first part of a character planner. A character is one typed state made of sections: Attributes (character level and attribute points), Skills (discipline levels, unlocked and learned skills, passive ranks, Blood Magic points) and Skill Bars. Later changes add Equipment, the Item Bar, crafted armor and weapons, companion and mount, and Effects as further sections, so a section never reshapes another. Each section is keyed by catalog keys and validates on its own.
+The planner is the first part of a character planner. A character is one typed state made of sections: Attributes (character level and attribute points), Skills (discipline levels, unlocked and learned skills, passive ranks, Blood Magic points) and Skill Bars, which holds the skill bar and the Offhand Spells Bar, ten slots each. The game saves the second bar as Offhand Skill 1 to 10 and shows it with the Activate Offhand Spell Bar key, Caps Lock by default (`DT_InputActionList`), so players plan both. Later changes add Equipment, the Item Bar, crafted armor and weapons, companion and mount, and Effects as further sections, so a section never reshapes another. Each section is keyed by catalog keys and validates on its own.
 
 One evaluator in `site/src/lib/planner/` runs the rules over the whole state and returns balances, totals and diagnostics. Each section adds its part to the same totals, such as health, mana and stamina, so later sections such as equipment add armor and speed without a second calculation. The editor, link, text and page cues read its result and never compute themselves.
 
@@ -96,7 +96,6 @@ Build after `add-skill-reference` ships. No existing planner, store or link form
 ## Open Questions
 
 - What the level up window's Strength, Intelligence and Dexterity EXP bonuses apply to. The planner shows them as the window does until a run measures one.
-- When the game shows its second skill bar set, which it saves as Offhand Skill 1 to 10 and fills through `OffhandSpellSLots`. A lab run that equips one-handed weapons and spells would show whether the Skill Bars section needs a second bar.
 - How stat crystals and vampirism change a character, which decides how they join the planner. The 12 stat crystals stand only in the excluded `Overworld_working` level, and vampirism comes from an untreated disease.
 
 ## Where Findings Live

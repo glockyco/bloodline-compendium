@@ -24,9 +24,13 @@ export interface SkillsSection {
 	bloodMagicPoints: number | null;
 }
 
+/** The game's two bars of ten: the skill bar, and the Offhand Spells Bar its own key switches to. */
+export type SkillBar = 'main' | 'offhand';
+
 export interface SkillBarsSection {
 	/** The two rows of five the game shows. */
 	main: (string | null)[];
+	offhand: (string | null)[];
 }
 
 /**
@@ -55,7 +59,7 @@ export function newCharacter(data: PlannerData): PlannerState {
 			>
 		},
 		skills: { disciplines: {}, unlocked: [], learned: [], passives: {}, bloodMagicPoints: null },
-		skillBars: { main: Array(hotbarSlots).fill(null) },
+		skillBars: { main: Array(hotbarSlots).fill(null), offhand: Array(hotbarSlots).fill(null) },
 		later: {}
 	};
 }
@@ -75,10 +79,8 @@ const withSkills = (state: PlannerState, change: Partial<SkillsSection>): Edit =
 
 /** A skill bar without a skill the character no longer knows. */
 function withoutOnBars(state: PlannerState, skill: string): SkillBarsSection {
-	return {
-		...state.skillBars,
-		main: state.skillBars.main.map((slot) => (slot === skill ? null : slot))
-	};
+	const without = (bar: (string | null)[]) => bar.map((slot) => (slot === skill ? null : slot));
+	return { main: without(state.skillBars.main), offhand: without(state.skillBars.offhand) };
 }
 
 /** Sets a whole number at least 1, as the game's levels are. Lowering keeps choices that no longer fit. */
@@ -200,8 +202,13 @@ export function setBloodMagicPoints(state: PlannerState, points: number | null):
 	});
 }
 
-/** Puts a known skill on a skill bar slot, or empties the slot with null. */
-export function placeOnHotbar(state: PlannerState, slot: number, skill: string | null): Edit {
+/** Puts a known skill on a slot of one bar, or empties the slot with null. A skill sits once on each bar. */
+export function placeOnHotbar(
+	state: PlannerState,
+	slot: number,
+	skill: string | null,
+	bar: SkillBar = 'main'
+): Edit {
 	if (!Number.isInteger(slot) || slot < 0 || slot >= hotbarSlots)
 		return refuse(state, 'The skill bar has two rows of five slots.');
 	if (
@@ -210,8 +217,8 @@ export function placeOnHotbar(state: PlannerState, slot: number, skill: string |
 		!state.skills.learned.includes(skill)
 	)
 		return refuse(state, 'Only an unlocked or learned skill goes on the skill bar.');
-	const main = state.skillBars.main.map((entry, index) =>
+	const placed = state.skillBars[bar].map((entry, index) =>
 		index === slot ? skill : entry === skill && skill !== null ? null : entry
 	);
-	return { state: { ...state, skillBars: { ...state.skillBars, main } } };
+	return { state: { ...state, skillBars: { ...state.skillBars, [bar]: placed } } };
 }
