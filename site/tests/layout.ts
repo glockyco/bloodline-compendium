@@ -8,7 +8,8 @@ import type { Page } from '@playwright/test';
  * - visible text is smaller than step 0 of the type scale,
  * - a surface or table cell is padded off the shared inset,
  * - a numeric cell or heading in a column of a table is not right-aligned,
- * - a comma in site text has no space after it.
+ * - a comma in site text has no space after it,
+ * - sibling sections of one column sit at different distances from each other.
  */
 export async function layoutProblems(page: Page): Promise<string[]> {
 	// Search and other components render after load, and their text counts too.
@@ -115,6 +116,22 @@ export async function layoutProblems(page: Page): Promise<string[]> {
 			// Game text keeps its own punctuation.
 			if (!parent.closest('[data-game]') && /,[^\s\d]/.test(parent.innerText ?? ''))
 				problems.push(`${describe(parent)} has a comma without a space after it`);
+		}
+		// Sections stacked in one column share one rhythm, so a reader never sees one gap wider than its neighbours.
+		for (const parent of new Set(
+			[...document.querySelectorAll('main section')].map((s) => s.parentElement!)
+		)) {
+			const sections = [...parent.children].filter((c) => c.tagName === 'SECTION' && visible(c));
+			if (sections.length < 3) continue;
+			const gaps = sections
+				.slice(1)
+				.map((s, i) =>
+					Math.round(s.getBoundingClientRect().top - sections[i].getBoundingClientRect().bottom)
+				);
+			if (Math.max(...gaps) - Math.min(...gaps) > tolerance)
+				problems.push(
+					`${describe(parent)} spaces its sections ${[...new Set(gaps)].join(', ')}px apart`
+				);
 		}
 		return problems;
 	});

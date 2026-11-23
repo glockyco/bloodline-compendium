@@ -72,9 +72,11 @@ h3 {
 	font-size: var(--type-sub);
 	line-height: var(--leading-heading);
 }
+/* Prose avoids a stranded last word on every page, not only in text sections. */
 p,
 li {
 	line-height: var(--leading-body);
+	text-wrap: pretty;
 }
 button,
 input,
@@ -197,10 +199,7 @@ label {
 .sections > section > h2 {
 	margin-bottom: var(--gap-line);
 }
-/* Prose ends without a stranded last word, and a list of separate thoughts spaces its items apart. */
-.sections p:not(.intro) {
-	text-wrap: pretty;
-}
+/* A list of separate thoughts spaces its items apart. */
 .sections > section > :is(ul, ol) {
 	display: grid;
 	gap: var(--gap-inline);

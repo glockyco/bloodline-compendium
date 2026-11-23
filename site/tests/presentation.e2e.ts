@@ -64,7 +64,12 @@ test.describe('planted defects on the fixture page', () => {
 			'starts at'
 		],
 		['text below the smallest step', '[data-ui=card] h3 { font-size: 12px; }', 'below'],
-		['a page wider than the window', 'main { min-width: 2000px; }', 'scrolls sideways']
+		['a page wider than the window', 'main { min-width: 2000px; }', 'scrolls sideways'],
+		[
+			'one section further from its siblings',
+			'section:has(#tables) { margin-top: 40px; }',
+			'spaces its sections'
+		]
 	])
 		test(`reports ${defect}`, async ({ page }) => {
 			await page.goto('/design/');
