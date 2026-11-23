@@ -2,6 +2,7 @@
 	import EntityPage from '#lib/entity/EntityPage.svelte';
 	import EntityVersions from '#lib/entity/EntityVersions.svelte';
 	import SkillVersion from '#lib/skills/SkillVersion.svelte';
+	import CharacterCue from '#lib/planner/CharacterCue.svelte';
 	import { kindPath } from '#lib/entities.js';
 	import { titleCase } from '#lib/labels.js';
 	import { skillStatus } from '#lib/skills/describe.js';
@@ -14,6 +15,24 @@
 		tree
 			? `${skill.name}, a ${tree.name} skill of The Bloodline that unlocks at ${tree.conditions[0]?.label ?? 'a known level'}.`
 			: `${skill.name}, a skill of The Bloodline. ${skillStatus(skill) ?? 'Learned outside the skill trees.'}`
+	);
+	// The trees that hold the skill and the level each needs, which the active character's cue compares.
+	const trees = $derived(
+		data.skill.sources.flatMap((source) =>
+			source.kind === 'skillTree'
+				? source.conditions.flatMap((condition) =>
+						condition.kind === 'disciplineLevel' && condition.entity?.key && condition.value != null
+							? [
+									{
+										discipline: condition.entity.key,
+										name: condition.entity.name,
+										level: condition.value
+									}
+								]
+							: []
+					)
+				: []
+		)
 	);
 	const reference = $derived({
 		kind: skill.kind,
@@ -46,6 +65,7 @@
 					)!}>{titleCase(data.category.name)}</a
 				>{#if tree}<span aria-hidden="true">·</span><span data-game>{tree.name}</span>{/if}
 			</p>
+			<CharacterCue skill={{ key: data.skill.key, trees }} />
 		{/snippet}
 		{#snippet panel(version, idPrefix)}<SkillVersion skill={version} {idPrefix} />{/snippet}
 	</EntityVersions>

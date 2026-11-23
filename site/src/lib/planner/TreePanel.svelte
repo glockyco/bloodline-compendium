@@ -15,7 +15,7 @@
 	let {
 		discipline,
 		data,
-		state,
+		state: plan,
 		evaluation,
 		setLevel,
 		toggleSkill,
@@ -33,7 +33,7 @@
 	} = $props();
 	const names = $derived(new Map(data.disciplines.map((entry) => [entry.key, entry.name])));
 	const skills = $derived(new Map(data.skills.map((skill) => [skill.key, skill])));
-	const level = $derived(levelOf(state, discipline.key));
+	const level = $derived(levelOf(plan, discipline.key));
 	const points = $derived(evaluation.proficiency[discipline.key]);
 	const slots = $derived([...discipline.slots].sort((a, b) => a.requiredLevel - b.requiredLevel));
 	const passives = $derived(
@@ -69,8 +69,10 @@
 	// An entry that checks another discipline's level names it, as the discipline page does.
 	const needs = (required: number, checked: string) =>
 		`Unlocks at ${names.get(checked) ?? 'another discipline'} level ${formatNumber(required)}`;
-	const unlocked = (key: string) => state.skills.unlocked.includes(key);
-	const ranksOf = (key: string) => state.skills.passives[key] ?? 0;
+	const unlocked = (key: string) => plan.skills.unlocked.includes(key);
+	const ranksOf = (key: string) => plan.skills.passives[key] ?? 0;
+	// Too narrow for both panels, the reader switches between them.
+	let shown: 'skills' | 'passives' = $state('skills');
 </script>
 
 <div class="tree">
@@ -89,83 +91,131 @@
 					)} of {formatNumber(points.earned ?? 0)} proficiency points left{/if}
 			</p>{/if}
 	</div>
-	{#if slots.length}<RelationTable
-			items={slots}
-			label="{discipline.name} skills"
-			headings={['Skill', 'Unlocked']}
-			collapse={false}
-			>{#snippet row(
-				slot,
-				index
-			)}{#if index === 0 || slots[index - 1].requiredLevel !== slot.requiredLevel}<tr
-						class="group-heading"
-						><th colspan="2" scope="colgroup">Level {formatNumber(slot.requiredLevel)}</th></tr
-					>{/if}<tr class:locked={levelOf(state, slot.levelDiscipline) < slot.requiredLevel}
-					><td
-						><EntityLink
-							entity={reference(slot.skill)}
-							icon
-						/>{#if slot.levelDiscipline !== discipline.key}<small
-								>{needs(slot.requiredLevel, slot.levelDiscipline)}</small
-							>{/if}</td
-					><td class="numeric"
-						><input
-							type="checkbox"
-							aria-label="Unlock {reference(slot.skill).name}"
-							checked={unlocked(slot.skill)}
-							onchange={(event) => {
-								toggleSkill(slot.skill);
-								// A refused unlock leaves the state as it was, so the box shows the state again.
-								event.currentTarget.checked = unlocked(slot.skill);
-							}}
-						/></td
-					></tr
-				>{/snippet}</RelationTable
-		>{/if}
-	{#if passives.length}<RelationTable
-			items={passives}
-			label="{discipline.name} passives"
-			headings={['Passive', 'Ranks']}
-			collapse={false}
-			>{#snippet row(
-				passive,
-				index
-			)}{#if index === 0 || passives[index - 1].requiredLevel !== passive.requiredLevel}<tr
-						class="group-heading"
-						><th colspan="2" scope="colgroup">Level {formatNumber(passive.requiredLevel)}</th></tr
-					>{/if}<tr class:locked={levelOf(state, passive.levelDiscipline) < passive.requiredLevel}
-					><td
-						><EntityLink
-							entity={passiveReference(passive)}
-							icon
-						/>{#if passive.levelDiscipline !== discipline.key}<small
-								>{needs(passive.requiredLevel, passive.levelDiscipline)}</small
-							>{/if}</td
-					><td class="numeric"
-						><span class="ranks"
-							><button
-								type="button"
-								aria-label="Remove a {passive.name} rank"
-								disabled={ranksOf(passive.key) < 1}
-								onclick={() => removeRank(passive.key)}>−</button
-							><output aria-label="{passive.name} ranks"
-								>{ranksOf(passive.key)} of {passive.ranks ?? 1}</output
-							><button
-								type="button"
-								aria-label="Buy a {passive.name} rank"
-								disabled={ranksOf(passive.key) >= rankCosts(passive).length}
-								onclick={() => buyRank(passive.key)}>+</button
-							></span
-						></td
-					></tr
-				>{/snippet}</RelationTable
-		>{/if}
+	{#if slots.length && passives.length}<div class="switch" role="group" aria-label="Show">
+			<button type="button" aria-pressed={shown === 'skills'} onclick={() => (shown = 'skills')}
+				>Skills</button
+			><button
+				type="button"
+				aria-pressed={shown === 'passives'}
+				onclick={() => (shown = 'passives')}>Passives</button
+			>
+		</div>{/if}
+	<div class="panels" data-shown={shown}>
+		{#if slots.length}<div class="panel skills-panel">
+				<RelationTable
+					items={slots}
+					label="{discipline.name} skills"
+					headings={['Skill', 'Unlocked']}
+					collapse={false}
+					>{#snippet row(
+						slot,
+						index
+					)}{#if index === 0 || slots[index - 1].requiredLevel !== slot.requiredLevel}<tr
+								class="group-heading"
+								><th colspan="2" scope="colgroup">Level {formatNumber(slot.requiredLevel)}</th></tr
+							>{/if}<tr class:locked={levelOf(plan, slot.levelDiscipline) < slot.requiredLevel}
+							><td
+								><EntityLink
+									entity={reference(slot.skill)}
+									icon
+								/>{#if slot.levelDiscipline !== discipline.key}<small
+										>{needs(slot.requiredLevel, slot.levelDiscipline)}</small
+									>{/if}</td
+							><td class="numeric"
+								><input
+									type="checkbox"
+									aria-label="Unlock {reference(slot.skill).name}"
+									checked={unlocked(slot.skill)}
+									onchange={(event) => {
+										toggleSkill(slot.skill);
+										// A refused unlock leaves the state as it was, so the box shows the state again.
+										event.currentTarget.checked = unlocked(slot.skill);
+									}}
+								/></td
+							></tr
+						>{/snippet}</RelationTable
+				>
+			</div>{/if}
+		{#if passives.length}<div class="panel passives-panel">
+				<RelationTable
+					items={passives}
+					label="{discipline.name} passives"
+					headings={['Passive', 'Ranks']}
+					collapse={false}
+					>{#snippet row(
+						passive,
+						index
+					)}{#if index === 0 || passives[index - 1].requiredLevel !== passive.requiredLevel}<tr
+								class="group-heading"
+								><th colspan="2" scope="colgroup">Level {formatNumber(passive.requiredLevel)}</th
+								></tr
+							>{/if}<tr
+							class:locked={levelOf(plan, passive.levelDiscipline) < passive.requiredLevel}
+							><td
+								><EntityLink
+									entity={passiveReference(passive)}
+									icon
+								/>{#if passive.levelDiscipline !== discipline.key}<small
+										>{needs(passive.requiredLevel, passive.levelDiscipline)}</small
+									>{/if}</td
+							><td class="numeric"
+								><span class="ranks"
+									><button
+										type="button"
+										aria-label="Remove a {passive.name} rank"
+										disabled={ranksOf(passive.key) < 1}
+										onclick={() => removeRank(passive.key)}>−</button
+									><output aria-label="{passive.name} ranks"
+										>{ranksOf(passive.key)} of {passive.ranks ?? 1}</output
+									><button
+										type="button"
+										aria-label="Buy a {passive.name} rank"
+										disabled={ranksOf(passive.key) >= rankCosts(passive).length}
+										onclick={() => buyRank(passive.key)}>+</button
+									></span
+								></td
+							></tr
+						>{/snippet}</RelationTable
+				>
+			</div>{/if}
+	</div>
 </div>
 
 <style>
 	.tree {
 		display: grid;
 		gap: var(--gap-block);
+		container-type: inline-size;
+	}
+	.panels {
+		display: grid;
+		gap: var(--gap-section) var(--gap-groups);
+		align-items: start;
+	}
+	.panel {
+		min-width: 0;
+	}
+	.switch {
+		display: flex;
+		gap: var(--gap-inline);
+	}
+	.switch button[aria-pressed='true'] {
+		border-color: var(--accent);
+		color: var(--text);
+	}
+	@container (width >= 44rem) {
+		.panels {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+		.switch {
+			display: none;
+		}
+	}
+	@container (width < 44rem) {
+		.panels[data-shown='skills'] .passives-panel,
+		.panels[data-shown='passives'] .skills-panel {
+			display: none;
+		}
 	}
 	.tree-head {
 		display: flex;

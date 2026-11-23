@@ -3,6 +3,10 @@ import { expect, test, type Page } from '@playwright/test';
 const level = (page: Page) => page.getByLabel('Character Level');
 const discipline = (page: Page) => page.getByLabel('Emberlore Level');
 
+const total = (page: Page, name: string) =>
+	page.locator('.totals div', { has: page.getByText(name, { exact: true }) }).locator('dd');
+const tab = (page: Page, name: string) => page.getByRole('tab', { name }).click();
+
 async function open(page: Page) {
 	await page.goto('/planner/');
 	// The planner reads stored characters and any link once it has hydrated, and marks itself ready.
@@ -15,11 +19,12 @@ test('a character level grants skill and level up points, and an attribute point
 	await open(page);
 	await level(page).fill('3');
 	await level(page).press('Enter');
-	await expect(page.getByText('2 of 2 skill points left')).toBeVisible();
-	await expect(page.getByText('6 of 6 level up points left')).toBeVisible();
+	await expect(total(page, 'Skill Points Left')).toHaveText('2 of 2');
+	await expect(total(page, 'Level Up Points Left')).toHaveText('6 of 6');
+	await tab(page, 'Attributes');
 	await page.getByRole('button', { name: 'Add a Fortitude point' }).click();
-	await expect(page.getByText('5 of 6 level up points left')).toBeVisible();
-	await expect(page.locator('.effects dd', { hasText: 'Health' }).first()).toContainText('175');
+	await expect(total(page, 'Level Up Points Left')).toHaveText('5 of 6');
+	await expect(total(page, 'Health')).toHaveText('175');
 });
 
 test('a skill above its level is refused, and lowering a level keeps the skill marked', async ({
@@ -59,7 +64,7 @@ test('a link opens the build as a preview, and saving keeps it as a character', 
 	await open(page);
 	await level(page).fill('4');
 	await level(page).press('Enter');
-	await page.getByLabel('Moss Ward').check();
+	await tab(page, 'Skill Bars');
 	await page.getByRole('button', { name: 'Row 1, slot 3: empty' }).click();
 	await page
 		.getByRole('group', { name: 'Skills for Row 1, slot 3' })
@@ -84,6 +89,7 @@ test('a link opens the build as a preview, and saving keeps it as a character', 
 	await expect(page.locator('.planner[data-ready]')).toBeAttached();
 	await expect(page.getByText('This is a shared build.')).toBeVisible();
 	await expect(level(page)).toHaveValue('4');
+	await tab(page, 'Skill Bars');
 	await expect(page.getByRole('button', { name: 'Row 1, slot 3: Moss Ward' })).toBeVisible();
 	await expect(page.getByLabel('Saved Character')).toHaveValue('');
 	await page.getByLabel('Name').fill('Warden');
@@ -94,27 +100,50 @@ test('a link opens the build as a preview, and saving keeps it as a character', 
 	await expect(level(page)).toHaveValue('4');
 });
 
-test('the skill bar works from the keyboard', async ({ page }) => {
+test('the skill bar works from the keyboard and places taught skills', async ({ page }) => {
 	await open(page);
-	await level(page).fill('4');
-	await level(page).press('Enter');
-	await page.getByLabel('Moss Ward').press('Space');
-	await expect(page.getByLabel('Moss Ward')).toBeChecked();
+	await tab(page, 'Skill Bars');
 	const slot = page.getByRole('button', { name: 'Row 2, slot 1: empty' });
 	await slot.press('Enter');
-	// The choices follow both rows, so opening a slot moves focus to them, and choosing returns it to the slot.
-	await expect(
-		page
-			.getByRole('group', { name: 'Skills for Row 2, slot 1' })
-			.getByRole('button', { name: 'Moss Ward' })
-	).toBeFocused();
-	await page.keyboard.press('Enter');
-	const placed = page.getByRole('button', { name: 'Row 2, slot 1: Moss Ward' });
+	// Opening a slot moves focus to its search field, Enter places the first match, and focus returns to the slot.
+	const search = page.getByRole('searchbox', { name: 'Search skills' });
+	await expect(search).toBeFocused();
+	const chooser = page.getByRole('group', { name: 'Skills for Row 2, slot 1' });
+	await expect(chooser.getByRole('heading', { name: 'Taught by a Book or Event' })).toBeVisible();
+	await search.fill('flare');
+	await expect(chooser.getByRole('button')).toHaveText(['Lanternedge Flare']);
+	await search.press('Enter');
+	const placed = page.getByRole('button', { name: 'Row 2, slot 1: Lanternedge Flare' });
 	await expect(placed).toBeFocused();
+	// A taught skill on the bar costs no skill point, so the build stays valid at level 1.
+	await expect(page.locator('section[aria-labelledby="problems"]')).toHaveCount(0);
 	await placed.press('Enter');
+	await expect(chooser.getByRole('heading', { name: 'Known' })).toBeVisible();
 	await page.keyboard.press('Escape');
 	await expect(placed).toBeFocused();
-	await expect(page.getByRole('group', { name: 'Skills for Row 2, slot 1' })).toHaveCount(0);
+	await expect(chooser).toHaveCount(0);
+});
+
+test('each section is a tab with its own address, and a phone switches between skills and passives', async ({
+	page
+}) => {
+	await page.goto('/planner/#skill-bars');
+	await expect(page.locator('.planner[data-ready]')).toBeAttached();
+	const bars = page.getByRole('tab', { name: 'Skill Bars' });
+	await expect(bars).toHaveAttribute('aria-selected', 'true');
+	await expect(page.getByRole('button', { name: 'Row 1, slot 1: empty' })).toBeVisible();
+	await bars.press('ArrowLeft');
+	await expect(page.getByRole('tab', { name: 'Skills' })).toBeFocused();
+	await expect(page).toHaveURL(/#skills$/);
+	// Wide enough, a discipline shows its skills and passives side by side.
+	await expect(page.getByLabel('Unlock Lanternedge Flare')).toBeVisible();
+	await expect(page.getByRole('button', { name: 'Buy a Glow rank' })).toBeVisible();
+
+	await page.setViewportSize({ width: 390, height: 844 });
+	await expect(page.getByRole('button', { name: 'Buy a Glow rank' })).toBeHidden();
+	await page.getByRole('button', { name: 'Passives', exact: true }).click();
+	await expect(page.getByRole('button', { name: 'Buy a Glow rank' })).toBeVisible();
+	await expect(page.getByLabel('Unlock Lanternedge Flare')).toBeHidden();
 });
 
 test('a malformed link says so and opens a new character', async ({ page }) => {
@@ -130,4 +159,63 @@ test('a skill page does not load the planner', async ({ page }) => {
 	await page.goto('/skills/cinder-flick/');
 	await page.waitForLoadState('networkidle');
 	expect(requests.filter((url) => url.includes('planner'))).toEqual([]);
+});
+
+test('pages show the active character against their levels, and stay neutral without one', async ({
+	page
+}) => {
+	await page.goto('/skills/lanternedge-flare/');
+	await page.waitForLoadState('networkidle');
+	await expect(page.locator('.cue')).toHaveCount(0);
+	await page.evaluate(() =>
+		localStorage.setItem(
+			'bloodline-planner',
+			JSON.stringify({
+				version: 1,
+				active: 'a',
+				characters: [
+					{
+						id: 'a',
+						name: 'Warden',
+						state: {
+							build: 90000001,
+							attributes: {
+								level: 5,
+								points: Object.fromEntries(
+									[
+										'Strength',
+										'Intelligence',
+										'Dexterity',
+										'Endurance',
+										'Fortitude',
+										'Constitution',
+										'Vitality',
+										'Wisdom',
+										'Willpower'
+									].map((attribute) => [attribute, 1])
+								)
+							},
+							skills: {
+								disciplines: { '/Invented/Trees/Emberlore': 3 },
+								unlocked: ['/Invented/Skills/CinderFlick'],
+								learned: [],
+								passives: {},
+								bloodMagicPoints: null
+							},
+							skillBars: { main: Array(10).fill(null) },
+							later: {}
+						}
+					}
+				]
+			})
+		)
+	);
+	await page.reload();
+	await expect(page.locator('.cue')).toHaveText(
+		'Warden needs Emberlore level 5 for this skill. It is at level 3. Open in the Character Planner'
+	);
+	await page.goto('/disciplines/emberlore/');
+	await expect(page.locator('.cue')).toHaveText(
+		'Warden has Emberlore at level 3, with 1 of its 2 skills unlocked. Open in the Character Planner'
+	);
 });

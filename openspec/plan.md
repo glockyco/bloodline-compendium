@@ -13,7 +13,7 @@ Every feature the compendium will grow, in the order it is built, with what each
    - Bows and shields, whose views are not settled.
    - A review step before renders are published.
    - Creatures and people get renders with their own pages.
-3. Disciplines, skills and the skill planner: `add-skill-reference`, then `add-skill-planner`.
+3. Disciplines, skills and the character planner: `add-skill-reference`, then `add-skill-planner`.
    - The reference first moves the catalog and the site from items to kinds: one producer per kind, sources for any entity, and lists, pages, tooltips, claims and coverage that work across kinds. Item output stays unchanged through that move.
    - It then publishes the 21 disciplines with their trees laid out as the skill window shows them, every skill the game defines with where it comes from, and passives and spellsongs on their discipline's page.
    - The planner is the first part of a character planner built from sections: a summary column that stays in view with the totals, points left and broken rules, and a tab per section with its own address. Step 3 ships the Attributes, Skills and Skill Bars sections, with a discipline's skills and passives side by side as the game's tree window shows them. Saved characters and shared links hold one part per section, so later sections join old links. Builds are shared as links that fit a Discord message and as text, and characters are kept in the browser.

@@ -42,7 +42,7 @@ export const readDisciplines = () => json<DisciplineIndex>('disciplines.json');
 export const readDiscipline = (slug: string) =>
 	json<DisciplinePage>('disciplines/' + slug + '.json');
 export const readSkills = () => json<SkillIndex>('skills.json');
-/** The skill planner's inputs, which only the planner route reads. */
+/** The character planner's inputs, which only the planner route reads. */
 export const readPlanner = () => json<PlannerData>('planner.json');
 export const readSkill = (slug: string) => json<SkillPage>('skills/' + slug + '.json');
 export const readMechanics = () => json<MechanicIndex>('mechanics.json');

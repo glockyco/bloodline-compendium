@@ -3,9 +3,11 @@
 	import type { PlannerData } from '../site-data.js';
 	import { hotbarSlots, type PlannerState } from './state.js';
 	/**
-	 * The game's skill bar, two rows of five slots. Each slot shows its skill's icon and whole name. Choosing a slot
-	 * lists the skills the character knows, and choosing one places it there, moving it from any other slot. The list
-	 * follows both rows, so opening it moves focus to its first choice, and closing it returns focus to the slot.
+	 * The game's skill bar, two rows of five slots, drawn as the game draws it: an icon tile with the slot's key, and
+	 * the skill's name below. Choosing a slot opens a chooser with a search field, listing the skills the character
+	 * knows and then the skills a book, a conversation or an event teaches. Choosing a taught skill marks it known,
+	 * because the bar is what a player marks it for. Focus moves to the search field, Enter there places the first
+	 * match, and closing returns focus to the slot.
 	 */
 	let {
 		plan,
@@ -16,33 +18,56 @@
 		data: PlannerData;
 		place: (slot: number, skill: string | null) => void;
 	} = $props();
+	type Choice = { key: string; name: string; icon: string | null };
 	const skills = $derived(new Map(data.skills.map((skill) => [skill.key, skill])));
+	const byName = (a: Choice, b: Choice) => a.name.localeCompare(b.name, 'en');
+	const knownKeys = $derived(new Set([...plan.skills.unlocked, ...plan.skills.learned]));
 	const known = $derived(
-		[...new Set([...plan.skills.unlocked, ...plan.skills.learned])]
+		[...knownKeys]
 			.map((key) => ({
 				key,
 				name: skills.get(key)?.name ?? 'A skill this game version lacks',
 				icon: skills.get(key)?.icon ?? null
 			}))
-			.sort((a, b) => a.name.localeCompare(b.name, 'en'))
+			.sort(byName)
+	);
+	const taught = $derived(
+		data.skills
+			.filter((skill) => skill.learned && !knownKeys.has(skill.key))
+			.map((skill) => ({ key: skill.key, name: skill.name, icon: skill.icon }))
+			.sort(byName)
+	);
+	let query = $state('');
+	const matches = (entry: Choice) =>
+		entry.name.toLocaleLowerCase('en').includes(query.trim().toLocaleLowerCase('en'));
+	const groups = $derived(
+		[
+			{ title: 'Known', entries: known.filter(matches) },
+			{ title: 'Taught by a Book or Event', entries: taught.filter(matches) }
+		].filter((group) => group.entries.length)
 	);
 	const perRow = hotbarSlots / 2;
 	let open: number | null = $state(null);
 	const slotButtons: HTMLButtonElement[] = $state([]);
-	let picker: HTMLDivElement | undefined = $state();
+	let search: HTMLInputElement | undefined = $state();
 	const label = (slot: number) =>
 		`Row ${Math.floor(slot / perRow) + 1}, slot ${(slot % perRow) + 1}`;
 	async function toggle(slot: number) {
 		open = open === slot ? null : slot;
+		query = '';
 		if (open === null) return;
 		await tick();
-		picker?.querySelector('button')?.focus();
+		search?.focus();
 	}
 	function close(slot: number) {
 		open = null;
 		slotButtons[slot]?.focus();
 	}
-	function escape(event: KeyboardEvent) {
+	function choose(skill: string | null) {
+		place(open!, skill);
+		close(open!);
+	}
+	function keydown(event: KeyboardEvent) {
 		if (event.key === 'Escape' && open !== null) close(open);
 	}
 </script>
@@ -50,27 +75,29 @@
 <div class="bar">
 	{#each [0, 1] as row (row)}<div class="row" role="group" aria-label="Row {row + 1}">
 			{#each Array.from({ length: perRow }, (_, index) => row * perRow + index) as slot (slot)}
-				{@const skill = plan.skillBars.main[slot]
-					? skills.get(plan.skillBars.main[slot]!)
-					: undefined}<button
+				{@const key = plan.skillBars.main[slot]}
+				{@const skill = key ? skills.get(key) : undefined}<button
 					type="button"
 					class="slot"
 					class:open={open === slot}
+					class:filled={key !== null}
 					bind:this={slotButtons[slot]}
-					aria-label="{label(slot)}: {plan.skillBars.main[slot]
+					aria-label="{label(slot)}: {key
 						? (skill?.name ?? 'a skill this game version lacks')
 						: 'empty'}"
 					aria-expanded={open === slot}
 					aria-controls={open === slot ? 'hotbar-picker' : undefined}
 					onclick={() => toggle(slot)}
-					><span class="number">{(slot % perRow) + 1}</span>{#if skill?.icon}<img
-							src="/icons/{skill.icon}-48.webp"
-							alt=""
-							width="24"
-							height="24"
-							loading="lazy"
-						/>{/if}<span class="name" data-game={skill ? true : undefined}
-						>{plan.skillBars.main[slot] ? (skill?.name ?? 'Unknown skill') : 'Empty'}</span
+					><span class="tile"
+						><span class="number">{(slot % perRow) + 1}</span>{#if skill?.icon}<img
+								src="/icons/{skill.icon}-160.webp"
+								alt=""
+								width="48"
+								height="48"
+								loading="lazy"
+							/>{/if}</span
+					><span class="name" data-game={skill ? true : undefined}
+						>{key ? (skill?.name ?? 'Unknown skill') : ''}</span
 					></button
 				>{/each}
 		</div>{/each}
@@ -79,89 +106,143 @@
 			id="hotbar-picker"
 			role="group"
 			aria-label="Skills for {label(open)}"
-			bind:this={picker}
 		>
-			{#each known as entry (entry.key)}<button
-					type="button"
-					aria-pressed={plan.skillBars.main[open] === entry.key}
-					onkeydown={escape}
-					onclick={() => {
-						place(open!, entry.key);
-						close(open!);
+			<div class="picker-head">
+				<input
+					type="search"
+					bind:this={search}
+					bind:value={query}
+					aria-label="Search skills"
+					placeholder="Search skills"
+					onkeydown={(event) => {
+						keydown(event);
+						const first = groups[0]?.entries[0];
+						if (event.key !== 'Enter' || !first) return;
+						// The key would otherwise press the slot that receives focus and reopen the chooser.
+						event.preventDefault();
+						choose(first.key);
 					}}
-					>{#if entry.icon}<img
-							src="/icons/{entry.icon}-48.webp"
-							alt=""
-							width="24"
-							height="24"
-							loading="lazy"
-						/>{/if}<span data-game>{entry.name}</span></button
-				>{/each}
-			{#if plan.skillBars.main[open]}<button
-					type="button"
-					onkeydown={escape}
-					onclick={() => {
-						place(open!, null);
-						close(open!);
-					}}>Empty This Slot</button
-				>{/if}
-			{#if !known.length}<p class="muted">Unlock or learn a skill to place it on the bar.</p>{/if}
+				/>{#if plan.skillBars.main[open]}<button
+						type="button"
+						onkeydown={keydown}
+						onclick={() => choose(null)}>Empty This Slot</button
+					>{/if}
+			</div>
+			{#each groups as group (group.title)}<h3 class="group-title">{group.title}</h3>
+				<div class="choices">
+					{#each group.entries as entry (entry.key)}<button
+							type="button"
+							aria-pressed={plan.skillBars.main[open] === entry.key}
+							onkeydown={keydown}
+							onclick={() => choose(entry.key)}
+							>{#if entry.icon}<img
+									src="/icons/{entry.icon}-48.webp"
+									alt=""
+									width="24"
+									height="24"
+									loading="lazy"
+								/>{/if}<span data-game>{entry.name}</span></button
+						>{/each}
+				</div>{:else}<p class="muted">
+					{query.trim()
+						? 'No skill matches.'
+						: 'Unlock a skill in the Skills tab to place it on the bar.'}
+				</p>{/each}
 		</div>{/if}
 </div>
 
 <style>
 	.bar {
 		display: grid;
-		gap: var(--gap-inline);
+		gap: var(--gap-block);
 	}
 	.row {
 		display: grid;
-		grid-template-columns: repeat(5, minmax(0, 1fr));
-		gap: var(--gap-inline);
+		grid-template-columns: repeat(5, minmax(0, var(--size-version-slot)));
+		gap: var(--gap-block);
 	}
 	.slot {
 		display: grid;
-		grid-template-columns: auto minmax(0, 1fr);
-		grid-template-rows: auto auto;
+		justify-items: center;
 		align-content: start;
-		align-items: center;
-		justify-items: start;
-		gap: var(--gap-line) var(--gap-inline);
-		min-height: var(--size-control-large);
-		text-align: start;
+		gap: var(--gap-inline);
+		min-width: 0;
+		padding: 0;
+		border: 0;
+		background: none;
+		text-align: center;
 	}
-	.slot.open {
+	.tile {
+		position: relative;
+		display: grid;
+		place-items: center;
+		width: 100%;
+		aspect-ratio: 1;
+		border: var(--marker-width) solid var(--slot-edge);
+		border-radius: var(--radius-1);
+		background: var(--surface-slot);
+	}
+	.filled .tile {
+		border-color: var(--tooltip-frame);
+	}
+	.slot.open .tile,
+	.slot:hover .tile {
 		border-color: var(--accent);
 	}
+	.tile img {
+		width: 70%;
+		height: auto;
+	}
 	.number {
-		grid-column: 1 / -1;
+		position: absolute;
+		top: 0;
+		left: 0;
+		padding: 0 var(--gap-inline);
+		border-bottom-right-radius: var(--radius-1);
+		background: var(--surface-panel);
 		color: var(--text-muted);
-		font-size: var(--type-meta);
+		line-height: var(--leading-meta);
+		font-size: var(--type-0);
 	}
 	.name {
-		overflow-wrap: anywhere;
-	}
-	.slot:not(:has(img)) .name {
-		grid-column: 1 / -1;
-	}
-	img {
-		width: var(--size-icon-inline);
-		height: var(--size-icon-inline);
+		font-size: var(--type-0);
+		line-height: var(--leading-meta);
+		overflow-wrap: normal;
+		hyphens: auto;
 	}
 	.picker {
+		display: grid;
+		gap: var(--gap-block);
+		padding: var(--inset);
+		border: var(--border-width) solid var(--border-control);
+		border-radius: var(--radius-1);
+		background: var(--surface-panel);
+	}
+	.picker-head {
 		display: flex;
 		flex-wrap: wrap;
 		gap: var(--gap-inline);
-		padding-top: var(--gap-inline);
 	}
-	.picker button {
+	.picker-head input {
+		flex: 1 1 var(--size-filter-control);
+	}
+	.group-title {
+		margin: 0;
+		color: var(--text-muted);
+		font-size: var(--type-0);
+	}
+	.choices {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--gap-inline);
+	}
+	.choices button {
 		display: inline-flex;
 		align-items: center;
 		gap: var(--gap-inline);
 	}
-	@media (width < 40rem) {
-		.row {
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-		}
+	.choices img {
+		width: var(--size-icon-inline);
+		height: var(--size-icon-inline);
 	}
 </style>

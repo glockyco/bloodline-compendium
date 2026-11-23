@@ -3,6 +3,7 @@
 	import DisciplineTables from '#lib/skills/DisciplineTables.svelte';
 	import BugsSection from '#lib/entity/BugsSection.svelte';
 	import LinkedText from '#lib/ui/LinkedText.svelte';
+	import CharacterCue from '#lib/planner/CharacterCue.svelte';
 	import { kindPath } from '#lib/entities.js';
 	import { disciplineContents, disciplineIntro } from '#lib/skills/describe.js';
 	let { data } = $props();
@@ -46,6 +47,15 @@
 		<p class="intro">
 			<LinkedText text={disciplineIntro(discipline)} />
 		</p>
+		<CharacterCue
+			discipline={{
+				key: discipline.key,
+				name: discipline.name,
+				skills: discipline.skillRows.flatMap((row) =>
+					row.slots.flatMap((slot) => slot.skill.key ?? [])
+				)
+			}}
+		/>
 	</header>
 	<div class="item-relations" data-pagefind-ignore="all">
 		<DisciplineTables {discipline} skillFacts={data.skillFacts} />

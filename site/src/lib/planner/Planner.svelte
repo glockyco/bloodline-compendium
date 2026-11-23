@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onMount, untrack } from 'svelte';
+	import { SvelteURL } from 'svelte/reactivity';
+	import { replaceState } from '$app/navigation';
 	import { page } from '$app/state';
 	import Section from '../ui/Section.svelte';
 	import LinkedText from '../ui/LinkedText.svelte';
@@ -43,7 +45,7 @@
 	} from './store.js';
 	import { buildText } from './text.js';
 	/**
-	 * The skill planner. It edits one character through the planner's actions, evaluates the whole build after every
+	 * The character planner. It edits one character through the planner's actions, evaluates the whole build after every
 	 * edit, and keeps characters in the browser. A build from a link opens as a preview that changes no stored
 	 * character until it is saved.
 	 */
@@ -66,7 +68,6 @@
 	const discipline = $derived(data.disciplines.find((entry) => entry.key === chosen));
 	const bloodMagic = $derived(data.disciplines.find((entry) => entry.levelName === 'Blood Magic'));
 	const categories = $derived(Map.groupBy(data.disciplines, (entry) => entry.category));
-	const learnable = $derived(data.skills.filter((skill) => skill.learned));
 	const names = $derived(
 		new Map([
 			...data.skills.map((skill) => [skill.key, skill.name] as const),
@@ -78,11 +79,69 @@
 	);
 	const nameOf = (key: string) => names.get(key) ?? 'Something this game version lacks';
 
+	// Each section is a tab whose id is the address fragment, so a link can open one.
+	const tabs = [
+		{ id: 'attributes', label: 'Attributes' },
+		{ id: 'skills', label: 'Skills' },
+		{ id: 'skill-bars', label: 'Skill Bars' }
+	] as const;
+	type Tab = (typeof tabs)[number]['id'];
+	let tab: Tab = $state('skills');
+	// The summary is a column on wide screens and a bar that opens on narrow ones.
+	let summaryOpen = $state(true);
+	function selectFragment() {
+		const fragment = window.location.hash.slice(1);
+		tab = tabs.find((entry) => entry.id === fragment)?.id ?? 'skills';
+	}
+	function selectTab(id: Tab, focus = false) {
+		tab = id;
+		const url = new SvelteURL(page.url.href);
+		url.hash = id;
+		// eslint-disable-next-line svelte/no-navigation-without-resolve -- only the current page's fragment changes.
+		replaceState(url, page.state);
+		if (focus) document.getElementById(`tab-${id}`)?.focus();
+	}
+	function navigateTabs(event: KeyboardEvent, index: number) {
+		const targets: Record<string, number> = {
+			ArrowRight: (index + 1) % tabs.length,
+			ArrowLeft: (index + tabs.length - 1) % tabs.length,
+			Home: 0,
+			End: tabs.length - 1
+		};
+		const target = targets[event.key];
+		if (target === undefined) return;
+		event.preventDefault();
+		selectTab(tabs[target].id, true);
+	}
+	onMount(() => {
+		selectFragment();
+		summaryOpen = !window.matchMedia('(width < 64rem)').matches;
+		window.addEventListener('hashchange', selectFragment);
+		return () => window.removeEventListener('hashchange', selectFragment);
+	});
+
 	function stored(result: StoreResult) {
 		store = result.store;
 		notice = result.saved ? '' : (result.problem ?? '');
 	}
 
+	// A taught skill is marked known when it goes on the bar and unmarked when it leaves it, since the bar is the only
+	// place a known skill counts.
+	function place(slot: number, skill: string | null) {
+		let state = plan;
+		if (skill && !state.skills.unlocked.includes(skill) && !state.skills.learned.includes(skill)) {
+			const learned = toggleLearned(state, data, skill);
+			if (learned.refused) return apply(learned);
+			state = learned.state;
+		}
+		const placed = placeOnHotbar(state, slot, skill);
+		if (placed.refused) return apply(placed);
+		state = placed.state;
+		for (const key of state.skills.learned)
+			if (!state.skillBars.main.includes(key) && !state.skills.unlocked.includes(key))
+				state = toggleLearned(state, data, key).state;
+		apply({ state });
+	}
 	function apply(edit: Edit) {
 		if (edit.refused) {
 			notice = edit.refused;
@@ -190,173 +249,216 @@
 <p class="notice" role="status" aria-live="polite">{notice}</p>
 
 <div class="planner" data-ready={ready || undefined}>
-	<div class="side">
-		<Section id="character" title="Character">
-			{#if preview}<p>This is a shared build. Save it as a character to keep your changes.</p>{/if}
-			<div class="characters">
+	<aside class="side" aria-label="Character summary">
+		<details class="summary" bind:open={summaryOpen}>
+			<summary
+				><span class="summary-name">{active?.name ?? 'New Character'}</span><span
+					class="summary-line"
+					>Level {formatNumber(plan.attributes.level)}, {formatNumber(
+						evaluation.skillPoints.remaining
+					)} skill points left{#if evaluation.diagnostics.length}, {evaluation.diagnostics.length}
+						{evaluation.diagnostics.length === 1 ? 'problem' : 'problems'}{/if}</span
+				></summary
+			>
+			<div class="summary-body">
+				<Section id="character" title="Character">
+					{#if preview}<p>
+							This is a shared build. Save it as a character to keep your changes.
+						</p>{/if}
+					<div class="characters">
+						<label
+							><span class="field-label">Saved Character</span><select
+								value={active?.id ?? ''}
+								onchange={(event) => {
+									const id = event.currentTarget.value || null;
+									stored(selectCharacter(backend, store, id));
+									const current = activeCharacter(store);
+									plan = current ? current.state : newCharacter(data);
+									preview = false;
+								}}
+								><option value="">Not saved</option
+								>{#each store.characters as character (character.id)}<option value={character.id}
+										>{character.name}</option
+									>{/each}</select
+							></label
+						>
+						<label
+							><span class="field-label">Name</span><input
+								type="search"
+								bind:value={name}
+								placeholder={active?.name ?? 'New character'}
+							/></label
+						>
+						<div class="buttons">
+							<button type="button" onclick={saveAsNew}>Save as New</button>
+							{#if active && !preview}<button
+									type="button"
+									disabled={!name.trim()}
+									onclick={() => {
+										stored(renameCharacter(backend, store, active.id, name.trim()));
+										name = '';
+									}}>Rename</button
+								><button
+									type="button"
+									onclick={() =>
+										stored(
+											duplicateCharacter(
+												backend,
+												store,
+												active.id,
+												name.trim() || `${active.name} copy`
+											)
+										)}>Duplicate</button
+								><button
+									type="button"
+									onclick={() => {
+										stored(deleteCharacter(backend, store, active.id));
+										plan = newCharacter(data);
+									}}>Delete</button
+								>{/if}
+						</div>
+					</div>
+					<label class="level"
+						><span class="field-label">Character Level</span><input
+							type="number"
+							min="1"
+							value={plan.attributes.level}
+							onchange={(event) => apply(setLevel(plan, Number(event.currentTarget.value)))}
+						/></label
+					>
+					<dl class="totals">
+						<div>
+							<dt>Skill Points Left</dt>
+							<dd>
+								{formatNumber(evaluation.skillPoints.remaining)} of {formatNumber(
+									evaluation.skillPoints.earned
+								)}
+							</dd>
+						</div>
+						<div>
+							<dt>Level Up Points Left</dt>
+							<dd>
+								{formatNumber(evaluation.levelUpPoints.remaining)} of {formatNumber(
+									evaluation.levelUpPoints.earned
+								)}
+							</dd>
+						</div>
+						{#if evaluation.effects}{#each [['Health', evaluation.effects.health], ['Mana', evaluation.effects.mana], ['Stamina', evaluation.effects.stamina]] as const as [label, value] (label)}<div
+								>
+									<dt>{label}</dt>
+									<dd>{formatNumber(value)}</dd>
+								</div>{/each}{/if}
+					</dl>
+				</Section>
+				{#if evaluation.diagnostics.length}<Section
+						id="problems"
+						title="What the Game Would Refuse"
+						count={evaluation.diagnostics.length}
+					>
+						<ul>
+							{#each evaluation.diagnostics as diagnostic, index (index)}<li>
+									{describe(diagnostic)}
+								</li>{/each}
+						</ul>
+					</Section>{/if}
+				<Section id="share" title="Share">
+					<div class="buttons">
+						<button type="button" onclick={() => copy('link')}>Copy Link</button>
+						<button type="button" onclick={() => copy('text')}>Copy as Text</button>
+					</div>
+					{#if text}<textarea readonly rows="8" aria-label="Build as text">{text}</textarea
+						>{:else if link}<input
+							type="search"
+							readonly
+							value={link}
+							aria-label="Build link"
+						/>{/if}
+				</Section>
+			</div>
+		</details>
+	</aside>
+	<div class="main">
+		<div class="tabs" role="tablist" aria-label="Character sections">
+			{#each tabs as entry, index (entry.id)}<button
+					type="button"
+					role="tab"
+					id="tab-{entry.id}"
+					aria-controls="panel-{entry.id}"
+					aria-selected={tab === entry.id}
+					tabindex={tab === entry.id ? 0 : -1}
+					onclick={() => selectTab(entry.id)}
+					onkeydown={(event) => navigateTabs(event, index)}>{entry.label}</button
+				>{/each}
+		</div>
+		<div
+			id="panel-attributes"
+			role="tabpanel"
+			aria-labelledby="tab-attributes"
+			hidden={tab !== 'attributes'}
+		>
+			<Section id="attribute-points" title="Attributes">
+				<AttributePanel
+					levels={plan.attributes.points}
+					{evaluation}
+					change={(attribute: Attribute, level: number) =>
+						apply(setAttribute(plan, attribute, level))}
+				/>
+			</Section>
+		</div>
+		<div id="panel-skills" role="tabpanel" aria-labelledby="tab-skills" hidden={tab !== 'skills'}>
+			<Section id="disciplines" title="Disciplines">
 				<label
-					><span class="field-label">Saved Character</span><select
-						value={active?.id ?? ''}
-						onchange={(event) => {
-							const id = event.currentTarget.value || null;
-							stored(selectCharacter(backend, store, id));
-							const current = activeCharacter(store);
-							plan = current ? current.state : newCharacter(data);
-							preview = false;
-						}}
-						><option value="">Not saved</option
-						>{#each store.characters as character (character.id)}<option value={character.id}
-								>{character.name}</option
+					><span class="field-label">Discipline</span><select bind:value={chosen}
+						>{#each [...categories] as [category, entries] (category)}<optgroup label={category}
+								>{#each entries as entry (entry.key)}<option value={entry.key}
+										>{entry.name}{(plan.skills.disciplines[entry.key] ?? 1) > 1
+											? ` (level ${plan.skills.disciplines[entry.key]})`
+											: ''}</option
+									>{/each}</optgroup
 							>{/each}</select
 					></label
 				>
-				<label
-					><span class="field-label">Name</span><input
-						type="search"
-						bind:value={name}
-						placeholder={active?.name ?? 'New character'}
-					/></label
-				>
-				<div class="buttons">
-					<button type="button" onclick={saveAsNew}>Save as New</button>
-					{#if active && !preview}<button
-							type="button"
-							disabled={!name.trim()}
-							onclick={() => {
-								stored(renameCharacter(backend, store, active.id, name.trim()));
-								name = '';
-							}}>Rename</button
-						><button
-							type="button"
-							onclick={() =>
-								stored(
-									duplicateCharacter(
-										backend,
-										store,
-										active.id,
-										name.trim() || `${active.name} copy`
+				{#if discipline}<TreePanel
+						{discipline}
+						{data}
+						state={plan}
+						{evaluation}
+						setLevel={(level) => apply(setDisciplineLevel(plan, discipline.key, level))}
+						toggleSkill={(skill) => apply(toggleSkill(plan, data, skill))}
+						buyRank={(passive) => apply(buyRank(plan, data, passive))}
+						removeRank={(passive) => apply(removeRank(plan, passive))}
+					/>{/if}
+				{#if bloodMagic && chosen === bloodMagic.key}<label class="level"
+						><span class="field-label">Blood Magic Points</span><input
+							type="number"
+							min="0"
+							value={plan.skills.bloodMagicPoints ?? ''}
+							onchange={(event) =>
+								apply(
+									setBloodMagicPoints(
+										plan,
+										event.currentTarget.value === '' ? null : Number(event.currentTarget.value)
 									)
-								)}>Duplicate</button
-						><button
-							type="button"
-							onclick={() => {
-								stored(deleteCharacter(backend, store, active.id));
-								plan = newCharacter(data);
-							}}>Delete</button
-						>{/if}
-				</div>
-			</div>
-			<label class="level"
-				><span class="field-label">Character Level</span><input
-					type="number"
-					min="1"
-					value={plan.attributes.level}
-					onchange={(event) => apply(setLevel(plan, Number(event.currentTarget.value)))}
-				/></label
-			>
-			<p class="balances">
-				{formatNumber(evaluation.skillPoints.remaining)} of {formatNumber(
-					evaluation.skillPoints.earned
-				)} skill points left<br />{formatNumber(evaluation.levelUpPoints.remaining)} of {formatNumber(
-					evaluation.levelUpPoints.earned
-				)} level up points left
-			</p>
-			{#if bloodMagic}<label class="level"
-					><span class="field-label">Blood Magic Points</span><input
-						type="number"
-						min="0"
-						value={plan.skills.bloodMagicPoints ?? ''}
-						onchange={(event) =>
-							apply(
-								setBloodMagicPoints(
-									plan,
-									event.currentTarget.value === '' ? null : Number(event.currentTarget.value)
-								)
-							)}
-					/></label
-				>
-				<p class="muted">
-					<LinkedText
-						text="[Blood Levels](mechanic:blood-levels) sets these points, not your Blood Magic level, so enter what your skill tree shows."
-					/>
-				</p>{/if}
-		</Section>
-		<Section id="attributes" title="Attributes">
-			<AttributePanel
-				levels={plan.attributes.points}
-				{evaluation}
-				change={(attribute: Attribute, level: number) =>
-					apply(setAttribute(plan, attribute, level))}
-			/>
-		</Section>
-		<Section id="share" title="Share">
-			<div class="buttons">
-				<button type="button" onclick={() => copy('link')}>Copy Link</button>
-				<button type="button" onclick={() => copy('text')}>Copy as Text</button>
-			</div>
-			{#if text}<textarea readonly rows="8" aria-label="Build as text">{text}</textarea
-				>{:else if link}<input type="search" readonly value={link} aria-label="Build link" />{/if}
-		</Section>
-	</div>
-	<div class="main">
-		{#if evaluation.diagnostics.length}<Section
-				id="problems"
-				title="What the Game Would Refuse"
-				count={evaluation.diagnostics.length}
-			>
-				<ul>
-					{#each evaluation.diagnostics as diagnostic, index (index)}<li>
-							{describe(diagnostic)}
-						</li>{/each}
-				</ul>
-			</Section>{/if}
-		<Section id="skill-bar" title="Skill Bar">
-			<Hotbar {plan} {data} place={(slot, skill) => apply(placeOnHotbar(plan, slot, skill))} />
-		</Section>
-		<Section id="disciplines" title="Disciplines">
-			<label
-				><span class="field-label">Discipline</span><select bind:value={chosen}
-					>{#each [...categories] as [category, entries] (category)}<optgroup label={category}
-							>{#each entries as entry (entry.key)}<option value={entry.key}
-									>{entry.name}{(plan.skills.disciplines[entry.key] ?? 1) > 1
-										? ` (level ${plan.skills.disciplines[entry.key]})`
-										: ''}</option
-								>{/each}</optgroup
-						>{/each}</select
-				></label
-			>
-			{#if discipline}<TreePanel
-					{discipline}
-					{data}
-					state={plan}
-					{evaluation}
-					setLevel={(level) => apply(setDisciplineLevel(plan, discipline.key, level))}
-					toggleSkill={(skill) => apply(toggleSkill(plan, data, skill))}
-					buyRank={(passive) => apply(buyRank(plan, data, passive))}
-					removeRank={(passive) => apply(removeRank(plan, passive))}
-				/>{/if}
-		</Section>
-		<Section
-			id="learned"
-			title="Skills From Books and Events"
-			count={learnable.length}
-			line="A book, a conversation or an event teaches these skills. They cost no skill point."
+								)}
+						/></label
+					>
+					<p class="muted">
+						<LinkedText
+							text="[Blood Levels](mechanic:blood-levels) sets these points, not your Blood Magic level, so enter what your skill tree shows."
+						/>
+					</p>{/if}
+			</Section>
+		</div>
+		<div
+			id="panel-skill-bars"
+			role="tabpanel"
+			aria-labelledby="tab-skill-bars"
+			hidden={tab !== 'skill-bars'}
 		>
-			<ul class="learned">
-				{#each learnable as skill (skill.key)}<li>
-						<label class="check"
-							><input
-								type="checkbox"
-								checked={plan.skills.learned.includes(skill.key)}
-								onchange={(event) => {
-									apply(toggleLearned(plan, data, skill.key));
-									event.currentTarget.checked = plan.skills.learned.includes(skill.key);
-								}}
-							/><span data-game>{skill.name}</span></label
-						>
-					</li>{/each}
-			</ul>
-		</Section>
+			<Section id="skill-bar" title="Skill Bar">
+				<Hotbar {plan} {data} {place} />
+			</Section>
+		</div>
 	</div>
 </div>
 
@@ -390,8 +492,85 @@
 	.level input {
 		width: var(--size-filter-control);
 	}
-	.balances {
+	@media (width >= 64rem) {
+		.side {
+			position: sticky;
+			top: var(--gap-section);
+			max-height: calc(var(--size-screen) - 2 * var(--gap-section));
+			overflow-y: auto;
+		}
+	}
+	.summary > summary {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: var(--gap-inline) var(--gap-block);
+		padding: var(--inset-cell) var(--inset);
+		border: var(--border-width) solid var(--border-control);
+		border-radius: var(--radius-1);
+		background: var(--surface-panel);
+		cursor: pointer;
+	}
+	.summary-name {
+		font-weight: var(--weight-strong);
+	}
+	.summary-line {
+		color: var(--text-muted);
+	}
+	.summary-body {
+		display: grid;
+		gap: var(--gap-section);
+	}
+	.summary[open] > .summary-body {
+		margin-top: var(--gap-block);
+	}
+	@media (width >= 64rem) {
+		.summary > summary {
+			display: none;
+		}
+		.summary[open] > .summary-body {
+			margin-top: 0;
+		}
+	}
+	.totals {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--gap-block) var(--gap-groups);
 		margin: 0;
+	}
+	.totals dt {
+		color: var(--text-muted);
+		font-size: var(--type-0);
+	}
+	.totals dd {
+		margin: 0;
+		font-variant-numeric: tabular-nums;
+	}
+	.tabs {
+		display: flex;
+		gap: var(--gap-inline);
+		border-bottom: var(--border-width) solid var(--border-control);
+		overflow-x: auto;
+	}
+	.tabs button {
+		flex: 0 0 auto;
+		padding: var(--inset-cell) var(--inset);
+		border: 0;
+		border-bottom: var(--marker-width) solid transparent;
+		border-radius: 0;
+		background: none;
+		color: var(--text-muted);
+	}
+	.tabs button[aria-selected='true'] {
+		border-bottom-color: var(--accent);
+		color: var(--text);
+	}
+	[role='tabpanel'] {
+		display: grid;
+		gap: var(--gap-section);
+	}
+	[role='tabpanel'][hidden] {
+		display: none;
 	}
 	textarea {
 		width: 100%;
@@ -404,18 +583,5 @@
 	}
 	.notice:empty {
 		display: none;
-	}
-	.learned {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(var(--size-card-narrow), 1fr));
-		gap: var(--gap-inline) var(--gap-groups);
-		margin: 0;
-		padding: 0;
-		list-style: none;
-	}
-	.check {
-		display: flex;
-		align-items: center;
-		gap: var(--gap-inline);
 	}
 </style>
