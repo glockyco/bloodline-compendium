@@ -177,8 +177,6 @@ Refactor the catalog, then the site, each verified by unchanged item output and 
 
 - Whether travel spawns the harvestables saved near you in the next area. Loading a level in the lab spawns the saved harvestables at their saved spots in whichever level loads, so run census3 found the Harbinger tutorial's trees and stones in Squalls End and the Necropolis. A run that travels on the map as a player does and then reads the area would show whether players meet them, which would make it a known issue.
 
-- Where the single Oak at the Rocky Hills and Rocky Tundra camps comes from. No spawner box of those camps holds Oak in the records or in play, so the harvest check lists it.
-
 - How the bonus's extra draws are counted. In run yield7 one hit gave three extra items, and `Give Bonus Loot` adds between one and three, by its call list. A run that harvests many deposits with hits would give the distribution.
 
 - Maps inside structs and sets keep only the entries they store, because extraction reads removed keys for an object's top-level maps alone.
