@@ -960,10 +960,18 @@
 	/* A phone reads each item as a compact row of the same surface: its name on the first line, then its type, its
 	   labelled stats and its value on the next. */
 	@media (width < 40rem) {
+		/* The label keeps one line and the select shrinks to what is left, so a long option such as "Blocks Without
+		   Stamina, highest first" shortens the select rather than breaking "Sort by". */
 		.phone-sort {
+			min-width: 0;
 			display: flex;
 			align-items: center;
 			gap: var(--gap-inline);
+			white-space: nowrap;
+		}
+		.phone-sort select {
+			min-width: 0;
+			flex: 0 1 auto;
 		}
 		thead {
 			display: none;
