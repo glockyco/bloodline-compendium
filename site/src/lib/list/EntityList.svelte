@@ -111,20 +111,29 @@
 			list.stats.length +
 			Number(Boolean(list.name))
 	);
-	// The first rows render at once and the rest follow in small batches, so a long list never blocks a click.
+	// The first rows render at once and the rest follow in small batches while the browser is idle, so a long list never
+	// delays a click, such as leaving the page before every row is built.
 	let built = $state(60);
 	$effect(() => {
 		const total = items.length;
 		let count = 60;
 		built = count;
-		let timer: ReturnType<typeof setTimeout> | undefined;
+		let handle: number | undefined;
+		const idle = (run: () => void) =>
+			typeof requestIdleCallback === 'function'
+				? requestIdleCallback(run, { timeout: 200 })
+				: (setTimeout(run, 16) as unknown as number);
+		const cancel = (id: number) =>
+			typeof cancelIdleCallback === 'function' ? cancelIdleCallback(id) : clearTimeout(id);
 		const grow = () => {
-			count = Math.min(total, count + 200);
+			count = Math.min(total, count + 40);
 			built = count;
-			if (count < total) timer = setTimeout(grow, 16);
+			if (count < total) handle = idle(grow);
 		};
-		if (total > count) timer = setTimeout(grow, 16);
-		return () => clearTimeout(timer);
+		if (total > count) handle = idle(grow);
+		return () => {
+			if (handle !== undefined) cancel(handle);
+		};
 	});
 	const shownRows = $derived(items.slice(0, built));
 	const count = (n: number) => `${formatNumber(n)} ${n === 1 ? noun.one : noun.many}`;
@@ -279,7 +288,7 @@
 							type="button"
 							class="clear"
 							onclick={() =>
-								apply({
+								remove({
 									name: '',
 									facets: {},
 									stats: [],

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, untrack } from 'svelte';
+	import { onMount, tick, untrack } from 'svelte';
 	import { page } from '$app/state';
 	import Section from '../ui/Section.svelte';
 	import Tabs from '../ui/Tabs.svelte';
@@ -244,6 +244,7 @@
 					<div class="characters">
 						<label
 							><span class="field-label">Saved Character</span><select
+								id="saved-character"
 								value={active?.id ?? ''}
 								onchange={(event) => {
 									const id = event.currentTarget.value || null;
@@ -290,6 +291,8 @@
 									onclick={() => {
 										stored(deleteCharacter(backend, store, active.id));
 										plan = newCharacter(data);
+										// The deleted character's buttons go, so focus moves to the character picker.
+										void tick().then(() => document.getElementById('saved-character')?.focus());
 									}}>Delete</button
 								>{/if}
 						</div>

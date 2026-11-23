@@ -77,7 +77,16 @@
 	}
 </script>
 
-<div class="bar">
+<!-- Escape anywhere in the bar closes the chooser, and focus leaving the bar closes it too. -->
+<div
+	class="bar"
+	role="presentation"
+	onkeydown={keydown}
+	onfocusout={(event) => {
+		if (open !== null && !event.currentTarget.contains(event.relatedTarget as Node | null))
+			open = null;
+	}}
+>
 	{#each [0, 1] as row (row)}<div class="row" role="group" aria-label="Row {row + 1}">
 			{#each Array.from({ length: perRow }, (_, index) => row * perRow + index) as slot (slot)}
 				{@const key = slots[slot]}
@@ -120,14 +129,19 @@
 					aria-label="Search skills"
 					placeholder="Search skills"
 					onkeydown={(event) => {
-						keydown(event);
+						// Shift+Tab returns to the slot that opened the chooser, which sits above it in the bar.
+						if (event.key === 'Tab' && event.shiftKey && open !== null) {
+							event.preventDefault();
+							close(open);
+							return;
+						}
 						const first = groups[0]?.entries[0];
 						if (event.key !== 'Enter' || !first) return;
 						// The key would otherwise press the slot that receives focus and reopen the chooser.
 						event.preventDefault();
 						choose(first.key);
 					}}
-				/>{#if slots[open]}<button type="button" onkeydown={keydown} onclick={() => choose(null)}
+				/>{#if slots[open]}<button type="button" onclick={() => choose(null)}
 						>Empty This Slot</button
 					>{/if}
 			</div>
@@ -136,7 +150,6 @@
 					{#each group.entries as entry (entry.key)}<button
 							type="button"
 							aria-pressed={slots[open] === entry.key}
-							onkeydown={keydown}
 							onclick={() => choose(entry.key)}
 							>{#if entry.icon}<img
 									src="/icons/{entry.icon}-48.webp"

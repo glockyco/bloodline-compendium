@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tick } from 'svelte';
 	import RelationTable from '../RelationTable.svelte';
 	import EntityLink from '../ui/EntityLink.svelte';
 	import { formatNumber } from '../format.js';
@@ -71,6 +72,12 @@
 		`Unlocks at ${names.get(checked) ?? 'another discipline'} level ${formatNumber(required)}`;
 	const unlocked = (key: string) => plan.skills.unlocked.includes(key);
 	const ranksOf = (key: string) => plan.skills.passives[key] ?? 0;
+	// A rank button that becomes disabled by its own click hands focus to the other one, so focus is never lost.
+	async function keepFocus(button: HTMLButtonElement) {
+		await tick();
+		if (!button.disabled) return;
+		button.parentElement?.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus();
+	}
 	// Too narrow for both panels, the reader switches between them.
 	let shown: 'skills' | 'passives' = $state('skills');
 </script>
@@ -164,14 +171,20 @@
 										type="button"
 										aria-label="Remove a {passive.name} rank"
 										disabled={ranksOf(passive.key) < 1}
-										onclick={() => removeRank(passive.key)}>−</button
+										onclick={(event) => {
+											removeRank(passive.key);
+											keepFocus(event.currentTarget);
+										}}>−</button
 									><output aria-label="{passive.name} ranks"
 										>{ranksOf(passive.key)} of {passive.ranks ?? 1}</output
 									><button
 										type="button"
 										aria-label="Buy a {passive.name} rank"
 										disabled={ranksOf(passive.key) >= rankCosts(passive).length}
-										onclick={() => buyRank(passive.key)}>+</button
+										onclick={(event) => {
+											buyRank(passive.key);
+											keepFocus(event.currentTarget);
+										}}>+</button
 									></span
 								></td
 							></tr

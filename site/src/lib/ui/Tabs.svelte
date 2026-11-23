@@ -101,11 +101,14 @@
 						/>{/if}</button
 				>{/each}
 		</div>{/if}
-	{#each tabs as entry (entry.id)}<div
+	<!-- A tab panel takes focus, as WAI-ARIA's tabs pattern asks, so Tab reaches it from its tab. -->
+	{#each tabs as entry (entry.id)}<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+		<div
 			id="panel-{entry.id}"
 			role={selected === null ? undefined : 'tabpanel'}
 			aria-labelledby={selected === null ? undefined : `tab-${entry.id}`}
 			hidden={selected !== null && selected !== entry.id}
+			tabindex={selected !== null && !overflow ? 0 : undefined}
 			aria-label={selected !== null && overflow ? entry.label : undefined}
 			class="panel-body"
 		>

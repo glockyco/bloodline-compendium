@@ -24,7 +24,14 @@
 	}}
 />
 
-<div class="switcher" bind:this={root}>
+<div
+	class="switcher"
+	bind:this={root}
+	onfocusout={(event) => {
+		// Tabbing out of the panel closes it, as a click outside does.
+		if (open && !root.contains(event.relatedTarget as Node | null)) open = false;
+	}}
+>
 	<button
 		bind:this={toggle}
 		type="button"
