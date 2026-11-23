@@ -429,6 +429,13 @@ test('release labels, provenance and static 404', async ({ page, request }) => {
 	expect(Object.keys(info).sort()).toEqual(['appId', 'buildId', 'commit', 'depots', 'dirty']);
 	expect(info.buildId).toBe(90000001);
 });
+test('a missing address offers the pages its words match', async ({ page }) => {
+	await page.goto('/items/lanternedge-blade/');
+	const matches = page.getByRole('region', { name: 'Possible Matches' });
+	await expect(matches.getByRole('link').first()).toContainText('Lanternedge');
+	await expect(page.getByRole('main').getByRole('link', { name: 'Items' })).toBeVisible();
+});
+
 test('reference layouts stay readable on desktop and phone', async ({ page }, testInfo) => {
 	for (const [name, width] of [
 		['desktop', 1280],

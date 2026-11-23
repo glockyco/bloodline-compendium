@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { browseKinds } from './entities.js';
 	import IconSlot from './ui/IconSlot.svelte';
+	import { preloadSearch, searchPages, type SearchResult } from './search.js';
 	/**
 	 * Search over every page, read from the Pagefind index the build writes. Each result shows its icon, its name and a
 	 * line with its kind and context, such as "Item · Weapon", so names that several kinds share stay apart.
@@ -14,39 +15,12 @@
 	const browse = $derived(browseKinds(page.data.kinds));
 	const id = $props.id();
 
-	interface Result {
-		url: string;
-		title: string;
-		kind: string;
-		detail: string | null;
-		icon: string | null;
-	}
-	interface Pagefind {
-		debouncedSearch(
-			query: string,
-			options?: object,
-			timeout?: number
-		): Promise<{
-			results: { data(): Promise<{ url: string; meta: Record<string, string> }> }[];
-		} | null>;
-	}
-
 	let query = $state('');
-	let results = $state<Result[]>([]);
+	let results = $state<SearchResult[]>([]);
 	let status = $state<'idle' | 'loading' | 'done' | 'failed'>('idle');
 	let open = $state(false);
 	let active = $state(-1);
 	let input: HTMLInputElement | undefined = $state();
-	let pagefind: Promise<Pagefind> | null = null;
-
-	// The index loads on first use, so pages without a search pay nothing for it.
-	function load(): Promise<Pagefind> {
-		// A URL built at run time keeps the bundler from resolving the index, which only the build writes.
-		const path = new URL('/pagefind/pagefind.js', location.origin).href;
-		pagefind ??= import(/* @vite-ignore */ path) as Promise<Pagefind>;
-		return pagefind;
-	}
-
 	async function search(value: string) {
 		if (!value.trim()) {
 			results = [];
@@ -55,17 +29,9 @@
 		}
 		status = 'loading';
 		try {
-			const found = await (await load()).debouncedSearch(value, {}, 150);
-			if (found === null) return;
-			const shown = await Promise.all(found.results.slice(0, 8).map((result) => result.data()));
-			if (value !== query) return;
-			results = shown.map((entry) => ({
-				url: entry.url.replace(/index\.html$/, ''),
-				title: entry.meta.title ?? entry.url,
-				kind: entry.meta.kind ?? 'Page',
-				detail: entry.meta.detail ?? null,
-				icon: entry.meta.icon ?? null
-			}));
+			const shown = await searchPages(value);
+			if (shown === null || value !== query) return;
+			results = shown;
 			active = results.length ? 0 : -1;
 			status = 'done';
 		} catch {
@@ -88,7 +54,7 @@
 		}
 	}
 
-	function choose(result: Result) {
+	function choose(result: SearchResult) {
 		open = false;
 		query = '';
 		results = [];
@@ -135,7 +101,7 @@
 			{placeholder}
 			onfocus={() => {
 				open = true;
-				void load();
+				void preloadSearch();
 			}}
 			oninput={() => {
 				open = true;

@@ -157,6 +157,10 @@ A discipline page opens with one sentence written from its rules that says how i
 
 A page whose parts a reader switches between, such as the resource groups and the planner's sections, uses `site/src/lib/ui/Tabs.svelte`: each tab has its own address fragment, the arrow keys move between tabs, and a count follows a label where the part is a list. Until the script runs every part shows with its heading, so search and readers without JavaScript see all of them. Tabs stay in one row: where they do not fit, the component replaces them with a full-width dropdown of the same parts, as the five resource groups on a phone, because tabs that scroll hide later parts and tabs that wrap lose their link to the panel. The planner's three tabs fit on a phone and stay tabs.
 
+### Missing pages
+
+A missing address shows the site's search results for the words in its last part, preferring the kind its first part names, as cards like the list pages, and then every list as a card to browse, because the address usually names what the reader wanted, such as /items/knights-broadsword/. The header's search is the only search field, so the page never shows two.
+
 ### Text pages and measure
 
 Prose keeps a measure of 72 characters, inside the 45 to 90 that typography guides recommend and under WCAG's 80. Tables, panels and side columns use the page's width. About, Known Issues and the mechanic pages share a text layout with a side column for the page's contents and related pages, as GOV.UK's two-thirds layout does, so wide screens use the width beside the prose.
