@@ -4,6 +4,8 @@ test('the skill list hides skills without a source behind a counted reveal, and 
 	page
 }) => {
 	await page.goto('/skills/');
+	// The reveal and the name filter act from hydration on, so a click before the scripts run would do nothing.
+	await page.waitForLoadState('networkidle');
 	await expect(page.locator('.entity-name')).toHaveText([
 		'Cinder Flick',
 		'Lanternedge Flare',
@@ -15,6 +17,7 @@ test('the skill list hides skills without a source behind a counted reveal, and 
 		'Not in normal play'
 	);
 	await page.goto('/skills/');
+	await page.waitForLoadState('networkidle');
 	await page.getByRole('searchbox', { name: /name/i }).fill('Lost');
 	await expect(page.locator('.entity-name')).toHaveText(['Lost Chant']);
 });
@@ -23,6 +26,7 @@ test('the skill list filters by discipline in its address and sorts by required 
 	page
 }) => {
 	await page.goto('/skills/');
+	await page.waitForLoadState('networkidle');
 	const filters = page.getByRole('complementary', { name: 'Skill filters' });
 	await filters.getByRole('checkbox', { name: /^Emberlore\s/ }).check();
 	await expect(page).toHaveURL(/discipline=Emberlore/);

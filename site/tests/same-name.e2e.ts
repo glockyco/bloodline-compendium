@@ -56,6 +56,7 @@ test('list rows link and preview the exact version while search returns one name
 		'true'
 	);
 	await page.goto('/');
+	await page.waitForLoadState('networkidle');
 	await page.getByRole('combobox', { name: 'Search the compendium' }).fill('Twin Lantern');
 	await expect(
 		page

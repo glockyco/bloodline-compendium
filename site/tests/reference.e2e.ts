@@ -42,6 +42,7 @@ test('filters items with counted facets, preserves URL state and sorts numeric v
 
 test('name filtering combines with facets and empty results can be cleared', async ({ page }) => {
 	await page.goto('/items/');
+	await page.waitForLoadState('networkidle');
 	const categories = page.getByRole('complementary', { name: 'Item filters' });
 	await categories.getByRole('checkbox', { name: /^Weapons\s/ }).check();
 	const name = page.getByRole('searchbox', { name: 'Search by name' });
@@ -118,6 +119,7 @@ test('phone filters open as a keyboard-accessible sheet and apply without naviga
 }) => {
 	await page.setViewportSize({ width: 390, height: 900 });
 	await page.goto('/items/');
+	await page.waitForLoadState('networkidle');
 	const open = page.getByRole('button', { name: 'Filters', exact: true });
 	await open.focus();
 	await page.keyboard.press('Enter');
@@ -226,6 +228,7 @@ test('keeps unconfirmed sources at the end without advertising a way to get the 
 		);
 	}
 	await page.goto('/items/?name=prism');
+	await page.waitForLoadState('networkidle');
 	await page.locator('.entity-name', { hasText: 'Hollow Prism' }).focus();
 	const preview = page.locator('#entity-preview');
 	await expect(preview).toContainText('No known source.');
@@ -233,6 +236,7 @@ test('keeps unconfirmed sources at the end without advertising a way to get the 
 	await expect(preview).not.toContainText('Unplaced prism');
 	await page.keyboard.press('Escape');
 	await page.goto('/');
+	await page.waitForLoadState('networkidle');
 	await page.getByRole('combobox', { name: 'Search the compendium' }).fill('Hollow');
 	const result = page
 		.getByRole('listbox', { name: 'Search results' })
@@ -379,6 +383,7 @@ test('a preview docked at the top of a phone screen is not hidden under the head
 });
 test('finds items by word prefix from the shared search', async ({ page }) => {
 	await page.goto('/');
+	await page.waitForLoadState('networkidle');
 	const search = page.getByRole('combobox', { name: 'Search the compendium' });
 	await search.fill('Lanter');
 	await expect(
@@ -390,6 +395,7 @@ test('finds items by word prefix from the shared search', async ({ page }) => {
 });
 test('leads a type word from the shared search to the filtered item list', async ({ page }) => {
 	await page.goto('/');
+	await page.waitForLoadState('networkidle');
 	await page.getByRole('combobox', { name: 'Search the compendium' }).fill('swords');
 	await page
 		.getByRole('listbox', { name: 'Search results' })
