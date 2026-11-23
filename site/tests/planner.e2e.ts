@@ -94,6 +94,29 @@ test('a link opens the build as a preview, and saving keeps it as a character', 
 	await expect(level(page)).toHaveValue('4');
 });
 
+test('the skill bar works from the keyboard', async ({ page }) => {
+	await open(page);
+	await level(page).fill('4');
+	await level(page).press('Enter');
+	await page.getByLabel('Moss Ward').press('Space');
+	await expect(page.getByLabel('Moss Ward')).toBeChecked();
+	const slot = page.getByRole('button', { name: 'Row 2, slot 1: empty' });
+	await slot.press('Enter');
+	// The choices follow both rows, so opening a slot moves focus to them, and choosing returns it to the slot.
+	await expect(
+		page
+			.getByRole('group', { name: 'Skills for Row 2, slot 1' })
+			.getByRole('button', { name: 'Moss Ward' })
+	).toBeFocused();
+	await page.keyboard.press('Enter');
+	const placed = page.getByRole('button', { name: 'Row 2, slot 1: Moss Ward' });
+	await expect(placed).toBeFocused();
+	await placed.press('Enter');
+	await page.keyboard.press('Escape');
+	await expect(placed).toBeFocused();
+	await expect(page.getByRole('group', { name: 'Skills for Row 2, slot 1' })).toHaveCount(0);
+});
+
 test('a malformed link says so and opens a new character', async ({ page }) => {
 	await page.goto('/planner/?build=v9.abc');
 	await expect(page.locator('.planner[data-ready]')).toBeAttached();
