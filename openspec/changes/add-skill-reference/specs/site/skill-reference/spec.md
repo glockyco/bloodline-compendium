@@ -48,3 +48,10 @@ Each passive and spellsong SHALL have an anchor on its discipline's page. A link
 #### Scenario: Link to a passive
 - **WHEN** a reader follows a link to a passive
 - **THEN** the discipline page opens at that passive with its tooltip facts visible
+
+### Requirement: Previews on skill links
+Every link to a skill, discipline, passive or spellsong SHALL show a preview on hover, keyboard focus and first touch, loading it on demand, and SHALL lead to its page or anchor without JavaScript. A skill's preview SHALL show its tooltip and its first way to get it, or why none is known. A discipline's preview SHALL show its category and what it contains.
+
+#### Scenario: Skill link
+- **WHEN** a reader focuses the Arcane Bolt link on the skill list
+- **THEN** Arcane Bolt's tooltip appears beside the link, followed by "Arcane, Arcane level 1."
