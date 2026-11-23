@@ -30,7 +30,7 @@ bun run --cwd site playwright install chromium
 bun run --cwd site dev
 ```
 
-The invented fixtures need no game installation and cannot be published as production data. To work with extracted data instead, set `BLOODLINE_SITE_DATA` to its absolute site-data directory.
+The invented fixtures need no game installation and cannot be published as production data. To work with extracted data instead, set `BLOODLINE_SITE_DATA` to its absolute site-data directory. Iterate on interface changes with this development server, which reloads on save, rather than with `build:preview`, which takes minutes. `build:fixtures` runs the prerender checks, such as missing link targets, in seconds.
 
 ## Extract and publish
 
