@@ -73,6 +73,8 @@ Place names come first among the later kinds, because places, people, the map an
 
 The header lists Items alone. `add-skill-reference` adds a Browse menu after Afallon's, with entries read from the kind registry.
 
+Keyboard checks still owed, each found by reading the code and not yet tried in a browser: Escape should dismiss an unknown value's tooltip (`UnknownValue.svelte`), one Escape should close only the topmost of a link preview and the popover under it (`EntityPreviews.svelte`), a fragment link into a hidden tab should open that tab (`revealFragment` in `routes/+layout.svelte`), and focus should survive `Tabs.svelte` switching between its tab row and its select as the width changes.
+
 ### Sharing and link previews
 
 - Every page has a title, a description and an image for link previews. Item renders replace the category art in previews once they exist.
