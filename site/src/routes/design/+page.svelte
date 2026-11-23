@@ -14,6 +14,7 @@
 	import EntityLink from '#lib/ui/EntityLink.svelte';
 	import IconTile from '#lib/ui/IconTile.svelte';
 	import Section from '#lib/ui/Section.svelte';
+	import Tabs from '#lib/ui/Tabs.svelte';
 	import { formatNumber } from '#lib/format.js';
 	let { data } = $props();
 	const icons = $derived(data.icons);
@@ -155,6 +156,19 @@
 						>{formatNumber(entry.price)}<small>gold</small></td
 					></tr
 				>{/snippet}</RelationTable
+		>
+	</Section>
+
+	<!-- More tabs than a phone's row holds, so the layout check sees the select that replaces them. -->
+	<Section id="tabs" title="Tabs">
+		<Tabs
+			tabs={[
+				{ id: 'woodcutting', label: 'Trees and Other Woodcutting Spots', count: 12 },
+				{ id: 'mining', label: 'Ore Veins and Other Mining Spots', count: 9 },
+				{ id: 'foraging', label: 'Bushes and Other Foraging Spots', count: 31 }
+			]}
+			label="Tab fixtures"
+			initial="woodcutting">{#snippet panel(id)}<p>Panel {id}.</p>{/snippet}</Tabs
 		>
 	</Section>
 

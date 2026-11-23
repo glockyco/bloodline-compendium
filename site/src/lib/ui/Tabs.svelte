@@ -129,12 +129,14 @@
 		gap: var(--gap-inline);
 		border-bottom: var(--border-width) solid var(--border-control);
 	}
-	/* A copy of the tab row that takes no space, measured to tell whether the real row fits. */
+	/* A copy of the tab row that takes no space, measured to tell whether the real row fits. It is as wide as the
+	   real row and hides what overflows, so its scroll width tells the row's need without widening the page. */
 	.measure {
 		position: absolute;
+		inset-inline: 0;
+		overflow: hidden;
 		visibility: hidden;
 		pointer-events: none;
-		width: max-content;
 	}
 	.tab-copy {
 		flex: 0 0 auto;
