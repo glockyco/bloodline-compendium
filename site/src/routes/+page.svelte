@@ -5,6 +5,7 @@
 	import ButtonLink from '#lib/ui/ButtonLink.svelte';
 	import IconTile from '#lib/ui/IconTile.svelte';
 	import Section from '#lib/ui/Section.svelte';
+	import { formatNumber } from '#lib/format.js';
 	let { data } = $props();
 </script>
 
@@ -29,8 +30,9 @@
 	<div class="hero-body">
 		<h1 id="title">The Bloodline Compendium</h1>
 		<p class="lede">
-			The Bloodline is a sandbox fantasy RPG where nearly everything you do has a level, with over
-			500 skills to unlock. This wiki is generated from the game's files.
+			The Bloodline is a sandbox fantasy RPG where nearly everything you do has a level, with {formatNumber(
+				data.skillCount
+			)} skills to unlock. This wiki is generated from the game's files.
 		</p>
 		<div class="hero-search">
 			<Search variant="hero" placeholder="Search items, skills and more" />

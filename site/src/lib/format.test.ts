@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { formatNumber, formatChance, formatChanceRange } from './format.js';
+import { formatNumber, formatChance, formatChanceRange, unitAfter } from './format.js';
 
 it('removes floating-point noise from pool weights and totals', () => {
 	expect(formatNumber(18.020000000000028)).toBe('18.02');
@@ -22,4 +22,13 @@ it('writes both ends of a chance range in one style', () => {
 	expect(formatChanceRange(0.0055, 0.385)).toBe('0.55% to 38.5%');
 	expect(formatChanceRange(0.002, 0.005)).toBe('about 1 in 500 to 1 in 200');
 	expect(formatChanceRange(0.25, 0.25)).toBe('25%');
+});
+
+it('writes a unit after its value as the game does', () => {
+	expect(5 + unitAfter(5, 'seconds')).toBe('5 seconds');
+	expect(1 + unitAfter(1, 'seconds')).toBe('1 second');
+	expect(50 + unitAfter(50, '% of incoming damage in stamina')).toBe(
+		'50% of incoming damage in stamina'
+	);
+	expect(20 + unitAfter(20, 'per contact')).toBe('20 per contact');
 });

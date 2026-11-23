@@ -5,6 +5,15 @@ export function formatNumber(value: number): string {
 }
 
 /** A count with its noun in the right number, such as "1 skill" or "12 skills". */
+/**
+ * A unit as it follows a value, as the game writes "4 seconds": after a space, in the singular for exactly 1, and
+ * straight after the number for a unit that starts with a percent sign, as in "50% of incoming damage in stamina".
+ */
+export function unitAfter(value: number | null | undefined, unit: string): string {
+	const word = value === 1 ? unit.replace(/s$/, '') : unit;
+	return unit.startsWith('%') ? word : ' ' + word;
+}
+
 export function plural(count: number, one: string, many: string): string {
 	return `${formatNumber(count)} ${count === 1 ? one : many}`;
 }

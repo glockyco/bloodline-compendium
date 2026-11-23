@@ -17,7 +17,7 @@
 		type ListState
 	} from './state.js';
 	import type { ListFacet } from '../site-data.js';
-	import { formatNumber } from '../format.js';
+	import { formatNumber, unitAfter } from '../format.js';
 
 	interface Props {
 		rows: R[];
@@ -181,6 +181,13 @@
 				: 'descending'
 			: 'none';
 	}
+	// A phone card has no heading over its values, so a number carries its column's unit after it there.
+	function cellUnit(item: R, column: { id: string }): string {
+		const unit = 'unit' in column && typeof column.unit === 'string' ? column.unit : null;
+		const cell = item.cells[column.id];
+		return unit && cell?.number != null && cell.text == null ? unitAfter(cell.number, unit) : '';
+	}
+
 	function cellText(item: R, column: string): string {
 		const cell = item.cells[column];
 		// A cell's text is what it shows when it has one, such as a speed word that sorts by its number. A cell
@@ -352,12 +359,14 @@
 												item
 											)}{/if}</td
 									>{/each}
-								{#each columns as column (column.id)}<td
+								{#each columns as column (column.id)}{@const unit = cellUnit(item, column)}<td
 										class:numeric={column.numeric}
-										class:short={cellText(item, column.id).length <= 16}
+										class:short={(cellText(item, column.id) + unit).length <= 16}
 										class:absent={!item.cells[column.id]}
 										data-label={cellText(item, column.id) ? column.label : undefined}
-										>{cellText(item, column.id) || 'None'}</td
+										>{cellText(item, column.id) || 'None'}{#if unit}<span class="cell-unit"
+												>{unit}</span
+											>{/if}</td
 									>{/each}
 								{#each trailing as column (column.id)}<td
 										class="trail"
@@ -742,6 +751,10 @@
 	.filters-button {
 		display: none;
 	}
+	/* A desktop column names its unit under its heading, so its cells leave it out. */
+	.cell-unit {
+		display: none;
+	}
 
 	/* Filters are disclosure groups, as in Afallon's filter panel: a title, a count of choices and a chevron. */
 	.group {
@@ -1022,6 +1035,13 @@
 		}
 		tbody td.absent {
 			display: none;
+		}
+		.cell-unit {
+			display: inline;
+		}
+		/* A value long enough for a line of its own, such as one with a long unit, wraps within it. */
+		tbody td.numeric:not(.short) {
+			white-space: normal;
 		}
 		/* Without a type, the value shares the name's line, and stats take whole lines below. */
 		tbody tr:not(:has(td.lead)) {
