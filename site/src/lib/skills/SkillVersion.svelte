@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { alignSide } from '#lib/ui/align-side.js';
 	import Section from '../ui/Section.svelte';
 	import SourceSections from '../entity/SourceSections.svelte';
 	import UnconfirmedSources from '../entity/UnconfirmedSources.svelte';
@@ -20,17 +21,17 @@
 	);
 </script>
 
-<div class="detail-layout">
+<div class="detail-layout" use:alignSide>
 	<!-- Only a skill without a confirmed way to learn it opens with an answer, which its sources give otherwise. -->
-	{#if status}<div class="answer" data-pagefind-ignore="all">
+	{#if status}<div class="answer" data-main data-pagefind-ignore="all">
 			<Section id={idPrefix + 'how-to-get-it'} title="How to Get It">
 				<p class="surface">{status}</p>
 			</Section>
 		</div>{/if}
-	<aside class="item-side" aria-label="Game card">
+	<aside class="item-side" data-side aria-label="Game card">
 		<SkillTooltip {skill} heading="p" />
 	</aside>
-	<div class="item-relations" data-pagefind-ignore="all">
+	<div class="item-relations" data-main data-pagefind-ignore="all">
 		<SourceSections {sources} {idPrefix} />
 		<UnconfirmedSources sources={skill.sources} name={skill.name} {idPrefix} />
 		<BugsSection notes={skill.notes} facts={skill.facts} name={skill.name} {idPrefix} />

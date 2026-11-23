@@ -336,6 +336,8 @@ small {
 	position: sticky;
 	top: var(--gap-block);
 	min-width: 0;
+	/* `alignSide` starts the card level with the main column's first card. Without JavaScript this offset assumes a
+	   first section with a heading and no intro line. */
 	margin-top: var(--inset-below-heading);
 }
 /* A render opens the main column without a heading, so the game card starts level with it. */

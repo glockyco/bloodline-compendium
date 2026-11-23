@@ -3,6 +3,7 @@
 	import { resolve } from '$app/paths';
 	import { formatNumber, plural } from '../format.js';
 	import { activeCharacter, loadStore, localBackend, type Character } from './store.js';
+	import type { SkillsSection } from './state.js';
 	/**
 	 * What the planner's active character has against this page: a skill's required level, or a discipline's level and
 	 * unlocked skills. It reads only the characters stored in the browser, never the planner's inputs, and shows
@@ -21,14 +22,17 @@
 	onMount(() => {
 		character = activeCharacter(loadStore(localBackend()).store);
 	});
-	const levelIn = (key: string) => character?.state.skills.disciplines[key] ?? 1;
+	// A character saved by an earlier planner may lack a field, which reads as empty.
+	const skills: Partial<SkillsSection> | undefined = $derived(
+		(character as Character | null)?.state.skills
+	);
+	const levelIn = (key: string) => skills?.disciplines?.[key] ?? 1;
 	const line = $derived.by(() => {
 		if (!character) return null;
 		const name = character.name;
 		if (skill) {
-			if (character.state.skills.unlocked.includes(skill.key))
-				return `${name} has unlocked this skill.`;
-			if (character.state.skills.learned.includes(skill.key)) return `${name} knows this skill.`;
+			if ((skills?.unlocked ?? []).includes(skill.key)) return `${name} has unlocked this skill.`;
+			if ((skills?.learned ?? []).includes(skill.key)) return `${name} knows this skill.`;
 			const tree = skill.trees[0];
 			if (!tree) return `${name} has not learned this skill.`;
 			const level = levelIn(tree.discipline);
@@ -38,7 +42,7 @@
 		}
 		if (discipline) {
 			const unlocked = discipline.skills.filter((key) =>
-				character!.state.skills.unlocked.includes(key)
+				(skills?.unlocked ?? []).includes(key)
 			).length;
 			return `${name} has ${discipline.name} at level ${formatNumber(levelIn(discipline.key))}, with ${formatNumber(unlocked)} of its ${plural(discipline.skills.length, 'skill', 'skills')} unlocked.`;
 		}

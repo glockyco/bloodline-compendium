@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { PlannerData } from '../site-data.js';
 import { evaluate } from './evaluate.js';
 import {
+	completeState,
 	buyRank,
 	newCharacter,
 	placeOnHotbar,
@@ -191,5 +192,13 @@ describe('planner', () => {
 		);
 		expect(refunded.skillBars.main).not.toContain('Ember');
 		expect(refunded.skillBars.offhand).not.toContain('Ember');
+	});
+
+	it('opens a character saved before a section existed with that section empty', () => {
+		const saved = apply((s) => setLevel(s, 4));
+		const oldBars = { main: saved.skillBars.main } as typeof saved.skillBars;
+		const opened = completeState({ ...saved, skillBars: oldBars }, data);
+		expect(opened.attributes.level).toBe(4);
+		expect(opened.skillBars.offhand).toEqual(Array(10).fill(null));
 	});
 });

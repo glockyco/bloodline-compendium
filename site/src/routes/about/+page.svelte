@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { alignSide } from '#lib/ui/align-side.js';
 	import { resolve } from '$app/paths';
 	import SeoHead from '#lib/SeoHead.svelte';
 	import { wrongFactHref } from '#lib/seo.js';
@@ -20,8 +21,8 @@
 		The Bloodline Compendium is a fan-made wiki for The Bloodline, generated from the game's files.
 	</p>
 </header>
-<div class="text-layout">
-	<div class="sections text-main">
+<div class="text-layout" use:alignSide>
+	<div class="sections text-main" data-main>
 		<section aria-labelledby="game">
 			<h2 id="game">About The Bloodline</h2>
 			<p>
@@ -68,7 +69,7 @@
 			</ul>
 		</section>
 	</div>
-	<aside class="panel text-side" aria-labelledby="more-links">
+	<aside class="panel text-side" data-side aria-labelledby="more-links">
 		<h2 id="more-links">More Links</h2>
 		<ul>
 			<li><a href={steam} rel="external">The Bloodline on Steam</a></li>

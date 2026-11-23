@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { alignSide } from '#lib/ui/align-side.js';
 	import EntityLink from '#lib/ui/EntityLink.svelte';
 	import Section from '#lib/ui/Section.svelte';
 	import LinkedText from '#lib/ui/LinkedText.svelte';
@@ -27,8 +28,12 @@
 			it.
 		</p>
 	</header>
-	<div class="text-layout">
-		{#if data.issues.length}<nav class="issue-index text-side panel" aria-labelledby="issue-index">
+	<div class="text-layout" use:alignSide>
+		{#if data.issues.length}<nav
+				class="issue-index text-side panel"
+				data-side
+				aria-labelledby="issue-index"
+			>
 				<h2 id="issue-index">On This Page</h2>
 				<ol>
 					{#each data.issues as { issue } (issue.id)}<li>
@@ -36,7 +41,7 @@
 						</li>{/each}
 				</ol>
 			</nav>{/if}
-		<div class="sections text-main">
+		<div class="sections text-main" data-main>
 			{#each data.issues as { issue, affected } (issue.id)}
 				<!-- Entity pages link the whole issue, so the anchor holds its heading and its surface. -->
 				<div class="issue-anchor" id={issue.id}>

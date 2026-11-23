@@ -94,3 +94,24 @@ test.describe('planted defects on the fixture page', () => {
 		expect(result.violations.map((violation) => violation.id)).toContain('color-contrast');
 	});
 });
+
+test('starts a side column level with the first card of the main column', async ({ page }) => {
+	await page.setViewportSize({ width: 1280, height: 900 });
+	for (const route of ['/items/lanternedge/', '/mechanics/skill-points/', '/about/']) {
+		await page.goto(route);
+		await page.waitForLoadState('networkidle');
+		const [side, card] = await page.evaluate(() => {
+			const layout = document.querySelector('.detail-layout, .text-layout')!;
+			const main = [...layout.querySelectorAll(':scope > [data-main]')].find(
+				(block) => block.firstElementChild
+			)!;
+			const first = main.firstElementChild!;
+			const target = first.matches('.section') ? first.querySelector(':scope > .body')! : first;
+			return [
+				layout.querySelector(':scope > [data-side]')!.getBoundingClientRect().top,
+				target.getBoundingClientRect().top
+			];
+		});
+		expect(Math.abs(side - card), route).toBeLessThan(1);
+	}
+});

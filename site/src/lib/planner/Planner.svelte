@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { onMount, untrack } from 'svelte';
-	import { SvelteURL } from 'svelte/reactivity';
-	import { replaceState } from '$app/navigation';
 	import { page } from '$app/state';
 	import Section from '../ui/Section.svelte';
+	import Tabs from '../ui/Tabs.svelte';
 	import LinkedText from '../ui/LinkedText.svelte';
 	import { entityPath } from '../entities.js';
 	import { formatNumber } from '../format.js';
@@ -17,6 +16,7 @@
 	import { decodeBuild, encodeBuild, LinkError } from './link.js';
 	import {
 		buyRank,
+		completeState,
 		newCharacter,
 		placeOnHotbar,
 		removeRank,
@@ -86,39 +86,10 @@
 		{ id: 'skills', label: 'Skills' },
 		{ id: 'skill-bars', label: 'Skill Bars' }
 	] as const;
-	type Tab = (typeof tabs)[number]['id'];
-	let tab: Tab = $state('skills');
 	// The summary is a column on wide screens and a bar that opens on narrow ones.
 	let summaryOpen = $state(true);
-	function selectFragment() {
-		const fragment = window.location.hash.slice(1);
-		tab = tabs.find((entry) => entry.id === fragment)?.id ?? 'skills';
-	}
-	function selectTab(id: Tab, focus = false) {
-		tab = id;
-		const url = new SvelteURL(page.url.href);
-		url.hash = id;
-		// eslint-disable-next-line svelte/no-navigation-without-resolve -- only the current page's fragment changes.
-		replaceState(url, page.state);
-		if (focus) document.getElementById(`tab-${id}`)?.focus();
-	}
-	function navigateTabs(event: KeyboardEvent, index: number) {
-		const targets: Record<string, number> = {
-			ArrowRight: (index + 1) % tabs.length,
-			ArrowLeft: (index + tabs.length - 1) % tabs.length,
-			Home: 0,
-			End: tabs.length - 1
-		};
-		const target = targets[event.key];
-		if (target === undefined) return;
-		event.preventDefault();
-		selectTab(tabs[target].id, true);
-	}
 	onMount(() => {
-		selectFragment();
 		summaryOpen = !window.matchMedia('(width < 64rem)').matches;
-		window.addEventListener('hashchange', selectFragment);
-		return () => window.removeEventListener('hashchange', selectFragment);
 	});
 
 	function stored(result: StoreResult) {
@@ -183,7 +154,7 @@
 			return;
 		}
 		const current = activeCharacter(store);
-		if (current) plan = current.state;
+		if (current) plan = completeState(current.state, data);
 		showLeading();
 	}
 
@@ -278,7 +249,7 @@
 									const id = event.currentTarget.value || null;
 									stored(selectCharacter(backend, store, id));
 									const current = activeCharacter(store);
-									plan = current ? current.state : newCharacter(data);
+									plan = current ? completeState(current.state, data) : newCharacter(data);
 									preview = false;
 								}}
 								><option value="">Not saved</option
@@ -383,99 +354,76 @@
 		</details>
 	</aside>
 	<div class="main">
-		<div class="tabs" role="tablist" aria-label="Character sections">
-			{#each tabs as entry, index (entry.id)}<button
-					type="button"
-					role="tab"
-					id="tab-{entry.id}"
-					aria-controls="panel-{entry.id}"
-					aria-selected={tab === entry.id}
-					tabindex={tab === entry.id ? 0 : -1}
-					onclick={() => selectTab(entry.id)}
-					onkeydown={(event) => navigateTabs(event, index)}>{entry.label}</button
-				>{/each}
-		</div>
-		<div
-			id="panel-attributes"
-			role="tabpanel"
-			aria-labelledby="tab-attributes"
-			hidden={tab !== 'attributes'}
-		>
-			<Section id="attribute-points" title="Attributes">
-				<AttributePanel
-					levels={plan.attributes.points}
-					{evaluation}
-					change={(attribute: Attribute, level: number) =>
-						apply(setAttribute(plan, attribute, level))}
-				/>
-			</Section>
-		</div>
-		<div id="panel-skills" role="tabpanel" aria-labelledby="tab-skills" hidden={tab !== 'skills'}>
-			<Section id="disciplines" title="Disciplines">
-				<label
-					><span class="field-label">Discipline</span><select bind:value={chosen}
-						>{#each [...categories] as [category, entries] (category)}<optgroup label={category}
-								>{#each entries as entry (entry.key)}<option value={entry.key}
-										>{entry.name}{(plan.skills.disciplines[entry.key] ?? 1) > 1
-											? ` (level ${plan.skills.disciplines[entry.key]})`
-											: ''}</option
-									>{/each}</optgroup
-							>{/each}</select
-					></label
-				>
-				{#if discipline}<TreePanel
-						{discipline}
-						{data}
-						state={plan}
-						{evaluation}
-						setLevel={(level) => apply(setDisciplineLevel(plan, discipline.key, level))}
-						toggleSkill={(skill) => apply(toggleSkill(plan, data, skill))}
-						buyRank={(passive) => apply(buyRank(plan, data, passive))}
-						removeRank={(passive) => apply(removeRank(plan, passive))}
-					/>{/if}
-				{#if bloodMagic && chosen === bloodMagic.key}<label class="level"
-						><span class="field-label">Blood Magic Points</span><input
-							type="number"
-							min="0"
-							value={plan.skills.bloodMagicPoints ?? ''}
-							onchange={(event) =>
-								apply(
-									setBloodMagicPoints(
-										plan,
-										event.currentTarget.value === '' ? null : Number(event.currentTarget.value)
-									)
-								)}
-						/></label
-					>
-					<p class="muted">
-						<LinkedText
-							text="[Blood Levels](mechanic:blood-levels) sets these points, not your Blood Magic level, so enter what your skill tree shows."
+		<Tabs {tabs} label="Character sections" initial="skills">
+			{#snippet panel(id)}{#if id === 'attributes'}
+					<Section id="attribute-points" title="Attributes">
+						<AttributePanel
+							levels={plan.attributes.points}
+							{evaluation}
+							change={(attribute: Attribute, level: number) =>
+								apply(setAttribute(plan, attribute, level))}
 						/>
-					</p>{/if}
-			</Section>
-		</div>
-		<div
-			id="panel-skill-bars"
-			role="tabpanel"
-			aria-labelledby="tab-skill-bars"
-			hidden={tab !== 'skill-bars'}
-		>
-			<Section id="skill-bar" title="Skill Bar">
-				<Hotbar {plan} {data} {place} />
-			</Section>
-			<Section
-				id="offhand-bar"
-				title="Offhand Spells Bar"
-				line="The Activate Offhand Spell Bar key, Caps Lock unless you change it, shows these ten slots."
-			>
-				<Hotbar
-					{plan}
-					{data}
-					bar="offhand"
-					place={(slot, skill) => place(slot, skill, 'offhand')}
-				/>
-			</Section>
-		</div>
+					</Section>
+				{:else if id === 'skills'}
+					<Section id="disciplines" title="Disciplines">
+						<label
+							><span class="field-label">Discipline</span><select bind:value={chosen}
+								>{#each [...categories] as [category, entries] (category)}<optgroup label={category}
+										>{#each entries as entry (entry.key)}<option value={entry.key}
+												>{entry.name}{(plan.skills.disciplines[entry.key] ?? 1) > 1
+													? ` (level ${plan.skills.disciplines[entry.key]})`
+													: ''}</option
+											>{/each}</optgroup
+									>{/each}</select
+							></label
+						>
+						{#if discipline}<TreePanel
+								{discipline}
+								{data}
+								state={plan}
+								{evaluation}
+								setLevel={(level) => apply(setDisciplineLevel(plan, discipline.key, level))}
+								toggleSkill={(skill) => apply(toggleSkill(plan, data, skill))}
+								buyRank={(passive) => apply(buyRank(plan, data, passive))}
+								removeRank={(passive) => apply(removeRank(plan, passive))}
+							/>{/if}
+						{#if bloodMagic && chosen === bloodMagic.key}<label class="level"
+								><span class="field-label">Blood Magic Points</span><input
+									type="number"
+									min="0"
+									value={plan.skills.bloodMagicPoints ?? ''}
+									onchange={(event) =>
+										apply(
+											setBloodMagicPoints(
+												plan,
+												event.currentTarget.value === '' ? null : Number(event.currentTarget.value)
+											)
+										)}
+								/></label
+							>
+							<p class="muted">
+								<LinkedText
+									text="[Blood Levels](mechanic:blood-levels) sets these points, not your Blood Magic level, so enter what your skill tree shows."
+								/>
+							</p>{/if}
+					</Section>
+				{:else}
+					<Section id="skill-bar" title="Skill Bar">
+						<Hotbar {plan} {data} {place} />
+					</Section>
+					<Section
+						id="offhand-bar"
+						title="Offhand Spells Bar"
+						line="The Activate Offhand Spell Bar key, Caps Lock unless you change it, shows these ten slots."
+					>
+						<Hotbar
+							{plan}
+							{data}
+							bar="offhand"
+							place={(slot, skill) => place(slot, skill, 'offhand')}
+						/>
+					</Section>{/if}{/snippet}
+		</Tabs>
 	</div>
 </div>
 
@@ -562,32 +510,6 @@
 	.totals dd {
 		margin: 0;
 		font-variant-numeric: tabular-nums;
-	}
-	.tabs {
-		display: flex;
-		gap: var(--gap-inline);
-		border-bottom: var(--border-width) solid var(--border-control);
-		overflow-x: auto;
-	}
-	.tabs button {
-		flex: 0 0 auto;
-		padding: var(--inset-cell) var(--inset);
-		border: 0;
-		border-bottom: var(--marker-width) solid transparent;
-		border-radius: 0;
-		background: none;
-		color: var(--text-muted);
-	}
-	.tabs button[aria-selected='true'] {
-		border-bottom-color: var(--accent);
-		color: var(--text);
-	}
-	[role='tabpanel'] {
-		display: grid;
-		gap: var(--gap-section);
-	}
-	[role='tabpanel'][hidden] {
-		display: none;
 	}
 	textarea {
 		width: 100%;

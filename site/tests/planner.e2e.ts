@@ -154,6 +154,21 @@ test('each section is a tab with its own address, and a phone switches between s
 	await expect(page.getByLabel('Unlock Lanternedge Flare')).toBeHidden();
 });
 
+test('tabs that do not fit become a dropdown of the same sections', async ({ page }) => {
+	await page.setViewportSize({ width: 390, height: 844 });
+	await open(page);
+	await expect(page.getByRole('tab', { name: 'Skill Bars' })).toBeVisible();
+	await page.setViewportSize({ width: 280, height: 844 });
+	const choose = page.getByLabel('Character sections');
+	await expect(choose).toBeVisible();
+	await expect(page.getByRole('tab')).toHaveCount(0);
+	await choose.selectOption('skill-bars');
+	await expect(
+		page.getByRole('button', { name: 'Row 1, slot 1: empty', exact: true })
+	).toBeVisible();
+	await expect(page).toHaveURL(/#skill-bars$/);
+});
+
 test('a malformed link says so and opens a new character', async ({ page }) => {
 	await page.goto('/planner/?build=v9.abc');
 	await expect(page.locator('.planner[data-ready]')).toBeAttached();

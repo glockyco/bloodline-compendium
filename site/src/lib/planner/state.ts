@@ -64,6 +64,25 @@ export function newCharacter(data: PlannerData): PlannerState {
 	};
 }
 
+/**
+ * A character saved by an earlier planner, completed with the defaults of every section or field it lacks, so a section
+ * added later opens empty instead of breaking the page. Unknown sections stay in `later`.
+ */
+export function completeState(saved: Partial<PlannerState>, data: PlannerData): PlannerState {
+	const fresh = newCharacter(data);
+	return {
+		build: saved.build ?? fresh.build,
+		attributes: {
+			...fresh.attributes,
+			...saved.attributes,
+			points: { ...fresh.attributes.points, ...saved.attributes?.points }
+		},
+		skills: { ...fresh.skills, ...saved.skills },
+		skillBars: { ...fresh.skillBars, ...saved.skillBars },
+		later: saved.later ?? {}
+	};
+}
+
 /** The outcome of an edit: the new state, or the unchanged state and why the game would refuse it. */
 export type Edit =
 	{ state: PlannerState; refused?: undefined } | { state: PlannerState; refused: string };

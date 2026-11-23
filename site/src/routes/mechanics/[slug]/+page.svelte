@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { alignSide } from '#lib/ui/align-side.js';
 	import EntityPage from '#lib/entity/EntityPage.svelte';
 	import LinkedText from '#lib/ui/LinkedText.svelte';
 	import EntityLink from '#lib/ui/EntityLink.svelte';
@@ -31,8 +32,8 @@
 		<h1>{mechanic.name}</h1>
 		<p class="intro"><LinkedText text={mechanic.intro} /></p>
 	</header>
-	<div class="text-layout">
-		<nav class="text-side panel" aria-label="{mechanic.name} and other mechanics">
+	<div class="text-layout" use:alignSide>
+		<nav class="text-side panel" data-side aria-label="{mechanic.name} and other mechanics">
 			<section>
 				<h2>On This Page</h2>
 				<ol>
@@ -58,7 +59,7 @@
 					</ul>
 				</section>{/if}
 		</nav>
-		<div class="sections text-main">
+		<div class="sections text-main" data-main>
 			{#each mechanic.sections as section (section.heading)}<Section
 					id={section.anchor!}
 					title={section.heading}

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { alignSide } from '#lib/ui/align-side.js';
 	import SourceSections from '#lib/entity/SourceSections.svelte';
 	import UnconfirmedSources from '#lib/entity/UnconfirmedSources.svelte';
 	import RelationTable from '#lib/RelationTable.svelte';
@@ -87,8 +88,8 @@
 	}
 </script>
 
-<div class="detail-layout">
-	<div class="answer" data-pagefind-ignore="all">
+<div class="detail-layout" use:alignSide>
+	<div class="answer" data-main data-pagefind-ignore="all">
 		<ItemModel name={item.name} renders={item.renders} />
 		{#if details.length || item.projectileGroups?.length}<Section
 				id={idPrefix + 'details'}
@@ -109,10 +110,10 @@
 				<p class="surface">{statusSentence[item.status]}</p>
 			</Section>{/if}
 	</div>
-	<aside class="item-side" aria-label="Game card">
+	<aside class="item-side" data-side aria-label="Game card">
 		<ItemTooltip {item} details={false} />
 	</aside>
-	<div class="item-relations" data-pagefind-ignore="all">
+	<div class="item-relations" data-main data-pagefind-ignore="all">
 		{#if recipes.length}<div class="recipes">
 				<Section
 					id={idPrefix + 'recipes'}
