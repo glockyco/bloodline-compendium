@@ -467,9 +467,9 @@
 					"direction": "incoming",
 					"entity": {
 						"kind": "resource",
-						"key": "/Invented/resource/cinderpear/0",
+						"key": "Resource:Ember orchard",
 						"name": "Ember orchard",
-						"slug": null,
+						"slug": "ember-orchard",
 						"icon": null
 					},
 					"label": "Obtained from",
@@ -996,9 +996,9 @@
 		{
 			"entity": {
 				"kind": "resource",
-				"key": "/Invented/resource/cinderpear/0",
+				"key": "Resource:Ember orchard",
 				"name": "Ember orchard",
-				"slug": null,
+				"slug": "ember-orchard",
 				"icon": null
 			},
 			"relations": [
@@ -2566,9 +2566,9 @@
 			"kind": "gathering",
 			"source": {
 				"kind": "resource",
-				"key": "/Invented/resource/cinderpear/0",
+				"key": "Resource:Ember orchard",
 				"name": "Ember orchard",
-				"slug": null,
+				"slug": "ember-orchard",
 				"icon": null
 			},
 			"target": {
@@ -2603,9 +2603,9 @@
 				"notes": [],
 				"entity": {
 					"kind": "resource",
-					"key": "/Invented/resource/cinderpear/0",
+					"key": "Resource:Ember orchard",
 					"name": "Ember orchard",
-					"slug": null,
+					"slug": "ember-orchard",
 					"icon": null
 				},
 				"conditions": [],

@@ -9,18 +9,27 @@ internal static class WorldSourceData
     private static readonly string[] NameFields = ["Full Name", "Name", "ItemInfo.ItemName"];
 
     public static EntityReference Reference(EntityKind kind, string? key, string name) =>
-        new(
-            kind,
-            key is not null && NamedByInstance(kind, key) ? Named(key, name) : key,
-            name,
-            null,
-            null
-        );
+        kind == EntityKind.Resource
+            ? Resource(name)
+            : new(
+                kind,
+                key is not null && NamedByInstance(kind, key) ? Named(key, name) : key,
+                name,
+                null,
+                null
+            );
 
-    // Containers and gathering or pickup objects share one class across objects the player meets under different
-    // names, such as a Miner's Crate and a Cabinet, so the name the player sees is part of their identity.
+    /// <summary>
+    /// A gathering resource is the thing a player meets by its name, such as Abyssberry Bush, whichever class or table
+    /// gives it, so its name is its identity and its page.
+    /// </summary>
+    public static EntityReference Resource(string name) =>
+        new(EntityKind.Resource, "Resource:" + name, name, ItemIdentity.Slug(name), null);
+
+    // Containers and pickup objects share one class across objects the player meets under different names, such as a
+    // Miner's Crate and a Cabinet, so the name the player sees is part of their identity.
     private static bool NamedByInstance(EntityKind kind, string key) =>
-        kind is EntityKind.Container or EntityKind.Resource
+        kind is EntityKind.Container or EntityKind.Pickup
         && key.EndsWith("_C", StringComparison.Ordinal);
 
     private static string Named(string key, string name) => key + "#" + name;

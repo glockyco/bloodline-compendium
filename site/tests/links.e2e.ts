@@ -50,6 +50,22 @@ test('a profession page lists every recipe under the level that unlocks it, with
 	await expect(page).toHaveURL(/\/items\/\?.*profession=Starsmithing.*sort=professionLevel/);
 });
 
+test('an item names the resource it is gathered from, whose page lists the item and the areas', async ({
+	page
+}) => {
+	await page.goto('/items/cinderpear/');
+	const row = page.locator('[data-relation-id="fixture:cinderpear:source:0"]');
+	await expect(row).toContainText('In 1 area');
+	await row.getByRole('link', { name: 'Ember orchard' }).click();
+	await expect(page).toHaveURL(/\/resources\/ember-orchard\/$/);
+	await expect(page.locator('[data-relation-id="fixture:cinderpear:source:0"]')).toContainText(
+		'Cinderpear'
+	);
+	const area = page.getByRole('table', { name: 'Areas with Ember orchard' }).locator('tbody tr');
+	await expect(area).toContainText('Glass Reach');
+	await expect(area.locator('td')).toHaveText(['Glass Reach', '1', '4']);
+});
+
 test('a mechanic page links what it explains, and section intros link the mechanic', async ({
 	page
 }) => {

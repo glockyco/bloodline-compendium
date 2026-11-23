@@ -27,7 +27,8 @@ export type EntityKind =
   | "passive"
   | "spellsong"
   | "profession"
-  | "mechanic";
+  | "mechanic"
+  | "pickup";
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "ConditionKind".
@@ -141,6 +142,11 @@ export type RenderBody = "male" | "female";
  * via the `definition` "ItemStatus".
  */
 export type ItemStatus = "obtainable" | "noKnownSource" | "notInNormalPlay";
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "ResourceAfterUse".
+ */
+export type ResourceAfterUse = "removed" | "stays";
 
 export interface SiteDataFiles {
   build: SiteBuild;
@@ -160,6 +166,8 @@ export interface SiteDataFiles {
   planner: PlannerData;
   profession: ProfessionPage;
   professions: ProfessionIndex;
+  resource: ResourcePage;
+  resources: ResourceIndex;
   skill: SkillPage;
   skills: SkillIndex;
   [k: string]: unknown;
@@ -800,6 +808,7 @@ export interface EntityKindDefinition {
     | "spellsong"
     | "profession"
     | "mechanic"
+    | "pickup"
     | null;
   kind: EntityKind;
   route: string | null;
@@ -971,6 +980,85 @@ export interface ProfessionSummary {
   name: string;
   slug: string;
   stations: EntityReference[];
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "ResourcePage".
+ */
+export interface ResourcePage {
+  category: string;
+  drawn: boolean;
+  harvest?: ResourceHarvest | null;
+  icon?: string | null;
+  key: string;
+  kind: EntityKind;
+  loot: ResourceLoot[];
+  name: string;
+  places: ResourcePlace[];
+  slug: string;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "ResourceHarvest".
+ */
+export interface ResourceHarvest {
+  afterUse: ResourceAfterUse;
+  bonus: number[];
+  bonusFrom: number;
+  experience: number;
+  itemsPerSpot: number;
+  level: number;
+  minigame: boolean;
+  profession: string;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "ResourceLoot".
+ */
+export interface ResourceLoot {
+  chance: number | null;
+  conditions: RelationCondition[];
+  item: EntityReference;
+  relationIds: string[];
+  unconfirmed: boolean;
+  value?: number | null;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "ResourcePlace".
+ */
+export interface ResourcePlace {
+  expected: number;
+  more: boolean;
+  most: number;
+  place: EntityReference;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "ResourceIndex".
+ */
+export interface ResourceIndex {
+  resources: ResourceSummary[];
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "ResourceSummary".
+ */
+export interface ResourceSummary {
+  category: string;
+  icon?: string | null;
+  key: string;
+  level?: number | null;
+  loot: number;
+  name: string;
+  profession?: string | null;
+  slug: string;
   [k: string]: unknown;
 }
 /**

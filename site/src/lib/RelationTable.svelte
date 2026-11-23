@@ -162,6 +162,11 @@
 	}
 	/* Narrow panels, including item previews, stack labelled values without horizontal scrolling. */
 	@container (width < 40rem) {
+		/* A long heading such as "Chance per Item Gathered" wraps between its words, so it leaves the row's name its
+		   width. */
+		.relation-panel :global(thead .numeric) {
+			white-space: normal;
+		}
 		.relation-panel :global(.stacked) {
 			display: block;
 		}

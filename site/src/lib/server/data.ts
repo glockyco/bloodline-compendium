@@ -14,6 +14,8 @@ import type {
 	SkillPage,
 	ProfessionIndex,
 	ProfessionPage,
+	ResourceIndex,
+	ResourcePage,
 	MechanicIndex,
 	MechanicPage,
 	PlannerData
@@ -48,6 +50,8 @@ export const readSkill = (slug: string) => json<SkillPage>('skills/' + slug + '.
 export const readMechanics = () => json<MechanicIndex>('mechanics.json');
 export const readMechanic = (slug: string) => json<MechanicPage>('mechanics/' + slug + '.json');
 export const readProfessions = () => json<ProfessionIndex>('professions.json');
+export const readResources = () => json<ResourceIndex>('resources.json');
+export const readResource = (slug: string) => json<ResourcePage>('resources/' + slug + '.json');
 export const readProfession = (slug: string) =>
 	json<ProfessionPage>('professions/' + slug + '.json');
 /**

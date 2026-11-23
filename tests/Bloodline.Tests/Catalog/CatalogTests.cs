@@ -898,4 +898,85 @@ public sealed class CatalogTests
         );
         Assert.Single(result.Report.Gaps.Single(gap => gap.Kind == GapKind.UnreadObject).Entries);
     }
+
+    [Fact]
+    public void AResourcePageGivesWhatAHarvestYieldsAndCountsItsSpotsAndTheirSpawnChance()
+    {
+        var ore = Item("/Game/Items/Ore.Ore_C", "Ore", "Material");
+        var gem = Item("/Game/Items/Gem.Gem_C", "Gem", "Material");
+        var gatherer = new ClassRecord(
+            "/Invented/HarvestableInteractionObject.HarvestableInteractionObject_C",
+            [],
+            Parse("""{"Mining Items":["Iron"]}""")
+        );
+        JsonObject Spot(string chance) =>
+            Parse($$"""{"Custom Preset":true,"Custom Preset Name":"Iron",{{chance}}}""");
+        var level = new LevelRecord(
+            "/Invented/Quarry",
+            [],
+            [
+                new ActorRecord(
+                    "A",
+                    gatherer.Path,
+                    Spot("\"Use Custom Spawn Chance?\":true,\"Custom Spawn Chance\":0.25")
+                ),
+                new ActorRecord(
+                    "B",
+                    gatherer.Path,
+                    Spot("\"Use Custom Spawn Chance?\":true,\"Custom Spawn Chance\":0.35")
+                ),
+                new ActorRecord("C", gatherer.Path, Spot("\"Use Custom Spawn Chance?\":false")),
+            ]
+        );
+        var records = Records([ore, gem, gatherer], [level]) with
+        {
+            HarvestPresets = new HarvestPresets(
+                [],
+                [
+                    new HarvestPreset(
+                        "Iron",
+                        "Mining",
+                        10,
+                        [new(ore.Path, 3), new(gem.Path, 1)],
+                        25,
+                        10,
+                        [0.3033m, 0.3033m, 1m]
+                    ),
+                ]
+            ),
+        };
+
+        var result = Build(records);
+
+        var page = Assert.Single(result.Resources.Pages);
+        Assert.Equal("Iron Deposit", page.Name);
+        Assert.Equal("iron-deposit", page.Slug);
+        Assert.Equal("Mining", page.Category);
+        Assert.Equal(new[] { "Ore", "Gem" }, page.Loot.Select(row => row.Item.Name));
+        Assert.Equal(new double?[] { 0.75, 0.25 }, page.Loot.Select(row => row.Chance));
+        // Each loot row is the relation the item page shows, so both pages name the same row.
+        var orePage = result.Items.Single(item => item.Key == ore.Path);
+        Assert.Equal(
+            orePage.Sources.Single(source => source.Entity.Kind == EntityKind.Resource).RelationId,
+            Assert.Single(page.Loot[0].RelationIds)
+        );
+        var harvest = page.Harvest!;
+        Assert.Equal(
+            (10, 25, true, 3, ResourceAfterUse.Stays),
+            (
+                harvest.Level,
+                harvest.Experience,
+                harvest.Minigame,
+                harvest.ItemsPerSpot,
+                harvest.AfterUse
+            )
+        );
+        Assert.Equal(10, harvest.BonusFrom);
+        Assert.Equal(new[] { 0.3033, 0.3033, 1 }, harvest.Bonus);
+        var place = Assert.Single(page.Places);
+        // One spot always there and two there 25% and 35% of the time give 1.6 on average, and 3 at most.
+        Assert.Equal((1.6, 3, false), (place.Expected, place.Most, place.More));
+        var summary = Assert.Single(result.Resources.Index.Resources);
+        Assert.Equal(("Mining", 10), (summary.Profession, summary.Level));
+    }
 }

@@ -361,7 +361,8 @@
         "passive",
         "spellsong",
         "profession",
-        "mechanic"
+        "mechanic",
+        "pickup"
       ],
       "title": "EntityKind"
     },
@@ -390,6 +391,7 @@
             "spellsong",
             "profession",
             "mechanic",
+            "pickup",
             null
           ]
         },
@@ -2139,6 +2141,246 @@
       ],
       "title": "ReportStatus"
     },
+    "ResourceAfterUse": {
+      "enum": [
+        "removed",
+        "stays"
+      ],
+      "title": "ResourceAfterUse"
+    },
+    "ResourceHarvest": {
+      "properties": {
+        "afterUse": {
+          "$ref": "#/$defs/ResourceAfterUse"
+        },
+        "bonus": {
+          "items": {
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "bonusFrom": {
+          "type": "integer"
+        },
+        "experience": {
+          "type": "integer"
+        },
+        "itemsPerSpot": {
+          "type": "integer"
+        },
+        "level": {
+          "type": "integer"
+        },
+        "minigame": {
+          "type": "boolean"
+        },
+        "profession": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "profession",
+        "level",
+        "experience",
+        "minigame",
+        "itemsPerSpot",
+        "afterUse",
+        "bonusFrom",
+        "bonus"
+      ],
+      "title": "ResourceHarvest",
+      "type": "object"
+    },
+    "ResourceIndex": {
+      "properties": {
+        "resources": {
+          "items": {
+            "$ref": "#/$defs/ResourceSummary"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "resources"
+      ],
+      "title": "ResourceIndex",
+      "type": "object"
+    },
+    "ResourceLoot": {
+      "properties": {
+        "chance": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "conditions": {
+          "items": {
+            "$ref": "#/$defs/RelationCondition"
+          },
+          "type": "array"
+        },
+        "item": {
+          "$ref": "#/$defs/EntityReference"
+        },
+        "relationIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "unconfirmed": {
+          "type": "boolean"
+        },
+        "value": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "item",
+        "relationIds",
+        "chance",
+        "unconfirmed",
+        "conditions"
+      ],
+      "title": "ResourceLoot",
+      "type": "object"
+    },
+    "ResourcePage": {
+      "properties": {
+        "category": {
+          "type": "string"
+        },
+        "drawn": {
+          "type": "boolean"
+        },
+        "harvest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ResourceHarvest"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "icon": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "key": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/EntityKind"
+        },
+        "loot": {
+          "items": {
+            "$ref": "#/$defs/ResourceLoot"
+          },
+          "type": "array"
+        },
+        "name": {
+          "type": "string"
+        },
+        "places": {
+          "items": {
+            "$ref": "#/$defs/ResourcePlace"
+          },
+          "type": "array"
+        },
+        "slug": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "slug",
+        "name",
+        "category",
+        "loot",
+        "places",
+        "kind",
+        "drawn"
+      ],
+      "title": "ResourcePage",
+      "type": "object"
+    },
+    "ResourcePlace": {
+      "properties": {
+        "expected": {
+          "type": "number"
+        },
+        "more": {
+          "type": "boolean"
+        },
+        "most": {
+          "type": "integer"
+        },
+        "place": {
+          "$ref": "#/$defs/EntityReference"
+        }
+      },
+      "required": [
+        "place",
+        "expected",
+        "most",
+        "more"
+      ],
+      "title": "ResourcePlace",
+      "type": "object"
+    },
+    "ResourceSummary": {
+      "properties": {
+        "category": {
+          "type": "string"
+        },
+        "icon": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "key": {
+          "type": "string"
+        },
+        "level": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "loot": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "profession": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "slug": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "slug",
+        "name",
+        "category",
+        "loot"
+      ],
+      "title": "ResourceSummary",
+      "type": "object"
+    },
     "SiteBuild": {
       "properties": {
         "appId": {
@@ -2826,6 +3068,12 @@
     "professions": {
       "$ref": "#/$defs/ProfessionIndex"
     },
+    "resource": {
+      "$ref": "#/$defs/ResourcePage"
+    },
+    "resources": {
+      "$ref": "#/$defs/ResourceIndex"
+    },
     "skill": {
       "$ref": "#/$defs/SkillPage"
     },
@@ -2850,6 +3098,8 @@
     "profession",
     "mechanics",
     "mechanic",
+    "resources",
+    "resource",
     "planner"
   ],
   "title": "SiteDataFiles",

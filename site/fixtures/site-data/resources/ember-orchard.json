@@ -1,0 +1,38 @@
+{
+	"key": "Resource:Ember orchard",
+	"slug": "ember-orchard",
+	"name": "Ember orchard",
+	"category": "Gathering",
+	"kind": "resource",
+	"icon": "cinderpear",
+	"drawn": false,
+	"loot": [
+		{
+			"item": {
+				"kind": "item",
+				"key": "/Invented/Items/Cinderpear",
+				"name": "Cinderpear",
+				"slug": "cinderpear",
+				"icon": "cinderpear"
+			},
+			"chance": null,
+			"unconfirmed": false,
+			"conditions": [],
+			"relationIds": ["fixture:cinderpear:source:0"]
+		}
+	],
+	"places": [
+		{
+			"place": {
+				"kind": "place",
+				"key": "/Invented/Places/GlassReach",
+				"name": "Glass Reach",
+				"slug": null,
+				"icon": null
+			},
+			"expected": 1.4,
+			"most": 4,
+			"more": false
+		}
+	]
+}

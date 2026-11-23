@@ -3,7 +3,8 @@
 -- Without arguments, gives one loaded harvestable each preset name, as harvest-presets.lua does, and lists the
 -- experience its Get ... EXP function returns and the bonus chance Calculate Bonus Chance returns with the checked
 -- profession's level on the game instance set to the required level and to 5, 10, 25, 50 and 100 levels above it. The
--- profession's level is restored afterwards.
+-- profession's level is restored afterwards. args.curve = N instead lists, for every Woodcutting and Mining preset, the
+-- bonus chance at each level from 1 to N.
 -- args.pick = "<preset>" instead calls Spawn Harvest FX args.times times on a loaded harvestable of that preset and
 -- lists, after each call, its Stage, whether it is still valid, and the player's inventory count of each loot item.
 -- The player's harvest animation calls Spawn Harvest FX at each swing, and it chooses the loot, rolls the bonus,
@@ -58,6 +59,33 @@ end
 local actor = harvestables[1]
 local gi = live("BP_PersistantGameInstance_C")
 local out = {}
+if args.curve then
+  for list, call in pairs(expFunction) do
+    if list ~= "Foraging EXP Items" then
+      local names = {}
+      actor[list]:ForEach(function(_, element) names[#names + 1] = element:get():ToString() end)
+      for _, name in ipairs(names) do
+        actor["Custom Preset"] = true
+        actor["Table Based Preset?"] = false
+        actor["Custom Preset Name"] = name
+        actor["NewFunction_0"](actor)
+        actor["Required level"] = 1
+        actor["Check Player Level"](actor)
+        local before = gi[call[3]]
+        local chances = {}
+        for level = 1, args.curve do
+          gi[call[3]] = level
+          local chance = {}
+          actor["Calculate Bonus Chance"](actor, chance)
+          chances[level] = math.floor(chance["Bonus Chance"] * 10000 + 0.5) / 10000
+        end
+        gi[call[3]] = before
+        out[#out + 1] = { preset = name, required = actor["Required level"], chances = chances }
+      end
+    end
+  end
+  return out
+end
 for list, call in pairs(expFunction) do
   local names = {}
   actor[list]:ForEach(function(_, element) names[#names + 1] = element:get():ToString() end)

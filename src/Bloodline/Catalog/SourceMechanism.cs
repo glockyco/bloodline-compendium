@@ -176,3 +176,18 @@ internal sealed class CatalogContext
             .ToArray();
     }
 }
+
+/// <summary>
+/// One gathering spot or spawner that gives <see cref="Resource"/> in <see cref="Place"/>. <see cref="Count"/> is how
+/// many harvestables it holds on average and <see cref="Most"/> at most, both null when no run has measured them.
+/// <see cref="Chance"/> is the chance it is there when the place loads, and <see cref="Share"/> the chance each of its
+/// harvestables is this resource, below 1 when the game draws the resource from a table by weight.
+/// </summary>
+internal sealed record GatherSpot(
+    EntityReference Resource,
+    EntityReference Place,
+    double? Count,
+    int? Most,
+    double Chance,
+    double Share
+);

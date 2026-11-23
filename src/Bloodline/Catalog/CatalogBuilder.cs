@@ -20,6 +20,7 @@ internal sealed record CatalogResult(
     public IReadOnlyList<PublishedIssue> Issues { get; init; } = [];
 
     public ProfessionOutput Professions { get; init; } = new(new ProfessionIndex([]), []);
+    public ResourceOutput Resources { get; init; } = new(new ResourceIndex([]), []);
 
     public MechanicOutput Mechanics { get; init; } = new(new MechanicIndex([]), []);
 
@@ -134,6 +135,11 @@ internal static class CatalogBuilder
         var skillClaims = new FactClaims(records.Code, records.Build.BuildId);
         SkillProducer.Claim(skills, skillClaims);
         var professions = ProfessionProducer.Produce(items.Items);
+        var resources = ResourceProducer.Produce(
+            items.Items,
+            GatheringMechanism.Spots(context),
+            records.HarvestPresets
+        );
         // The Known Issues page lists every page of every kind that notes an issue.
         var issues = KnownIssues.Publish(
             records.Issues,
@@ -165,6 +171,7 @@ internal static class CatalogBuilder
         [
             .. skills.Disciplines.Select(SkillProducer.DisciplineReference),
             .. professions.Pages.Select(page => Professions.Reference(page.Name)),
+            .. resources.Pages.Select(page => WorldSourceData.Resource(page.Name)),
             .. records.Mechanics.Select(MechanicProducer.Reference),
         ];
         UnlinkedMentions(records, overviews, coverage);
@@ -180,6 +187,7 @@ internal static class CatalogBuilder
             Tooltips = items.Tooltips,
             Issues = issues,
             Professions = professions,
+            Resources = resources,
             Mechanics = MechanicProducer.Produce(records.Mechanics),
             Links = Links(
                 records,

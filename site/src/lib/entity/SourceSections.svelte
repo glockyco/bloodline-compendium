@@ -27,7 +27,9 @@
 		(Object.keys(sourceHeadings) as SourceKind[])
 			.filter((kind) => !recipeKinds.has(kind))
 			.map((kind) => {
-				const listed = sortSources(confirmedSources.filter((source) => source.kind === kind));
+				const listed = merged(
+					sortSources(confirmedSources.filter((source) => source.kind === kind))
+				);
 				// Sources share a place heading where several stand in the same place. A source in several places
 				// would sit under one of them while naming the others, so such groups list places in their rows.
 				const places = listed.map(placeOf);
@@ -84,6 +86,39 @@
 			})
 			.filter((group) => group.sources.length)
 	);
+	/**
+	 * A resource with a page gives an item from spots that are always that resource and from spots drawn from a table,
+	 * by separate relations that differ only in notes the resource page shows. Their rows read the same, so they show as
+	 * one row with every place, carrying each relation.
+	 */
+	function merged(listed: Source[]): (Source & { alsoRelationIds?: string[] })[] {
+		const rows: (Source & { alsoRelationIds?: string[] })[] = [];
+		for (const source of listed) {
+			const same =
+				source.kind === 'gathering' && source.entity?.slug != null
+					? rows.find(
+							(row) =>
+								row.entity?.key === source.entity?.key &&
+								row.odds?.chance === source.odds?.chance &&
+								JSON.stringify(row.conditions) === JSON.stringify(source.conditions)
+						)
+					: undefined;
+			if (!same) {
+				rows.push(source);
+				continue;
+			}
+			const index = rows.indexOf(same);
+			rows[index] = {
+				...same,
+				places: [
+					...same.places,
+					...source.places.filter((place) => !same.places.some((other) => other.key === place.key))
+				],
+				alsoRelationIds: [...(same.alsoRelationIds ?? []), source.relationId]
+			};
+		}
+		return rows;
+	}
 	function placeOf(source: Source): string | null {
 		if (source.places[0]) return source.places[0].name;
 		if (source.settlement) return 'Your settlement';
@@ -121,6 +156,7 @@
 					placeFirst={group.kind === 'pickup'}
 					levelCondition={sourceLevels[group.kind]?.condition}
 					id={`${idPrefix}source-${group.kind}-${index + 1}`}
+					alsoRelationIds={source.alsoRelationIds}
 				/>{/snippet}</RelationTable
 		>
 	</Section>

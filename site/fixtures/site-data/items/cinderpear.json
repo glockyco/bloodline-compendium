@@ -83,9 +83,9 @@
 			"notes": [],
 			"entity": {
 				"kind": "resource",
-				"key": "/Invented/resource/cinderpear/0",
+				"key": "Resource:Ember orchard",
 				"name": "Ember orchard",
-				"slug": null,
+				"slug": "ember-orchard",
 				"icon": null
 			},
 			"conditions": [],
@@ -107,9 +107,9 @@
 			"direction": "incoming",
 			"entity": {
 				"kind": "resource",
-				"key": "/Invented/resource/cinderpear/0",
+				"key": "Resource:Ember orchard",
 				"name": "Ember orchard",
-				"slug": null,
+				"slug": "ember-orchard",
 				"icon": null
 			},
 			"label": "Obtained from",

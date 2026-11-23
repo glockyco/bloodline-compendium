@@ -79,7 +79,7 @@ internal sealed class PickupObjectMechanism : ISourceMechanism
                     amount,
                     places,
                     WorldSourceData.Reference(
-                        EntityKind.Resource,
+                        EntityKind.Pickup,
                         path,
                         WorldSourceData.Name(properties, path, context.ItemLink(item).Name)
                     ),
@@ -107,7 +107,7 @@ internal sealed class PickupObjectMechanism : ISourceMechanism
                     amount,
                     places,
                     WorldSourceData.Reference(
-                        EntityKind.Resource,
+                        EntityKind.Pickup,
                         path,
                         WorldSourceData.Name(properties, path, context.ItemLink(collectible).Name)
                     ),

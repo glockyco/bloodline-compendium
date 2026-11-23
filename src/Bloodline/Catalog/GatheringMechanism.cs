@@ -138,6 +138,105 @@ internal sealed class GatheringMechanism : ISourceMechanism
     }
 
     /// <summary>
+    /// Every gathering spot in play: each placement and each spawner of a gatherer, with the resources its rows name in
+    /// that place. A placement with a custom spawn chance is there on a load with that chance, which the game rolls
+    /// again each time the place loads, as The Elderglen Woods held 97 Coal deposits on one load and 36 on the next
+    /// (runs yield1 and yield7). A spawner holds as many as it spawns on average and at most, or null for a dungeon
+    /// populator, whose outcrop count no run has measured.
+    /// </summary>
+    public static IEnumerable<GatherSpot> Spots(CatalogContext context)
+    {
+        foreach (
+            var type in context.Classes.Values.Where(type =>
+                !context.IsExcludedClass(type.Path) && IsGatherer(context, type.Path)
+            )
+        )
+        {
+            var spawned =
+                ItemIdentity.ClassName(type.Path) == "HarvestableInteractionObject"
+                    ? SpawnedHarvestables(context, type)
+                    : [];
+            var spots = context
+                .Placements.Where(placement => placement.Actor.Class == type.Path)
+                .Select(placement =>
+                    (
+                        placement.Properties,
+                        placement.Level,
+                        Spawner: false,
+                        Count: (double?)1,
+                        Most: (int?)1
+                    )
+                )
+                .Concat(
+                    spawned.Select(spot =>
+                        (spot.Properties, spot.Level, Spawner: true, spot.Count, spot.Most)
+                    )
+                );
+            foreach (var (properties, level, spawner, count, most) in spots)
+            {
+                var place = context.Places.Get(level);
+                var resources = Sources(context, type.Path, properties, [place], true)
+                    .Where(source => !source.Source.Unconfirmed)
+                    .Select(source => source.Source.Entity)
+                    .DistinctBy(entity => entity.Key)
+                    .ToArray();
+                var chance =
+                    !spawner && RecordValues.Boolean(properties["Use Custom Spawn Chance?"]) == true
+                        ? RecordValues.Number(properties["Custom Spawn Chance"]) ?? 1
+                        : 1;
+                var shares = Shares(context, properties);
+                foreach (var resource in resources)
+                    yield return new GatherSpot(
+                        resource,
+                        place,
+                        count,
+                        most,
+                        chance,
+                        shares.TryGetValue(resource.Name, out var share) ? share
+                            : resources.Length == 1 ? 1
+                            : throw new InvalidDataException(
+                                $"A {ItemIdentity.ClassName(type.Path)} spot in {place.Name} gives several resources without a table to draw them from."
+                            )
+                    );
+            }
+        }
+    }
+
+    /// <summary>
+    /// The chance a spot is each resource it can be: 1 for a named preset, and for a spot that draws its preset from a
+    /// table the preset's weight over the table's sum, as `Choose Preset` draws (run presets2).
+    /// </summary>
+    private static Dictionary<string, double> Shares(CatalogContext context, JsonObject properties)
+    {
+        var shares = new Dictionary<string, double>(StringComparer.Ordinal);
+        if (RecordValues.Boolean(properties["Custom Preset"]) != true)
+            return shares;
+        if (RecordValues.Boolean(properties["Table Based Preset?"]) != true)
+        {
+            if (RecordValues.String(properties["Custom Preset Name"]) is { } name)
+                shares[PresetName(Preset(context, name))] = 1;
+            return shares;
+        }
+        var entries = RecordValues
+            .MapEntries(properties["Custom Preset Table"])
+            .Select(entry =>
+                (
+                    Name: RecordValues.String(entry.Key),
+                    Weight: RecordValues.Number(entry.Value) ?? 0
+                )
+            )
+            .Where(entry => entry.Name is not null && entry.Weight > 0)
+            .ToArray();
+        var total = entries.Sum(entry => entry.Weight);
+        foreach (var (name, weight) in entries)
+        {
+            var resource = PresetName(Preset(context, name!));
+            shares[resource] = shares.GetValueOrDefault(resource) + weight / total;
+        }
+        return shares;
+    }
+
+    /// <summary>
     /// The custom presets each level can hold in play, placed or spawned, by level path, which the harvest check
     /// compares with the harvestables a census run found.
     /// </summary>
@@ -160,7 +259,10 @@ internal sealed class GatheringMechanism : ISourceMechanism
                 )
             )
             .Select(placement => (placement.Properties, placement.Level))
-            .Concat(SpawnedHarvestables(context, harvestable))
+            .Concat(
+                SpawnedHarvestables(context, harvestable)
+                    .Select(spot => (spot.Properties, spot.Level))
+            )
             .GroupBy(spot => spot.Level, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(
                 group => group.Key,
@@ -184,16 +286,20 @@ internal sealed class GatheringMechanism : ISourceMechanism
     /// above zero, and trees from its Tree Chances when its Tree Spawn Chances is, each taking the preset its type names
     /// first, such as Iron for Iron Deposit.
     /// </summary>
-    private static IEnumerable<(JsonObject Properties, string Level)> SpawnedHarvestables(
-        CatalogContext context,
-        ClassRecord harvestable
-    )
+    private static IEnumerable<(
+        JsonObject Properties,
+        string Level,
+        double? Count,
+        int? Most
+    )> SpawnedHarvestables(CatalogContext context, ClassRecord harvestable)
     {
         foreach (var placement in context.Placements)
         {
             if (context.IsExcludedClass(placement.Actor.Class))
                 continue;
             JsonObject? spawned = null;
+            double? count = null;
+            int? most = null;
             if (
                 WorldSourceData.IsClass(
                     context,
@@ -215,6 +321,19 @@ internal sealed class GatheringMechanism : ISourceMechanism
                     ["Table Based Preset?"] = true,
                     ["Custom Preset Table"] = table?.DeepClone(),
                 };
+                // Spawn draws its amount with RandomIntegerInRange from Min to Max Spawn Count, as 617 boxes in run
+                // census3 held between the two, on average halfway.
+                var defaults = context.Classes.GetValueOrDefault(placement.Actor.Class)?.Properties;
+                var min =
+                    RecordValues.Number(properties["Min Spawn Count"])
+                    ?? RecordValues.Number(defaults?["Min Spawn Count"])
+                    ?? 0;
+                var max =
+                    RecordValues.Number(properties["Max Spawn Count"])
+                    ?? RecordValues.Number(defaults?["Max Spawn Count"])
+                    ?? 0;
+                count = (min + max) / 2;
+                most = (int)max;
             }
             else if (
                 WorldSourceData.IsClass(context, placement.Actor.Class, "OpenWorld_Populator_C")
@@ -227,6 +346,8 @@ internal sealed class GatheringMechanism : ISourceMechanism
                     ["Table Based Preset?"] = false,
                     ["Custom Preset Name"] = "Iron",
                 };
+                count = RecordValues.Number(placement.Properties["Ore (Iron) Count"]);
+                most = (int?)count;
             }
             if (
                 WorldSourceData.IsClass(
@@ -273,7 +394,9 @@ internal sealed class GatheringMechanism : ISourceMechanism
                                 },
                             }
                         ),
-                        placement.Level
+                        placement.Level,
+                        null,
+                        null
                     );
                 }
             }
@@ -281,7 +404,9 @@ internal sealed class GatheringMechanism : ISourceMechanism
             {
                 yield return (
                     RecordMerge.OverlayProperties(harvestable.Properties, spawned),
-                    placement.Level
+                    placement.Level,
+                    count,
+                    most
                 );
             }
         }
@@ -512,14 +637,16 @@ internal sealed class GatheringMechanism : ISourceMechanism
     }
 
     /// <summary>
-    /// The presets a custom-preset placement can become: its name, or each name of the table it draws from. A missing
-    /// name is null, so the check can report it.
+    /// The presets a custom-preset placement can become: its name, or each name of the table it draws from with a
+    /// weight above 0. A missing name is null, so the check can report it.
     /// </summary>
     private static IEnumerable<string?> PresetNames(JsonObject properties) =>
         RecordValues.Boolean(properties["Custom Preset"]) != true ? []
         : RecordValues.Boolean(properties["Table Based Preset?"]) == true
             ? RecordValues
                 .MapEntries(properties["Custom Preset Table"])
+                // A preset of weight 0 is never drawn, as a Scorched Coast box lists Aloe beside Golden Barrel Cactus.
+                .Where(entry => RecordValues.Number(entry.Value) is not <= 0)
                 .Select(entry => RecordValues.String(entry.Key))
                 .Distinct(StringComparer.Ordinal)
         : [RecordValues.String(properties["Custom Preset Name"])];
@@ -549,7 +676,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
     }
 
     /// <summary>A tree for a Woodcutting preset and a deposit for a Mining one, as the game's own pools name Pine Tree and Iron Deposit.</summary>
-    private static string PresetName(HarvestPreset preset) =>
+    internal static string PresetName(HarvestPreset preset) =>
         preset.Checks switch
         {
             "Woodcutting" => preset.Preset + " Tree",
@@ -645,6 +772,20 @@ internal sealed class GatheringMechanism : ISourceMechanism
         var measured = context
             .Records.HarvestPresets.Presets.Select(preset => (preset.Preset, preset.Checks))
             .ToHashSet();
+        var incomplete = context
+            .Records.HarvestPresets.Presets.Where(preset =>
+                preset.Experience <= 0
+                || preset.Bonus is null
+                || (preset.Checks != "Foraging" && preset.Bonus.Count == 0)
+            )
+            .Select(preset => preset.Preset)
+            .ToArray();
+        if (incomplete.Length > 0)
+            throw new InvalidDataException(
+                "harvest-presets.json lacks the experience or bonus chances of "
+                    + string.Join(", ", incomplete)
+                    + ". Run tools/runtime/checks/harvest-yield.lua."
+            );
         if (!listed.SetEquals(measured))
             throw new InvalidDataException(
                 "harvest-presets.json and HarvestableInteractionObject's level lists differ: "

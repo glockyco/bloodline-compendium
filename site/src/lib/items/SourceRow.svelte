@@ -14,6 +14,7 @@
 		placeFirst = false,
 		showUnit = true,
 		levelCondition,
+		alsoRelationIds = [],
 		id
 	}: {
 		source: Source;
@@ -30,6 +31,8 @@
 		 * value in that column, and its conditions leave it out.
 		 */
 		levelCondition?: RelationCondition['kind'];
+		/** Further relations this row stands for, when rows that read the same are shown as one. */
+		alsoRelationIds?: string[];
 		id: string;
 	} = $props();
 	const level = $derived(
@@ -42,6 +45,8 @@
 			? source.conditions.filter((condition) => condition.kind !== levelCondition)
 			: source.conditions
 	);
+	// A gathering row whose resource has a page says how many areas have it, and the page lists them with the notes.
+	const summarized = $derived(source.kind === 'gathering' && source.entity?.slug != null);
 	// The camp maps of one terrain share their terrain's name, so a list names each place once.
 	const places = $derived(
 		source.places.filter(
@@ -62,17 +67,23 @@
 						? ', '
 						: ''}<EntityLink entity={place} />{/each}{:else if source.settlement}Your settlement{:else}Location
 				unknown{/if}{/snippet}
+		{#each alsoRelationIds as also (also)}<span
+				data-relation-id={also}
+				data-relation-direction="incoming"
+			></span>{/each}
 		<span class="relation-name"
 			>{#if placeFirst}{@render placeList()}{:else}<EntityLink entity={source.entity} />{/if}</span
 		>
 		<Conditions {conditions} />
 		<!-- Random loot and crops stand nowhere in particular, so only ways that stand somewhere miss a place. -->
-		{#if showPlaces && !placeFirst && (places.length || source.settlement || placedKinds.has(source.kind))}<p
+		{#if summarized}{#if places.length}<p class="source-places">
+					{places.length === 1 ? 'In 1 area' : `In ${formatNumber(places.length)} areas`}
+				</p>{/if}{:else if showPlaces && !placeFirst && (places.length || source.settlement || placedKinds.has(source.kind))}<p
 				class="source-places"
 			>
 				{@render placeList()}
 			</p>{/if}
-		{#if source.inputs.length || source.notes.length || source.quotes?.length}
+		{#if source.inputs.length || (!summarized && source.notes.length) || source.quotes?.length}
 			<details class="row-details">
 				<summary
 					>Details <span class="sr-only">for <span data-game>{source.name}</span></span></summary
@@ -92,7 +103,7 @@
 						{quote.player ? 'You say' : 'They say'}
 						"<span data-game>{quote.text}</span>"
 					</p>{/each}
-				{#if source.notes.length}<ul>
+				{#if !summarized && source.notes.length}<ul>
 						{#each source.notes as note, index (index)}<li>{note}</li>{/each}
 					</ul>{/if}
 			</details>

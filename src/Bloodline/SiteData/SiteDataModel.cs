@@ -25,6 +25,7 @@ internal enum EntityKind
     Spellsong,
     Profession,
     Mechanic,
+    Pickup,
 }
 
 /// <summary>
@@ -777,6 +778,100 @@ internal sealed record ProfessionRow(
     int? Output
 );
 
+/// <summary>The gathering resources by category and name. Written as <c>resources.json</c>.</summary>
+internal sealed record ResourceIndex(IReadOnlyList<ResourceSummary> Resources);
+
+/// <summary>A resource as the resource list shows it: its category, the level it needs and how many items it gives.</summary>
+internal sealed record ResourceSummary(
+    string Key,
+    string Slug,
+    string Name,
+    string Category,
+    int Loot
+)
+{
+    public string? Icon { get; init; }
+
+    /// <summary>The profession whose level it needs and that level, when the game sets one.</summary>
+    public string? Profession { get; init; }
+
+    public int? Level { get; init; }
+}
+
+/// <summary>
+/// Everything a resource page shows: how a harvest works when lab runs measured it, the items it gives with the chance
+/// per item, and where it stands. <see cref="Category"/> is the profession whose level it checks, Farming for crops,
+/// or Gathering. Written as <c>resources/&lt;slug&gt;.json</c>.
+/// </summary>
+internal sealed record ResourcePage(
+    string Key,
+    string Slug,
+    string Name,
+    string Category,
+    IReadOnlyList<ResourceLoot> Loot,
+    IReadOnlyList<ResourcePlace> Places
+)
+{
+    [JsonRequired]
+    public EntityKind Kind { get; init; } = EntityKind.Resource;
+
+    public string? Icon { get; init; }
+
+    public ResourceHarvest? Harvest { get; init; }
+
+    /// <summary>The game chooses at random what each of some spots is, so only some of them give this resource.</summary>
+    [JsonRequired]
+    public bool Drawn { get; init; }
+}
+
+/// <summary>
+/// What one harvest of a resource gives, as runs yield1, yield7, forage1 and curve1 measured it. <see cref="Experience"/>
+/// is given per pick, or for Woodcutting and Mining only when you hit the minigame's green area, which also rolls for
+/// bonus items with <see cref="Bonus"/>: the chance at each level from <see cref="BonusFrom"/>, the last one holding for
+/// every level above. Bonus is empty when the resource never rolls it.
+/// </summary>
+internal sealed record ResourceHarvest(
+    string Profession,
+    int Level,
+    int Experience,
+    bool Minigame,
+    int ItemsPerSpot,
+    ResourceAfterUse AfterUse,
+    int BonusFrom,
+    IReadOnlyList<double> Bonus
+);
+
+internal enum ResourceAfterUse
+{
+    /// <summary>The spot is removed a few seconds after its last harvest.</summary>
+    Removed,
+
+    /// <summary>The spot stays and refuses further harvests.</summary>
+    Stays,
+}
+
+/// <summary>An item a resource gives, with the chance per harvest, by the relations that the item page shows too.</summary>
+internal sealed record ResourceLoot(
+    EntityReference Item,
+    IReadOnlyList<string> RelationIds,
+    double? Chance,
+    bool Unconfirmed
+)
+{
+    /// <summary>The item's value in gold, as its page gives it.</summary>
+    public double? Value { get; init; }
+
+    [JsonRequired]
+    public IReadOnlyList<RelationCondition> Conditions { get; init; } = [];
+}
+
+/// <summary>
+/// A place a resource stands in: how many of it a visit finds on average, since the game decides on each load which
+/// spots are there and what a drawn spot becomes, and how many it can hold at most. <see cref="More"/> marks a place
+/// where a dungeon adds outcrops or trees in a number no run has measured, which neither count includes.
+/// </summary>
+internal sealed record ResourcePlace(EntityReference Place, double Expected, int Most, bool More);
+
 /// <summary>The disciplines in the skill window's order. Written as <c>disciplines.json</c>.</summary>
 internal sealed record DisciplineIndex(IReadOnlyList<DisciplineSummary> Disciplines);
 
@@ -990,6 +1085,8 @@ internal sealed record SiteDataFiles(
     ProfessionPage Profession,
     MechanicIndex Mechanics,
     MechanicPage Mechanic,
+    ResourceIndex Resources,
+    ResourcePage Resource,
     PlannerData Planner
 );
 

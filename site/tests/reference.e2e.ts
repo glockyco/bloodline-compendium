@@ -576,6 +576,8 @@ test('each public page has production identity, social metadata and generated br
 			'/skills/moss-ward/',
 			'/professions/',
 			'/professions/starsmithing/',
+			'/resources/',
+			'/resources/ember-orchard/',
 			'/mechanics/',
 			'/mechanics/discipline-levels/',
 			'/mechanics/skill-points/',

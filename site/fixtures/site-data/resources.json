@@ -1,0 +1,12 @@
+{
+	"resources": [
+		{
+			"key": "Resource:Ember orchard",
+			"slug": "ember-orchard",
+			"name": "Ember orchard",
+			"category": "Gathering",
+			"loot": 1,
+			"icon": "cinderpear"
+		}
+	]
+}

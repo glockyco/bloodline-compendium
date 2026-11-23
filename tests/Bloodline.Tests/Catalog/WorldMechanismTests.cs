@@ -77,7 +77,7 @@ public sealed class WorldMechanismTests
         Assert.Empty(result.Source.Places);
         Assert.Equal(new[] { 4d, 2d }, NoteNumbers(result.Source));
         Assert.Equal(EntityKind.Resource, result.Source.Entity.Kind);
-        Assert.Equal(table.Path + ":InventedRow", result.Source.Entity.Key);
+        Assert.Equal("Resource:Invented Row", result.Source.Entity.Key);
         var condition = Assert.Single(result.Source.Conditions);
         Assert.Equal(ConditionKind.ProficiencyLevel, condition.Kind);
         Assert.Equal(7, condition.Value);
@@ -607,7 +607,7 @@ public sealed class WorldMechanismTests
         // The game sets the required level by a custom preset's name, so a preset's recorded level restricts nothing.
         Assert.Empty(result.Source.Conditions);
         // Every gathering node shares this class, so the node is told apart by the name it shows.
-        Assert.Equal(gatherer.Path + "#Iron Deposit", result.Source.Entity.Key);
+        Assert.Equal("Resource:Iron Deposit", result.Source.Entity.Key);
         Assert.DoesNotContain(
             sources,
             source => source.Key.Contains("Dud", StringComparison.Ordinal)
@@ -634,9 +634,20 @@ public sealed class WorldMechanismTests
                     "Iron",
                     "Mining",
                     10,
-                    [new("/Invented/Ore.Ore_C", 3), new("/Invented/Gem.Gem_C", 1)]
+                    [new("/Invented/Ore.Ore_C", 3), new("/Invented/Gem.Gem_C", 1)],
+                    5,
+                    1,
+                    [0.15m, 1m]
                 ),
-                new HarvestPreset("Coal", "Mining", 1, [new("/Invented/Coal.Coal_C", 1)]),
+                new HarvestPreset(
+                    "Coal",
+                    "Mining",
+                    1,
+                    [new("/Invented/Coal.Coal_C", 1)],
+                    5,
+                    1,
+                    [0.15m, 1m]
+                ),
             ]
         );
         EntitySource[] Sources(string placement) =>
@@ -659,7 +670,7 @@ public sealed class WorldMechanismTests
         var ore = Assert.Single(named, source => source.Key == "/Invented/Ore.Ore_C").Source;
         Assert.Equal(0.75, ore.Odds!.Chance);
         Assert.Equal("Iron Deposit", ore.Name);
-        Assert.Equal(gatherer.Path + "#Iron Deposit", ore.Entity.Key);
+        Assert.Equal("Resource:Iron Deposit", ore.Entity.Key);
         Assert.Equal("Requires Mining level 10", Assert.Single(ore.Conditions).Label);
         Assert.Equal(
             0.25,
@@ -705,13 +716,32 @@ public sealed class WorldMechanismTests
         var presets = new HarvestPresets(
             [],
             [
-                new HarvestPreset("Birch", "Woodcutting", 5, [new("/Invented/Birch.Birch_C", 1)]),
-                new HarvestPreset("Pine", "Woodcutting", 1, [new("/Invented/Pine.Pine_C", 1)]),
+                new HarvestPreset(
+                    "Birch",
+                    "Woodcutting",
+                    5,
+                    [new("/Invented/Birch.Birch_C", 1)],
+                    5,
+                    1,
+                    [0.15m, 1m]
+                ),
+                new HarvestPreset(
+                    "Pine",
+                    "Woodcutting",
+                    1,
+                    [new("/Invented/Pine.Pine_C", 1)],
+                    5,
+                    1,
+                    [0.15m, 1m]
+                ),
                 new HarvestPreset(
                     "Fly Agaric",
                     "Foraging",
                     1,
-                    [new("/Invented/Agaric.Agaric_C", 1)]
+                    [new("/Invented/Agaric.Agaric_C", 1)],
+                    5,
+                    1,
+                    [0.15m, 1m]
                 ),
             ]
         );
@@ -736,6 +766,28 @@ public sealed class WorldMechanismTests
         // A box flagged for general mushroom rates spawns from that table instead of its own.
         var mushrooms = Sources("""{"General Mushroom Spawn Rates":true}""");
         Assert.Equal("/Invented/Agaric.Agaric_C", Assert.Single(mushrooms).Key);
+
+        // A box spawns between its Min and Max Spawn Count, and each spawned spot is one preset of its table by weight.
+        var spots = GatheringMechanism
+            .Spots(
+                Context(
+                    [harvestable, box],
+                    levels:
+                    [
+                        Level(
+                            box,
+                            """{"Min Spawn Count":4,"Max Spawn Count":10,"Custom Preset Table":{"$map":[["Birch",1],["Pine",3]]}}"""
+                        ),
+                    ],
+                    harvestPresets: presets
+                )
+            )
+            .ToArray();
+        var birchSpots = Assert.Single(spots, spot => spot.Resource.Name == "Birch Tree");
+        Assert.Equal(
+            (7d, 10, 0.25),
+            (birchSpots.Count!.Value, birchSpots.Most!.Value, birchSpots.Share)
+        );
     }
 
     [Fact]
@@ -748,8 +800,24 @@ public sealed class WorldMechanismTests
         var presets = new HarvestPresets(
             [],
             [
-                new HarvestPreset("Iron", "Mining", 10, [new("/Invented/Ore.Ore_C", 1)]),
-                new HarvestPreset("Coal", "Mining", 1, [new("/Invented/Coal.Coal_C", 1)]),
+                new HarvestPreset(
+                    "Iron",
+                    "Mining",
+                    10,
+                    [new("/Invented/Ore.Ore_C", 1)],
+                    5,
+                    1,
+                    [0.15m, 1m]
+                ),
+                new HarvestPreset(
+                    "Coal",
+                    "Mining",
+                    1,
+                    [new("/Invented/Coal.Coal_C", 1)],
+                    5,
+                    1,
+                    [0.15m, 1m]
+                ),
             ]
         );
         var context = Context(
@@ -805,7 +873,17 @@ public sealed class WorldMechanismTests
         var gatherer = Type("HarvestableInteractionObject", """{"Mining Items":["Iron","Gold"]}""");
         var presets = new HarvestPresets(
             [],
-            [new HarvestPreset("Iron", "Mining", 10, [new("/Invented/Ore.Ore_C", 1)])]
+            [
+                new HarvestPreset(
+                    "Iron",
+                    "Mining",
+                    10,
+                    [new("/Invented/Ore.Ore_C", 1)],
+                    5,
+                    1,
+                    [0.15m, 1m]
+                ),
+            ]
         );
         var error = Assert.Throws<InvalidDataException>(() =>
             new GatheringMechanism()

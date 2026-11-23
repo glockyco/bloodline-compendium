@@ -55,3 +55,21 @@ Every link to a skill, discipline, passive or spellsong SHALL show a preview on 
 #### Scenario: Skill link
 - **WHEN** a reader focuses the Arcane Bolt link on the skill list
 - **THEN** Arcane Bolt's tooltip appears beside the link, followed by "Arcane, Arcane level 1."
+
+### Requirement: Resource pages
+Each gathering resource SHALL have a page with every item it gives and its chance per item, the areas it stands in with how many of it a load holds on average, and, where lab runs measured its preset, the level it needs, what one harvest gives, its bonus chance by level and what happens to a used spot.
+
+#### Scenario: A measured deposit
+- **WHEN** a reader opens Coal Deposit
+- **THEN** the page lists Chunk of Coal with its chance, needs Mining level 1, gives 3 items and 7 Mining experience per hit, and lists The Elderglen Woods with the number of deposits a load holds on average
+
+#### Scenario: A spot that is one of several resources
+- **WHEN** a spawner box draws its preset from a table of Coal and Iron
+- **THEN** each area counts that box toward Coal and Iron by their weight in the table, and the page says that some spots become one of several resources at random
+
+### Requirement: Gathering rows on item pages
+An item page SHALL name each resource it is gathered from in one row that links the resource page, with the chance per harvest, the level it needs and the number of areas.
+
+#### Scenario: From an item to its resource
+- **WHEN** a reader opens Chunk of Coal and follows Coal Deposit in its gathering row
+- **THEN** the Coal Deposit page opens and lists Chunk of Coal by the same row

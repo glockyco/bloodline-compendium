@@ -81,9 +81,9 @@
 	},
 	{
 		"kind": "resource",
-		"hasPages": false,
-		"route": null,
-		"searchFilter": "Resource",
+		"hasPages": true,
+		"route": "resources",
+		"searchFilter": "Resources",
 		"structuredDataType": "Thing",
 		"host": null
 	},
@@ -140,5 +140,13 @@
 		"route": "mechanics",
 		"searchFilter": "Mechanics",
 		"structuredDataType": "Thing"
+	},
+	{
+		"kind": "pickup",
+		"hasPages": false,
+		"route": null,
+		"searchFilter": "Pickups",
+		"structuredDataType": "Thing",
+		"host": null
 	}
 ]

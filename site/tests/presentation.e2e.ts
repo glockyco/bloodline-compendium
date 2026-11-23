@@ -11,6 +11,8 @@ const routes = [
 	'/about/',
 	'/professions/',
 	'/professions/starsmithing/',
+	'/resources/',
+	'/resources/ember-orchard/',
 	'/mechanics/',
 	'/mechanics/skill-points/',
 	'/disciplines/emberlore/'
