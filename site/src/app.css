@@ -297,14 +297,12 @@ small {
 .disclosure > :not(summary) {
 	margin-top: var(--gap-block);
 }
-/* A page title beside its icon in a slot, as a profession's or a discipline's. */
-.icon-heading {
-	grid-template-columns: auto minmax(0, 1fr);
-	align-items: start;
-	gap: var(--gap-block);
-}
 .item-heading h1 {
 	margin: 0;
+}
+/* An intro under the title and its line reads as the start of the page, a step apart from the heading. */
+.item-heading > .intro {
+	margin-top: var(--gap-line);
 }
 .identity {
 	display: flex;

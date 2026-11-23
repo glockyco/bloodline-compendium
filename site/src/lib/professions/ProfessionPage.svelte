@@ -1,7 +1,6 @@
 <script lang="ts">
 	import EntityPage from '#lib/entity/EntityPage.svelte';
 	import EntityLink from '#lib/ui/EntityLink.svelte';
-	import IconSlot from '#lib/ui/IconSlot.svelte';
 	import Section from '#lib/ui/Section.svelte';
 	import RelationTable from '#lib/RelationTable.svelte';
 	import Ingredients from '#lib/items/Ingredients.svelte';
@@ -64,8 +63,7 @@
 	{description}
 	{icon}
 >
-	<header class="item-heading icon-heading">
-		<IconSlot {icon} />
+	<header class="item-heading">
 		<div>
 			<h1>{profession.name}</h1>
 			<dl class="facts">

@@ -18,11 +18,11 @@ Each discipline SHALL have a page that shows its skills and its passives in rows
 - **THEN** the page lists it under the level it requires
 
 ### Requirement: Discipline facts
-A discipline page SHALL state its category, the proficiency points one level grants, and any known issue that affects it in its Bugs section.
+A discipline page SHALL state its category, and SHALL open with one sentence that says how it levels, what its level unlocks and how many proficiency points each level up gives, such as "Necromancy levels up as you use it. Its level unlocks the skills below, and each level up gives you 2 proficiency points to spend on its passives." A known issue that affects the discipline SHALL appear in its Bugs section.
 
 #### Scenario: Discipline with a defect
 - **WHEN** a reader opens Blood Magic while its points defect is a known issue
-- **THEN** the page names the issue in place of a number of points per level
+- **THEN** the intro names the defect in place of a number of points per level, and the Bugs section lists it
 
 ### Requirement: Skill pages
 Each skill SHALL have a page with its game card and facts, then every way to get it with its condition and cost, then the discipline row that holds it. A skill without a source SHALL state its status.

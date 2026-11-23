@@ -133,6 +133,8 @@ The profession and mechanic lists are cards three to a row, because six professi
 
 Discipline Levels is a mechanic page for what new players asked in the trials: how a discipline levels, that it starts at level 1 and has no highest level, and which key opens the skill tree. Discipline pages link to it.
 
+A discipline page opens with one sentence written from its rules that says how it levels, what its level unlocks and how many proficiency points each level up gives, such as "Necromancy levels up as you use it. Its level unlocks the skills below, and each level up gives you 2 proficiency points to spend on its passives.", because a player reads the opening anyway and it can say what the points buy. Blood Magic's sentence names its points bug instead of a number, and a tree without a level of its own names the levels its skills check. Discipline and profession pages head with the title and its line and no icon, as item and skill pages do, so every page kind has the same heading on one left edge. The Proficiency Points page gives Focuses "1 for the first level up, then none" and Vampirism "None", and says their points buy nothing because they have no passives.
+
 ### Text pages and measure
 
 Prose keeps a measure of 72 characters, inside the 45 to 90 that typography guides recommend and under WCAG's 80. Tables, panels and side columns use the page's width. About, Known Issues and the mechanic pages share a text layout with a side column for the page's contents and related pages, as GOV.UK's two-thirds layout does, so wide screens use the width beside the prose.
@@ -143,7 +145,7 @@ A weapon part whose class other rows share, such as Steel Claymore Guard and Ste
 
 ### Home and search
 
-The header lists Items, Disciplines, Skills and Professions, the kinds players browse most, and the footer lists every kind. A line under each discipline's title says how disciplines level and links Discipline Levels. The home page leads with two buttons, Browse Items and Browse Skills, and shows item categories and disciplines as icon tiles with a count, the disciplines in one grid with their skill window category in each tile's line. The site's own search shows each result's icon, name and a line with its kind and context, such as "Skill · Magic · Pyromancy", in one list ranked by best match.
+The header lists Items, Disciplines, Skills and Professions, the kinds players browse most, and the footer lists every kind. The home page leads with two buttons, Browse Items and Browse Skills, and shows item categories and disciplines as icon tiles with a count, the disciplines in one grid with their skill window category in each tile's line. The site's own search shows each result's icon, name and a line with its kind and context, such as "Skill · Magic · Pyromancy", in one list ranked by best match.
 
 ## Risks / Trade-offs
 

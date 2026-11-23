@@ -40,7 +40,7 @@
 ## 6. Pages
 
 - [x] 6.1 Compare discipline page layouts in Plannotator with the game's tree window screenshots, at both widths
-- [ ] 6.2 Build discipline pages with skill rows, proficiency rows, Lute's spellsongs, facts and Bugs
+- [x] 6.2 Build discipline pages with skill rows, proficiency rows, Lute's spellsongs, facts and Bugs
 - [x] 6.3 Compare skill page, skill tooltip, passive and spellsong tooltip designs and status wording in Plannotator
 - [x] 6.4 Build skill pages, the skill list with its filters and reveal, and passive and spellsong anchors and tooltips
 - [x] 6.5 Add fixtures with extreme content for every new kind and browser tests for the list, pages, anchors and tooltips

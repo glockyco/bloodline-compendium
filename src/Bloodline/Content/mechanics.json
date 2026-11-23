@@ -53,7 +53,7 @@
 			{
 				"heading": "How You Get Them",
 				"paragraphs": [
-					"Each time a discipline levels up, you get proficiency points for that discipline."
+					"Each time a discipline levels up, you get proficiency points for that discipline. Focuses and Vampirism have no passives, so their points buy nothing."
 				],
 				"table": {
 					"headings": [
@@ -70,8 +70,12 @@
 							"2"
 						],
 						[
-							"[Focuses](discipline:focuses) and [Vampirism](discipline:vampirism)",
-							"None after the first level"
+							"[Focuses](discipline:focuses)",
+							"1 for the first level up, then none"
+						],
+						[
+							"[Vampirism](discipline:vampirism)",
+							"None"
 						],
 						[
 							"[Blood Magic](discipline:blood-magic)",
@@ -89,7 +93,7 @@
 			}
 		],
 		"evidence": [
-			"Run grants1, build 24464547: a discipline level up added 1 proficiency point of that discipline, Necromancy 2, and Focuses, whose level the game names Staff, and Vampirism none after the first.",
+			"Run grants1, build 24464547: a discipline level up added 1 proficiency point of that discipline, Necromancy 2, Focuses, whose level the game names Staff, 1 for its first level up and none after, and Vampirism none. Run progression3 also saw Vampirism's first two level ups add none.",
 			"Run passives1, build 24464547: Lasting Servitude's ranks cost 2, 4, 6, 8 and 10 points, and Lingering Souls' 1 to 5."
 		]
 	},
