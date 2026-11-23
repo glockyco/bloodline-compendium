@@ -35,13 +35,16 @@ const data: PlannerData = {
 	skills: [{ key: '/Invented/Ember', slug: 'ember', name: 'Ember', icon: null, learned: false }]
 };
 
+const fresh = newCharacter(data);
 const build: PlannerState = {
-	...newCharacter(data),
-	level: 12,
-	disciplines: { '/Invented/FireTree': 6 },
-	attributes: { ...newCharacter(data).attributes, Fortitude: 4 },
-	skills: ['/Invented/Ember'],
-	hotbar: ['/Invented/Ember', null, null, null, null, null, null, null, null, null]
+	...fresh,
+	attributes: { level: 12, points: { ...fresh.attributes.points, Fortitude: 4 } },
+	skills: {
+		...fresh.skills,
+		disciplines: { '/Invented/FireTree': 6 },
+		unlocked: ['/Invented/Ember']
+	},
+	skillBars: { main: ['/Invented/Ember', null, null, null, null, null, null, null, null, null] }
 };
 
 async function raw(json: string) {
@@ -69,7 +72,7 @@ describe('build links', () => {
 	it('keeps a renamed skill by its key', async () => {
 		const value = await encodeBuild(build);
 		const renamed = { ...data, skills: [{ ...data.skills[0], name: 'Cinder' }] };
-		expect((await decodeBuild(value, renamed)).state.skills).toEqual(['/Invented/Ember']);
+		expect((await decodeBuild(value, renamed)).state.skills.unlocked).toEqual(['/Invented/Ember']);
 	});
 
 	it('keeps a key the payload lacks as unresolved and writes it back the same', async () => {
@@ -77,9 +80,16 @@ describe('build links', () => {
 		const without = { ...data, skills: [], disciplines: [{ ...data.disciplines[0], slots: [] }] };
 		const decoded = await decodeBuild(value, without);
 		expect(decoded.unresolved).toHaveLength(1);
-		expect(decoded.state.skills[0].startsWith(unresolvedPrefix)).toBe(true);
-		expect(decoded.state.hotbar[0]).toBe(decoded.state.skills[0]);
+		expect(decoded.state.skills.unlocked[0].startsWith(unresolvedPrefix)).toBe(true);
+		expect(decoded.state.skillBars.main[0]).toBe(decoded.state.skills.unlocked[0]);
 		expect((await decodeBuild(await encodeBuild(decoded.state), data)).state).toEqual(build);
+	});
+
+	it('opens a link from a later planner and passes its unknown sections on', async () => {
+		const later = { ...build, later: { e: { h: 'Invented Helm' } } };
+		const decoded = await decodeBuild(await encodeBuild(later), data);
+		expect(decoded.state).toEqual(later);
+		expect((await decodeBuild(await encodeBuild(decoded.state), data)).state).toEqual(later);
 	});
 
 	it('refuses other versions, oversized data and data no planner wrote', async () => {

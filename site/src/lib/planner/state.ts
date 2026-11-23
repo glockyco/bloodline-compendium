@@ -6,41 +6,57 @@ import { evaluate, levelOf } from './evaluate.js';
 /** The skill bar's slots: two rows of five, as the game lays them out. */
 export const hotbarSlots = 10;
 
-/**
- * One planned character, each choice keyed by catalog key so a link survives renames. Discipline levels default to 1
- * and passive ranks to 0, so the state stores only what differs.
- */
-export interface PlannerState {
-	/** The game build the inputs came from when the build was planned. */
-	build: number;
+/** The character's level and the points in each attribute. */
+export interface AttributesSection {
 	level: number;
+	points: Record<Attribute, number>;
+}
+
+/** Discipline levels default to 1 and passive ranks to 0, so the section stores only what differs. */
+export interface SkillsSection {
 	disciplines: Record<string, number>;
-	attributes: Record<Attribute, number>;
 	/** Skills unlocked in the trees, which cost a skill point each. */
-	skills: string[];
+	unlocked: string[];
 	/** Skills a book, conversation or event taught, which cost no skill point. */
 	learned: string[];
 	passives: Record<string, number>;
 	/** The Blood Magic proficiency points the character has, which its level does not set. */
 	bloodMagicPoints: number | null;
-	hotbar: (string | null)[];
+}
+
+export interface SkillBarsSection {
+	/** The two rows of five the game shows. */
+	main: (string | null)[];
+}
+
+/**
+ * One planned character as sections, each keyed by catalog key so a link survives renames. A later planner adds
+ * sections, such as equipment, without reshaping these, and `later` keeps the sections of a later planner that this one
+ * does not know, as read, so saving and sharing pass them on.
+ */
+export interface PlannerState {
+	/** The game build the inputs came from when the build was planned. */
+	build: number;
+	attributes: AttributesSection;
+	skills: SkillsSection;
+	skillBars: SkillBarsSection;
+	later: Record<string, unknown>;
 }
 
 /** A new character: level 1, every attribute and discipline at 1, nothing bought. */
 export function newCharacter(data: PlannerData): PlannerState {
 	return {
 		build: data.build,
-		level: 1,
-		disciplines: {},
-		attributes: Object.fromEntries(attributes.map((attribute) => [attribute, 1])) as Record<
-			Attribute,
-			number
-		>,
-		skills: [],
-		learned: [],
-		passives: {},
-		bloodMagicPoints: null,
-		hotbar: Array(hotbarSlots).fill(null)
+		attributes: {
+			level: 1,
+			points: Object.fromEntries(attributes.map((attribute) => [attribute, 1])) as Record<
+				Attribute,
+				number
+			>
+		},
+		skills: { disciplines: {}, unlocked: [], learned: [], passives: {}, bloodMagicPoints: null },
+		skillBars: { main: Array(hotbarSlots).fill(null) },
+		later: {}
 	};
 }
 
@@ -50,19 +66,34 @@ export type Edit =
 
 const refuse = (state: PlannerState, refused: string): Edit => ({ state, refused });
 
+const withAttributes = (state: PlannerState, change: Partial<AttributesSection>): Edit => ({
+	state: { ...state, attributes: { ...state.attributes, ...change } }
+});
+const withSkills = (state: PlannerState, change: Partial<SkillsSection>): Edit => ({
+	state: { ...state, skills: { ...state.skills, ...change } }
+});
+
+/** A skill bar without a skill the character no longer knows. */
+function withoutOnBars(state: PlannerState, skill: string): SkillBarsSection {
+	return {
+		...state.skillBars,
+		main: state.skillBars.main.map((slot) => (slot === skill ? null : slot))
+	};
+}
+
 /** Sets a whole number at least 1, as the game's levels are. Lowering keeps choices that no longer fit. */
 function positive(value: number): number {
 	return Math.max(1, Math.floor(value));
 }
 
 export function setLevel(state: PlannerState, level: number): Edit {
-	return { state: { ...state, level: positive(level) } };
+	return withAttributes(state, { level: positive(level) });
 }
 
 export function setDisciplineLevel(state: PlannerState, discipline: string, level: number): Edit {
-	return {
-		state: { ...state, disciplines: { ...state.disciplines, [discipline]: positive(level) } }
-	};
+	return withSkills(state, {
+		disciplines: { ...state.skills.disciplines, [discipline]: positive(level) }
+	});
 }
 
 /**
@@ -75,7 +106,7 @@ export function setAttribute(state: PlannerState, attribute: Attribute, value: n
 		return refuse(state, `${attribute} starts at 1 and cannot go lower.`);
 	if (level > measuredLevels.max)
 		return refuse(state, `${attribute} effects are known up to ${measuredLevels.max}.`);
-	return { state: { ...state, attributes: { ...state.attributes, [attribute]: level } } };
+	return withAttributes(state, { points: { ...state.attributes.points, [attribute]: level } });
 }
 
 /**
@@ -83,14 +114,17 @@ export function setAttribute(state: PlannerState, attribute: Attribute, value: n
  * skill point is left, and refunds the point when the skill is clicked again.
  */
 export function toggleSkill(state: PlannerState, data: PlannerData, skill: string): Edit {
-	if (state.skills.includes(skill))
+	if (state.skills.unlocked.includes(skill))
 		return {
 			state: {
 				...state,
-				skills: state.skills.filter((key) => key !== skill),
-				hotbar: state.learned.includes(skill)
-					? state.hotbar
-					: state.hotbar.map((slot) => (slot === skill ? null : slot))
+				skills: {
+					...state.skills,
+					unlocked: state.skills.unlocked.filter((key) => key !== skill)
+				},
+				skillBars: state.skills.learned.includes(skill)
+					? state.skillBars
+					: withoutOnBars(state, skill)
 			}
 		};
 	const slot = data.disciplines
@@ -102,24 +136,24 @@ export function toggleSkill(state: PlannerState, data: PlannerData, skill: strin
 		return refuse(state, `Needs ${checked?.name ?? 'its discipline'} level ${slot.requiredLevel}.`);
 	if (evaluate(state, data).skillPoints.remaining < 1)
 		return refuse(state, 'No skill point is left.');
-	return { state: { ...state, skills: [...state.skills, skill] } };
+	return withSkills(state, { unlocked: [...state.skills.unlocked, skill] });
 }
 
 /** Marks a skill a book, conversation or event teaches as known, or unmarks it. */
 export function toggleLearned(state: PlannerState, data: PlannerData, skill: string): Edit {
-	if (state.learned.includes(skill))
+	if (state.skills.learned.includes(skill))
 		return {
 			state: {
 				...state,
-				learned: state.learned.filter((key) => key !== skill),
-				hotbar: state.skills.includes(skill)
-					? state.hotbar
-					: state.hotbar.map((slot) => (slot === skill ? null : slot))
+				skills: { ...state.skills, learned: state.skills.learned.filter((key) => key !== skill) },
+				skillBars: state.skills.unlocked.includes(skill)
+					? state.skillBars
+					: withoutOnBars(state, skill)
 			}
 		};
 	if (!data.skills.some((entry) => entry.key === skill && entry.learned))
 		return refuse(state, 'No book, conversation or event teaches this skill.');
-	return { state: { ...state, learned: [...state.learned, skill] } };
+	return withSkills(state, { learned: [...state.skills.learned, skill] });
 }
 
 /**
@@ -132,7 +166,7 @@ export function buyRank(state: PlannerState, data: PlannerData, passive: string)
 	);
 	const entry = owner?.passives.find((candidate) => candidate.key === passive);
 	if (!owner || !entry) return refuse(state, 'No skill tree holds this passive.');
-	const ranks = state.passives[passive] ?? 0;
+	const ranks = state.skills.passives[passive] ?? 0;
 	const costs = rankCosts(entry);
 	if (ranks >= costs.length)
 		return refuse(
@@ -148,32 +182,36 @@ export function buyRank(state: PlannerState, data: PlannerData, passive: string)
 	const balance = evaluate(state, data).proficiency[owner.key];
 	if (balance?.remaining !== null && balance !== undefined && balance.remaining < costs[ranks])
 		return refuse(state, `Needs ${costs[ranks]} ${owner.name} points.`);
-	return { state: { ...state, passives: { ...state.passives, [passive]: ranks + 1 } } };
+	return withSkills(state, { passives: { ...state.skills.passives, [passive]: ranks + 1 } });
 }
 
 /** Removes the last bought rank, a planning edit the game itself does not offer. */
 export function removeRank(state: PlannerState, passive: string): Edit {
-	const ranks = state.passives[passive] ?? 0;
+	const ranks = state.skills.passives[passive] ?? 0;
 	if (ranks < 1) return refuse(state, 'No rank is bought.');
-	const passives = { ...state.passives, [passive]: ranks - 1 };
+	const passives = { ...state.skills.passives, [passive]: ranks - 1 };
 	if (passives[passive] === 0) delete passives[passive];
-	return { state: { ...state, passives } };
+	return withSkills(state, { passives });
 }
 
 export function setBloodMagicPoints(state: PlannerState, points: number | null): Edit {
-	return {
-		state: { ...state, bloodMagicPoints: points === null ? null : Math.max(0, Math.floor(points)) }
-	};
+	return withSkills(state, {
+		bloodMagicPoints: points === null ? null : Math.max(0, Math.floor(points))
+	});
 }
 
-/** Puts a known skill on a hotbar slot, or empties the slot with null. */
+/** Puts a known skill on a skill bar slot, or empties the slot with null. */
 export function placeOnHotbar(state: PlannerState, slot: number, skill: string | null): Edit {
 	if (!Number.isInteger(slot) || slot < 0 || slot >= hotbarSlots)
 		return refuse(state, 'The skill bar has two rows of five slots.');
-	if (skill !== null && !state.skills.includes(skill) && !state.learned.includes(skill))
+	if (
+		skill !== null &&
+		!state.skills.unlocked.includes(skill) &&
+		!state.skills.learned.includes(skill)
+	)
 		return refuse(state, 'Only an unlocked or learned skill goes on the skill bar.');
-	const hotbar = state.hotbar.map((entry, index) =>
+	const main = state.skillBars.main.map((entry, index) =>
 		index === slot ? skill : entry === skill && skill !== null ? null : entry
 	);
-	return { state: { ...state, hotbar } };
+	return { state: { ...state, skillBars: { ...state.skillBars, main } } };
 }

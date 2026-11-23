@@ -15,12 +15,12 @@ export function buildText(
 	skillUrl: (slug: string) => string
 ): string {
 	const skills = new Map(data.skills.map((skill) => [skill.key, skill]));
-	const raised = attributes.filter((attribute) => state.attributes[attribute] > 1);
+	const raised = attributes.filter((attribute) => state.attributes.points[attribute] > 1);
 	const disciplines = data.disciplines
-		.map((discipline) => [discipline.name, state.disciplines[discipline.key] ?? 1] as const)
+		.map((discipline) => [discipline.name, state.skills.disciplines[discipline.key] ?? 1] as const)
 		.filter(([, level]) => level > 1)
 		.sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'en'));
-	const bar = state.hotbar.flatMap((key, slot) => {
+	const bar = state.skillBars.main.flatMap((key, slot) => {
 		if (key === null) return [];
 		const skill = skills.get(key);
 		return [
@@ -31,10 +31,10 @@ export function buildText(
 	});
 	return [
 		`The Bloodline build, game build ${state.build}`,
-		`Level ${state.level}`,
+		`Level ${state.attributes.level}`,
 		raised.length
 			? 'Attributes: ' +
-				raised.map((attribute) => `${attribute} ${state.attributes[attribute]}`).join(', ')
+				raised.map((attribute) => `${attribute} ${state.attributes.points[attribute]}`).join(', ')
 			: 'Attributes: all at 1',
 		disciplines.length
 			? 'Disciplines: ' + disciplines.map(([name, level]) => `${name} ${level}`).join(', ')

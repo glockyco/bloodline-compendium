@@ -38,7 +38,7 @@ export interface Evaluation {
 
 /** A discipline's planned level, 1 unless the build sets another. */
 export function levelOf(state: PlannerState, discipline: string): number {
-	return state.disciplines[discipline] ?? 1;
+	return state.skills.disciplines[discipline] ?? 1;
 }
 
 function balance(earned: number | null, spent: number): Balance {
@@ -59,19 +59,22 @@ export function evaluate(state: PlannerState, data: PlannerData): Evaluation {
 	);
 	const learnable = new Set(data.skills.filter((skill) => skill.learned).map((skill) => skill.key));
 
-	const gainedLevels = state.level - 1;
+	const gainedLevels = state.attributes.level - 1;
 	const known = (earned: number, spent: number): KnownBalance => ({
 		earned,
 		spent,
 		remaining: earned - spent
 	});
-	const skillPoints = known(gainedLevels * characterLevelGrant.skillPoints, state.skills.length);
+	const skillPoints = known(
+		gainedLevels * characterLevelGrant.skillPoints,
+		state.skills.unlocked.length
+	);
 	const levelUpPoints = known(
 		gainedLevels * characterLevelGrant.levelUpPoints,
-		attributes.reduce((sum, attribute) => sum + (state.attributes[attribute] - 1), 0)
+		attributes.reduce((sum, attribute) => sum + (state.attributes.points[attribute] - 1), 0)
 	);
 
-	for (const skill of state.skills) {
+	for (const skill of state.skills.unlocked) {
 		const slot = slots.get(skill);
 		if (!slot) diagnostics.push({ kind: 'unresolved', entry: skill });
 		else if (levelOf(state, slot.levelDiscipline) < slot.requiredLevel)
@@ -82,12 +85,12 @@ export function evaluate(state: PlannerState, data: PlannerData): Evaluation {
 				needs: slot.requiredLevel
 			});
 	}
-	for (const skill of state.learned)
+	for (const skill of state.skills.learned)
 		if (!learnable.has(skill)) diagnostics.push({ kind: 'unresolved', entry: skill });
 
 	const proficiency: Record<string, Balance> = {};
 	const spent = new Map<string, number>();
-	for (const [key, ranks] of Object.entries(state.passives)) {
+	for (const [key, ranks] of Object.entries(state.skills.passives)) {
 		const owner = data.disciplines.find((discipline) =>
 			discipline.passives.some((passive) => passive.key === key)
 		);
@@ -116,7 +119,7 @@ export function evaluate(state: PlannerState, data: PlannerData): Evaluation {
 		const level = levelOf(state, discipline.key);
 		// Blood Magic's points follow the Blood Levels setting rather than its level, so the reader enters them.
 		let earned: number | null = proficiencyPointsPerLevel(discipline.levelName, 1).setByBloodLevels
-			? state.bloodMagicPoints
+			? state.skills.bloodMagicPoints
 			: 0;
 		for (let from = 1; from < level && earned !== null; from++) {
 			const points = proficiencyPointsPerLevel(discipline.levelName, from);
@@ -136,17 +139,21 @@ export function evaluate(state: PlannerState, data: PlannerData): Evaluation {
 		if (points.remaining !== null && points.remaining < 0)
 			diagnostics.push({ kind: 'overspent', balance: name, by: -points.remaining });
 
-	const effects = attributeEffects(state.attributes);
+	const effects = attributeEffects(state.attributes.points);
 	if (!effects.known)
 		for (const attribute of effects.missing)
 			diagnostics.push({
 				kind: 'attribute',
 				attribute,
-				level: state.attributes[attribute as keyof typeof state.attributes]
+				level: state.attributes.points[attribute as keyof typeof state.attributes.points]
 			});
 
-	state.hotbar.forEach((skill, slot) => {
-		if (skill !== null && !state.skills.includes(skill) && !state.learned.includes(skill))
+	state.skillBars.main.forEach((skill, slot) => {
+		if (
+			skill !== null &&
+			!state.skills.unlocked.includes(skill) &&
+			!state.skills.learned.includes(skill)
+		)
 			diagnostics.push({ kind: 'hotbar', entry: skill, slot });
 	});
 

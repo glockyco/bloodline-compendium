@@ -29,7 +29,12 @@ const data: PlannerData = {
 
 describe('build text', () => {
 	it('lists the skill bar in order with each page, then the build link', () => {
-		let state: PlannerState = { ...newCharacter(data), level: 12, disciplines: { Fire: 9 } };
+		const fresh = newCharacter(data);
+		let state: PlannerState = {
+			...fresh,
+			attributes: { ...fresh.attributes, level: 12 },
+			skills: { ...fresh.skills, disciplines: { Fire: 9 } }
+		};
 		for (const [slot, skill] of [
 			[4, 'Spark'],
 			[0, 'Ember'],

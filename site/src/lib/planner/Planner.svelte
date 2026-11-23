@@ -125,7 +125,7 @@
 
 	// The planner opens on the discipline the character has the highest level in, the one it plans most.
 	function showLeading() {
-		const [leading] = Object.entries(plan.disciplines).sort((a, b) => b[1] - a[1]);
+		const [leading] = Object.entries(plan.skills.disciplines).sort((a, b) => b[1] - a[1]);
 		if (leading && data.disciplines.some((entry) => entry.key === leading[0])) chosen = leading[0];
 	}
 
@@ -250,7 +250,7 @@
 				><span class="field-label">Character Level</span><input
 					type="number"
 					min="1"
-					value={plan.level}
+					value={plan.attributes.level}
 					onchange={(event) => apply(setLevel(plan, Number(event.currentTarget.value)))}
 				/></label
 			>
@@ -265,7 +265,7 @@
 					><span class="field-label">Blood Magic Points</span><input
 						type="number"
 						min="0"
-						value={plan.bloodMagicPoints ?? ''}
+						value={plan.skills.bloodMagicPoints ?? ''}
 						onchange={(event) =>
 							apply(
 								setBloodMagicPoints(
@@ -283,7 +283,7 @@
 		</Section>
 		<Section id="attributes" title="Attributes">
 			<AttributePanel
-				levels={plan.attributes}
+				levels={plan.attributes.points}
 				{evaluation}
 				change={(attribute: Attribute, level: number) =>
 					apply(setAttribute(plan, attribute, level))}
@@ -318,8 +318,8 @@
 				><span class="field-label">Discipline</span><select bind:value={chosen}
 					>{#each [...categories] as [category, entries] (category)}<optgroup label={category}
 							>{#each entries as entry (entry.key)}<option value={entry.key}
-									>{entry.name}{(plan.disciplines[entry.key] ?? 1) > 1
-										? ` (level ${plan.disciplines[entry.key]})`
+									>{entry.name}{(plan.skills.disciplines[entry.key] ?? 1) > 1
+										? ` (level ${plan.skills.disciplines[entry.key]})`
 										: ''}</option
 								>{/each}</optgroup
 						>{/each}</select
@@ -347,10 +347,10 @@
 						<label class="check"
 							><input
 								type="checkbox"
-								checked={plan.learned.includes(skill.key)}
+								checked={plan.skills.learned.includes(skill.key)}
 								onchange={(event) => {
 									apply(toggleLearned(plan, data, skill.key));
-									event.currentTarget.checked = plan.learned.includes(skill.key);
+									event.currentTarget.checked = plan.skills.learned.includes(skill.key);
 								}}
 							/><span data-game>{skill.name}</span></label
 						>

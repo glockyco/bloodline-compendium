@@ -69,8 +69,8 @@
 	// An entry that checks another discipline's level names it, as the discipline page does.
 	const needs = (required: number, checked: string) =>
 		`Unlocks at ${names.get(checked) ?? 'another discipline'} level ${formatNumber(required)}`;
-	const unlocked = (key: string) => state.skills.includes(key);
-	const ranksOf = (key: string) => state.passives[key] ?? 0;
+	const unlocked = (key: string) => state.skills.unlocked.includes(key);
+	const ranksOf = (key: string) => state.skills.passives[key] ?? 0;
 </script>
 
 <div class="tree">

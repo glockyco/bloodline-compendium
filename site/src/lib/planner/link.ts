@@ -45,37 +45,51 @@ export function digestIndex(data: PlannerData): Map<string, string> {
 	return index;
 }
 
-/** The compact form a link carries, with keys as digests and defaults left out. */
+/**
+ * The compact form a link carries, with keys as digests and defaults left out. Each section of the state is one member,
+ * and a member this planner does not know, written by a later planner, is kept in `later` and written back unchanged.
+ */
 interface Compact {
 	b: number;
-	l: number;
-	d?: [string, number][];
-	a: number[];
-	s?: string[];
-	k?: string[];
-	p?: [string, number][];
-	m?: number;
-	h?: (string | 0)[];
+	/** Attributes: the character level and each attribute's points, in the order of `attributes`. */
+	a: { l: number; p: number[] };
+	/** Skills: discipline levels, unlocked and learned skills, passive ranks and Blood Magic points. */
+	s?: {
+		d?: [string, number][];
+		u?: string[];
+		k?: string[];
+		p?: [string, number][];
+		m?: number;
+	};
+	/** Skill Bars: the main bar's ten slots, 0 for an empty one. */
+	r?: { m?: (string | 0)[] };
 }
+
+const knownSections = new Set(['b', 'a', 's', 'r']);
 
 const short = (key: string) =>
 	key.startsWith(unresolvedPrefix) ? key.slice(unresolvedPrefix.length) : digest(key);
 
-function compact(state: PlannerState): Compact {
-	const result: Compact = {
+function compact(state: PlannerState): Compact & Record<string, unknown> {
+	const result: Compact & Record<string, unknown> = {
+		...state.later,
 		b: state.build,
-		l: state.level,
-		a: attributes.map((attribute) => state.attributes[attribute])
+		a: {
+			l: state.attributes.level,
+			p: attributes.map((attribute) => state.attributes.points[attribute])
+		}
 	};
-	const disciplines = Object.entries(state.disciplines).filter(([, level]) => level !== 1);
-	if (disciplines.length) result.d = disciplines.map(([key, level]) => [short(key), level]);
-	if (state.skills.length) result.s = state.skills.map(short);
-	if (state.learned.length) result.k = state.learned.map(short);
-	const passives = Object.entries(state.passives).filter(([, ranks]) => ranks > 0);
-	if (passives.length) result.p = passives.map(([key, ranks]) => [short(key), ranks]);
-	if (state.bloodMagicPoints !== null) result.m = state.bloodMagicPoints;
-	if (state.hotbar.some((slot) => slot !== null))
-		result.h = state.hotbar.map((slot) => (slot === null ? 0 : short(slot)));
+	const skills: NonNullable<Compact['s']> = {};
+	const disciplines = Object.entries(state.skills.disciplines).filter(([, level]) => level !== 1);
+	if (disciplines.length) skills.d = disciplines.map(([key, level]) => [short(key), level]);
+	if (state.skills.unlocked.length) skills.u = state.skills.unlocked.map(short);
+	if (state.skills.learned.length) skills.k = state.skills.learned.map(short);
+	const passives = Object.entries(state.skills.passives).filter(([, ranks]) => ranks > 0);
+	if (passives.length) skills.p = passives.map(([key, ranks]) => [short(key), ranks]);
+	if (state.skills.bloodMagicPoints !== null) skills.m = state.skills.bloodMagicPoints;
+	if (Object.keys(skills).length) result.s = skills;
+	if (state.skillBars.main.some((slot) => slot !== null))
+		result.r = { m: state.skillBars.main.map((slot) => (slot === null ? 0 : short(slot))) };
 	return result;
 }
 
@@ -179,24 +193,30 @@ export async function decodeBuild(
 		if (error instanceof LinkError) throw error;
 		throw new LinkError('malformed', 'The link is not a build.');
 	}
-	const c = parsed as Partial<Compact>;
+	const c = parsed as Partial<Compact> & Record<string, unknown>;
+	const isObject = (value: unknown): value is Record<string, unknown> =>
+		typeof value === 'object' && value !== null && !Array.isArray(value);
+	const skills = c.s ?? {};
+	const bars = c.r ?? {};
 	if (
-		typeof parsed !== 'object' ||
-		parsed === null ||
+		!isObject(parsed) ||
 		!isCount(c.b) ||
-		!isCount(c.l, 1) ||
-		!Array.isArray(c.a) ||
-		c.a.length !== attributes.length ||
-		!c.a.every((level) => isCount(level, 1)) ||
-		(c.d !== undefined && !isPairs(c.d)) ||
-		(c.p !== undefined && !isPairs(c.p)) ||
-		(c.s !== undefined && !isDigests(c.s)) ||
-		(c.k !== undefined && !isDigests(c.k)) ||
-		(c.m !== undefined && !isCount(c.m)) ||
-		(c.h !== undefined &&
-			(!Array.isArray(c.h) ||
-				c.h.length !== hotbarSlots ||
-				!c.h.every((slot) => slot === 0 || typeof slot === 'string')))
+		!isObject(c.a) ||
+		!isCount(c.a.l, 1) ||
+		!Array.isArray(c.a.p) ||
+		c.a.p.length !== attributes.length ||
+		!c.a.p.every((level) => isCount(level, 1)) ||
+		!isObject(skills) ||
+		(skills.d !== undefined && !isPairs(skills.d)) ||
+		(skills.p !== undefined && !isPairs(skills.p)) ||
+		(skills.u !== undefined && !isDigests(skills.u)) ||
+		(skills.k !== undefined && !isDigests(skills.k)) ||
+		(skills.m !== undefined && !isCount(skills.m)) ||
+		!isObject(bars) ||
+		(bars.m !== undefined &&
+			(!Array.isArray(bars.m) ||
+				bars.m.length !== hotbarSlots ||
+				!bars.m.every((slot) => slot === 0 || typeof slot === 'string')))
 	)
 		throw new LinkError('malformed', 'The link is not a build.');
 	const index = digestIndex(data);
@@ -207,18 +227,30 @@ export async function decodeBuild(
 		unresolved.push(short);
 		return unresolvedPrefix + short;
 	};
+	const points = c.a.p;
 	const state: PlannerState = {
 		build: c.b,
-		level: c.l,
-		disciplines: Object.fromEntries((c.d ?? []).map(([short, level]) => [key(short), level])),
-		attributes: Object.fromEntries(
-			attributes.map((attribute, position) => [attribute, c.a![position]])
-		) as PlannerState['attributes'],
-		skills: (c.s ?? []).map(key),
-		learned: (c.k ?? []).map(key),
-		passives: Object.fromEntries((c.p ?? []).map(([short, ranks]) => [key(short), ranks])),
-		bloodMagicPoints: c.m ?? null,
-		hotbar: c.h ? c.h.map((slot) => (slot === 0 ? null : key(slot))) : Array(hotbarSlots).fill(null)
+		attributes: {
+			level: c.a.l,
+			points: Object.fromEntries(
+				attributes.map((attribute, position) => [attribute, points[position]])
+			) as PlannerState['attributes']['points']
+		},
+		skills: {
+			disciplines: Object.fromEntries(
+				(skills.d ?? []).map(([short, level]) => [key(short), level])
+			),
+			unlocked: (skills.u ?? []).map(key),
+			learned: (skills.k ?? []).map(key),
+			passives: Object.fromEntries((skills.p ?? []).map(([short, ranks]) => [key(short), ranks])),
+			bloodMagicPoints: skills.m ?? null
+		},
+		skillBars: {
+			main: bars.m
+				? bars.m.map((slot) => (slot === 0 ? null : key(slot)))
+				: Array(hotbarSlots).fill(null)
+		},
+		later: Object.fromEntries(Object.entries(c).filter(([name]) => !knownSections.has(name)))
 	};
 	return { state, unresolved: [...new Set(unresolved)] };
 }

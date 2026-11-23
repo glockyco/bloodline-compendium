@@ -18,7 +18,7 @@
 	} = $props();
 	const skills = $derived(new Map(data.skills.map((skill) => [skill.key, skill])));
 	const known = $derived(
-		[...new Set([...plan.skills, ...plan.learned])]
+		[...new Set([...plan.skills.unlocked, ...plan.skills.learned])]
 			.map((key) => ({
 				key,
 				name: skills.get(key)?.name ?? 'A skill this game version lacks',
@@ -50,12 +50,14 @@
 <div class="bar">
 	{#each [0, 1] as row (row)}<div class="row" role="group" aria-label="Row {row + 1}">
 			{#each Array.from({ length: perRow }, (_, index) => row * perRow + index) as slot (slot)}
-				{@const skill = plan.hotbar[slot] ? skills.get(plan.hotbar[slot]!) : undefined}<button
+				{@const skill = plan.skillBars.main[slot]
+					? skills.get(plan.skillBars.main[slot]!)
+					: undefined}<button
 					type="button"
 					class="slot"
 					class:open={open === slot}
 					bind:this={slotButtons[slot]}
-					aria-label="{label(slot)}: {plan.hotbar[slot]
+					aria-label="{label(slot)}: {plan.skillBars.main[slot]
 						? (skill?.name ?? 'a skill this game version lacks')
 						: 'empty'}"
 					aria-expanded={open === slot}
@@ -68,7 +70,7 @@
 							height="24"
 							loading="lazy"
 						/>{/if}<span class="name" data-game={skill ? true : undefined}
-						>{plan.hotbar[slot] ? (skill?.name ?? 'Unknown skill') : 'Empty'}</span
+						>{plan.skillBars.main[slot] ? (skill?.name ?? 'Unknown skill') : 'Empty'}</span
 					></button
 				>{/each}
 		</div>{/each}
@@ -81,7 +83,7 @@
 		>
 			{#each known as entry (entry.key)}<button
 					type="button"
-					aria-pressed={plan.hotbar[open] === entry.key}
+					aria-pressed={plan.skillBars.main[open] === entry.key}
 					onkeydown={escape}
 					onclick={() => {
 						place(open!, entry.key);
@@ -95,7 +97,7 @@
 							loading="lazy"
 						/>{/if}<span data-game>{entry.name}</span></button
 				>{/each}
-			{#if plan.hotbar[open]}<button
+			{#if plan.skillBars.main[open]}<button
 					type="button"
 					onkeydown={escape}
 					onclick={() => {

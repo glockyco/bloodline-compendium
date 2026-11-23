@@ -114,7 +114,7 @@ describe('planner', () => {
 		const state = apply((s) => setLevel(s, 5));
 		const result = toggleSkill(state, data, 'Blaze');
 		expect(result.refused).toBe('Needs Fire level 5.');
-		expect(result.state.skills).toEqual([]);
+		expect(result.state.skills.unlocked).toEqual([]);
 	});
 
 	it('refuses a rank beyond the last and changes no balance', () => {
@@ -156,7 +156,7 @@ describe('planner', () => {
 			(s) => setDisciplineLevel(s, fire, 3)
 		);
 		const result = evaluate(state, data);
-		expect(state.skills).toContain('Blaze');
+		expect(state.skills.unlocked).toContain('Blaze');
 		expect(result.diagnostics).toContainEqual({
 			kind: 'level',
 			entry: 'Blaze',
@@ -171,7 +171,7 @@ describe('planner', () => {
 			(s) => toggleLearned(s, data, 'Tome'),
 			(s) => placeOnHotbar(s, 2, 'Tome')
 		);
-		expect(state.hotbar[2]).toBe('Tome');
+		expect(state.skillBars.main[2]).toBe('Tome');
 		expect(evaluate(state, data).skillPoints.spent).toBe(0);
 		expect(placeOnHotbar(state, 3, 'Ember').refused).toBeDefined();
 	});
