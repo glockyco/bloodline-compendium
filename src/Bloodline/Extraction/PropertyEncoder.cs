@@ -36,16 +36,25 @@ internal sealed class PropertyEncoder(
                 or "MulticastInlineDelegateProperty"
                 or "MulticastSparseDelegateProperty";
 
-    public JsonObject Properties(IEnumerable<FPropertyTag> properties) =>
-        EncodeProperties(properties, null, null);
+    /// <summary>
+    /// Encodes an object's stored properties. <paramref name="removed"/> holds the keys its maps remove from their
+    /// archetype's, which mark each top-level map as a delta that <see cref="Records.RecordMerge"/> applies.
+    /// </summary>
+    public JsonObject Properties(
+        IEnumerable<FPropertyTag> properties,
+        IReadOnlyDictionary<(string Name, int Index), FPropertyTagType?[]>? removed = null
+    ) => EncodeProperties(properties, null, null, removed);
 
     public JsonObject Properties(
         IEnumerable<FPropertyTag> properties,
         IEnumerable<string> declaredNames
-    ) => EncodeProperties(properties, declaredNames, null);
+    ) => EncodeProperties(properties, declaredNames, null, null);
 
-    public JsonObject Properties(IEnumerable<FPropertyTag> properties, UStruct declaration) =>
-        EncodeProperties(properties, null, declaration);
+    public JsonObject Properties(
+        IEnumerable<FPropertyTag> properties,
+        UStruct declaration,
+        IReadOnlyDictionary<(string Name, int Index), FPropertyTagType?[]>? removed = null
+    ) => EncodeProperties(properties, null, declaration, removed);
 
     public JsonNode? Value(FPropertyTagType? value, FPropertyTagData? metadata = null) =>
         EncodeValue(value, metadata, null, false);
@@ -75,7 +84,7 @@ internal sealed class PropertyEncoder(
             }
             return RecordMerge.OverlayProperties(
                 result,
-                EncodeProperties(defaults, names.Keys, declaration)
+                EncodeProperties(defaults, names.Keys, declaration, null)
             );
         }
         finally
@@ -202,7 +211,8 @@ internal sealed class PropertyEncoder(
     private JsonObject EncodeProperties(
         IEnumerable<FPropertyTag> properties,
         IEnumerable<string>? declaredNames,
-        UStruct? declaration
+        UStruct? declaration,
+        IReadOnlyDictionary<(string Name, int Index), FPropertyTagType?[]>? removed
     )
     {
         var stored = properties
@@ -238,24 +248,53 @@ internal sealed class PropertyEncoder(
                                 "StaticArrayElement",
                                 $"No stored value for {group.Key}[{index}]."
                             )
-                            : EncodeTag(element, field)
+                            : EncodeTag(element, field, removed)
                     );
                 }
                 result[names[group.Key]] = array;
             }
             else
             {
-                result[names[group.Key]] = EncodeTag(elements[0], field);
+                result[names[group.Key]] = EncodeTag(elements[0], field, removed);
             }
         }
         return result;
     }
 
-    private JsonNode? EncodeTag(FPropertyTag property, FProperty? declaration)
+    private JsonNode? EncodeTag(
+        FPropertyTag property,
+        FProperty? declaration,
+        IReadOnlyDictionary<(string Name, int Index), FPropertyTagType?[]>? removed
+    )
     {
         if (property.Tag is not null)
         {
-            return EncodeValue(property.Tag, property.TagData, declaration, false);
+            var encoded = EncodeValue(property.Tag, property.TagData, declaration, false);
+            // A top-level map is a delta of its archetype's map, so its removed keys travel with its entries.
+            if (
+                removed is not null
+                && encoded is JsonObject map
+                && map.ContainsKey(RecordFormat.Map)
+            )
+            {
+                var keys = new JsonArray();
+                foreach (
+                    var key in removed.GetValueOrDefault((property.Name.Text, property.ArrayIndex))
+                        ?? []
+                )
+                {
+                    keys.Add(
+                        EncodeValue(
+                            key,
+                            property.TagData?.InnerTypeData,
+                            (declaration as FMapProperty)?.KeyProp,
+                            true
+                        )
+                    );
+                }
+                map[RecordFormat.RemovedKeys] = keys;
+            }
+            return encoded;
         }
         if (HasParser(property.PropertyType.Text))
         {
@@ -443,7 +482,7 @@ internal sealed class PropertyEncoder(
             case null:
                 return null;
             case FStructFallback fallback:
-                return EncodeProperties(fallback.Properties, null, declaration);
+                return EncodeProperties(fallback.Properties, null, declaration, null);
             case FScriptStruct structure:
                 return Native(structure.StructType, declaration);
             case FName name:

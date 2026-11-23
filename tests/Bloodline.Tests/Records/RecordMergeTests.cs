@@ -52,6 +52,46 @@ public sealed class RecordMergeTests
     }
 
     [Fact]
+    public void AppliesAMapDeltaAsUnrealLoadsIt()
+    {
+        // Unreal keeps the archetype's entries an object does not remove, replaces changed ones in place and appends new
+        // ones, as the Khenmoore and Snowy Cliffside spawner boxes hold their tables in play.
+        var merged = RecordMerge.OverlayProperties(
+            Parse("""{"Table": {"$map": [["Pine", 1], ["Birch", 1], ["Ash", 1]]}}"""),
+            Parse("""{"Table": {"$map": [["Ash", 0.5], ["Oak", 2]], "$remove": ["Pine"]}}""")
+        );
+
+        Assert.Equal(
+            [("Birch", 1d), ("Ash", 0.5), ("Oak", 2d)],
+            RecordValues
+                .MapEntries(merged["Table"])
+                .Select(entry =>
+                    (RecordValues.String(entry.Key)!, RecordValues.Number(entry.Value)!.Value)
+                )
+        );
+        Assert.False(merged["Table"]!.AsObject().ContainsKey("$remove"));
+    }
+
+    [Fact]
+    public void KeepsADeltaWithoutABaseForTheArchetypeBelowIt()
+    {
+        // A class's stored map is a delta of its parent's, which the class record merges after its own defaults.
+        var own = RecordMerge.OverlayProperties(
+            Parse("""{}"""),
+            Parse("""{"Table": {"$map": [["Oak", 2]], "$remove": ["Pine"]}}""")
+        );
+        var merged = RecordMerge.OverlayProperties(
+            Parse("""{"Table": {"$map": [["Pine", 1], ["Birch", 1]]}}"""),
+            own
+        );
+
+        Assert.Equal(
+            ["Birch", "Oak"],
+            RecordValues.MapEntries(merged["Table"]).Select(entry => RecordValues.String(entry.Key))
+        );
+    }
+
+    [Fact]
     public void ExplicitEmptyValuesOverrideTheBase()
     {
         var merged = RecordMerge.OverlayProperties(

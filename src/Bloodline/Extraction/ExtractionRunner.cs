@@ -24,6 +24,7 @@ internal sealed class ExtractionRunner
     private readonly DefaultFileProvider provider;
     private readonly GapCollector gaps;
     private readonly PropertyEncoder encoder;
+    private readonly MapDeltas deltas;
     private readonly CodeExtractor code;
     private readonly Dictionary<string, FAssetData> classes;
     private readonly Dictionary<string, FAssetData[]> types;
@@ -50,6 +51,7 @@ internal sealed class ExtractionRunner
             .ToDictionary(group => group.Key, group => group.ToArray(), StringComparer.Ordinal);
         ConfigureMapStructTypes(assets);
         encoder = new PropertyEncoder(resolveType: ResolveType);
+        deltas = new MapDeltas(provider);
     }
 
     public static void Run(LocalConfiguration configuration)
@@ -256,7 +258,14 @@ internal sealed class ExtractionRunner
             var properties = RecordMerge.OverlayProperties(
                 inherited,
                 DefaultChain.Merge([
-                    new DefaultLayer(zero, encoder.Properties(cdo.Properties, generated)),
+                    new DefaultLayer(
+                        zero,
+                        encoder.Properties(
+                            cdo.Properties,
+                            generated,
+                            deltas.For(package)(package.GetExportIndex(cdo.Name))
+                        )
+                    ),
                 ])
             );
             var widget = asset.AssetClass.Text == "WidgetBlueprint";
@@ -333,6 +342,7 @@ internal sealed class ExtractionRunner
     {
         var generatedName = path.Split('.')[^1];
         var widgets = new List<WidgetRecord>();
+        var removed = deltas.For(package);
         for (var i = 0; i < package.ExportsLazy.Length; i++)
         {
             var info = package.ResolvePackageIndex(new FPackageIndex(package, i + 1));
@@ -357,8 +367,8 @@ internal sealed class ExtractionRunner
                     {
                         var widget = package.ExportsLazy[i].Value;
                         var values = widget.Class?.Load() is UStruct declaration
-                            ? encoder.Properties(widget.Properties, declaration)
-                            : encoder.Properties(widget.Properties);
+                            ? encoder.Properties(widget.Properties, declaration, removed(i))
+                            : encoder.Properties(widget.Properties, removed(i));
                         // A widget's slot names the panel that holds it, and the panel's slot list gives its order.
                         var slot = widget
                             .GetOrDefault<FPackageIndex?>("Slot")
@@ -477,6 +487,7 @@ internal sealed class ExtractionRunner
             }
         }
         var actors = new List<ActorRecord>();
+        var removed = deltas.For(package);
         for (var i = 0; i < package.ExportsLazy.Length; i++)
         {
             var info = package.ResolvePackageIndex(new FPackageIndex(package, i + 1));
@@ -503,7 +514,7 @@ internal sealed class ExtractionRunner
                             classPath,
                             DefaultChain.Placement(
                                 defaults,
-                                encoder.Properties(actor.Properties, declaration)
+                                encoder.Properties(actor.Properties, declaration, removed(i))
                             )
                         );
                     },
@@ -519,6 +530,7 @@ internal sealed class ExtractionRunner
     {
         var dialogue = package.GetExport(asset.AssetName.Text);
         var objects = new List<InnerObjectRecord>();
+        var removed = deltas.For(package);
         for (var i = 0; i < package.ExportsLazy.Length; i++)
         {
             var info = package.ResolvePackageIndex(new FPackageIndex(package, i + 1));
@@ -548,8 +560,8 @@ internal sealed class ExtractionRunner
                             DefaultChain.Placement(
                                 defaults,
                                 inner.Class?.Load() is UStruct declaration
-                                    ? encoder.Properties(inner.Properties, declaration)
-                                    : encoder.Properties(inner.Properties)
+                                    ? encoder.Properties(inner.Properties, declaration, removed(i))
+                                    : encoder.Properties(inner.Properties, removed(i))
                             )
                         );
                     },

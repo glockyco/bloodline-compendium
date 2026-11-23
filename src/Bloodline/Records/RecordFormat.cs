@@ -20,7 +20,9 @@ namespace Bloodline.Records;
 /// pattern, with a percent suffix or ISO currency prefix where appropriate, and retain their
 /// <c>history</c> and authored options. Dates and times display their stored ticks in invariant ISO form,
 /// with time zone and style metadata retained instead of applying machine-local settings.</item>
-/// <item><c>{"$map": [[key, value], ...]}</c> is a map, with entries in stored order.</item>
+/// <item><c>{"$map": [[key, value], ...]}</c> is a map, with entries in stored order. A top-level map that an object
+/// stores over its archetype's also has <c>"$remove": [key, ...]</c>: the object's map is the archetype's without
+/// those keys, with the entries added or replaced, which <see cref="RecordMerge"/> applies.</item>
 /// <item><c>{"$unsupported": "PropertyType"}</c> is a property type that the encoder does not handle.</item>
 /// </list>
 /// Struct field names drop the <c>_N_GUID</c> suffix that user-defined structs add, unless two fields of one
@@ -41,6 +43,7 @@ internal static class RecordFormat
     public const string TextFormat = "format";
     public const string TextArguments = "arguments";
     public const string Map = "$map";
+    public const string RemovedKeys = "$remove";
     public const string Unsupported = "$unsupported";
 
     /// <summary>Whether a key is a tag key, which no struct field name starts with.</summary>
