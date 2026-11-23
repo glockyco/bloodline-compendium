@@ -29,8 +29,8 @@
 
 ## 5. Ship
 
-- [ ] 5.1 Run the full check suite and the real-data build
-- [ ] 5.2 Review the planner and the cued pages on real data at 1440 and 390 px and record the review in the commit bodies
-- [ ] 5.3 Update the README for the planner and rule checks
+- [x] 5.1 Run the full check suite and the real-data build
+- [x] 5.2 Review the planner and the cued pages on real data at 1440 and 390 px and record the review in the commit bodies
+- [x] 5.3 Update the README for the planner and rule checks
 - [ ] 5.4 Push, wait for CI, deploy to staging and production, and pass the smoke checks
 - [ ] 5.5 Validate, archive and sync the specs
