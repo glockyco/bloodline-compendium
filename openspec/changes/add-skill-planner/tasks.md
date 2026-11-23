@@ -21,6 +21,9 @@
 
 - [ ] 4.1 Compare the planner layout, attribute panel, hotbar, cues and text format in Plannotator
 - [ ] 4.2 Build the planner route reusing the discipline rows, with keyboard use and both widths
+- [ ] 4.5 Restructure the state, the store and the link into sections, with unknown sections kept on decode
+- [ ] 4.6 Build the summary column and section tabs with their own addresses, and the side-by-side discipline view
+- [ ] 4.7 Observe in the lab when the game shows the off-hand skill bar, and add it to the Skill Bars section if players use it
 - [ ] 4.3 Add active-character cues to discipline and skill pages
 - [ ] 4.4 Add fixtures and browser tests for editing, invalid choices, links, text, characters and cues
 

@@ -39,9 +39,11 @@ Builds are shared as prose with the attribute split, the disciplines, and the ho
 
 ## Decisions
 
-### One state, one evaluator
+### A character planner built from sections
 
-The planner keeps one typed state: game build, character level, discipline levels, attribute points, unlocked skills, passive ranks and hotbar slots, each keyed by catalog key. One evaluator in `site/src/lib/planner/` runs the rules over the state and returns balances, derived values and diagnostics. The editor, link, text and page cues read its result and never compute themselves.
+The planner is the first part of a character planner. A character is one typed state made of sections: Attributes (character level and attribute points), Skills (discipline levels, unlocked and learned skills, passive ranks, Blood Magic points) and Skill Bars. Later changes add Equipment, the Item Bar, crafted armor and weapons, companion and mount, and Effects as further sections, so a section never reshapes another. Each section is keyed by catalog keys and validates on its own.
+
+One evaluator in `site/src/lib/planner/` runs the rules over the whole state and returns balances, totals and diagnostics. Each section adds its part to the same totals, such as health, mana and stamina, so later sections such as equipment add armor and speed without a second calculation. The editor, link, text and page cues read its result and never compute themselves.
 
 Rules for character level grants, attribute effects and regeneration join `site/src/lib/rules/` with worded steps, citations and recorded vectors, and `rules:check` compares them with the recorded runs. Attribute effects are published only within the measured range, and the lab measures a high point count before the planner allows it.
 
@@ -63,7 +65,7 @@ Lowering a level or removing points keeps the choices that no longer fit, marks 
 
 ### Build links
 
-A build travels as `/planner/?build=v1.<data>`, where the data is the state as compact JSON, compressed with raw deflate and written in base64url. Entities are written as short digests of their keys, and publication fails when two keys share a digest. The decoder limits the encoded and expanded sizes, rejects unknown versions and malformed data, and keeps keys missing from the current catalog as unresolved entries without substituting others. A whole link stays within 1,500 characters, inside Discord's 2,000-character message limit with room for a comment.
+A build travels as `/planner/?build=v1.<data>`, where the data is the state as compact JSON with one member per section, compressed with raw deflate and written in base64url. A decoder reads the sections it knows and keeps unknown ones, so a link made after a later section joins still opens its known parts, and an old link opens with the new section empty. Entities are written as short digests of their keys, and publication fails when two keys share a digest. The decoder limits the encoded and expanded sizes, rejects unknown versions and malformed data, and keeps keys missing from the current catalog as unresolved entries without substituting others. A whole link stays within 1,500 characters, inside Discord's 2,000-character message limit with room for a comment.
 
 The query is used rather than the fragment because a server receives it, so per-build previews can be added later without changing links. The static site serves the planner for any query, so no request-time code is needed now.
 
@@ -79,7 +81,7 @@ Discipline and skill pages show cues for the active character, such as its level
 
 ### Presentation
 
-The planner's layout, the attribute panel, the hotbar, cues and the text format go through Plannotator comparisons before they ship. The tree panels reuse the discipline page's rows, so a reader plans in the layout the game shows.
+A summary column stays in view with the character's name and level, the points left, the totals and the rules the build breaks, and with saving and sharing. Beside it, each section is a tab with its own address, such as `#skills`, so a link can open a tab. On a phone the summary becomes a bar at the top that opens. In the Skills tab a discipline shows its skills and its passives side by side, as the game's tree window does, both in rows by the level that unlocks each. A phone switches between the two with buttons at the top of the discipline. The tree panels reuse the discipline page's rows. Texts and visible choices go through Plannotator comparisons before they ship.
 
 ## Risks / Trade-offs
 
@@ -94,6 +96,8 @@ Build after `add-skill-reference` ships. No existing planner, store or link form
 ## Open Questions
 
 - What the level up window's Strength, Intelligence and Dexterity EXP bonuses apply to. The planner shows them as the window does until a run measures one.
+- When the game shows its second skill bar set, which it saves as Offhand Skill 1 to 10 and fills through `OffhandSpellSLots`. A lab run that equips one-handed weapons and spells would show whether the Skill Bars section needs a second bar.
+- How stat crystals and vampirism change a character, which decides how they join the planner. The 12 stat crystals stand only in the excluded `Overworld_working` level, and vampirism comes from an untreated disease.
 
 ## Where Findings Live
 

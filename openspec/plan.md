@@ -16,12 +16,13 @@ Every feature the compendium will grow, in the order it is built, with what each
 3. Disciplines, skills and the skill planner: `add-skill-reference`, then `add-skill-planner`.
    - The reference first moves the catalog and the site from items to kinds: one producer per kind, sources for any entity, and lists, pages, tooltips, claims and coverage that work across kinds. Item output stays unchanged through that move.
    - It then publishes the 21 disciplines with their trees laid out as the skill window shows them, every skill the game defines with where it comes from, and passives and spellsongs on their discipline's page.
-   - The planner covers what one level up and one tree window decide together: character and discipline levels, attributes with the health, stamina and mana they give, skills, passive ranks and the ten hotbar slots. Builds are shared as links that fit a Discord message and as text, and characters are kept in the browser.
+   - The planner is the first part of a character planner built from sections: a summary column that stays in view with the totals, points left and broken rules, and a tab per section with its own address. Step 3 ships the Attributes, Skills and Skill Bars sections, with a discipline's skills and passives side by side as the game's tree window shows them. Saved characters and shared links hold one part per section, so later sections join old links. Builds are shared as links that fit a Discord message and as text, and characters are kept in the browser.
+   - Gathering resources, such as Birch Tree and Coal Deposit, get pages with their loot, the harvests a spot gives, experience, the goblin ambush and their areas with how many spots each has and how likely they are. Item pages keep one short row per resource that links to its page.
 4. Crafting and equipment: `add-crafting-and-equipment`.
    - Smithing with weapon parts and quality, and a weapon builder.
    - Armorsmithing, runes, attunement and enchanting.
    - Crafting stations, cooking with ingredient treatments, farming and recipe learning.
-   - The planner's second part: equipment, crafted weapons, runes and enchantments with armor and mobility totals.
+   - The planner's next sections: Equipment with its 15 slots, crafted armor with runes, crafted weapons with enchantments, the Item Bar, and companion and mount, adding to the summary's totals.
 5. Places and people: towns, regions, dungeons and settlement buildings, and the merchants, trainers, quest givers and conversation partners in them.
    - Places also list what is placed in them for progression: the 34 skill books, the 11 spellsong note sheets, and the blood pool ritual sites and necromancer shrines that grant Blood Magic and Necromancy points. Skill and spellsong sources name these places as unlinked text until then.
    - The settlement Blacksmith's stock drawn from its item pool as an item source, with its chance per restock, verified by the Knight's Broadsword.
@@ -30,9 +31,10 @@ Every feature the compendium will grow, in the order it is built, with what each
 6. Creatures and loot, with drop tables and spawn odds.
    - No player skill from the skills table is referenced by an enemy, so creature abilities need their own reading.
    - The weapon each enemy sets as its rare drop on construction and the finds Fenraen digs up as item sources, verified by a Bandit Cutter's weapon drop.
-7. Quests, achievements and guilds with their ranks.
+7. Quests, achievements and guilds with their ranks, and the standing systems players ask about: settlement levels, buildings and income, guild ranks and what they unlock, town respect, crimes and bounties.
 8. The interactive map from level captures and placements, linked both ways with the pages of places, people, creatures and resources. Skill books, note sheets and point shrines are map markers.
 9. Mounts, companions, diseases, calendar events and the arena.
+   - The planner's Effects section: food and potion effects, crafted potions, and how stat crystals and vampirism change a character, once these pages explain how each works.
    - Vampirism as a disease grants Feed and opens the Vampirism tree's purpose, which the skill reference publishes without explaining.
    - Stables, contract scroll pools, seasonal gifts, archaeology rewards and level reward variables as item sources, verified by Brown Horse, Meteor Storm, Holly Harpoon, a fossil and Feral Maw.
    - Seasonal state from the reader's date, verified by a Hallowed Eve item in October and in March.
