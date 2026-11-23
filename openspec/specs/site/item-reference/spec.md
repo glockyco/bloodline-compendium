@@ -48,18 +48,25 @@ Tables of at most ten rows SHALL show all rows. Longer tables SHALL show eight r
 - THEN eight rows are visible and the remaining three are in a native disclosure in prerendered HTML
 
 ### Requirement: Search
-The site SHALL let readers find items by name from every page, without a server.
+The site SHALL let readers find every entity with a page by name from every page, without a server, with each result marked by its kind.
 
 #### Scenario: Searching by the start of a word
-- **WHEN** a reader types the beginning of a word in an item's name
-- **THEN** matching items are offered with links to their pages
+- **WHEN** a reader types the beginning of a word in an item's or a skill's name
+- **THEN** matching entities are offered with their kind and links to their pages
 
 ### Requirement: Build label
-Every page SHALL identify the reviewed game release and link to release information. The footer SHALL provide Items, Known Issues, About, wrong-fact reporting and Ko-fi links. The header SHALL keep search and support visible. The About page SHALL explain how the site is made, the release date, the distinct data-update date, what it does not list yet, patch notes and unofficial status.
+Every page SHALL identify the reviewed game release and link to release information. The About page SHALL explain how the site is made, the release date, the distinct data-update date, what it does not list yet, patch notes and unofficial status.
 
 #### Scenario: Reading release information
 - **WHEN** a reader opens About
 - **THEN** the page distinguishes the game release from the data update and links to the reviewed patch notes
+
+### Requirement: Site navigation
+The header SHALL link the lists of the kinds players browse most, Items, Disciplines, Skills and Professions, and SHALL keep search and support visible. The footer SHALL provide every kind's list, read from the kind registry, and Known Issues, About, wrong-fact reporting and Ko-fi links.
+
+#### Scenario: New kind in the footer
+- **WHEN** a kind with pages is registered
+- **THEN** the footer lists it without other changes to the layout
 
 ### Requirement: Publication provenance
 Each built site SHALL include a build information file naming the code commit and the Steam app ID, build ID and depot manifest IDs it was built from. The file SHALL NOT contain record data. A production build SHALL refuse a working tree with uncommitted changes.
@@ -80,11 +87,11 @@ The site SHALL be fully prerendered static files. The build SHALL fail when the 
 - **THEN** the build fails and reports the count by directory
 
 ### Requirement: Reference hub
-The home page SHALL say what a visitor can look up, provide search and category entry points, and show release information without repeating the complete item list.
+The home page SHALL say what a visitor can look up, provide search and an entry point for every kind with pages, and show release information without repeating any complete list.
 
 #### Scenario: Starting a lookup
 - **WHEN** a reader opens the home page
-- **THEN** search and category links offer direct routes to the items
+- **THEN** search and links to the item, discipline and skill lists offer direct routes
 
 ### Requirement: Discoverable factual pages
 Each indexable page SHALL have a unique factual title and description, canonical URL and appropriate social metadata. Structured data SHALL include WebSite without SearchAction and BreadcrumbList matching visible breadcrumbs. About SHALL be visible and included in the sitemap. Wiki MAY be used as a descriptive search term but SHALL NOT replace the site name or imply official status.
