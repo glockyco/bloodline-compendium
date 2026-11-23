@@ -7,6 +7,7 @@
 - Requirements live in `openspec/specs/`, planned work in `openspec/changes/`. A change's `design.md` records why it chose its approach.
 - Fix incorrect facts at their producer rather than compensating in a page, so every consumer receives the same correction.
 - Add regression tests for observable behavior rather than implementation details, so refactoring does not invalidate the contract.
-- Inspect changed interfaces in a browser with real data at desktop and phone widths. Invented fixtures exercise edge cases but do not prove that the game data reads correctly.
+- Inspect changed interfaces in a browser with real data at desktop and phone widths. Invented fixtures exercise edge cases but do not prove that the game data reads correctly. Then have the `visual-review` agent compare the changed pages with their siblings before showing them, because an author judges its own pages too kindly.
+- Have the `comparison-check` agent check a comparison file before it opens in Plannotator.
 - Keep each fact at its producer and link to its contract instead of duplicating it across pages or instructions.
 - Write each finding, decision and piece of open work to its home before a session ends, as the "Where findings live" section of the active architecture change's `design.md` lists, because session history is not a record.
