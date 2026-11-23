@@ -7,11 +7,15 @@ Shows disciplines, skills, passives and spellsongs to players the way the game's
 ## ADDED Requirements
 
 ### Requirement: Discipline pages read as tree windows
-Each discipline SHALL have a page that shows its skills in rows by required discipline level and its passives in rows by required proficiency level, in the game's order, with each row's level as its label. Lute SHALL show its spellsongs where the game shows them. On phones the two panels SHALL stack with skills first.
+Each discipline SHALL have a page that shows its skills and its passives in rows by the level that unlocks each, in the game's order, with each row headed by its level, such as "Level 5". Lute SHALL show its spellsongs where the game shows them. On phones the two panels SHALL stack with skills first.
 
 #### Scenario: Finding a skill by level
 - **WHEN** a reader opens Pyromancy
 - **THEN** each row names its Pyromancy level and holds that level's skills as linked icons
+
+#### Scenario: Passive in a row with a different label
+- **WHEN** a passive requires a lower level than the row the skill window shows it in
+- **THEN** the page lists it under the level it requires
 
 ### Requirement: Discipline facts
 A discipline page SHALL state its category, the proficiency points one level grants, and any known issue that affects it in its Bugs section.
