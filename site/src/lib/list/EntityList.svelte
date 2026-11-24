@@ -373,9 +373,11 @@
 										class:short={(cellText(item, column.id) + unit).length <= 16}
 										class:absent={!item.cells[column.id]}
 										data-label={cellText(item, column.id) ? column.label : undefined}
-										>{cellText(item, column.id) || 'None'}{#if unit}<span class="cell-unit"
-												>{unit}</span
-											>{/if}</td
+										><span
+											>{cellText(item, column.id) || 'None'}{#if unit}<span class="cell-unit"
+													>{unit}</span
+												>{/if}</span
+										></td
 									>{/each}
 								{#each trailing as column (column.id)}<td
 										class="trail"
@@ -996,11 +998,11 @@
 		tbody {
 			display: block;
 		}
-		/* The name spans the row, the type and value share the next line at its two edges, and labelled stats
-		   follow in two columns, so values line up from row to row. */
+		/* The name spans the row with the type under it, and every stat and the value follow one to a line, label
+		   left and value right, as relation tables read on phones, so each row reads the same way. */
 		tbody tr {
 			display: grid;
-			grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+			grid-template-columns: auto minmax(0, 1fr);
 			align-items: baseline;
 			gap: var(--gap-line) var(--gap-block);
 			padding: var(--inset-cell) var(--inset);
@@ -1009,31 +1011,27 @@
 			border-top: var(--border-width) solid var(--border);
 		}
 		tbody td {
+			grid-column: 1 / -1;
 			padding: 0;
 			border: 0;
 		}
 		tbody td.name {
-			grid-column: 1 / -1;
 			min-width: 0;
 		}
 		tbody td.lead {
-			grid-row: 2;
-			grid-column: 1;
+			padding-left: var(--inset-note);
 			color: var(--text-muted);
 		}
-		tbody td.trail {
-			grid-row: 2;
-			grid-column: 2;
+		tbody td:not(.name, .lead) {
+			display: grid;
+			grid-template-columns: subgrid;
+			align-items: baseline;
 			text-align: right;
 		}
-		td[data-label]:not(.lead, .trail)::before {
-			content: attr(data-label) ' ';
+		tbody td:not(.name, .lead)::before {
+			content: attr(data-label);
 			color: var(--text-muted);
 			font-size: var(--type-meta);
-		}
-		/* A stat reads from its label, an empty one takes no place, and a long one such as a list of effects takes
-		   the whole line. */
-		tbody td:not(.name, .lead, .trail) {
 			text-align: left;
 		}
 		tbody td.absent {
@@ -1045,22 +1043,6 @@
 		/* A value long enough for a line of its own, such as one with a long unit, wraps within it. */
 		tbody td.numeric:not(.short) {
 			white-space: normal;
-		}
-		/* Without a type, the value shares the name's line, and stats take whole lines below. */
-		tbody tr:not(:has(td.lead)) {
-			grid-template-columns: minmax(0, 1fr) auto;
-		}
-		tbody tr:not(:has(td.lead)) td.name {
-			grid-column: 1;
-		}
-		tbody tr:not(:has(td.lead)) td.trail {
-			grid-row: 1;
-		}
-		tbody tr:not(:has(td.lead)) td:not(.name, .trail) {
-			grid-column: 1 / -1;
-		}
-		tbody td:not(.name, .lead, .trail, .short, .absent) {
-			grid-column: 1 / -1;
 		}
 		.reveal {
 			margin-left: 0;
