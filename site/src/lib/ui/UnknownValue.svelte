@@ -4,9 +4,24 @@
 	 * a tap focuses the element. It needs no JavaScript. A value that differs from case to case reads Varies.
 	 */
 	let { reason, id, label = 'Unknown' }: { reason: string; id: string; label?: string } = $props();
+	// Escape hides the reason until the pointer or focus leaves, as WCAG asks of content shown on hover or focus.
+	let dismissed = $state(false);
 </script>
 
-<span class="unknown-value" tabindex="0" role="button" aria-describedby={id}
+<span
+	class="unknown-value"
+	class:dismissed
+	tabindex="0"
+	role="button"
+	aria-describedby={id}
+	onkeydown={(event) => {
+		if (event.key === 'Escape' && !dismissed) {
+			dismissed = true;
+			event.preventDefault();
+		}
+	}}
+	onblur={() => (dismissed = false)}
+	onmouseleave={() => (dismissed = false)}
 	>{label}<span class="reason" role="tooltip" {id}>{reason}</span></span
 >
 
@@ -38,8 +53,7 @@
 		text-align: start;
 		white-space: normal;
 	}
-	.unknown-value:hover .reason,
-	.unknown-value:focus .reason {
+	.unknown-value:is(:hover, :focus):not(.dismissed) .reason {
 		display: block;
 	}
 </style>

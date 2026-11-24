@@ -1,6 +1,6 @@
 <script lang="ts" generics="Id extends string">
 	import type { Snippet } from 'svelte';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { SvelteURL } from 'svelte/reactivity';
 	import { replaceState } from '$app/navigation';
 	import { page } from '$app/state';
@@ -59,7 +59,20 @@
 		selectFragment();
 		window.addEventListener('hashchange', selectFragment);
 		const observer = new ResizeObserver(() => {
-			if (measure && container) overflow = measure.scrollWidth > container.clientWidth;
+			if (!measure || !container) return;
+			const next = measure.scrollWidth > container.clientWidth;
+			if (next === overflow) return;
+			// The tab row and the select replace each other, so focus on one moves to the other instead of the page.
+			const focused =
+				container.contains(document.activeElement) && !measure.contains(document.activeElement);
+			overflow = next;
+			if (focused)
+				void tick().then(() =>
+					(next
+						? document.getElementById(select_id)
+						: document.getElementById(`tab-${selected}`)
+					)?.focus()
+				);
 		});
 		if (container) observer.observe(container);
 		return () => {

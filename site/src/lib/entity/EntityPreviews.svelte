@@ -113,8 +113,10 @@
 		const steps: Record<string, number> = { ArrowDown: 1, ArrowUp: -1, PageDown: 8, PageUp: -8 };
 		const key = (event: KeyboardEvent) => {
 			if (!anchor) return;
+			// The preview is the topmost layer, so one Escape closes it alone and leaves a menu or dialog under it open.
 			if (event.key === 'Escape') {
 				event.preventDefault();
+				event.stopPropagation();
 				close();
 				return;
 			}
@@ -137,7 +139,7 @@
 		document.addEventListener('pointerdown', down);
 		// The router follows links from its own click listener, so a first tap is caught in the capture phase.
 		document.addEventListener('click', click, true);
-		document.addEventListener('keydown', key);
+		document.addEventListener('keydown', key, true);
 		return () => {
 			close();
 			document.removeEventListener('pointerover', over);
@@ -147,7 +149,7 @@
 			document.removeEventListener('focusout', blur);
 			document.removeEventListener('pointerdown', down);
 			document.removeEventListener('click', click, true);
-			document.removeEventListener('keydown', key);
+			document.removeEventListener('keydown', key, true);
 		};
 	});
 </script>

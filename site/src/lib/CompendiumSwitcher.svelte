@@ -17,7 +17,7 @@
 		if (open && !root.contains(event.target as Node)) open = false;
 	}}
 	onkeydown={(event) => {
-		if (open && event.key === 'Escape') {
+		if (open && event.key === 'Escape' && !event.defaultPrevented) {
 			open = false;
 			toggle.focus();
 		}
