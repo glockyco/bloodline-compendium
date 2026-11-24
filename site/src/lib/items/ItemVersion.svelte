@@ -9,6 +9,7 @@
 	import Section from '#lib/ui/Section.svelte';
 	import ItemTooltip from '#lib/items/ItemTooltip.svelte';
 	import ItemDetails from '#lib/items/ItemDetails.svelte';
+	import ConsoleCommand from '#lib/items/ConsoleCommand.svelte';
 	import ItemModel from '#lib/items/ItemModel.svelte';
 	import OnHitEffects from '#lib/items/OnHitEffects.svelte';
 	import { detailRows } from '#lib/items/game-card.js';
@@ -127,6 +128,7 @@
 				</Section>
 			</div>{/if}
 		<SourceSections sources={item.sources} {idPrefix} />
+		<ConsoleCommand command={item.consoleCommand ?? null} id={idPrefix + 'console'} />
 		{#if uses.length}<Section
 				id={idPrefix + 'used-for'}
 				title="Used For"

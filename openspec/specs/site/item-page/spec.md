@@ -169,3 +169,15 @@ An item page with a published render SHALL show it in the main column above Deta
 #### Scenario: A ring
 - **WHEN** a reader opens an item that has no render
 - **THEN** the main column opens with Details
+
+### Requirement: Console command
+Every item page SHALL end its ways to get the item with a Console Command section. For an item the console's `AddItem` command can give, it SHALL say in one sentence that spawning is a cheat and reveal on request how to open the console, the command with a copy button, and how to get more. For any other item it SHALL say that the command cannot give it, because players otherwise guess names that do nothing.
+
+#### Scenario: Item the console can give
+- **WHEN** a reader opens Basic Iron Spatha and shows the command
+- **THEN** the page shows `AddItem BasicIronSpatha` with a Copy button
+
+#### Scenario: Item the console cannot give
+- **WHEN** a reader opens Cooked Rabbit Meat
+- **THEN** the Console Command section says the `AddItem` command cannot give it
+

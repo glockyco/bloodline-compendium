@@ -13,7 +13,7 @@ Item pages, lists, tooltips and tools SHALL describe the game: what an item does
 - **THEN** no sentence below the sources says that sources may be incomplete or that locations may be unreachable
 
 ### Requirement: No pipeline words or identifiers
-Site text, labels, table headers, empty states and accessibility text SHALL NOT use pipeline words such as entity, relation, source as a noun for a game object, coverage, mechanism, record, weight, pick or relative chance, and SHALL NOT show identifiers such as package paths, class names, dialogue states, enum words or error messages. Game names and game text keep their own wording. The voice check SHALL fail on the listed words and on identifier patterns in site text.
+Site text, labels, table headers, empty states and accessibility text SHALL NOT use pipeline words such as entity, relation, source as a noun for a game object, coverage, mechanism, record, weight, pick or relative chance, and SHALL NOT show identifiers such as package paths, class names, dialogue states, enum words or error messages. Game names and game text keep their own wording. The voice check SHALL fail on the listed words and on identifier patterns in site text. A console command SHALL show the name a player types, as the only exception.
 
 #### Scenario: Dialogue state in a condition
 - **WHEN** a condition is built from a dialogue state whose action is unknown
