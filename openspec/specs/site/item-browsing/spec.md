@@ -35,7 +35,7 @@ Filters that apply to one category SHALL appear when that category is selected o
 
 ### Requirement: Columns for the category
 The list SHALL show columns that suit the selected category: damage, speed and type for weapons, armor, class and slot for armor, healing and effects for food and potions, contributions and fitting weapons for parts, and the number of uses for materials.
-A column that only some weapons have, such as Headshot, Projectiles per Shot or the shield columns, SHALL show only when every listed weapon has it, so all weapons show Damage and Speed and a Bow filter adds Headshot and Projectiles per Shot. A ranged weapon's Damage cell SHALL show its body hit, the number its game card calls Damage. Each name SHALL show its icon in a 36 px slot, because the game's thin weapon icons need an edge to read.
+A column that only some weapons have, such as Headshot, Projectiles per Shot or the shield columns, SHALL show only when every listed weapon has it, so all weapons show Damage and Speed and a Bow filter adds Headshot and Projectiles per Shot. A ranged weapon's Damage cell SHALL show its body hit, the number its game card calls Damage. Each name SHALL show its icon in a slot, 36 px in the table and as tall as the name and type lines on phones, because the game's thin weapon icons need an edge to read.
 
 #### Scenario: All weapons
 - **WHEN** a reader selects Weapons

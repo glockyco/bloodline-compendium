@@ -34,7 +34,10 @@ test('filters items with counted facets, preserves URL state and sorts numeric v
 		'Hollow Prism'
 	);
 	await expect(page.locator('tr', { hasText: 'Hollow Prism' })).toContainText('No known source');
-	await expect(page.locator('tbody [data-ui=slot] img').first()).toHaveAttribute('src', /-48.webp$/);
+	await expect(page.locator('tbody [data-ui=slot] img').first()).toHaveAttribute(
+		'src',
+		/-48.webp$/
+	);
 	await page.getByRole('button', { name: 'Item', exact: true }).click();
 	await page.getByRole('button', { name: 'Item', exact: true }).click();
 	await expect(page.locator('.entity-name').first()).toContainText('Twin Lantern');

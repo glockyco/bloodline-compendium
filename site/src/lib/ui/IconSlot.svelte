@@ -9,8 +9,8 @@
 	}: {
 		/** The icon's hash, or null to keep the slot empty. */
 		icon: string | null;
-		/** A small row slot, a list row's readable one, or a tile's larger one. */
-		size?: 'row' | 'list' | 'tile';
+		/** A small row slot, a list row's readable one, one as tall as a name and the line under it, or a tile's. */
+		size?: 'row' | 'list' | 'pair' | 'tile';
 	} = $props();
 </script>
 
@@ -41,6 +41,10 @@
 	.list {
 		width: var(--size-icon-list);
 		height: var(--size-icon-list);
+	}
+	.pair {
+		width: var(--size-icon-pair);
+		height: var(--size-icon-pair);
 	}
 	.tile {
 		width: var(--size-icon-tile);

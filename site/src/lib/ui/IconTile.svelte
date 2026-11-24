@@ -22,7 +22,7 @@
 
 <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- callers pass hrefs they resolved. -->
 <a class="tile" {href}>
-	<IconSlot {icon} />
+	<IconSlot {icon} size="pair" />
 	<span class="text">
 		<span class="name" data-game={game || undefined}>{name}</span>
 		{#if meta}<span class="meta">{meta}</span>{/if}
@@ -66,5 +66,17 @@
 		text-wrap: pretty;
 		font-size: var(--type-meta);
 		line-height: var(--leading-meta);
+	}
+	/* Two tiles share a phone's width, so the icon stands above a centred name, as Afallon's tiles do, and the
+	   name keeps the tile's whole width. */
+	@media (width < 40rem) {
+		.tile {
+			grid-template-columns: minmax(0, 1fr);
+			justify-items: center;
+			text-align: center;
+		}
+		.text {
+			justify-items: center;
+		}
 	}
 </style>

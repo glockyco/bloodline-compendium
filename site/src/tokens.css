@@ -126,11 +126,16 @@
 	--size-checkbox: 1.125rem;
 	--size-emblem: 3rem;
 	--size-icon-row: 1.75rem;
-	/* A list row's icon sits in a slot large enough to read, as the game's inventory shows it. */
+	/* A list row's icon sits in a slot large enough to read, as the game's inventory shows it. On phones it spans
+	   the name and the type line beside it. */
 	--size-icon-list: 2.25rem;
 	--size-icon-inline: 1.5rem;
 	--size-icon-version: 3rem;
 	--size-icon-tile: 3rem;
+	/* A home tile's icon spans its name and the line under it, so neither hangs beside an edge of the icon. */
+	--size-icon-pair: calc(
+		var(--type-1) * var(--leading-body) + var(--type-meta) * var(--leading-meta)
+	);
 	--size-version-slot: 7.5rem;
 	--size-icon-title: 5rem;
 	--size-page: 75rem;
@@ -205,8 +210,10 @@
 		--gutter: var(--space-4);
 		--gap-page: var(--space-6);
 		--size-icon-title: 3.5rem;
-		/* Two tiles share a phone's width, so a smaller icon leaves their names room for a whole word. */
 		--size-icon-tile: 2.25rem;
+		--size-icon-list: calc(
+			var(--type-1) * var(--leading-data) + var(--type-meta) * var(--leading-meta)
+		);
 		--size-relation-number: 5.5rem;
 	}
 }
