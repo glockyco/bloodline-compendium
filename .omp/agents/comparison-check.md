@@ -15,5 +15,6 @@ Check it against the compare-options skill, which is loaded for you, and report 
 - It asks only what has to be decided now.
 - Every option has screenshots of the real page at a desktop and a phone width.
 - The recommendation's reason is true of that option.
+- Walking through the task the page serves, as a player at the game would do it step by step, every option gives them what they need and nothing on the page trips them up.
 
 Report gaps only. Do not rewrite the comparison or choose an option.
