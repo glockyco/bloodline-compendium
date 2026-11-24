@@ -84,14 +84,14 @@ internal static class ItemList
 
     private static readonly ColumnRule[] Columns =
     [
-        new("damage", "Damage", ["weapon"], true, null, item => Number(item, Stat.Damage)),
+        // A ranged weapon states its damage as a body hit, which players read as its damage, so one column holds both.
         new(
-            "bodyHitDamage",
+            "damage",
             "Damage",
             ["weapon"],
             true,
             null,
-            item => Number(item, Stat.BodyHitDamage)
+            item => Number(item, Stat.Damage) ?? Number(item, Stat.BodyHitDamage)
         ),
         new(
             "headHitDamage",

@@ -1,9 +1,8 @@
 import type { ItemIndex, ItemSummary, ListColumn } from '../site-data.js';
 import type { ListModel } from '../list/state.js';
 
-/** Weapon columns that only some weapons have, shown when a shown weapon has them. */
+/** Weapon columns that only some weapons have, shown when every shown weapon has them, as after a weapon type filter. */
 const specializedWeaponColumns: Record<string, true> = {
-	bodyHitDamage: true,
 	headHitDamage: true,
 	projectilesPerShot: true,
 	blockStaminaCost: true,
@@ -12,20 +11,14 @@ const specializedWeaponColumns: Record<string, true> = {
 };
 
 /**
- * Leaves out specialized weapon columns that no shown item has, and melee damage when every shown weapon is ranged
- * or a shield, whose damage the other columns state.
+ * Leaves out specialized weapon columns that a shown item lacks, and any column no shown item has, so no column fills
+ * with empty values.
  */
 function prune(shown: ItemSummary[], columns: ListColumn[]): ListColumn[] {
-	const weapons = shown.filter((item) => item.category === 'weapon');
-	const noMeleeDamage =
-		weapons.length > 0 &&
-		weapons.every(
-			(item) => !item.cells.damage && (item.cells.bodyHitDamage || item.cells.blockStaminaCost)
-		);
-	return columns.filter(
-		(column) =>
-			(!specializedWeaponColumns[column.id] || shown.some((item) => item.cells[column.id])) &&
-			(column.id !== 'damage' || !noMeleeDamage)
+	return columns.filter((column) =>
+		specializedWeaponColumns[column.id]
+			? shown.length > 0 && shown.every((item) => item.cells[column.id])
+			: column.id !== 'damage' || shown.some((item) => item.cells[column.id])
 	);
 }
 

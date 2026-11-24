@@ -128,8 +128,8 @@ it('offers shield block facts as generic numeric columns for filtering and sorti
 	expect(names(sortItems(items, state.sort))).toEqual(['Shield', 'Other Shield']);
 });
 
-it('offers ranged hit columns and sorts their numeric values with absent facts last', () => {
-	const ids = ['bodyHitDamage', 'headHitDamage', 'projectilesPerShot'];
+it('shows ranged hit columns only when every shown weapon has them and sorts absent facts last', () => {
+	const ids = ['damage', 'headHitDamage', 'projectilesPerShot'];
 	const weapon = index.items.find((item) => item.slug === 'lanternedge')!;
 	const ranged = (name: string, number: number): ItemSummary => ({
 		...weapon,
@@ -150,7 +150,9 @@ it('offers ranged hit columns and sorts their numeric values with absent facts l
 		}))
 	});
 	const state = readState(new URLSearchParams('category=weapon'), rangedIndex);
-	expect(shownColumns(items, state, rangedIndex).map((column) => column.id)).toEqual(ids);
+	expect(shownColumns(items, state, rangedIndex).map((column) => column.id)).toEqual(['damage']);
+	const bows = [ranged('Low', 2), ranged('High', 10)];
+	expect(shownColumns(bows, state, rangedIndex).map((column) => column.id)).toEqual(ids);
 	for (const id of ids) {
 		const descending = readState(new URLSearchParams(`sort=${id}`), rangedIndex);
 		expect(descending.sort).toEqual({ column: id, direction: 'desc' });
@@ -158,24 +160,6 @@ it('offers ranged hit columns and sorts their numeric values with absent facts l
 		const ascending = readState(new URLSearchParams(`sort=${id}&dir=asc`), rangedIndex);
 		expect(names(sortItems(items, ascending.sort))).toEqual(['Low', 'High', 'Absent']);
 	}
-	const withMeleeColumns = {
-		...rangedIndex,
-		columns: [...index.columns, ...rangedIndex.columns]
-	};
-	for (const type of ['Gun', 'Pistol', 'Crossbow', 'Bow']) {
-		const item = { ...ranged(type, 8), type };
-		expect(shownColumns([item], state, withMeleeColumns).map((column) => column.id)).toEqual([
-			'speed',
-			...ids
-		]);
-	}
-	expect(shownColumns([weapon], state, withMeleeColumns).map((column) => column.id)).toEqual([
-		'damage',
-		'speed'
-	]);
-	expect(
-		shownColumns([weapon, ranged('Bow', 8)], state, withMeleeColumns).map((column) => column.id)
-	).toEqual(['damage', 'speed', ...ids]);
 });
 
 it('writes only what differs from the defaults and reads it back', () => {
