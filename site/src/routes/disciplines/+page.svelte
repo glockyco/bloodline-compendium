@@ -55,7 +55,13 @@
 	title="Disciplines | The Bloodline Compendium"
 	description="Every discipline of The Bloodline's skill window, with its skills by level and its passives with their cost per rank."
 />
-<h1 class="list-title">Disciplines</h1>
+<header class="page-heading list-title">
+	<h1>Disciplines</h1>
+	<p class="intro">
+		The {disciplines.length} disciplines of the skill window, each with its skills by level and its passives
+		with their cost per rank.
+	</p>
+</header>
 <!-- The game's skill window groups disciplines in these categories, one tab each. -->
 <Tabs
 	tabs={groups.map((group) => ({
@@ -67,13 +73,13 @@
 	initial={groups[0].category.slug}
 >
 	{#snippet panel(id, tabbed)}{@const group = groups.find((entry) => entry.category.slug === id)!}
-		{#if tabbed}<CardGrid rows={2} columns={3} label={group.category.name}
+		{#if tabbed}<CardGrid rows={2} columns={4} label={group.category.name}
 				>{#each group.members as discipline (discipline.key)}{@render card(
 						discipline,
 						'h2'
 					)}{/each}</CardGrid
 			>{:else}<Section {id} title={group.category.name} count={group.members.length}
-				><CardGrid rows={2} columns={3} label={group.category.name}
+				><CardGrid rows={2} columns={4} label={group.category.name}
 					>{#each group.members as discipline (discipline.key)}{@render card(
 							discipline,
 							'h3'

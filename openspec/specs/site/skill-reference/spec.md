@@ -16,6 +16,13 @@ Each discipline SHALL have a page that shows its skills and its passives in rows
 - **WHEN** a passive requires a lower level than the row the skill window shows it in
 - **THEN** the page lists it under the level it requires
 
+### Requirement: Discipline list
+The discipline list SHALL open with a one-line intro and show one tab per skill window category, as the game's skill window groups them, with each discipline as a card of its icon, name and counts, four cards to a line on wide screens so no category ends with a lone card. A category fragment such as `#magic` SHALL open its tab.
+
+#### Scenario: Opening a category
+- **WHEN** a reader follows a discipline page's link to `/disciplines/#magic`
+- **THEN** the Magic tab is selected and shows its ten disciplines
+
 ### Requirement: Discipline facts
 A discipline page SHALL state its category, and SHALL open with one sentence that says how it levels, what its level unlocks and how many proficiency points each level up gives, such as "Necromancy levels up as you use it. Its level unlocks the skills below, and each level up gives you 2 proficiency points to spend on its passives." A known issue that affects the discipline SHALL appear in its Bugs section.
 
