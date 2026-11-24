@@ -7,7 +7,7 @@ const port = Number(process.env.E2E_PORT ?? 8796);
 export default defineConfig({
 	testDir: './tests',
 	testMatch: '**/*.e2e.ts',
-	use: { baseURL: `http://127.0.0.1:${port}`, browserName: 'chromium' },
+	use: { baseURL: `http://127.0.0.1:${port}`, browserName: 'chromium', trace: 'retain-on-failure' },
 	webServer: {
 		command: `bun run wrangler dev --assets build --port ${port} --local`,
 		url: `http://127.0.0.1:${port}`,
