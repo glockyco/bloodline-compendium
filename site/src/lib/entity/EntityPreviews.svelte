@@ -72,6 +72,8 @@
 			pointer = { x: event.clientX, y: event.clientY };
 			if (link === anchor) return;
 			clearTimeout(intent);
+			// The details load while the pointer rests, so the preview shows when the intent delay ends.
+			void loadPreview(link.dataset.preview!);
 			intent = setTimeout(() => void show(link), 160);
 		};
 		const move = (event: PointerEvent) => {
