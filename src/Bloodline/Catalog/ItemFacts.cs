@@ -16,6 +16,7 @@ internal sealed class ItemFacts(
 )
 {
     private readonly FactClaims claims = new(code, build);
+    private readonly ConsoleCommands console = new(tables);
     public IReadOnlyList<FactClaim> Claims => claims.Claims;
 
     private readonly HashSet<string> ignoredFoodEffects = new(StringComparer.Ordinal);
@@ -457,6 +458,7 @@ internal sealed class ItemFacts(
             Type = type ?? "Unknown",
             ProjectileGroups = projectileGroups,
             OnHitEffects = category == "Weapon" ? ResolveOnHitEffects(item) : null,
+            ConsoleCommand = console.For(item.Path),
         };
         claims.Record(item.Path, page, projectileFunction, projectileDamage);
         return page;

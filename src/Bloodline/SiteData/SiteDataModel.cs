@@ -270,6 +270,9 @@ internal sealed record ItemPage(
 
     public IReadOnlyList<OnHitEffect>? OnHitEffects { get; init; }
 
+    /// <summary>The console line that gives this item, such as "AddItem Bread", or null when the console cannot.</summary>
+    public string? ConsoleCommand { get; init; }
+
     [JsonRequired]
     public IReadOnlyList<ItemUse> Uses { get; init; } = [];
 

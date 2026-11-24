@@ -668,6 +668,12 @@
         "category": {
           "$ref": "#/$defs/CategoryLink"
         },
+        "consoleCommand": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "description": {
           "type": [
             "string",

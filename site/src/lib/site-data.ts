@@ -598,6 +598,7 @@ export interface KnownIssue {
  */
 export interface ItemPage {
   category: CategoryLink;
+  consoleCommand?: string | null;
   description: string | null;
   facts: Fact[];
   icon: string | null;
