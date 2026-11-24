@@ -29,7 +29,8 @@
 		/** The fixed columns to show for the shown rows. */
 		fixed: (shown: R[]) => FixedDisplay<R>[];
 		/** The row's name cell. */
-		name: Snippet<[R]>;
+		/** The row's name with its meta line, the leading columns' text phones show under it, and its status note. */
+		name: Snippet<[R, string | null, string | null]>;
 		/** Short notes for statuses that browsing hides, keyed by status. */
 		statusNotes: Record<string, string>;
 		/** The reveal's text: how to show the hidden rows, and how to hide them again. */
@@ -355,9 +356,11 @@
 					<tbody
 						>{#each shownRows as item (item.key)}<tr>
 								<td class="name"
-									>{@render name(item)}{#if statusNotes[item.status]}<small class="status-note"
-											>{statusNotes[item.status]}</small
-										>{/if}</td
+									>{@render name(
+										item,
+										leading.map((column) => column.text(item)).join(' · ') || null,
+										statusNotes[item.status] ?? null
+									)}</td
 								>
 								{#each leading as column (column.id)}<td
 										class="lead"
@@ -677,7 +680,8 @@
 		font-variant-numeric: tabular-nums;
 		white-space: nowrap;
 	}
-	/* A name keeps room for a few words before other columns take the width. */
+	/* A name keeps room for a few words before other columns take the width. Its icon spans the name and the
+	   lines under it, so they start at the name's edge. */
 	td.name {
 		min-width: var(--size-name-column);
 	}
@@ -740,12 +744,6 @@
 	}
 	:global(.entity-name:hover) {
 		text-decoration: underline;
-	}
-	.status-note {
-		display: block;
-		padding-left: var(--inset-note);
-		color: var(--text-muted);
-		font-size: var(--type-0);
 	}
 	.empty {
 		padding: var(--inset-loose) var(--inset);
@@ -1019,14 +1017,14 @@
 			min-width: 0;
 		}
 		tbody td.lead {
-			padding-left: var(--inset-note);
-			color: var(--text-muted);
+			display: none;
 		}
 		tbody td:not(.name, .lead) {
 			display: grid;
 			grid-template-columns: subgrid;
 			align-items: baseline;
 			text-align: right;
+			text-wrap: pretty;
 		}
 		tbody td:not(.name, .lead)::before {
 			content: attr(data-label);

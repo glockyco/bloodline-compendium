@@ -74,5 +74,9 @@
 	{valueLabel}
 	path={(query) => kindPath('item', data.kinds, query)!}
 >
-	{#snippet name(item: ItemSummary)}<ListName row={item} />{/snippet}
+	{#snippet name(item: ItemSummary, meta: string | null, note: string | null)}<ListName
+			row={item}
+			{meta}
+			{note}
+		/>{/snippet}
 </EntityList>

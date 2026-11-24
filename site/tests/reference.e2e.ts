@@ -34,7 +34,7 @@ test('filters items with counted facets, preserves URL state and sorts numeric v
 		'Hollow Prism'
 	);
 	await expect(page.locator('tr', { hasText: 'Hollow Prism' })).toContainText('No known source');
-	await expect(page.locator('.entity-name img').first()).toHaveAttribute('src', /-48.webp$/);
+	await expect(page.locator('tbody [data-ui=slot] img').first()).toHaveAttribute('src', /-48.webp$/);
 	await page.getByRole('button', { name: 'Item', exact: true }).click();
 	await page.getByRole('button', { name: 'Item', exact: true }).click();
 	await expect(page.locator('.entity-name').first()).toContainText('Twin Lantern');
@@ -75,7 +75,7 @@ test('combines filters, restores them from a shared URL and adds stat columns', 
 	await expect(facets.getByRole('checkbox', { name: /^Sword\s/ })).toBeChecked();
 	await expect(page.locator('.entity-name')).toHaveText(['Lanternedge']);
 	// A list opened from a filtered address shows each row with its own icon.
-	await expect(page.locator('.entity-name img')).toHaveAttribute(
+	await expect(page.locator('tbody [data-ui=slot] img')).toHaveAttribute(
 		'src',
 		'/icons/lanternedge-48.webp'
 	);

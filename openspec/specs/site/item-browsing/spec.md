@@ -74,7 +74,7 @@ A column SHALL name its unit, and a cell without a value SHALL say whether the v
 - THEN its cell says it is unknown and its column names the unit
 
 ### Requirement: Narrow lists keep item names visible
-On tablet widths the item name SHALL stay visible while the other columns scroll. On phones a row SHALL show its name with its type under it, then each stat and the sell value on its own line, label left and value right, as relation tables read on phones.
+On tablet widths the item name SHALL stay visible while the other columns scroll. On phones a row SHALL show its name with its type and any status note stacked beside its icon, then each stat and the sell value on its own line, label left and value right, as relation tables read on phones.
 
 #### Scenario: Scrolling a narrow list
 - WHEN a reader scrolls the columns on a narrow screen

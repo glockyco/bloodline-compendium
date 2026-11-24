@@ -175,10 +175,8 @@
 	--size-preview-phone: 60vh;
 	--size-facet-values: 15rem;
 	--size-item-type: 8rem;
-	--size-name-column: 10rem;
+	--size-name-column: 12rem;
 	--size-filter-control: 8rem;
-	/* A row's note lines up with the name beside its icon. */
-	--inset-note: calc(var(--size-icon-list) + var(--gap-inline));
 	/* A line under a table name with its inline icon starts under the name's text. */
 	--inset-icon-text: calc(var(--size-icon-inline) + var(--gap-inline));
 	--inset-ribbon: calc(var(--size-ribbon-notch) + var(--inset));
