@@ -7,22 +7,29 @@ Defines the crafting systems whose rules the catalog publishes so that players c
 ## ADDED Requirements
 
 ### Requirement: Weapon assembly
-The catalog SHALL publish which part kinds each crafted weapon family takes, which parts fit each kind, every part's damage, speed and value contributions, and how quality scales the finished weapon's stats, as the equipped weapon reconstructs them. Where the game's code holds two quality tables, the published one SHALL be the one a lab run of a crafted and equipped weapon confirms.
+The catalog SHALL publish which part kinds each crafted weapon family takes, which parts fit each kind, and every part's damage, speed and value contributions to the equipped weapon.
 
 #### Scenario: Part page
 - **WHEN** a reader opens Angled Iron Blade
 - **THEN** the page names the weapons the blade fits and links the weapon builder
 
-#### Scenario: Quality D
-- **WHEN** a lab run crafts a D quality weapon and reads its equipped damage
-- **THEN** the published multiplier for D is the one that reproduces that damage
+### Requirement: Quality grades
+The catalog SHALL publish the quality grades the anvil gives through its minigame and through Auto Craft, and how each grade scales a crafted weapon's stats as the equipped weapon carries them. Where the game converts a quality in more than one place, the published conversion SHALL be the one a lab run confirms. A recipe weapon's page SHALL say that crafted copies differ by quality.
+
+#### Scenario: One quality grade
+- **WHEN** a lab run crafts a weapon at one quality grade and reads its equipped damage
+- **THEN** the published multiplier for that grade reproduces that damage
+
+#### Scenario: Recipe weapon
+- **WHEN** a reader opens Copper Claymore
+- **THEN** the page says that a crafted copy's damage, speed and value depend on the quality it was made at
 
 ### Requirement: Armorsmithing
 The catalog SHALL publish the armorsmithing qualities with their required levels, the armor each armor class and quality gives, the rune slots and how they change experience, and the materials each crafted armor piece costs.
 
-#### Scenario: Masterwork heavy armor
-- **WHEN** a reader looks up heavy armor of Masterwork quality
-- **THEN** the reference shows armor 16 and the required armorsmithing level 60
+#### Scenario: Heavy armor at one quality
+- **WHEN** a lab run crafts heavy armor at one armorsmithing quality and reads its armor
+- **THEN** the reference shows that armor and the armorsmithing level the quality needs
 
 ### Requirement: Rune attunement and enchanting
 The catalog SHALL publish rune attunement effectiveness ranges by tier and the break chance by attunement level, and the enchanting transformation with its effect on item value, only after a lab run confirms their units.
@@ -36,10 +43,10 @@ The catalog SHALL publish the recipes that `Crafting:Get Correct Item` maps by h
 
 #### Scenario: Hardcoded weapon recipe
 - **WHEN** `Crafting:Get Correct Item` maps Copper Claymore to a recipe row with positive quantities
-- **THEN** Copper Claymore lists that recipe as a source with its ingredients
+- **THEN** Copper Claymore's 25 damage version lists that recipe as a source with its ingredients
 
 #### Scenario: Missing recipe row
-- **WHEN** the code maps Atacamite Ingot to a row name the recipe table lacks
+- **WHEN** the code maps Round Mace to the row name `RoundedMace`, which the recipe table lacks
 - **THEN** no source is published and the maintainer report lists the mapping
 
 ### Requirement: Recipe learning
@@ -48,3 +55,10 @@ A recipe source SHALL state how the player learns the recipe, as far as the game
 #### Scenario: Learned recipe
 - **WHEN** a reader opens Apple Pie
 - **THEN** its recipe states how the player learns it
+
+### Requirement: Ingredient treatments
+An ingredient's treatment effects SHALL state what a meal or potion made with the treated ingredient applies, as a lab run of the cooking and potion windows confirms, and SHALL be removed from pages where the windows apply none.
+
+#### Scenario: Chopped Gildleaf
+- **WHEN** a lab run crafts a potion with chopped Gildleaf and drinks it
+- **THEN** Gildleaf's chopped effect states what the potion applied
