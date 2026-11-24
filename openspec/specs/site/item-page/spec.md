@@ -80,6 +80,7 @@ An item without a known source SHALL state its status, either that it cannot be 
 
 ### Requirement: Previews on links
 Every link to an item SHALL show the item's tooltip on hover, keyboard focus and first touch, loading it on demand, and SHALL lead to the item's page without JavaScript.
+The preview SHALL be one raised panel with one edge in the border colour of the site's controls, holding the game card without its own shadow and the facts below it, as Afallon's and Ancient Kingdoms' previews are one panel. Its details SHALL start loading when the pointer reaches the link, so the preview appears when the hover delay ends.
 
 #### Scenario: Ingredient link
 - **WHEN** a reader focuses the Bread link on Apple Pie's page

@@ -172,14 +172,21 @@
 		visibility: hidden;
 		width: var(--size-tooltip);
 		padding: 0;
+		/* One raised panel with one edge, as Afallon's and Ancient Kingdoms' previews are, so the facts under the game
+		   card read as part of it rather than as the table behind it. */
+		border: var(--border-width) solid var(--border-control);
 		border-radius: var(--radius-1);
-		background: var(--surface-panel);
+		background: var(--surface-raised);
 		box-shadow: var(--shadow-raised);
 		overflow: auto;
 		pointer-events: none;
 	}
 	/* The game card is the popover's top edge, with no second frame around it, and the site's facts below it share
 	   one inset. */
+	/* The panel casts the shadow, so the game card inside it casts none onto the facts below. */
+	.entity-preview :global(.card) {
+		box-shadow: none;
+	}
 	.entity-preview :global([data-ui='tooltip'] > :not(.card)) {
 		padding-inline: var(--inset);
 	}
