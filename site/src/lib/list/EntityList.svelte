@@ -739,12 +739,6 @@
 	:global(.entity-name:hover) {
 		text-decoration: underline;
 	}
-	:global(.entity-name img) {
-		flex: none;
-		width: var(--size-icon-row);
-		height: var(--size-icon-row);
-		object-fit: contain;
-	}
 	.status-note {
 		display: block;
 		padding-left: var(--inset-note);

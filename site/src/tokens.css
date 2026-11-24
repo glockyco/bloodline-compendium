@@ -126,6 +126,8 @@
 	--size-checkbox: 1.125rem;
 	--size-emblem: 3rem;
 	--size-icon-row: 1.75rem;
+	/* A list row's icon sits in a slot large enough to read, as the game's inventory shows it. */
+	--size-icon-list: 2.25rem;
 	--size-icon-inline: 1.5rem;
 	--size-icon-version: 3rem;
 	--size-icon-tile: 3rem;
@@ -176,7 +178,7 @@
 	--size-name-column: 10rem;
 	--size-filter-control: 8rem;
 	/* A row's note lines up with the name beside its icon. */
-	--inset-note: calc(var(--size-icon-row) + var(--gap-inline));
+	--inset-note: calc(var(--size-icon-list) + var(--gap-inline));
 	/* A line under a table name with its inline icon starts under the name's text. */
 	--inset-icon-text: calc(var(--size-icon-inline) + var(--gap-inline));
 	--inset-ribbon: calc(var(--size-ribbon-notch) + var(--inset));

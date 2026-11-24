@@ -9,14 +9,14 @@
 	}: {
 		/** The icon's hash, or null to keep the slot empty. */
 		icon: string | null;
-		/** A row's slot, as in search results, or a tile's larger one. */
-		size?: 'row' | 'tile';
+		/** A small row slot, a list row's readable one, or a tile's larger one. */
+		size?: 'row' | 'list' | 'tile';
 	} = $props();
 </script>
 
 <span class="slot {size}" data-ui="slot"
 	>{#if icon}<img
-			src="/icons/{icon}-160.webp"
+			src="/icons/{icon}-{size === 'list' ? 48 : 160}.webp"
 			alt=""
 			width="48"
 			height="48"
@@ -36,6 +36,11 @@
 	.row {
 		width: var(--size-icon-row);
 		height: var(--size-icon-row);
+	}
+	/* A list holds hundreds of rows, so its slots load the small icon. */
+	.list {
+		width: var(--size-icon-list);
+		height: var(--size-icon-list);
 	}
 	.tile {
 		width: var(--size-icon-tile);

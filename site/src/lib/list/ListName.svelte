@@ -1,5 +1,6 @@
 <script lang="ts">
 	import EntityLink from '../ui/EntityLink.svelte';
+	import IconSlot from '../ui/IconSlot.svelte';
 	import type { EntityKind } from '../site-data.js';
 	/** A list row's name: its icon and name, linking to its page at the row's version. */
 	let {
@@ -25,12 +26,5 @@
 		slug: row.slug,
 		icon: row.icon,
 		fragment: row.versionId ?? null
-	}}
-	>{#if row.icon}<img
-			src={'/icons/' + row.icon + '-48.webp'}
-			alt=""
-			width="32"
-			height="32"
-			loading="lazy"
-		/>{/if}<span data-game>{row.name}</span></EntityLink
+	}}><IconSlot icon={row.icon} size="list" /><span data-game>{row.name}</span></EntityLink
 >
