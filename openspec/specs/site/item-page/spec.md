@@ -31,11 +31,11 @@ A crafted item SHALL show its recipe as a visible line: ingredients with quantit
 - **THEN** 3 Apple and 1 Bread, the cooking fire and 35 cooking experience are visible without opening anything
 
 ### Requirement: Uses
-An item used by recipes, purchases or construction SHALL list each use with what it makes, the skill and level it needs and the quantity it consumes as a number, without repeating the item's own name. Long lists SHALL filter by discipline, made item type and level and by name when there are more than ten uses, and the first screen SHALL link to the list.
+An item used by recipes, purchases or construction SHALL list each use with what it makes, the skill and level it needs and the quantity it consumes as a number, without repeating the item's own name. A known level SHALL read as the skill followed by ", level" and the number, and the amount SHALL sit under Quantity, because two bare numbers in one row read alike. Long lists SHALL filter by discipline, made item type and level and by name when there are more than ten uses, and the first screen SHALL link to the list.
 
 #### Scenario: Iron Ingot
 - **WHEN** a reader opens Iron Ingot
-- **THEN** a Used For link on the first screen leads to rows such as Angled Iron Blade with its icon, Weaponsmithing 8 and 6, filterable by skill, type and level
+- **THEN** a Used For link on the first screen leads to rows such as Angled Iron Blade with its icon, "Weaponsmithing, level 8" and a Quantity of 6, filterable by profession, type and level
 
 ### Requirement: Items shown with their icons
 Wherever a page lists items, each item SHALL show its icon beside its name, and the icon, name and quantity of one entry SHALL form one link target.

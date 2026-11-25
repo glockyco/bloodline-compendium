@@ -175,7 +175,7 @@
 					</p>{:else}<RelationTable
 						items={shownUses}
 						label="Used for"
-						headings={['Makes', 'Profession', 'Needed']}
+						headings={['Makes', 'Profession', 'Quantity']}
 						numeric={[false, true]}
 						>{#snippet row(use, index)}<tr
 								id={`${idPrefix}use-${index + 1}`}
@@ -186,11 +186,11 @@
 										conditions={otherConditions(use)}
 									/></td
 								><td
-									>{#if use.profession}<EntityLink entity={use.profession} />{:else}{useLabel(
-											use.kind
-										)}{/if}{#if levelOf(use) != null}<span class="muted"
-											>{` ${formatNumber(levelOf(use)!)}`}</span
-										>{/if}</td
+									><span
+										>{#if use.profession}<EntityLink entity={use.profession} />{:else}{useLabel(
+												use.kind
+											)}{/if}{#if levelOf(use) != null}{`, level ${formatNumber(levelOf(use)!)}`}{/if}</span
+									></td
 								><td class="numeric">{formatNumber(use.quantity)}</td></tr
 							>{/snippet}</RelationTable
 					>{/if}
