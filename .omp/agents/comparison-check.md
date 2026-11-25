@@ -16,5 +16,7 @@ Check it against the compare-options skill, which is loaded for you, and report 
 - Every option has screenshots of the real page at a desktop and a phone width.
 - The recommendation's reason is true of that option.
 - Walking through the task the page serves, as a player at the game would do it step by step, every option gives them what they need and nothing on the page trips them up.
+- It judges wording by what it tells a player, not by where a layout cuts it off. Truncation is a layout defect to report, never a reason to prefer one wording.
+- The review file is short enough to read in a minute per card: the question, at most two sentences of context, one line per option, the screenshots and a one-sentence reason. Evidence, references, earlier decisions, option checks and page defects belong in a separate evidence file the review file links once. Report a review file that is longer as a failure, and do not ask for more text in it.
 
 Report gaps only. Do not rewrite the comparison or choose an option.
