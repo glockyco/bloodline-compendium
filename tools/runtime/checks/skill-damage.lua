@@ -1,15 +1,21 @@
--- lab setup: supplies a skill with AddNewSkill, sets requested saved passive ranks, restores player mana,
--- and places a fresh enemy with movement and AI disabled. The check does not set Health, armor or Damage.
+-- lab setup: supplies a skill with AddNewSkill, sets requested saved ranks, upgrades or proficiency levels,
+-- restores player mana, and places a fresh enemy with movement and AI disabled. It does not set target Health,
+-- armor or Damage.
 -- Run in a loaded lab save. "skill" is the full class path (including .Class_C) and "school" optionally reads
 -- the live elemental damage and mana helpers. "ranks" sets named saved ranks (0 removes a rank).
+-- "upgrades" maps exact legacy upgrade names to booleans. "levels" maps Unarmed, Vampirism or Lute Playing
+-- to levels. "trackMotion" records the caster's position and movement mode. "trackSummons" records spawned
+-- actors' Health, MaxHealth and DamageMelee as well as Damage.
 -- "slot" selects the controller's offhand hotbar slot (default 1). The check binds the skill there.
 -- "action": "inspect" supplies the skill and reads ranks without casting.
--- "distance" (default 300), "pitch" (default -8), "height" and "lateral" place and aim at the target.
+-- "distance" (default 300), "pitch" (default -8), "yaw", "height" and "lateral" place and aim at the target.
 -- "enemy" picks its class, "stationaryTick" leaves its actor tick on, and "seconds" sets the sample duration.
 -- "thirdPerson" keeps the current camera instead of switching to first person.
 -- "recastAfter" presses the same slot a second time after that many seconds, for skills with a follow-up cast.
 -- "actorOverlap" explicitly dispatches the spawned actor class's actor-overlap event at the target, once.
 -- This isolates an impact branch. It does not reproduce a normal collision.
+-- "watch" lists full Class_C:Function paths whose calls are recorded alongside hits.
+-- "withoutCollision" disables collision on newly spawned actors of the named class to isolate an impact.
 local p = requirePlayer()
 local world = UEHelpers.GetWorld()
 local controller = UEHelpers.GetPlayerController()
@@ -21,6 +27,32 @@ local function number(object, key)
     if type(value) == 'number' then return value end
 end
 local function coords(vector) return { x = vector.X, y = vector.Y, z = vector.Z } end
+local saved = p['Persistant Ref']
+local stats = p.PlayerPassiveLevelStatComponent
+
+local function setUpgrades(upgrades)
+    local array = saved['Unlocked Skill Upgrades']
+    local retained = {}
+    for i = 1, #array do
+        local upgrade = array[i]:ToString()
+        if upgrades[upgrade] == nil then retained[#retained + 1] = upgrade end
+    end
+    for upgrade, unlocked in pairs(upgrades) do
+        if unlocked then retained[#retained + 1] = upgrade end
+    end
+    array:Empty()
+    for i, upgrade in ipairs(retained) do array[i] = FName(upgrade) end
+end
+
+if args.upgrades then setUpgrades(args.upgrades) end
+if args.levels then
+    for proficiency, level in pairs(args.levels) do
+        assert(proficiency == 'Unarmed' or proficiency == 'Vampirism' or proficiency == 'Lute Playing',
+            'Unsupported proficiency: ' .. proficiency)
+        saved[proficiency .. ' Level'] = level
+    end
+    if args.levels.Unarmed then stats['Set Unarmed Damage'](stats) end
+end
 
 local skillPath = assert(args.skill, 'Give the skill class path in skill')
 local skillClass = assert(skillPath:match('%.([^%.]+)$'), 'Include .Class_C in skill')
@@ -33,7 +65,7 @@ if not skill then
 end
 
 local function setRanks(ranks)
-    local array = p['Persistant Ref']['Completed Achievements']
+    local array = saved['Completed Achievements']
     local retained = {}
     for i = 1, #array do
         local achievement = array[i]:ToString()
@@ -49,13 +81,20 @@ end
 if args.ranks then setRanks(args.ranks) end
 
 local function bonus(suffix)
-    local component = p.PlayerPassiveLevelStatComponent
     local result = {}
     local fn = 'Get ' .. args.school .. ' ' .. suffix
-    component[fn](component, result)
+    stats[fn](stats, result)
     return result['Bonus Percent']
 end
-local inputs = { skill = skill:GetFullName(), ranks = args.ranks }
+local inputs = { skill = skill:GetFullName(), ranks = args.ranks, upgrades = args.upgrades, levels = args.levels,
+    unarmedDamage = number(p, 'Unarmed Damage') }
+local equipped = p['Equipped Item']
+if valid(equipped) then
+    inputs.equipped = equipped:GetFullName()
+    if equipped.WeaponInfo then
+        inputs.weaponDamage = field(equipped.WeaponInfo, '/Game/BloodlinesAlpha/Interactables/Weapons/F_WeaponINfo.F_WeaponInfo', 'Damage')
+    end
+end
 if args.school then
     inputs.damageBonus = bonus('Damage Bonuses')
     inputs.manaReduction = bonus('Mana Cost Reduction')
@@ -78,8 +117,9 @@ commands['close-tutorials']({})
 statics:SetGamePaused(world, false)
 if valid(state.enemy) then state.enemy:K2_DestroyActor() end
 local rotation = controller:GetControlRotation()
-controller:SetControlRotation({ Pitch = args.pitch or -8, Yaw = rotation.Yaw, Roll = 0 })
-local angle = math.rad(rotation.Yaw)
+local yaw = args.yaw or rotation.Yaw
+controller:SetControlRotation({ Pitch = args.pitch or -8, Yaw = yaw, Roll = 0 })
+local angle = math.rad(yaw)
 local x, y = math.cos(angle), math.sin(angle)
 local location, distance, lateral = p:K2_GetActorLocation(), args.distance or 300, args.lateral or 0
 local transform = {
@@ -103,6 +143,9 @@ if not state.hooks then
     local function observe(phase, object)
         if not state.capture or not valid(object) or not isInstance(object) then return end
         local capture = state.capture
+        if phase == 'afterFinish' and capture.withoutCollision == object:GetClass():GetFName():ToString() then
+            object:SetActorEnableCollision(false)
+        end
         local id = object:GetAddress()
         local spawn = capture.byAddress[id]
         if not spawn then
@@ -113,11 +156,16 @@ if not state.hooks then
         end
         local damage = number(object, 'Damage')
         local explosionDamage = number(object, 'Explosion Damage')
+        local health = capture.trackSummons and number(object, 'Health') or nil
+        local maxHealth = capture.trackSummons and number(object, 'MaxHealth') or nil
+        local melee = capture.trackSummons and number(object, 'DamageMelee') or nil
         local samples = spawn.samples
         local previous = samples[#samples]
-        if phase ~= 'frame' or not previous or previous.damage ~= damage or previous.explosionDamage ~= explosionDamage then
-            samples[#samples + 1] = { phase = phase, t = capture.time(), damage = damage,
-                explosionDamage = explosionDamage, location = phase ~= 'created' and coords(object:K2_GetActorLocation()) or nil }
+        if phase ~= 'frame' or not previous or previous.damage ~= damage or previous.explosionDamage ~= explosionDamage
+            or previous.health ~= health or previous.maxHealth ~= maxHealth or previous.melee ~= melee then
+            samples[#samples + 1] = { phase = phase, t = capture.time(), damage = damage, health = health,
+                maxHealth = maxHealth, melee = melee, explosionDamage = explosionDamage,
+                location = phase ~= 'created' and coords(object:K2_GetActorLocation()) or nil }
         end
     end
     NotifyOnNewObject('/Script/Engine.Actor', function(actor) observe('created', actor) end)
@@ -125,29 +173,52 @@ if not state.hooks then
         function(_, actor) observe('beforeFinish', actor:get()) end,
         function(_, actor) observe('afterFinish', actor:get()) end)
     RegisterHook('/Game/AIBehaviorToolkit/Blueprints/Goblin_Base.Goblin_Base_C:Recieve Damage',
-        function(context, damage, _, element)
+        function(context, damage, impact, element)
             local capture = state.capture
             local target = context:get()
             if not capture or target:GetAddress() ~= capture.targetAddress then return end
+            local location = impact:get()
             capture.receives[#capture.receives + 1] = {
                 t = capture.time(), damage = damage:get(), element = element:get(), health = target.Health,
+                location = coords(location), order = #capture.events + #capture.receives + 1,
             }
         end)
     state.observe = observe
     state.hooks = { pre, post }
 end
 
+state.watches = state.watches or {}
+for _, path in ipairs(args.watch or {}) do
+    if not state.watches[path] then
+        local owner = assert(path:match('^(.+):[^:]+$'), 'Use the full class path and function: ' .. path)
+        LoadAsset(owner)
+        state.watches[path] = { RegisterHook(path, function(context)
+            local capture = state.capture
+            if not capture or not capture.watch[path] then return end
+            local object = context:get()
+            capture.events[#capture.events + 1] = {
+                t = capture.time(), method = path, actor = valid(object) and object:GetFullName() or nil,
+                order = #capture.events + #capture.receives + 1,
+            }
+        end) }
+    end
+end
+
 local function snapshot()
     return { health = valid(enemy) and enemy.Health or nil, mana = p['Current Mana'],
-        stamina = p.Stamina, cooldown = number(skill, 'CurrentCooldownTime') }
+        stamina = p.Stamina, cooldown = number(skill, 'CurrentCooldownTime'),
+        casterHealth = number(p, 'Health'), caster = args.trackMotion and coords(p:K2_GetActorLocation()) or nil,
+        movementMode = args.trackMotion and p.CharacterMovement.MovementMode or nil }
 end
 local finish = defer()
 local elapsed, rows, hits, mana, deduction = 0, {}, {}, {}, 0
 local started = statics:GetTimeSeconds(world)
 local target = { actor = enemy:GetFullName(), armor = number(enemy, 'Armor'), location = coords(enemy:K2_GetActorLocation()),
-    caster = coords(location), distance = distance, lateral = lateral, pitch = args.pitch or -8 }
+    caster = coords(location), distance = distance, lateral = lateral, pitch = args.pitch or -8, yaw = yaw }
 local capture = { spawns = {}, objects = {}, byAddress = {}, receives = {}, targetAddress = enemy:GetAddress(),
+    events = {}, watch = {}, trackSummons = args.trackSummons, withoutCollision = args.withoutCollision,
     time = function() return statics:GetTimeSeconds(world) - started end }
+for _, path in ipairs(args.watch or {}) do capture.watch[path] = true end
 local initial, previous, castAt, recastAt, dispatched
 local handle
 local function stopSampling()
@@ -196,7 +267,7 @@ handle = LoopInGameThreadAfterFrames(1, function()
             stopSampling()
             finish({ inputs = inputs, target = target, initial = initial, final = snapshot(), rows = rows, hits = hits,
                 mana = mana, manaSpent = deduction, spawns = capture.spawns, castAt = castAt, receives = capture.receives,
-                recastAt = recastAt,
+                recastAt = recastAt, events = capture.events,
                 dispatchedActorOverlap = dispatched })
         end
     end)

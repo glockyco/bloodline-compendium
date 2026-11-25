@@ -10,9 +10,6 @@ if [[ "${1:-all}" != "staff" ]]; then
   : "${BLOODLINE_SITE_DATA:?Set BLOODLINE_SITE_DATA to the regenerated catalog.}"
 item=/Game/BloodlinesAlpha/Interactables
 food=$item/Crafting_Items/GeneralFoodItems
-knees=$item/Armor/Knees/Knee_Armor_01.Knee_Armor_01_C
-sword=$item/Weapons/1HandedWeapons/1HSword_BloodforgedBlade.1HSword_BloodforgedBlade_C
-maw=$item/Armor/Head/HeadArmor_Tusks.HeadArmor_Tusks_C
 pants=$item/Armor/Legs/Leather_Pants.Leather_Pants_C
 band=$item/Armor/ETC/BonecallersBand.BonecallersBand_C
 # Foods whose descriptions promise an effect while the food effect table has no row for them.
@@ -40,17 +37,30 @@ potions=(
 armor='{"values":["ArmorTotal","PlayerPassiveLevelStatComponent.Total Armor"]}'
 health='["Health","Max Health","Health Regen Speed"]'
 meals=$(printf '"%s",' "${uneaten[@]#* }")
-lab give "{\"items\":[\"$knees\",\"$sword\",\"$maw\",\"$pants\",\"$band\",${meals}\"$apple\",\"$stew\",\"$cake\",\"$bread\",\"$spud\",$(printf '"%s",' "${potions[@]#* }" | sed 's/,$//')]}"
+lab close-tutorials
+bash "$(dirname "$0")/crafting-issues.sh" trade
+foragers() { lab eval "$(dirname "$0")/foragers-feast.lua" "{\"action\":\"$1\",\"name\":\"${2:-}\"}"; }
+flower=$item/Crafting_Items/Herbs_And_Roots/LoveMeNotFlower.LoveMeNotFlower_C
+lab give "{\"items\":[\"$item/ChickenMeat.ChickenMeat_C\"]}"
+lab give "{\"count\":2,\"items\":[\"$flower\"]}"
+foragers open
+lab capture-screen foragers-cooking-window
+foragers add "Chicken Meat"
+foragers add "Love-me-not Flower"
+foragers add "Love-me-not Flower"
+lab capture-screen foragers-ingredients
+foragers cook
+foragers wait
+lab capture-screen foragers-result
+foragers close
 lab open-sheet
 lab read-tooltips
-lab player "$armor"
-lab capture-screen armor-none
-# knee-armor-not-counted: the knee guards count only once another armor piece is equipped.
-for step in "knees $knees" "sword $sword" "maw $maw"; do
-  lab equip "{\"item\":\"${step#* }\"}"
-  lab player "$armor"
-  lab capture-screen "armor-${step%% *}"
-done
+lab capture-screen foragers-inventory
+lab press '{"widget":"CharacterSheet_C","button":"WBP_CloseButton"}'
+bash "$(dirname "$0")/knee-issue.sh" player
+lab give "{\"items\":[\"$pants\",\"$band\",${meals}\"$apple\",\"$stew\",\"$cake\",\"$bread\",\"$spud\",$(printf '"%s",' "${potions[@]#* }" | sed 's/,$//')]}"
+lab open-sheet '{"refresh":true}'
+lab read-tooltips
 # armor-without-row and armor-slot-adds-none: each piece leaves Armor where it was.
 for step in "pants $pants" "band $band"; do
   lab equip "{\"item\":\"${step#* }\"}"
@@ -58,8 +68,7 @@ for step in "pants $pants" "band $band"; do
   lab capture-screen "armor-${step%% *}"
 done
 # food-without-row, with Roasted Apple as a food that heals: Health is brought to 10, sampled every frame around the
-# meal, and captured before and after, which also shows the status effects. The tutorial popup that equipping the
-# sword opens covers the status effects and returns after closing, so it is closed before each screenshot.
+# meal, and captured before and after, which also shows the status effects.
 for step in "${uneaten[@]}" "apple $apple"; do
   lab take-damage '{"toHealth":10}'
   lab close-tutorials
@@ -79,6 +88,11 @@ for step in "bread $bread" "spud $spud"; do
   lab capture-screen "${step%% *}-after"
 done
 # potions-without-effect: Health, Mana and Stamina are brought low and sampled every frame around each potion.
+for potion in "Health Potion" "Mana Potion"; do
+  lab eval "$(dirname "$0")/assembled-weapon-tooltips.lua" "{\"action\":\"inventory\",\"name\":\"$potion\",\"capture\":true}"
+  lab capture-screen "${potion%% *}-potion-tooltip"
+  lab eval "$(dirname "$0")/assembled-weapon-tooltips.lua" '{"action":"clear"}'
+done
 for step in "${potions[@]}"; do
   lab take-damage '{"toHealth":10}'
   lab eval "$(dirname "$0")/lower-bars.lua" '{"mana":5,"stamina":5}'

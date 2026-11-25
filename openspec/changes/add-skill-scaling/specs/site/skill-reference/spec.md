@@ -7,7 +7,7 @@ A skill page SHALL show a Damage section after the game card and before Skill Tr
 
 #### Scenario: Elemental skill
 - **WHEN** a reader opens Ice Shard
-- **THEN** its Damage section lists Base Damage 25, Frostbite with "Scaling: +2% per rank" and Frozen Dominion with "Scaling: +5% per rank", and its footer links Icebreaker, Arctic Might and Frost Mastery as unmeasured
+- **THEN** its Damage section lists Base Damage 25 and one row per Cryomancy damage passive, such as Frostbite with "Scaling: +2% per rank" and Frozen Dominion with "Scaling: +5% per rank"
 
 #### Scenario: Weapon skill
 - **WHEN** a reader opens Heavy Sweep

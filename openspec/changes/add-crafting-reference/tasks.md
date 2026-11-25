@@ -5,7 +5,7 @@
 - [ ] 1.3 Assemble weapons from parts, including parts whose `TypeFilters` is empty, and record which parts the crafting window accepts and the finished weapon's equipped stats
 - [ ] 1.4 Craft armor at each armorsmithing quality and read its armor, attune a rune at attunement level 1, and enchant a weapon and read its value in the running game, repeating a result that a random roll can change
 - [ ] 1.5 Cook a meal and craft a potion with a treated ingredient, such as chopped Gildleaf, and record which treatments each window applies and what the result applies when eaten or drunk
-- [ ] 1.6 Record the empty "Quality: S" weapon that a recipe's Auto Craft adds, and the stored damage of F and D weapons that differs from the damage they hit for, in `issues/known-issues.json` as the game-issues skill describes
+- [x] 1.6 Check which crafting defects a player can reproduce. Record the grade D spear's lower damage in Theo Macgowan's Trading tooltip. Copper Claymore's extra "Quality: S" weapon requires a hidden handler and is not a known issue.
 - [ ] 1.7 Record each result in design.md and as a check script under `tools/runtime/checks/`
 
 ## 2. Catalog
