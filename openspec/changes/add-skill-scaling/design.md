@@ -49,9 +49,11 @@ The catalog publishes each skill's damage as a base and a list of typed inputs, 
 
 Each kind of input ships only after `tools/runtime/checks/skill-damage.lua` measures it against a still enemy, as the trace's lab plan describes: Ice Shard as the control for elemental ranks at ranks 0, 1, 2 and 5 and with two passives, Spire Barrage, Earth Spikes and Inferno Lance as suspected drops, Heavy Sweep for weapon damage with two weapons, an unarmed skill at two Unarmed levels, an undead summon with and without its passives, Bard's Bolt with two lutes, Mending Melody with and without Lute's Embrace, and mana spent at ranks 0 and 5 of one mana passive.
 
-### Presentation by comparison
+### One Damage table for every kind of hit
 
-How a skill page shows its scaling is a visible design choice, so it goes through a comparison with screenshots before it ships. Afallon's ability pages, which show a Damage table of each source and its amount with a link to how damage scales, are the reference. The fixed-damage case on most melee pages needs its own option, because players read it as missing data unless it says the damage is fixed in this build.
+Skill pages show a Damage From and Amount table, borrowed from Afallon's ability pages, with one row per hit and its scaling on a second line beginning "Scaling:". Comparison 86 weighed this against a separate scaling row per hit and chose the single row, because a reader then never matches an amount with another row for the same hit. The same table covers passive bonuses, weapon formulas, fixed hits and unmeasured hits, so a player learns one way to read it.
+
+Skill pages reuse the item pages' Bugs section without a link beside the game card, because a link there would change both page kinds for a case the Bugs heading already serves. A passive names the skills it was measured to raise in one sentence under its description, which keeps the links in the passive's own row without a disclosure.
 
 ### Applied base, not the tooltip's
 

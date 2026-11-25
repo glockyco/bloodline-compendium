@@ -8,6 +8,7 @@
 - [ ] 1.6 Measure the landing hit of the 16 skills whose tooltip's Base Damage differs from the base their formula uses. Walking Capacitor is the one left, because it channels only while its key is held.
 - [ ] 1.7 Measure the mana spent by one skill per elemental school at mana passive ranks 0 and 5, and whether Lightning Fury and Thunderous Smite charge twice their cost and Ice Spike charges nothing
 - [ ] 1.8 Record each result and its run in design.md, and each lab-confirmed difference from a passive's description in `issues/known-issues.json` as the game-issues skill describes
+- [ ] 1.9 Measure Ice Shard and Spire Barrage at rank 5 of each Cryomancy damage passive not yet measured (Icebreaker, Arctic Might, Frost Mastery), and one skill per other elemental school at rank 5 of each of its five damage passives, and identify Spire Barrage's separate 25 hit
 
 ## 2. Catalog
 
@@ -21,6 +22,7 @@
 - [ ] 3.2 Compare how a skill page shows its scaling, with options for an elemental skill, a weapon skill and a fixed-damage melee skill, and build the answer
 - [ ] 3.3 Show on each scaling passive the skills it affects, after the comparison, and verify Fire Affinity's anchor
 - [ ] 3.4 Show each hotbar skill's damage and mana cost in the planner from the build's passive ranks and levels, and weapon scaling as unknown until builds hold a weapon
+- [ ] 3.5 Compare where to explain Frozen Ground and how to link to that explanation from site-authored text without changing game descriptions
 
 ## 4. Integration
 
