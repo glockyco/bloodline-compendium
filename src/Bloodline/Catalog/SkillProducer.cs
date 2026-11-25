@@ -1,5 +1,7 @@
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using Bloodline.Records;
 using Bloodline.SiteData;
 
@@ -23,7 +25,7 @@ internal sealed record SkillOutput(
 /// as its window. A skill is every skill class the skills table or a live tree names, with the sources mechanisms
 /// find for it. Passives and spellsongs are entries on their discipline's page.
 /// </summary>
-internal sealed class SkillProducer
+internal sealed partial class SkillProducer
 {
     private const string SkillsTable = "SkillsDataTable";
 
@@ -379,7 +381,100 @@ internal sealed class SkillProducer
                 }
             );
         }
-        return new Prepared(disciplines, skills, entries, skillReferences, entities);
+        var scale = DamageScalings(context, disciplines);
+        return new Prepared(
+            disciplines,
+            skills.Select(scale).ToList(),
+            entries.Select(scale).ToList(),
+            skillReferences,
+            entities
+        );
+    }
+
+    [GeneratedRegex(@"^\+(?<percent>[0-9.]+)% (?<school>\w+) damage per rank\.")]
+    private static partial Regex DamagePerRank();
+
+    /// <summary>
+    /// Gives each skill the damage passives its cast applies. A passive counts when the game describes it as damage
+    /// per rank for its discipline, and a skill counts when its code calls that discipline's
+    /// <c>Get ... Damage Bonuses</c>. Run skill-lab-elemental-ranks measured each such passive at its described
+    /// amount. A skill that the lab saw ignore the bonus carries the known issue instead.
+    /// </summary>
+    private static Func<SkillPage, SkillPage> DamageScalings(
+        CatalogContext context,
+        IReadOnlyList<DisciplinePage> disciplines
+    )
+    {
+        var bySchool = new Dictionary<string, DamageScaling>(StringComparer.OrdinalIgnoreCase);
+        foreach (var page in disciplines)
+        {
+            var host = DisciplineReference(page);
+            var passives = page
+                .PassiveRows.SelectMany(row => row.Passives)
+                .Select(passive =>
+                    (Passive: passive, Match: DamagePerRank().Match(passive.Description ?? ""))
+                )
+                .Where(entry =>
+                    entry.Match.Success
+                    && entry.Passive.Ranks is not null
+                    && string.Equals(
+                        entry.Match.Groups["school"].Value,
+                        page.Name,
+                        StringComparison.OrdinalIgnoreCase
+                    )
+                )
+                .Select(entry => new ScalingPassive(
+                    new EntityReference(
+                        EntityKind.Passive,
+                        entry.Passive.Key,
+                        entry.Passive.Name,
+                        null,
+                        entry.Passive.Icon
+                    )
+                    {
+                        Fragment = entry.Passive.Anchor,
+                        Host = host,
+                    },
+                    double.Parse(
+                        entry.Match.Groups["percent"].Value,
+                        CultureInfo.InvariantCulture
+                    ) / 100,
+                    entry.Passive.Ranks!.Value
+                ))
+                .ToArray();
+            if (passives.Length > 0)
+                bySchool[page.Name] = new DamageScaling(host, passives);
+        }
+        var callers = (context.Records.Code?.Functions ?? [])
+            .SelectMany(function =>
+                function
+                    .Calls.Where(call =>
+                        call.StartsWith("virtual:Get ", StringComparison.Ordinal)
+                        && call.EndsWith(" Damage Bonuses", StringComparison.Ordinal)
+                    )
+                    .Select(call => (function.Package, School: call[12..^15]))
+            )
+            .ToLookup(entry => entry.Package, entry => entry.School, StringComparer.Ordinal);
+        // The helper's result does not reach every skill's hit, as Spire Barrage's spears show, so a skill's scaling
+        // is published only where the lab's sweep saw its hits rise by the passives' full bonus.
+        SkillPage Scale(SkillPage page)
+        {
+            var found = callers[page.Key.Split('.')[0]]
+                .Distinct()
+                .Select(bySchool.GetValueOrDefault)
+                .FirstOrDefault(found => found is not null);
+            var bonus = found?.Passives.Sum(passive => passive.PerRank * passive.Ranks) ?? 0;
+            return page with
+            {
+                DamageScaling =
+                    found is not null
+                    && context.Records.SkillRanks.GetValueOrDefault(page.Key)?.Rose(bonus) == true
+                        ? found
+                        : null,
+                Versions = page.Versions.Select(Scale).ToArray(),
+            };
+        }
+        return Scale;
     }
 
     public SkillOutput Finish(Prepared prepared, GraphResult graph)

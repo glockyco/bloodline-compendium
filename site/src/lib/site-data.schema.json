@@ -145,6 +145,25 @@
       "title": "CraftingData",
       "type": "object"
     },
+    "DamageScaling": {
+      "properties": {
+        "discipline": {
+          "$ref": "#/$defs/EntityReference"
+        },
+        "passives": {
+          "items": {
+            "$ref": "#/$defs/ScalingPassive"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "discipline",
+        "passives"
+      ],
+      "title": "DamageScaling",
+      "type": "object"
+    },
     "DisciplineIndex": {
       "properties": {
         "disciplines": {
@@ -2459,6 +2478,26 @@
       "title": "ResourceSummary",
       "type": "object"
     },
+    "ScalingPassive": {
+      "properties": {
+        "passive": {
+          "$ref": "#/$defs/EntityReference"
+        },
+        "perRank": {
+          "type": "number"
+        },
+        "ranks": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "passive",
+        "perRank",
+        "ranks"
+      ],
+      "title": "ScalingPassive",
+      "type": "object"
+    },
     "SiteBuild": {
       "properties": {
         "appId": {
@@ -2572,6 +2611,16 @@
     },
     "SkillPage": {
       "properties": {
+        "damageScaling": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DamageScaling"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "description": {
           "type": [
             "string",

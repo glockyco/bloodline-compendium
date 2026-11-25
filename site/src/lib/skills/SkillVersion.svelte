@@ -7,6 +7,8 @@
 	import SkillTooltip from './SkillTooltip.svelte';
 	import { skillStatus } from './describe.js';
 	import { skillRowAnchor } from './anchors.js';
+	import EntityLink from '../ui/EntityLink.svelte';
+	import { formatNumber } from '../format.js';
 	import type { SkillPage } from '../site-data.js';
 	/** One version of a skill page: how to learn it beside its game card, as an item version reads. */
 	let { skill, idPrefix = '' }: { skill: SkillPage; idPrefix?: string } = $props();
@@ -18,6 +20,11 @@
 				? { ...source, entity: { ...source.entity, fragment: skillRowAnchor(skill.slug) } }
 				: source
 		)
+	);
+	// The damage passives' bonuses add up, so the most they give together is the sum of every rank.
+	const scaling = $derived(skill.damageScaling);
+	const mostBonus = $derived(
+		scaling ? scaling.passives.reduce((sum, entry) => sum + entry.perRank * entry.ranks, 0) : 0
 	);
 </script>
 
@@ -33,6 +40,18 @@
 	</aside>
 	<div class="item-relations" data-main data-pagefind-ignore="all">
 		<SourceSections {sources} {idPrefix} />
+		{#if scaling}<Section id={idPrefix + 'damage'} title="Damage">
+				<p class="surface">
+					{scaling.discipline.name}'s damage passives raise {skill.name}'s damage:
+					{#each scaling.passives as entry, index (entry.passive.key)}{index
+							? index === scaling.passives.length - 1
+								? ' and '
+								: ', '
+							: ''}<EntityLink entity={entry.passive} />{/each}. Their bonuses add up, to {formatNumber(
+						Math.round(mostBonus * 1000) / 10
+					)}% more at full ranks.
+				</p>
+			</Section>{/if}
 		<UnconfirmedSources sources={skill.sources} name={skill.name} {idPrefix} />
 		<BugsSection notes={skill.notes} facts={skill.facts} name={skill.name} {idPrefix} />
 	</div>

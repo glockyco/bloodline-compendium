@@ -24,6 +24,10 @@ internal sealed record CatalogRecords(
     /// <summary>Skill tooltips that lab runs of the build read, empty when no run read any.</summary>
     public IReadOnlyList<SkillTooltip> SkillTooltips { get; init; } = [];
 
+    /// <summary>Each skill's hits at rank 0 and at full ranks of its damage passives, from the lab's skill-ranks runs.</summary>
+    public IReadOnlyDictionary<string, SkillRankCast> SkillRanks { get; init; } =
+        new Dictionary<string, SkillRankCast>();
+
     /// <summary>The repository's known game defects, which the build copies beside the program.</summary>
     public KnownIssueRegistry Issues { get; init; } = new([]);
 
@@ -57,6 +61,7 @@ internal sealed record CatalogRecords(
             Code = CanonicalJson.Read<CodeIndex>(layout.CodeIndexFile),
             Tooltips = TooltipCheck.Load(layout.RuntimeDirectory),
             SkillTooltips = SkillTooltipCheck.Load(layout.RuntimeDirectory),
+            SkillRanks = SkillRankCheck.Load(layout.RuntimeDirectory),
             Trees = TreeCheck.Load(layout.RuntimeDirectory),
             Censuses = HarvestCheck.Load(layout.RuntimeDirectory),
             Issues = KnownIssues.Load(Path.Combine(AppContext.BaseDirectory, "known-issues.json")),

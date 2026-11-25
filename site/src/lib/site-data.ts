@@ -1093,6 +1093,7 @@ export interface ResourceSummary {
  * via the `definition` "SkillPage".
  */
 export interface SkillPage {
+  damageScaling?: DamageScaling | null;
   description: string | null;
   facts: Fact[];
   icon: string | null;
@@ -1108,6 +1109,25 @@ export interface SkillPage {
   versionLabel?: string | null;
   versionName?: string | null;
   versions: SkillPage[];
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "DamageScaling".
+ */
+export interface DamageScaling {
+  discipline: EntityReference;
+  passives: ScalingPassive[];
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "ScalingPassive".
+ */
+export interface ScalingPassive {
+  passive: EntityReference;
+  perRank: number;
+  ranks: number;
   [k: string]: unknown;
 }
 /**

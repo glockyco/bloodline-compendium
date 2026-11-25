@@ -2,38 +2,13 @@
 
 ## ADDED Requirements
 
-### Requirement: Damage section on skill pages
-A skill page SHALL show a Damage section after the game card and before Skill Tree, as a Damage From and Amount table with one row per hit or bonus. A row whose scaling adds a fact its amount does not show SHALL carry that scaling on a second line beginning "Scaling:", so a reader never has to match an amount with a separate scaling row. The section SHALL NOT add different hits together.
+### Requirement: Damage passives on skill pages
+A skill page SHALL have a Damage section when a lab run saw one of the skill's hits rise by the full bonus of its discipline's damage passives. The section SHALL say in one sentence that those passives raise the skill's damage, link each passive, and give the bonus they add up to at full ranks. A skill without such a run SHALL have no Damage section, because its code can compute the bonus and still hit with another number.
 
 #### Scenario: Elemental skill
-- **WHEN** a reader opens Ice Shard
-- **THEN** its Damage section lists Base Damage 25 and one row per Cryomancy damage passive, such as Frostbite with "Scaling: +2% per rank" and Frozen Dominion with "Scaling: +5% per rank"
+- **WHEN** a reader opens Glacial Crush
+- **THEN** its Damage section reads "Cryomancy's damage passives raise Glacial Crush's damage: Frostbite, Icebreaker, Arctic Might, Frost Mastery and Frozen Dominion. Their bonuses add up, to 75% more at full ranks." with each passive linked
 
-#### Scenario: Weapon skill
-- **WHEN** a reader opens Heavy Sweep
-- **THEN** its Damage section shows the Sweep Hit row with "3 × equipped weapon damage" and no total
-
-#### Scenario: Fixed skill
-- **WHEN** a reader opens Spire Barrage
-- **THEN** each spear's row shows 30 with the passives it was measured not to raise
-
-### Requirement: Unmeasured damage
-The Damage section SHALL give an unmeasured amount or scaling as Unknown with its reason, and SHALL name in a footer the inputs the trace links to a hit whose effect is unmeasured.
-
-#### Scenario: Unmeasured hits
-- **WHEN** a reader opens Leaping Smash before the lab measures it
-- **THEN** the mid-air strike and the landing attack each show Unknown for amount and scaling, and each Unknown gives its reason on hover, focus and tap
-
-### Requirement: Applied damage with its bug
-A skill whose hit uses another number than its game card or than a passive's text promises SHALL show the applied number in its Damage section and a Bugs row in the item pages' pattern, without a link beside the game card.
-
-#### Scenario: Tooltip base differs
-- **WHEN** a reader opens Ember Flick
-- **THEN** the Damage section shows the 35 impact and the burn of five ticks of 10 as separate rows, and Bugs reads "Without damage passive ranks, Ember Flick deals 35 damage on impact, although the tooltip shows Base Damage: 45."
-
-### Requirement: Passives show the skills they affect
-A scaling passive's row SHALL name the skills its ranks were measured to raise in one sentence under its description, linked to their pages, and SHALL say that other skills may also gain damage while the list is incomplete. It SHALL NOT list skills that do not gain, because their own pages explain that. The game's own description stays unlinked.
-
-#### Scenario: Frostbite
-- **WHEN** a reader follows a link to Frostbite
-- **THEN** the row under its description reads that it raises damage for Ice Shard and Ice Spike, linked, and that other skills may also gain damage
+#### Scenario: Skill without a measured rise
+- **WHEN** a reader opens Spire Barrage, whose spears the lab saw hit for 30 at every rank
+- **THEN** the page has no Damage section

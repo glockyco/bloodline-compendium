@@ -1068,7 +1068,22 @@ internal sealed record SkillPage(
 
     [JsonRequired]
     public IReadOnlyList<IssueNote> Notes { get; init; } = [];
+
+    /// <summary>The passives whose ranks raise this skill's damage, or null when none do.</summary>
+    public DamageScaling? DamageScaling { get; init; }
 }
+
+/// <summary>
+/// The damage passives of <see cref="Discipline"/> that a skill's cast applies. Their bonuses add up before they
+/// multiply the skill's damage, as run skill-damage-recovery measured.
+/// </summary>
+internal sealed record DamageScaling(
+    EntityReference Discipline,
+    IReadOnlyList<ScalingPassive> Passives
+);
+
+/// <summary>A passive that adds <see cref="PerRank"/>, as a fraction, to a skill's damage for each of its ranks.</summary>
+internal sealed record ScalingPassive(EntityReference Passive, double PerRank, int Ranks);
 
 /// <summary>An entity whose entities of one name share a page, one version for each different thing they show.</summary>
 internal interface IVersionedPage
