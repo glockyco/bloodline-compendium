@@ -87,11 +87,21 @@ internal sealed class CraftingMechanism : ISourceMechanism
     /// The recipe row of each item class that <c>Crafting:Get Correct Item</c> maps by hand, such as IronIngot for
     /// Iron Ingot, read from the build's code index.
     /// </summary>
-    private static IReadOnlyList<ClassName> HandMapped(CatalogContext context) =>
+    internal static IReadOnlyList<ClassName> HandMapped(CatalogContext context) =>
         context
             .Records.Code?.Functions.FirstOrDefault(function => function.Citation == CorrectItem)
             ?.ClassNames
         ?? [];
+
+    /// <summary>
+    /// A cooking row of the recipe table. The cooking fire opens <c>CookingWindow</c>, not the crafting window, so
+    /// <see cref="CookingMechanism"/> publishes these rows.
+    /// </summary>
+    internal static bool IsCooking(TableRow row) =>
+        (
+            RecordValues.EnumDisplay(row.Values["CraftingType"])
+            ?? RecordValues.EnumValue(row.Values["CraftingType"])
+        ) is "Cooking" or "CraftingTypes::NewEnumerator6";
 
     /// <summary>Hand-mapped items whose recipe row the recipe table lacks, which the crafting window cannot make.</summary>
     public static IReadOnlyList<ClassName> MissingRows(CatalogContext context)
@@ -136,7 +146,7 @@ internal sealed class CraftingMechanism : ISourceMechanism
             );
         foreach (var (table, row) in RecipeRows(context))
         {
-            if (RecordValues.Integer(row.Values["CraftAmount"]) is not > 0)
+            if (RecordValues.Integer(row.Values["CraftAmount"]) is not > 0 || IsCooking(row))
             {
                 continue;
             }

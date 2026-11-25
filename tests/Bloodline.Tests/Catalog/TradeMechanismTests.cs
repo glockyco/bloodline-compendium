@@ -342,43 +342,63 @@ public sealed class TradeMechanismTests
     }
 
     [Fact]
-    public void CookingCountsRepeatedIngredientsWithoutGrantingThem()
+    public void CookingTakesIngredientsFromTheCookingRowAndTheMealFromTheMealRow()
     {
         var food = Item("Stew");
-        var ingredient = Item("Root");
+        var lost = Item("Lost");
+        var meat = Item("Meat");
+        var root = Item("Root");
         var context = Context(
-            [food, ingredient],
+            [food, lost, meat, root],
             [
+                // The meal row lists one root, the cooking row fills two slots with it and sets no quantities, as
+                // Foragers Feast does. The cooking fire accepts only the cooking row's ingredients.
                 Table(
                     "AllFoodRecipes",
                     new TableRow(
                         "Recipe",
                         Properties(
-                            $$"""{"CompletedMeal":{"$ref":"{{food.Path}}"},"RequiredItems":[{"$ref":"{{ingredient.Path}}"},null,{"$ref":"{{ingredient.Path}}"}],"RecipeName":"Root stew","EXPReward":3}"""
+                            $$"""{"CompletedMeal":{"$ref":"{{food.Path}}"},"RequiredItems":[{"$ref":"{{meat.Path}}"},{"$ref":"{{root.Path}}"}],"RecipeName":"Root stew","EXPReward":3}"""
+                        )
+                    ),
+                    new TableRow(
+                        "Orphan",
+                        Properties(
+                            $$"""{"CompletedMeal":{"$ref":"{{lost.Path}}"},"RequiredItems":[{"$ref":"{{root.Path}}"},null,{"$ref":"{{root.Path}}"}],"RecipeName":"Lost stew","EXPReward":1}"""
+                        )
+                    )
+                ),
+                Table(
+                    "ItemRecipes",
+                    new TableRow(
+                        "Recipe",
+                        Properties(
+                            $$$"""{"Item1":{"$ref":"{{{meat.Path}}}"},"Item2":{"$ref":"{{{root.Path}}}"},"Item3":{"$ref":"{{{root.Path}}}"},"Item4":null,"QtyReqItem1":0,"QtyReqItem2":0,"QtyReqItem3":0,"QtyReqItem4":0,"CraftAmount":1,"CraftingType":{"$enum":"CraftingTypes::NewEnumerator6","display":"Cooking"}}"""
                         )
                     )
                 ),
             ]
         );
-        var found = Assert.Single(new CookingMechanism().FindSources(context));
-        Assert.Equal(food.Path, found.Key);
-        Assert.Equal(2, Assert.Single(found.Source.Inputs).Quantity);
-        Assert.Equal(new Amount(1, 1), found.Source.Amount);
-        Assert.Equal("Root stew", found.Source.Name);
-        Assert.Empty(found.Source.Places);
-        Assert.Equal(EntityKind.Recipe, found.Source.Entity.Kind);
+        var found = new CookingMechanism().FindSources(context).ToDictionary(found => found.Key);
+        var stew = found[food.Path].Source;
+        Assert.False(stew.Unconfirmed);
         Assert.Equal(
-            "/Game/Invented/AllFoodRecipes.AllFoodRecipes:Recipe",
-            found.Source.Entity.Key
+            [("Meat", 1), ("Root", 2)],
+            stew.Inputs.Select(input => (input.Item.Name, input.Quantity)).OrderBy(pair => pair.Name)
         );
+        Assert.Equal(new Amount(1, 1), stew.Amount);
+        Assert.Equal("Root stew", stew.Name);
+        Assert.Equal("/Game/Invented/AllFoodRecipes.AllFoodRecipes:Recipe", stew.Entity.Key);
         Assert.Equal(
             ("Cooking Fire", "Cooking", 3d),
-            (
-                found.Source.Recipe!.Station!.Name,
-                found.Source.Recipe.Profession?.Name,
-                found.Source.Recipe.Experience
-            )
+            (stew.Recipe!.Station!.Name, stew.Recipe.Profession?.Name, stew.Recipe.Experience)
         );
+        // A meal row with no cooking row matches no ingredients the player can put in.
+        var orphan = found[lost.Path].Source;
+        Assert.True(orphan.Unconfirmed);
+        Assert.Equal(2, Assert.Single(orphan.Inputs).Quantity);
+        // The crafting window never opens for cooking, so the crafting producer leaves the cooking row alone.
+        Assert.Empty(new CraftingMechanism().FindSources(context));
     }
 
     [Fact]

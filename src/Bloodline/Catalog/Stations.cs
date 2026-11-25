@@ -5,7 +5,7 @@ namespace Bloodline.Catalog;
 /// <summary>
 /// The station that opens the crafting window for each discipline. Anvil_Workbench, Engineers_Workbench,
 /// NecromancersAltar and Smelting_Oven create Crafting with their crafting type, FocusAssemblyTable creates it for
-/// magical components, and CookingFire opens CookingWindow, which reads AllFoodRecipes.
+/// magical components, and CookingFire opens CookingWindow, whose recipes <see cref="CookingMechanism"/> describes.
 /// </summary>
 internal static class Stations
 {
