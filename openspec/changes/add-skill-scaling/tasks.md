@@ -1,12 +1,12 @@
 ## 1. Evidence
 
 - [x] 1.1 Trace every published skill's damage, mana cost and effect inputs in the code, with function and statement citations, in `artifacts/24464547/runtime/skill-scaling.md`
-- [ ] 1.2 Write `tools/runtime/checks/skill-damage.lua`, which casts a hotbar skill through its own input at a still enemy and reads the target's Health per frame, the caster's mana and every actor the cast spawns
-- [ ] 1.3 Measure Ice Shard at Cryomancy damage ranks 0, 1, 2 and 5 and with two different passives, and Spire Barrage, Earth Spikes, Inferno Lance and Emberspark with and without ranks
+- [x] 1.2 Write `tools/runtime/checks/skill-damage.lua`, which casts a hotbar skill through its own input at a still enemy and reads the target's Health per frame, the caster's mana and every actor the cast spawns
+- [x] 1.3 Measure Ice Shard at Cryomancy damage ranks 0, 1, 2 and 5 and with two different passives, and Spire Barrage, Earth Spikes, Inferno Lance and Emberspark with and without ranks
 - [ ] 1.4 Measure Heavy Sweep with two weapons, an unarmed skill at two Unarmed levels, Heartwrench at two Vampirism levels, an undead summon with and without its damage and health passives, Bard's Bolt with two lutes, and Mending Melody with and without Lute's Embrace
 - [ ] 1.5 Measure an Arcane and a Necromancy skill with and without their older passives, and a Druidism form with Bestial Fury
-- [ ] 1.6 Measure the landing hit of the 16 skills whose tooltip's Base Damage differs from the base their formula uses, such as Ember Flick and Meteor Form
-- [ ] 1.7 Measure the mana spent by one skill per elemental school at mana passive ranks 0 and 5
+- [ ] 1.6 Measure the landing hit of the 16 skills whose tooltip's Base Damage differs from the base their formula uses. Walking Capacitor is the one left, because it channels only while its key is held.
+- [ ] 1.7 Measure the mana spent by one skill per elemental school at mana passive ranks 0 and 5, and whether Lightning Fury and Thunderous Smite charge twice their cost and Ice Spike charges nothing
 - [ ] 1.8 Record each result and its run in design.md, and each lab-confirmed difference from a passive's description in `issues/known-issues.json` as the game-issues skill describes
 
 ## 2. Catalog

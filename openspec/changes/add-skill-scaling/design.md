@@ -1,6 +1,6 @@
 ## Context
 
-Findings come from Steam build 24464547. `artifacts/24464547/runtime/skill-scaling.md` holds the trace of every published skill's damage path with its function and statement citations. It is a reading of the code, which the lab has not yet confirmed.
+Findings come from Steam build 24464547. `artifacts/24464547/runtime/skill-scaling.md` holds the trace of every published skill's damage path with its function and statement citations. `artifacts/24464547/runtime/skill-damage.md` holds the lab measurements of `tools/runtime/checks/skill-damage.lua`, in runs `skill-damage-recovery` and `skill-damage-followups`, which cast each skill from the hotbar at a still Goblin Brute with zero Armor and read its Health every frame.
 
 What the code does:
 - `PlayerPassiveLevelStatComponent` has a damage helper and a mana helper per elemental school. Each reads the ranks of five named passives from the saved passive list, which is the passive's rank and not the discipline's level. The damage helper sums 0.02, 0.02, 0.03, 0.03 and 0.05 per rank, and a usual cast deals `base * (1 + sum)`. The mana helper sums 0.024, 0.024, 0.03, 0.036 and 0.036 per rank, and `Skill:Consume Mana` charges `ManaCost * (1 - sum)` for those five schools.
@@ -12,6 +12,12 @@ What the code does:
 - Bard's Bolt and Harmonic Burst deal the lute's damage plus 25. Mending Melody heals by the Lute level, and Lute's Embrace doubles the heal where its description says 50% more.
 - No attribute multiplies a skill's damage, and no passive shortens cooldowns in general.
 - For 16 of the 56 skills whose traced formula names its base, the base differs from the Base Damage the game's tooltip shows, which skill pages publish. Ember Flick's card says 45 and its hit multiplies 35, Meteor Form's card says 100 and its hit multiplies 300.
+
+What the lab showed:
+- Elemental damage ranks add before they multiply. Ice Shard hit for 25, 25.5, 26 and 27.5 at Frostbite ranks 0, 1, 2 and 5, and for 33.75 with Frozen Dominion 5 as well, which is `25 * (1 + 0.10 + 0.25)`. Ice Spike rose from 35 to 38.5 at Frostbite rank 5.
+- Four spells ignore the bonus. Spire Barrage's spears hit for 30, Earth Spikes for 100 per hit, Inferno Lance for 150 plus a 50 explosion, and Emberspark landed only its fixed 25 in normal collisions, both at rank 0 and with two of the school's damage passives at rank 5.
+- The tooltip's Base Damage is not the hit for 15 of the 16 skills the trace named: Ember Flick hit for 35 against a tooltip of 45, Meteor Form for 300 against 100, Lightning Fury for 75 against 35. Walking Capacitor did not channel headless and stays unmeasured.
+- Lightning Fury and Thunderous Smite took 60 and 70 mana in one step, twice their costs of 30 and 35, and Ice Spike took none. Task 1.7 measures mana on purpose before this becomes a claim.
 
 What the compendium has:
 - Skill pages show the game card with base damage, cooldown and mana or stamina cost, from `S_SkillInfo`.
@@ -66,6 +72,6 @@ The developer said the melee trees will be revisited. The pages state melee scal
 
 ## Open Questions
 
-- Which of the suspected drops the game applies, and whether they are defects.
+- Whether the four spells that ignore the damage bonus are defects or the developer's intent. Pages state the fixed numbers the lab measured either way.
 - How older passives such as Holy Retribution and Death's Embrace reach the skills of their trees in play.
 - Whether Bestial Fury raises shapeshift damage at all.
