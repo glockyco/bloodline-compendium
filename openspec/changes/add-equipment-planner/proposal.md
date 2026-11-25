@@ -2,7 +2,7 @@
 
 ## Why
 
-Players who share builds compare gear as well as levels and skills, and the Character Planner has only Attributes, Skills and Skill Bars. Comparison 59 approved Equipment and Item Bar tabs for it. A crafted weapon's numbers depend on the quality of each copy, so Equipment builds on the crafting rules that `add-crafting-reference` verifies.
+Players who share builds compare gear as well as levels and skills, and the Character Planner has only Attributes, Skills and Skill Bars. Comparison 59 approved Equipment and Item Bar tabs for it. An assembled weapon's numbers depend on its parts and the grade of each copy, so Equipment builds on the crafting rules that `add-crafting-reference` verifies.
 
 ## What Changes
 
@@ -27,4 +27,4 @@ None.
 - `site/src/lib/planner/`, `site/src/lib/rules/` and the planner route's payload budget in `scripts/payload-gate.mjs`.
 - The catalog writes, as planner inputs, the items each slot and the Item Bar take with the facts the rules need.
 - A lab check under `tools/runtime/checks/` for which items each slot takes.
-- Depends on `add-crafting-reference`. Companion and mount choices arrive with step 9's companion and mount pages.
+- Depends on `add-crafting-reference`. Companion and mount choices arrive with the plan's mounts and companions step.

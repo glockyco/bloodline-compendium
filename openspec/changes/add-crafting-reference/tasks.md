@@ -1,11 +1,12 @@
 ## 1. Evidence
 
 - [ ] 1.1 Locate the crafted armor classes and the functions that apply weapon assembly, armorsmithing, attunement, enchanting and recipe learning, and record them in design.md
-- [ ] 1.2 Craft the same weapon through the minigame and through Auto Craft, read each copy's quality and its equipped damage, speed and value in the running game, and repeat Auto Craft enough to show the grades its roll gives
+- [x] 1.2 Craft a recipe weapon and an assembled weapon through Craft, Auto Craft and the minigame, read each copy's grade and its stored and equipped damage, speed and value, and observe a hit, in runs `craft-quality`, `craft-quality-assembly` and `craft-quality-blank`
 - [ ] 1.3 Assemble weapons from parts, including parts whose `TypeFilters` is empty, and record which parts the crafting window accepts and the finished weapon's equipped stats
 - [ ] 1.4 Craft armor at each armorsmithing quality and read its armor, attune a rune at attunement level 1, and enchant a weapon and read its value in the running game, repeating a result that a random roll can change
 - [ ] 1.5 Cook a meal and craft a potion with a treated ingredient, such as chopped Gildleaf, and record which treatments each window applies and what the result applies when eaten or drunk
-- [ ] 1.6 Record each result in design.md and as a check script under `tools/runtime/checks/`
+- [ ] 1.6 Record the empty "Quality: S" weapon that a recipe's Auto Craft adds, and the stored damage of F and D weapons that differs from the damage they hit for, in `issues/known-issues.json` as the game-issues skill describes
+- [ ] 1.7 Record each result in design.md and as a check script under `tools/runtime/checks/`
 
 ## 2. Catalog
 

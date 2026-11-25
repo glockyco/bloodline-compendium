@@ -14,15 +14,15 @@ The catalog SHALL publish which part kinds each crafted weapon family takes, whi
 - **THEN** the page names the weapons the blade fits and links the weapon builder
 
 ### Requirement: Quality grades
-The catalog SHALL publish the quality grades the anvil gives through its minigame and through Auto Craft, and how each grade scales a crafted weapon's stats as the equipped weapon carries them. Where the game converts a quality in more than one place, the published conversion SHALL be the one a lab run confirms. A recipe weapon's page SHALL say that crafted copies differ by quality.
+The catalog SHALL publish the quality grades an assembled weapon can get, the minigame result each grade needs, and how each grade scales the stored damage and value the inventory shows and the damage and attack speed the equipped weapon uses. A recipe weapon's page SHALL keep its class values, because a recipe gives no grade.
 
-#### Scenario: One quality grade
-- **WHEN** a lab run crafts a weapon at one quality grade and reads its equipped damage
-- **THEN** the published multiplier for that grade reproduces that damage
+#### Scenario: Grade F
+- **WHEN** a reader looks up an assembled spear whose parts sum to 15 damage at grade F
+- **THEN** the reference shows that the inventory lists 7 damage and the spear hits for 12
 
 #### Scenario: Recipe weapon
 - **WHEN** a reader opens Copper Claymore
-- **THEN** the page says that a crafted copy's damage, speed and value depend on the quality it was made at
+- **THEN** its damage and value are the same for every crafted copy
 
 ### Requirement: Armorsmithing
 The catalog SHALL publish the armorsmithing qualities with their required levels, the armor each armor class and quality gives, the rune slots and how they change experience, and the materials each crafted armor piece costs.

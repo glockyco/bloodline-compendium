@@ -6,7 +6,7 @@ Findings come from Steam build 24464547.
 - The Item Bar has eight slots, separate from Equipment and the two skill bars, as comparison 59 records.
 - Armor is measured: `establish-reference-architecture`'s design records the armor rule from runs, such as a 20-point hit falling to 17.2 with Feral Maw and the Winter Warden Cuirass, and its walking speeds. `issues/known-issues.json` records Leather Pants adding 0 and knee armor counting only after another piece goes on.
 - Walking speed depends on the Light, Medium and Heavy Armor levels. Comparison 46 set those levels aside for Equipment.
-- A crafted weapon's damage, speed and value depend on the quality of each copy, as `add-crafting-reference`'s design records, so Equipment needs that change's model to hold crafted gear.
+- An assembled weapon's damage, speed and value depend on its parts and the grade of each copy, as `add-crafting-reference`'s design records, so Equipment needs that change's model to hold it. Recipe weapons keep their class values.
 - The planner keeps builds in a versioned link of sections, and an older planner keeps sections it does not know when it saves or shares again, as comparison 60 decided.
 
 ## Goals / Non-Goals
@@ -18,19 +18,19 @@ Findings come from Steam build 24464547.
 
 **Non-Goals:**
 
-- Companion and mount choices, which join with step 9's companion and mount pages.
-- What consumables on the Item Bar do to the character, which joins with step 9's Effects section.
+- Companion and mount choices, which join with the plan's mounts and companions step and its pages.
+- What consumables on the Item Bar do to the character, which joins with the planner's Effects section in that same step.
 - Per-build social link previews, which the roadmap puts later.
 
 ## Decisions
 
 ### After the crafting reference
 
-Equipment ships after `add-crafting-reference`, so its slot entries and link sections are designed once for found and crafted gear. Showing found gear first would leave crafted copies at base numbers and need a second design of the same slots.
+Equipment ships after `add-crafting-reference`, so its slot entries and link sections are designed once for found and crafted gear. Showing found gear first would leave assembled weapons out and need a second design of the same slots.
 
 ### 13 slots and the Item Bar
 
-Equipment covers the 13 worn and held slots, and the Item Bar shares its item choice, as comparison 59 approved. Companion and mount wait for step 9, because the sheet appears to pick them through their own screens, which step 9's companion and mount pages explain and check.
+Equipment covers the 13 worn and held slots, and the Item Bar shares its item choice, as comparison 59 approved. Companion and mount wait for the plan's mounts and companions step, because the sheet appears to pick them through their own screens, which that step's pages explain and check.
 
 ### Slot entries
 

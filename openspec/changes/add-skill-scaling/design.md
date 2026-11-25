@@ -1,0 +1,71 @@
+## Context
+
+Findings come from Steam build 24464547. `artifacts/24464547/runtime/skill-scaling.md` holds the trace of every published skill's damage path with its function and statement citations. It is a reading of the code, which the lab has not yet confirmed.
+
+What the code does:
+- `PlayerPassiveLevelStatComponent` has a damage helper and a mana helper per elemental school. Each reads the ranks of five named passives from the saved passive list, which is the passive's rank and not the discipline's level. The damage helper sums 0.02, 0.02, 0.03, 0.03 and 0.05 per rank, and a usual cast deals `base * (1 + sum)`. The mana helper sums 0.024, 0.024, 0.03, 0.036 and 0.036 per rank, and `Skill:Consume Mana` charges `ManaCost * (1 - sum)` for those five schools.
+- Several spells compute the bonus and then hit with something else: Spire Barrage hands its ice spear a literal 30, Earth Spikes sets no damage on its spike actor, and Inferno Lance and Spark replace the result with an older path. Emberspark has a second fixed hit beside its scaled one.
+- `Skill:Check Damage Passives` holds older per-school passives, such as Holy Retribution for Arcane and Death's Embrace for Necromancy, which count only where a skill asks for them and uses the answer.
+- Druidism's `Check Form Passives` adds 0 for Bestial Fury, while a separate helper adds 20% per rank and looks for a different first-rank name.
+- Undead summons apply `base * (1 + sum)` of their own damage and health passives at spawn.
+- Melee, ranged and some Vampirism skills read the equipped weapon's `WeaponInfo.Damage`, often with a multiplier, such as 3 for Heavy Sweep. Unarmed skills read the unarmed rating, `round(L + 5 + 3 * floor(L / 5))` for Unarmed level L. Heartwrench reads the Vampirism level.
+- Bard's Bolt and Harmonic Burst deal the lute's damage plus 25. Mending Melody heals by the Lute level, and Lute's Embrace doubles the heal where its description says 50% more.
+- No attribute multiplies a skill's damage, and no passive shortens cooldowns in general.
+- For 16 of the 56 skills whose traced formula names its base, the base differs from the Base Damage the game's tooltip shows, which skill pages publish. Ember Flick's card says 45 and its hit multiplies 35, Meteor Form's card says 100 and its hit multiplies 300.
+
+What the compendium has:
+- Skill pages show the game card with base damage, cooldown and mana or stamina cost, from `S_SkillInfo`.
+- Discipline pages show each passive with its game description, ranks and costs.
+- The Character Planner holds a build's passive ranks, the discipline levels and the hotbar, so the elemental and older passive bonuses can be computed for a build now. A build has no weapon until `add-equipment-planner`.
+
+## Goals / Non-Goals
+
+**Goals:**
+
+- A player can read on a skill page what makes its damage grow, and by how much at full ranks.
+- A player can read on a passive which skills it affects.
+- The planner shows the damage and mana cost a build's skills have.
+- Every published coefficient rests on a lab measurement, and every lab-confirmed mismatch with a description is a known issue.
+
+**Non-Goals:**
+
+- Damage per second, rotations or combat simulation.
+- Damage-over-time totals, which depend on the target's status handling. Pages state the tick and duration the code supplies, where the lab confirms them.
+- Enemy armor and resistances, which arrive with creatures.
+
+## Decisions
+
+### Inputs, not formulas per skill
+
+The catalog publishes each skill's damage as a base and a list of typed inputs, such as the Pyromancy damage passives, the equipped weapon times 3, or the unarmed rating, with each input's coefficients. Rules in `site/src/lib/rules/` turn base and inputs into a number with worded steps. A skill whose traced hit drops the bonus publishes the bonus only after the lab shows which number lands, and a skill whose hit path the trace did not resolve publishes its scaling as unknown. This keeps one rule per kind of input, as `site/game-rules` requires, instead of a formula per skill.
+
+### Lab before publishing
+
+Each kind of input ships only after `tools/runtime/checks/skill-damage.lua` measures it against a still enemy, as the trace's lab plan describes: Ice Shard as the control for elemental ranks at ranks 0, 1, 2 and 5 and with two passives, Spire Barrage, Earth Spikes and Inferno Lance as suspected drops, Heavy Sweep for weapon damage with two weapons, an unarmed skill at two Unarmed levels, an undead summon with and without its passives, Bard's Bolt with two lutes, Mending Melody with and without Lute's Embrace, and mana spent at ranks 0 and 5 of one mana passive.
+
+### Presentation by comparison
+
+How a skill page shows its scaling is a visible design choice, so it goes through a comparison with screenshots before it ships. Afallon's ability pages, which show a Damage table of each source and its amount with a link to how damage scales, are the reference. The fixed-damage case on most melee pages needs its own option, because players read it as missing data unless it says the damage is fixed in this build.
+
+### Applied base, not the tooltip's
+
+A skill's published damage base is the number its hit uses, as the lab confirms it. Where the game's tooltip shows another Base Damage, the game card keeps the applied number and the page names the tooltip's number in its Bugs section, as `site/item-page` already does for items.
+
+### Mismatches are game issues
+
+A difference between a passive's description and what the lab measures, such as 2.4% where the description says 2.5%, is the game's defect, decided with `.agent/skills/game-issues/SKILL.md`. It goes into `issues/known-issues.json` with its reproduction, and the page shows the applied number beside the issue, as items do.
+
+### After the game's melee revisit
+
+The developer said the melee trees will be revisited. The pages state melee scaling as this build has it, and the update workflow's rule check reports when a cited helper's fingerprint changes, which marks the scaling for review after that update.
+
+## Risks / Trade-offs
+
+- A skill can hit through several actors, ticks and branches, so one "damage" per skill can mislead. Pages list each scaled hit by what the player sees, such as the projectile and the burning ground, where the lab separates them.
+- Casting a hotbar skill headless needs its input action or the controller's own use function. If neither works headless, the check runs in `launch render`, which needs no window.
+
+## Open Questions
+
+- Which of the suspected drops the game applies, and whether they are defects.
+- How older passives such as Holy Retribution and Death's Embrace reach the skills of their trees in play.
+- Whether Bestial Fury raises shapeshift damage at all.

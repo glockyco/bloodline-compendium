@@ -5,8 +5,10 @@ Findings come from Steam build 24464547. `curate-item-reference` first planned t
 What the game holds:
 - `WeaponComponentTable` has 791 parts with their class, part kind, the weapon types they fit (`TypeFilters`), damage, speed, value and `WeaponsmithingLevelRequired`. Only 11 rows name the weapon types they fit, so an empty `TypeFilters` does not say which weapons a part fits.
 - `ItemRecipes` has 1,124 rows with up to four ingredients, their quantities, `CraftAmount` and `CraftingType`. `AllFoodRecipes` has 100 rows and `SeedDataTable` 18. 41 of the 369 listed weapons and 2 of the 402 listed armor pieces have a recipe. Weapons assembled from parts are not listed items, because each is its own combination.
-- The anvil scales a crafted weapon when it is made. `Crafting:Begin Crafting Minigame` opens `BlacksmithingMinigame` for an anvil recipe or a weapon from parts. `BlacksmithingMinigame:Scale Weapon Based On Quality` writes the scaled damage, speed and value into the new item's `ItemInfo`, and `Crafting:Add Custom Weapon to Inventory` multiplies a weapon from parts by the minigame's quality. With Auto Craft, `BlacksmithingMinigame:Auto Craft` sets the quality from `RandomIntegerInRange(1, 5)` and the Weaponsmithing level instead of the minigame. Copies of the same crafted weapon therefore differ, and an equipped crafted weapon carries values that no class default holds.
-- `Crafting` and `CustomWeapon_Base` each convert a quality to a stat multiplier in their own `Convert Quality to Stat Multiplier`, which `curate-item-reference` read as D 0.75 and F 0.5 against 0.9 and 0.8. The equipment slot, inventory and storage widgets have their own copies. Which one the equipped weapon uses is open.
+- Only weapons assembled from parts get a quality grade. A recipe weapon, such as Copper Claymore, comes out of Craft and Auto Craft with its class defaults every time: 34 crafts in run `craft-quality` gave 25 damage and 100 value. Assembling a weapon opens `BlacksmithingMinigame`, whose quality bar gives F at 0% to 24%, D to 49%, C to 69%, B to 89%, A to 99% and S at 100% (`artifacts/24464547/runtime/craft-quality.md`).
+- A grade scales two things differently. The stored damage and value that the inventory and equipment slot show use `Crafting:Convert Quality to Stat Multiplier`, 0.50, 0.75, 1.00, 1.10, 1.20 and 1.30 from F to S, truncated. The equipped weapon rebuilds its combat damage and attack speed from the unscaled part sums with `CustomWeapon_Base`'s own conversion, 0.80, 0.90, 1.00, 1.10, 1.20 and 1.30. An F spear of 15 part damage stores 7 and hits for 12, run `craft-quality-assembly`.
+- Assembly's Auto Craft button is hidden. Its event, called in the lab only, rolls F, D or C at 20%, 60% and 20% whatever the Weaponsmithing level.
+- A recipe's Auto Craft also adds an empty weapon named "Empty" with "Quality: S", 0 damage and 0 value, reproduced on a fresh save in run `craft-quality-blank`.
 - `Armorsmithing` holds the armorsmithing qualities and `Check Armor Quality is Unlocked`. The player also has rune tiers, an attunement table and enchantments with melee trigger types, as `establish-reference-architecture`'s design records, and the code index locates `Begin Attunement` and `Add Enchanted Item to Inventory`.
 - `AllIngredientEffects` has 27 rows of ingredient treatments, which `Potioncrafting_Ingredient_Slot:Retrieve Prep Effects` reads. 27 item pages show these treatment effects from the table, and no lab run has confirmed that a meal or potion applies them.
 
@@ -49,7 +51,7 @@ Item sources stay with the source mechanisms. Crafting rules do not enter the so
 
 ### Reference before the planner
 
-A crafted weapon's numbers depend on the quality of each copy, so the planner cannot show crafted gear from item pages alone. This change ships the rules and their pages first. `add-equipment-planner` designs Equipment's slot entries and link format once, for found and crafted gear, on the model this change publishes. The weapon builder is the first tool on the verified rules, and Equipment reuses its weapon editor.
+An assembled weapon's numbers depend on its parts and the grade of each copy, so the planner cannot show it from item pages alone. This change ships the rules and their pages first. `add-equipment-planner` designs Equipment's slot entries and link format once, for found and crafted gear, on the model this change publishes. The weapon builder is the first tool on the verified rules, and Equipment reuses its weapon editor.
 
 ### Lab first
 
@@ -57,16 +59,15 @@ Each rule ships only after a check under `tools/runtime/checks/` observes it in 
 
 ### Recipes and treatments stay, other cooking and farming do not
 
-How a recipe is learned answers how to get any crafted item, gear or meal, so recipe learning belongs here. The treatment check confirms facts that 27 ingredient pages already show. New cooking or farming mechanics have no specific question behind them yet, and the effects of meals and potions join the planner only with step 9's Effects section.
+How a recipe is learned answers how to get any crafted item, gear or meal, so recipe learning belongs here. The treatment check confirms facts that 27 ingredient pages already show. New cooking or farming mechanics have no specific question behind them yet, and the effects of meals and potions join the planner only with the planner's Effects section in the plan's mounts and companions step.
 
 ## Risks / Trade-offs
 
-- The minigame may need a real cursor or timed input that a headless lab session cannot give. Auto Craft's roll then settles which grades exist, and the minigame's mapping to grades stays unknown until a window session measures it.
+- Pages that show an assembled weapon's damage must say which of the two numbers a player sees where, because the inventory shows the stored one and combat uses the other. The stored number for F and D is a known-issue candidate.
 - Rune and enchanting values may be random within ranges. Pages then show the range and its odds, not a single number.
 
 ## Open Questions
 
-- Which quality grades the anvil gives, how the minigame's result and Auto Craft's roll with the Weaponsmithing level map to them, which conversion applies to equipped weapons, and to which stats.
 - Which parts fit which weapons, and how part contributions combine.
 - Armor by class and quality, required levels, material costs and rune slots per armorsmithing quality.
 - Attunement effectiveness and break chance by tier and level, and what enchanting changes.
