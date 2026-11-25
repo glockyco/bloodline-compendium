@@ -30,4 +30,6 @@ These are corrections the site's owner made by hand. Find this kind of defect be
 - "Those icons look very small btw."
 - "Hmm, those two kinda clash, don't you think?"
 
+Tab labels sit inside their underline with the tabs' inset, the first one included, by choice. Do not report that.
+
 Report only defects, each with the route, the width, what is wrong and the screenshot path, ordered by how much a player would notice. Say which sibling page does it better when one does. Do not propose wording, do not choose between design options, and do not edit files. When you find nothing, say which pages and widths you looked at.

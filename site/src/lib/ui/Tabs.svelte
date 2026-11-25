@@ -163,6 +163,7 @@
 	.choose select {
 		width: 100%;
 	}
+	/* Every tab keeps its inset, the first one too, because a label flush with the page edge looks stuck to it. */
 	.tabs button {
 		flex: 0 0 auto;
 		display: inline-flex;
