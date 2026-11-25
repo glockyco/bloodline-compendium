@@ -315,9 +315,21 @@ internal sealed record OnHitEffect(
 /// <summary>A page's item-specific note about a known issue, falling back to the issue's effect.</summary>
 internal sealed record IssueNote(string Issue, string Effect)
 {
+    public string? Workaround { get; init; }
+
     /// <summary>Tooltip values with no applied fact, such as the damage a shield never deals.</summary>
     public IReadOnlyDictionary<string, string>? TooltipValues { get; init; }
 }
+
+/// <summary>One player action and what to look for immediately afterward.</summary>
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
+internal sealed record IssueStep(string Action, string Result);
+
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
+internal sealed record IssueEffectDetail(string Label, string Text);
+
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
+internal sealed record IssueNoteText(string Effect, string? Workaround = null);
 
 internal enum ReportStatus
 {
@@ -335,9 +347,9 @@ internal enum ReportStatus
 internal sealed record KnownIssue(
     string Id,
     string Title,
-    string Effect,
+    string? Effect,
     string? Workaround,
-    IReadOnlyList<string> Steps,
+    IReadOnlyList<IssueStep> Steps,
     string Expected,
     string Observed,
     string Cause,
@@ -347,11 +359,13 @@ internal sealed record KnownIssue(
     string? ReportUrl
 )
 {
+    public IReadOnlyList<IssueEffectDetail>? EffectDetails { get; init; }
+
     /// <summary>
-    /// Optional sentences for the pages that note this issue, keyed by the entity key of each, such as an item's or a
+    /// Optional notes for the pages that show this issue, keyed by entity key, such as an item's or a
     /// discipline's class path. A discipline notes an issue only through this entry.
     /// </summary>
-    public IReadOnlyDictionary<string, string>? Notes { get; init; }
+    public IReadOnlyDictionary<string, IssueNoteText>? Notes { get; init; }
 }
 
 /// <summary>The registry of reproduced game defects, <c>issues/known-issues.json</c>.</summary>

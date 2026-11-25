@@ -18,29 +18,44 @@ const chosen = ids.length
 // Discord rejects messages longer than 2,000 characters.
 const limit = 2000;
 
-/** The report for one issue: what players see first, then how to reproduce it, then the cause in the game's code. */
-function report(issue) {
+/** The report's sections, kept intact when Discord needs more than one message. */
+function reportSections(issue) {
   return [
-    `**${issue.title}**`,
-    issue.effect,
-    "",
-    "Steps:",
-    ...issue.steps.map((step, index) => `${index + 1}. ${step}`),
-    "",
-    `Expected: ${issue.expected}`,
-    `Observed: ${issue.observed}`,
-    "",
+    [
+      `**${issue.title}**`,
+      ...(issue.effect ? [issue.effect] : []),
+      ...(issue.effectDetails ?? []).map(
+        ({ label, text }) => `**${label}:** ${text}`,
+      ),
+    ].join("\n"),
+    [
+      "Steps:",
+      ...issue.steps.flatMap(({ action, result }, index) => [
+        `${index + 1}. ${action}`,
+        `   ${result}`,
+      ]),
+    ].join("\n"),
+    `Expected: ${issue.expected}\nObserved: ${issue.observed}`,
     `Likely cause, from reading the game's Blueprints: ${issue.cause}`,
-    `Functions: ${issue.citations.map((citation) => "`" + citation + "`").join(", ")}`,
-    `Steam build: ${issue.builds.join(", ")}`,
-  ].join("\n");
+    [
+      `Functions: ${issue.citations.map((citation) => "`" + citation + "`").join(", ")}`,
+      `Steam build: ${issue.builds.join(", ")}`,
+    ].join("\n"),
+  ];
 }
 
 for (const issue of chosen) {
-  const text = report(issue);
-  if (text.length > limit)
-    throw new Error(
-      `The report for ${issue.id} has ${text.length} characters, more than Discord's ${limit}.`,
-    );
-  console.log(`----- ${issue.id} (${text.length} characters)\n${text}\n`);
+  let message = "";
+  for (const section of reportSections(issue)) {
+    if (section.length > limit)
+      throw new Error(
+        `A section of ${issue.id} has ${section.length} characters, more than Discord's ${limit}.`,
+      );
+    if (message && message.length + 2 + section.length > limit) {
+      console.log(`----- ${issue.id} (${message.length} characters)\n${message}\n`);
+      message = "";
+    }
+    message = message ? `${message}\n\n${section}` : section;
+  }
+  console.log(`----- ${issue.id} (${message.length} characters)\n${message}\n`);
 }

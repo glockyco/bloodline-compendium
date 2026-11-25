@@ -36,6 +36,27 @@ it('names the tooltip values an issue explains in its sentence, as the game prin
 	]);
 });
 
+it('keeps the workaround outside the effect and its tooltip comparison', () => {
+	const rows = bugRows({
+		facts: [fact('armorRating', 'Armor', '7', 'knee-issue')],
+		notes: [
+			{
+				issue: 'knee-issue',
+				effect: 'Equipping it leaves Armor unchanged.',
+				workaround: 'Take off another piece of armor.'
+			}
+		]
+	});
+	expect(rows).toEqual([
+		{
+			kind: 'issue',
+			issue: 'knee-issue',
+			sentence: 'Equipping it leaves Armor unchanged, although the tooltip shows ARMOR: 7.',
+			workaround: 'Take off another piece of armor.'
+		}
+	]);
+});
+
 it('gives a tooltip difference that no issue on the page explains a row of its own', () => {
 	const unexplained = fact('damage', 'Damage', '2', null);
 	const rows = bugRows({

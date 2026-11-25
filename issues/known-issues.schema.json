@@ -1,5 +1,59 @@
 {
   "$defs": {
+    "IssueEffectDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "text"
+      ],
+      "title": "IssueEffectDetail",
+      "type": "object"
+    },
+    "IssueNoteText": {
+      "additionalProperties": false,
+      "properties": {
+        "effect": {
+          "type": "string"
+        },
+        "workaround": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "effect"
+      ],
+      "title": "IssueNoteText",
+      "type": "object"
+    },
+    "IssueStep": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "type": "string"
+        },
+        "result": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "action",
+        "result"
+      ],
+      "title": "IssueStep",
+      "type": "object"
+    },
     "KnownIssue": {
       "additionalProperties": false,
       "properties": {
@@ -19,7 +73,19 @@
           "type": "array"
         },
         "effect": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "effectDetails": {
+          "items": {
+            "$ref": "#/$defs/IssueEffectDetail"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
         },
         "expected": {
           "type": "string"
@@ -29,7 +95,7 @@
         },
         "notes": {
           "additionalProperties": {
-            "type": "string"
+            "$ref": "#/$defs/IssueNoteText"
           },
           "type": [
             "object",
@@ -50,7 +116,7 @@
         },
         "steps": {
           "items": {
-            "type": "string"
+            "$ref": "#/$defs/IssueStep"
           },
           "type": "array"
         },

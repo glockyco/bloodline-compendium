@@ -11,7 +11,7 @@ namespace Bloodline.Catalog;
 /// </summary>
 internal static partial class KnownIssues
 {
-    /// <summary>Knee armor counts only after another armor piece is equipped.</summary>
+    /// <summary>Knee armor counts only after another armor piece is put on or taken off.</summary>
     public const string KneeArmor = "knee-armor-not-counted";
 
     /// <summary>A food lists an effect that the food manager's switch does not name.</summary>
@@ -174,6 +174,10 @@ internal static partial class KnownIssues
                     $"Known issue {issue.Id} needs steps, code citations and a confirmed build."
                 );
             }
+            if (issue.Effect is null && issue.EffectDetails is not { Count: > 0 })
+            {
+                throw new InvalidDataException($"Known issue {issue.Id} needs a player-facing effect.");
+            }
             if ((issue.Report == ReportStatus.Reported) != (issue.ReportUrl is not null))
             {
                 throw new InvalidDataException(
@@ -307,6 +311,13 @@ internal static partial class KnownIssues
             {
                 notes[item.Key].Add(SilentCrossbow);
             }
+            if (
+                item.Key
+                == "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Herbs_And_Roots/LoveMeNotFlower.LoveMeNotFlower_C"
+            )
+            {
+                notes[item.Key].Add("foragers-feast-gives-flower");
+            }
         }
         // An item's Bugs rows follow the order of the Known Issues page, which is the registry's.
         var order = registry
@@ -319,19 +330,26 @@ internal static partial class KnownIssues
                     Notes = notes[item.Key]
                         .Select(id => Find(id, "The page of " + item.Name))
                         .OrderBy(issue => order[issue.Id])
-                        .Select(issue => new IssueNote(
-                            issue.Id,
-                            issue.Id switch
+                        .Select(issue =>
+                        {
+                            var note = issue.Notes?.GetValueOrDefault(item.Key);
+                            var effect = issue.Id switch
                             {
                                 "armor-without-row" or "armor-slot-adds-none" =>
                                     $"Wearing {item.Name} adds no armor.",
                                 NoProficiency => $"{item.Name} trains no weapon proficiency.",
                                 WeaponTooltipDamage => WeaponDamageNote(item),
-                                _ => issue.Notes?.GetValueOrDefault(item.Key) ?? issue.Effect,
-                            }
-                        )
-                        {
-                            TooltipValues = tooltipValues.GetValueOrDefault((item.Key, issue.Id)),
+                                _ => note?.Effect
+                                    ?? issue.Effect
+                                    ?? throw new InvalidDataException(
+                                        $"Known issue {issue.Id} needs an effect for {item.Name}."
+                                    ),
+                            };
+                            return new IssueNote(issue.Id, effect)
+                            {
+                                Workaround = note is null ? issue.Workaround : note.Workaround,
+                                TooltipValues = tooltipValues.GetValueOrDefault((item.Key, issue.Id)),
+                            };
                         })
                         .ToArray(),
                 }
@@ -341,12 +359,16 @@ internal static partial class KnownIssues
 
     /// <summary>
     /// The notes the registry gives an entity of a kind without derived notes, such as a discipline or a skill: each
-    /// issue whose notes name its key, with that sentence, in the registry's order.
+    /// issue whose notes name its key, in the registry's order.
     /// </summary>
     public static IReadOnlyList<IssueNote> RegistryNotes(KnownIssueRegistry registry, string key) =>
         registry
             .Issues.Where(issue => issue.Notes?.ContainsKey(key) == true)
-            .Select(issue => new IssueNote(issue.Id, issue.Notes![key]))
+            .Select(issue =>
+            {
+                var note = issue.Notes![key];
+                return new IssueNote(issue.Id, note.Effect) { Workaround = note.Workaround };
+            })
             .ToArray();
 
     /// <summary>
@@ -421,19 +443,35 @@ internal static partial class KnownIssues
     }
 
     /// <summary>Every text of an issue that a reader sees apart from its title, where links may stand.</summary>
-    public static IEnumerable<string> Texts(KnownIssue issue) =>
-        (
-            (IEnumerable<string?>)
-                [
-                    issue.Effect,
-                    issue.Workaround,
-                    .. issue.Steps,
-                    issue.Expected,
-                    issue.Observed,
-                    issue.Cause,
-                    .. issue.Notes?.Values ?? [],
-                ]
-        ).OfType<string>();
+    public static IEnumerable<string> Texts(KnownIssue issue)
+    {
+        if (issue.Effect is not null)
+            yield return issue.Effect;
+        foreach (var detail in issue.EffectDetails ?? [])
+        {
+            yield return detail.Label;
+            yield return detail.Text;
+        }
+        if (issue.Workaround is not null)
+            yield return issue.Workaround;
+        foreach (var step in issue.Steps)
+        {
+            yield return step.Action;
+            yield return step.Result;
+        }
+        yield return issue.Expected;
+        yield return issue.Observed;
+        yield return issue.Cause;
+        if (issue.Notes is not null)
+        {
+            foreach (var note in issue.Notes.Values)
+            {
+                yield return note.Effect;
+                if (note.Workaround is not null)
+                    yield return note.Workaround;
+            }
+        }
+    }
 
     private static string WeaponDamageNote(ItemPage item)
     {

@@ -3,13 +3,13 @@
   "issues": [
     {
       "id": "armor-without-row",
-      "title": "Some armor adds no armor when worn",
+      "title": "Some Armor Adds No Armor When Worn",
       "effect": "Some armor pieces, such as Leather Pants and the Velosian Plume-helm, add no armor when worn and do not lower the damage you take, although their tooltips show an armor value.",
       "workaround": null,
       "steps": [
-        "Take off all armor and open the character sheet. Armor shows 0.",
-        "Hover Leather Pants in the inventory. The tooltip shows ARMOR: 4.",
-        "Equip Leather Pants. Armor on the character sheet still shows 0."
+        { "action": "Take off all armor and open the character sheet.", "result": "Armor shows 0." },
+        { "action": "Hover Leather Pants in the inventory.", "result": "The tooltip shows ARMOR: 4." },
+        { "action": "Equip Leather Pants.", "result": "Armor on the character sheet still shows 0." }
       ],
       "expected": "Armor rises by the value the tooltip shows.",
       "observed": "Armor on the character sheet stays at 0.",
@@ -26,13 +26,13 @@
     },
     {
       "id": "armor-slot-adds-none",
-      "title": "Some accessories show armor they never add",
+      "title": "Some Accessories Show Armor They Never Add",
       "effect": "Some rings, amulets, belts, wings and packs, such as Bonecaller's Band and Pactborn Wings, show an armor value in their tooltips but add no armor when worn.",
       "workaround": null,
       "steps": [
-        "Equip a piece of body armor and note Armor on the character sheet.",
-        "Hover Bonecaller's Band in the inventory. The tooltip shows ARMOR: 1.",
-        "Equip Bonecaller's Band. Armor on the character sheet does not change."
+        { "action": "Equip a piece of body armor that adds armor, such as a Cloth Hood, and open the character sheet.", "result": "Armor rises. Note the new total." },
+        { "action": "Hover Bonecaller's Band in the inventory.", "result": "The tooltip shows ARMOR: 1." },
+        { "action": "Equip Bonecaller's Band.", "result": "Armor on the character sheet does not change." }
       ],
       "expected": "Armor rises by the value the tooltip shows, or the tooltip shows no armor.",
       "observed": "Armor on the character sheet stays the same.",
@@ -46,23 +46,66 @@
       "reportUrl": null
     },
     {
-      "id": "knee-armor-not-counted",
-      "title": "Knee armor counts only after another piece is equipped",
-      "effect": "Knee armor, such as Broad Knee Guards, adds no armor when it is the last armor you equip. It counts once you equip another armor piece.",
-      "notes": {
-        "/Game/BloodlinesAlpha/Interactables/Armor/Knees/Knee_Armor_01.Knee_Armor_01_C": "Broad Knee Guards' 7 armor counts only after you equip another piece of armor.",
-        "/Game/BloodlinesAlpha/Interactables/Armor/Knees/Knee_Armor_StandardCaps.Knee_Armor_StandardCaps_C": "Standard Cap Guards' 6 armor counts only after you equip another piece of armor."
-      },
-      "workaround": "Equip another armor piece after the knee armor.",
+      "id": "assembled-weapon-trade-damage",
+      "title": "Trading Shows Less Damage for Some Assembled Weapons",
+      "effect": "Trading can show less damage than your inventory for the same assembled weapon. A grade D spear made from a Pine Polearm Shaft and Small Copper Spearhead shows three different values.",
+      "effectDetails": [
+        { "label": "In Trading", "text": "The tooltip shows DAMAGE: 11." },
+        { "label": "In your inventory", "text": "The tooltip shows DAMAGE: 14." },
+        { "label": "On a hit", "text": "The spear deals 13.5 damage before modifiers." }
+      ],
+      "workaround": "Check the tooltip in your inventory or equipment slot instead.",
       "steps": [
-        "Take off all armor. Armor on the character sheet shows 0.",
-        "Equip Broad Knee Guards, which add 7 armor. Armor still shows 0.",
-        "Equip a weapon. Armor still shows 0.",
-        "Equip Feral Maw, a helmet that adds 1 armor. Armor shows 8."
+        {
+          "action": "At the anvil in Harbinger Stronghold, assemble a Spear with a Pine Polearm Shaft and a Small Copper Spearhead. If you finish with Quality: C, make another and finish with D.",
+          "result": "The spear is grade D. A grade C spear would show 15 damage on both screens."
+        },
+        { "action": "Open your character sheet and hover over the spear in your inventory.", "result": "The tooltip shows DAMAGE: 14." },
+        {
+          "action": "Close the character sheet and speak to Theo Macgowan in Harbinger Stronghold. Choose \"Let's see what you have in stock.\"",
+          "result": "The Trading window opens."
+        },
+        { "action": "Hover over the spear under Your Inventory in Trading.", "result": "The tooltip shows DAMAGE: 11." }
+      ],
+      "expected": "Trading and the character sheet agree on the damage of the same weapon.",
+      "observed": "Theo's normally opened Trading window built a tooltip with DAMAGE: 11 for the grade D spear. Its inventory and equipment tooltips showed DAMAGE: 14. An ordinary hit removed 13.5 health from an unarmored target. To capture the Trading tooltip in the lab, the existing tooltip widget was moved from its holder into the viewport without changing its text or visibility.",
+      "cause": "Assembly scales and truncates the stored part damage. Trading reads that stored number. The equipped weapon recomputes damage from its parts with a different multiplier for grades D and F. The character sheet rounds the recomputed value, which can also differ from the stored number when the multipliers agree.",
+      "citations": [
+        "/Game/BloodlinesAlpha/Crafting:Add Custom Weapon to Inventory",
+        "/Game/BloodlinesAlpha/Crafting:Convert Quality to Stat Multiplier",
+        "/Game/fantasy_gui_4/widgets/sample_windows/Trader_Inventory_Item:Create Tooltip",
+        "/Game/BloodlinesAlpha/UI/Inventory/UI_InventoryItem_2:Convert Custom Weapon Description to Stats",
+        "/Game/BloodlinesAlpha/UI/CharacterSheet/UI_EquipmentSlot:Convert Custom Weapon Description to Stats",
+        "/Game/BloodlinesAlpha/Interactables/Weapons/1HandedWeapons/CustomWeapon_Base:Convert Quality to Stat Multiplier"
+      ],
+      "builds": [24464547],
+      "report": "notReported",
+      "reportUrl": null
+    },
+    {
+      "id": "knee-armor-not-counted",
+      "title": "Equipping Knee Guards Does Not Update Armor",
+      "effect": "Putting on or swapping knee guards leaves Armor on the character sheet unchanged. Putting on or taking off another piece of armor afterward makes the guards' armor count.",
+      "notes": {
+        "/Game/BloodlinesAlpha/Interactables/Armor/Knees/Knee_Armor_01.Knee_Armor_01_C": {
+          "effect": "Equipping Broad Knee Guards leaves Armor unchanged, although the tooltip shows ARMOR: 7.",
+          "workaround": "After equipping the guards, put on or take off another piece of armor, such as a Cloth Hood."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Armor/Knees/Knee_Armor_StandardCaps.Knee_Armor_StandardCaps_C": {
+          "effect": "Equipping Standard Cap Guards leaves Armor unchanged, although the tooltip shows ARMOR: 6.",
+          "workaround": "After equipping the guards, put on or take off another piece of armor, such as a Cloth Hood."
+        }
+      },
+      "workaround": "After equipping the guards, put on or take off another piece of armor, such as a Cloth Hood.",
+      "steps": [
+        { "action": "Close any tutorial pop-ups. Open the character sheet and take off all armor.", "result": "Armor shows 0." },
+        { "action": "Equip Broad Knee Guards.", "result": "Their tooltip shows ARMOR: 7, but Armor stays at 0." },
+        { "action": "Put on another piece of armor, such as a Cloth Hood.", "result": "Armor updates to count the guards. With a Cloth Hood, it rises to 10." },
+        { "action": "Take off the Cloth Hood.", "result": "Armor drops to 7. The guards' armor still counts." }
       ],
       "expected": "Armor shows 7 once the knee guards are equipped.",
-      "observed": "Armor stays at 0 until another armor piece is equipped, and then includes the knee guards.",
-      "cause": "Equipping armor in every other slot recalculates the armor total through Set player Speed based on Armor, which calls Retrieve Player Armor. The knee branch of Attach Equipment attaches the knee armor without that call, so the total keeps its old value until another armor piece is equipped.",
+      "observed": "In issue-knees-short-1125 and issue-knees-armed-1125, Armor stayed at 0 after equipping the guards alone or with a sword. Adding a Cloth Hood raised it to 10 with Broad Knee Guards or 9 with Standard Cap Guards. Swapping guards alone left the old total in place. In design-facts (2026-11-25T20-49-18-980Z), Armor stayed at 3 when Broad Knee Guards went on after a Cloth Hood. Removing and replacing the hood gave 7 and 10. Equipping the guards alone left Armor at 0, and adding Leather Pants raised it to 7.",
+      "cause": "The knee branch of Attach Equipment does not call Set player Speed based on Armor, so it skips Retrieve Player Armor and leaves the previous total in place. Equipping a helmet runs that recalculation after a Delay. A pausing tutorial can prevent that delay from completing until gameplay resumes.",
       "citations": [
         "/Game/BloodlinesAlpha/Blueprints/FirstPerson2/FirstPersonCharacter2:Attach Equipment",
         "/Game/BloodlinesAlpha/Blueprints/FirstPerson2/FirstPersonCharacter2:Set player Speed based on Armor",
@@ -73,22 +116,52 @@
       "reportUrl": null
     },
     {
-      "id": "food-without-row",
-      "title": "Some foods do nothing when eaten",
-      "effect": "Steak, Soup, Turkey Leg, Cooked Red Wrangler, Red Wrangler Sandwich and Potato Seeds are consumed without any effect, although their descriptions say they restore health.",
+      "id": "foragers-feast-gives-flower",
+      "title": "Foragers Feast Gives a Flower Instead of a Meal",
+      "effect": "Cooking Foragers Feast uses Chicken Meat and two Love-me-not Flowers but gives back only one Love-me-not Flower.",
       "notes": {
-        "/Game/BloodlinesAlpha/Interactables/Steak.Steak_C": "Despite its description, Steak restores no health when eaten.",
-        "/Game/BloodlinesAlpha/Interactables/Soup.Soup_C": "Despite its description, Soup restores no health when eaten.",
-        "/Game/BloodlinesAlpha/Interactables/TukeyLeg.TukeyLeg_C": "Despite its description, Turkey Leg restores no health when eaten.",
-        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/CookedWrangler.CookedWrangler_C": "Despite its description, Cooked Red Wrangler restores no stamina or health when eaten.",
-        "/Game/BloodlinesAlpha/Interactables/WranglerSandwich.WranglerSandwich_C": "Despite its description, Red Wrangler Sandwich restores no stamina, health or mana when eaten.",
-        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/PotatoSeeds.PotatoSeeds_C": "Despite their description, Potato Seeds restore no health when eaten."
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Herbs_And_Roots/LoveMeNotFlower.LoveMeNotFlower_C": {
+          "effect": "Cooking Foragers Feast gives a Love-me-not Flower instead of a meal."
+        }
       },
       "workaround": null,
       "steps": [
-        "Lose some Health.",
-        "Hover Steak in the inventory. Its description says it restores 80 health.",
-        "Eat it. The Steak is gone, and Health only keeps regenerating as before."
+        { "action": "At a cooking fire, add one Chicken Meat and two Love-me-not Flowers to the pot.", "result": "The pot contains all three ingredients." },
+        { "action": "Choose Cook! and wait for it to finish.", "result": "The result shows a flower. If this is your first time cooking the recipe, the game shows \"Recipe Discovered!\"" },
+        { "action": "Check your inventory.", "result": "The ingredients are used up, and you get back one Love-me-not Flower instead of a meal." }
+      ],
+      "expected": "Cooking Foragers Feast gives a meal.",
+      "observed": "With two flowers the game discovers Foragers Feast, awards 25 Cooking EXP, consumes the ingredients and gives one Love-me-not Flower. With only one flower the game instead rejects the ingredients as an invalid recipe and returns them.",
+      "cause": "Check Data Table for Recipe matches the ingredients against the ForagersFeast row in ItemRecipes, which requires two flowers. Translate Data Table Row to Item Class then reads the output from AllFoodRecipes, whose ForagersFeast row points to Love-me-not Flower.",
+      "citations": [
+        "/Game/BloodlinesAlpha/UI/CookingWindow:Check Data Table for Recipe",
+        "/Game/BloodlinesAlpha/UI/CookingWindow:Translate Data Table Row to Item Class",
+        "/Game/BloodlinesAlpha/UI/CookingWindow:Begin Cooking"
+      ],
+      "builds": [24464547],
+      "report": "notReported",
+      "reportUrl": null
+    },
+    {
+      "id": "food-without-row",
+      "title": "Some Foods Do Nothing When Eaten",
+      "effect": "Steak, Soup, Turkey Leg, Cooked Red Wrangler, Red Wrangler Sandwich and Potato Seeds are consumed without any effect, although their descriptions say they restore health.",
+      "notes": {
+        "/Game/BloodlinesAlpha/Interactables/Steak.Steak_C": { "effect": "Despite its description, Steak restores no health when eaten." },
+        "/Game/BloodlinesAlpha/Interactables/Soup.Soup_C": { "effect": "Despite its description, Soup restores no health when eaten." },
+        "/Game/BloodlinesAlpha/Interactables/TukeyLeg.TukeyLeg_C": { "effect": "Despite its description, Turkey Leg restores no health when eaten." },
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/CookedWrangler.CookedWrangler_C": {
+          "effect": "Despite its description, Cooked Red Wrangler restores no stamina or health when eaten."
+        },
+        "/Game/BloodlinesAlpha/Interactables/WranglerSandwich.WranglerSandwich_C": {
+          "effect": "Despite its description, Red Wrangler Sandwich restores no stamina, health or mana when eaten."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/PotatoSeeds.PotatoSeeds_C": { "effect": "Despite their description, Potato Seeds restore no health when eaten." }
+      },
+      "workaround": null,
+      "steps": [
+        { "action": "Lose some health and hover Steak in the inventory.", "result": "The description says it restores 80 health." },
+        { "action": "Eat the Steak.", "result": "The Steak is gone, and Health keeps regenerating as before." }
       ],
       "expected": "Health rises by 80.",
       "observed": "The food is used up, and Health does not rise beyond its normal regeneration.",
@@ -102,15 +175,17 @@
     },
     {
       "id": "food-effect-not-applied",
-      "title": "Druid's Stew does not boost foraging experience",
+      "title": "Druid's Stew Does Not Boost Foraging Experience",
       "effect": "Druid's Stew grants Druidsight but not the foraging experience boost it lists.",
       "notes": {
-        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/GeneralFoodItems/DruidsStew.DruidsStew_C": "Despite its description, Druid's Stew does not boost foraging experience. It still gives Druidsight."
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/GeneralFoodItems/DruidsStew.DruidsStew_C": {
+          "effect": "Despite its description, Druid's Stew does not boost foraging experience. It still gives Druidsight."
+        }
       },
       "workaround": null,
       "steps": [
-        "Eat Druid's Stew. The status effects show Druidsight but no foraging experience boost.",
-        "Eat Carrot Cake. The foraging experience boost appears."
+        { "action": "Eat Druid's Stew.", "result": "The status effects show Druidsight but no foraging experience boost." },
+        { "action": "Eat Carrot Cake.", "result": "The foraging experience boost appears." }
       ],
       "expected": "Druid's Stew adds the foraging experience boost as well as Druidsight.",
       "observed": "Only Druidsight appears, and the foraging experience multiplier stays at 1.",
@@ -124,17 +199,26 @@
     },
     {
       "id": "food-description-mismatch",
-      "title": "Some foods restore different amounts than their descriptions say",
-      "effect": "Buttered Bread restores 15 health and 30 mana, the reverse of its description, and Spud Colossus restores 200 health and no stamina, while its description says 200 stamina.",
+      "title": "Some Foods Restore Different Amounts than Their Descriptions Say",
+      "effect": null,
+      "effectDetails": [
+        { "label": "Health and mana amounts reversed", "text": "Buttered Bread restores 15 health and 30 mana, not 30 health and 15 mana." },
+        { "label": "Health instead of stamina", "text": "Spud Colossus restores up to 200 health and no stamina. Its description says 200 stamina." }
+      ],
       "notes": {
-        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/GeneralFoodItems/ButteredBread.ButteredBread_C": "Despite its description, Buttered Bread restores 15 health and 30 mana when eaten.",
-        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/SpudColossus.SpudColossus_C": "Despite its description, Spud Colossus restores 200 health and no stamina when eaten."
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/GeneralFoodItems/ButteredBread.ButteredBread_C": {
+          "effect": "Despite its description, Buttered Bread restores 15 health and 30 mana when eaten."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/SpudColossus.SpudColossus_C": {
+          "effect": "Despite its description, Spud Colossus restores 200 health and no stamina when eaten."
+        }
       },
       "workaround": null,
       "steps": [
-        "Lose some health and mana. Hover Buttered Bread in the inventory. Its description says it restores 30 health and 15 mana.",
-        "Eat it. Health rises by 15 and Mana by 30.",
-        "Lose some health and stamina, and eat Spud Colossus, whose description says it restores 200 stamina. Health rises by up to 200, and Stamina only keeps regenerating as before."
+        { "action": "Lose some health and mana. Hover Buttered Bread in the inventory.", "result": "The description says it restores 30 health and 15 mana." },
+        { "action": "Eat the Buttered Bread.", "result": "Health rises by 15 and Mana by 30, up to their maximums." },
+        { "action": "Lose some health and stamina, then hover Spud Colossus in the inventory.", "result": "The description says it restores 200 stamina." },
+        { "action": "Eat the Spud Colossus.", "result": "Health rises by up to 200, and Stamina keeps regenerating as before." }
       ],
       "expected": "Buttered Bread restores 30 health and 15 mana, and Spud Colossus restores 200 stamina.",
       "observed": "Buttered Bread restores 15 health and 30 mana. Spud Colossus restores 200 health, up to the maximum, and no stamina.",
@@ -148,23 +232,30 @@
     },
     {
       "id": "potions-without-effect",
-      "title": "Some potions do nothing when used",
-      "effect": "Health Potion, Mana Potion and Castleside Cider do nothing when used, and Dwarfs Flaggon only restores 60 stamina.",
+      "title": "Some Potions Do Nothing or Have the Wrong Effect",
+      "effect": null,
+      "effectDetails": [
+        { "label": "No effect", "text": "Health Potion, Mana Potion and Castleside Cider." },
+        { "label": "Stamina only", "text": "Dwarfs Flaggon restores 60 stamina." }
+      ],
       "notes": {
-        "/Game/BloodlinesAlpha/Interactables/HealthPotion.HealthPotion_C": "Despite its description, Health Potion restores no health when used.",
-        "/Game/ManaPotion.ManaPotion_C": "Despite its description, Mana Potion restores no mana when used.",
-        "/Game/BloodlinesAlpha/Interactables/CastlesideCider.CastlesideCider_C": "Castleside Cider does nothing when used.",
-        "/Game/BloodlinesAlpha/Interactables/TheDwarfsFlaggonBeer.TheDwarfsFlaggonBeer_C": "Despite its description, Dwarfs Flaggon does not make you drunk. It only restores 60 stamina."
+        "/Game/BloodlinesAlpha/Interactables/HealthPotion.HealthPotion_C": {
+          "effect": "Health Potion has no description in its inventory tooltip and restores no health, mana or stamina."
+        },
+        "/Game/ManaPotion.ManaPotion_C": { "effect": "Mana Potion has no description in its inventory tooltip and restores no health, mana or stamina." },
+        "/Game/BloodlinesAlpha/Interactables/CastlesideCider.CastlesideCider_C": { "effect": "Castleside Cider is consumed without restoring health, mana or stamina." },
+        "/Game/BloodlinesAlpha/Interactables/TheDwarfsFlaggonBeer.TheDwarfsFlaggonBeer_C": { "effect": "Dwarfs Flaggon restores 60 stamina without restoring health or mana." }
       },
       "workaround": null,
       "steps": [
-        "Lose some health and mana. Hover Health Potion in the inventory. Its description calls it a standard healing potion.",
-        "Use it. The potion is gone, and Health only keeps regenerating as before.",
-        "Use Mana Potion with some mana missing. Mana only keeps regenerating as before.",
-        "Use Dwarfs Flaggon with some stamina missing. Stamina rises by 60 at once, and no Drunk status appears."
+        { "action": "Lose some health, mana and stamina. Hover Health Potion and Mana Potion in your inventory.", "result": "Neither tooltip has a description." },
+        { "action": "Use Health Potion.", "result": "The potion is consumed. Health, Mana and Stamina regenerate as before." },
+        { "action": "Use Mana Potion.", "result": "The potion is consumed. Health, Mana and Stamina regenerate as before." },
+        { "action": "Use Castleside Cider.", "result": "The cider is consumed. Health, Mana and Stamina regenerate as before." },
+        { "action": "Use Dwarfs Flaggon with at least 60 stamina missing.", "result": "Stamina rises by 60 at once. Health and Mana regenerate as before." }
       ],
-      "expected": "Health Potion restores health, Mana Potion restores mana, and Dwarfs Flaggon makes you drunk, as their descriptions say.",
-      "observed": "Health Potion, Mana Potion and Castleside Cider are used up without any effect. Dwarfs Flaggon restores 60 stamina and nothing else.",
+      "expected": "Using the potions applies their configured effects. The Dwarfs Flaggon hot-swap tooltip lists Drunk for 60 seconds.",
+      "observed": "Health Potion, Mana Potion and Castleside Cider are used up without restoring health, mana or stamina. Castleside Cider shows no status. Dwarfs Flaggon restores 60 stamina and does not change health or mana beyond natural regeneration. Its status list stayed empty after drinking. Its inventory tooltip omits the description that Trading and hot-swap show.",
       "cause": "Using a potion runs FoodManager's Drink Potion, which reads each effect slot's power as an effect number of PotionEffectTranslatorTable and its duration as the amount, as the potion crafting window writes potions. These potions store their real powers there, such as 345 for Restore Health, which are no effect numbers. Dwarfs Flaggon's Improved Jumping holds 5, the number of Restore Stamina, with 60 as its duration.",
       "citations": [
         "/Game/BloodlinesAlpha/UI/CharacterSheet/FoodManager:Drink Potion",
@@ -176,20 +267,28 @@
     },
     {
       "id": "staves-without-fireballs",
-      "title": "Some staves launch no fireballs",
+      "title": "Some Staves Launch No Fireballs",
       "effect": "Despite their descriptions, Fairy Staff, Gripclaw Staff and the two staves named Soulstaff launch no fireballs and use no mana.",
       "notes": {
-        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/FairyStaff.FairyStaff_C": "Despite its description, Fairy Staff launches no fireballs and uses no mana.",
-        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/NecroStaff.NecroStaff_C": "Despite its description, Gripclaw Staff launches no fireballs and uses no mana.",
-        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/DeathsGrasp_Soulstaff.DeathsGrasp_Soulstaff_C": "Despite its description, Soulstaff launches no fireballs, uses no mana and deals no damage.",
-        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/PriestsSoulStaff.PriestsSoulStaff_C": "Despite its description, Soulstaff launches no fireballs, uses no mana and deals no damage."
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/FairyStaff.FairyStaff_C": {
+          "effect": "Despite its description, Fairy Staff launches no fireballs and uses no mana."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/NecroStaff.NecroStaff_C": {
+          "effect": "Despite its description, Gripclaw Staff launches no fireballs and uses no mana."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/DeathsGrasp_Soulstaff.DeathsGrasp_Soulstaff_C": {
+          "effect": "Despite its description, Soulstaff launches no fireballs, uses no mana and deals no damage."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/PriestsSoulStaff.PriestsSoulStaff_C": {
+          "effect": "Despite its description, Soulstaff launches no fireballs, uses no mana and deals no damage."
+        }
       },
       "workaround": null,
       "steps": [
-        "Hover Fairy Staff in the inventory. Its description says it launches small fireballs each time it is swung and each swing consumes 5 mana.",
-        "Equip and draw Fairy Staff with at least 5 mana available. The staff is visible in hand.",
-        "Use normal attacks while aiming into open space. The staff swings, but no fireball appears and the mana bar does not drop.",
-        "Repeat with Gripclaw Staff or a staff named Soulstaff. They show the same description, and their swings launch no fireball either."
+        { "action": "Hover Fairy Staff in the inventory.", "result": "Its description says each swing launches small fireballs and consumes 5 mana." },
+        { "action": "Equip and draw Fairy Staff with at least 5 mana available.", "result": "The staff is visible in hand." },
+        { "action": "Use normal attacks while aiming into open space.", "result": "The staff swings, but no fireball appears and the mana bar does not drop." },
+        { "action": "Repeat with Gripclaw Staff or a staff named Soulstaff.", "result": "They show the same description, and their swings launch no fireball either." }
       ],
       "expected": "Each normal swing launches a small fireball and consumes 5 mana, as the description says.",
       "observed": "Normal swings of Fairy Staff, Gripclaw Staff and both staves named Soulstaff create no projectile and consume no mana. Fairy Staff's charged attacks, blocking and attacks while blocking also produced no fireball in either first-person or third-person view.",
@@ -208,19 +307,29 @@
     },
     {
       "id": "staff-point-blank-damage",
-      "title": "Some staves deal 100 damage at close range",
-      "effect": "The projectiles of Walking Stick, Acolyte Geomancer Staff and Moonstone Staff deal 100 damage instead of 12, 20 and 35 if they hit an enemy as they leave the staff. Attacking from close range can make this happen.",
+      "title": "Some Staves Deal 100 Damage at Close Range",
+      "effect": null,
+      "effectDetails": [
+        { "label": "Hits as the projectile leaves the staff", "text": "Walking Stick, Acolyte Geomancer Staff and Moonstone Staff can deal 100 damage. Attacking at close range can make this happen." },
+        { "label": "Hits after the projectile travels", "text": "Walking Stick deals 12 damage, Acolyte Geomancer Staff deals 20 and Moonstone Staff deals 35." }
+      ],
       "notes": {
-        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/WalkingStick.WalkingStick_C": "Walking Stick's projectile deals 100 damage instead of 12 if it hits an enemy as it leaves the staff. Attacking from close range can make this happen.",
-        "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/AcolyteGeomancerStaff.AcolyteGeomancerStaff_C": "Acolyte Geomancer Staff's projectile deals 100 damage instead of 20 if it hits an enemy as it leaves the staff. Attacking from close range can make this happen.",
-        "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/MoonstoneStaff.MoonstoneStaff_C": "Moonstone Staff's projectile deals 100 damage instead of 35 if it hits an enemy as it leaves the staff. Attacking from close range can make this happen."
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Halberds/WalkingStick.WalkingStick_C": {
+          "effect": "Walking Stick's projectile deals 100 damage instead of 12 if it hits an enemy as it leaves the staff. Attacking from close range can make this happen."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/AcolyteGeomancerStaff.AcolyteGeomancerStaff_C": {
+          "effect": "Acolyte Geomancer Staff's projectile deals 100 damage instead of 20 if it hits an enemy as it leaves the staff. Attacking from close range can make this happen."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Weapons/Staves/MoonstoneStaff.MoonstoneStaff_C": {
+          "effect": "Moonstone Staff's projectile deals 100 damage instead of 35 if it hits an enemy as it leaves the staff. Attacking from close range can make this happen."
+        }
       },
       "workaround": null,
       "steps": [
-        "Equip and draw Acolyte Geomancer Staff with enough mana to attack and no damage-changing effects active. The staff is visible in hand.",
-        "Attack a goblin from a distance where the projectile visibly travels before impact. A normal projectile hit shows 20 damage.",
-        "Face a goblin at close melee range and use normal attacks through the second swing of the combo. A projectile that hits as it appears can show 100 damage.",
-        "Repeat with Walking Stick and Moonstone Staff. Their distant projectile hits show 12 and 35 damage respectively, while point-blank hits can show 100."
+        { "action": "Equip and draw Acolyte Geomancer Staff with enough mana to attack and no damage-changing effects active.", "result": "The staff is visible in hand." },
+        { "action": "Attack a goblin from far enough away for the projectile to travel before impact.", "result": "A normal projectile hit shows 20 damage." },
+        { "action": "Face a goblin at close melee range and use normal attacks through the second swing of the combo.", "result": "A projectile that hits as it appears can show 100 damage." },
+        { "action": "Repeat with Walking Stick and Moonstone Staff.", "result": "Their distant projectile hits show 12 and 35 damage respectively. Hits as the projectile leaves the staff can show 100." }
       ],
       "expected": "Normal projectile hits use the same base damage at both ranges: 12 for Walking Stick, 20 for Acolyte Geomancer Staff and 35 for Moonstone Staff.",
       "observed": "All three staves dealt 100 projectile damage when the projectile overlapped the goblin during creation. At longer range, Walking Stick dealt 12, Acolyte Geomancer Staff dealt 20 and Moonstone Staff dealt 35.",
@@ -238,16 +347,22 @@
     },
     {
       "id": "weapon-tooltip-damage",
-      "title": "Some weapons deal different damage than their tooltips show",
-      "effect": "Daggers, spears and some swords deal less or more than their tooltips show. Guns, pistols and bows show a different number than a body hit deals. Shields show damage they never deal. Some staves show the wrong damage for their projectile.",
+      "title": "Some Weapons Deal Different Damage than Their Tooltips Show",
+      "effect": null,
+      "effectDetails": [
+        { "label": "Melee weapons", "text": "Daggers, spears and some swords deal less or more damage than their tooltips show." },
+        { "label": "Ranged weapons", "text": "Guns, pistols and bows show different damage than a single body hit deals." },
+        { "label": "Shields", "text": "Their tooltips show damage that shields never deal with a normal attack." },
+        { "label": "Staves", "text": "Some show different damage than their projectiles deal." }
+      ],
       "workaround": null,
       "steps": [
-        "Hover Goblin Shiv in the inventory. Its tooltip shows Damage: 20. Equip it and hit an enemy without damage-changing effects. The hit deals 8 damage.",
-        "Repeat with Farmer's Pitchfork and Bloodforged Blade. Their tooltips show Damage: 35 and Damage: 55, while their hits deal 10 and 35.",
-        "Hover Copper Flintlock Pistol whose tooltip shows Damage: 100, then shoot an enemy's body and head from several steps away. A body hit deals 50 damage and a headshot deals 100.",
-        "Repeat with a gun or bow whose tooltip damage differs. Compare a single projectile's body hit with the tooltip, not the whole shot.",
-        "Equip Areman Shield with no weapon and try a normal attack. Its tooltip shows Damage: 15, but the attack deals no damage.",
-        "Hover Walking Stick. Its tooltip shows Damage: 2. Hit an enemy from a few steps away so its projectile travels before impact. The hit deals 12 damage. Pinto Staff, Fairy Staff and Gripclaw Staff instead hit with their swings for 10."
+        { "action": "Hover Goblin Shiv in the inventory, then equip it and hit an enemy without damage-changing effects.", "result": "The tooltip shows Damage: 20, but the hit deals 8 damage." },
+        { "action": "Repeat with Farmer's Pitchfork and Bloodforged Blade.", "result": "The tooltip numbers are 35 and 55, while the hits deal 10 and 35." },
+        { "action": "Hover Copper Flintlock Pistol, then shoot an enemy's body and head from several steps away.", "result": "The tooltip shows Damage: 100. A body hit deals 50 damage and a headshot deals 100." },
+        { "action": "Repeat with another affected gun or bow. Compare a single projectile's body hit with the tooltip, not the whole shot.", "result": "The tooltip number differs from the body hit." },
+        { "action": "Hover Areman Shield, then equip it with no weapon and try a normal attack.", "result": "The tooltip shows Damage: 15, but the attack deals no damage." },
+        { "action": "Hover Walking Stick, then hit an enemy from a few steps away so its projectile travels before impact.", "result": "The tooltip shows Damage: 2, but the hit deals 12 damage. Pinto Staff, Fairy Staff and Gripclaw Staff hit with their swings for 10 instead." }
       ],
       "expected": "A weapon's Damage tooltip describes the damage its normal hit applies.",
       "observed": "Goblin Shiv dealt 8 damage, Farmer's Pitchfork 10 and Bloodforged Blade 35, against tooltip values of 20, 35 and 55. Copper Flintlock Pistol dealt 50 on a body hit and 100 on a headshot, against tooltip Damage 100. Powerful Blunderbuss pellets dealt 0 on a body hit and 20 on a headshot, against tooltip Damage 300. Attacking with only Areman Shield or Lonland Shield dealt no damage, despite tooltip Damage 15 and 100. Walking Stick, Adept Cryomancer Staff, Moonstone Staff and Winter's Whisper dealt 12, 20, 35 and 35 from range, while Pinto Staff, Fairy Staff and Gripclaw Staff dealt 10 with their swings.",
@@ -269,14 +384,13 @@
     },
     {
       "id": "halberds-train-no-proficiency",
-      "title": "Some weapons train no weapon proficiency",
+      "title": "Some Weapons Train No Weapon Proficiency",
       "effect": "Hits with these weapons add no EXP to One-Handed Weapons, Two-Handed Weapons or any other passive level.",
       "workaround": null,
       "steps": [
-        "Open the character sheet and choose Detailed Stats. Under Passive Levels, One-Handed Weapons and Two-Handed Weapons show 0/50 EXP on a new character.",
-        "Equip and draw Lonland Halberd and hit an enemy once.",
-        "Open Detailed Stats again. No passive level shows more EXP.",
-        "Hit an enemy once with Bloodforged Blade and open Detailed Stats again. One-Handed Weapons shows 2/50 EXP."
+        { "action": "On a new character, open the character sheet and choose Detailed Stats.", "result": "Under Passive Levels, One-Handed Weapons and Two-Handed Weapons show 0/50 EXP." },
+        { "action": "Equip and draw Lonland Halberd, hit an enemy once and open Detailed Stats again.", "result": "No passive level shows more EXP." },
+        { "action": "Hit an enemy once with Bloodforged Blade and open Detailed Stats again.", "result": "One-Handed Weapons shows 2/50 EXP." }
       ],
       "expected": "Each hit adds EXP to a passive level, as hits with other melee weapons do.",
       "observed": "Hits with Lonland Halberd, Standard Greataxe, Fairy Staff and each other affected weapon add no EXP to any passive level. A hit with Bloodforged Blade adds 2 EXP to One-Handed Weapons, a hit with Copper Battleaxe 2 EXP to Two-Handed Weapons, and hits with staves such as Moonstone Staff add EXP to Focuses.",
@@ -291,19 +405,41 @@
     },
     {
       "id": "copied-item-names",
-      "title": "Some items show another item's name",
-      "effect": "Five items show the name of another item: a wood axe named Askillian Gladus, a blade named Bonemetal Grip, an earth orb named Bolt-Orb, a breeze stone named Earthshard Heart and a geo wand core named Stormbound Wand Core.",
+      "title": "Some Items Show Another Item's Name",
+      "effect": "Five items show the name of another item.",
+      "effectDetails": [
+        { "label": "Askillian Gladus", "text": "A wood axe uses this name." },
+        { "label": "Bonemetal Grip", "text": "A blade uses this name." },
+        { "label": "Bolt-Orb", "text": "An earth orb uses this name." },
+        { "label": "Earthshard Heart", "text": "A stone that emits a breeze uses this name." },
+        { "label": "Stormbound Wand Core", "text": "A geo wand core uses this name." }
+      ],
       "notes": {
-        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/EarthOrb.EarthOrb_C": "Despite its name, this Bolt-Orb is an earth orb, as its description says.",
-        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/Whisperquartz.Whisperquartz_C": "Despite its name, this Earthshard Heart is a stone that emits a breeze, as its description says.",
-        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/WeaponComponents/WC_TerrashardWandCore.WC_TerrashardWandCore_C": "Despite its name, this Stormbound Wand Core is a geo-attuned wand core, as its description says.",
-        "/Game/BloodlinesAlpha/Interactables/Weapons/1HandedWeapons/1HAXE_Woodaxe.1HAXE_Woodaxe_C": "Despite its name, this Askillian Gladus is a wood axe, as its description says.",
-        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/WeaponComponents/WC_BonemetalBlade.WC_BonemetalBlade_C": "Despite its name, this Bonemetal Grip is a blade, as its description says."
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/EarthOrb.EarthOrb_C": {
+          "effect": "Despite its name, this Bolt-Orb is an earth orb, as its description says.",
+          "workaround": "Tell the orbs apart by their descriptions and icons."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/Whisperquartz.Whisperquartz_C": {
+          "effect": "Despite its name, this Earthshard Heart is a stone that emits a breeze, as its description says.",
+          "workaround": "Tell the stones apart by their descriptions and icons."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/WeaponComponents/WC_TerrashardWandCore.WC_TerrashardWandCore_C": {
+          "effect": "Despite its name, this Stormbound Wand Core is a geo-attuned wand core, as its description says.",
+          "workaround": "Tell the wand cores apart by their descriptions and icons."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Weapons/1HandedWeapons/1HAXE_Woodaxe.1HAXE_Woodaxe_C": {
+          "effect": "Despite its name, this Askillian Gladus is a wood axe, as its description says.",
+          "workaround": "Tell the weapons apart by their descriptions and icons."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/WeaponComponents/WC_BonemetalBlade.WC_BonemetalBlade_C": {
+          "effect": "Despite its name, this Bonemetal Grip is a blade, as its description says.",
+          "workaround": "Tell the parts apart by their descriptions and icons."
+        }
       },
       "workaround": "Tell them apart by their descriptions and icons.",
       "steps": [
-        "Hover Bolt-Orb in the inventory. The tooltip shows the name Bolt-Orb above \"An orb containing churning, magical earth magic.\"",
-        "Hover the other Bolt-Orb. Its tooltip shows the same name above \"An orb containing concentrated manathunder.\""
+        { "action": "Hover Bolt-Orb in the inventory.", "result": "The tooltip shows the name Bolt-Orb above \"An orb containing churning, magical earth magic.\"" },
+        { "action": "Hover the other Bolt-Orb.", "result": "The tooltip shows the same name above \"An orb containing concentrated manathunder.\"" }
       ],
       "expected": "Each item shows its own name, such as an earth orb named for earth.",
       "observed": "The tooltips of the wood axe, the Bonemetal blade, the earth orb, the breeze stone and the geo wand core show the names Askillian Gladus, Bonemetal Grip, Bolt-Orb, Earthshard Heart and Stormbound Wand Core, each the name of another item, above descriptions of what they are.",
@@ -317,34 +453,101 @@
     },
     {
       "id": "shared-save-tags",
-      "title": "Some items disappear when you take a matching item",
-      "effect": "Some items lie in pairs, such as two Emberglass in the Hills of Delvenaugh. Taking one makes the other disappear when the area loads again. Taking Stone or Ulfberht Blade in Whitebrook Haven, Lifebinder Ring or Webspinner Gauntlets in Drakthul Fjord or Spark Bottoms in the Glennheim Hills makes the others of these five disappear.",
+      "title": "Some Items Disappear After You Take One of Them",
+      "effect": "Some items lie in pairs. Taking one can make the other disappear about a minute after the area next loads.",
+      "effectDetails": [
+        { "label": "Glennheim Hills", "text": "Some Mining Picks lie in pairs, and so do some Bags of Gold." },
+        {
+          "label": "Hills of Delvenaugh",
+          "text": "Some Emberglass, Cryolite Bloom, Shockgem Cores, Silver Ingots, Mystcopper Ingots, Gold Ingots, Iron Ingots, Bone Dust and Fine Cloth lie in pairs of the same item. Both Earthshard Heart versions have pairs too: the stone that shifts in your palm and the one that emits a soft breeze."
+        },
+        { "label": "Harbinger Stronghold", "text": "The Medium Health Potion is paired with the Medium Stamina Potion." },
+        {
+          "label": "Group of five",
+          "text": "Taking one can cost you the other four: Stone and Ulfberht Blade in Whitebrook Haven, Lifebinder Ring and Webspinner Gauntlets in Drakthul Fjord, and Spark Bottoms in the Glennheim Hills."
+        }
+      ],
       "notes": {
-        "/Game/BloodlinesAlpha/Interactables/Weapons/2H_Weapons/TwoHanded_Tool_Weapons/MiningPickaxe.MiningPickaxe_C": "Some Mining Picks in the Glennheim Hills lie in pairs. Taking one makes the other disappear when the area loads again.",
-        "/Game/BloodlinesAlpha/Interactables/BagOfGold100gp.BagOfGold100gp_C": "Some Bags of Gold in the Glennheim Hills lie in pairs. Taking one makes the other disappear when the area loads again.",
-        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/Emberglass.Emberglass_C": "Some Emberglass in the Hills of Delvenaugh lies in pairs. Taking one makes the other disappear when the area loads again.",
-        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/CryoliteBloom.CryoliteBloom_C": "Some Cryolite Blooms in the Hills of Delvenaugh lie in pairs. Taking one makes the other disappear when the area loads again.",
-        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/EarthshardHeart.EarthshardHeart_C": "Some Earthshard Hearts in the Hills of Delvenaugh lie in pairs. Taking one makes the other disappear when the area loads again.",
-        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/Whisperquartz.Whisperquartz_C": "Some of these Earthshard Hearts in the Hills of Delvenaugh lie in pairs. Taking one makes the other disappear when the area loads again.",
-        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/StonegemCore.StonegemCore_C": "Some Shockgem Cores in the Hills of Delvenaugh lie in pairs. Taking one makes the other disappear when the area loads again.",
-        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/SilverIngot.SilverIngot_C": "Some Silver Ingots in the Hills of Delvenaugh lie in pairs. Taking one makes the other disappear when the area loads again.",
-        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/MystcopperIngot.MystcopperIngot_C": "Some Mystcopper Ingots in the Hills of Delvenaugh lie in pairs. Taking one makes the other disappear when the area loads again.",
-        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/GoldIngot.GoldIngot_C": "Some Gold Ingots in the Hills of Delvenaugh lie in pairs. Taking one makes the other disappear when the area loads again.",
-        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/IronIngot.IronIngot_C": "Some Iron Ingots in the Hills of Delvenaugh lie in pairs. Taking one makes the other disappear when the area loads again.",
-        "/Game/BloodlinesAlpha/Interactables/BoneDust_Item.BoneDust_Item_C": "Some Bone Dust in the Hills of Delvenaugh lies in pairs. Taking one makes the other disappear when the area loads again.",
-        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/FineCloth.FineCloth_C": "Some Fine Cloth in the Hills of Delvenaugh lies in pairs. Taking one makes the other disappear when the area loads again.",
-        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/GenericPotions/MediumStaminaPotion.MediumStaminaPotion_C": "In the Harbinger Stronghold, a Medium Stamina Potion and a Medium Health Potion lie as a pair. Taking one makes the other disappear when the area loads again.",
-        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/GenericPotions/MediumHealthPotion.MediumHealthPotion_C": "In the Harbinger Stronghold, a Medium Stamina Potion and a Medium Health Potion lie as a pair. Taking one makes the other disappear when the area loads again.",
-        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/Stone.Stone_C": "Taking the Stone or Ulfberht Blade in Whitebrook Haven, Lifebinder Ring or Webspinner Gauntlets in Drakthul Fjord or Spark Bottoms in the Glennheim Hills makes the others of these five disappear.",
-        "/Game/BloodlinesAlpha/Interactables/Weapons/1HandedWeapons/1HSWORD_LonlandSword.1HSWORD_LonlandSword_C": "Taking Stone or Ulfberht Blade in Whitebrook Haven, Lifebinder Ring or Webspinner Gauntlets in Drakthul Fjord or Spark Bottoms in the Glennheim Hills makes the others of these five disappear.",
-        "/Game/BloodlinesAlpha/Interactables/Armor/ETC/LifebinderRing.LifebinderRing_C": "Taking Stone or Ulfberht Blade in Whitebrook Haven, Lifebinder Ring or Webspinner Gauntlets in Drakthul Fjord or Spark Bottoms in the Glennheim Hills makes the others of these five disappear.",
-        "/Game/BloodlinesAlpha/Interactables/Armor/Arms/WebspinnerGauntlets.WebspinnerGauntlets_C": "Taking Stone or Ulfberht Blade in Whitebrook Haven, Lifebinder Ring or Webspinner Gauntlets in Drakthul Fjord or Spark Bottoms in the Glennheim Hills makes the others of these five disappear.",
-        "/Game/BloodlinesAlpha/Interactables/Armor/Legs/LegArmor_Sparkbottoms.LegArmor_Sparkbottoms_C": "Taking Stone or Ulfberht Blade in Whitebrook Haven, Lifebinder Ring or Webspinner Gauntlets in Drakthul Fjord or Spark Bottoms in the Glennheim Hills makes the others of these five disappear."
+        "/Game/BloodlinesAlpha/Interactables/Weapons/2H_Weapons/TwoHanded_Tool_Weapons/MiningPickaxe.MiningPickaxe_C": {
+          "effect": "Some Mining Picks in the Glennheim Hills lie in pairs. Taking one can make the other disappear about a minute after the area next loads.",
+          "workaround": "Take both picks of a pair before you leave the area."
+        },
+        "/Game/BloodlinesAlpha/Interactables/BagOfGold100gp.BagOfGold100gp_C": {
+          "effect": "Some Bags of Gold in the Glennheim Hills lie in pairs. Taking one can make the other disappear about a minute after the area next loads.",
+          "workaround": "Take both bags of a pair before you leave the area."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/Emberglass.Emberglass_C": {
+          "effect": "Some Emberglass in the Hills of Delvenaugh lies in pairs. Taking one can make the other disappear about a minute after the area next loads.",
+          "workaround": "Take both pieces of a pair before you leave the area."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/CryoliteBloom.CryoliteBloom_C": {
+          "effect": "Some Cryolite Blooms in the Hills of Delvenaugh lie in pairs. Taking one can make the other disappear about a minute after the area next loads.",
+          "workaround": "Take both blooms of a pair before you leave the area."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/EarthshardHeart.EarthshardHeart_C": {
+          "effect": "Some Earthshard Hearts that shift in your palm lie in pairs in the Hills of Delvenaugh. Taking one can make the other disappear about a minute after the area next loads.",
+          "workaround": "Take both stones of a pair before you leave the area."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/Whisperquartz.Whisperquartz_C": {
+          "effect": "Some Earthshard Hearts that emit a soft breeze lie in pairs in the Hills of Delvenaugh. Taking one can make the other disappear about a minute after the area next loads.",
+          "workaround": "Take both stones of a pair before you leave the area."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/StonegemCore.StonegemCore_C": {
+          "effect": "Some Shockgem Cores in the Hills of Delvenaugh lie in pairs. Taking one can make the other disappear about a minute after the area next loads.",
+          "workaround": "Take both cores of a pair before you leave the area."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/SilverIngot.SilverIngot_C": {
+          "effect": "Some Silver Ingots in the Hills of Delvenaugh lie in pairs. Taking one can make the other disappear about a minute after the area next loads.",
+          "workaround": "Take both ingots of a pair before you leave the area."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/MystcopperIngot.MystcopperIngot_C": {
+          "effect": "Some Mystcopper Ingots in the Hills of Delvenaugh lie in pairs. Taking one can make the other disappear about a minute after the area next loads.",
+          "workaround": "Take both ingots of a pair before you leave the area."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/GoldIngot.GoldIngot_C": {
+          "effect": "Some Gold Ingots in the Hills of Delvenaugh lie in pairs. Taking one can make the other disappear about a minute after the area next loads.",
+          "workaround": "Take both ingots of a pair before you leave the area."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/IronIngot.IronIngot_C": {
+          "effect": "Some Iron Ingots in the Hills of Delvenaugh lie in pairs, and taking one can make the other disappear about a minute after the area next loads.",
+          "workaround": "Take both ingots of a pair before you leave the area."
+        },
+        "/Game/BloodlinesAlpha/Interactables/BoneDust_Item.BoneDust_Item_C": {
+          "effect": "Some Bone Dust in the Hills of Delvenaugh lies in pairs. Taking one can make the other disappear about a minute after the area next loads.",
+          "workaround": "Take both items of a pair before you leave the area."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/FineCloth.FineCloth_C": {
+          "effect": "Some Fine Cloth in the Hills of Delvenaugh lies in pairs. Taking one can make the other disappear about a minute after the area next loads.",
+          "workaround": "Take both pieces of a pair before you leave the area."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/GenericPotions/MediumStaminaPotion.MediumStaminaPotion_C": {
+          "effect": "In Harbinger Stronghold, the Medium Stamina Potion and Medium Health Potion form a pair. Taking one can make the other disappear about a minute after the area next loads.",
+          "workaround": "Take both potions before you leave the Stronghold."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/GenericPotions/MediumHealthPotion.MediumHealthPotion_C": {
+          "effect": "In Harbinger Stronghold, the Medium Stamina Potion and Medium Health Potion form a pair. Taking one can make the other disappear about a minute after the area next loads.",
+          "workaround": "Take both potions before you leave the Stronghold."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Crafting_Items/Ore_And_Ingots/Stone.Stone_C": {
+          "effect": "The Stone lying in Whitebrook Haven is in a group with Ulfberht Blade there, Lifebinder Ring and Webspinner Gauntlets in Drakthul Fjord, and Spark Bottoms in the Glennheim Hills. Taking any one can make the others disappear about a minute after their areas next load."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Weapons/1HandedWeapons/1HSWORD_LonlandSword.1HSWORD_LonlandSword_C": {
+          "effect": "This Ulfberht Blade lying in Whitebrook Haven is in a group with Stone there, Lifebinder Ring and Webspinner Gauntlets in Drakthul Fjord, and Spark Bottoms in the Glennheim Hills. Taking any one can make the others disappear about a minute after their areas next load."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Armor/ETC/LifebinderRing.LifebinderRing_C": {
+          "effect": "The Lifebinder Ring lying in Drakthul Fjord is in a group with Webspinner Gauntlets there, Stone and Ulfberht Blade in Whitebrook Haven, and Spark Bottoms in the Glennheim Hills. Taking any one can make the others disappear about a minute after their areas next load."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Armor/Arms/WebspinnerGauntlets.WebspinnerGauntlets_C": {
+          "effect": "The Webspinner Gauntlets lying in Drakthul Fjord are in a group with Lifebinder Ring there, Stone and Ulfberht Blade in Whitebrook Haven, and Spark Bottoms in the Glennheim Hills. Taking any one can make the others disappear about a minute after their areas next load."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Armor/Legs/LegArmor_Sparkbottoms.LegArmor_Sparkbottoms_C": {
+          "effect": "The Spark Bottoms lying in the Glennheim Hills are in a group with Stone and Ulfberht Blade in Whitebrook Haven and Lifebinder Ring and Webspinner Gauntlets in Drakthul Fjord. Taking any one can make the others disappear about a minute after their areas next load."
+        }
       },
       "workaround": "Take both items of a pair before you leave the area.",
       "steps": [
-        "In the Harbinger Stronghold, take the Medium Stamina Potion and leave the Medium Health Potion.",
-        "Save, leave the Stronghold and return. About a minute after the Stronghold loads, the Medium Health Potion is gone."
+        { "action": "In Harbinger Stronghold, take the Medium Stamina Potion and leave the Medium Health Potion.", "result": "The Medium Health Potion is still there." },
+        { "action": "Save, leave the Stronghold and return.", "result": "About a minute after the Stronghold loads, the Medium Health Potion disappears." }
       ],
       "expected": "The Medium Health Potion stays until you take it.",
       "observed": "In 29 of 31 groups of placed items that share a save tag, taking one made the others disappear about a minute after the area loaded again, as did taking one of the five items without a tag. Taking both items of a pair in one visit kept both.",
@@ -359,17 +562,26 @@
     },
     {
       "id": "blood-magic-points-follow-blood-setting",
-      "title": "Blood Magic points follow the blood setting",
-      "effect": "Each time [Blood Magic](discipline:blood-magic) levels up, your Blood Magic points are set to 2, 3, 4 or 6, depending on your [Blood Levels](mechanic:blood-levels) setting. They replace the points you had, so points you saved are lost.",
+      "title": "Blood Magic Points Follow the Blood Setting",
+      "effect": "Each time [Blood Magic](discipline:blood-magic) levels up, your [Blood Levels](mechanic:blood-levels) setting determines how many Blood Magic points you get. They replace the points you had, so points you saved are lost.",
+      "effectDetails": [
+        { "label": "No blood", "text": "2 points." },
+        { "label": "A bit of blood", "text": "3 points." },
+        { "label": "Default Amount", "text": "4 points." },
+        { "label": "BLOODBATH", "text": "6 points." }
+      ],
       "notes": {
-        "/Game/UltimateSkillSystem/SkillsData/BloodMagicLBSkillTree.BloodMagicLBSkillTree_C": "Each time Blood Magic levels up, your Blood Magic points are set to 2, 3, 4 or 6, depending on your [Blood Levels](mechanic:blood-levels) setting. Points you saved are lost."
+        "/Game/UltimateSkillSystem/SkillsData/BloodMagicLBSkillTree.BloodMagicLBSkillTree_C": {
+          "effect": "Each time Blood Magic levels up, your Blood Magic points are set to 2, 3, 4 or 6, depending on your [Blood Levels](mechanic:blood-levels) setting. Points you saved are lost.",
+          "workaround": "Set Blood Levels to BLOODBATH in the pause menu under Settings, Video and Effect Settings before Blood Magic levels up, and spend your points before its next level."
+        }
       },
       "workaround": "Set Blood Levels to BLOODBATH in the pause menu under Settings, Video and Effect Settings before Blood Magic levels up, and spend your points before its next level.",
       "steps": [
-        "Open Settings from the pause menu, choose Video and Effect Settings and set Blood Levels to No blood.",
-        "Gain a Blood Magic level and open the Blood Magic skill tree. Blood Magic Proficiency Points shows 2.",
-        "Set Blood Levels to BLOODBATH and gain another Blood Magic level. The tree shows 6 points.",
-        "Spend points on a passive and gain another Blood Magic level. The tree shows 6 points again."
+        { "action": "Open Settings from the pause menu, choose Video and Effect Settings and set Blood Levels to No blood.", "result": "Blood Levels shows No blood." },
+        { "action": "Gain a Blood Magic level and open the Blood Magic skill tree.", "result": "Blood Magic Proficiency Points shows 2." },
+        { "action": "Set Blood Levels to BLOODBATH and gain another Blood Magic level.", "result": "The tree shows 6 points." },
+        { "action": "Spend points on a passive and gain another Blood Magic level.", "result": "The tree shows 6 points again." }
       ],
       "expected": "Each Blood Magic level adds Blood Magic points to the ones you have, as levels of other disciplines do.",
       "observed": "After a Blood Magic level the tree shows the Blood Levels setting plus one: 2 with No blood, 3 with A bit of blood, 4 with Default Amount and 6 with BLOODBATH. After spending 2 of 3 points, the next level restored 3.",
@@ -385,13 +597,17 @@
     },
     {
       "id": "rusty-crossbow-fires-nothing",
-      "title": "Rusty Crossbows from merchants and Squalls End fire nothing",
-      "effect": "The Rusty Crossbow that merchants sell, and the one lying in Squalls End, fire no bolt and deal no damage.",
+      "title": "Rusty Crossbows from Merchants and Squalls End Fire Nothing",
+      "effect": "The Rusty Crossbow sold by merchants or found lying in Squalls End fires no bolt and deals no damage.",
+      "effectDetails": [
+        { "label": "Elderglen", "text": "The Rusty Crossbow the shopkeeper sells." },
+        { "label": "Squalls End", "text": "The Rusty Crossbow the shopkeeper sells and the one lying in the area." }
+      ],
       "workaround": "Choose Crossbow when Geoffrey Woodkin offers you a ranged weapon in Harbinger Stronghold. The Rusty Crossbow he gives works. A crate at Parford Lake sometimes holds one too.",
       "steps": [
-        "Buy a Rusty Crossbow from the shopkeeper in Squalls End and keep arrows in your inventory.",
-        "Equip and draw it. The crossbow is in your hands.",
-        "Fire at an enemy. No bolt leaves the crossbow, and the enemy's health stays the same."
+        { "action": "Buy a Rusty Crossbow from the shopkeeper in Squalls End and keep arrows in your inventory.", "result": "Your inventory holds the crossbow and the arrows." },
+        { "action": "Equip and draw it.", "result": "The crossbow is in your hands." },
+        { "action": "Fire at an enemy.", "result": "No bolt leaves the crossbow, and the enemy's health stays the same." }
       ],
       "expected": "Firing shoots a bolt that hits for the crossbow's damage.",
       "observed": "Ten shots at 100 to 600 units fired no bolt and took no health from a Goblin Brute. The shopkeepers of Squalls End and Elderglen stock this crossbow. The other Rusty Crossbow, which crates and Geoffrey Woodkin give, hit the same Goblin Brute for 85. In run geoffrey1, Geoffrey Woodkin in Harbinger Stronghold used the dialogue whose Crossbow choice gives it.",

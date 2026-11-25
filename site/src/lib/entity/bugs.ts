@@ -3,7 +3,7 @@ import type { Fact, IssueNote } from '../site-data.js';
 
 /** A row of an entity page's Bugs section: a known issue's sentence about the entity, or a tooltip value that no issue on the page explains. */
 export type BugRow =
-	| { kind: 'issue'; issue: string; sentence: string }
+	| { kind: 'issue'; issue: string; sentence: string; workaround?: string }
 	| { kind: 'difference'; fact: Fact; sentence: string };
 
 /** A tooltip value as the game prints it, such as "ARMOR: 4" or "Damage: 20". */
@@ -36,7 +36,12 @@ export function bugRows(item: { facts: Fact[]; notes: IssueNote[] }): BugRow[] {
 			const sentence = shown.length
 				? `${note.effect.replace(/\.$/, '')}, although the tooltip shows ${joinAnd(shown)}.`
 				: note.effect;
-			return { kind: 'issue', issue: note.issue, sentence };
+			return {
+				kind: 'issue',
+				issue: note.issue,
+				sentence,
+				...(note.workaround ? { workaround: note.workaround } : {})
+			};
 		}),
 		...differences
 			.filter((fact) => fact.gameShowsIssue == null || !noted.has(fact.gameShowsIssue))

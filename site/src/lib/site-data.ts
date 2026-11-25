@@ -312,6 +312,7 @@ export interface IssueNote {
   tooltipValues?: {
     [k: string]: string;
   } | null;
+  workaround?: string | null;
   [k: string]: unknown;
 }
 /**
@@ -579,18 +580,43 @@ export interface KnownIssue {
   builds: number[];
   cause: string;
   citations: string[];
-  effect: string;
+  effect: string | null;
+  effectDetails?: IssueEffectDetail[] | null;
   expected: string;
   id: string;
   notes?: {
-    [k: string]: string;
+    [k: string]: IssueNoteText;
   } | null;
   observed: string;
   report: ReportStatus;
   reportUrl: string | null;
-  steps: string[];
+  steps: IssueStep[];
   title: string;
   workaround: string | null;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "IssueEffectDetail".
+ */
+export interface IssueEffectDetail {
+  label: string;
+  text: string;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "IssueNoteText".
+ */
+export interface IssueNoteText {
+  effect: string;
+  workaround?: string | null;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "IssueStep".
+ */
+export interface IssueStep {
+  action: string;
+  result: string;
 }
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema

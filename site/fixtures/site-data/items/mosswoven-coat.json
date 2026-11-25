@@ -92,7 +92,8 @@
 	"notes": [
 		{
 			"effect": "Wearing the Mosswoven Coat adds no armor.",
-			"issue": "invented-coat-armor"
+			"issue": "invented-coat-armor",
+			"workaround": "Wear another coat."
 		}
 	],
 	"status": "obtainable",

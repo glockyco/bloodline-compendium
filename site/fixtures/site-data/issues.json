@@ -30,8 +30,13 @@
 			"observed": "Armor stays the same.",
 			"report": "notReported",
 			"reportUrl": null,
-			"steps": ["Equip the Mosswoven Coat.", "Armor on the character sheet does not change."],
-			"title": "The Mosswoven Coat adds no armor",
+			"steps": [
+				{
+					"action": "Equip the Mosswoven Coat.",
+					"result": "Armor on the character sheet does not change."
+				}
+			],
+			"title": "The Mosswoven Coat Adds No Armor",
 			"workaround": "Wear another coat."
 		}
 	}

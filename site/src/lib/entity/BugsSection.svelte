@@ -26,7 +26,11 @@
 							>{#each row.sentence.split(name) as part, index (index)}{#if index}<span data-game
 										>{name}</span
 									>{/if}<LinkedText text={part} />{/each}</span
-						><small
+						>
+						{#if row.workaround}
+							<span><strong>Workaround:</strong> <LinkedText text={row.workaround} /></span>
+						{/if}
+						<small
 							><!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- the resolved issue page with its section. -->
 							<a href={resolve('known-issues/') + '#' + row.issue}>Read about this issue</a></small
 						>

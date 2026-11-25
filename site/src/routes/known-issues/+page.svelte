@@ -47,7 +47,15 @@
 				<div class="issue-anchor" id={issue.id}>
 					<Section id={issue.id + '-title'} title={issue.title}>
 						<div class="surface issue">
-							<p class="effect"><LinkedText text={issue.effect} /></p>
+							<div class="field effect">
+								{#if issue.effect}<p><LinkedText text={issue.effect} /></p>{/if}
+								{#each issue.effectDetails ?? [] as detail (detail.label)}
+									<p>
+										<strong><LinkedText text={detail.label} />:</strong>
+										<LinkedText text={detail.text} />
+									</p>
+								{/each}
+							</div>
 							{#if issue.workaround}<div class="field">
 									<h3 class="field-label">Workaround</h3>
 									<p><LinkedText text={issue.workaround} /></p>
@@ -70,7 +78,8 @@
 								<summary>Steps to Reproduce</summary>
 								<ol class="steps">
 									{#each issue.steps as step, index (index)}<li>
-											<LinkedText text={step} />
+											<LinkedText text={step.action} />
+											<span class="step-result muted"><LinkedText text={step.result} /></span>
 										</li>{/each}
 								</ol>
 							</details>
@@ -150,8 +159,8 @@
 	.field :is(p, dd, ol, ul) {
 		margin: 0;
 	}
-	.effect {
-		margin: 0;
+	.step-result {
+		display: block;
 	}
 	.steps {
 		padding-left: var(--inset-loose);

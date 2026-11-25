@@ -14,7 +14,7 @@ public sealed class KnownIssueTests
             "Invented issue",
             "Invented effect.",
             null,
-            ["Invented step."],
+            [new IssueStep("Invented action.", "Invented result.")],
             "Invented expectation.",
             "Invented observation.",
             "Invented cause.",
@@ -64,29 +64,31 @@ public sealed class KnownIssueTests
     [Fact]
     public void AffectedPagesCarryTheNoteAndThePublishedIssueListsThem()
     {
-        var result = CatalogBuilder.Build(Records(Issue(KnownIssues.KneeArmor)), []);
+        var issue = Issue(KnownIssues.KneeArmor) with { Workaround = "Invented workaround." };
+        var result = CatalogBuilder.Build(Records(issue), []);
 
         var note = Assert.Single(Assert.Single(result.Items).Notes);
         Assert.Equal((KnownIssues.KneeArmor, "Invented effect."), (note.Issue, note.Effect));
+        Assert.Equal("Invented workaround.", note.Workaround);
         Assert.Equal("Knee guards", Assert.Single(Assert.Single(result.Issues).Affected).Name);
     }
 
     [Fact]
-    public void ItemNotesOverrideOnlyTheMatchingItemsEffect()
+    public void ItemNotesCanReplaceTheEffectAndWorkaround()
     {
         var issue = Issue(KnownIssues.KneeArmor) with
         {
-            Notes = new Dictionary<string, string>
+            Workaround = "Invented generic workaround.",
+            Notes = new Dictionary<string, IssueNoteText>
             {
-                [KneeGuards().Path] = "Invented item-specific effect.",
+                [KneeGuards().Path] = new("Invented item-specific effect.", "Invented item-specific workaround."),
             },
         };
         var result = CatalogBuilder.Build(Records(issue), []);
 
-        Assert.Equal(
-            "Invented item-specific effect.",
-            Assert.Single(Assert.Single(result.Items).Notes).Effect
-        );
+        var note = Assert.Single(Assert.Single(result.Items).Notes);
+        Assert.Equal("Invented item-specific effect.", note.Effect);
+        Assert.Equal("Invented item-specific workaround.", note.Workaround);
         Assert.Equal("Invented effect.", Assert.Single(result.Issues).Issue.Effect);
     }
 
@@ -97,7 +99,7 @@ public sealed class KnownIssueTests
     {
         var issue = Issue("unrelated-issue") with
         {
-            Notes = new Dictionary<string, string> { [key] = "Invented item-specific effect." },
+            Notes = new Dictionary<string, IssueNoteText> { [key] = new("Invented item-specific effect.") },
         };
 
         var error = Assert.Throws<InvalidDataException>(() =>
@@ -479,7 +481,7 @@ public sealed class KnownIssueTests
         var other = BloodMagic with { Key = "/Game/Invented/OtherBloodMagicTree" };
         var issue = Issue("shared") with
         {
-            Steps = ["Open [Blood Magic](discipline:blood-magic)."],
+            Steps = [new IssueStep("Open the skill tree.", "[Blood Magic](discipline:blood-magic) is shown.")],
         };
         var error = Assert.Throws<InvalidDataException>(() =>
             KnownIssues.Links(

@@ -516,7 +516,7 @@ public sealed class CatalogTests
                         "Invented issue",
                         "Invented effect.",
                         null,
-                        ["Invented step."],
+                        [new IssueStep("Invented action.", "Invented result.")],
                         "Invented expectation.",
                         "Invented observation.",
                         "Invented cause.",

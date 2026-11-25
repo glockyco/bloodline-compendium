@@ -60,7 +60,7 @@ Where the game's tooltip shows another value than the game applies, the game car
 - **AND** the Bugs section reads "Wearing Leather Pants adds no armor, although the tooltip shows ARMOR: 4.", with a link to the known issue
 
 ### Requirement: Bugs section
-An item with a known game issue or a tooltip difference SHALL end with a Bugs section whose rows look like the page's other lists. A known issue SHALL take one row with its sentence about this item, ending with the tooltip values it explains, and a link to its entry on Known Issues, without the issue's title or its list of affected items. A tooltip difference that no known issue explains SHALL take a row of its own that names the tooltip's value and the applied one.
+An item with a known game issue or a tooltip difference SHALL end with a Bugs section whose rows look like the page's other lists. A known issue SHALL take one row. Its effect sentence about this item SHALL come first and end with the tooltip values it explains. Any workaround SHALL follow on its own line labelled "Workaround:" so readers know what they are working around. The row SHALL end with a link to the Known Issues entry without the issue's title or its list of affected items. A tooltip difference that no known issue explains SHALL take a row of its own that names the tooltip's value and the applied one.
 
 #### Scenario: Walking Stick
 - **WHEN** a reader opens Walking Stick
@@ -70,6 +70,11 @@ An item with a known game issue or a tooltip difference SHALL end with a Bugs se
 #### Scenario: Velosian Plume-helm
 - **WHEN** a reader opens Velosian Plume-helm
 - **THEN** one row says that wearing it adds no armor, although the tooltip shows ARMOR: 9 and Type: Medium, with a link to the known issue
+
+#### Scenario: Broad Knee Guards
+- **WHEN** a reader opens Broad Knee Guards
+- **THEN** the Bugs row reads "Equipping Broad Knee Guards leaves Armor unchanged, although the tooltip shows ARMOR: 7."
+- **AND** the next line reads "Workaround: After equipping the guards, put on or take off another piece of armor, such as a Cloth Hood."
 
 ### Requirement: Status without a known source
 An item without a known source SHALL state its status, either that it cannot be obtained in normal play or that it has no known source and may come from a quest or event, and SHALL still show its uses and facts.

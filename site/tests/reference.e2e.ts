@@ -715,9 +715,10 @@ test('notes a known issue on the affected item and explains it on a linked, sear
 	const note = page.getByRole('region', { name: 'Bugs 1', exact: true });
 	await expect(note.getByRole('heading', { name: 'Bugs 1' })).toBeVisible();
 	await expect(note.locator('ul.surface > li')).toHaveCount(1);
-	await expect(note.locator('li > span')).toHaveText(
-		'Wearing the Mosswoven Coat adds no armor, although the tooltip shows ARMOR: 8.'
-	);
+	await expect(note.locator('li > span')).toHaveText([
+		'Wearing the Mosswoven Coat adds no armor, although the tooltip shows ARMOR: 8.',
+		'Workaround: Wear another coat.'
+	]);
 	await expect(note.locator('li > small')).toHaveText(['Read about this issue']);
 	const card = page.getByRole('complementary', { name: 'Game card' });
 	await expect(card.locator('#bugs')).toHaveCount(0);
@@ -735,6 +736,18 @@ test('notes a known issue on the affected item and explains it on a linked, sear
 	await expect(
 		entry.locator('.affected-list').getByRole('link', { name: 'Mosswoven Coat' })
 	).toHaveAttribute('href', '/items/mosswoven-coat/');
+	const steps = entry.getByRole('list').filter({
+		hasText: 'Armor on the character sheet does not change.'
+	});
+	await expect(steps).toBeHidden();
+	await entry.getByText('Steps to Reproduce').click();
+	const step = steps.getByRole('listitem');
+	await expect(step).toHaveCount(1);
+	await expect(step).toContainText('Equip the Mosswoven Coat.');
+	await expect(step.getByText('Armor on the character sheet does not change.')).toHaveCSS(
+		'display',
+		'block'
+	);
 	await expect(entry.getByText('Confirmed on')).toBeHidden();
 	await entry.getByText('For Developers').click();
 	await expect(entry.getByText('Confirmed on')).toBeVisible();
