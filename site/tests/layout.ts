@@ -9,7 +9,8 @@ import type { Page } from '@playwright/test';
  * - a surface or table cell is padded off the shared inset,
  * - a numeric cell or heading in a column of a table is not right-aligned,
  * - a comma in site text has no space after it,
- * - sibling sections of one column sit at different distances from each other.
+ * - sibling sections of one column sit at different distances from each other,
+ * - a link with a preview reaches past its text, so its preview opens away from what the reader points at.
  */
 export async function layoutProblems(page: Page): Promise<string[]> {
 	// Search and other components render after load, and their text counts too.
@@ -132,6 +133,14 @@ export async function layoutProblems(page: Page): Promise<string[]> {
 				problems.push(
 					`${describe(parent)} spaces its sections ${[...new Set(gaps)].join(', ')}px apart`
 				);
+		}
+		for (const link of document.querySelectorAll('a[data-preview]')) {
+			if (!visible(link) || link.getClientRects().length !== 1) continue;
+			const text = document.createRange();
+			text.selectNodeContents(link);
+			const right = Math.max(...[...text.getClientRects()].map((rect) => rect.right));
+			if (link.getBoundingClientRect().right - right > 4)
+				problems.push(`${describe(link)} reaches past its text`);
 		}
 		return problems;
 	});

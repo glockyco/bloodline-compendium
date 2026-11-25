@@ -49,8 +49,10 @@
 		align-items: center;
 		gap: var(--gap-inline);
 	}
+	/* Each line keeps its own width, so the link and its preview end where the name's text ends. */
 	.lines {
 		display: grid;
+		justify-items: start;
 		min-width: 0;
 	}
 	/* Lines under a name read smaller than it, as a place under a name does in relation tables. */

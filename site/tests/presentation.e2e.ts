@@ -69,6 +69,11 @@ test.describe('planted defects on the fixture page', () => {
 			'one section further from its siblings',
 			'section:has(#tables) { margin-top: 40px; }',
 			'spaces its sections'
+		],
+		[
+			'a link wider than its text',
+			'a[data-preview] { display: inline-block; width: 30rem; }',
+			'reaches past its text'
 		]
 	])
 		test(`reports ${defect}`, async ({ page }) => {
