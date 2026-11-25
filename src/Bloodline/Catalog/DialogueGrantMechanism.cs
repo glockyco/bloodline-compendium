@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using Bloodline.Records;
 using Bloodline.SiteData;
 
@@ -74,38 +75,64 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
             {
                 continue;
             }
-            var placedUsers = placements[dialogue.Path.Split('.')[0]].ToArray();
-            var users = placedUsers
-                .Select(placement =>
+            var package = dialogue.Path.Split('.')[0];
+            var speaker = RecordValues.Text(dialogue.Properties["Name"]);
+            if (string.IsNullOrWhiteSpace(speaker))
+                speaker = null;
+            var placedUsers = placements[package].ToArray();
+            var users = new List<(
+                EntityReference Entity,
+                EntityReference? Place,
+                bool Generated,
+                bool UsesDialogue
+            )>();
+            foreach (var placement in placedUsers)
+            {
+                var generated = placement.Actor.Class.Contains(
+                    "Spawner",
+                    StringComparison.OrdinalIgnoreCase
+                );
+                var activeDialogue = RecordValues.AnyReference(placement.Properties["Dialogue"]);
+                var usesDialogue =
+                    !generated
+                    && string.Equals(
+                        activeDialogue?.Split('.')[0],
+                        package,
+                        StringComparison.OrdinalIgnoreCase
+                    );
+                // A placement that swaps in another conversation speaks under that conversation's name, as the arena's
+                // waitress does (run design-facts). An actor with its own conversation keeps its own name.
+                var swapped =
+                    usesDialogue
+                    && !defaultsByDialogue[package].Any(type => type.Path == placement.Actor.Class);
+                users.Add(
                     (
-                        Name: WorldSourceData.Name(placement.Properties, placement.Actor.Class),
-                        Place: (EntityReference?)context.Places.Get(placement.Level),
-                        Generated: placement.Actor.Class.Contains(
-                            "Spawner",
-                            StringComparison.OrdinalIgnoreCase
-                        ),
-                        Entity: WorldSourceData.PlacementEntity(
+                        WorldSourceData.PlacementEntity(
                             context,
                             placement,
-                            EntityKind.Person
-                        )
+                            EntityKind.Person,
+                            swapped ? speaker : null
+                        ),
+                        context.Places.Get(placement.Level),
+                        generated,
+                        usesDialogue
                     )
-                )
-                .ToList();
-            foreach (var type in defaultsByDialogue[dialogue.Path.Split('.')[0]])
+                );
+            }
+            foreach (var type in defaultsByDialogue[package])
             {
                 if (!placedUsers.Any(placement => placement.Actor.Class == type.Path))
                 {
                     users.Add(
                         (
-                            WorldSourceData.Name(type.Properties, type.Path),
-                            null,
-                            type.Path.Contains("Spawner", StringComparison.OrdinalIgnoreCase),
                             WorldSourceData.Reference(
                                 EntityKind.Person,
                                 dialogue.Path,
                                 WorldSourceData.Name(type.Properties, type.Path)
-                            )
+                            ),
+                            null,
+                            type.Path.Contains("Spawner", StringComparison.OrdinalIgnoreCase),
+                            false
                         )
                     );
                 }
@@ -114,24 +141,65 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
             {
                 users.Add(
                     (
-                        ItemIdentity.Readable(dialogue.Path.Split('/').Last().Split('.')[0]),
-                        null,
-                        false,
                         WorldSourceData.Reference(
                             EntityKind.Person,
                             dialogue.Path,
-                            ItemIdentity.Readable(dialogue.Path.Split('/').Last().Split('.')[0])
-                        )
+                            ItemIdentity.Readable(package.Split('/').Last())
+                        ),
+                        null,
+                        false,
+                        false
                     )
                 );
             }
+            var data = RecordValues.Elements(dialogue.Properties["Data"]).ToArray();
+            var incoming = data.SelectMany(node =>
+                    RecordValues
+                        .Elements(RecordValues.At(node, "Links"))
+                        .Select(RecordValues.Integer)
+                        .OfType<long>()
+                        .Select(id => (Id: id, Node: node))
+                )
+                .ToLookup(entry => entry.Id, entry => entry.Node);
+            var objects = dialogue.Objects.ToDictionary(
+                obj => obj.Path,
+                StringComparer.OrdinalIgnoreCase
+            );
+            var debits = new Dictionary<string, int?>(StringComparer.OrdinalIgnoreCase);
+            foreach (var obj in dialogue.Objects)
+            {
+                if (WorldSourceData.IsClass(context, obj.Class, "TakePlayerMoney"))
+                {
+                    debits.Add(
+                        obj.Path,
+                        WorldSourceData.Integer(EventProperties(context, obj)["Item Cost"])
+                    );
+                }
+                else if (WorldSourceData.IsClass(context, obj.Class, "TakeMoneyBasedOnitemValue"))
+                {
+                    var chargedItem = RecordValues.AnyReference(
+                        EventProperties(context, obj)["Item"]
+                    );
+                    debits.Add(
+                        obj.Path,
+                        chargedItem is not null
+                        && context.Classes.TryGetValue(chargedItem, out var type)
+                            ? WorldSourceData.Integer(
+                                RecordValues.At(type.Properties, "ItemInfo.ItemValue")
+                            )
+                            : null
+                    );
+                }
+            }
+            var underUnused = dialogue.Path.Contains(
+                "/Dialogue_Unused/",
+                StringComparison.OrdinalIgnoreCase
+            );
             var rewards = grants
                 .Select(entry =>
                 {
                     var (grant, spec) = entry;
-                    var properties = context.Classes.TryGetValue(grant.Class, out var defaults)
-                        ? RecordMerge.OverlayProperties(defaults.Properties, grant.Properties)
-                        : grant.Properties;
+                    var properties = EventProperties(context, grant);
                     return (
                         Grant: grant,
                         Spec: spec!,
@@ -149,7 +217,13 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
                     continue;
                 }
                 var notes = GrantNotes(dialogue).ToList();
-                var quotes = Quotes(dialogue, grant).Distinct().ToArray();
+                var grantLines = data.Where(node => References(node, "Events", grant.Path)).ToArray();
+                var quotes = Quotes(context, grantLines, incoming, objects, debits)
+                    .Distinct()
+                    .ToArray();
+                var price = spec.Kind == EntityKind.Item
+                    ? GrantPrice(context, grantLines, incoming, objects, debits)
+                    : null;
                 var requirements = WorldSourceData.DialogueConditions(context, dialogue, grant);
                 var matching = rewards
                     .Where(reward =>
@@ -181,33 +255,42 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
                             : $"{matching.Length} lines of this conversation give it."
                     );
                 }
-                foreach (var (name, place, generated, entity) in users)
+                foreach (var (entity, place, generated, usesDialogue) in users)
                 {
+                    var unconfirmed = underUnused && !usesDialogue;
+                    IReadOnlyList<string> sourceNotes = notes;
+                    if (unconfirmed)
+                    {
+                        sourceNotes =
+                        [
+                            .. sourceNotes,
+                            "The game files mark this conversation unused, so it may never take place.",
+                        ];
+                    }
+                    if (generated)
+                    {
+                        sourceNotes =
+                        [
+                            .. sourceNotes,
+                            "A character the game generates holds this conversation, so who and where is unknown.",
+                        ];
+                    }
                     yield return new EntitySource(
                         item,
                         new Source(
                             SourceKind.Dialogue,
-                            name,
+                            entity.Name,
                             place is null ? [] : [place],
-                            null,
+                            price,
                             spec.AmountField is null ? null : new Amount(amount, amount),
                             [],
-                            generated
-                                ?
-                                [
-                                    .. notes,
-                                    "A character the game generates holds this conversation, so who and where is unknown.",
-                                ]
-                                : notes
+                            sourceNotes
                         )
                         {
                             Entity = entity,
                             Quotes = quotes,
                             Conditions = requirements.Shown,
-                            Unconfirmed = dialogue.Path.Contains(
-                                "/Dialogue_Unused/",
-                                StringComparison.OrdinalIgnoreCase
-                            ),
+                            Unconfirmed = unconfirmed,
                         }
                     )
                     {
@@ -219,42 +302,142 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
         }
     }
 
-    private static IEnumerable<Quote> Quotes(AssetRecord dialogue, InnerObjectRecord grant)
-    {
-        var nodes = RecordValues
-            .Elements(dialogue.Properties["Data"])
-            .Where(node =>
-                RecordValues
-                    .Elements(RecordValues.At(node, "Events"))
-                    .Any(evt =>
-                        string.Equals(
-                            RecordValues.AnyReference(evt),
-                            grant.Path,
-                            StringComparison.OrdinalIgnoreCase
-                        )
-                    )
+    private static JsonObject EventProperties(CatalogContext context, InnerObjectRecord obj) =>
+        context.Classes.TryGetValue(obj.Class, out var defaults)
+            ? RecordMerge.OverlayProperties(defaults.Properties, obj.Properties)
+            : obj.Properties;
+
+    private static bool References(JsonNode? node, string field, string path) =>
+        RecordValues.Elements(RecordValues.At(node, field)).Any(reference =>
+            string.Equals(
+                RecordValues.AnyReference(reference),
+                path,
+                StringComparison.OrdinalIgnoreCase
             )
-            .ToArray();
-        // Dialogue wording is context, not a substitute for typed relation conditions.
-        foreach (var node in nodes)
+        );
+
+    private static IEnumerable<JsonNode?> Parents(JsonNode? node, ILookup<long, JsonNode?> incoming) =>
+        RecordValues.Integer(RecordValues.At(node, "id")) is { } id ? incoming[id] : [];
+
+    private static IEnumerable<Quote> Quotes(
+        CatalogContext context,
+        JsonNode?[] grantLines,
+        ILookup<long, JsonNode?> incoming,
+        IReadOnlyDictionary<string, InnerObjectRecord> objects,
+        IReadOnlyDictionary<string, int?> debits
+    )
+    {
+        bool HasClass(JsonNode? node, string field, string type) =>
+            RecordValues.Elements(RecordValues.At(node, field)).Any(reference =>
+                RecordValues.AnyReference(reference) is { } path
+                && objects.TryGetValue(path, out var obj)
+                && WorldSourceData.IsClass(context, obj.Class, type)
+            );
+
+        bool Charges(JsonNode? node) =>
+            RecordValues.Elements(RecordValues.At(node, "Events")).Any(evt =>
+                RecordValues.AnyReference(evt) is { } path && debits.ContainsKey(path)
+            );
+
+        foreach (var node in grantLines)
         {
-            var text = RecordValues.Text(RecordValues.At(node, "Text"));
-            if (!string.IsNullOrWhiteSpace(text))
+            var hasPayment =
+                Charges(node)
+                || HasClass(node, "Conditions", "PlayerHasEnoughMoney")
+                || HasClass(node, "Conditions", "PlayerHasEnoughMoneyForSpecifiedItem");
+            foreach (var paymentLine in hasPayment ? [node] : Parents(node, incoming).Where(Charges))
             {
-                yield return new Quote(
-                    text.Trim(),
-                    RecordValues.Boolean(RecordValues.At(node, "isPlayer")) == true
-                );
+                // The offer is quoted dialogue. A gold check need not deduct anything.
+                foreach (var offer in Parents(paymentLine, incoming).Where(offer =>
+                    RecordValues.Boolean(RecordValues.At(offer, "isPlayer")) == false
+                ))
+                {
+                    if (Line(offer) is { } quotedOffer)
+                        yield return quotedOffer;
+                }
+                if (paymentLine != node && Line(paymentLine) is { } quotedReply)
+                    yield return quotedReply;
             }
+            if (Line(node) is { } grantLine)
+                yield return grantLine;
         }
     }
 
+    private static Price? GrantPrice(
+        CatalogContext context,
+        IReadOnlyList<JsonNode?> grantLines,
+        ILookup<long, JsonNode?> incoming,
+        IReadOnlyDictionary<string, InnerObjectRecord> objects,
+        IReadOnlyDictionary<string, int?> debits
+    )
+    {
+        (bool Found, int? Cost) Debit(JsonNode? node)
+        {
+            var found = false;
+            long total = 0;
+            foreach (var evt in RecordValues.Elements(RecordValues.At(node, "Events")))
+            {
+                if (
+                    RecordValues.AnyReference(evt) is not { } path
+                    || !debits.TryGetValue(path, out var cost)
+                )
+                    continue;
+                found = true;
+                if (cost is not >= 0)
+                    return (true, null);
+                total += cost.Value;
+            }
+            return (found, total <= int.MaxValue ? (int)total : null);
+        }
+
+        int? LineCost(JsonNode? node)
+        {
+            var (directDebit, cost) = Debit(node);
+            if (directDebit)
+                return cost;
+            if (debits.Count == 0)
+            {
+                // A zero-gold acceptance check does not debit gold, even when the previous line quotes a price.
+                return RecordValues.Elements(RecordValues.At(node, "Conditions")).Any(check =>
+                    RecordValues.AnyReference(check) is { } path
+                    && objects.TryGetValue(path, out var obj)
+                    && WorldSourceData.IsClass(context, obj.Class, "PlayerHasEnoughMoney")
+                    && WorldSourceData.Integer(EventProperties(context, obj)["Required Money"]) == 0
+                )
+                    ? 0
+                    : null;
+            }
+            // Some replies debit the gold, then immediately advance to the line that grants the item.
+            int? earlierCost = null;
+            foreach (var previous in Parents(node, incoming))
+            {
+                var (paid, amount) = Debit(previous);
+                if (!paid || amount is null || (earlierCost is not null && earlierCost != amount))
+                    return null;
+                earlierCost = amount;
+            }
+            return earlierCost;
+        }
+
+        int? price = null;
+        foreach (var line in grantLines)
+        {
+            var cost = LineCost(line);
+            if (cost is null || (price is not null && price != cost))
+                return null;
+            price = cost;
+        }
+        return price is { } amount ? new Price(amount, null) : null;
+    }
+
+    private static Quote? Line(JsonNode? node) =>
+        RecordValues.Text(RecordValues.At(node, "Text")) is { } text
+        && !string.IsNullOrWhiteSpace(text)
+            ? new Quote(text.Trim(), RecordValues.Boolean(RecordValues.At(node, "isPlayer")) == true)
+            : null;
+
     private static IEnumerable<string> GrantNotes(AssetRecord dialogue)
     {
-        if (dialogue.Path.Contains("/Dialogue_Unused/", StringComparison.OrdinalIgnoreCase))
-        {
-            yield return "The game files mark this conversation unused, so it may never take place.";
-        }
         if (dialogue.Path.Contains("_SoulfaringNight.", StringComparison.OrdinalIgnoreCase))
         {
             yield return "From the Soulfaring Night conversation.";

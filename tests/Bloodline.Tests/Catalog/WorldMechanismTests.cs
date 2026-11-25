@@ -185,20 +185,26 @@ public sealed class WorldMechanismTests
     }
 
     [Theory]
-    [InlineData("/Invented/Dialogue_Unused/Tale.Tale", true)]
-    [InlineData("/Invented/Tale.Tale", false)]
-    public void DialogueMarkedUnusedRetainsItsRewardPlaceAndExplanation(
+    [InlineData("/Invented/Dialogue_Unused/Tale.Tale", true, false)]
+    [InlineData("/Invented/Dialogue_Unused/Tale.Tale", false, true)]
+    [InlineData("/Invented/Tale.Tale", true, false)]
+    public void DialogueUsesItsSpeakerAndPlacementOverTheFolderName(
         string path,
+        bool placed,
         bool unconfirmed
     )
     {
         var grant = Type("AddItemDialogue");
-        var npc = Type("Storyteller");
-        npc.Properties["Dialogue"] = new JsonObject { ["$ref"] = path };
+        var npc = Type(
+            "Storyteller",
+            """
+            {"Full Name":{"$text":"Placed name"},"Dialogue":{"$ref":"/Invented/Default.Default"}}
+            """
+        );
         var dialogue = new AssetRecord(
             path,
             "Dialogue",
-            new JsonObject(),
+            Parse("""{"Name":{"$text":"Spoken name"}}"""),
             [
                 new InnerObjectRecord(
                     path + ":Grant",
@@ -210,12 +216,24 @@ public sealed class WorldMechanismTests
         var source = Assert
             .Single(
                 new DialogueGrantMechanism().FindSources(
-                    Context([grant, npc], levels: [Level(npc)], dialogues: [dialogue])
+                    Context(
+                        [grant, npc],
+                        levels: placed
+                            ? [Level(npc, $$$"""{"Dialogue":{"$ref":"{{{path}}}"}}""")]
+                            : [],
+                        dialogues: [dialogue]
+                    )
                 )
             )
             .Source;
         Assert.Equal(unconfirmed, source.Unconfirmed);
-        Assert.Equal("/Invented/Coast", Assert.Single(source.Places).Key);
+        // Only a placement that swaps the conversation in speaks under its name.
+        Assert.Equal(placed ? "Spoken name" : "Tale", source.Name);
+        Assert.Equal(source.Name, source.Entity.Name);
+        if (placed)
+            Assert.Equal("/Invented/Coast", Assert.Single(source.Places).Key);
+        else
+            Assert.Empty(source.Places);
         Assert.Equal(
             unconfirmed,
             source.Notes.Contains(
@@ -309,6 +327,132 @@ public sealed class WorldMechanismTests
             source.Unresolved,
             label => label.Contains("Earlier lines", StringComparison.Ordinal)
         );
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void DialogueQuestGateMustHoldOnEveryRouteToTheGrant(bool bothRepliesRequireQuest)
+    {
+        var grant = Type("AddItemDialogue");
+        var eligibility = Type("Quest_is_Active", """{"Quest Needed":"InventedRow"}""");
+        var questTable = Table("DT_UQC_Quests", """{"DisplayName":{"$text":"Invented quest"}}""");
+        var otherChecks = bothRepliesRequireQuest ? """[{"$ref":"OtherCheck"}]""" : "[]";
+        var dialogue = new AssetRecord(
+            "/Invented/Tale.Tale",
+            "Dialogue",
+            Parse(
+                $$"""
+                {"Data":[
+                    {"id":0,"Links":[1,2]},
+                    {"id":1,"Links":[3],"Conditions":[{"$ref":"Check"}]},
+                    {"id":2,"Links":[3],"Conditions":{{otherChecks}}},
+                    {"id":3,"Links":[4,5]},
+                    {"id":4,"Events":[{"$ref":"Gift"}]},
+                    {"id":5,"Links":[3]}
+                ]}
+                """
+            ),
+            [
+                new InnerObjectRecord(
+                    "Gift",
+                    grant.Path,
+                    Parse("""{"Item To Add":{"$ref":"/Invented/Gift.Gift_C"}}""")
+                ),
+                new InnerObjectRecord("Check", eligibility.Path, new JsonObject()),
+                new InnerObjectRecord("OtherCheck", eligibility.Path, new JsonObject()),
+            ]
+        );
+        var source = Assert.Single(
+            new DialogueGrantMechanism().FindSources(
+                Context([grant, eligibility], [questTable], dialogues: [dialogue])
+            )
+        );
+
+        if (bothRepliesRequireQuest)
+        {
+            var condition = Assert.Single(source.Source.Conditions);
+            Assert.Equal(ConditionKind.Quest, condition.Kind);
+            Assert.Equal(questTable.Path + ":InventedRow", condition.Entity!.Key);
+            Assert.Equal("Requires the quest \"Invented quest\" to be active", condition.Label);
+        }
+        else
+        {
+            Assert.Empty(source.Source.Conditions);
+        }
+        Assert.Empty(source.Unresolved);
+    }
+
+    [Theory]
+    [InlineData("itemValue", 17)]
+    [InlineData("fixed", 23)]
+    [InlineData("nothing", 0)]
+    [InlineData("threshold", null)]
+    public void DialogueUsesTheDebitEventInsteadOfTheOfferQuote(string debitType, int? expectedCost)
+    {
+        var grant = Type("AddItemDialogue");
+        var check = Type(
+            "PlayerHasEnoughMoney",
+            debitType == "threshold" ? """{"Required Money":45}""" : """{"Required Money":0}"""
+        );
+        var debit = debitType == "fixed"
+            ? Type("TakePlayerMoney", """{"Item Cost":23}""")
+            : Type("TakeMoneyBasedOnitemValue");
+        var pie = Type("Pie", """{"ItemInfo":{"ItemValue":17}}""");
+        var separateGrantLine = debitType == "itemValue";
+        var debitOnGrant = debitType == "fixed" ? """,{"$ref":"Debit"}""" : "";
+        var deal = separateGrantLine
+            ? """
+                {"id":2,"Links":[4],"Events":[{"$ref":"Debit"}],"isPlayer":true,"Text":{"$text":"Deal."}},
+                {"id":4,"Events":[{"$ref":"Gift"}],"isPlayer":false,"Text":{"$text":"Here it is."}}
+                """
+            : $$$"""
+                {"id":2,"Conditions":[{"$ref":"Check"}],"Events":[{"$ref":"Gift"}{{{debitOnGrant}}}],"isPlayer":true,"Text":{"$text":"Deal."}}
+                """;
+        var dialogue = new AssetRecord(
+            "/Invented/Tale.Tale",
+            "Dialogue",
+            Parse(
+                $$$"""
+                {"Data":[
+                    {"id":0,"Links":[1]},
+                    {"id":1,"Links":[2,3],"isPlayer":false,"Text":{"$text":"45 gold for the pie."}},
+                    {"id":3,"isPlayer":true,"Text":{"$text":"No thanks."}},
+                    {{{deal}}}
+                ]}
+                """
+            ),
+            [
+                new InnerObjectRecord(
+                    "Gift",
+                    grant.Path,
+                    Parse("""{"Item To Add":{"$ref":"/Invented/Pie.Pie_C"}}""")
+                ),
+                new InnerObjectRecord("Check", check.Path, new JsonObject()),
+                .. debitType is "itemValue" or "fixed"
+                    ? [
+                        new InnerObjectRecord(
+                            "Debit",
+                            debit.Path,
+                            Parse("""{"Item":{"$ref":"/Invented/Pie.Pie_C"}}""")
+                        ),
+                    ]
+                    : Array.Empty<InnerObjectRecord>(),
+            ]
+        );
+        var source = Assert
+            .Single(
+                new DialogueGrantMechanism().FindSources(
+                    Context([grant, check, debit, pie], dialogues: [dialogue])
+                )
+            )
+            .Source;
+        Quote[] expected = separateGrantLine
+            ? [new("45 gold for the pie.", false), new("Deal.", true), new("Here it is.", false)]
+            : [new("45 gold for the pie.", false), new("Deal.", true)];
+
+        Assert.Equal(expectedCost is { } amount ? new Price(amount, null) : null, source.Price);
+        Assert.Equal(expected, source.Quotes);
     }
 
     [Theory]

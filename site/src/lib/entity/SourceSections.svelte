@@ -87,12 +87,15 @@
 			.filter((group) => group.sources.length)
 	);
 	/**
-	 * A resource with a page gives an item from spots that are always that resource and from spots drawn from a table,
-	 * by separate relations that differ only in notes the resource page shows. Their rows read the same, so they show as
-	 * one row with every place, carrying each relation.
+	 * Rows that read the same apart from their place show as one row with every place, carrying each relation. A
+	 * resource with a page gives an item from spots that are always that resource and from spots drawn from a table,
+	 * by relations that differ only in notes the resource page shows. A conversation that generated characters hold
+	 * in several towns, such as a Civilian's, is one way to get the item.
 	 */
 	function merged(listed: Source[]): (Source & { alsoRelationIds?: string[] })[] {
 		const rows: (Source & { alsoRelationIds?: string[] })[] = [];
+		const said = (source: Source) =>
+			JSON.stringify([source.conditions, source.notes, source.price, source.quotes, source.amount]);
 		for (const source of listed) {
 			const same =
 				source.kind === 'gathering' && source.entity?.slug != null
@@ -102,7 +105,12 @@
 								row.odds?.chance === source.odds?.chance &&
 								JSON.stringify(row.conditions) === JSON.stringify(source.conditions)
 						)
-					: undefined;
+					: source.kind === 'dialogue' && source.entity?.slug == null
+						? rows.find(
+								(row) =>
+									row.kind === 'dialogue' && row.name === source.name && said(row) === said(source)
+							)
+						: undefined;
 			if (!same) {
 				rows.push(source);
 				continue;

@@ -140,6 +140,19 @@ internal static class WorldSourceData
     {
         var result = new List<RelationCondition>();
         var unresolved = new List<string>();
+        InnerObjectRecord? ReadObject(JsonNode? value)
+        {
+            var path = RecordValues.AnyReference(value);
+            return dialogue.Objects.FirstOrDefault(obj =>
+                string.Equals(obj.Path, path, StringComparison.OrdinalIgnoreCase)
+            );
+        }
+
+        JsonObject Properties(InnerObjectRecord instance) =>
+            context.Classes.TryGetValue(instance.Class, out var defaults)
+                ? RecordMerge.OverlayProperties(defaults.Properties, instance.Properties)
+                : instance.Properties;
+
         var data = RecordValues.Elements(dialogue.Properties["Data"]).ToArray();
         var nodes = data.Where(node =>
                 RecordValues
@@ -169,6 +182,7 @@ internal static class WorldSourceData
                 predecessors.Add(id, previous = []);
             previous.Add(node);
         }
+        var questGates = new Dictionary<RelationCondition, HashSet<long>>();
         while (pending.TryDequeue(out var id))
         {
             if (!predecessors.TryGetValue(id, out var previous))
@@ -181,10 +195,67 @@ internal static class WorldSourceData
                 )
                     continue;
                 pending.Enqueue(parent);
-                if (RecordValues.Elements(RecordValues.At(node, "Conditions")).Any())
-                    unresolved.Add(
-                        "Earlier lines of the conversation have checks whose path is not read."
-                    );
+                foreach (var check in RecordValues.Elements(RecordValues.At(node, "Conditions")))
+                {
+                    var instance = ReadObject(check);
+                    var kind = instance is null ? null : ItemIdentity.ClassName(instance.Class);
+                    if (instance is not null && QuestState(kind) is { } state)
+                    {
+                        var quest = QuestCondition(context, Properties(instance), state);
+                        if (quest.Entity?.Key is null)
+                        {
+                            unresolved.Add("An earlier line checks a quest that could not be read.");
+                            continue;
+                        }
+                        if (!questGates.TryGetValue(quest, out var gates))
+                            questGates.Add(quest, gates = []);
+                        gates.Add(parent);
+                    }
+                    else
+                    {
+                        unresolved.Add(
+                            "Earlier lines of the conversation have checks whose path is not read."
+                        );
+                    }
+                }
+            }
+        }
+        if (questGates.Count > 0)
+        {
+            // Different replies can require the same quest. Only report that quest if removing all lines
+            // that check it cuts every route from the opening to the grant, including paths around loops.
+            bool ReachesOpening(IReadOnlySet<long>? blocked)
+            {
+                var seen = new HashSet<long>();
+                var search = new Queue<long>(eventIds);
+                while (search.TryDequeue(out var target))
+                {
+                    if (blocked?.Contains(target) == true || !seen.Add(target))
+                        continue;
+                    if (target == 0)
+                        return true;
+                    if (!predecessors.TryGetValue(target, out var previous))
+                        continue;
+                    foreach (var prior in previous)
+                    {
+                        if (RecordValues.Integer(RecordValues.At(prior, "id")) is { } id)
+                            search.Enqueue(id);
+                    }
+                }
+                return false;
+            }
+
+            if (ReachesOpening(null))
+            {
+                foreach (var (quest, gates) in questGates)
+                {
+                    if (!ReachesOpening(gates))
+                        result.Add(quest);
+                }
+            }
+            else
+            {
+                unresolved.Add("Earlier lines of the conversation have checks whose path is not read.");
             }
         }
         foreach (var node in nodes)
@@ -195,18 +266,15 @@ internal static class WorldSourceData
         foreach (var node in nodes)
         foreach (var condition in RecordValues.Elements(RecordValues.At(node, "Conditions")))
         {
-            var reference = RecordValues.AnyReference(condition);
-            var instance = dialogue.Objects.FirstOrDefault(obj =>
-                string.Equals(obj.Path, reference, StringComparison.OrdinalIgnoreCase)
-            );
+            var instance = ReadObject(condition);
             if (instance is null)
             {
-                unresolved.Add("A check of the line could not be read: " + reference);
+                unresolved.Add(
+                    "A check of the line could not be read: " + RecordValues.AnyReference(condition)
+                );
                 continue;
             }
-            var properties = context.Classes.TryGetValue(instance.Class, out var defaults)
-                ? RecordMerge.OverlayProperties(defaults.Properties, instance.Properties)
-                : instance.Properties;
+            var properties = Properties(instance);
             var type = ItemIdentity.ClassName(instance.Class);
             if (type == "PlayerHasEnoughMoney")
             {
@@ -224,35 +292,9 @@ internal static class WorldSourceData
                     )
                 );
             }
-            else if (
-                type
-                is "Quest_is_Active"
-                    or "Quest_is_NOT_Active"
-                    or "Quest_is_COMPLETED"
-                    or "Quest_is_NOT_completed"
-            )
+            else if (QuestState(type) is { } state)
             {
-                var quest = TableEntity(
-                    context,
-                    EntityKind.Quest,
-                    "DT_UQC_Quests",
-                    RecordValues.String(properties["Quest Needed"])
-                );
-                var state = type switch
-                {
-                    "Quest_is_Active" => "active",
-                    "Quest_is_NOT_Active" => "not active",
-                    "Quest_is_COMPLETED" => "completed",
-                    _ => "not completed",
-                };
-                result.Add(
-                    new(
-                        ConditionKind.Quest,
-                        quest,
-                        null,
-                        $"Requires the quest \"{quest.Name}\" to be {state}"
-                    )
-                );
+                result.Add(QuestCondition(context, properties, state));
             }
             else if (type is "CheckIfDialogueTagIsValid" or "CheckIfDialogueTagIsNOTValid")
             {
@@ -348,6 +390,36 @@ internal static class WorldSourceData
             }
         }
         return new(result.Distinct().ToArray(), unresolved.Distinct().ToArray());
+    }
+
+    private static string? QuestState(string? type) =>
+        type switch
+        {
+            "Quest_is_Active" => "active",
+            "Quest_is_NOT_Active" => "not active",
+            "Quest_is_COMPLETED" => "completed",
+            "Quest_is_NOT_completed" => "not completed",
+            _ => null,
+        };
+
+    private static RelationCondition QuestCondition(
+        CatalogContext context,
+        JsonObject properties,
+        string state
+    )
+    {
+        var quest = TableEntity(
+            context,
+            EntityKind.Quest,
+            "DT_UQC_Quests",
+            RecordValues.String(properties["Quest Needed"])
+        );
+        return new(
+            ConditionKind.Quest,
+            quest,
+            null,
+            $"Requires the quest \"{quest.Name}\" to be {state}"
+        );
     }
 
     // A tag check names the conversation that sets the tag. A conversation that sets its own tag meets a check
