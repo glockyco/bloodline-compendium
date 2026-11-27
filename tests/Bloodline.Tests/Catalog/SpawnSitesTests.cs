@@ -28,26 +28,100 @@ public sealed class SpawnSitesTests
             []
         );
 
-    private static CatalogContext Context(JsonObject den, params CodeFunction[] functions)
+    private static CodeFunction ReplacementFunction()
     {
+        const string package =
+            "/Game/Overworld/OverworldInteractables/ReplaceActorsWithOtherActors";
+        return new CodeFunction(
+            package,
+            package + ".ReplaceActorsWithOtherActors_C",
+            "RecieveEventTriggered",
+            false,
+            "f2356bab079f",
+            CodeParseStatus.Complete,
+            [],
+            [],
+            [],
+            []
+        );
+    }
+
+    private static CatalogContext Context(JsonObject den, params CodeFunction[] functions) =>
+        Context(den, [], functions);
+
+    private static CatalogContext Context(
+        JsonObject den,
+        IReadOnlyList<AssetRecord> dialogues,
+        params CodeFunction[] functions
+    )
+    {
+        var actorProperties = (JsonObject)den.DeepClone();
+        actorProperties["Tags"] = new JsonArray("Hermit");
+        actorProperties["Name"] = "Old Hermit";
         var records = new CatalogRecords(
             new BuildRecord(1159290, 1, []),
             [
                 new ClassRecord(Den, [], new JsonObject()),
                 new ClassRecord(Sleeper, [], new JsonObject()),
                 new ClassRecord(Beast, [], new JsonObject()),
+                new ClassRecord(
+                    "/Game/Overworld/OverworldInteractables/ReplaceActorsWithOtherActors.ReplaceActorsWithOtherActors_C",
+                    [],
+                    new JsonObject()
+                ),
             ],
             [],
             [],
-            [new LevelRecord(Level, [], [new ActorRecord("Den", Den, den)])],
-            [],
+            [new LevelRecord(Level, [], [new ActorRecord("Hermit", Den, actorProperties)])],
+            dialogues,
             [],
             []
         )
         {
-            Code = CodeIndex.Create(functions),
+            Code = CodeIndex.Create([ReplacementFunction(), .. functions]),
         };
         return new CatalogContext(records, new Dictionary<string, ItemPage>(), []);
+    }
+
+    [Fact]
+    public void ConversationReplacementAddsItsPlaceAndNoteToTheSpawnedPerson()
+    {
+        const string package =
+            "/Game/Overworld/OverworldInteractables/ReplaceActorsWithOtherActors";
+        var dialogue = new AssetRecord(
+            "/Game/Invented/Dialogue",
+            "Dialogue",
+            new JsonObject(),
+            [
+                new InnerObjectRecord(
+                    "/Game/Invented/Dialogue:Replace",
+                    package + ".ReplaceActorsWithOtherActors_C",
+                    new JsonObject
+                    {
+                        ["Actor To Spawn"] = new JsonObject { ["$ref"] = Beast },
+                        ["Tag to Find"] = "Hermit",
+                    }
+                ),
+            ]
+        );
+        var context = Context(new JsonObject(), [dialogue]);
+
+        var sites = new SpawnSites(context, []);
+
+        Assert.Equal(Level, Assert.Single(sites.Places(Beast)).Key);
+        Assert.Equal("Old Hermit", Assert.Single(sites.Replaces(Beast)));
+        var candidate = new EntitySource(
+            Beast,
+            new Source(SourceKind.EnemyDrop, "Beast", [], null, null, [], [])
+            {
+                Entity = new EntityReference(EntityKind.Item, Beast, "Beast", "beast", null),
+            }
+        );
+        var arriving = sites.Arriving(candidate);
+        Assert.Equal(
+            "Takes the place of Old Hermit during a conversation.",
+            Assert.Single(arriving.Source.Notes)
+        );
     }
 
     [Fact]

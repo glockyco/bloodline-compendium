@@ -1256,6 +1256,25 @@
       "title": "ListFacet",
       "type": "object"
     },
+    "MechanicChance": {
+      "properties": {
+        "label": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "value": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "MechanicChance",
+      "type": "object"
+    },
     "MechanicIndex": {
       "properties": {
         "mechanics": {
@@ -1322,6 +1341,12 @@
             "null"
           ]
         },
+        "data": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "heading": {
           "type": "string"
         },
@@ -1376,6 +1401,30 @@
     "MechanicTable": {
       "additionalProperties": false,
       "properties": {
+        "anchors": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "chanceColumns": {
+          "additionalProperties": {
+            "items": {
+              "items": {
+                "$ref": "#/$defs/MechanicChance"
+              },
+              "type": "array"
+            },
+            "type": "array"
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
         "headings": {
           "items": {
             "type": "string"
@@ -2868,6 +2917,12 @@
         "entity": {
           "$ref": "#/$defs/EntityReference"
         },
+        "events": {
+          "items": {
+            "$ref": "#/$defs/SourceEvent"
+          },
+          "type": "array"
+        },
         "inputs": {
           "items": {
             "$ref": "#/$defs/ItemAmount"
@@ -2963,6 +3018,33 @@
       ],
       "title": "Source",
       "type": "object"
+    },
+    "SourceEvent": {
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/SourceEventKind"
+        },
+        "name": {
+          "type": "string"
+        },
+        "page": {
+          "$ref": "#/$defs/EntityReference"
+        }
+      },
+      "required": [
+        "kind",
+        "name",
+        "page"
+      ],
+      "title": "SourceEvent",
+      "type": "object"
+    },
+    "SourceEventKind": {
+      "enum": [
+        "worldMap",
+        "calendar"
+      ],
+      "title": "SourceEventKind"
     },
     "SourceKind": {
       "enum": [

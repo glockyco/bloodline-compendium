@@ -20,6 +20,11 @@ internal static class MechanicProducer
             if (!names.Add(ItemIdentity.Slug(page.Name)))
                 throw new InvalidDataException($"Two mechanic pages are named {page.Name}.");
             foreach (var section in page.Sections)
+            {
+                if (section.Table is not null && section.Data is not null)
+                    throw new InvalidDataException(
+                        $"A section of the mechanic page {page.Name} names a table to build and also writes one."
+                    );
                 if (
                     section.Table is { } table
                     && table.Rows.Any(row => row.Count != table.Headings.Count)
@@ -27,6 +32,7 @@ internal static class MechanicProducer
                     throw new InvalidDataException(
                         $"A table of the mechanic page {page.Name} has a row without a cell for every heading."
                     );
+            }
             if (page.Sections.Count == 0 || page.Evidence.Count == 0)
                 throw new InvalidDataException(
                     $"The mechanic page {page.Name} needs sections and the evidence for them."

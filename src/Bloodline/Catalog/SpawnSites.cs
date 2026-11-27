@@ -9,9 +9,13 @@ namespace Bloodline.Catalog;
 /// A function that spawns the classes it reads wherever its object is, read with <c>bloodline script</c>.
 /// <see cref="Fingerprint"/> is the reviewed function's fingerprint, so a game update that changes it fails the
 /// catalog until the function is read again. <see cref="Setting"/> names a count on the object that has to be above
-/// zero for the spawn to happen, which a placement can set.
+/// zero for the spawn to happen, which a placement can set. <see cref="Except"/> holds classes the function reads
+/// without spawning them.
 /// </summary>
-internal sealed record SpawnSite(string Citation, string Fingerprint, string? Setting = null);
+internal sealed record SpawnSite(string Citation, string Fingerprint, string? Setting = null)
+{
+    public IReadOnlyList<string> Except { get; init; } = [];
+}
 
 /// <summary>
 /// Where the game brings a class into the world without a level holding it: a spawner's settings name it, a
@@ -81,10 +85,37 @@ internal sealed class SpawnSites
             "/Game/AIBehaviorToolkit/Blueprints/ScarecrowEnemy:Turn into Scarecrow",
             "ff36e608caac"
         ),
+        // A goblin camp spawns the spawner that picks its goblins.
+        new("/Game/Overworld/OpenWorldAreas/GoblinCampsite:ReceiveBeginPlay", "9a8de8ab124f"),
+        // A bandit fortress spawns a random one of two bandits at each of its posts.
+        new(
+            "/Game/Overworld/OpenWorldAreas/Small_Event_Areas/Small_Event_Area_PropsAndBuildings/SmallEventAreaBuildings/GenericBuildings/Bandit_Fortress:ReceiveBeginPlay",
+            "4d57a4a2550e"
+        )
+        {
+            Except = ["/Game/AIBehaviorToolkit/Blueprints/Goblin_Base.Goblin_Base_C"],
+        },
+        // The ghost ship of the calendar leaves an Ethereal Chest when it is destroyed.
+        new("/Game/PuzzleProps/UndeadAirship:Spawn Ethereal Chest", "143a9fdb1e2a"),
     ];
+
+    private const string Replace =
+        "/Game/Overworld/OverworldInteractables/ReplaceActorsWithOtherActors";
+
+    /// <summary>Where a class comes into the world: a place it is spawned in, or an event that brings it.</summary>
+    private readonly record struct Spot(EntityReference? Place, SourceEvent? Event)
+    {
+        public static implicit operator Spot(EntityReference place) => new(place, null);
+    }
 
     private readonly CatalogContext context;
     private readonly Dictionary<string, List<EntityReference>> places = new(
+        StringComparer.OrdinalIgnoreCase
+    );
+    private readonly Dictionary<string, List<SourceEvent>> events = new(
+        StringComparer.OrdinalIgnoreCase
+    );
+    private readonly Dictionary<string, List<string>> replaced = new(
         StringComparer.OrdinalIgnoreCase
     );
     private readonly HashSet<(string Class, string? Place)> read = [];
@@ -95,6 +126,14 @@ internal sealed class SpawnSites
     public IReadOnlyList<EntityReference> Places(string path) =>
         places.TryGetValue(path, out var found) ? found : [];
 
+    /// <summary>The world map and calendar events that bring the class, also through what they spawn.</summary>
+    public IReadOnlyList<SourceEvent> Events(string path) =>
+        events.TryGetValue(path, out var found) ? found : [];
+
+    /// <summary>The people whose place the class takes during a conversation, by name.</summary>
+    public IReadOnlyList<string> Replaces(string path) =>
+        replaced.TryGetValue(path, out var found) ? found : [];
+
     /// <summary>
     /// Whether every place of the class comes from a function in <see cref="Read"/>. Other places come from a
     /// spawner's settings or a level's script, where it is not read when the spawn happens.
@@ -103,6 +142,43 @@ internal sealed class SpawnSites
         Places(path).All(place => read.Contains((path.ToLowerInvariant(), place.Key)));
 
     public IEnumerable<string> Classes => places.Keys;
+
+    /// <summary>The classes an event brings, also through what it spawns.</summary>
+    public IEnumerable<string> Brought(SourceEvent happening) =>
+        events.Where(pair => pair.Value.Contains(happening)).Select(pair => pair.Key);
+
+    /// <summary>
+    /// The way with how its giver comes into the world besides its places: the events that bring it, and the
+    /// person it replaces in a conversation.
+    /// </summary>
+    public EntitySource Arriving(EntitySource candidate)
+    {
+        if (candidate.Source.Entity.Key is not { } key)
+            return candidate;
+        // A container or pickup is keyed by its class and the name it shows.
+        var path = key.Split('#')[0];
+        var during = Events(path);
+        var names = Replaces(path);
+        if (during.Count == 0 && names.Count == 0)
+            return candidate;
+        return candidate with
+        {
+            Source = candidate.Source with
+            {
+                Events =
+                [
+                    .. during
+                        .OrderBy(happening => happening.Kind)
+                        .ThenBy(happening => happening.Name, StringComparer.Ordinal),
+                ],
+                Notes =
+                [
+                    .. candidate.Source.Notes,
+                    .. names.Select(name => $"Takes the place of {name} during a conversation."),
+                ],
+            },
+        };
+    }
 
     public SpawnSites(CatalogContext context, IReadOnlyList<SpawnSite>? sites = null)
     {
@@ -144,7 +220,65 @@ internal sealed class SpawnSites
                         Add(place, RecordValues.AnyReference(enemy), false);
             }
         }
+        foreach (var happening in context.Events.WorldMap)
+        foreach (var spawned in happening.Spawns)
+            Add(
+                new Spot(null, GameEvents.Reference(SourceEventKind.WorldMap, happening.Name)),
+                spawned,
+                true
+            );
+        foreach (var happening in context.Events.Calendar)
+        foreach (var spawned in happening.Spawns)
+            Add(
+                new Spot(null, GameEvents.Reference(SourceEventKind.Calendar, happening.Name)),
+                spawned,
+                true
+            );
+        Replacements();
         ReadSites(sites ?? Read);
+    }
+
+    /// <summary>
+    /// A conversation can replace a person with another object: its event finds every object with a tag, removes
+    /// it and spawns its own class there, as Aida's conversation spawns the Demon of Grief.
+    /// </summary>
+    private void Replacements()
+    {
+        if (
+            ReadFunction.Find(
+                context,
+                Replace + ":RecieveEventTriggered",
+                "f2356bab079f",
+                "SpawnSites.Replacements"
+            )
+            is null
+        )
+            return;
+        foreach (var dialogue in context.Records.Dialogues)
+        foreach (var inner in dialogue.Objects)
+        {
+            if (
+                inner.Class != Replace + ".ReplaceActorsWithOtherActors_C"
+                || RecordValues.AnyReference(inner.Properties["Actor To Spawn"]) is not { } spawned
+                || RecordValues.String(inner.Properties["Tag to Find"]) is not { } tag
+            )
+                continue;
+            foreach (var placement in context.Placements)
+            {
+                if (
+                    !RecordValues
+                        .Elements(placement.Properties["Tags"])
+                        .Any(entry => RecordValues.String(entry) == tag)
+                )
+                    continue;
+                Add(context.Places.Get(placement.Level), spawned, true);
+                if (!replaced.TryGetValue(spawned, out var names))
+                    replaced.Add(spawned, names = []);
+                var name = WorldSourceData.Name(placement.Properties, placement.Actor.Class);
+                if (!names.Contains(name))
+                    names.Add(name);
+            }
+        }
     }
 
     private void ReadSites(IReadOnlyList<SpawnSite> reviewed)
@@ -152,25 +286,18 @@ internal sealed class SpawnSites
         var sites = new List<(SpawnSite Site, CodeFunction Function)>();
         foreach (var site in reviewed)
         {
-            var function = code.SingleOrDefault(function => function.Citation == site.Citation);
             // A build without the object has nothing to read, but one that changed it has to be read again.
-            if (
-                function is null
-                && context.Classes.Keys.Any(path =>
-                    path.Split('.')[0] == site.Citation.Split(':')[0]
-                )
-            )
-                throw new InvalidDataException(
-                    $"{site.Citation} is gone, but its class is not. Read the class again and update SpawnSites.Read."
-                );
+            var function = ReadFunction.Find(
+                context,
+                site.Citation,
+                site.Fingerprint,
+                "SpawnSites.Read"
+            );
             if (function is null)
                 continue;
-            if (
-                !function.Fingerprint.StartsWith(site.Fingerprint, StringComparison.Ordinal)
-                || !function.Calls.Contains(SpawnCall)
-            )
+            if (!function.Calls.Contains(SpawnCall))
                 throw new InvalidDataException(
-                    $"{site.Citation} changed since it was read as a spawn site. Read it again and update SpawnSites.Read."
+                    $"{site.Citation} spawns nothing any more. Read it again and update SpawnSites.Read."
                 );
             sites.Add((site, function));
         }
@@ -187,7 +314,7 @@ internal sealed class SpawnSites
             foreach (var (site, function) in sites)
             {
                 var package = function.Package;
-                var here = new List<EntityReference>();
+                var here = new List<Spot>();
                 foreach (var placement in standing.GetValueOrDefault(package) ?? [])
                 {
                     if (
@@ -196,17 +323,21 @@ internal sealed class SpawnSites
                     )
                         here.Add(context.Places.Get(placement.Level));
                 }
-                // An object that another site spawns keeps its class defaults.
+                // An object that another site or an event spawns keeps its class defaults.
                 var owner = function.Owner;
                 if (
                     site.Setting is null
                     || context.Classes.TryGetValue(owner, out var type)
                         && RecordValues.Number(type.Properties[site.Setting]) is > 0
                 )
-                    here.AddRange(Places(owner));
-                foreach (var place in here.Distinct())
+                {
+                    here.AddRange(Places(owner).Select(place => (Spot)place));
+                    here.AddRange(Events(owner).Select(happening => new Spot(null, happening)));
+                }
+                foreach (var spot in here.Distinct().ToArray())
                 foreach (var spawned in Objects(function))
-                    changed |= Add(place, spawned, true);
+                    if (!site.Except.Contains(spawned, StringComparer.OrdinalIgnoreCase))
+                        changed |= Add(spot, spawned, true);
             }
         } while (changed);
     }
@@ -253,29 +384,29 @@ internal sealed class SpawnSites
         );
     }
 
-    private void Scan(EntityReference place, JsonObject properties, string? owner, bool site)
+    private void Scan(Spot spot, JsonObject properties, string? owner, bool site)
     {
         foreach (var field in PopulationFields)
         foreach (var entry in RecordValues.Elements(properties[field]))
         {
             if (RecordValues.Integer(RecordValues.At(entry, "maxSpawnNPC")) is <= 0)
                 continue;
-            Add(place, RecordValues.AnyReference(RecordValues.At(entry, "classNPC")), site);
+            Add(spot, RecordValues.AnyReference(RecordValues.At(entry, "classNPC")), site);
         }
         foreach (var field in SpawnMapFields)
         foreach (var (key, value) in RecordValues.MapEntries(properties[field]))
         {
             if (RecordValues.Number(value) is > 0)
-                Add(place, RecordValues.AnyReference(key), site);
+                Add(spot, RecordValues.AnyReference(key), site);
         }
         if (owner is not null && properties["Enemies"] is { } enemies && DrawsEnemies(owner))
         {
             foreach (var (key, value) in RecordValues.MapEntries(enemies))
                 if (RecordValues.Number(value) is > 0)
-                    Add(place, RecordValues.AnyReference(key), site);
+                    Add(spot, RecordValues.AnyReference(key), site);
         }
         foreach (var field in SpawnClassFields)
-            Add(place, RecordValues.AnyReference(properties[field]), site);
+            Add(spot, RecordValues.AnyReference(properties[field]), site);
         foreach (var (field, value) in properties)
         {
             if (
@@ -283,32 +414,44 @@ internal sealed class SpawnSites
                 || field.StartsWith("Wave ", StringComparison.Ordinal)
             )
                 foreach (var entry in RecordValues.Elements(value))
-                    Add(place, RecordValues.AnyReference(entry), site);
+                    Add(spot, RecordValues.AnyReference(entry), site);
             if (
                 field.StartsWith("Level ", StringComparison.Ordinal)
                 && field.EndsWith(" Spawn Rates", StringComparison.Ordinal)
             )
                 foreach (var (key, weight) in RecordValues.MapEntries(value))
                     if (RecordValues.Number(weight) is > 0)
-                        Add(place, RecordValues.AnyReference(key), site);
+                        Add(spot, RecordValues.AnyReference(key), site);
         }
     }
 
-    private bool Add(EntityReference place, string? spawned, bool site)
+    private bool Add(Spot spot, string? spawned, bool site)
     {
         if (spawned is null || context.IsExcludedClass(spawned))
             return false;
-        if (!places.TryGetValue(spawned, out var known))
-            places.Add(spawned, known = []);
-        if (known.Contains(place))
-            return false;
-        known.Add(place);
-        if (site)
-            read.Add((spawned.ToLowerInvariant(), place.Key));
+        if (spot.Event is { } happening)
+        {
+            if (!events.TryGetValue(spawned, out var during))
+                events.Add(spawned, during = []);
+            if (during.Contains(happening))
+                return false;
+            during.Add(happening);
+        }
+        else
+        {
+            var place = spot.Place!;
+            if (!places.TryGetValue(spawned, out var known))
+                places.Add(spawned, known = []);
+            if (known.Contains(place))
+                return false;
+            known.Add(place);
+            if (site)
+                read.Add((spawned.ToLowerInvariant(), place.Key));
+        }
         // A spawner can spawn another spawner, as a camp's population spawns the bandit spawner that picks its
-        // bandits, so what the spawned class spawns stands in the same place.
+        // bandits, so what the spawned class spawns stands in the same place or comes with the same event.
         if (context.Classes.TryGetValue(spawned, out var type))
-            Scan(place, type.Properties, spawned, site);
+            Scan(spot, type.Properties, spawned, site);
         return true;
     }
 }

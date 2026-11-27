@@ -512,10 +512,28 @@ internal sealed record Source(
     /// <summary>The lines of a conversation that give the item, in the game's own words.</summary>
     public IReadOnlyList<Quote> Quotes { get; init; } = [];
 
+    /// <summary>
+    /// The events that bring the source into the world for a while, besides its <see cref="Places"/>, such as a Bear
+    /// in the world map event Bear.
+    /// </summary>
+    public IReadOnlyList<SourceEvent> Events { get; init; } = [];
+
     /// <summary>The progression points a source costs, such as the skill point that unlocks a tree skill.</summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public PointCost? Cost { get; init; }
 }
+
+internal enum SourceEventKind
+{
+    WorldMap,
+    Calendar,
+}
+
+/// <summary>
+/// An event of the world map or the calendar, with the entry of the mechanic page that describes it as
+/// <see cref="Page"/>.
+/// </summary>
+internal sealed record SourceEvent(SourceEventKind Kind, string Name, EntityReference Page);
 
 /// <summary>An amount of progression points, such as 1 skill point.</summary>
 internal sealed record PointCost(int Amount, PointKind Points);
@@ -721,6 +739,12 @@ internal sealed record MechanicSection(string Heading, IReadOnlyList<string> Par
 
     /// <summary>Numbers a player compares, shown after the paragraphs. Cells may link as paragraphs do.</summary>
     public MechanicTable? Table { get; init; }
+
+    /// <summary>
+    /// In the written content, the name of the table the catalog builds from the game's records for this section,
+    /// such as the chance of each world map event by terrain. The catalog replaces it with <see cref="Table"/>.
+    /// </summary>
+    public string? Data { get; init; }
 }
 
 /// <summary>A small table of a mechanic section, with a heading per column and the cells of each row.</summary>
@@ -728,7 +752,20 @@ internal sealed record MechanicSection(string Heading, IReadOnlyList<string> Par
 internal sealed record MechanicTable(
     IReadOnlyList<string> Headings,
     IReadOnlyList<IReadOnlyList<string>> Rows
-);
+)
+{
+    /// <summary>A fragment for each row that other pages link to, or null when no row is a link target.</summary>
+    public IReadOnlyList<string>? Anchors { get; init; }
+
+    /// <summary>Chance cells by column, in row order. The matching text cells are empty.</summary>
+    public IReadOnlyDictionary<
+        int,
+        IReadOnlyList<IReadOnlyList<MechanicChance>>
+    >? ChanceColumns { get; init; }
+}
+
+/// <summary>A fraction with an optional label, such as the terrain where the chance applies.</summary>
+internal sealed record MechanicChance(double Value, string? Label = null);
 
 /// <summary>A mechanic page. Written as <c>mechanics/&lt;slug&gt;.json</c>.</summary>
 internal sealed record MechanicPage(

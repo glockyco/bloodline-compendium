@@ -1,4 +1,4 @@
-import type { RelationCondition, SourceKind } from './site-data.js';
+import type { RelationCondition, SourceEventKind, SourceKind } from './site-data.js';
 export function titleCase(value: string): string {
 	return value
 		.replace(/([a-z])([A-Z])/g, '$1 $2')
@@ -49,6 +49,11 @@ export const placeUnknownReasons: Partial<Record<SourceKind, string>> = {
 	enemyDrop: 'No fixed spawn in any area.',
 	containerLoot: 'No fixed spot in any area.',
 	dialogue: 'Not placed in any area.'
+};
+/** What a row calls the events that bring its giver, for one event and for several. */
+export const eventLabels: Record<SourceEventKind, [string, string]> = {
+	worldMap: ['World map event:', 'World map events:'],
+	calendar: ['Calendar event:', 'Calendar events:']
 };
 /** The level a source kind's rows need, shown as its own column, such as the discipline level of a skill tree. */
 export const sourceLevels: Partial<

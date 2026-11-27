@@ -77,9 +77,15 @@ internal static class CatalogBuilder
         var coverage = new Coverage();
         var itemProducer = new ItemProducer(records, iconsDirectory, renders);
         var context = new CatalogContext(records, itemProducer.Initial, exclusions);
+        // The tables a mechanic page takes from the records stand in for their names from here on.
+        records = records with
+        {
+            Mechanics = EventTables.Fill(records.Mechanics, context),
+        };
         var candidates = mechanisms
             .SelectMany(mechanism => mechanism.FindSources(context))
             .Where(candidate => !context.IsExcludedClass(candidate.Key))
+            .Select(context.SpawnSites.Arriving)
             .ToArray();
         var prepared = itemProducer.Prepare(
             context,

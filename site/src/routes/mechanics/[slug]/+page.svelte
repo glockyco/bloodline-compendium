@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { alignSide } from '#lib/ui/align-side.js';
+	import type { MechanicTable } from '#lib/site-data.js';
+	import Chance from '#lib/ui/Chance.svelte';
 	import EntityPage from '#lib/entity/EntityPage.svelte';
 	import LinkedText from '#lib/ui/LinkedText.svelte';
 	import EntityLink from '#lib/ui/EntityLink.svelte';
@@ -8,11 +10,14 @@
 	import { plainText } from '#lib/links.js';
 	let { data } = $props();
 	const mechanic = $derived(data.mechanic);
-	// A column of numbers aligns right, as numbers do in every table of the site.
-	const numericColumns = (table: { headings: string[]; rows: string[][] }) =>
-		table.headings.map((_, column) =>
-			table.rows.every((cells) => /^\d[\d,.]*$/.test(cells[column]))
-		);
+	// A column of numbers or chances aligns right, as numbers do in every table of the site.
+	const numericColumns = (table: MechanicTable) =>
+		table.headings.map((_, column) => {
+			const chances = table.chanceColumns?.[column];
+			return chances
+				? chances.every((cell) => cell.length === 1 && !cell[0].label)
+				: table.rows.every((cells) => /^\d[\d,.]*$/.test(cells[column]));
+		});
 	const reference = $derived({
 		kind: mechanic.kind,
 		key: mechanic.key,
@@ -67,19 +72,42 @@
 					{#each section.paragraphs as paragraph, index (index)}<p>
 							<LinkedText text={paragraph} />
 						</p>{/each}
-					{#if section.table}<RelationTable
-							items={section.table.rows}
+					{#if section.table}
+						{@const table = section.table}
+						{@const numeric = numericColumns(table)}
+						<RelationTable
+							items={table.rows}
 							label={section.heading}
-							headings={section.table.headings}
-							numeric={numericColumns(section.table).slice(1)}
+							headings={table.headings}
+							numeric={numeric.slice(1)}
 							collapse={false}
-							>{#snippet row(cells)}<tr
-									>{#each cells as cell, index (index)}<td
-											class:numeric={numericColumns(section.table!)[index]}
-											><LinkedText text={cell} /></td
-										>{/each}</tr
-								>{/snippet}</RelationTable
-						>{/if}
+						>
+							{#snippet row(cells, index)}
+								<tr id={table.anchors?.[index]}>
+									{#each cells as cell, column (column)}
+										{@const chances = table.chanceColumns?.[column]?.[index]}
+										<td class:numeric={numeric[column]}>
+											{#if chances}
+												{#each chances as chance, entry (entry)}
+													{@const id = `${section.anchor}-${index}-${column}-${entry}`}
+													{#if chance.label}
+														<div class="labelled-chance">
+															<span>{chance.label}</span>
+															<Chance min={chance.value} {id} />
+														</div>
+													{:else}
+														<Chance min={chance.value} {id} />
+													{/if}
+												{/each}
+											{:else}
+												<LinkedText text={cell} />
+											{/if}
+										</td>
+									{/each}
+								</tr>
+							{/snippet}
+						</RelationTable>
+					{/if}
 				</Section>{/each}
 			<details class="disclosure" data-developer>
 				<summary>For Developers</summary>
@@ -94,6 +122,11 @@
 <style>
 	.text-layout {
 		margin-top: var(--gap-section);
+	}
+	.labelled-chance {
+		display: flex;
+		justify-content: space-between;
+		gap: var(--gap-inline);
 	}
 	.evidence {
 		display: grid;

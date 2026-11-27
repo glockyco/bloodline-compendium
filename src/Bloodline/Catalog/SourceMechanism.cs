@@ -59,6 +59,11 @@ internal sealed class CatalogContext
     /// <summary>Where spawners, level scripts and read spawn sites bring a class into the world.</summary>
     public SpawnSites SpawnSites => spawnSites ??= new SpawnSites(this);
 
+    private GameEvents? events;
+
+    /// <summary>The world map and calendar events with what each brings.</summary>
+    public GameEvents Events => events ??= new GameEvents(this);
+
     public CatalogContext(
         CatalogRecords records,
         IReadOnlyDictionary<string, ItemPage> items,

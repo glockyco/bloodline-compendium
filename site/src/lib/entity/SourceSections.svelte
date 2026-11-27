@@ -148,6 +148,8 @@
 	function placeOf(source: Source): string | null {
 		if (source.places[0]) return source.places[0].name;
 		if (source.settlement) return 'Your settlement';
+		// A way that only an event brings has no place of its own, and its row names the event.
+		if (source.events?.length) return 'During Events';
 		// Random loot and crops stand nowhere in particular, so only ways that stand somewhere miss a place.
 		return placedKinds.has(source.kind) ? placeUnknown : null;
 	}

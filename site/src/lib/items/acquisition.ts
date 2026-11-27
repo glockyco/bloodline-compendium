@@ -290,7 +290,8 @@ function pairedEntries(
 	const names = [...new Set(phrases)];
 	const of = (name: string) => sources.filter((_, index) => phrases[index] === name);
 	const unknown = (group: Source[]) =>
-		placedKinds.has(kind) && group.every((source) => !source.settlement && !source.places.length);
+		placedKinds.has(kind) &&
+		group.every((source) => !source.settlement && !source.places.length && !source.events?.length);
 	if (names.length === 1) {
 		const places = [
 			...new Set(sources.map(placeName).filter((place): place is string => place !== null))

@@ -55,21 +55,11 @@ internal sealed class Liveness
         var code = context.Records.Code?.Functions ?? [];
         var skipped = new HashSet<string>(StringComparer.Ordinal);
         foreach (var lookUp in lookUps ?? LookUps)
-        {
-            var function = code.SingleOrDefault(function => function.Citation == lookUp.Citation);
-            var package = lookUp.Citation.Split(':')[0];
-            if (function is null && context.Classes.Keys.Any(path => Package(path) == package))
-                throw new InvalidDataException(
-                    $"{lookUp.Citation} is gone, but its class is not. Read the class again and update Liveness.LookUps."
-                );
-            if (function is null)
-                continue;
-            if (!function.Fingerprint.StartsWith(lookUp.Fingerprint, StringComparison.Ordinal))
-                throw new InvalidDataException(
-                    $"{lookUp.Citation} changed since it was read as a look-up. Read it again and update Liveness.LookUps."
-                );
-            skipped.Add(lookUp.Citation);
-        }
+            if (
+                ReadFunction.Find(context, lookUp.Citation, lookUp.Fingerprint, "Liveness.LookUps")
+                is not null
+            )
+                skipped.Add(lookUp.Citation);
 
         var edges = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
         HashSet<string> From(string package)

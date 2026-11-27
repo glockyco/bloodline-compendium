@@ -55,6 +55,11 @@ export type RelationDirection = "outgoing" | "incoming";
 export type PointKind = "skillPoint" | "proficiencyPoint" | "levelUpPoint";
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "SourceEventKind".
+ */
+export type SourceEventKind = "worldMap" | "calendar";
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "SourceKind".
  */
 export type SourceKind =
@@ -409,6 +414,7 @@ export interface Source {
   conditions: RelationCondition[];
   cost?: PointCost | null;
   entity: EntityReference;
+  events?: SourceEvent[];
   inputs: ItemAmount[];
   kind: SourceKind;
   name: string;
@@ -440,6 +446,16 @@ export interface Amount {
 export interface PointCost {
   amount: number;
   points: PointKind;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "SourceEvent".
+ */
+export interface SourceEvent {
+  kind: SourceEventKind;
+  name: string;
+  page: EntityReference;
   [k: string]: unknown;
 }
 /**
@@ -864,6 +880,7 @@ export interface MechanicPage {
  */
 export interface MechanicSection {
   anchor?: string | null;
+  data?: string | null;
   heading: string;
   paragraphs: string[];
   table?: MechanicTable | null;
@@ -873,8 +890,21 @@ export interface MechanicSection {
  * via the `definition` "MechanicTable".
  */
 export interface MechanicTable {
+  anchors?: string[] | null;
+  chanceColumns?: {
+    [k: string]: MechanicChance[][];
+  } | null;
   headings: string[];
   rows: string[][];
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "MechanicChance".
+ */
+export interface MechanicChance {
+  label?: string | null;
+  value: number;
+  [k: string]: unknown;
 }
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema

@@ -2,7 +2,7 @@
 	import type { RelationCondition, Source } from '../site-data.js';
 	import { formatNumber } from '../format.js';
 	import { alwaysThere, formatAmount, oddsLabel, payPrice, placedKinds } from './acquisition.js';
-	import { placeUnknownReasons } from '../labels.js';
+	import { eventLabels, placeUnknownReasons } from '../labels.js';
 	import EntityLink from '../ui/EntityLink.svelte';
 	import Conditions from '../Conditions.svelte';
 	import Chance from '../ui/Chance.svelte';
@@ -55,6 +55,13 @@
 			(place, index) => source.places.findIndex((other) => other.name === place.name) === index
 		)
 	);
+	// A way an event brings is not without a place, and each kind of event has its own line.
+	const events = $derived(source.events ?? []);
+	const eventLines = $derived(
+		(Object.keys(eventLabels) as (keyof typeof eventLabels)[])
+			.map((kind) => ({ kind, events: events.filter((event) => event.kind === kind) }))
+			.filter((line) => line.events.length)
+	);
 </script>
 
 <tr
@@ -74,17 +81,26 @@
 				data-relation-direction="incoming"
 			></span>{/each}
 		<span class="relation-name"
-			>{#if placeFirst}{@render placeList()}{:else}<EntityLink entity={source.entity} />{/if}</span
+			>{#if placeFirst && (places.length || source.settlement || !events.length)}{@render placeList()}{:else}<EntityLink
+					entity={source.entity}
+				/>{/if}</span
 		>
 		<Conditions {conditions} />
 		<!-- Random loot and crops stand nowhere in particular, so only ways that stand somewhere miss a place. -->
 		{#if summarized}{#if places.length}<p class="source-places">
 					{places.length === 1 ? 'In 1 area' : `In ${formatNumber(places.length)} areas`}
-				</p>{/if}{:else if showPlaces && !placeFirst && (places.length || source.settlement || placedKinds.has(source.kind))}<p
+				</p>{/if}{:else if showPlaces && !placeFirst && (places.length || source.settlement || (placedKinds.has(source.kind) && !events.length))}<p
 				class="source-places"
 			>
 				{@render placeList()}
 			</p>{/if}
+		{#each eventLines as line (line.kind)}<p class="source-places">
+				{eventLabels[line.kind][
+					line.events.length === 1 ? 0 : 1
+				]}{#each line.events as event, index (event.name)}{index ? ', ' : ' '}<EntityLink
+						entity={event.page}>{event.name}</EntityLink
+					>{/each}
+			</p>{/each}
 		{#if source.inputs.length || (!summarized && source.notes.length) || source.quotes?.length}
 			<details class="row-details">
 				<summary
