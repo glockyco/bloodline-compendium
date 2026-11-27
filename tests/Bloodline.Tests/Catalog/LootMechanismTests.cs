@@ -545,6 +545,33 @@ public sealed class LootMechanismTests
         Assert.Equal(Level, Assert.Single(source.Source.Places).Key);
     }
 
+    [Theory]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    public void EnemyThatNothingPlacesOrNamesIsOnlyInTheGameFiles(bool named, bool unconfirmed)
+    {
+        // A creature that another class holds a reference to may be brought in while the game runs, so only one
+        // that nothing names counts as absent from the world.
+        const string enemy = "/Game/Invented/Beast.Beast_C";
+        var properties = Parse("""{"Enemy Name":{"$text":"Marsh beast"}}""");
+        properties["Loot Table"] = Pool();
+        var keeper = Parse(
+            named ? """{"Summons":{"$ref":"/Game/Invented/Beast.Beast_C"}}""" : """{}"""
+        );
+        var source = Assert
+            .Single(
+                new EnemyDropMechanism().FindSources(
+                    Context([
+                        new ClassRecord(enemy, [], properties),
+                        new ClassRecord("/Game/Invented/Keeper.Keeper_C", [], keeper),
+                    ])
+                )
+            )
+            .Source;
+        Assert.Empty(source.Places);
+        Assert.Equal(unconfirmed, source.Unconfirmed);
+    }
+
     [Fact]
     public void EnemyPlacedOverrideDoesNotReplaceSpawnedDefaultPool()
     {
