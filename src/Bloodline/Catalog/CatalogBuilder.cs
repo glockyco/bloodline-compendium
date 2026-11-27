@@ -58,6 +58,7 @@ internal static class CatalogBuilder
             new CurrencyShopMechanism(),
             new CraftingMechanism(),
             new ChiselingMechanism(),
+            new SpecialKeyChestMechanism(),
             new CookingMechanism(),
             new DialogueGrantMechanism(),
             new FishingMechanism(),

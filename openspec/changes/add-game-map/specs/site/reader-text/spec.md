@@ -44,3 +44,10 @@ An item that the Chiseling Station gives SHALL show one row under Chiseled with 
 #### Scenario: Pristine Human Fossil
 - **WHEN** the item page of Pristine Human Fossil is built
 - **THEN** its Chiseled row reads Chiseling Station, The Mage's College: Main Hall, "Keep at least 75% of it intact.", 20% per Chiselstone, with 1 Chiselstone as a required item
+
+### Requirement: Locked chests
+A chest that opens only with a key SHALL show under Found in Containers as Locked Chest with "Requires" and the key's name as its condition, and a container that always holds the item SHALL read Always in its chance column, because opening it is enough.
+
+#### Scenario: Golden Plate
+- **WHEN** the item page of Golden Plate is built
+- **THEN** its row reads Locked Chest, "Requires Castleside Tavernkeeper's Key", Woodhurst, Always

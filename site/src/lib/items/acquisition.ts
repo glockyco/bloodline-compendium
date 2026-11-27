@@ -48,9 +48,16 @@ export function oddsLabel(odds: Odds, kind: SourceKind): string {
 	return oddsLabels[odds.event];
 }
 
-/** Whether a source gives the item every time, which reads Always, as on the OSRS Wiki. A placed item does. */
+/**
+ * Whether a source gives the item every time, which reads Always, as on the OSRS Wiki. A placed item does, and so
+ * does a container that always holds it, such as a locked chest.
+ */
 export function alwaysThere(odds: Odds, kind: SourceKind): boolean {
-	return kind === 'pickup' && odds.chance === 1 && (odds.highestChance ?? 1) === 1;
+	return (
+		(kind === 'pickup' || kind === 'containerLoot') &&
+		odds.chance === 1 &&
+		(odds.highestChance ?? 1) === 1
+	);
 }
 
 export function sourceContext(source: Source): string | null {
