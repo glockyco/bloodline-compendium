@@ -67,6 +67,7 @@ it('links an event-only source without saying its location is unknown', () => {
 			source: {
 				...container,
 				places: [],
+				spawn: null,
 				events: [
 					{
 						kind: 'calendar',
@@ -82,12 +83,15 @@ it('links an event-only source without saying its location is unknown', () => {
 					}
 				]
 			},
+			showSpawn: true,
 			id: 'event-only-test'
 		}
 	});
 	expect(body).toContain('Calendar event:');
 	expect(body).toContain('href="/mechanics/calendar-events/#ghost-ship"');
 	expect(body).toContain('Ghost Ship');
+	expect(body).toContain('Event only');
+	expect(body).not.toContain('Always');
 	expect(body).not.toContain('Location unknown');
 	expect(body).not.toContain('No fixed spawn');
 });

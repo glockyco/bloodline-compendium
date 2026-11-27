@@ -31,6 +31,16 @@ public sealed class SourceCoverageTests
         );
     }
 
+    [Fact]
+    public void NamedEventProvidesAKnownRouteWithoutAFixedPlace()
+    {
+        var source = new Source(SourceKind.ContainerLoot, "Chest", [], null, null, [], [])
+        {
+            Events = [GameEvents.Reference(SourceEventKind.Calendar, "Ghost Ship")],
+        };
+        Assert.False(SourceCoverage.HasUnknownPlace(source));
+    }
+
     [Theory]
     [InlineData((int)SourceKind.Smithing)]
     [InlineData((int)SourceKind.Crafting)]

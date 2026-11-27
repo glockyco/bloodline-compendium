@@ -158,7 +158,7 @@ internal sealed class SpawnSites
             return candidate;
         // A container or pickup is keyed by its class and the name it shows.
         var path = key.Split('#')[0];
-        var during = Events(path);
+        var during = candidate.UseGiverEvents ? Events(path) : [];
         var notes = ReplacementNotes(path);
         if (during.Count == 0 && notes.Count == 0)
             return candidate;

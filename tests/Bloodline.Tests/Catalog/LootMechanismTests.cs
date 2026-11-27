@@ -97,14 +97,19 @@ public sealed class LootMechanismTests
         Assert.Equal(0.5, candidate.Container!.AppearanceChance);
     }
 
-    [Fact]
-    public void EtherealChestRebuildsItsPoolAndRangesOddsAcrossCharacterLevels()
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    [InlineData(false, true)]
+    public void EtherealChestKeepsRitualAndCalendarRoutesSeparate(bool ritual, bool calendar)
     {
         const string weapon = "/Game/Invented/Weapon.Weapon_C";
         const string armour = "/Game/Invented/Armour.Armour_C";
         const string food = "/Game/Invented/Food.Food_C";
         const string rejected = "/Game/Invented/OtherWeapon.OtherWeapon_C";
         var chest = ContainerLootMechanism.EtherealChest;
+        const string ritualClass = "/Game/PuzzleProps/UndeadRitual.UndeadRitual_C";
+        const string shipClass = "/Game/PuzzleProps/UndeadAirship.UndeadAirship_C";
         var properties = OnePick(
             Parse(
                 """
@@ -116,66 +121,128 @@ public sealed class LootMechanismTests
             )
         );
         properties["Selected Loot Table"] = Pool();
-        var context = Context(
-            [new ClassRecord(chest, [ContainerLootMechanism.Root], properties)],
-            [new ActorRecord("Chest", chest, new JsonObject())],
-            [
-                new TableRecord(
-                    ContainerLootMechanism.AllLootRates,
-                    null,
-                    [
-                        Row(weapon, 1, "Ethereal", 1),
-                        Row(armour, 2, "Undead", 5),
-                        Row(food, 3, "Treasure", 1),
-                        Row(rejected, 1, "Bandit", 1),
-                    ]
-                ),
-            ],
-            [
-                Reading("ReceiveBeginPlay", "bbc26085741a"),
-                Reading("Check Data Table For Correct Item", "4faf00914556"),
-            ]
+        var classes = new List<ClassRecord>
+        {
+            new(chest, [ContainerLootMechanism.Root], properties),
+        };
+        var actors = new List<ActorRecord>();
+        var tables = new List<TableRecord>
+        {
+            new(
+                ContainerLootMechanism.AllLootRates,
+                null,
+                [
+                    Row(weapon, 1, "Ethereal", 1),
+                    Row(armour, 2, "Undead", 5),
+                    Row(food, 3, "Treasure", 1),
+                    Row(rejected, 1, "Bandit", 1),
+                ]
+            ),
+        };
+        var functions = new List<CodeFunction>
+        {
+            Reading(chest, "ReceiveBeginPlay", "bbc26085741a"),
+            Reading(chest, "Check Data Table For Correct Item", "4faf00914556"),
+        };
+        if (ritual)
+        {
+            actors.Add(new ActorRecord("Ritual", ritualClass, new JsonObject()));
+            functions.Add(Reading(ritualClass, "Stopped Ritual", "530be74334bb", chest));
+        }
+        if (calendar)
+        {
+            var events = EventRecords
+                .Create(
+                    worldMap: false,
+                    calendar: true,
+                    calendarRows: [EventRecords.CalendarRow("Ghost Ship", "", 1, "ALL")]
+                )
+                .Records;
+            classes.AddRange(events.Classes);
+            tables.AddRange(events.Tables);
+            functions.AddRange(events.Code!.Functions);
+            functions.Add(Reading(shipClass, "Spawn Ethereal Chest", "143a9fdb1e2a", chest));
+        }
+        var context = Context(classes, actors, tables, functions);
+        var candidates = new ContainerLootMechanism()
+            .FindSources(context)
+            .Select(context.SpawnSites.Arriving)
+            .ToArray();
+        Assert.Equal(
+            new[] { armour, weapon },
+            candidates.Select(candidate => candidate.Key).Distinct().Order(StringComparer.Ordinal)
         );
-        var sources = new ContainerLootMechanism().FindSources(context).ToArray();
+        var sources = CatalogContext.MergeSources(
+            candidates.Where(candidate => candidate.Key == weapon),
+            context.ExcludedLevels
+        );
 
-        Assert.Equal(2, sources.Length);
-        var entry = Assert.Single(sources, candidate => candidate.Key == weapon).Source;
-        Assert.Equal(1.0 / 11, entry.Odds!.Chance!.Value, 7);
-        Assert.Equal(2.0 / 7, entry.Odds.HighestChance!.Value, 7);
-        Assert.Equal("The chance changes with your character level.", Assert.Single(entry.Notes));
-        Assert.Equal(Level, Assert.Single(entry.Places).Key);
-        Assert.Contains(sources, candidate => candidate.Key == armour);
-
-        static TableRow Row(string item, int type, string tag, int level) =>
-            new(
-                item,
-                new JsonObject
-                {
-                    ["ItemClass"] = new JsonObject { ["$ref"] = item },
-                    ["ItemType"] = new JsonObject
-                    {
-                        ["$enum"] = $"E_ItemType::NewEnumerator{type}",
-                    },
-                    ["Tags"] = new JsonArray(tag),
-                    ["Level"] = level,
-                    ["BaseSpawnRate"] = 1,
-                }
+        Assert.Equal(ritual && calendar ? 2 : 1, sources.Count);
+        Assert.All(
+            sources,
+            source =>
+            {
+                Assert.False(source.Unconfirmed);
+                Assert.Equal(OddsEvent.Container, source.Odds!.Event);
+                Assert.Equal(1.0 / 11, source.Odds.Chance!.Value, 7);
+                Assert.Equal(2.0 / 7, source.Odds.HighestChance!.Value, 7);
+                Assert.Contains("The chance changes with your character level.", source.Notes);
+            }
+        );
+        if (ritual)
+        {
+            var entry = Assert.Single(sources, source => source.Places.Count > 0);
+            Assert.Equal(Level, Assert.Single(entry.Places).Key);
+            Assert.Empty(entry.Events);
+            Assert.Contains("Stop an undead ritual to make the chest appear", entry.Notes);
+        }
+        if (calendar)
+        {
+            var entry = Assert.Single(sources, source => source.Events.Count > 0);
+            Assert.Empty(entry.Places);
+            Assert.Equal(
+                "The chance changes with your character level.",
+                Assert.Single(entry.Notes)
             );
-
-        CodeFunction Reading(string name, string fingerprint) =>
-            new(
-                chest.Split('.')[0],
-                chest,
-                name,
-                false,
-                fingerprint,
-                CodeParseStatus.Complete,
-                [],
-                [],
-                [],
-                []
-            );
+            var happening = Assert.Single(entry.Events);
+            Assert.Equal(SourceEventKind.Calendar, happening.Kind);
+            Assert.Equal("Ghost Ship", happening.Name);
+            Assert.Equal("calendar-events", happening.Page.Slug);
+            Assert.Equal("ghost-ship", happening.Page.Fragment);
+        }
     }
+
+    private static CodeFunction Reading(
+        string owner,
+        string name,
+        string fingerprint,
+        string? target = null
+    ) =>
+        new(
+            owner.Split('.')[0],
+            owner,
+            name,
+            false,
+            fingerprint,
+            CodeParseStatus.Complete,
+            target is null ? [] : [new CodeTarget(CodeTargetKind.Object, target)],
+            [],
+            target is null ? [] : ["/Script/Engine:BeginDeferredActorSpawnFromClass"],
+            []
+        );
+
+    private static TableRow Row(string item, int type, string tag, int level) =>
+        new(
+            item,
+            new JsonObject
+            {
+                ["ItemClass"] = new JsonObject { ["$ref"] = item },
+                ["ItemType"] = new JsonObject { ["$enum"] = $"E_ItemType::NewEnumerator{type}" },
+                ["Tags"] = new JsonArray(tag),
+                ["Level"] = level,
+                ["BaseSpawnRate"] = 1,
+            }
+        );
 
     [Theory]
     [InlineData("Crate", false)]

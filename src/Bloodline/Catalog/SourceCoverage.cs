@@ -18,7 +18,10 @@ internal static class SourceCoverage
         SourceKind.Gathering,
     }.ToFrozenSet();
 
-    // A source in the player's settlement has its place, which no level holds.
+    // A settlement or a named event gives a route even if there is no fixed place.
     public static bool HasUnknownPlace(Source source) =>
-        source.Places.Count == 0 && !source.Settlement && PlaceBound.Contains(source.Kind);
+        source.Places.Count == 0
+        && !source.Settlement
+        && source.Events.Count == 0
+        && PlaceBound.Contains(source.Kind);
 }

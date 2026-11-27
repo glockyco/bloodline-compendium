@@ -21,6 +21,9 @@ internal sealed record EntitySource(string Key, Source Source, ContainerDetails?
     public EntityKind Kind { get; init; } = EntityKind.Item;
 
     public IReadOnlyList<string> Unresolved { get; init; } = [];
+
+    /// <summary>Whether to infer events from the giver instead of using the events on this particular way.</summary>
+    public bool UseGiverEvents { get; init; } = true;
 }
 
 /// <summary>Dialogue requirements a page shows, and those that only the maintainer report lists.</summary>

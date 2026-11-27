@@ -16,6 +16,7 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
     internal const string AllLootRates = "/Game/BloodlinesAlpha/Interactables/AllLootSpawnRates";
 
     private const string LevelDependentOdds = "The chance changes with your character level.";
+    private const string RitualChest = "Stop an undead ritual to make the chest appear";
 
     public IEnumerable<EntitySource> FindSources(CatalogContext context)
     {
@@ -287,13 +288,21 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
             }
         }
         var entity = WorldSourceData.Reference(EntityKind.Container, path, name);
-        var conditions = WorldSourceData.Conditions(
-            context,
-            properties,
-            places.Count == 1 ? places[0].Key : null
-        );
+        var events = context.SpawnSites.Events(path);
+        var regular = places.Count > 0 || events.Count == 0;
+        var absent = regular && places.Count == 0 && !context.CanAppear(path);
+        var ritual =
+            path == EtherealChest && places.Count > 0 && context.SpawnSites.Places(path).Count > 0;
+        var conditions = regular
+            ? WorldSourceData.Conditions(
+                context,
+                properties,
+                places.Count == 1 ? places[0].Key : null
+            )
+            : [];
+        var eventConditions =
+            events.Count > 0 ? WorldSourceData.Conditions(context, properties) : [];
         var picks = details.Picks;
-        var absent = places.Count == 0 && !context.CanAppear(path);
         for (var index = 0; index < entries.Length; index++)
         {
             var item = entries[index].Key;
@@ -304,29 +313,43 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                     "How many items this container holds is unknown."
                 )
                 : LootOdds.Of(OddsEvent.Container, min, picks, max > min ? max : null);
-            yield return new EntitySource(
-                item,
-                new Source(
-                    SourceKind.ContainerLoot,
-                    name,
+            var amount = LootRecords.Quantity(context, item);
+            IReadOnlyList<string> oddsNotes = max > min ? [LevelDependentOdds] : [];
+            if (regular)
+                yield return Way(
                     places,
-                    null,
-                    LootRecords.Quantity(context, item),
                     [],
+                    conditions,
                     absent ? ["No container of this kind is placed anywhere in the world."]
-                        : max > min ? [LevelDependentOdds]
-                        : []
+                        : ritual ? [RitualChest, .. oddsNotes]
+                        : oddsNotes,
+                    absent
+                );
+            if (events.Count > 0)
+                yield return Way([], events, eventConditions, oddsNotes, false);
+
+            EntitySource Way(
+                IReadOnlyList<EntityReference> routePlaces,
+                IReadOnlyList<SourceEvent> routeEvents,
+                IReadOnlyList<RelationCondition> routeConditions,
+                IReadOnlyList<string> notes,
+                bool unconfirmed
+            ) =>
+                new(
+                    item,
+                    new Source(SourceKind.ContainerLoot, name, routePlaces, null, amount, [], notes)
+                    {
+                        Entity = entity,
+                        Conditions = routeConditions,
+                        Events = routeEvents,
+                        Odds = odds,
+                        Unconfirmed = unconfirmed,
+                    },
+                    details
                 )
                 {
-                    Entity = entity,
-                    Conditions = conditions,
-                    Odds = odds,
-                    Unconfirmed = absent,
-                }
-            )
-            {
-                Container = details,
-            };
+                    UseGiverEvents = false,
+                };
         }
     }
 
