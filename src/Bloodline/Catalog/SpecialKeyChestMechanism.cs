@@ -4,31 +4,43 @@ using Bloodline.SiteData;
 namespace Bloodline.Catalog;
 
 /// <summary>
-/// A chest that opens only with one key and then gives what its placement lists, read with <c>bloodline script</c>:
-/// the overlap event asks <c>Check If Player Has Key In Inventory</c> for <c>Key Required</c> when
-/// <c>Requires Key?</c> is set, keeps the key, and gives <c>Item(s) to give</c> and <c>Gold to give</c>.
+/// A treasure chest that gives what its placement lists, read with <c>bloodline script</c>: the overlap event asks
+/// <c>Check If Player Has Key In Inventory</c> for <c>Key Required</c> when <c>Requires Key?</c> is set, keeps the
+/// key, and gives <c>Item(s) to give</c> and <c>Gold to give</c>. The special key chest names its key as an item,
+/// and the plain treasure chest opens without one in every placement.
 /// </summary>
 internal sealed class SpecialKeyChestMechanism : ISourceMechanism
 {
-    private const string Chest = "/Game/PuzzleProps/SpecialKeyTreasureChest";
+    private static readonly (string Package, string Function, string Fingerprint)[] Chests =
+    [
+        (
+            "/Game/PuzzleProps/SpecialKeyTreasureChest",
+            "ExecuteUbergraph_SpecialKeyTreasureChest",
+            "a818badcb450"
+        ),
+        ("/Game/PuzzleProps/TreasureChest", "ExecuteUbergraph_TreasureChest", "927b0a9db04f"),
+    ];
 
     public IEnumerable<EntitySource> FindSources(CatalogContext context)
     {
-        if (
-            ReadFunction.Find(
-                context,
-                Chest + ":ExecuteUbergraph_SpecialKeyTreasureChest",
-                "a818badcb450",
-                "SpecialKeyChestMechanism"
+        var read = Chests
+            .Where(chest =>
+                ReadFunction.Find(
+                    context,
+                    chest.Package + ":" + chest.Function,
+                    chest.Fingerprint,
+                    "SpecialKeyChestMechanism"
+                )
+                    is not null
             )
-            is null
-        )
-            yield break;
+            .Select(chest => chest.Package)
+            .ToHashSet(StringComparer.Ordinal);
         foreach (var placement in context.Placements)
         {
-            if (placement.Actor.Class.Split('.')[0] != Chest)
+            if (!read.Contains(placement.Actor.Class.Split('.')[0]))
                 continue;
             var place = context.Places.Get(placement.Level);
+            var name = "Treasure Chest";
             RelationCondition[] conditions = [];
             if (
                 RecordValues.Boolean(placement.Properties["Requires Key?"]) == true
@@ -37,6 +49,7 @@ internal sealed class SpecialKeyChestMechanism : ISourceMechanism
             {
                 var link = context.ItemLink(key);
                 conditions = [new(ConditionKind.GameState, link, null, "Requires " + link.Name)];
+                name = "Locked Chest";
             }
             foreach (var item in RecordValues.Elements(placement.Properties["Item(s) to give"]))
             {
@@ -46,7 +59,7 @@ internal sealed class SpecialKeyChestMechanism : ISourceMechanism
                     path,
                     new Source(
                         SourceKind.ContainerLoot,
-                        "Locked Chest",
+                        name,
                         [place],
                         null,
                         new Amount(1, 1),
@@ -56,8 +69,8 @@ internal sealed class SpecialKeyChestMechanism : ISourceMechanism
                     {
                         Entity = WorldSourceData.Reference(
                             EntityKind.Container,
-                            Chest + ".SpecialKeyTreasureChest_C",
-                            "Locked Chest"
+                            placement.Actor.Class,
+                            name
                         ),
                         Odds = new Odds(OddsEvent.Container, 1, 1, null),
                         Conditions = conditions,
