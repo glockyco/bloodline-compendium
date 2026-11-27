@@ -140,11 +140,11 @@
 		>{/if}
 	{#if showSpawn}
 		<td class="numeric spawn-value">
-			{#if !source.spawn || (source.spawn.min === 1 && source.spawn.max === 1)}Always{:else}<Chance
-					min={source.spawn.min}
-					max={source.spawn.max}
-					id={id + '-spawn'}
-				/>{/if}
+			{#if !source.spawn || (source.spawn.min === 1 && source.spawn.max === 1)}
+				{events.length && places.length ? 'Always at listed places' : 'Always'}
+			{:else}
+				<Chance min={source.spawn.min} max={source.spawn.max} id={id + '-spawn'} />
+			{/if}
 		</td>
 	{/if}
 	{#if showContext}

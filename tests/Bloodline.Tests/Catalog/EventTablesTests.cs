@@ -118,7 +118,7 @@ public sealed class EventTablesTests
     }
 
     [Fact]
-    public void EnemyDropSourceCarriesItsWorldMapEventReference()
+    public void CreatureBroughtOnlyByAnEventIsAnAvailableWay()
     {
         var context = BanditContext();
 
@@ -128,6 +128,8 @@ public sealed class EventTablesTests
         );
         var happening = Assert.Single(source.Source.Events);
 
+        Assert.Empty(source.Source.Places);
+        Assert.False(source.Source.Unconfirmed);
         Assert.Equal(SourceEventKind.WorldMap, happening.Kind);
         Assert.Equal("Bandit Ambush", happening.Name);
         Assert.Equal("bandit-ambush", happening.Page.Fragment);

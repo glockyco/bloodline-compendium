@@ -134,10 +134,10 @@ internal sealed class CatalogContext
     private Liveness? liveness;
 
     /// <summary>
-    /// Whether anything in a level in play could bring the class into the world, as <see cref="Liveness"/> follows
-    /// it. A class that no level holds and nothing there leads to cannot be found in play.
+    /// Whether a reviewed event brings the class or <see cref="Liveness"/> can reach it from a level in play.
     /// </summary>
-    public bool CanAppear(string path) => (liveness ??= new Liveness(this)).IsLive(path);
+    public bool CanAppear(string path) =>
+        SpawnSites.Events(path).Count > 0 || (liveness ??= new Liveness(this)).IsLive(path);
 
     public EntityReference ItemLink(string path) =>
         Items.TryGetValue(path, out var item) && !IsExcludedClass(path)
