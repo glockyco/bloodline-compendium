@@ -622,7 +622,7 @@
     {
       "id": "spells-ignore-damage-passives",
       "title": "Some Spells Ignore Their Damage Passives",
-      "effect": "Spire Barrage, Earth Hammer, Inferno Lance and Emberspark deal the same damage at every rank of their discipline's damage passives, although those passives promise more damage for the whole discipline.",
+      "effect": "Spire Barrage, Earth Hammer, Earth Spikes, Inferno Lance, Emberspark, Emberspike and Spark deal the same damage at every rank of their discipline's damage passives, although those passives promise more damage for the whole discipline.",
       "notes": {
         "/Game/UltimateSkillSystem/SkillSystemSkill/SpireBarrage_Skill.SpireBarrage_Skill_C": {
           "effect": "Cryomancy's damage passives do not raise Spire Barrage's damage. Each spear deals 30 at every rank."
@@ -635,6 +635,15 @@
         },
         "/Game/UltimateSkillSystem/SystemDemonstration/ExampleSkills/Skill_Emberspark.Skill_Emberspark_C": {
           "effect": "Pyromancy's damage passives do not raise Emberspark's damage. Its hit deals 25 at every rank."
+        },
+        "/Game/UltimateSkillSystem/SkillSystemSkill/Skill_EarthSpikes.Skill_EarthSpikes_C": {
+          "effect": "Geomancy's damage passives do not raise Earth Spikes' damage. Its hit deals 100 at every rank."
+        },
+        "/Game/UltimateSkillSystem/SkillSystemSkill/Skill_MagmaSpikes.Skill_MagmaSpikes_C": {
+          "effect": "Pyromancy's damage passives do not raise Emberspike's damage. Its hit deals 100 at every rank."
+        },
+        "/Game/UltimateSkillSystem/SystemDemonstration/ExampleSkills/Skill_Spark.Skill_Spark_C": {
+          "effect": "Electromancy's damage passives do not raise Spark's damage. Its hit deals 15 at every rank."
         }
       },
       "workaround": null,
@@ -649,12 +658,72 @@
         }
       ],
       "expected": "Every rank of a discipline's damage passives raises the damage of these spells, as it does for the discipline's other spells.",
-      "observed": "With all five damage passives of their discipline at rank 0 and at their highest rank, Spire Barrage's spears dealt 30, Earth Hammer's hits 25 and 100, Inferno Lance's lance 150 and its explosion 50, and Emberspark's hit 25. In the same runs Ice Shard rose from 25 to 43.75, and 53 other spells rose by the same 75%.",
-      "cause": "Each discipline's damage passives are added up by one function, and a spell multiplies its damage by the result. These four spells hit with fixed numbers instead of that product.",
+      "observed": "With all five damage passives of their discipline at rank 0 and at their highest rank, Spire Barrage's spears dealt 30, Earth Hammer's hits 25 and 100, Earth Spikes' hit 100, Inferno Lance's lance 150 and its explosion 50, Emberspark's hit 25, Emberspike's hit 100 and Spark's hit 15. Each skill was cast in a freshly opened level. In the same run Ice Shard rose from 25 to 43.75, and 53 other spells rose by the same 75%.",
+      "cause": "Each discipline's damage passives are added up by one function, and a spell multiplies its damage by the result. These seven spells hit with fixed numbers instead of that product.",
       "citations": [
         "/Game/BloodlinesAlpha/UI/CharacterSheet/PlayerPassiveLevelStatComponent:Get Cryomancy Damage Bonuses",
         "/Game/BloodlinesAlpha/UI/CharacterSheet/PlayerPassiveLevelStatComponent:Get Geomancy Damage Bonuses",
-        "/Game/BloodlinesAlpha/UI/CharacterSheet/PlayerPassiveLevelStatComponent:Get Pyromancy Damage Bonuses"
+        "/Game/BloodlinesAlpha/UI/CharacterSheet/PlayerPassiveLevelStatComponent:Get Pyromancy Damage Bonuses",
+        "/Game/BloodlinesAlpha/UI/CharacterSheet/PlayerPassiveLevelStatComponent:Get Electromancy Damage Bonuses"
+      ],
+      "builds": [24464547],
+      "report": "notReported",
+      "reportUrl": null
+    },
+    {
+      "id": "sellers-name-another-price",
+      "title": "Some Sellers Take a Different Price than They Name",
+      "effect": "Mysha Bullock and Silent Wyn name one price and take another.",
+      "effectDetails": [
+        {
+          "label": "In Woodhurst",
+          "text": "Mysha Bullock names 250 gold for Honey Glazed Ham and takes 10, 150 for Chicken Meat and takes 15, 150 for Steak and takes 7, and 50 for Ale and takes 10."
+        },
+        {
+          "label": "In Harbingers Arena",
+          "text": "Mysha Bullock names 10 gold for Steak and takes 7, and 5 for Turkey Leg and takes 6."
+        },
+        {
+          "label": "In Elderglen",
+          "text": "Silent Wyn asks 250 gold for Dewdrop and takes none."
+        }
+      ],
+      "notes": {
+        "/Game/BloodlinesAlpha/Interactables/Steak.Steak_C": {
+          "effect": "Mysha Bullock names 10 gold for Steak in Harbingers Arena and 150 in Woodhurst, but buying it takes 7 in both."
+        },
+        "/Game/BloodlinesAlpha/Interactables/TukeyLeg.TukeyLeg_C": {
+          "effect": "Mysha Bullock names 5 gold for Turkey Leg in Harbingers Arena, but buying it takes 6."
+        },
+        "/Game/BloodlinesAlpha/Interactables/CastlesideCoddle.CastlesideCoddle_C": {
+          "effect": "Mysha Bullock names 250 gold for Honey Glazed Ham, her Castleside Coddle, in Woodhurst, but buying it takes 10."
+        },
+        "/Game/BloodlinesAlpha/Interactables/ChickenMeat.ChickenMeat_C": {
+          "effect": "Mysha Bullock names 150 gold for Chicken Meat in Woodhurst, but buying it takes 15."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Ale.Ale_C": {
+          "effect": "Mysha Bullock names 50 gold for Ale in Woodhurst, but buying it takes 10."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Dewdrop.Dewdrop_C": {
+          "effect": "Silent Wyn asks 250 gold for Dewdrop, but accepting takes no gold."
+        }
+      },
+      "workaround": null,
+      "steps": [
+        {
+          "action": "Note your gold. In Woodhurst, ask Mysha Bullock \"What do you have to eat?\" and reply \"Just some chicken, please.\"",
+          "result": "She says \"That'll be 150 gold.\""
+        },
+        {
+          "action": "Reply \"Here you go.\"",
+          "result": "You get one Chicken Meat, and your gold drops by 15."
+        }
+      ],
+      "expected": "The seller takes the gold they name.",
+      "observed": "Every order of both waitresses named Mysha Bullock was bought once. In Woodhurst she named 250, 150, 150, 50 and 50 gold for Honey Glazed Ham, Chicken Meat, Steak, Rum and Ale and took 10, 15, 7, 10 and 10. Castleside Cider cost the 120 she named. In Harbingers Arena she named 10 for Steak and took 7, named 5 for Turkey Leg and took 6, and took what she named for Soup, Rum, Ale and Dwarfs Flaggon. With the quest Dependence Substitution active, accepting Silent Wyn's offer of 250 gold gave one Dewdrop and left gold at 750.",
+      "cause": "A waitress's order takes the item's value, such as 7 for Steak, whatever her line says. Silent Wyn's conversation has no step that takes gold.",
+      "citations": [
+        "/Game/Overworld/OverworldInteractables/TakeMoneyBasedOnitemValue:RecieveEventTriggered"
       ],
       "builds": [24464547],
       "report": "notReported",

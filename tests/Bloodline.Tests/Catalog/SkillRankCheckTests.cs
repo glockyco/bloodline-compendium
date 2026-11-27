@@ -32,6 +32,13 @@ public sealed class SkillRankCheckTests
                     Cast("Lost", 5, null, [70]),
                     Cast("Armor", 0, null),
                     Cast("Armor", 5, null),
+                    // A skill that missed at the first distance and is cast again from another.
+                    Cast("Far", 0, null),
+                    Cast("Far", 5, null),
+                    Cast("Far", 0, [20]),
+                    Cast("Far", 5, [35]),
+                    Cast("Far", 0, null),
+                    Cast("Far", 5, null),
                 ]
             );
             // A run under another name is not a sweep.
@@ -48,6 +55,7 @@ public sealed class SkillRankCheckTests
             Assert.True(casts["Lost"].Rose(0.75));
             Assert.False(casts["Armor"].Rose(0.75));
             Assert.False(casts["Armor"].Unchanged);
+            Assert.True(casts["Far"].Rose(0.75));
             Assert.DoesNotContain("Gone", casts.Keys);
         }
         finally

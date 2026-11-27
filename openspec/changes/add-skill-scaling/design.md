@@ -16,7 +16,8 @@ What the code does:
 What the lab showed:
 - Elemental damage ranks add before they multiply. Ice Shard hit for 25, 25.5, 26 and 27.5 at Frostbite ranks 0, 1, 2 and 5, and for 33.75 with Frozen Dominion 5 as well, which is `25 * (1 + 0.10 + 0.25)`. Ice Spike rose from 35 to 38.5 at Frostbite rank 5.
 - Every damage passive applies with the coefficient the code names. Run `skill-lab-elemental-ranks` set each passive to rank 5 alone, for Ice Shard, Ember Flick, Snap Shard, Airblade and Thunderous Smite, and each hit rose by 10%, 10%, 15%, 15% and 25% in the passives' order.
-- Four spells ignore the bonus. At rank 0 and at full ranks of their school's five damage passives, Spire Barrage's spears hit for 30, Earth Hammer for 25 and 100, Inferno Lance for 150 plus a 50 explosion, and Emberspark for its fixed 25. Earth Spikes' direct hit stays at 100, while a second hit of 45 rose to 78.75 in both sweeps.
+- Seven spells ignore the bonus. At rank 0 and at full ranks of their school's five damage passives, Spire Barrage's spears hit for 30, Earth Hammer for 25 and 100, Earth Spikes for 100, Inferno Lance for 150 plus a 50 explosion, Emberspark for 25, Emberspike for 100 and Spark for 15.
+- Of the 84 skills whose code asks for the bonus, 54 rose by the full 75% in the skill-ranks sweep. 19 landed no hit on a still enemy from five distances and angles: armors, wards, leaps, marks and skills that need a moving or frozen enemy or a held key. Flamethrower, Molten Slag, Overcharged and Shatterstorm hit without showing their own damage clearly, so they are neither confirmed nor in the issue.
 - The tooltip's Base Damage is not the hit for 15 of the 16 skills the trace named: Ember Flick hit for 35 against a tooltip of 45, Meteor Form for 300 against 100, Lightning Fury for 75 against 35. Walking Capacitor did not channel headless and stays unmeasured.
 - Lightning Fury and Thunderous Smite took 60 and 70 mana in one step, twice their costs of 30 and 35, and Ice Spike took none. Task 1.7 measures mana on purpose before this becomes a claim.
 
@@ -54,7 +55,7 @@ Each kind of input ships only after `tools/runtime/checks/skill-damage.lua` meas
 
 The five damage passives of a school apply to every skill alike, so a skill page says in one sentence that they raise its damage, links them, and gives the 75% they add up to, which Ice Shard confirmed at 43.75 from 25. A table of the five passives on every skill page would repeat the discipline page. Comparison 86 had chosen such a table while three passives were unmeasured.
 
-The code alone does not tell which skills use the bonus, because a skill can compute it and hit with another number, as Spire Barrage does, and one skill can have a hit that scales beside hits that do not, as Ember Flick's impact and burn do. `tools/runtime/checks/skill-ranks.sh` therefore casts every skill whose code asks for the bonus at rank 0 and at full ranks, and the catalog publishes the sentence only where a hit rose by the full bonus. Each cast starts from the same place after the earlier casts' leftovers are destroyed, because burning ground and similar effects of one skill otherwise hit the next skill's enemy, and each hit is read from what the enemy received, because two hits in one frame otherwise read as one. A skill whose cast does not reach the enemy at the sweep's distance, or that deals no damage, gets no sentence.
+The code alone does not tell which skills use the bonus, because a skill can compute it and hit with another number, as Spire Barrage does, and one skill can have a hit that scales beside hits that do not, as Ember Flick's impact and burn do. `tools/runtime/checks/skill-ranks.sh` therefore casts every skill whose code asks for the bonus at rank 0 and at full ranks, and the catalog publishes the sentence only where a hit rose by the full bonus. Each skill is cast in a freshly opened level, because what one skill leaves behind hits a later skill's enemy: burning ground, and effects on the player such as an armed Quakefall, whose quake an earlier sweep read as a hit of Earth Spikes and of Flamethrower. Each hit is read from what the enemy received, because two hits in one frame otherwise read as one. A skill that misses the enemy is cast again from other distances and angles, and one that never hits gets no sentence.
 
 Skill pages reuse the item pages' Bugs section without a link beside the game card, because a link there would change both page kinds for a case the Bugs heading already serves. The passives' own descriptions already state their bonus, so passive rows list no skills.
 
@@ -77,6 +78,6 @@ The developer said the melee trees will be revisited. The pages state melee scal
 
 ## Open Questions
 
-- Whether the four spells that ignore the damage bonus are defects or the developer's intent. Pages state the fixed numbers the lab measured either way.
+- Whether the seven spells that ignore the damage bonus are defects or the developer's intent. Pages state the fixed numbers the lab measured either way.
 - How older passives such as Holy Retribution and Death's Embrace reach the skills of their trees in play.
 - Whether Bestial Fury raises shapeshift damage at all.

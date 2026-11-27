@@ -22,7 +22,11 @@ internal sealed record SkillRankCast(string Run, IReadOnlyList<double> Zero, IRe
 
 internal static class SkillRankCheck
 {
-    /// <summary>Each skill's pair of casts in the latest run. Run directories start with their start time.</summary>
+    /// <summary>
+    /// Each skill's pair of casts in the latest run. The sweep casts a skill that missed the enemy again from another
+    /// distance, so the pair in which both casts hit stands, and otherwise the skill's last pair. Run directories
+    /// start with their start time.
+    /// </summary>
     public static IReadOnlyDictionary<string, SkillRankCast> Load(string runtimeDirectory)
     {
         var casts = new Dictionary<string, SkillRankCast>(StringComparer.Ordinal);
@@ -52,7 +56,10 @@ internal static class SkillRankCheck
             var hits = Hits(result);
             if (ranks.All(rank => rank.Value!.GetValue<double>() == 0))
                 zero[skill] = hits;
-            else if (zero.TryGetValue(skill, out var before))
+            else if (
+                zero.TryGetValue(skill, out var before)
+                && !(casts.TryGetValue(skill, out var kept) && kept.Zero.Count > 0 && kept.Full.Count > 0)
+            )
                 casts[skill] = new SkillRankCast(Path.GetFileName(run), before, hits);
         }
         return casts;

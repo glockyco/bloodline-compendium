@@ -118,6 +118,9 @@ internal static partial class KnownIssues
     /// <summary>A crossbow whose class is no crossbow, so firing it does nothing.</summary>
     public const string SilentCrossbow = "rusty-crossbow-fires-nothing";
 
+    /// <summary>A seller whose line names one price while the purchase takes another.</summary>
+    public const string NamedPrice = "sellers-name-another-price";
+
     /// <summary>
     /// The Rusty Crossbow that merchants sell and Squalls End holds, which runs ranged1 to ranged3 saw fire nothing and
     /// run shops1 found in the stock of the shopkeepers of Squalls End and Elderglen.
@@ -317,6 +320,16 @@ internal static partial class KnownIssues
             )
             {
                 notes[item.Key].Add("foragers-feast-gives-flower");
+            }
+            // Run quoted-prices bought every order of the two waitresses, and the entry's notes name each item whose
+            // seller took another price than their line says.
+            if (
+                registry
+                    .Issues.FirstOrDefault(issue => issue.Id == NamedPrice)
+                    ?.Notes?.ContainsKey(item.Key) == true
+            )
+            {
+                notes[item.Key].Add(NamedPrice);
             }
         }
         // An item's Bugs rows follow the order of the Known Issues page, which is the registry's.

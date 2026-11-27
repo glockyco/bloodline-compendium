@@ -16,9 +16,11 @@
 -- This isolates an impact branch. It does not reproduce a normal collision.
 -- "watch" lists full Class_C:Function paths whose calls are recorded alongside hits.
 -- "withoutCollision" disables collision on newly spawned actors of the named class to isolate an impact.
--- "home": true isolates a cast in a series from the casts before it. The first such cast records where the caster
--- stands and looks. Each one destroys the actors that earlier casts left behind, such as burning ground, returns the
--- caster to that place and view with full Health, and waits for the caster to return to their own body after a form.
+-- "home" makes a second cast start as the first did. "home": "here" records where the caster stands and looks.
+-- "home": true destroys the actors the cast before left behind, such as burning ground, and returns the caster to
+-- that place and view with full Health. Both wait for the caster to return to their own body after a form.
+-- Effects of earlier casts can also live on the player, such as an armed Quakefall that lands its quake on a later
+-- cast's enemy, so a measurement of another skill needs a freshly opened level, as skill-ranks.sh does.
 local p = requirePlayer()
 local world = UEHelpers.GetWorld()
 local controller = UEHelpers.GetPlayerController()
@@ -119,13 +121,13 @@ if not args.thirdPerson and not p['First Person?'] then p['Set camera to First P
 commands['close-tutorials']({})
 statics:SetGamePaused(world, false)
 if valid(state.enemy) then state.enemy:K2_DestroyActor() end
-if args.home then
+if args.home == 'here' then
+    local at, view = p:K2_GetActorLocation(), controller:GetControlRotation()
+    state.home = { location = { X = at.X, Y = at.Y, Z = at.Z }, yaw = view.Yaw }
+elseif args.home then
+    assert(state.home, 'Cast with "home": "here" first')
     for _, actor in ipairs(state.leftover or {}) do
         if valid(actor) and actor:GetAddress() ~= p:GetAddress() then actor:K2_DestroyActor() end
-    end
-    if not state.home then
-        local at, view = p:K2_GetActorLocation(), controller:GetControlRotation()
-        state.home = { location = { X = at.X, Y = at.Y, Z = at.Z }, yaw = view.Yaw }
     end
     p:K2_SetActorLocation(state.home.location, false, {}, true)
     controller:SetControlRotation({ Pitch = 0, Yaw = state.home.yaw, Roll = 0 })
