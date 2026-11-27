@@ -76,7 +76,7 @@ internal static class EventTables
 
     private static MechanicTable Terrains(GameEvents events) =>
         new(
-            ["Column", "Terrain Around You"],
+            ["Terrain List", "Terrain Around You"],
             [
                 .. events.Terrains.Select(terrain =>
                     (IReadOnlyList<string>)[terrain.Name, string.Join(", ", terrain.Terrains)]
@@ -101,15 +101,14 @@ internal static class EventTables
                             GameEvents.Reference(SourceEventKind.WorldMap, happening.Name)
                         )
                     );
-                    return (IReadOnlyList<string>)
-                        [
-                            happening.Name,
-                            creatures.Length > 0 && happening.Also is not null
-                                ? creatures + ". " + happening.Also
-                                : happening.Also ?? creatures,
-                            .. (includeChances ? new[] { "" } : []),
-                            FormattableString.Invariant($"{happening.Stays} seconds"),
-                        ];
+                    var brings =
+                        creatures.Length > 0 && happening.Also is not null
+                            ? creatures + ". " + happening.Also
+                            : happening.Also ?? creatures;
+                    var stays = FormattableString.Invariant($"{happening.Stays} seconds");
+                    return includeChances
+                        ? (IReadOnlyList<string>)[happening.Name, brings, "", stays]
+                        : [happening.Name, brings, stays];
                 }),
             ]
         )

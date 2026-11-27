@@ -239,6 +239,9 @@
 		.relation-panel :global(.stacked td:nth-child(5)::before) {
 			content: var(--label-5);
 		}
+		.relation-panel :global(.stacked td:nth-child(6)::before) {
+			content: var(--label-6);
+		}
 		.relation-panel :global(.stacked td:nth-child(2)::after) {
 			content: var(--unit-2);
 			white-space: pre;
@@ -253,6 +256,10 @@
 		}
 		.relation-panel :global(.stacked td:nth-child(5)::after) {
 			content: var(--unit-5);
+			white-space: pre;
+		}
+		.relation-panel :global(.stacked td:nth-child(6)::after) {
+			content: var(--unit-6);
 			white-space: pre;
 		}
 		/* A unit follows its value after one space, not the gap between the label and the value. */
@@ -270,6 +277,9 @@
 		}
 		.relation-panel :global(.stacked td.one:nth-child(5)::after) {
 			content: var(--unit-one-5);
+		}
+		.relation-panel :global(.stacked td.one:nth-child(6)::after) {
+			content: var(--unit-one-6);
 		}
 		/* A value the row lacks or the game does not tell has no unit to carry. */
 		.relation-panel :global(.stacked td.absent::after) {

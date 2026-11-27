@@ -9,13 +9,13 @@
 
 <SeoHead
 	title="Mechanics | The Bloodline Compendium"
-	description="Discipline levels, skill points, proficiency points and the Blood Levels setting in The Bloodline."
+	description="Discipline levels, skill and proficiency points, Blood Levels, and world map and calendar events in The Bloodline."
 />
 <header class="page-heading list-title">
 	<h1>Mechanics</h1>
 	<p class="intro">
-		How disciplines level up, what skill and proficiency points buy, and what the Blood Levels
-		setting changes.
+		How disciplines level up, what points buy, what Blood Levels change, and where to find events on
+		the world map and calendar.
 	</p>
 </header>
 <CardGrid rows={2} columns={balancedColumns(data.index.mechanics.length)} label="Mechanics">

@@ -16,7 +16,7 @@
 			const chances = table.chanceColumns?.[column];
 			return chances
 				? chances.every((cell) => cell.length === 1 && !cell[0].label)
-				: table.rows.every((cells) => /^\d[\d,.]*$/.test(cells[column]));
+				: table.rows.every((cells) => /^\d[\d,.]*(?: seconds)?$/.test(cells[column]));
 		});
 	const reference = $derived({
 		kind: mechanic.kind,
@@ -86,19 +86,24 @@
 								<tr id={table.anchors?.[index]}>
 									{#each cells as cell, column (column)}
 										{@const chances = table.chanceColumns?.[column]?.[index]}
-										<td class:numeric={numeric[column]}>
+										<td
+											class:numeric={numeric[column]}
+											class:event-description={table.anchors && column > 0 && !numeric[column]}
+										>
 											{#if chances}
-												{#each chances as chance, entry (entry)}
-													{@const id = `${section.anchor}-${index}-${column}-${entry}`}
-													{#if chance.label}
-														<div class="labelled-chance">
-															<span>{chance.label}</span>
+												<div>
+													{#each chances as chance, entry (entry)}
+														{@const id = `${section.anchor}-${index}-${column}-${entry}`}
+														{#if chance.label}
+															<div class="labelled-chance">
+																<span>{chance.label}</span>
+																<Chance min={chance.value} {id} />
+															</div>
+														{:else}
 															<Chance min={chance.value} {id} />
-														</div>
-													{:else}
-														<Chance min={chance.value} {id} />
-													{/if}
-												{/each}
+														{/if}
+													{/each}
+												</div>
 											{:else}
 												<LinkedText text={cell} />
 											{/if}
@@ -123,10 +128,22 @@
 	.text-layout {
 		margin-top: var(--gap-section);
 	}
+	tr:target {
+		background: var(--surface-raised);
+	}
+	@container (width < 40rem) {
+		.event-description {
+			flex-direction: column;
+		}
+		.event-description > div {
+			align-self: stretch;
+		}
+	}
 	.labelled-chance {
 		display: flex;
 		justify-content: space-between;
 		gap: var(--gap-inline);
+		white-space: nowrap;
 	}
 	.evidence {
 		display: grid;
