@@ -110,7 +110,8 @@ internal static partial class GameMap
         CatalogRecords records,
         GameMapRegistry registry,
         IReadOnlySet<string> named,
-        IEnumerable<FactClaim> claims
+        IEnumerable<FactClaim> claims,
+        IEnumerable<string>? readings = null
     )
     {
         var kinds = new Dictionary<string, SortedSet<string>>(StringComparer.OrdinalIgnoreCase);
@@ -144,6 +145,7 @@ internal static partial class GameMap
         var cited = claims
             .SelectMany(claim => claim.Citations)
             .Select(citation => citation.Function)
+            .Concat(readings ?? [])
             .Distinct(StringComparer.Ordinal)
             .GroupBy(function => function.Split(':')[0], StringComparer.OrdinalIgnoreCase)
             .ToDictionary(

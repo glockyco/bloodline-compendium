@@ -13,6 +13,9 @@ internal sealed record CatalogResult(
 {
     public IReadOnlyList<FactClaim> Claims { get; init; } = [];
 
+    /// <summary>The functions whose reading the catalog holds by fingerprint, by citation.</summary>
+    public IReadOnlyCollection<string> Readings { get; init; } = [];
+
     /// <summary>The comparison with in-game tooltips, null when no lab run of the build read any.</summary>
     public TooltipReport? Tooltips { get; init; }
 
@@ -192,6 +195,7 @@ internal static class CatalogBuilder
         )
         {
             Claims = [.. items.Claims, .. skillClaims.Claims],
+            Readings = context.Readings,
             Tooltips = items.Tooltips,
             Issues = issues,
             Professions = professions,

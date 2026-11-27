@@ -67,6 +67,12 @@ internal sealed class CatalogContext
     /// <summary>The world map and calendar events with what each brings.</summary>
     public GameEvents Events => events ??= new GameEvents(this);
 
+    /// <summary>
+    /// The functions the catalog holds as read, by their citation, which the game map counts as cited like the
+    /// functions a fact claim rests on.
+    /// </summary>
+    public HashSet<string> Readings { get; } = new(StringComparer.Ordinal);
+
     public CatalogContext(
         CatalogRecords records,
         IReadOnlyDictionary<string, ItemPage> items,

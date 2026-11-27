@@ -13,7 +13,9 @@ public sealed class GameMapTests
     private static CodeFunction Function(string package, string name, bool window = false) =>
         new(package, package, name, window, "", CodeParseStatus.Complete, [], [], [], []);
 
-    private static (GameMapReport Map, IReadOnlyList<string> Unclassified) Build()
+    private static (GameMapReport Map, IReadOnlyList<string> Unclassified) Build(
+        IEnumerable<string>? readings = null
+    )
     {
         var records = new CatalogRecords(
             new BuildRecord(1, 1, []),
@@ -88,7 +90,8 @@ public sealed class GameMapTests
                 "/Game/Invented/Sword",
                 "/Game/Effects/Glow",
             },
-            claims
+            claims,
+            readings
         );
     }
 
@@ -118,6 +121,15 @@ public sealed class GameMapTests
         Assert.Equal(MapState.Published, map["/Game/Effects/Glow"].State);
         Assert.Equal(MapState.SetAside, map["/Game/Effects/Torch"].State);
         Assert.Equal("Only looks.", map["/Game/Effects/Torch"].Reason);
+    }
+
+    [Fact]
+    public void AFunctionTheCatalogHoldsAsReadPublishesItsPackage()
+    {
+        var window = Build(["/Game/Invented/StableWindow:Construct"])
+            .Map.Packages.Single(package => package.Path == "/Game/Invented/StableWindow");
+        Assert.Equal(MapState.Published, window.State);
+        Assert.Equal(1, window.CitedFunctions);
     }
 
     [Fact]

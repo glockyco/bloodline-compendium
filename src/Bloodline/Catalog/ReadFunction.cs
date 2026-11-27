@@ -35,6 +35,7 @@ internal static class ReadFunction
             throw new InvalidDataException(
                 $"{citation} changed since it was read. Read it again and update {list}."
             );
+        context.Readings.Add(citation);
         return function;
     }
 }

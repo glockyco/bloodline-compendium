@@ -94,7 +94,8 @@ internal static class CatalogCommand
                             SearchOption.AllDirectories
                         )
                     ),
-                    catalog.Claims
+                    catalog.Claims,
+                    catalog.Readings
                 );
                 Bloodline.Output.CanonicalJson.Write(layout.MapFile, map);
                 Console.WriteLine(
