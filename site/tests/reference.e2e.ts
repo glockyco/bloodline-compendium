@@ -215,12 +215,14 @@ test('keeps unconfirmed sources at the end without advertising a way to get the 
 			'only-in-game-files'
 		);
 		const files = page.getByRole('table', { name: 'Only in the Game Files' });
-		await expect(files.getByRole('columnheader')).toHaveText(['Source']);
+		await expect(files.getByRole('columnheader')).toHaveText(['Interaction']);
+		// Each way keeps its place and says beside it why it is not a way in the world.
 		const dialogue = files.getByRole('row').filter({ hasText: 'The Silent Curator' });
 		await expect(dialogue).toContainText('Glass Reach');
-		await expect(
-			page.locator('#only-in-game-files').locator('xpath=ancestor::section[1]')
-		).toContainText('no place or person in the world uses them');
+		await expect(dialogue).toContainText('This dialogue is marked unused in the game files.');
+		await expect(files.getByRole('row').filter({ hasText: 'Unplaced prism' })).toContainText(
+			'No placed instance was found for this pickup.'
+		);
 		await expect(page.locator('meta[name="description"]')).toHaveAttribute(
 			'content',
 			/No known source\./

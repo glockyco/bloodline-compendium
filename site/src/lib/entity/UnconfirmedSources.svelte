@@ -1,61 +1,88 @@
 <script lang="ts">
 	import RelationTable from '#lib/RelationTable.svelte';
+	import Conditions from '#lib/Conditions.svelte';
+	import { sourceHeadings } from '#lib/labels.js';
 	import EntityLink from '#lib/ui/EntityLink.svelte';
 	import Section from '#lib/ui/Section.svelte';
 	import type { Source } from '#lib/site-data.js';
-	/** The ways to get an entity that only the game files name, which no place or person in the world uses. */
-	let {
-		sources,
-		name,
-		idPrefix = ''
-	}: {
-		sources: Source[];
-		/** The entity's name, as the section's sentence names it. */
-		name: string;
-		idPrefix?: string;
-	} = $props();
-	// Unconfirmed sources of one name and place share a row, which keeps each source's relation. One sentence says
-	// why none is confirmed.
-	const rows = $derived.by(() => {
-		const key = (source: Source) =>
-			source.name + '|' + source.places.map((place) => place.name).join(',');
-		const listed = sources.filter((candidate) => candidate.unconfirmed);
-		return listed
-			.filter((source, index) => listed.findIndex((other) => key(other) === key(source)) === index)
-			.map((source) => ({
-				source,
-				relationIds: listed
-					.filter((other) => key(other) === key(source))
-					.map((other) => other.relationId)
-			}));
+	import { scopeReasons } from './reason-scope.js';
+	/** The ways to get an entity that only the game files name, each with the reason it is not a way in the world. */
+	let { sources, idPrefix = '' }: { sources: Source[]; idPrefix?: string } = $props();
+	// How much a spot gives before it regrows is no reason, unless it gives nothing.
+	const reasonsOf = (source: Source) => [
+		...source.notes.filter((note) => !/^Gives up to [1-9]/.test(note)),
+		...source.conditions
+			.filter((condition) => condition.kind === 'unknown')
+			.map((condition) => condition.label + '.')
+	];
+	const requirements = (source: Source) =>
+		source.conditions.filter((condition) => condition.kind !== 'unknown');
+	// Sources that read the same share a row, which keeps each source's relation.
+	const scoped = $derived.by(() => {
+		const rows: { key: string; source: Source; relationIds: string[] }[] = [];
+		for (const source of sources) {
+			if (!source.unconfirmed) continue;
+			const key = JSON.stringify([
+				source.kind,
+				source.name,
+				source.places.map((place) => place.name),
+				requirements(source),
+				reasonsOf(source)
+			]);
+			const row = rows.find((other) => other.key === key);
+			if (row) row.relationIds.push(source.relationId);
+			else rows.push({ key, source, relationIds: [source.relationId] });
+		}
+		return scopeReasons(rows, ({ source }) => reasonsOf(source));
 	});
-	const sentence = $derived(
-		`The game files list these ways to get ${name}, but no ${
-			rows.some(({ source }) => source.kind === 'dialogue') ? 'place or person' : 'place'
-		} in the world uses them.`
-	);
 </script>
 
-{#if rows.length}<Section
+{#if scoped.rows.length}<Section
 		id={idPrefix + 'only-in-game-files'}
 		title="Only in the Game Files"
-		count={rows.length}
-		line={sentence}
+		count={scoped.rows.length}
+		line={scoped.lines.join(' ')}
 	>
-		<RelationTable items={rows} label="Only in the Game Files" headings={['Source']} numeric={false}
-			>{#snippet row({ source, relationIds }, index)}<tr
+		<RelationTable
+			items={scoped.rows}
+			label="Only in the Game Files"
+			headings={['Interaction']}
+			numeric={false}
+			>{#snippet row({ row: { source, relationIds }, reasons, band }, index)}{#if band}<tr
+						class="group-heading"
+						><th scope="colgroup"
+							>{#each band as reason (reason)}<span class="band-reason">{reason}</span>{/each}</th
+						></tr
+					>{/if}<tr
 					id={`${idPrefix}unconfirmed-source-${index + 1}`}
 					data-relation-id={relationIds.join(' ')}
 					data-relation-direction="incoming"
 					><td
-						><span class="relation-name"
+						><p class="method">{sourceHeadings[source.kind]}</p>
+						<span class="relation-name"
 							><EntityLink entity={source.entity}>{source.name}</EntityLink></span
-						>{#if source.places.length}<p class="source-places">
+						>
+						<Conditions conditions={requirements(source)} />
+						{#if source.places.length}<p class="source-places">
 								{#each source.places as place, index (index)}{index ? ', ' : ''}<EntityLink
 										entity={place}
 									/>{/each}
-							</p>{/if}</td
+							</p>{/if}{#each reasons as reason (reason)}<p class="source-places">
+								{reason}
+							</p>{/each}</td
 					></tr
 				>{/snippet}</RelationTable
 		>
 	</Section>{/if}
+
+<style>
+	.method {
+		margin: 0;
+		color: var(--text-muted);
+		font-size: var(--type-meta);
+		line-height: var(--leading-meta);
+	}
+	.band-reason {
+		display: block;
+	}
+</style>

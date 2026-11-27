@@ -213,7 +213,7 @@
 						>{/snippet}</RelationTable
 				>
 			</Section>{/if}
-		<UnconfirmedSources sources={item.sources} name={item.name} {idPrefix} />
+		<UnconfirmedSources sources={item.sources} {idPrefix} />
 		<BugsSection notes={item.notes} facts={item.facts} name={item.name} {idPrefix} />
 	</div>
 </div>

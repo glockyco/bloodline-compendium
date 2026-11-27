@@ -52,7 +52,7 @@
 					)}% more damage at full ranks.
 				</p>
 			</Section>{/if}
-		<UnconfirmedSources sources={skill.sources} name={skill.name} {idPrefix} />
+		<UnconfirmedSources sources={skill.sources} {idPrefix} />
 		<BugsSection notes={skill.notes} facts={skill.facts} name={skill.name} {idPrefix} />
 	</div>
 </div>
