@@ -82,7 +82,7 @@ internal sealed class ItemProducer
             texture => texture.Path,
             StringComparer.OrdinalIgnoreCase
         );
-        var statuses = new ItemStatuses(records, context.ExcludedLevels);
+        var statuses = new ItemStatuses(records, context.ExcludedLevels, context.CanAppear);
         var items = new List<ItemPage>();
         foreach (var type in selected.Where(type => !context.IsExcludedClass(type.Path)))
         {

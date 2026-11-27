@@ -153,7 +153,11 @@ internal sealed class Liveness
             var targets = From(Package(dialogue.Path));
             Walk(dialogue.Properties, targets, null);
             foreach (var inner in dialogue.Objects)
+            {
+                // A conversation's event object runs its class's script, as one opens a currency shop.
+                targets.Add(Package(inner.Class));
                 Walk(inner.Properties, targets, null);
+            }
         }
 
         var todo = new Queue<string>();

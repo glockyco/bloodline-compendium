@@ -13,7 +13,10 @@ public sealed class ItemStatusesTests
     private static JsonObject Holding() =>
         new() { ["Custom Loot Table"] = new JsonArray(new JsonObject { ["$ref"] = Item }) };
 
-    private static ItemStatus Status(int sources, params LevelRecord[] levels)
+    private static ItemStatus Status(int sources, params LevelRecord[] levels) =>
+        Status(sources, true, levels);
+
+    private static ItemStatus Status(int sources, bool canAppear, params LevelRecord[] levels)
     {
         var self = new ClassRecord(
             Item,
@@ -36,7 +39,10 @@ public sealed class ItemStatusesTests
             [],
             []
         );
-        return new ItemStatuses(records, new HashSet<string>([TestLevel])).Of(Item, sources);
+        return new ItemStatuses(records, new HashSet<string>([TestLevel]), _ => canAppear).Of(
+            Item,
+            sources
+        );
     }
 
     [Fact]
@@ -75,6 +81,10 @@ public sealed class ItemStatusesTests
     [Fact]
     public void AnItemNamedOnlyByItselfHasNoKnownSource() =>
         Assert.Equal(ItemStatus.NoKnownSource, Status(0));
+
+    [Fact]
+    public void AnItemThatNothingInPlayLeadsToIsNotInNormalPlay() =>
+        Assert.Equal(ItemStatus.NotInNormalPlay, Status(0, false));
 
     [Fact]
     public void AnItemWithASourceIsObtainable() =>

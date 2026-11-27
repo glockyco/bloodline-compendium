@@ -6,7 +6,8 @@ namespace Bloodline.Catalog;
 
 /// <summary>
 /// Whether a player can get an item. An item without a source is out of normal play when every record that names
-/// it lies in an excluded test level and no game code names it, and has no known source otherwise.
+/// it lies in an excluded test level and no game code names it, or when nothing in play leads to it, and has no
+/// known source otherwise.
 /// </summary>
 internal sealed class ItemStatuses
 {
@@ -14,10 +15,16 @@ internal sealed class ItemStatuses
         StringComparer.OrdinalIgnoreCase
     );
     private readonly IReadOnlySet<string> excludedLevels;
+    private readonly Func<string, bool> canAppear;
 
-    public ItemStatuses(CatalogRecords records, IReadOnlySet<string> excludedLevels)
+    public ItemStatuses(
+        CatalogRecords records,
+        IReadOnlySet<string> excludedLevels,
+        Func<string, bool> canAppear
+    )
     {
         this.excludedLevels = excludedLevels;
+        this.canAppear = canAppear;
         foreach (var level in records.Levels)
         foreach (var actor in level.Actors)
             Collect(actor.Properties, level.Path);
@@ -46,7 +53,7 @@ internal sealed class ItemStatuses
         if (sources > 0)
             return ItemStatus.Obtainable;
         var others = NamedBy(item);
-        return others.Count > 0 && others.All(excludedLevels.Contains)
+        return others.Count > 0 && others.All(excludedLevels.Contains) || !canAppear(item)
             ? ItemStatus.NotInNormalPlay
             : ItemStatus.NoKnownSource;
     }
