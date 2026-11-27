@@ -13,10 +13,12 @@
 
 ## 3. How things come into the world
 
-- [ ] 3.1 Read every way a creature or container without a level comes into the world, with function citations: world map events and the camp areas' event spawner, roaming armies and encampments, rituals, warpgates, airships, quest spawners and summons
+- [x] 3.1 Read every way a creature or container without a level comes into the world, with function citations: world map events and the camp areas' event spawner, roaming armies and encampments, rituals, warpgates, airships, quest spawners and summons
 - [ ] 3.2 Compare how a way without a fixed place states its mechanic on an item page, such as Bear through the world map event Bear, and build the answer in the catalog and the site
 - [ ] 3.3 Read stables, the chiseling station, fighter contracts, special key chests, fetch quest items and the default stock of the Lionsmane and Church of Arosa shops, and publish each as a way to get its items after its comparison
 - [ ] 3.4 Recount the items without a way and the ways without a place or mechanic, and record what stays open in the registry
+- [ ] 3.5 Observe the options of the encounter window of a hostile world map event in the lab (fight, run, toll, gift, climb, speak) and add them to the World Map Events page after their comparison
+- [ ] 3.6 Read and publish what the objects of calendar and world map events give: the crashed and damaged airship, the meteors of a Meteor Storm, the Moonstone Meteorite, the Warp Strider's chest, Badbarrel's waves, hostages, the hordes, Sandstorm, Lost Spirits, Deathfog, the Merchant Caravan's stock and the Caravan Ambush's merchant
 
 ## 4. Creatures and what they drop
 
