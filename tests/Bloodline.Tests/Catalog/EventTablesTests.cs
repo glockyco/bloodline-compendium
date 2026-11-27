@@ -23,6 +23,7 @@ public sealed class EventTablesTests
         Assert.Null(section.Data);
         Assert.Equal(new[] { "Bandit Ambush", "Robber", "15 seconds" }, Assert.Single(table.Rows));
         Assert.Equal(["bandit-ambush"], table.Anchors);
+        Assert.Null(table.CellLinks);
     }
 
     [Fact]
@@ -42,6 +43,11 @@ public sealed class EventTablesTests
             table.Headings
         );
         Assert.Equal(["bandit-ambush"], table.Anchors);
+        Assert.Equal(
+            "Each percentage is the chance that the next event in that terrain is this one.",
+            table.ChanceContext
+        );
+        Assert.Null(table.CellLinks);
         Assert.Equal(["Bandit Ambush", "Robber", "", "15 seconds"], Assert.Single(table.Rows));
         Assert.Equal(
             new MechanicChance(1, "Pine Forest", "terrain"),
@@ -50,19 +56,44 @@ public sealed class EventTablesTests
     }
 
     [Fact]
-    public void SeparateWorldMapChanceTableKeepsZeroesAndFractions()
+    public void SeparateWorldMapEffectsLinkToTheirOwnRowsInTheFiveTerrainMatrix()
     {
-        var table = Assert
-            .Single(
-                Assert
-                    .Single(EventTables.Fill([Page("worldMapEventChances")], BanditContext()))
-                    .Sections
-            )
-            .Table!;
+        var context = EventRecords.Create(
+            new Dictionary<string, IReadOnlyDictionary<string, double>>
+            {
+                ["Pine Forest Events"] = new Dictionary<string, double>
+                {
+                    ["Bear"] = 1,
+                    ["Bandit Ambush"] = 3,
+                },
+            }
+        );
+        var content = Page("worldMapEventChances") with
+        {
+            Sections =
+            [
+                new("Chances by Terrain", []) { Data = "worldMapEventChances" },
+                new("What Each Event Brings", []) { Data = "worldMapEvents" },
+            ],
+        };
+        var page = Assert.Single(EventTables.Fill([content], context));
+        var matrix = page.Sections[0].Table!;
+        var effects = page.Sections[1].Table!;
 
-        Assert.Equal("Pine Forest", table.Headings[1]);
-        Assert.Equal(new MechanicChance(1), Assert.Single(Assert.Single(table.ChanceColumns![1])));
-        Assert.Equal(new MechanicChance(0), Assert.Single(Assert.Single(table.ChanceColumns[2])));
+        Assert.Equal(6, matrix.Headings.Count);
+        Assert.Equal("Pine Forest", matrix.Headings[1]);
+        Assert.Equal(["bandit-ambush", "bear"], effects.Anchors);
+        Assert.Equal(["chances-bandit-ambush", "chances-bear"], matrix.Anchors);
+        Assert.Equal(
+            new MechanicCellLink("chances-bandit-ambush", "Terrain chances for Bandit Ambush"),
+            effects.CellLinks![0][0]
+        );
+        Assert.Equal(
+            new MechanicCellLink("chances-bear", "Terrain chances for Bear"),
+            effects.CellLinks[0][1]
+        );
+        Assert.Equal(new MechanicChance(0.25), Assert.Single(matrix.ChanceColumns![1][1]));
+        Assert.Equal(new MechanicChance(0), Assert.Single(matrix.ChanceColumns[2][1]));
     }
 
     [Fact]
@@ -93,15 +124,27 @@ public sealed class EventTablesTests
                 EventRecords.CalendarRow("Rabbit Swarm", "Rabbits appear.", 1, "Area 1"),
             ]
         );
-        var table = Assert
-            .Single(Assert.Single(EventTables.Fill([Page("calendarEvents")], context)).Sections)
-            .Table!;
+        var content = Page("calendarEvents") with
+        {
+            Sections =
+            [
+                new("Events", []) { Data = "calendarEvents" },
+                new("Calendar Areas", []) { Data = "calendarEventAreas" },
+            ],
+        };
+        var page = Assert.Single(
+            MechanicProducer.Produce(EventTables.Fill([content], context)).Pages
+        );
+        var table = page.Sections[0].Table!;
 
         Assert.Equal(
             ["Moonstone Meteorite", "A meteor falls.", "All calendar event areas", ""],
             table.Rows[0]
         );
         Assert.Equal(["Rabbit Swarm", "Rabbits appear.", "Area 1", ""], table.Rows[1]);
+        Assert.Equal(new MechanicCellLink("calendar-areas"), table.CellLinks![2][0]);
+        Assert.Equal(page.Sections[1].Anchor, table.CellLinks[2][0].Anchor);
+        Assert.Single(table.CellLinks[2]);
         Assert.Equal(1.0 / 36, Assert.Single(table.ChanceColumns![3][1]).Value, 10);
     }
 

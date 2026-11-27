@@ -165,9 +165,7 @@
 			},
 			{
 				"heading": "What Each Event Brings",
-				"paragraphs": [
-					"Each percentage is the chance that a new event in that terrain is of this kind."
-				],
+				"paragraphs": [],
 				"data": "worldMapEventsWithChances"
 			}
 		],
@@ -186,6 +184,7 @@
 				"heading": "How Events Are Chosen",
 				"paragraphs": [
 					"The game schedules at most one event per day. It skips Soulfaring Night on Vohath 15 of the year 874. For each draw, it chooses one of 18 areas at random, then draws an event that can happen there.",
+					"Open Calendar on the world map and check a date for the event and its area. Your Character Sheet also has a Calendar button.",
 					"The event happens while you are in its area on its day."
 				]
 			},
@@ -207,7 +206,8 @@
 		"evidence": [
 			"Code: CalendarEventManager's Generate Event gives each free date within its Foresight Range of 14 days one event, and Assemble Event For Given Location picks one of 18 area names at random and draws by EventSpawnRate among the rows of CalendarEventInfo that name the area or ALL.",
 			"Code: CalendarEvent_Spawner's Recieve Event calls the function of the day's event, such as Spawn Ghost Ship.",
-			"Runs events1 and events2, build 24464547: each fresh calendar had 13 generated entries on Vohath 2 through 14, all in eligible areas. Setting the date to Vohath 7 before opening Parford Lake gave 25 Rabbits for its scheduled Rabbit Swarm, versus 0 on Vohath 1. Runs events2 and holidays2 generated an event on Vohath 25 but not Vohath 15."
+			"Runs events1 and events2, build 24464547: each fresh calendar had 13 generated entries on Vohath 2 through 14, all in eligible areas. Setting the date to Vohath 7 before opening Parford Lake gave 25 Rabbits for its scheduled Rabbit Swarm, versus 0 on Vohath 1. Runs events2 and holidays2 generated an event on Vohath 25 but not Vohath 15.",
+			"Run review-interface, build 24464547: the world map's Calendar button opened the calendar with event and area names on their dates. The Character Sheet's Calendar button also opened the calendar, but the sheet covered it in that capture."
 		]
 	}
 ]

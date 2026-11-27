@@ -891,14 +891,29 @@ export interface MechanicSection {
  */
 export interface MechanicTable {
   anchors?: string[] | null;
+  cellLinks?: {
+    [k: string]: {
+      [k: string]: MechanicCellLink;
+    };
+  } | null;
   chanceColumns?: {
     [k: string]: MechanicChance[][];
   } | null;
+  chanceContext?: string | null;
   headings: string[];
   rowNotes?: {
     [k: string]: string;
   } | null;
   rows: string[][];
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "MechanicCellLink".
+ */
+export interface MechanicCellLink {
+  anchor: string;
+  label?: string | null;
+  [k: string]: unknown;
 }
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema

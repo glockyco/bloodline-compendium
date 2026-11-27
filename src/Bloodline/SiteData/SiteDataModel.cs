@@ -760,12 +760,24 @@ internal sealed record MechanicTable(
     /// <summary>Short guidance shown beside the row's name, indexed by row.</summary>
     public IReadOnlyDictionary<int, string>? RowNotes { get; init; }
 
+    /// <summary>Links to fragments on the same page, keyed first by column and then by row.</summary>
+    public IReadOnlyDictionary<
+        int,
+        IReadOnlyDictionary<int, MechanicCellLink>
+    >? CellLinks { get; init; }
+
+    /// <summary>What the chances measure, shown before the table and beside labelled chances on a linked row.</summary>
+    public string? ChanceContext { get; init; }
+
     /// <summary>Chance cells by column, in row order. The matching text cells are empty.</summary>
     public IReadOnlyDictionary<
         int,
         IReadOnlyList<IReadOnlyList<MechanicChance>>
     >? ChanceColumns { get; init; }
 }
+
+/// <summary>A cell's fragment link. A label adds it after the cell value instead of linking the value itself.</summary>
+internal sealed record MechanicCellLink(string Anchor, string? Label = null);
 
 /// <summary>A fraction with an optional label, such as the terrain where the chance applies.</summary>
 internal sealed record MechanicChance(

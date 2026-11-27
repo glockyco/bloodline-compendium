@@ -1256,6 +1256,25 @@
       "title": "ListFacet",
       "type": "object"
     },
+    "MechanicCellLink": {
+      "properties": {
+        "anchor": {
+          "type": "string"
+        },
+        "label": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "anchor"
+      ],
+      "title": "MechanicCellLink",
+      "type": "object"
+    },
     "MechanicChance": {
       "properties": {
         "label": {
@@ -1417,6 +1436,18 @@
             "null"
           ]
         },
+        "cellLinks": {
+          "additionalProperties": {
+            "additionalProperties": {
+              "$ref": "#/$defs/MechanicCellLink"
+            },
+            "type": "object"
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
         "chanceColumns": {
           "additionalProperties": {
             "items": {
@@ -1429,6 +1460,12 @@
           },
           "type": [
             "object",
+            "null"
+          ]
+        },
+        "chanceContext": {
+          "type": [
+            "string",
             "null"
           ]
         },

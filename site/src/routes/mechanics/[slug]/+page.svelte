@@ -76,6 +76,9 @@
 					{#if section.table}
 						{@const table = section.table}
 						{@const numeric = numericColumns(table)}
+						{#if table.chanceContext}
+							<p>{table.chanceContext}</p>
+						{/if}
 						<RelationTable
 							items={table.rows}
 							label={section.heading}
@@ -88,12 +91,17 @@
 								<tr id={anchor} class:anchor-target={anchor && page.url.hash === `#${anchor}`}>
 									{#each cells as cell, column (column)}
 										{@const chances = table.chanceColumns?.[column]?.[index]}
+										{@const cellLink = table.cellLinks?.[column]?.[index]}
+										{@const rowNote = column === 0 ? table.rowNotes?.[index] : undefined}
 										<td
 											class:numeric={numeric[column]}
 											class:event-description={table.anchors && column > 0 && !numeric[column]}
 										>
 											{#if chances}
 												<div>
+													{#if table.chanceContext && !numeric[column]}
+														<p class="chance-context">{table.chanceContext}</p>
+													{/if}
 													{#each chances as chance, entry (entry)}
 														{@const id = `${section.anchor}-${index}-${column}-${entry}`}
 														{#if chance.label}
@@ -107,13 +115,25 @@
 															</div>
 														{:else}
 															<Chance min={chance.value} {id} />
+															{#if table.chanceContext}
+																<span class="matrix-terrain" aria-hidden="true"
+																	>{table.headings[column]}</span
+																>
+															{/if}
 														{/if}
 													{/each}
 												</div>
-											{:else if column === 0 && table.rowNotes?.[index]}
+											{:else if cellLink && !cellLink.label}
+												<a href={`#${cellLink.anchor}`}>{cell}</a>
+											{:else if rowNote || cellLink}
 												<div>
 													<LinkedText text={cell} />
-													<p class="event-note">{table.rowNotes[index]}</p>
+													{#if rowNote}<p class="event-note">{rowNote}</p>{/if}
+													{#if cellLink}
+														<p class="event-note">
+															<a href={`#${cellLink.anchor}`}>{cellLink.label}</a>
+														</p>
+													{/if}
 												</div>
 											{:else}
 												<LinkedText text={cell} />
@@ -156,6 +176,22 @@
 		justify-content: space-between;
 		gap: var(--gap-inline);
 		white-space: nowrap;
+	}
+	.chance-context,
+	.matrix-terrain {
+		display: none;
+	}
+	:is(tr:target, tr.anchor-target) .chance-context {
+		display: block;
+		margin-block-end: var(--gap-line);
+		color: var(--text-soft);
+	}
+	@container (width >= 40rem) {
+		:is(tr:target, tr.anchor-target) .matrix-terrain {
+			display: block;
+			color: var(--text-muted);
+			font-size: var(--type-meta);
+		}
 	}
 	.event-note {
 		margin-top: var(--gap-inline);

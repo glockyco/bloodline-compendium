@@ -8,6 +8,9 @@ namespace Bloodline.Catalog;
 /// </summary>
 internal static class EventTables
 {
+    private const string NextEventChance =
+        "Each percentage is the chance that the next event in that terrain is this one.";
+
     public static IReadOnlyList<MechanicContent> Fill(
         IReadOnlyList<MechanicContent> content,
         CatalogContext context
@@ -16,17 +19,14 @@ internal static class EventTables
             .. content.Select(page =>
                 page with
                 {
-                    Sections =
-                    [
-                        .. page.Sections.Select(section => Fill(section, page.Name, context)),
-                    ],
+                    Sections = [.. page.Sections.Select(section => Fill(section, page, context))],
                 }
             ),
         ];
 
     private static MechanicSection Fill(
         MechanicSection section,
-        string page,
+        MechanicContent page,
         CatalogContext context
     ) =>
         section.Data switch
@@ -44,16 +44,24 @@ internal static class EventTables
             var data => section with { Data = null, Table = Build(context, page, data) },
         };
 
-    private static MechanicTable Build(CatalogContext context, string page, string data) =>
+    private static MechanicTable Build(CatalogContext context, MechanicContent page, string data) =>
         data switch
         {
             "worldMapEventChances" => Chances(context.Events),
             "worldMapEventTerrains" => Terrains(context.Events),
-            "worldMapEvents" => WorldMap(context),
+            "worldMapEvents" => WorldMap(
+                context,
+                linkChances: page.Sections.Any(section => section.Data == "worldMapEventChances")
+            ),
             "worldMapEventsWithChances" => WorldMap(context, includeChances: true),
-            "calendarEvents" => Calendar(context.Events),
+            "calendarEvents" => Calendar(
+                context.Events,
+                page.Sections.FirstOrDefault(section =>
+                    section.Data == "calendarEventAreas"
+                )?.Heading
+            ),
             _ => throw new InvalidDataException(
-                $"The mechanic page {page} names the table {data}, which the catalog does not build."
+                $"The mechanic page {page.Name} names the table {data}, which the catalog does not build."
             ),
         };
 
@@ -69,6 +77,11 @@ internal static class EventTables
             ]
         )
         {
+            Anchors =
+            [
+                .. ordered.Select(happening => ChanceAnchor(ItemIdentity.Slug(happening.Name))),
+            ],
+            ChanceContext = NextEventChance,
             ChanceColumns = Enumerable
                 .Range(0, events.Terrains.Count)
                 .ToDictionary(
@@ -83,6 +96,8 @@ internal static class EventTables
         };
     }
 
+    private static string ChanceAnchor(string eventAnchor) => $"chances-{eventAnchor}";
+
     private static WorldMapEvent[] OrderedWorldMap(GameEvents events) =>
         [.. events.WorldMap.OrderBy(happening => happening.Name, StringComparer.Ordinal)];
 
@@ -96,9 +111,14 @@ internal static class EventTables
             ]
         );
 
-    private static MechanicTable WorldMap(CatalogContext context, bool includeChances = false)
+    private static MechanicTable WorldMap(
+        CatalogContext context,
+        bool includeChances = false,
+        bool linkChances = false
+    )
     {
         var events = OrderedWorldMap(context.Events);
+        string[] anchors = [.. events.Select(happening => ItemIdentity.Slug(happening.Name))];
         return new MechanicTable(
             includeChances
                 ? ["Event", "What It Brings", "Chance by Terrain", "Stays on the Map"]
@@ -125,7 +145,22 @@ internal static class EventTables
             ]
         )
         {
-            Anchors = [.. events.Select(happening => ItemIdentity.Slug(happening.Name))],
+            Anchors = anchors,
+            CellLinks = linkChances
+                ? new Dictionary<int, IReadOnlyDictionary<int, MechanicCellLink>>
+                {
+                    [0] = Enumerable
+                        .Range(0, events.Length)
+                        .ToDictionary(
+                            index => index,
+                            index => new MechanicCellLink(
+                                ChanceAnchor(anchors[index]),
+                                $"Terrain chances for {events[index].Name}"
+                            )
+                        ),
+                }
+                : null,
+            ChanceContext = includeChances ? NextEventChance : null,
             ChanceColumns = includeChances
                 ? new Dictionary<int, IReadOnlyList<IReadOnlyList<MechanicChance>>>
                 {
@@ -150,13 +185,23 @@ internal static class EventTables
         };
     }
 
-    private static MechanicTable Calendar(GameEvents events)
+    private static MechanicTable Calendar(GameEvents events, string? areasHeading)
     {
         var ordered = events
             .Calendar.OrderByDescending(happening => happening.Chance)
             .ThenBy(happening => happening.Name, StringComparer.Ordinal)
             .ToArray();
         var ghostShip = Array.FindIndex(ordered, happening => happening.Name == "Ghost Ship");
+        var areaLink = areasHeading is null
+            ? null
+            : new MechanicCellLink(ItemIdentity.Slug(areasHeading));
+        Dictionary<int, MechanicCellLink>? areaLinks = null;
+        if (areaLink is not null)
+        {
+            for (var index = 0; index < ordered.Length; index++)
+                if (ordered[index].Areas.Count == 0)
+                    (areaLinks ??= [])[index] = areaLink;
+        }
         return new MechanicTable(
             ["Event", "Calendar Text", "Areas", "Chance per Day"],
             [
@@ -175,6 +220,12 @@ internal static class EventTables
         )
         {
             Anchors = [.. ordered.Select(happening => ItemIdentity.Slug(happening.Name))],
+            CellLinks = areaLinks is null
+                ? null
+                : new Dictionary<int, IReadOnlyDictionary<int, MechanicCellLink>>
+                {
+                    [2] = areaLinks,
+                },
             RowNotes =
                 ghostShip >= 0
                     ? new Dictionary<int, string>
