@@ -17,18 +17,19 @@
 	const bugs = $derived(bugRows({ notes, facts }));
 </script>
 
+<!-- The page's own name is the game's text, so it keeps the game's wording inside the site's sentence. -->
+{#snippet named(text: string)}{#each text.split(name) as part, index (index)}{#if index}<span
+				data-game>{name}</span
+			>{/if}<LinkedText text={part} />{/each}{/snippet}
+
 {#if bugs.length}
 	<Section id={idPrefix + 'bugs'} title="Bugs" count={bugs.length}>
 		<ul class="surface bug-rows">
 			{#each bugs as row (row.kind === 'issue' ? row.issue : row.fact.stat)}
 				<li>
-					{#if row.kind === 'issue'}<span
-							>{#each row.sentence.split(name) as part, index (index)}{#if index}<span data-game
-										>{name}</span
-									>{/if}<LinkedText text={part} />{/each}</span
-						>
+					{#if row.kind === 'issue'}<span>{@render named(row.sentence)}</span>
 						{#if row.workaround}
-							<span><strong>Workaround:</strong> <LinkedText text={row.workaround} /></span>
+							<span><strong>Workaround:</strong> {@render named(row.workaround)}</span>
 						{/if}
 						<small
 							><!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- the resolved issue page with its section. -->
