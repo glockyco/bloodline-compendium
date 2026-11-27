@@ -54,6 +54,11 @@ internal sealed class CatalogContext
     /// <summary>The skill trees a player reaches, which skill and spellsong sources and producers share.</summary>
     public SkillTrees SkillTrees => skillTrees ??= new SkillTrees(this);
 
+    private SpawnSites? spawnSites;
+
+    /// <summary>Where spawners, level scripts and read spawn sites bring a class into the world.</summary>
+    public SpawnSites SpawnSites => spawnSites ??= new SpawnSites(this);
+
     public CatalogContext(
         CatalogRecords records,
         IReadOnlyDictionary<string, ItemPage> items,

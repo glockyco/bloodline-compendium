@@ -248,6 +248,10 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
 
 internal static class LootRecords
 {
+    /// <summary>
+    /// Every class that matches, once for each level that holds it with that placement's settings. A class that no
+    /// level holds comes once with its defaults and the places where something spawns it.
+    /// </summary>
     internal static IEnumerable<(
         string Path,
         JsonObject Properties,
@@ -266,7 +270,7 @@ internal static class LootRecords
         {
             var placements = byClass[type.Path];
             if (!placements.Any())
-                yield return (type.Path, type.Properties, []);
+                yield return (type.Path, type.Properties, context.SpawnSites.Places(type.Path));
             foreach (var placement in placements)
                 yield return (
                     type.Path,

@@ -573,6 +573,30 @@ public sealed class LootMechanismTests
     }
 
     [Fact]
+    public void ContainerThatSpawnerBringsInStandsWhereTheSpawnerDoes()
+    {
+        // A chest that no level holds is found where the object that spawns it stands.
+        var properties = OnePick(Parse("""{"Object Name":{"$text":"Old box"}}"""));
+        properties["Selected Loot Table"] = Pool();
+        var spawner = new JsonObject
+        {
+            ["Actor To Spawn"] = new JsonObject { ["$ref"] = Container },
+        };
+        var source = Assert
+            .Single(
+                new ContainerLootMechanism().FindSources(
+                    Context(
+                        [new ClassRecord(Container, [ContainerLootMechanism.Root], properties)],
+                        [new ActorRecord("Spawner", "/Game/Invented/Spawner.Spawner_C", spawner)]
+                    )
+                )
+            )
+            .Source;
+        Assert.Equal(Level, Assert.Single(source.Places).Key);
+        Assert.False(source.Unconfirmed);
+    }
+
+    [Fact]
     public void EnemyPlacedOverrideDoesNotReplaceSpawnedDefaultPool()
     {
         var properties = Parse("""{"Enemy Name":{"$text":"Marsh beast"}}""");
