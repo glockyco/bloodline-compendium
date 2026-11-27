@@ -8,8 +8,8 @@ The site rests on a small part of the game: its facts cite 166 of 57,869 functio
 - A registry in the repository assigns packages to systems, such as quests, world map events or stables, and sets a state where cataloging cannot derive one.
 - A package is published when site data or a fact citation names it, which cataloging derives itself. Otherwise the registry sets it aside with a reason, or leaves it open.
 - Cataloging fails when a package belongs to no system, so a game update cannot add content unseen.
-- Every window and every object that stands in a level belongs to a system, and the report lists the systems that only such a window or object reaches.
-- The maintainer report lists the open systems by size.
+- Every window and every object that stands in a level belongs to a system, and the map lists them under the systems that are open.
+- The map lists the systems by how much of each is open.
 - The open systems are then read and described in the order comparison 100 set: how things come into the world, creatures and what they drop, mounts and taming.
 
 ## Capabilities
@@ -24,7 +24,7 @@ None. Each mechanic that becomes a page or a fact adds its own requirement when 
 
 ## Impact
 
-- `src/Bloodline/Catalog`: a map writer and its check, beside the maintainer report.
+- `src/Bloodline/Catalog`: a map writer and its check, run after the site data is written.
 - A new registry file in the repository, read by cataloging.
 - `README.md`: where the map is and how to classify a new package.
 - No site page changes with the map itself.

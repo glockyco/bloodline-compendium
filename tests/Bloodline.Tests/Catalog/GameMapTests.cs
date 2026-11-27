@@ -8,17 +8,23 @@ namespace Bloodline.Tests.Catalog;
 
 public sealed class GameMapTests
 {
+    private const string Mount = "/Game/Invented/Mounts/Base.Base_C";
+
     private static CodeFunction Function(string package, string name, bool window = false) =>
         new(package, package, name, window, "", CodeParseStatus.Complete, [], [], [], []);
 
-    [Fact]
-    public void ListsEveryPackageWithWhatTheSiteRestsOn()
+    private static (GameMapReport Map, IReadOnlyList<string> Unclassified) Build()
     {
         var records = new CatalogRecords(
             new BuildRecord(1, 1, []),
             [
                 new ClassRecord("/Game/Invented/Stable.Stable_C", [], new JsonObject()),
                 new ClassRecord("/Game/Invented/Sword.Sword_C", [], new JsonObject()),
+                // A mount outside the mounts' folder still belongs to them by what it derives from.
+                new ClassRecord("/Game/Elsewhere/Camel.Camel_C", [Mount], new JsonObject()),
+                new ClassRecord("/Game/Effects/Glow.Glow_C", [], new JsonObject()),
+                new ClassRecord("/Game/Effects/Torch.Torch_C", [], new JsonObject()),
+                new ClassRecord("/Game/NewFolder/Thing.Thing_C", [], new JsonObject()),
             ],
             [new TableRecord("/Game/Invented/Prices.Prices", null, [])],
             [],
@@ -37,6 +43,7 @@ public sealed class GameMapTests
                             "/Game/Invented/Stable.Stable_C",
                             new JsonObject()
                         ),
+                        new ActorRecord("Torch", "/Game/Effects/Torch.Torch_C", new JsonObject()),
                     ]
                 ),
             ],
@@ -55,6 +62,12 @@ public sealed class GameMapTests
                 []
             ),
         };
+        var registry = new GameMapRegistry([
+            new MapRule("Mounts", Ancestor: Mount),
+            new MapRule("Areas", Kind: "level"),
+            new MapRule("Effects", Prefix: "/Game/Effects/", SetAside: "Only looks."),
+            new MapRule("Stables", Prefix: "/Game/Invented/"),
+        ]);
         var claims = new[]
         {
             new FactClaim(
@@ -67,37 +80,65 @@ public sealed class GameMapTests
                 [new CodeCitation("/Game/Invented/Stable:Buy Mount", "")]
             ),
         };
-        var map = GameMap
-            .Build(
-                records,
-                new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "/Game/Invented/Sword" },
-                claims
-            )
-            .Packages.ToDictionary(package => package.Path);
-
-        // Every record and every package with code is on the map, whether or not the site uses it.
-        Assert.Equal(
-            [
-                "/Game/Invented/Prices",
-                "/Game/Invented/Stable",
-                "/Game/Invented/StableWindow",
+        return GameMap.Build(
+            records,
+            registry,
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
                 "/Game/Invented/Sword",
-                "/Game/Invented/Town",
-            ],
-            map.Keys.Order(StringComparer.Ordinal)
+                "/Game/Effects/Glow",
+            },
+            claims
         );
+    }
+
+    [Fact]
+    public void ListsEveryPackageWithItsSystemAndWhatTheSiteRestsOn()
+    {
+        var map = Build().Map.Packages.ToDictionary(package => package.Path);
+
         var stable = map["/Game/Invented/Stable"];
         Assert.Equal(["class", "code"], stable.Kinds);
         Assert.Equal(2, stable.Functions);
         Assert.Equal(1, stable.CitedFunctions);
         // Two actors in one level count as one level.
         Assert.Equal(1, stable.Levels);
+        Assert.Equal("Stables", stable.System);
         // A cited function publishes its package, and so does a name in the site data.
-        Assert.True(stable.Published);
-        Assert.True(map["/Game/Invented/Sword"].Published);
+        Assert.Equal(MapState.Published, stable.State);
+        Assert.Equal(MapState.Published, map["/Game/Invented/Sword"].State);
         Assert.Equal(0, map["/Game/Invented/Sword"].CitedFunctions);
+        // Nothing names the window or the table, and no rule sets them aside.
         Assert.True(map["/Game/Invented/StableWindow"].Window);
-        Assert.False(map["/Game/Invented/StableWindow"].Published);
-        Assert.False(map["/Game/Invented/Prices"].Published);
+        Assert.Equal(MapState.Open, map["/Game/Invented/StableWindow"].State);
+        Assert.Equal(MapState.Open, map["/Game/Invented/Prices"].State);
+        Assert.Equal("Mounts", map["/Game/Elsewhere/Camel"].System);
+        Assert.Equal("Areas", map["/Game/Invented/Town"].System);
+        // What the site names is published even in a folder the registry sets aside.
+        Assert.Equal(MapState.Published, map["/Game/Effects/Glow"].State);
+        Assert.Equal(MapState.SetAside, map["/Game/Effects/Torch"].State);
+        Assert.Equal("Only looks.", map["/Game/Effects/Torch"].Reason);
+    }
+
+    [Fact]
+    public void NamesThePackagesThatNoRuleCovers()
+    {
+        var (map, unclassified) = Build();
+        Assert.Equal(["/Game/NewFolder/Thing"], unclassified);
+        Assert.DoesNotContain(map.Packages, package => package.Path == "/Game/NewFolder/Thing");
+    }
+
+    [Fact]
+    public void SumsEachSystemAndShowsWhatAPlayerMeetsUnread()
+    {
+        var systems = Build().Map.Systems.ToDictionary(system => system.Name);
+        var stables = systems["Stables"];
+        Assert.Equal(4, stables.Packages);
+        Assert.Equal(2, stables.Published);
+        Assert.Equal(2, stables.Open);
+        Assert.Equal(1, stables.OpenFunctions);
+        Assert.Equal(["/Game/Invented/StableWindow"], stables.OpenWindows);
+        // A set-aside class that stands in a level is listed, so a folder rule cannot hide it.
+        Assert.Equal(["/Game/Effects/Torch"], systems["Effects"].SetAsidePlaced);
     }
 }

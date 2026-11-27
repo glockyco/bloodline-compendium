@@ -84,8 +84,9 @@ internal static class CatalogCommand
                 );
                 CatalogWriter.Write(layout, provenance, catalog);
                 // The map marks a package published when the site data just written names it.
-                var map = GameMap.Build(
+                var (map, unclassified) = GameMap.Build(
                     records,
+                    GameMapRegistry.Load(Path.Combine(AppContext.BaseDirectory, "game-map.json")),
                     GameMap.NamedPackages(
                         Directory.EnumerateFiles(
                             layout.SiteDirectory,
@@ -97,8 +98,19 @@ internal static class CatalogCommand
                 );
                 Bloodline.Output.CanonicalJson.Write(layout.MapFile, map);
                 Console.WriteLine(
-                    $"Game map: {map.Packages.Count} packages, {map.Packages.Count(package => package.Published)} published."
+                    $"Game map: {map.Packages.Count} packages in {map.Systems.Count} systems, {map.Packages.Count(package => package.State == MapState.Published)} published, {map.Packages.Count(package => package.State == MapState.SetAside)} set aside, {map.Packages.Count(package => package.State == MapState.Open)} open."
                 );
+                // A package that no rule covers is one nobody decided anything about, such as a folder a game
+                // update added.
+                if (unclassified.Count > 0)
+                {
+                    Console.Error.WriteLine(
+                        $"coverage/game-map.json has no system for {unclassified.Count} packages:"
+                    );
+                    foreach (var package in unclassified)
+                        Console.Error.WriteLine(package);
+                    return 1;
+                }
                 Console.WriteLine(
                     $"Cataloged {catalog.Items.Count} items for build {buildId} in {timer.Elapsed.TotalSeconds.ToString("F2", CultureInfo.InvariantCulture)} seconds."
                 );

@@ -70,6 +70,8 @@ The cross-reference keeps what each function reads, writes and calls. To read wh
 dotnet run --project src/Bloodline -- script <package> [function]
 ```
 
+Cataloging also writes `map.json` beside `report.json`: every package of the build with its system and whether the site rests on it, and every system with how much of it is published, set aside and still open. Read its `systems` to see what nobody has described yet. [coverage/game-map.json](coverage/game-map.json) assigns packages to systems by its first rule that holds, and cataloging fails when a package matches none, which happens when a game update adds a folder. Then add a rule: name the system as a player would, and give `setAside` a reason only for what changes how the game looks or sounds. Check the map's `setAsidePlaced` afterwards, because a class that stands in a level is rarely only decoration.
+
 To review real data locally without uploading:
 
 ```sh

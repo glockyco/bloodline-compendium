@@ -6,10 +6,10 @@
 
 ## 2. Registry and check
 
-- [ ] 2.1 Add the registry file with systems as a player names them and prefix rules, classify all packages of build 24464547, and set aside engine, animation, effect, photo mode and test content with reasons
-- [ ] 2.2 Fail cataloging on a package without a system, and verify with a planted package
-- [ ] 2.3 List open systems with their open packages, functions, windows and placed objects in `report.json`, and set-aside classes that stand in a level
-- [ ] 2.4 Describe the map, the registry and how to classify a new package in `README.md`
+- [x] 2.1 Add the registry file with systems as a player names them, rules by class ancestry, record kind and path prefix, classify all packages of build 24464547, and set aside animation, effect, sky, water, sound, photo mode, settings and demonstration content with reasons
+- [x] 2.2 Fail cataloging on a package without a system, and verify with a planted package
+- [x] 2.3 List the systems in the map with their published, set-aside and open packages and functions, their open windows and placed objects, and set-aside classes that stand in a level
+- [x] 2.4 Describe the map, the registry and how to classify a new package in `README.md`
 
 ## 3. How things come into the world
 

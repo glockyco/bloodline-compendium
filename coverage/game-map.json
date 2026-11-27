@@ -1,0 +1,585 @@
+{
+  "rules": [
+    {
+      "system": "Animation",
+      "ancestor": "/Script/Engine.AnimInstance",
+      "setAside": "Animation code decides how a body moves, not what the game does."
+    },
+    {
+      "system": "Animation",
+      "ancestor": "/Script/Engine.AnimNotify",
+      "setAside": "Animation code decides how a body moves, not what the game does."
+    },
+    {
+      "system": "Animation",
+      "ancestor": "/Script/AnimGraphRuntime.AnimNotify_PlayMontageNotify",
+      "setAside": "Animation code decides how a body moves, not what the game does."
+    },
+    {
+      "system": "Animation",
+      "ancestor": "/Script/AnimGraphRuntime.AnimNotify_PlayMontageNotifyWindow",
+      "setAside": "Animation code decides how a body moves, not what the game does."
+    },
+    {
+      "system": "Camera shakes",
+      "ancestor": "/Script/GameplayCameras.MatineeCameraShake",
+      "setAside": "A camera shake is an effect on the view."
+    },
+    {
+      "system": "Mounts",
+      "ancestor": "/Game/Mounts/BaseMount_Asset.BaseMount_Asset_C"
+    },
+    {
+      "system": "Stronghold decorations",
+      "ancestor": "/Game/Cities/HarbingerStronghold/Decorations/Base_Decoration.Base_Decoration_C"
+    },
+    {
+      "system": "Fighter contracts",
+      "ancestor": "/Game/BloodlinesAlpha/Interactables/Arena_Buffs/Arena_FighterContract_Base.Arena_FighterContract_Base_C"
+    },
+    {
+      "system": "Containers",
+      "ancestor": "/Game/BloodlinesAlpha/Interactables/LootableObject.LootableObject_C"
+    },
+    {
+      "system": "Stations and objects to use",
+      "ancestor": "/Game/BloodlinesAlpha/Interactables/InteractableObject.InteractableObject_C"
+    },
+    {
+      "system": "Items",
+      "ancestor": "/Game/BloodlinesAlpha/Interactables/BP_BaseItemAsset.BP_BaseItemAsset_C"
+    },
+    {
+      "system": "Skills",
+      "ancestor": "/Game/UltimateSkillSystem/SkillSystemSkill/Skill.Skill_C"
+    },
+    {
+      "system": "People",
+      "ancestor": "/Game/FriendlyUnits/VitalNPCs/VitalNPC_Base.VitalNPC_Base_C"
+    },
+    {
+      "system": "People",
+      "ancestor": "/Game/FriendlyUnits/Civilians_Shopkeepers_Criers/Civilian.Civilian_C"
+    },
+    {
+      "system": "Companions and soldiers",
+      "ancestor": "/Game/FriendlyUnits/Soldiers/Base_Complex_Companion.Base_Complex_Companion_C"
+    },
+    {
+      "system": "Companions and soldiers",
+      "ancestor": "/Game/FriendlyUnits/Soldiers/FRIENDLY_BASE_2.FRIENDLY_BASE_2_C"
+    },
+    {
+      "system": "Creatures",
+      "ancestor": "/Game/AIBehaviorToolkit/Blueprints/BP_NPC_Base.BP_NPC_Base_C"
+    },
+    {
+      "system": "Conversations",
+      "ancestor": "/Script/DialoguePlugin.DialogueEvents"
+    },
+    {
+      "system": "Conversations",
+      "ancestor": "/Script/DialoguePlugin.DialogueConditions"
+    },
+    {
+      "system": "Conversations",
+      "kind": "conversation"
+    },
+    {
+      "system": "Creature behaviour",
+      "ancestor": "/Script/AIModule.BTTask_BlueprintBase"
+    },
+    {
+      "system": "Creature behaviour",
+      "ancestor": "/Script/AIModule.BTDecorator_BlueprintBase"
+    },
+    {
+      "system": "Creature behaviour",
+      "ancestor": "/Script/AIModule.BTService_BlueprintBase"
+    },
+    {
+      "system": "Creature behaviour",
+      "ancestor": "/Script/AIModule.EnvQueryContext_BlueprintBase"
+    },
+    {
+      "system": "Creature behaviour",
+      "ancestor": "/Script/AIModule.AIController"
+    },
+    {
+      "system": "Areas",
+      "kind": "level"
+    },
+    {
+      "system": "Character sheet, inventory and windows",
+      "prefix": "/Game/BloodlinesAlpha/UI/"
+    },
+    {
+      "system": "Player character and game rules",
+      "prefix": "/Game/BloodlinesAlpha/Blueprints/"
+    },
+    {
+      "system": "Objects in the world",
+      "prefix": "/Game/BloodlinesAlpha/Interactables/"
+    },
+    {
+      "system": "Projectiles and weapon parts",
+      "prefix": "/Game/BloodlinesAlpha/Weapons/"
+    },
+    {
+      "system": "Objects in the world",
+      "prefix": "/Game/BloodlinesAlpha/Pickups/"
+    },
+    {
+      "system": "Enchanting",
+      "prefix": "/Game/BloodlinesAlpha/Enchanting/"
+    },
+    {
+      "system": "Enchanting",
+      "prefix": "/Game/BloodlinesAlpha/Enchantment/"
+    },
+    {
+      "system": "Core game objects and windows",
+      "prefix": "/Game/BloodlinesAlpha/"
+    },
+    {
+      "system": "Village buildings and their events",
+      "prefix": "/Game/Overworld/Villages/"
+    },
+    {
+      "system": "Areas and what they spawn",
+      "prefix": "/Game/Overworld/OpenWorldAreas/"
+    },
+    {
+      "system": "Companions and soldiers",
+      "prefix": "/Game/Overworld/CompanionFormats/"
+    },
+    {
+      "system": "World map",
+      "prefix": "/Game/Overworld/EnemyEncampments/"
+    },
+    {
+      "system": "Areas and what they spawn",
+      "prefix": "/Game/Overworld/"
+    },
+    {
+      "system": "Skill trees and skill windows",
+      "prefix": "/Game/UltimateSkillSystem/SkillsData/"
+    },
+    {
+      "system": "Skill trees and skill windows",
+      "prefix": "/Game/UltimateSkillSystem/SkillBookWidgets/"
+    },
+    {
+      "system": "Skill trees and skill windows",
+      "prefix": "/Game/UltimateSkillSystem/SkillBarWidgets/"
+    },
+    {
+      "system": "Skill effects and projectiles",
+      "prefix": "/Game/UltimateSkillSystem/"
+    },
+    {
+      "system": "Shop, calendar and popup windows",
+      "prefix": "/Game/fantasy_gui_4/"
+    },
+    {
+      "system": "Puzzles, rituals, chests and traps",
+      "prefix": "/Game/PuzzleProps/"
+    },
+    {
+      "system": "Creatures",
+      "prefix": "/Game/AIBehaviorToolkit/"
+    },
+    {
+      "system": "Creatures",
+      "prefix": "/Game/EnemyUnits/"
+    },
+    {
+      "system": "Creatures",
+      "prefix": "/Game/EnemyProjectiles/"
+    },
+    {
+      "system": "Bosses",
+      "prefix": "/Game/BossAIToolkit/Demo/",
+      "setAside": "A demonstration or test asset, not part of normal play."
+    },
+    {
+      "system": "Bosses",
+      "prefix": "/Game/BossAIToolkit/"
+    },
+    {
+      "system": "Missions",
+      "prefix": "/Game/AdvancedMissionSys/"
+    },
+    {
+      "system": "Quests",
+      "prefix": "/Game/UltimateQuestsComp/"
+    },
+    {
+      "system": "Quests",
+      "prefix": "/Game/QuestSytems/"
+    },
+    {
+      "system": "Objects in the world",
+      "prefix": "/Game/Blueprints/"
+    },
+    {
+      "system": "Stronghold, arena and cities",
+      "prefix": "/Game/Cities/"
+    },
+    {
+      "system": "World map",
+      "prefix": "/Game/Eudros/"
+    },
+    {
+      "system": "World map",
+      "prefix": "/Game/OverworldHUDElements/"
+    },
+    {
+      "system": "Dungeons and challenge locations",
+      "prefix": "/Game/ChallengeLocations/"
+    },
+    {
+      "system": "Dungeons and challenge locations",
+      "prefix": "/Game/PolygonDungeons/"
+    },
+    {
+      "system": "Companions and soldiers",
+      "prefix": "/Game/FriendlyUnits/"
+    },
+    {
+      "system": "Mounts",
+      "prefix": "/Game/Mounts/"
+    },
+    {
+      "system": "Mounts",
+      "prefix": "/Game/CT_Components/"
+    },
+    {
+      "system": "Mounts",
+      "prefix": "/Game/HorseAnimsetPro/"
+    },
+    {
+      "system": "Deployables",
+      "prefix": "/Game/Deployables/"
+    },
+    {
+      "system": "Items",
+      "prefix": "/Game/CustomWeapons/"
+    },
+    {
+      "system": "Seasonal events",
+      "prefix": "/Game/Christmas_Assets/"
+    },
+    {
+      "system": "Seasonal events",
+      "prefix": "/Game/EasterAssets/"
+    },
+    {
+      "system": "Seasonal events",
+      "prefix": "/Game/Halloween_Assets/"
+    },
+    {
+      "system": "Conversations",
+      "prefix": "/Game/Dialogue/"
+    },
+    {
+      "system": "Conversations",
+      "prefix": "/Game/Conversations/"
+    },
+    {
+      "system": "Shop, calendar and popup windows",
+      "prefix": "/Game/GenericInterfaces/"
+    },
+    {
+      "system": "Construction and crafting windows",
+      "prefix": "/Game/Widgets/"
+    },
+    {
+      "system": "Menus and tooltips",
+      "prefix": "/Game/UI/"
+    },
+    {
+      "system": "Compass",
+      "prefix": "/Game/CompassSystem/"
+    },
+    {
+      "system": "Carrying objects",
+      "prefix": "/Game/PhysicsCarry/"
+    },
+    {
+      "system": "Grapple hook",
+      "prefix": "/Game/FPGrappleHook/"
+    },
+    {
+      "system": "Trains",
+      "prefix": "/Game/Train_Controller/"
+    },
+    {
+      "system": "People",
+      "prefix": "/Game/CivilManager/"
+    },
+    {
+      "system": "Skill trees and skill windows",
+      "prefix": "/Game/UpgradeTrees/"
+    },
+    {
+      "system": "Areas and what they spawn",
+      "prefix": "/Game/Lonland_Assets/"
+    },
+    {
+      "system": "Settings",
+      "prefix": "/Game/Settings/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Settings",
+      "prefix": "/Game/Input/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Settings",
+      "prefix": "/Game/BSM_Minimalist/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Photo mode",
+      "prefix": "/Game/AdvancedPhotoMode/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Photo mode",
+      "prefix": "/Game/NewFreeCameraMode/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/GabrielAguiarProd/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/TopDownToolkit/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/TopDownBP/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/OpenWorldAudio/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/UltraDynamicSky/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/CartoonWaterShader/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/Portals_VFXPack/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/MaterialMix/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Objects in the world",
+      "prefix": "/Game/Polygon_Fantasy_Kingdom/"
+    },
+    {
+      "system": "Objects in the world",
+      "prefix": "/Game/ISW/"
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/CloseCombat/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/ImpactEffectSystem/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Objects in the world",
+      "prefix": "/Game/Lightning_Electricity_Pack/"
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/OptimizationComponent/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/AdvancedLocomotionV3/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/CircularAnimatedBar/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/BeefyBlackbirds/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/WaterfallTool/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/GoodParticleStatus/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/Snap-In/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Objects in the world",
+      "prefix": "/Game/TimeWarpEffectTemplate/"
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/Zone_AnimatedDecals/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/AnimatedLowPolyWeapons/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/Animations/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/MaskEffects/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/ProceduralWalkMeshes/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/GoodSky/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/AnimStarterPack/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/YI_BloodDroplets/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/ActiveRagdoll/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/FPPTemplate/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/BeefyGrassLands/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/DestructableBuildings/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/Modulated_Lighting/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Objects in the world",
+      "prefix": "/Game/Generic_Props/"
+    },
+    {
+      "system": "Objects in the world",
+      "prefix": "/Game/CustomModels/"
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/Water_Asset/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/FirstPersonMage/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Objects in the world",
+      "prefix": "/Game/LowPolyMedievalConstructions/"
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/MaleHarbingerVoice/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/PolygonNatureBiomes/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Objects in the world",
+      "prefix": "/Game/PolygonVikings/"
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Game/Volume_KillFoliage/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Engine/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/Niagara/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Areas and what they spawn",
+      "prefix": "/PopulationControlLite/"
+    },
+    {
+      "system": "Engine and asset packs",
+      "prefix": "/MagicLeapPassableWorld/",
+      "setAside": "Engine or asset pack code that changes how the game looks or sounds, not what it does."
+    },
+    {
+      "system": "Loose objects and windows",
+      "loose": true
+    }
+  ]
+}

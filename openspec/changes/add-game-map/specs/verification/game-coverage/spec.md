@@ -26,15 +26,19 @@ Cataloging SHALL fail and name the packages when a package belongs to no system 
 - **THEN** cataloging fails and lists those packages
 
 ### Requirement: The player's side
-Every window and every class with an actor in a level SHALL belong to a system, and the maintainer report SHALL list each open system together with the windows and placed objects that lead to it.
+Every window and every class with an actor in a level SHALL belong to a system, and the map SHALL list for each system its open windows and its open classes that stand in a level. The map SHALL also list every set-aside class that stands in a level.
 
 #### Scenario: Window of an open system
-- **WHEN** a window belongs to a system that is open
-- **THEN** the report lists the window under that system
+- **WHEN** a window belongs to a system and nothing names it
+- **THEN** the map lists the window among that system's open windows
 
-### Requirement: Open systems in the report
-The maintainer report SHALL list every system with open packages, with the number of its packages and functions that are open, largest first.
+#### Scenario: World object in a set-aside folder
+- **WHEN** a rule sets a folder of building meshes aside and a class in it stands in a level
+- **THEN** the map lists that class among the system's set-aside classes that stand in a level
+
+### Requirement: Open systems in the map
+The map SHALL list every system with the number of its packages and functions that are published, set aside and open, ordered by open functions, largest first.
 
 #### Scenario: Untouched system
 - **WHEN** no page or fact names any package of the mounts system
-- **THEN** the report lists mounts with all of its packages and functions as open
+- **THEN** the map lists mounts with all of its packages and functions as open

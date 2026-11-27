@@ -36,5 +36,10 @@
       Link="known-issues.json"
       CopyToOutputDirectory="PreserveNewest"
     />
+    <Content
+      Include="../../coverage/game-map.json"
+      Link="game-map.json"
+      CopyToOutputDirectory="PreserveNewest"
+    />
   </ItemGroup>
 </Project>
