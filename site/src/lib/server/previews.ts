@@ -126,6 +126,16 @@ export const previewSources: {
 /** A skill's preview: its tooltip, and its first way to get it or why none is known, for each version. */
 export function skillPreview(skill: SkillPage): SkillPreview {
 	const tree = skill.sources.find((source) => source.kind === 'skillTree');
+	// A tree's skill unlocks at a level of its own discipline, whose name the condition already carries. Only a tree
+	// without a level of its own checks another discipline, and then both names matter.
+	const level = tree?.conditions[0];
+	const treeRoute =
+		tree &&
+		(!level
+			? tree.name
+			: level.entity?.name === tree.name
+				? level.label
+				: `${tree.name}, ${level.label}`);
 	return {
 		kind: 'skill',
 		versionId: skill.versionId ?? null,
@@ -134,8 +144,8 @@ export function skillPreview(skill: SkillPage): SkillPreview {
 		icon: skill.icon,
 		description: skill.description,
 		facts: skill.facts,
-		route: tree
-			? `${tree.name}, ${tree.conditions[0]?.label ?? 'a known level'}.`
+		route: treeRoute
+			? `${treeRoute}.`
 			: (firstRoute(skill.sources, Object.keys(sourceHeadings) as SourceKind[]) ??
 				skillStatus(skill))
 	};
