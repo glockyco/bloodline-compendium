@@ -118,8 +118,15 @@ internal static partial class KnownIssues
     /// <summary>A crossbow whose class is no crossbow, so firing it does nothing.</summary>
     public const string SilentCrossbow = "rusty-crossbow-fires-nothing";
 
-    /// <summary>A seller whose line names one price while the purchase takes another.</summary>
-    public const string NamedPrice = "sellers-name-another-price";
+    /// <summary>
+    /// Issues that runs of both waitresses' orders observed, whose registry notes name each item they concern: a
+    /// seller whose line names one price while the purchase takes another, and the Rum order that gives Ale.
+    /// </summary>
+    private static readonly string[] OrderIssues =
+    [
+        "sellers-name-another-price",
+        "rum-order-gives-ale",
+    ];
 
     /// <summary>
     /// The Rusty Crossbow that merchants sell and Squalls End holds, which runs ranged1 to ranged3 saw fire nothing and
@@ -323,15 +330,15 @@ internal static partial class KnownIssues
             {
                 notes[item.Key].Add("foragers-feast-gives-flower");
             }
-            // Run quoted-prices bought every order of the two waitresses, and the entry's notes name each item whose
-            // seller took another price than their line says.
-            if (
-                registry
-                    .Issues.FirstOrDefault(issue => issue.Id == NamedPrice)
-                    ?.Notes?.ContainsKey(item.Key) == true
+            // Runs quoted-prices and rum-gives-ale bought every order of the two waitresses, and each entry's notes
+            // name the items it concerns.
+            foreach (
+                var issue in registry.Issues.Where(issue =>
+                    OrderIssues.Contains(issue.Id) && issue.Notes?.ContainsKey(item.Key) == true
+                )
             )
             {
-                notes[item.Key].Add(NamedPrice);
+                notes[item.Key].Add(issue.Id);
             }
         }
         // An item's Bugs rows follow the order of the Known Issues page, which is the registry's.

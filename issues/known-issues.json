@@ -674,7 +674,7 @@
     {
       "id": "sellers-name-another-price",
       "title": "Some Sellers Take a Different Price than They Name",
-      "effect": "Mysha Bullock and Silent Wyn name one price and take another.",
+      "effect": "Mysha Bullock, Heidi Blanchard and Silent Wyn name one price and take another.",
       "effectDetails": [
         {
           "label": "In Woodhurst",
@@ -682,7 +682,7 @@
         },
         {
           "label": "In Harbingers Arena",
-          "text": "Mysha Bullock names 10 gold for Steak and takes 7, and 5 for Turkey Leg and takes 6."
+          "text": "Heidi Blanchard names 10 gold for Steak and takes 7, and 5 for Turkey Leg and takes 6."
         },
         {
           "label": "In Elderglen",
@@ -691,10 +691,10 @@
       ],
       "notes": {
         "/Game/BloodlinesAlpha/Interactables/Steak.Steak_C": {
-          "effect": "Mysha Bullock names 10 gold for Steak in Harbingers Arena and 150 in Woodhurst, but buying it takes 7 in both."
+          "effect": "Heidi Blanchard names 10 gold for Steak in Harbingers Arena and Mysha Bullock 150 in Woodhurst, but buying it takes 7 from both."
         },
         "/Game/BloodlinesAlpha/Interactables/TukeyLeg.TukeyLeg_C": {
-          "effect": "Mysha Bullock names 5 gold for Turkey Leg in Harbingers Arena, but buying it takes 6."
+          "effect": "Heidi Blanchard names 5 gold for Turkey Leg in Harbingers Arena, but buying it takes 6."
         },
         "/Game/BloodlinesAlpha/Interactables/CastlesideCoddle.CastlesideCoddle_C": {
           "effect": "Mysha Bullock names 250 gold for Honey Glazed Ham, her Castleside Coddle, in Woodhurst, but buying it takes 10."
@@ -721,10 +721,43 @@
         }
       ],
       "expected": "The seller takes the gold they name.",
-      "observed": "Every order of both waitresses named Mysha Bullock was bought once. In Woodhurst she named 250, 150, 150, 50 and 50 gold for Honey Glazed Ham, Chicken Meat, Steak, Rum and Ale and took 10, 15, 7, 10 and 10. Castleside Cider cost the 120 she named. In Harbingers Arena she named 10 for Steak and took 7, named 5 for Turkey Leg and took 6, and took what she named for Soup, Rum, Ale and Dwarfs Flaggon. With the quest Dependence Substitution active, accepting Silent Wyn's offer of 250 gold gave one Dewdrop and left gold at 750.",
+      "observed": "Every order of the two waitresses was bought once. In Woodhurst Mysha Bullock named 250, 150, 150, 50 and 50 gold for Honey Glazed Ham, Chicken Meat, Steak, Rum and Ale and took 10, 15, 7, 10 and 10. Castleside Cider cost the 120 she named. In Harbingers Arena Heidi Blanchard, whom the dialogue window also calls Mysha Bullock, named 10 for Steak and took 7, named 5 for Turkey Leg and took 6, and took what she named for Soup, Rum, Ale and Dwarfs Flaggon. With the quest Dependence Substitution active, accepting Silent Wyn's offer of 250 gold gave one Dewdrop and left gold at 750.",
       "cause": "A waitress's order takes the item's value, such as 7 for Steak, whatever her line says. Silent Wyn's conversation has no step that takes gold.",
       "citations": [
         "/Game/Overworld/OverworldInteractables/TakeMoneyBasedOnitemValue:RecieveEventTriggered"
+      ],
+      "builds": [24464547],
+      "report": "notReported",
+      "reportUrl": null
+    },
+    {
+      "id": "rum-order-gives-ale",
+      "title": "Ordering Rum Gives Ale",
+      "effect": "Ordering Rum from Heidi Blanchard in Harbingers Arena or from Mysha Bullock in Woodhurst gives Ale.",
+      "notes": {
+        "/Game/BloodlinesAlpha/Interactables/Ale.Ale_C": {
+          "effect": "Ordering Rum from Heidi Blanchard in Harbingers Arena or from Mysha Bullock in Woodhurst also gives Ale."
+        },
+        "/Game/BloodlinesAlpha/Interactables/Rum.Rum_C": {
+          "effect": "Ordering Rum from Heidi Blanchard in Harbingers Arena or from Mysha Bullock in Woodhurst gives Ale, not Rum."
+        }
+      },
+      "workaround": null,
+      "steps": [
+        {
+          "action": "In Harbingers Arena, ask Heidi Blanchard \"What do you have to drink?\" and reply \"Rum.\"",
+          "result": "She says \"That'll be 10 gold.\""
+        },
+        {
+          "action": "Reply \"Here you go.\"",
+          "result": "She says \"Thank you. Here's your flaggon of rum.\" Your inventory gains one Ale and no Rum."
+        }
+      ],
+      "expected": "The Rum order gives Rum.",
+      "observed": "In Harbingers Arena the Rum order took 10 gold and added one Ale to an empty inventory. In Woodhurst the Rum order and the Ale order together left two Ale and no Rum.",
+      "cause": "The Rum order's step that gives the item names Ale in both conversations.",
+      "citations": [
+        "/Game/Overworld/OverworldInteractables/AddItemDialogue:RecieveEventTriggered"
       ],
       "builds": [24464547],
       "report": "notReported",
