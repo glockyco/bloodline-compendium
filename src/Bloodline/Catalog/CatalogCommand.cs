@@ -83,6 +83,22 @@ internal static class CatalogCommand
                     release
                 );
                 CatalogWriter.Write(layout, provenance, catalog);
+                // The map marks a package published when the site data just written names it.
+                var map = GameMap.Build(
+                    records,
+                    GameMap.NamedPackages(
+                        Directory.EnumerateFiles(
+                            layout.SiteDirectory,
+                            "*.json",
+                            SearchOption.AllDirectories
+                        )
+                    ),
+                    catalog.Claims
+                );
+                Bloodline.Output.CanonicalJson.Write(layout.MapFile, map);
+                Console.WriteLine(
+                    $"Game map: {map.Packages.Count} packages, {map.Packages.Count(package => package.Published)} published."
+                );
                 Console.WriteLine(
                     $"Cataloged {catalog.Items.Count} items for build {buildId} in {timer.Elapsed.TotalSeconds.ToString("F2", CultureInfo.InvariantCulture)} seconds."
                 );

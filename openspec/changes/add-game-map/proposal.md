@@ -8,7 +8,7 @@ The site rests on a small part of the game: its facts cite 166 of 57,869 functio
 - A registry in the repository assigns packages to systems, such as quests, world map events or stables, and sets a state where cataloging cannot derive one.
 - A package is published when site data or a fact citation names it, which cataloging derives itself. Otherwise the registry sets it aside with a reason, or leaves it open.
 - Cataloging fails when a package belongs to no system, so a game update cannot add content unseen.
-- Every window and every object a player can use belongs to a system, and the report lists the systems that only such a window or object reaches.
+- Every window and every object that stands in a level belongs to a system, and the report lists the systems that only such a window or object reaches.
 - The maintainer report lists the open systems by size.
 - The open systems are then read and described in the order comparison 100 set: how things come into the world, creatures and what they drop, mounts and taming.
 

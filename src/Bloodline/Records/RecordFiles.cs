@@ -125,6 +125,9 @@ internal sealed class RecordLayout(string outputDirectory, long buildId)
     /// <summary>The maintainer report of what the catalog could not read or resolve.</summary>
     public string ReportFile => System.IO.Path.Combine(BuildDirectory, "report.json");
 
+    /// <summary>The map of every package of the build, with what the site rests on.</summary>
+    public string MapFile => System.IO.Path.Combine(BuildDirectory, "map.json");
+
     /// <summary>The lab's runs of the build, one directory each with its <c>run.jsonl</c>.</summary>
     public string RuntimeDirectory => System.IO.Path.Combine(BuildDirectory, "runtime");
 

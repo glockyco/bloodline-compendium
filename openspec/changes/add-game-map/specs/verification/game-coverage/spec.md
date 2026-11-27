@@ -26,7 +26,7 @@ Cataloging SHALL fail and name the packages when a package belongs to no system 
 - **THEN** cataloging fails and lists those packages
 
 ### Requirement: The player's side
-Every window and every class of object a player can use SHALL belong to a system, and the maintainer report SHALL list each open system together with the windows and usable objects that lead to it.
+Every window and every class with an actor in a level SHALL belong to a system, and the maintainer report SHALL list each open system together with the windows and placed objects that lead to it.
 
 #### Scenario: Window of an open system
 - **WHEN** a window belongs to a system that is open

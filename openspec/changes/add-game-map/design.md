@@ -25,9 +25,9 @@ A package holds one class, table, conversation, level or enum with its functions
 
 A package is published when a path in the site data or in `claims.json` names it. That needs no instrumentation of the mechanisms and cannot claim more than the site shows. It says that the site names the package, not that every rule in it was read, so the report also gives each system's cited functions beside its function count.
 
-### Systems come from the registry, windows and usable objects from the records
+### Systems come from the registry, windows and placed objects from the records
 
-The registry names systems as a player would, such as stables or world map events, and maps prefixes to them. Windows are the packages the code index marks as widgets. Usable objects are the classes that derive from the game's base interactable. Both are listed under their system, which shows a mechanic that only a window reveals.
+The registry names systems as a player would, such as stables or world map events, and maps prefixes to them. Windows are the packages the code index marks as widgets. Placed objects are the classes with an actor in a level. No base class marks what a player can use: the cooking fire derives from the game's interactable, but the stable shop and the Fairy Chest derive from a plain actor and act through an overlap or a window. Both lists stand under their system, which shows a mechanic that only a window or an object in the world reveals.
 
 ### The check fails on unclassified packages only
 
@@ -35,9 +35,5 @@ An open package is known work and does not fail cataloging. A package without a 
 
 ## Risks / Trade-offs
 
-- A folder-wide entry can hide a class that matters to players, such as a boss among effect packs. Mitigation: set aside by the narrowest prefix that is true, and list set-aside classes that derive from creature, item or interactable bases in the report.
+- A folder-wide entry can hide a class that matters to players, such as a boss among effect packs. Mitigation: set aside by the narrowest prefix that is true, and list set-aside classes that stand in a level in the report.
 - "Published" overstates systems the site only links to, such as a creature named as a drop source. Mitigation: the cited-function count beside it.
-
-## Open Questions
-
-- Which base classes mark a usable object in this game. Task 1.2 reads them from the records.

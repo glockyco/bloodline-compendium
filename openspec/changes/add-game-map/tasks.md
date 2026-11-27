@@ -1,14 +1,14 @@
 ## 1. Map
 
-- [ ] 1.1 Write the map from the build's records in cataloging: every package with its kinds, function count and window flag, and verify the count against `artifacts/24464547/map/packages.json`
-- [ ] 1.2 Find the base classes of objects a player can use, list windows and usable objects per package, and verify with the cooking fire, a chest and the stable shop
-- [ ] 1.3 Derive the published state from site data and `claims.json`, with each package's cited functions, and verify that a package named only by an item page is published with no cited function
+- [x] 1.1 Write the map from the build's records in cataloging: every package with its kinds, function count and window flag, and verify the count against the first cut's 7,134 packages
+- [x] 1.2 Count for each package the levels that hold an actor of its class, and verify with the cooking fire, a chest and the stable shop
+- [x] 1.3 Derive the published state from site data and `claims.json`, with each package's cited functions, and verify that a package named only by an item page is published with no cited function
 
 ## 2. Registry and check
 
 - [ ] 2.1 Add the registry file with systems as a player names them and prefix rules, classify all packages of build 24464547, and set aside engine, animation, effect, photo mode and test content with reasons
 - [ ] 2.2 Fail cataloging on a package without a system, and verify with a planted package
-- [ ] 2.3 List open systems with their open packages, functions, windows and usable objects in `report.json`, and set-aside classes that derive from creature, item or usable bases
+- [ ] 2.3 List open systems with their open packages, functions, windows and placed objects in `report.json`, and set-aside classes that stand in a level
 - [ ] 2.4 Describe the map, the registry and how to classify a new package in `README.md`
 
 ## 3. How things come into the world
