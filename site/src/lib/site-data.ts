@@ -866,7 +866,6 @@ export interface EntityKindDefinition {
  * via the `definition` "MechanicPage".
  */
 export interface MechanicPage {
-  evidence: string[];
   intro: string;
   key: string;
   kind: EntityKind;

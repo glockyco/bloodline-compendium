@@ -76,7 +76,7 @@ test('a mechanic page links what it explains, and section intros link the mechan
 		'/disciplines/emberlore/'
 	);
 	await expect(page.locator('#earning-skill-points')).toHaveText('Earning Skill Points');
-	await expect(page.getByText('For Developers')).toBeVisible();
+	await expect(page.getByText('For Developers')).toHaveCount(0);
 	await page.goto('/disciplines/emberlore/');
 	await expect(
 		page

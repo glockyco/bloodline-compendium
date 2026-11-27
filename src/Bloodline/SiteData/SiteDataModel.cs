@@ -727,7 +727,8 @@ internal sealed record ArmorQuality(
 
 /// <summary>
 /// A hand-written explanation of how a part of the game works, from <c>src/Bloodline/Content/mechanics.json</c>. Its text
-/// may link entities as text written for the site does. <see cref="Evidence"/> names the runs and code each fact rests on.
+/// may link entities as text written for the site does. <see cref="Evidence"/> names the observations and code each fact
+/// rests on, for maintainers only, so the published page leaves it out.
 /// </summary>
 [JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
 internal sealed record MechanicContent(
@@ -801,8 +802,7 @@ internal sealed record MechanicPage(
     string Slug,
     string Name,
     string Intro,
-    IReadOnlyList<MechanicSection> Sections,
-    IReadOnlyList<string> Evidence
+    IReadOnlyList<MechanicSection> Sections
 )
 {
     [JsonRequired]

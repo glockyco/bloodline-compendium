@@ -67,8 +67,7 @@ internal static class MechanicProducer
                                 Anchor = ItemIdentity.Slug(section.Heading),
                             }
                         )
-                        .ToArray(),
-                    page.Evidence
+                        .ToArray()
                 );
             })
             .ToArray();

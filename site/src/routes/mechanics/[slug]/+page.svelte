@@ -158,12 +158,6 @@
 						</RelationTable>
 					{/if}
 				</Section>{/each}
-			<details class="disclosure" data-developer>
-				<summary>For Developers</summary>
-				<ul class="evidence">
-					{#each mechanic.evidence as entry, index (index)}<li>{entry}</li>{/each}
-				</ul>
-			</details>
 		</div>
 	</div>
 </EntityPage>
@@ -214,11 +208,6 @@
 	}
 	.event-note {
 		margin-top: var(--gap-inline);
-		color: var(--text-soft);
-	}
-	.evidence {
-		display: grid;
-		gap: var(--gap-inline);
 		color: var(--text-soft);
 	}
 </style>

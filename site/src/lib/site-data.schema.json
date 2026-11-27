@@ -1318,12 +1318,6 @@
     },
     "MechanicPage": {
       "properties": {
-        "evidence": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
         "intro": {
           "type": "string"
         },
@@ -1352,7 +1346,6 @@
         "name",
         "intro",
         "sections",
-        "evidence",
         "kind"
       ],
       "title": "MechanicPage",
