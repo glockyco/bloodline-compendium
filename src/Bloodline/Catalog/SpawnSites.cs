@@ -101,6 +101,8 @@ internal sealed class SpawnSites
 
     private const string Replace =
         "/Game/Overworld/OverworldInteractables/ReplaceActorsWithOtherActors";
+    private const string AidaDialogue =
+        "/Game/Dialogue/Askil/TheFlowingSands/Aida_FlowingSands.Aida_FlowingSands";
 
     /// <summary>Where a class comes into the world: a place it is spawned in, or an event that brings it.</summary>
     private readonly record struct Spot(EntityReference? Place, SourceEvent? Event)
@@ -130,8 +132,7 @@ internal sealed class SpawnSites
     public IReadOnlyList<SourceEvent> Events(string path) =>
         events.TryGetValue(path, out var found) ? found : [];
 
-    /// <summary>The people whose place the class takes during a conversation, by name.</summary>
-    public IReadOnlyList<string> Replaces(string path) =>
+    private IReadOnlyList<string> ReplacementNotes(string path) =>
         replaced.TryGetValue(path, out var found) ? found : [];
 
     /// <summary>
@@ -158,24 +159,26 @@ internal sealed class SpawnSites
         // A container or pickup is keyed by its class and the name it shows.
         var path = key.Split('#')[0];
         var during = Events(path);
-        var names = Replaces(path);
-        if (during.Count == 0 && names.Count == 0)
+        var notes = ReplacementNotes(path);
+        if (during.Count == 0 && notes.Count == 0)
             return candidate;
         return candidate with
         {
             Source = candidate.Source with
             {
                 Events =
-                [
-                    .. during
-                        .OrderBy(happening => happening.Kind)
-                        .ThenBy(happening => happening.Name, StringComparer.Ordinal),
-                ],
+                    during.Count == 0
+                        ? candidate.Source.Events
+                        :
+                        [
+                            .. during
+                                .OrderBy(happening => happening.Kind)
+                                .ThenBy(happening => happening.Name, StringComparer.Ordinal),
+                        ],
                 Notes =
-                [
-                    .. candidate.Source.Notes,
-                    .. names.Select(name => $"Replaces {name} as you advance the conversation"),
-                ],
+                    notes.Count == 0
+                        ? candidate.Source.Notes
+                        : [.. candidate.Source.Notes, .. notes],
             },
         };
     }
@@ -272,13 +275,45 @@ internal sealed class SpawnSites
                 )
                     continue;
                 Add(context.Places.Get(placement.Level), spawned, true);
-                if (!replaced.TryGetValue(spawned, out var names))
-                    replaced.Add(spawned, names = []);
+                if (!replaced.TryGetValue(spawned, out var notes))
+                    replaced.Add(spawned, notes = []);
                 var name = WorldSourceData.Name(placement.Properties, placement.Actor.Class);
-                if (!names.Contains(name))
-                    names.Add(name);
+                var note = ReplacementNote(dialogue, inner, name);
+                if (!notes.Contains(note))
+                    notes.Add(note);
             }
         }
+    }
+
+    private static string ReplacementNote(
+        AssetRecord dialogue,
+        InnerObjectRecord replacement,
+        string name
+    )
+    {
+        // The lab reached this conversation through Force Talk, then advanced through the replacement's reply.
+        if (dialogue.Path == AidaDialogue)
+        {
+            foreach (var node in RecordValues.Elements(dialogue.Properties["Data"]))
+            {
+                var reply = RecordValues.Text(RecordValues.At(node, "Text"));
+                if (
+                    reply == "*Fight!*"
+                    && RecordValues.Boolean(RecordValues.At(node, "isPlayer")) == true
+                    && RecordValues
+                        .Elements(RecordValues.At(node, "Events"))
+                        .Any(evt =>
+                            string.Equals(
+                                RecordValues.AnyReference(evt),
+                                replacement.Path,
+                                StringComparison.OrdinalIgnoreCase
+                            )
+                        )
+                )
+                    return $"Choose \"{reply}\" in {name}'s conversation to make the demon appear";
+            }
+        }
+        return $"Replaces {name} as you advance the conversation";
     }
 
     private void ReadSites(IReadOnlyList<SpawnSite> reviewed)

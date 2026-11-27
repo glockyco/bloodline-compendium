@@ -56,8 +56,8 @@ public sealed class SpawnSitesTests
     )
     {
         var actorProperties = (JsonObject)den.DeepClone();
-        actorProperties["Tags"] = new JsonArray("Hermit");
-        actorProperties["Name"] = "Old Hermit";
+        actorProperties["Tags"] ??= new JsonArray("Hermit");
+        actorProperties["Name"] ??= "Old Hermit";
         var records = new CatalogRecords(
             new BuildRecord(1159290, 1, []),
             [
@@ -109,7 +109,6 @@ public sealed class SpawnSitesTests
         var sites = new SpawnSites(context, []);
 
         Assert.Equal(Level, Assert.Single(sites.Places(Beast)).Key);
-        Assert.Equal("Old Hermit", Assert.Single(sites.Replaces(Beast)));
         var candidate = new EntitySource(
             Beast,
             new Source(SourceKind.EnemyDrop, "Beast", [], null, null, [], [])
@@ -122,6 +121,55 @@ public sealed class SpawnSitesTests
             "Replaces Old Hermit as you advance the conversation",
             Assert.Single(arriving.Source.Notes)
         );
+    }
+
+    [Theory]
+    [InlineData(true, "Choose \"*Fight!*\" in Aida's conversation to make the demon appear")]
+    [InlineData(false, "Replaces Aida as you advance the conversation")]
+    public void AidaNoteNamesActualPlayerReplyThatTriggersReplacement(bool player, string expected)
+    {
+        const string replacement = "/Game/Invented/Dialogue:Replace";
+        var dialogue = new AssetRecord(
+            "/Game/Dialogue/Askil/TheFlowingSands/Aida_FlowingSands.Aida_FlowingSands",
+            "Dialogue",
+            new JsonObject
+            {
+                ["Data"] = new JsonArray(
+                    new JsonObject
+                    {
+                        ["Text"] = new JsonObject { ["$text"] = "*Fight!*" },
+                        ["isPlayer"] = player,
+                        ["Events"] = new JsonArray(new JsonObject { ["$ref"] = replacement }),
+                    }
+                ),
+            },
+            [
+                new InnerObjectRecord(
+                    replacement,
+                    "/Game/Overworld/OverworldInteractables/ReplaceActorsWithOtherActors.ReplaceActorsWithOtherActors_C",
+                    new JsonObject
+                    {
+                        ["Actor To Spawn"] = new JsonObject { ["$ref"] = Beast },
+                        ["Tag to Find"] = "Aida",
+                    }
+                ),
+            ]
+        );
+        var context = Context(
+            new JsonObject { ["Name"] = "Aida", ["Tags"] = new JsonArray("Aida") },
+            [dialogue]
+        );
+        var sites = new SpawnSites(context, []);
+        var candidate = new EntitySource(
+            Beast,
+            new Source(SourceKind.EnemyDrop, "Demon", [], null, null, [], [])
+            {
+                Entity = new EntityReference(EntityKind.Creature, Beast, "Demon", null, null),
+            }
+        );
+
+        Assert.Equal(Level, Assert.Single(sites.Places(Beast)).Key);
+        Assert.Equal(expected, Assert.Single(sites.Arriving(candidate).Source.Notes));
     }
 
     [Fact]
