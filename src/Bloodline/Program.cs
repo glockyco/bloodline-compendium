@@ -8,6 +8,7 @@ var root = new RootCommand("Builds The Bloodline Compendium's data from the inst
     Bloodline.Extraction.ExtractCommand.CreateCommand(),
     Bloodline.Catalog.CatalogCommand.CreateCommand(),
     Bloodline.Code.CompareCommand.CreateCommand(),
+    Bloodline.Code.ScriptCommand.CreateCommand(),
 };
 
 try

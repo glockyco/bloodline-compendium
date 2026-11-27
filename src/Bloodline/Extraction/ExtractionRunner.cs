@@ -54,18 +54,11 @@ internal sealed class ExtractionRunner
         deltas = new MapDeltas(provider);
     }
 
-    public static void Run(LocalConfiguration configuration)
+    /// <summary>Opens the installed game's files with their scripts, as extraction and script reading need.</summary>
+    internal static DefaultFileProvider OpenGameFiles(InstallationSnapshot snapshot)
     {
-        var clock = Stopwatch.StartNew();
-        using var memory = new PeakMemorySample();
-        var snapshot = InstallationSnapshot.Capture(configuration);
-        var build = snapshot.Manifest.Build;
-        var layout = new RecordLayout(configuration.OutputDirectory, build.BuildId);
-        using var output = new AtomicRecordsDirectory(layout.RecordsDirectory);
-        var root = output.DirectoryPath;
-        var gaps = new GapCollector(configuration.SteamLibrary, configuration.OutputDirectory);
         CUE4Parse.Globals.FatalObjectSerializationErrors = true;
-        using var provider = new DefaultFileProvider(
+        var provider = new DefaultFileProvider(
             snapshot.PaksDirectory,
             SearchOption.TopDirectoryOnly,
             new VersionContainer(EGame.GAME_UE4_27),
@@ -76,6 +69,20 @@ internal sealed class ExtractionRunner
         provider.Mount();
         provider.PostMount();
         provider.LoadVirtualPaths();
+        return provider;
+    }
+
+    public static void Run(LocalConfiguration configuration)
+    {
+        var clock = Stopwatch.StartNew();
+        using var memory = new PeakMemorySample();
+        var snapshot = InstallationSnapshot.Capture(configuration);
+        var build = snapshot.Manifest.Build;
+        var layout = new RecordLayout(configuration.OutputDirectory, build.BuildId);
+        using var output = new AtomicRecordsDirectory(layout.RecordsDirectory);
+        var root = output.DirectoryPath;
+        var gaps = new GapCollector(configuration.SteamLibrary, configuration.OutputDirectory);
+        using var provider = OpenGameFiles(snapshot);
         var registry = provider.Files.Single(pair =>
             pair.Key.EndsWith("/AssetRegistry.bin", StringComparison.OrdinalIgnoreCase)
         );

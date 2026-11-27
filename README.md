@@ -64,6 +64,12 @@ Extraction writes the Blueprint function cross-reference to each build's `record
 dotnet run --project src/Bloodline -- compare artifacts/<previous-build> artifacts/<current-build>
 ```
 
+The cross-reference keeps what each function reads, writes and calls. To read what a function does, print its statements. Without a function name, the command lists the package's functions:
+
+```sh
+dotnet run --project src/Bloodline -- script <package> [function]
+```
+
 To review real data locally without uploading:
 
 ```sh
