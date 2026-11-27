@@ -59,6 +59,50 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                     yield return source;
                 continue;
             }
+            // LootableObject's begin play sets its contents to the Custom Loot list for the custom preset type, so
+            // the container holds each listed item.
+            if (
+                RecordValues.EnumValue(properties["Loot Type"]) is { } lootType
+                && enumValues.GetValueOrDefault(lootType) == 4
+                && RecordValues.Elements(properties["Custom Loot"]).Any()
+                && ReadFunction.Find(
+                    context,
+                    "/Game/BloodlinesAlpha/Interactables/LootableObject:ExecuteUbergraph_LootableObject",
+                    "78274d8b2b4a",
+                    "ContainerLootMechanism"
+                )
+                    is not null
+            )
+            {
+                foreach (var entry in RecordValues.Elements(properties["Custom Loot"]))
+                {
+                    if (RecordValues.AnyReference(entry) is not { } item)
+                        continue;
+                    yield return new EntitySource(
+                        item,
+                        new Source(
+                            SourceKind.ContainerLoot,
+                            name,
+                            places,
+                            null,
+                            LootRecords.Quantity(context, item),
+                            [],
+                            []
+                        )
+                        {
+                            Entity = WorldSourceData.Reference(EntityKind.Container, path, name),
+                            Odds = new Odds(OddsEvent.Container, 1, 1, null),
+                            Conditions = WorldSourceData.Conditions(
+                                context,
+                                properties,
+                                places.Count == 1 ? places[0].Key : null
+                            ),
+                        },
+                        details
+                    );
+                }
+                continue;
+            }
             var pool = SelectPool(properties, enumValues);
             if (RecordValues.Boolean(properties["Use Specific Loot Table?"]) == true)
             {
