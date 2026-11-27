@@ -20,36 +20,68 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
             StringComparer.OrdinalIgnoreCase
         );
         foreach (var placement in context.Placements)
+            Spawns(context.Places.Get(placement.Level), placement.Properties, []);
+        // A level's own script can spawn an enemy, as Glennheim Hills spawns The Copper King.
+        var levels = context
+            .Records.Levels.Select(level => level.Path)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        foreach (var function in context.Records.Code?.Functions ?? [])
         {
-            foreach (var field in PopulationFields)
-            foreach (var entry in RecordValues.Elements(placement.Properties[field]))
+            if (
+                levels.Contains(function.Package)
+                && function.Calls.Contains("/Script/Engine:BeginDeferredActorSpawnFromClass")
+            )
+                Spawns(
+                    context.Places.Get(function.Package),
+                    [],
+                    function
+                        .Reads.Where(read => read.Kind == Code.CodeTargetKind.Object)
+                        .Select(read => read.Path)
+                );
+        }
+
+        void Spawns(
+            EntityReference place,
+            System.Text.Json.Nodes.JsonObject root,
+            IEnumerable<string> classes
+        )
+        {
+            foreach (var spawned in classes)
+                Add(spawned);
+            Scan(root);
+
+            void Scan(System.Text.Json.Nodes.JsonObject properties)
             {
-                if (RecordValues.Integer(RecordValues.At(entry, "maxSpawnNPC")) is <= 0)
-                    continue;
-                Add(RecordValues.AnyReference(RecordValues.At(entry, "classNPC")));
-            }
-            foreach (var (key, value) in RecordValues.MapEntries(placement.Properties["Spawns"]))
-            {
-                if (RecordValues.Number(value) is > 0)
-                    Add(RecordValues.AnyReference(key));
-            }
-            foreach (var field in SpawnClassFields)
-                Add(RecordValues.AnyReference(placement.Properties[field]));
-            foreach (var (field, value) in placement.Properties)
-            {
-                if (
-                    field == "Quest Units To Spawn"
-                    || field.StartsWith("Wave ", StringComparison.Ordinal)
-                )
-                    foreach (var entry in RecordValues.Elements(value))
-                        Add(RecordValues.AnyReference(entry));
-                if (
-                    field.StartsWith("Level ", StringComparison.Ordinal)
-                    && field.EndsWith(" Spawn Rates", StringComparison.Ordinal)
-                )
-                    foreach (var (key, weight) in RecordValues.MapEntries(value))
-                        if (RecordValues.Number(weight) is > 0)
-                            Add(RecordValues.AnyReference(key));
+                foreach (var field in PopulationFields)
+                foreach (var entry in RecordValues.Elements(properties[field]))
+                {
+                    if (RecordValues.Integer(RecordValues.At(entry, "maxSpawnNPC")) is <= 0)
+                        continue;
+                    Add(RecordValues.AnyReference(RecordValues.At(entry, "classNPC")));
+                }
+                foreach (var (key, value) in RecordValues.MapEntries(properties["Spawns"]))
+                {
+                    if (RecordValues.Number(value) is > 0)
+                        Add(RecordValues.AnyReference(key));
+                }
+                foreach (var field in SpawnClassFields)
+                    Add(RecordValues.AnyReference(properties[field]));
+                foreach (var (field, value) in properties)
+                {
+                    if (
+                        field == "Quest Units To Spawn"
+                        || field.StartsWith("Wave ", StringComparison.Ordinal)
+                    )
+                        foreach (var entry in RecordValues.Elements(value))
+                            Add(RecordValues.AnyReference(entry));
+                    if (
+                        field.StartsWith("Level ", StringComparison.Ordinal)
+                        && field.EndsWith(" Spawn Rates", StringComparison.Ordinal)
+                    )
+                        foreach (var (key, weight) in RecordValues.MapEntries(value))
+                            if (RecordValues.Number(weight) is > 0)
+                                Add(RecordValues.AnyReference(key));
+                }
             }
 
             void Add(string? enemy)
@@ -58,9 +90,13 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
                     return;
                 if (!spawnedPlaces.TryGetValue(enemy, out var places))
                     spawnedPlaces.Add(enemy, places = []);
-                var place = context.Places.Get(placement.Level);
-                if (!places.Contains(place))
-                    places.Add(place);
+                if (places.Contains(place))
+                    return;
+                places.Add(place);
+                // A spawner can spawn another spawner, as a camp's population spawns the bandit spawner that
+                // picks its bandits, so what the spawned class spawns stands in the same place.
+                if (context.Classes.TryGetValue(enemy, out var type))
+                    Scan(type.Properties);
             }
         }
         foreach (

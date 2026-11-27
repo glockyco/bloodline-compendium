@@ -521,6 +521,31 @@ public sealed class LootMechanismTests
     }
 
     [Fact]
+    public void EnemyStandsWhereASpawnedSpawnerPicksIt()
+    {
+        // A camp's population spawns a spawner, whose own level table picks the enemy.
+        const string enemy = "/Game/Invented/Beast.Beast_C";
+        const string picker = "/Game/Invented/Picker.Picker_C";
+        var properties = Parse("""{"Enemy Name":{"$text":"Marsh beast"}}""");
+        properties["Loot Table"] = Pool();
+        var rates = Parse(
+            """{"Level 1-4 Spawn Rates":{"$map":[[{"$ref":"/Game/Invented/Beast.Beast_C"},5]]}}"""
+        );
+        var population = Parse(
+            """{"spawnDataArr":[{"classNPC":{"$ref":"/Game/Invented/Picker.Picker_C"}}]}"""
+        );
+        var source = Assert.Single(
+            new EnemyDropMechanism().FindSources(
+                Context(
+                    [new ClassRecord(enemy, [], properties), new ClassRecord(picker, [], rates)],
+                    [new ActorRecord("Spawner", "/Game/Invented/Spawner.Spawner_C", population)]
+                )
+            )
+        );
+        Assert.Equal(Level, Assert.Single(source.Source.Places).Key);
+    }
+
+    [Fact]
     public void EnemyPlacedOverrideDoesNotReplaceSpawnedDefaultPool()
     {
         var properties = Parse("""{"Enemy Name":{"$text":"Marsh beast"}}""");
