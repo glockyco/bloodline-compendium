@@ -40,8 +40,8 @@
     "reason": "Exclamation marks in the site's own text."
   },
   {
-    "pattern": "\\b(entit(y|ies)|relations?|coverage|mechanisms?|records?|weights?(?! reduction\\b)|picks?(?! up\\b)|relative chance)\\b",
-    "reason": "Pipeline words, such as a loot table's picks. Name the game's things and events instead. Picking up an item and armor weight reduction are the game's own terms."
+    "pattern": "\\b(entit(y|ies)|relations?|coverage|mechanisms?|records?|weights?(?! reduction\\b)|(?<!\\bMining )picks?(?! up\\b)|relative chance)\\b",
+    "reason": "Pipeline words, such as a loot table's picks. Name the game's things and events instead. Picking up an item, the Mining Pick and armor weight reduction are the game's own terms."
   },
   {
     "pattern": "\\b(sources? may be incomplete|may be unreachable|this reference|the reference|our data|the data)\\b",

@@ -128,7 +128,7 @@
       "workaround": null,
       "steps": [
         { "action": "At a cooking fire, add one Chicken Meat and two Love-me-not Flowers to the pot.", "result": "The pot contains all three ingredients." },
-        { "action": "Choose Cook! and wait for it to finish.", "result": "The result shows a flower. If this is your first time cooking the recipe, the game shows \"Recipe Discovered!\"" },
+        { "action": "Choose \"Cook!\" and wait for it to finish.", "result": "The result shows a flower. If this is your first time cooking the recipe, the game shows \"Recipe Discovered!\"" },
         { "action": "Check your inventory.", "result": "The ingredients are used up, and you get back one Love-me-not Flower instead of a meal." }
       ],
       "expected": "Cooking Foragers Feast gives a meal.",
