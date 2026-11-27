@@ -26,6 +26,10 @@ An unknown or doubtful value SHALL be stated where the value appears, with what 
 - **WHEN** an enemy's drop has no established chance
 - **THEN** the chance cell reads Unknown and its reason is available on hover, focus and tap
 
+#### Scenario: Recipe its station does not list
+- **WHEN** the game files hold a recipe that its station's list leaves out
+- **THEN** Only in the Game Files shows its ingredients and a reason that names the station, such as "The Engineer's Workbench is not known to list it." or "The Cooking Fire is not known to make it."
+
 ### Requirement: Casing, numbers and plurals
 Titles, headings, column headers and buttons SHALL use Title Case and sentences SHALL use sentence case. Counts SHALL agree with their nouns. In a sentence, a chance below 1 percent SHALL read as approximately 1 in N with its event. In a column of chances, every chance SHALL read as a percent, and every chance short of certain SHALL give its reading as about 1 in N on hover, focus and tap. Every number SHALL pass through the shared formatter.
 

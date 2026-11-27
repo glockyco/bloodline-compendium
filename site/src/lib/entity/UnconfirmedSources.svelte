@@ -1,6 +1,7 @@
 <script lang="ts">
 	import RelationTable from '#lib/RelationTable.svelte';
 	import Conditions from '#lib/Conditions.svelte';
+	import Ingredients from '#lib/items/Ingredients.svelte';
 	import { sourceHeadings } from '#lib/labels.js';
 	import EntityLink from '#lib/ui/EntityLink.svelte';
 	import Section from '#lib/ui/Section.svelte';
@@ -63,6 +64,8 @@
 							><EntityLink entity={source.entity}>{source.name}</EntityLink></span
 						>
 						<Conditions conditions={requirements(source)} />
+						<!-- Nobody has tried a recipe that its station does not list, so its ingredients let a reader try. -->
+						{#if source.inputs.length}<Ingredients inputs={source.inputs} inline />{/if}
 						{#if source.places.length}<p class="source-places">
 								{#each source.places as place, index (index)}{index ? ', ' : ''}<EntityLink
 										entity={place}

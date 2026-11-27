@@ -283,6 +283,10 @@ internal sealed class CraftingMechanism : ISourceMechanism
                 && listed.Profession is null
                 && typeName is not null
                 && TierLists.Any(entry => entry.Profession == typeName);
+            if (unlisted && Stations.For(typeName) is { } station)
+            {
+                notes.Add($"The {station.Name} is not known to list it.");
+            }
             if (listed.Profession is not null)
             {
                 typeName = listed.Profession;

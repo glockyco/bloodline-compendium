@@ -105,7 +105,15 @@ internal sealed class CookingMechanism : ISourceMechanism
             .ToArray();
         return new EntitySource(
             item,
-            new Source(SourceKind.Cooking, name, [], null, new Amount(1, 1), inputs, [])
+            new Source(
+                SourceKind.Cooking,
+                name,
+                [],
+                null,
+                new Amount(1, 1),
+                inputs,
+                unconfirmed ? ["The Cooking Fire is not known to make it."] : []
+            )
             {
                 Entity = WorldSourceData.Reference(EntityKind.Recipe, key, name),
                 Unconfirmed = unconfirmed,
