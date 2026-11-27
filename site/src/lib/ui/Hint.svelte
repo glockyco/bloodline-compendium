@@ -1,15 +1,27 @@
 <script lang="ts">
 	/**
-	 * A value that is not known, which reads Unknown and shows why on hover, on keyboard focus and on tap, since
-	 * a tap focuses the element. It needs no JavaScript. A value that differs from case to case reads Varies.
+	 * A value with more to say about it, which shows on hover, on keyboard focus and on tap, since a tap focuses the
+	 * element. It needs no JavaScript.
 	 */
-	let { reason, id, label = 'Unknown' }: { reason: string; id: string; label?: string } = $props();
-	// Escape hides the reason until the pointer or focus leaves, as WCAG asks of content shown on hover or focus.
+	let {
+		text,
+		hint,
+		id,
+		soft = false
+	}: {
+		text: string;
+		hint: string;
+		id: string;
+		/** Whether the value reads softer than its neighbours, as a value that is not known does. */
+		soft?: boolean;
+	} = $props();
+	// Escape hides the hint until the pointer or focus leaves, as WCAG asks of content shown on hover or focus.
 	let dismissed = $state(false);
 </script>
 
 <span
-	class="unknown-value"
+	class="hinted"
+	class:soft
 	class:dismissed
 	tabindex="0"
 	role="button"
@@ -22,18 +34,20 @@
 	}}
 	onblur={() => (dismissed = false)}
 	onmouseleave={() => (dismissed = false)}
-	>{label}<span class="reason" role="tooltip" {id}>{reason}</span></span
+	>{text}<span class="hint" role="tooltip" {id}>{hint}</span></span
 >
 
 <style>
-	.unknown-value {
+	.hinted {
 		position: relative;
-		color: var(--text-soft);
 		text-decoration: underline dotted;
 		text-underline-offset: var(--underline-offset);
 		cursor: help;
 	}
-	.reason {
+	.soft {
+		color: var(--text-soft);
+	}
+	.hint {
 		position: absolute;
 		z-index: var(--layer-tooltip);
 		inset-block-start: var(--position-below);
@@ -53,7 +67,7 @@
 		text-align: start;
 		white-space: normal;
 	}
-	.unknown-value:is(:hover, :focus):not(.dismissed) .reason {
+	.hinted:is(:hover, :focus):not(.dismissed) .hint {
 		display: block;
 	}
 </style>

@@ -2,7 +2,7 @@
 	import type { DetailRow } from './game-card.js';
 	import type { Fact, ItemPage } from '../site-data.js';
 	import { formatNumber } from '../format.js';
-	import UnknownValue from '../ui/UnknownValue.svelte';
+	import Hint from '../ui/Hint.svelte';
 	let {
 		rows,
 		wide = false,
@@ -21,9 +21,11 @@
 	{#each rows as row (row.key)}<div class:prose={row.prose}>
 			<dt>{row.label}</dt>
 			{#each row.values as value, index (index)}<dd>
-					{#if value.unknown}<UnknownValue
-							reason={value.unknown}
+					{#if value.unknown}<Hint
+							text="Unknown"
+							hint={value.unknown}
 							id={'unknown-' + row.key + '-' + index}
+							soft
 						/>{:else}{value.text}{/if}
 				</dd>{/each}
 		</div>{/each}

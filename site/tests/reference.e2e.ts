@@ -290,8 +290,14 @@ test('separates container spawns from loot chances on desktop and labelled phone
 			'Chance per Container'
 		]);
 		const row = table.locator('.source-row').filter({ hasText: 'Stargazer cache' });
-		await expect(row.locator('.spawn-value')).toHaveText('25% to 100%');
-		await expect(row.locator('.context-value')).toHaveText('50.8% to 86.6%');
+		// The cell shows the percent. Its hint, hidden until hover, focus or tap, reads the chance as 1 in N.
+		await expect(row.locator('.spawn-value')).toHaveText('25% to 100%', { useInnerText: true });
+		await expect(
+			row.locator('.spawn-value').getByRole('tooltip', { includeHidden: true })
+		).toHaveText('about 1 in 4 to always');
+		await expect(row.locator('.context-value')).toHaveText('50.8% to 86.6%', {
+			useInnerText: true
+		});
 		if (width === 390) {
 			await expect(table).toHaveClass(/stacked/);
 			await expect(row.locator('.spawn-value')).toBeVisible();

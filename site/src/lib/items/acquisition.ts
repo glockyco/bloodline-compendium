@@ -47,12 +47,9 @@ export function oddsLabel(odds: Odds, kind: SourceKind): string {
 	return oddsLabels[odds.event];
 }
 
-/** A source's chance as its row shows it. A placed item is there every time, which reads Always, as on the OSRS Wiki. */
-export function chanceText(odds: Odds, kind: SourceKind): string {
-	const highest = odds.highestChance ?? odds.chance!;
-	return kind === 'pickup' && odds.chance === 1 && highest === 1
-		? 'Always'
-		: formatChanceRange(odds.chance!, highest);
+/** Whether a source gives the item every time, which reads Always, as on the OSRS Wiki. A placed item does. */
+export function alwaysThere(odds: Odds, kind: SourceKind): boolean {
+	return kind === 'pickup' && odds.chance === 1 && (odds.highestChance ?? 1) === 1;
 }
 
 export function sourceContext(source: Source): string | null {
@@ -61,8 +58,9 @@ export function sourceContext(source: Source): string | null {
 		return amount === 0 ? 'Free' : pricePhrase(formatNumber(amount), source.price.currency);
 	}
 	if (source.odds?.chance != null) {
-		const chance = chanceText(source.odds, source.kind);
-		return chance === 'Always' ? chance : `${chance} ${oddsLabel(source.odds, source.kind)}`;
+		return alwaysThere(source.odds, source.kind)
+			? 'Always'
+			: `${formatChanceRange(source.odds.chance, source.odds.highestChance ?? source.odds.chance)} ${oddsLabel(source.odds, source.kind)}`;
 	}
 	return null;
 }

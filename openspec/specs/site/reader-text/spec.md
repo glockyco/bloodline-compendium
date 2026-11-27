@@ -27,12 +27,16 @@ An unknown or doubtful value SHALL be stated where the value appears, with what 
 - **THEN** the chance cell reads Unknown and its reason is available on hover, focus and tap
 
 ### Requirement: Casing, numbers and plurals
-Titles, headings, column headers and buttons SHALL use Title Case and sentences SHALL use sentence case. Counts SHALL agree with their nouns. Chances below 1 percent SHALL read as approximately 1 in N with their event. Every number SHALL pass through the shared formatter.
+Titles, headings, column headers and buttons SHALL use Title Case and sentences SHALL use sentence case. Counts SHALL agree with their nouns. In a sentence, a chance below 1 percent SHALL read as approximately 1 in N with its event. In a column of chances, every chance SHALL read as a percent, and every chance short of certain SHALL give its reading as about 1 in N on hover, focus and tap. Every number SHALL pass through the shared formatter.
 
 #### Scenario: One ingredient
 - **WHEN** a recipe uses one Iron Ingot
 - **THEN** the page reads 1 Iron Ingot, not 1 items
 
-#### Scenario: Rare container loot
-- **WHEN** an item's chance per container is 0.4 percent
-- **THEN** the page reads about 1 in 250 containers
+#### Scenario: Rare container loot in a sentence
+- **WHEN** a sentence states an item's chance per container of 0.4 percent
+- **THEN** it reads about 1 in 250 per container
+
+#### Scenario: Chance column
+- **WHEN** a column lists chances of 0.59 percent and 82.5 percent
+- **THEN** the cells read 0.59% and 82.5%, and their hints read about 1 in 170 and about 1 in 1.2

@@ -2,6 +2,7 @@
 	import { untrack } from 'svelte';
 	import { alignSide } from '#lib/ui/align-side.js';
 	import EntityPage from '#lib/entity/EntityPage.svelte';
+	import Chance from '#lib/ui/Chance.svelte';
 	import EntityLink from '#lib/ui/EntityLink.svelte';
 	import Section from '#lib/ui/Section.svelte';
 	import RelationTable from '#lib/RelationTable.svelte';
@@ -130,7 +131,7 @@
 			label="Items {resource.name} gives"
 			headings={lootHeadings}
 			collapse={false}
-			>{#snippet row(entry)}<tr
+			>{#snippet row(entry, index)}<tr
 					data-relation-id={entry.relationIds[0]}
 					data-relation-direction="outgoing"
 					><td
@@ -142,7 +143,10 @@
 								data-relation-direction="outgoing"
 							></span>{/each}</td
 					><td class="numeric" class:absent={entry.chance == null}
-						>{entry.chance == null ? 'Unknown' : formatChance(entry.chance)}</td
+						>{#if entry.chance == null}Unknown{:else}<Chance
+								min={entry.chance}
+								id={`gives-${index + 1}-chance`}
+							/>{/if}</td
 					>{#if perSpot}<td class="numeric"
 							>{entry.chance == null
 								? 'Unknown'

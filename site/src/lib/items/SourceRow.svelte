@@ -1,10 +1,11 @@
 <script lang="ts">
 	import type { RelationCondition, Source } from '../site-data.js';
-	import { formatNumber, formatChanceRange } from '../format.js';
-	import { chanceText, formatAmount, oddsLabel, payPrice, placedKinds } from './acquisition.js';
+	import { formatNumber } from '../format.js';
+	import { alwaysThere, formatAmount, oddsLabel, payPrice, placedKinds } from './acquisition.js';
 	import EntityLink from '../ui/EntityLink.svelte';
 	import Conditions from '../Conditions.svelte';
-	import UnknownValue from '../ui/UnknownValue.svelte';
+	import Chance from '../ui/Chance.svelte';
+	import Hint from '../ui/Hint.svelte';
 	let {
 		source,
 		showAmount = false,
@@ -122,9 +123,11 @@
 		>{/if}
 	{#if showSpawn}
 		<td class="numeric spawn-value">
-			{!source.spawn || (source.spawn.min === 1 && source.spawn.max === 1)
-				? 'Always'
-				: formatChanceRange(source.spawn.min, source.spawn.max)}
+			{#if !source.spawn || (source.spawn.min === 1 && source.spawn.max === 1)}Always{:else}<Chance
+					min={source.spawn.min}
+					max={source.spawn.max}
+					id={id + '-spawn'}
+				/>{/if}
 		</td>
 	{/if}
 	{#if showContext}
@@ -144,16 +147,16 @@
 					></span
 				>
 			{:else if source.odds?.chance != null}
-				{chanceText(
-					source.odds,
-					source.kind
-				)}{#if showUnit && chanceText(source.odds, source.kind) !== 'Always'}<small
-						>{oddsLabel(source.odds, source.kind)}</small
-					>{/if}
-			{:else if source.odds?.unknown}<UnknownValue
-					reason={source.odds.unknown}
+				{#if alwaysThere(source.odds, source.kind)}Always{:else}<Chance
+						min={source.odds.chance}
+						max={source.odds.highestChance ?? source.odds.chance}
+						id={id + '-odds'}
+					/>{#if showUnit}<small>{oddsLabel(source.odds, source.kind)}</small>{/if}{/if}
+			{:else if source.odds?.unknown}<Hint
+					text={source.kind === 'randomLoot' ? 'Varies' : 'Unknown'}
+					hint={source.odds.unknown}
 					id={id + '-odds'}
-					label={source.kind === 'randomLoot' ? 'Varies' : 'Unknown'}
+					soft
 				/>{:else}<span class="muted">Unknown</span>{/if}
 		</td>
 	{/if}
