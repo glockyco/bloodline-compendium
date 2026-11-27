@@ -393,6 +393,17 @@ internal static class WorldSourceData
                 unresolved.Add("Unread dialogue check " + type + ".");
             }
         }
+        // A route can check that a quest is active and later that it is completed, as handing a quest in does. A
+        // reader then needs only the later state, and both together read as a contradiction.
+        result.RemoveAll(condition =>
+            condition.Kind == ConditionKind.Quest
+            && condition.Label.EndsWith(" to be active", StringComparison.Ordinal)
+            && result.Any(other =>
+                other.Kind == ConditionKind.Quest
+                && other.Entity?.Key == condition.Entity?.Key
+                && other.Label.EndsWith(" to be completed", StringComparison.Ordinal)
+            )
+        );
         return new(result.Distinct().ToArray(), unresolved.Distinct().ToArray());
     }
 
