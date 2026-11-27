@@ -618,6 +618,47 @@
       "builds": [24464547],
       "report": "notReported",
       "reportUrl": null
+    },
+    {
+      "id": "spells-ignore-damage-passives",
+      "title": "Some Spells Ignore Their Damage Passives",
+      "effect": "Spire Barrage, Earth Hammer, Inferno Lance and Emberspark deal the same damage at every rank of their discipline's damage passives, although those passives promise more damage for the whole discipline.",
+      "notes": {
+        "/Game/UltimateSkillSystem/SkillSystemSkill/SpireBarrage_Skill.SpireBarrage_Skill_C": {
+          "effect": "Cryomancy's damage passives do not raise Spire Barrage's damage. Each spear deals 30 at every rank."
+        },
+        "/Game/Skill_EarthHammer.Skill_EarthHammer_C": {
+          "effect": "Geomancy's damage passives do not raise Earth Hammer's damage. Its hits deal 25 and 100 at every rank."
+        },
+        "/Game/UltimateSkillSystem/SkillSystemSkill/Skill_InfernoLance.Skill_InfernoLance_C": {
+          "effect": "Pyromancy's damage passives do not raise Inferno Lance's damage. Its lance deals 150 and its explosion 50 at every rank."
+        },
+        "/Game/UltimateSkillSystem/SystemDemonstration/ExampleSkills/Skill_Emberspark.Skill_Emberspark_C": {
+          "effect": "Pyromancy's damage passives do not raise Emberspark's damage. Its hit deals 25 at every rank."
+        }
+      },
+      "workaround": null,
+      "steps": [
+        {
+          "action": "Before buying any Cryomancy damage passive, such as Frostbite, cast Ice Shard and Spire Barrage at an enemy.",
+          "result": "Ice Shard deals 25 damage, and each spear of Spire Barrage deals 30."
+        },
+        {
+          "action": "Buy all 5 ranks of Frostbite, whose description says \"+2% cryomancy damage per rank\", and cast both again.",
+          "result": "Ice Shard deals 27.5 damage. Each spear of Spire Barrage still deals 30."
+        }
+      ],
+      "expected": "Every rank of a discipline's damage passives raises the damage of these spells, as it does for the discipline's other spells.",
+      "observed": "With all five damage passives of their discipline at rank 0 and at their highest rank, Spire Barrage's spears dealt 30, Earth Hammer's hits 25 and 100, Inferno Lance's lance 150 and its explosion 50, and Emberspark's hit 25. In the same runs Ice Shard rose from 25 to 43.75, and 53 other spells rose by the same 75%.",
+      "cause": "Each discipline's damage passives are added up by one function, and a spell multiplies its damage by the result. These four spells hit with fixed numbers instead of that product.",
+      "citations": [
+        "/Game/BloodlinesAlpha/UI/CharacterSheet/PlayerPassiveLevelStatComponent:Get Cryomancy Damage Bonuses",
+        "/Game/BloodlinesAlpha/UI/CharacterSheet/PlayerPassiveLevelStatComponent:Get Geomancy Damage Bonuses",
+        "/Game/BloodlinesAlpha/UI/CharacterSheet/PlayerPassiveLevelStatComponent:Get Pyromancy Damage Bonuses"
+      ],
+      "builds": [24464547],
+      "report": "notReported",
+      "reportUrl": null
     }
   ]
 }

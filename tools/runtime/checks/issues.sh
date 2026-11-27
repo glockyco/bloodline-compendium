@@ -250,4 +250,6 @@ for crossbow in RustyCrossbow Rusty_Crossbow; do
   lab eval "$ranged" '{"action":"attack","seconds":3}'
   lab capture-screen "crossbow-$crossbow"
 done
+# spells-ignore-damage-passives: skill-ranks.sh casts its spells at rank 0 and at full ranks in its own run, because
+# it needs `begin skill-ranks` for the catalog to read it.
 fi

@@ -16,7 +16,7 @@ What the code does:
 What the lab showed:
 - Elemental damage ranks add before they multiply. Ice Shard hit for 25, 25.5, 26 and 27.5 at Frostbite ranks 0, 1, 2 and 5, and for 33.75 with Frozen Dominion 5 as well, which is `25 * (1 + 0.10 + 0.25)`. Ice Spike rose from 35 to 38.5 at Frostbite rank 5.
 - Every damage passive applies with the coefficient the code names. Run `skill-lab-elemental-ranks` set each passive to rank 5 alone, for Ice Shard, Ember Flick, Snap Shard, Airblade and Thunderous Smite, and each hit rose by 10%, 10%, 15%, 15% and 25% in the passives' order.
-- Four spells ignore the bonus. Spire Barrage's spears hit for 30 at rank 5 of each of the five Cryomancy damage passives. Earth Spikes hit for 100 per hit, Inferno Lance for 150 plus a 50 explosion, and Emberspark landed only its fixed 25 in normal collisions, both at rank 0 and with two of the school's damage passives at rank 5.
+- Four spells ignore the bonus. At rank 0 and at full ranks of their school's five damage passives, Spire Barrage's spears hit for 30, Earth Hammer for 25 and 100, Inferno Lance for 150 plus a 50 explosion, and Emberspark for its fixed 25. Earth Spikes' direct hit stays at 100, while a second hit of 45 rose to 78.75 in both sweeps.
 - The tooltip's Base Damage is not the hit for 15 of the 16 skills the trace named: Ember Flick hit for 35 against a tooltip of 45, Meteor Form for 300 against 100, Lightning Fury for 75 against 35. Walking Capacitor did not channel headless and stays unmeasured.
 - Lightning Fury and Thunderous Smite took 60 and 70 mana in one step, twice their costs of 30 and 35, and Ice Spike took none. Task 1.7 measures mana on purpose before this becomes a claim.
 

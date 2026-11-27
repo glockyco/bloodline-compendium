@@ -47,9 +47,9 @@
 							? index === scaling.passives.length - 1
 								? ' and '
 								: ', '
-							: ''}<EntityLink entity={entry.passive} />{/each}. Their bonuses add up, to {formatNumber(
+							: ''}<EntityLink entity={entry.passive} />{/each}. Together they add up to {formatNumber(
 						Math.round(mostBonus * 1000) / 10
-					)}% more at full ranks.
+					)}% more damage at full ranks.
 				</p>
 			</Section>{/if}
 		<UnconfirmedSources sources={skill.sources} name={skill.name} {idPrefix} />
