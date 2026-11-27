@@ -177,7 +177,10 @@ public sealed class PickupObjectMechanismTests
             .Source;
         Assert.Empty(source.Places);
         Assert.True(source.Unconfirmed);
-        Assert.Contains("No pickup location in the world is known.", source.Notes);
+        Assert.Contains(
+            "It can lie in the world as a pickup, but none is placed anywhere.",
+            source.Notes
+        );
     }
 
     [Fact]

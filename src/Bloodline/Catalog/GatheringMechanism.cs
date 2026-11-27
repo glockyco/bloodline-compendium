@@ -472,7 +472,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
             var notes = HarvestNotes(properties).ToList();
             if (!placed)
             {
-                notes.Add("No gathering spot in the world is known to give it.");
+                notes.Add(NoneGives);
             }
             foreach (var (item, weight) in WorldSourceData.Pool(properties[pool]))
             {
@@ -538,7 +538,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
                         [],
                         [
                             .. HarvestNotes(properties),
-                            "No gathering spot in the world is known to use this gathering method.",
+                            "No spot of this kind is placed anywhere in the world.",
                         ]
                     )
                     {
@@ -559,7 +559,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
                                 ConditionKind.Unknown,
                                 null,
                                 null,
-                                "Whether this gathering method is active is unknown"
+                                "This kind of spot may be switched off"
                             ),
                         ],
                         Odds = LootOdds.Of(
@@ -593,7 +593,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
             var notes = HarvestNotes(properties).ToList();
             if (!placed)
             {
-                notes.Add("No gathering spot in the world is known to give it.");
+                notes.Add(NoneGives);
             }
             if (drawn)
             {
@@ -710,6 +710,10 @@ internal sealed class GatheringMechanism : ISourceMechanism
             "Flower Grove items" => "Flower Grove",
             _ => "Gathering point",
         };
+
+    /// <summary>Why a resource that exists is no way to get one of its items.</summary>
+    private const string NoneGives =
+        "This kind of spot can give it, but none of those placed in the world do.";
 
     private static IEnumerable<string> HarvestNotes(JsonObject properties)
     {
@@ -879,12 +883,7 @@ internal sealed class GatheringMechanism : ISourceMechanism
                             [],
                             [
                                 .. HarvestNotes(properties),
-                                .. places.Count == 0
-                                    ? new[]
-                                    {
-                                        "No gathering spot in the world is known to give it.",
-                                    }
-                                    : [],
+                                .. places.Count == 0 ? new[] { NoneGives } : [],
                                 .. quantity is <= 0
                                     ? new[]
                                     {

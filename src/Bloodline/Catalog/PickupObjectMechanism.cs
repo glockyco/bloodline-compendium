@@ -147,7 +147,11 @@ internal sealed class PickupObjectMechanism : ISourceMechanism
                 amount,
                 [],
                 places.Count == 0
-                    ? [.. notes ?? [], "No pickup location in the world is known."]
+                    ?
+                    [
+                        .. notes ?? [],
+                        "It can lie in the world as a pickup, but none is placed anywhere.",
+                    ]
                     : notes ?? []
             )
             {

@@ -236,9 +236,7 @@ public sealed class WorldMechanismTests
             Assert.Empty(source.Places);
         Assert.Equal(
             unconfirmed,
-            source.Notes.Contains(
-                "The game files mark this conversation unused, so it may never take place."
-            )
+            source.Notes.Contains("The conversation is marked unused, so it may never happen.")
         );
     }
 
@@ -763,7 +761,10 @@ public sealed class WorldMechanismTests
             .Source;
         Assert.Empty(unused.Places);
         Assert.True(unused.Unconfirmed);
-        Assert.Contains("No gathering spot in the world is known to give it.", unused.Notes);
+        Assert.Contains(
+            "This kind of spot can give it, but none of those placed in the world do.",
+            unused.Notes
+        );
     }
 
     [Fact]
@@ -1053,7 +1054,7 @@ public sealed class WorldMechanismTests
         Assert.Equal(new[] { 4d }, NoteNumbers(result.Source));
         Assert.True(result.Source.Unconfirmed);
         Assert.Contains(
-            "No gathering spot in the world is known to use this gathering method.",
+            "No spot of this kind is placed anywhere in the world.",
             result.Source.Notes
         );
     }
@@ -1197,7 +1198,7 @@ public sealed class WorldMechanismTests
         Assert.Empty(unplaced.Source.Places);
         Assert.True(unplaced.Source.Unconfirmed);
         Assert.Contains(
-            "No gathering spot in the world is known to give it.",
+            "This kind of spot can give it, but none of those placed in the world do.",
             unplaced.Source.Notes
         );
         gatherer.Properties[field] = null;

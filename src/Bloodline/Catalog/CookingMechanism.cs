@@ -112,7 +112,9 @@ internal sealed class CookingMechanism : ISourceMechanism
                 null,
                 new Amount(1, 1),
                 inputs,
-                unconfirmed ? ["The Cooking Fire is not known to make it."] : []
+                unconfirmed
+                    ? ["The recipe exists, but the Cooking Fire has no working way to make it."]
+                    : []
             )
             {
                 Entity = WorldSourceData.Reference(EntityKind.Recipe, key, name),

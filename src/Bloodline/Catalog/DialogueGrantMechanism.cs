@@ -257,7 +257,7 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
                         sourceNotes =
                         [
                             .. sourceNotes,
-                            "The game files mark this conversation unused, so it may never take place.",
+                            "The conversation is marked unused, so it may never happen.",
                         ];
                     }
                     if (generated)

@@ -28,7 +28,11 @@ An unknown or doubtful value SHALL be stated where the value appears, with what 
 
 #### Scenario: Recipe its station does not list
 - **WHEN** the game files hold a recipe that its station's list leaves out
-- **THEN** Only in the Game Files shows its ingredients and a reason that names the station, such as "The Engineer's Workbench is not known to list it." or "The Cooking Fire is not known to make it."
+- **THEN** Only in the Game Files shows its ingredients and a reason that names the station, such as "The recipe exists, but the Engineer's Workbench doesn't offer it."
+
+#### Scenario: Reason in a player's words
+- **WHEN** a way that only the game files hold gives its reason
+- **THEN** the reason says what a player would tell another, with its detail, such as "This kind of spot can give it, but none of those placed in the world do.", and not how the site knows, as "is not known to" or "the game files" would
 
 #### Scenario: Ways without a place
 - **WHEN** several creatures that drop an item have no place
