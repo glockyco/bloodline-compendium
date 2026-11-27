@@ -518,6 +518,12 @@ internal sealed record Source(
     /// </summary>
     public IReadOnlyList<SourceEvent> Events { get; init; } = [];
 
+    /// <summary>
+    /// What a player does to make the source appear in its place, shown under the place, such as the reply that
+    /// turns a person into a creature.
+    /// </summary>
+    public IReadOnlyList<string> Triggers { get; init; } = [];
+
     /// <summary>The progression points a source costs, such as the skill point that unlocks a tree skill.</summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public PointCost? Cost { get; init; }

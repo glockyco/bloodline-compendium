@@ -175,10 +175,7 @@ internal sealed class SpawnSites
                                 .OrderBy(happening => happening.Kind)
                                 .ThenBy(happening => happening.Name, StringComparer.Ordinal),
                         ],
-                Notes =
-                    notes.Count == 0
-                        ? candidate.Source.Notes
-                        : [.. candidate.Source.Notes, .. notes],
+                Triggers = notes,
             },
         };
     }
@@ -310,10 +307,10 @@ internal sealed class SpawnSites
                             )
                         )
                 )
-                    return $"Follow The Mirage to the cave north of Dariush. Choose \"{reply}\" in {name}'s conversation to make the demon appear";
+                    return $"Follow The Mirage to the cave north of Dariush. Choose \"{reply}\" in {name}'s conversation to make the demon appear.";
             }
         }
-        return $"Replaces {name} as you advance the conversation";
+        return $"Replaces {name} as you advance the conversation.";
     }
 
     private void ReadSites(IReadOnlyList<SpawnSite> reviewed)

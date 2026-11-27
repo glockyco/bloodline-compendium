@@ -153,18 +153,18 @@
 					"While you travel, a new event appears near you about every 5 seconds until 7 are on the map.",
 					"The terrain around you decides which events can appear. Each event disappears after a while unless you enter it.",
 					"While you stand still, no new event appears and the events on the map do not run out.",
-					"Many events take you to a nearby camp area. The Hostile Logging Camp takes you to its own camp, Merchant Caravan lets you trade on the world map, and you can board an Airship there."
+					"Entering an event takes you to a camp area nearby. The Hostile Logging Camp has its own area. A Merchant Caravan trades with you on the world map, and an Airship is boarded there."
 				]
 			},
 			{
 				"heading": "Terrain",
 				"paragraphs": [
-					"Terrains share five lists of events. Find the terrain you are travelling through to see which list of chances applies."
+					"Every terrain uses one of five lists of events. Look up the terrain you are in to see which."
 				],
 				"data": "worldMapEventTerrains"
 			},
 			{
-				"heading": "What Each Event Brings",
+				"heading": "Events",
 				"paragraphs": [],
 				"data": "worldMapEventsWithChances"
 			}
@@ -183,7 +183,7 @@
 			{
 				"heading": "How Events Are Chosen",
 				"paragraphs": [
-					"The game schedules at most one event per day. It skips Soulfaring Night on Vohath 15 of the year 874. For each draw, it chooses one of 18 areas at random, then draws an event that can happen there.",
+					"A day has at most one event. For each day the game picks one of 18 areas at random and then an event that can happen there. Soulfaring Night, on Vohath 15 of 874, gets none.",
 					"Open Calendar on the world map and check a date for the event and its area. Your Character Sheet also has a Calendar button.",
 					"The event happens while you are in its area on its day."
 				],
@@ -192,14 +192,14 @@
 			{
 				"heading": "Events",
 				"paragraphs": [
-					"Chance per Day gives the odds of drawing that event in any area, on days with a draw."
+					"Chance per Day is how likely a day's event is this one, in any of its areas."
 				],
 				"data": "calendarEvents"
 			},
 			{
 				"heading": "Calendar Areas",
 				"paragraphs": [
-					"These are the areas that can have an event on the calendar."
+					"Calendar events can happen in these areas."
 				],
 				"data": "calendarEventAreas"
 			}

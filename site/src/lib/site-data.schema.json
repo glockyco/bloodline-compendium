@@ -3062,6 +3062,12 @@
             }
           ]
         },
+        "triggers": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
         "unconfirmed": {
           "type": "boolean"
         }

@@ -8,8 +8,7 @@ namespace Bloodline.Catalog;
 /// </summary>
 internal static class EventTables
 {
-    private const string NextEventChance =
-        "Each percentage is the chance that the next event in that terrain is this one.";
+    private const string NextEventChance = "How likely the next event in that terrain is this one.";
 
     public static IReadOnlyList<MechanicContent> Fill(
         IReadOnlyList<MechanicContent> content,
@@ -130,8 +129,8 @@ internal static class EventTables
         string[] anchors = [.. events.Select(happening => ItemIdentity.Slug(happening.Name))];
         return new MechanicTable(
             includeChances
-                ? ["Event", "What It Brings", "Chance by Terrain", "Stays on the Map"]
-                : ["Event", "What It Brings", "Stays on the Map"],
+                ? ["Event", "What You Find", "Chance by Terrain", "Stays on the Map"]
+                : ["Event", "What You Find", "Stays on the Map"],
             [
                 .. events.Select(happening =>
                 {

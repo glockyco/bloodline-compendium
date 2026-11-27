@@ -427,6 +427,7 @@ export interface Source {
   relationId: string;
   settlement?: boolean;
   spawn?: ChanceRange | null;
+  triggers?: string[];
   unconfirmed: boolean;
   [k: string]: unknown;
 }

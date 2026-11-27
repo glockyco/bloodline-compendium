@@ -104,6 +104,7 @@
 							: ','}</span
 					>{/each}
 			</p>{/each}
+		{#each source.triggers ?? [] as trigger (trigger)}<p class="source-places">{trigger}</p>{/each}
 		{#if source.inputs.length || (!summarized && source.notes.length) || source.quotes?.length}
 			<details class="row-details">
 				<summary

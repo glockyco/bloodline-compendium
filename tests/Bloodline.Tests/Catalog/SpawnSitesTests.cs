@@ -118,17 +118,17 @@ public sealed class SpawnSitesTests
         );
         var arriving = sites.Arriving(candidate);
         Assert.Equal(
-            "Replaces Old Hermit as you advance the conversation",
-            Assert.Single(arriving.Source.Notes)
+            "Replaces Old Hermit as you advance the conversation.",
+            Assert.Single(arriving.Source.Triggers)
         );
     }
 
     [Theory]
     [InlineData(
         true,
-        "Follow The Mirage to the cave north of Dariush. Choose \"*Fight!*\" in Aida's conversation to make the demon appear"
+        "Follow The Mirage to the cave north of Dariush. Choose \"*Fight!*\" in Aida's conversation to make the demon appear."
     )]
-    [InlineData(false, "Replaces Aida as you advance the conversation")]
+    [InlineData(false, "Replaces Aida as you advance the conversation.")]
     public void AidaNoteNamesActualPlayerReplyThatTriggersReplacement(bool player, string expected)
     {
         const string replacement = "/Game/Invented/Dialogue:Replace";
@@ -172,7 +172,7 @@ public sealed class SpawnSitesTests
         );
 
         Assert.Equal(Level, Assert.Single(sites.Places(Beast)).Key);
-        Assert.Equal(expected, Assert.Single(sites.Arriving(candidate).Source.Notes));
+        Assert.Equal(expected, Assert.Single(sites.Arriving(candidate).Source.Triggers));
     }
 
     [Fact]

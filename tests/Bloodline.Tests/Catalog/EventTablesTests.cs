@@ -39,14 +39,11 @@ public sealed class EventTablesTests
             .Table!;
 
         Assert.Equal(
-            ["Event", "What It Brings", "Chance by Terrain", "Stays on the Map"],
+            ["Event", "What You Find", "Chance by Terrain", "Stays on the Map"],
             table.Headings
         );
         Assert.Equal(["bandit-ambush"], table.Anchors);
-        Assert.Equal(
-            "Each percentage is the chance that the next event in that terrain is this one.",
-            table.ChanceContext
-        );
+        Assert.Equal("How likely the next event in that terrain is this one.", table.ChanceContext);
         Assert.Null(table.CellLinks);
         Assert.Equal(["Bandit Ambush", "Robber", "", "15 seconds"], Assert.Single(table.Rows));
         Assert.Equal(
@@ -73,7 +70,7 @@ public sealed class EventTablesTests
             Sections =
             [
                 new("Chances by Terrain", []) { Data = "worldMapEventChances" },
-                new("What Each Event Brings", []) { Data = "worldMapEvents" },
+                new("Events", []) { Data = "worldMapEvents" },
                 new("Terrain", []) { Data = "worldMapEventTerrains" },
             ],
         };
