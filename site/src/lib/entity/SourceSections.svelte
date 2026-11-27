@@ -2,7 +2,13 @@
 	import SourceRow from '#lib/items/SourceRow.svelte';
 	import RelationTable from '#lib/RelationTable.svelte';
 	import Section from '#lib/ui/Section.svelte';
-	import { sourceColumns, sourceHeadings, sourceIntros, sourceLevels } from '#lib/labels.js';
+	import {
+		placeUnknownReasons,
+		sourceColumns,
+		sourceHeadings,
+		sourceIntros,
+		sourceLevels
+	} from '#lib/labels.js';
 	import {
 		headingCase,
 		oddsLabel,
@@ -41,9 +47,19 @@
 					places.some((place, index) => places.indexOf(place) !== index);
 				// Places follow the order of their best source, so the likeliest place leads as the likeliest row would.
 				const order = [...new Set(listed.map(placeOf))];
-				const sorted = byPlace
+				const placed = byPlace
 					? [...listed].sort((a, b) => order.indexOf(placeOf(a)) - order.indexOf(placeOf(b)))
 					: listed;
+				// Several ways without a place share one heading at the end, which says once why they have none. Where
+				// places head the rows, one such way gets the heading too.
+				const lost = placed.filter((source) => placeOf(source) === placeUnknown);
+				const band =
+					placeUnknownReasons[kind] && (lost.length > 1 || (byPlace && lost.length === 1))
+						? lost.length
+						: 0;
+				const sorted = band
+					? [...placed.filter((source) => !lost.includes(source)), ...lost]
+					: placed;
 				const showAmount = sorted.some(
 					(source) => source.amount && (source.amount.min !== 1 || source.amount.max !== 1)
 				);
@@ -70,6 +86,7 @@
 					kind,
 					sources: sorted,
 					byPlace,
+					bandFrom: band ? sorted.length - band : null,
 					showPlaces,
 					showAmount,
 					showSpawn,
@@ -127,11 +144,12 @@
 		}
 		return rows;
 	}
+	const placeUnknown = 'Location unknown';
 	function placeOf(source: Source): string | null {
 		if (source.places[0]) return source.places[0].name;
 		if (source.settlement) return 'Your settlement';
 		// Random loot and crops stand nowhere in particular, so only ways that stand somewhere miss a place.
-		return placedKinds.has(source.kind) ? 'Location unknown' : null;
+		return placedKinds.has(source.kind) ? placeUnknown : null;
 	}
 </script>
 
@@ -147,10 +165,13 @@
 			items={group.sources}
 			label={sourceHeadings[group.kind]}
 			headings={group.headings}
-			>{#snippet row(
-				source,
-				index
-			)}{#if group.byPlace && (index === 0 || placeOf(group.sources[index - 1]) !== placeOf(source))}<tr
+			>{#snippet row(source, index)}{@const lost =
+					group.bandFrom != null && index >= group.bandFrom}{#if index === group.bandFrom}<tr
+						class="group-heading"
+						><th colspan={group.headings.length} scope="colgroup"
+							>{placeUnknown}<span class="band-reason">{placeUnknownReasons[group.kind]}</span></th
+						></tr
+					>{:else if !lost && group.byPlace && (index === 0 || placeOf(group.sources[index - 1]) !== placeOf(source))}<tr
 						class="group-heading"
 						><th colspan={group.headings.length} scope="colgroup" data-game>{placeOf(source)}</th
 						></tr
@@ -160,7 +181,7 @@
 					showSpawn={group.showSpawn}
 					showContext={group.showContext}
 					showUnit={!group.sharedUnit}
-					showPlaces={!group.byPlace && group.showPlaces}
+					showPlaces={!lost && !group.byPlace && group.showPlaces}
 					placeFirst={group.kind === 'pickup'}
 					levelCondition={sourceLevels[group.kind]?.condition}
 					id={`${idPrefix}source-${group.kind}-${index + 1}`}
@@ -169,3 +190,10 @@
 		>
 	</Section>
 {/each}
+
+<style>
+	.band-reason {
+		display: block;
+		font-weight: var(--weight-regular);
+	}
+</style>

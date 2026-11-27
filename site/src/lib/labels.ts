@@ -44,6 +44,12 @@ export const sourceIntros: Partial<Record<SourceKind, string>> = {
 	skillTree:
 		'A skill costs 1 [skill point](mechanic:skill-points) once its discipline reaches the required level. Clicking it again refunds the point.'
 };
+/** What is known of a way that stands somewhere but that no area places, for one row and for several alike. */
+export const placeUnknownReasons: Partial<Record<SourceKind, string>> = {
+	enemyDrop: 'No fixed spawn in any area.',
+	containerLoot: 'No fixed spot in any area.',
+	dialogue: 'Not placed in any area.'
+};
 /** The level a source kind's rows need, shown as its own column, such as the discipline level of a skill tree. */
 export const sourceLevels: Partial<
 	Record<SourceKind, { condition: RelationCondition['kind']; heading: string }>

@@ -30,6 +30,10 @@ An unknown or doubtful value SHALL be stated where the value appears, with what 
 - **WHEN** the game files hold a recipe that its station's list leaves out
 - **THEN** Only in the Game Files shows its ingredients and a reason that names the station, such as "The Engineer's Workbench is not known to list it." or "The Cooking Fire is not known to make it."
 
+#### Scenario: Ways without a place
+- **WHEN** several creatures that drop an item have no place
+- **THEN** their rows stand at the end of the table under one heading that reads Location unknown and "No fixed spawn in any area.", and a single such row reads "Location unknown. No fixed spawn in any area." beside it
+
 ### Requirement: Casing, numbers and plurals
 Titles, headings, column headers and buttons SHALL use Title Case and sentences SHALL use sentence case. Counts SHALL agree with their nouns. In a sentence, a chance below 1 percent SHALL read as approximately 1 in N with its event. In a column of chances, every chance SHALL read as a percent, and every chance short of certain SHALL give its reading as about 1 in N on hover, focus and tap. Every number SHALL pass through the shared formatter.
 

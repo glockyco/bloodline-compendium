@@ -2,6 +2,7 @@
 	import type { RelationCondition, Source } from '../site-data.js';
 	import { formatNumber } from '../format.js';
 	import { alwaysThere, formatAmount, oddsLabel, payPrice, placedKinds } from './acquisition.js';
+	import { placeUnknownReasons } from '../labels.js';
 	import EntityLink from '../ui/EntityLink.svelte';
 	import Conditions from '../Conditions.svelte';
 	import Chance from '../ui/Chance.svelte';
@@ -67,7 +68,7 @@
 		{#snippet placeList()}{#if places.length}{#each places as place, index (index)}{index
 						? ', '
 						: ''}<EntityLink entity={place} />{/each}{:else if source.settlement}Your settlement{:else}Location
-				unknown{/if}{/snippet}
+				unknown{#if placeUnknownReasons[source.kind]}{`. ${placeUnknownReasons[source.kind]}`}{/if}{/if}{/snippet}
 		{#each alsoRelationIds as also (also)}<span
 				data-relation-id={also}
 				data-relation-direction="incoming"
