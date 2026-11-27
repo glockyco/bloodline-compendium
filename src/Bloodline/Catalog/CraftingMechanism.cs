@@ -285,7 +285,7 @@ internal sealed class CraftingMechanism : ISourceMechanism
                 && TierLists.Any(entry => entry.Profession == typeName);
             if (unlisted && Stations.For(typeName) is { } station)
             {
-                notes.Add($"The recipe exists, but the {station.Name} doesn't offer it.");
+                notes.Add($"The recipe exists, but the {station.Name} does not offer it.");
             }
             if (listed.Profession is not null)
             {

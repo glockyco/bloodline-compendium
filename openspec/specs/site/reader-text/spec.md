@@ -28,7 +28,7 @@ An unknown or doubtful value SHALL be stated where the value appears, with what 
 
 #### Scenario: Recipe its station does not list
 - **WHEN** the game files hold a recipe that its station's list leaves out
-- **THEN** Only in the Game Files shows its ingredients and a reason that names the station, such as "The recipe exists, but the Engineer's Workbench doesn't offer it."
+- **THEN** Only in the Game Files shows its ingredients and a reason that names the station, such as "The recipe exists, but the Engineer's Workbench does not offer it."
 
 #### Scenario: Reason in a player's words
 - **WHEN** a way that only the game files hold gives its reason
