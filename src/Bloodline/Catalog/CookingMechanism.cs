@@ -20,7 +20,11 @@ internal sealed class CookingMechanism : ISourceMechanism
             .SelectMany(table => table.Rows)
             .Where(CraftingMechanism.IsCooking)
             .GroupBy(row => row.Name, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
+            .ToDictionary(
+                group => group.Key,
+                group => group.First(),
+                StringComparer.OrdinalIgnoreCase
+            );
         var meals = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (
             var (table, row) in context
@@ -66,9 +70,7 @@ internal sealed class CookingMechanism : ISourceMechanism
             {
                 continue;
             }
-            var path = context
-                .Records.Tables.First(table => table.Rows.Contains(row))
-                .Path;
+            var path = context.Records.Tables.First(table => table.Rows.Contains(row)).Path;
             yield return Recipe(
                 context,
                 item,

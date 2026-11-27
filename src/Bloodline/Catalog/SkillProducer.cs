@@ -435,10 +435,8 @@ internal sealed partial class SkillProducer
                         Fragment = entry.Passive.Anchor,
                         Host = host,
                     },
-                    double.Parse(
-                        entry.Match.Groups["percent"].Value,
-                        CultureInfo.InvariantCulture
-                    ) / 100,
+                    double.Parse(entry.Match.Groups["percent"].Value, CultureInfo.InvariantCulture)
+                        / 100,
                     entry.Passive.Ranks!.Value
                 ))
                 .ToArray();

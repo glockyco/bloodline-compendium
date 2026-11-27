@@ -12,10 +12,17 @@ public sealed class SkillRankCheckTests
         try
         {
             // An earlier sweep is replaced as a whole by a later one.
-            var earlier = Directory.CreateDirectory(Path.Combine(runtime, "2026-01-01-skill-ranks"));
+            var earlier = Directory.CreateDirectory(
+                Path.Combine(runtime, "2026-01-01-skill-ranks")
+            );
             File.WriteAllLines(
                 Path.Combine(earlier.FullName, "run.jsonl"),
-                [Cast("Spire", 0, [30]), Cast("Spire", 5, [52.5]), Cast("Gone", 0, [5]), Cast("Gone", 5, [5])]
+                [
+                    Cast("Spire", 0, [30]),
+                    Cast("Spire", 5, [52.5]),
+                    Cast("Gone", 0, [5]),
+                    Cast("Gone", 5, [5]),
+                ]
             );
             var run = Directory.CreateDirectory(Path.Combine(runtime, "2026-01-02-skill-ranks"));
             // A scaled impact with fixed burn ticks. Spears that ignore the ranks, two of which land in one frame at

@@ -52,7 +52,9 @@ for (const issue of chosen) {
         `A section of ${issue.id} has ${section.length} characters, more than Discord's ${limit}.`,
       );
     if (message && message.length + 2 + section.length > limit) {
-      console.log(`----- ${issue.id} (${message.length} characters)\n${message}\n`);
+      console.log(
+        `----- ${issue.id} (${message.length} characters)\n${message}\n`,
+      );
       message = "";
     }
     message = message ? `${message}\n\n${section}` : section;

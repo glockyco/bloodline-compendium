@@ -384,7 +384,8 @@ public sealed class TradeMechanismTests
         Assert.False(stew.Unconfirmed);
         Assert.Equal(
             [("Meat", 1), ("Root", 2)],
-            stew.Inputs.Select(input => (input.Item.Name, input.Quantity)).OrderBy(pair => pair.Name)
+            stew.Inputs.Select(input => (input.Item.Name, input.Quantity))
+                .OrderBy(pair => pair.Name)
         );
         Assert.Equal(new Amount(1, 1), stew.Amount);
         Assert.Equal("Root stew", stew.Name);

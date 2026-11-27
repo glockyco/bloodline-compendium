@@ -81,7 +81,10 @@ public sealed class KnownIssueTests
             Workaround = "Invented generic workaround.",
             Notes = new Dictionary<string, IssueNoteText>
             {
-                [KneeGuards().Path] = new("Invented item-specific effect.", "Invented item-specific workaround."),
+                [KneeGuards().Path] = new(
+                    "Invented item-specific effect.",
+                    "Invented item-specific workaround."
+                ),
             },
         };
         var result = CatalogBuilder.Build(Records(issue), []);
@@ -99,7 +102,10 @@ public sealed class KnownIssueTests
     {
         var issue = Issue("unrelated-issue") with
         {
-            Notes = new Dictionary<string, IssueNoteText> { [key] = new("Invented item-specific effect.") },
+            Notes = new Dictionary<string, IssueNoteText>
+            {
+                [key] = new("Invented item-specific effect."),
+            },
         };
 
         var error = Assert.Throws<InvalidDataException>(() =>
@@ -481,7 +487,13 @@ public sealed class KnownIssueTests
         var other = BloodMagic with { Key = "/Game/Invented/OtherBloodMagicTree" };
         var issue = Issue("shared") with
         {
-            Steps = [new IssueStep("Open the skill tree.", "[Blood Magic](discipline:blood-magic) is shown.")],
+            Steps =
+            [
+                new IssueStep(
+                    "Open the skill tree.",
+                    "[Blood Magic](discipline:blood-magic) is shown."
+                ),
+            ],
         };
         var error = Assert.Throws<InvalidDataException>(() =>
             KnownIssues.Links(

@@ -395,9 +395,10 @@ public sealed class WorldMechanismTests
             "PlayerHasEnoughMoney",
             debitType == "threshold" ? """{"Required Money":45}""" : """{"Required Money":0}"""
         );
-        var debit = debitType == "fixed"
-            ? Type("TakePlayerMoney", """{"Item Cost":23}""")
-            : Type("TakeMoneyBasedOnitemValue");
+        var debit =
+            debitType == "fixed"
+                ? Type("TakePlayerMoney", """{"Item Cost":23}""")
+                : Type("TakeMoneyBasedOnitemValue");
         var pie = Type("Pie", """{"ItemInfo":{"ItemValue":17}}""");
         var separateGrantLine = debitType == "itemValue";
         var debitOnGrant = debitType == "fixed" ? """,{"$ref":"Debit"}""" : "";
@@ -430,7 +431,8 @@ public sealed class WorldMechanismTests
                 ),
                 new InnerObjectRecord("Check", check.Path, new JsonObject()),
                 .. debitType is "itemValue" or "fixed"
-                    ? [
+                    ?
+                    [
                         new InnerObjectRecord(
                             "Debit",
                             debit.Path,

@@ -7,7 +7,11 @@ namespace Bloodline.Catalog;
 /// discipline's damage passives at rank 0 and once with all of them at their highest rank.
 /// <c>tools/runtime/checks/skill-ranks.sh</c> makes these runs.
 /// </summary>
-internal sealed record SkillRankCast(string Run, IReadOnlyList<double> Zero, IReadOnlyList<double> Full)
+internal sealed record SkillRankCast(
+    string Run,
+    IReadOnlyList<double> Zero,
+    IReadOnlyList<double> Full
+)
 {
     /// <summary>Whether a hit at full ranks is a hit at rank 0 raised by <paramref name="bonus"/>.</summary>
     public bool Rose(double bonus) =>
@@ -40,7 +44,8 @@ internal static class SkillRankCheck
             return casts;
         var zero = new Dictionary<string, IReadOnlyList<double>>(StringComparer.Ordinal);
         foreach (
-            var line in File.ReadLines(Path.Combine(run, "run.jsonl")).Where(line => line.Length > 0)
+            var line in File.ReadLines(Path.Combine(run, "run.jsonl"))
+                .Where(line => line.Length > 0)
         )
         {
             var entry = JsonNode.Parse(line);
@@ -58,7 +63,11 @@ internal static class SkillRankCheck
                 zero[skill] = hits;
             else if (
                 zero.TryGetValue(skill, out var before)
-                && !(casts.TryGetValue(skill, out var kept) && kept.Zero.Count > 0 && kept.Full.Count > 0)
+                && !(
+                    casts.TryGetValue(skill, out var kept)
+                    && kept.Zero.Count > 0
+                    && kept.Full.Count > 0
+                )
             )
                 casts[skill] = new SkillRankCast(Path.GetFileName(run), before, hits);
         }

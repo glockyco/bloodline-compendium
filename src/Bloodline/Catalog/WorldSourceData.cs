@@ -204,7 +204,9 @@ internal static class WorldSourceData
                         var quest = QuestCondition(context, Properties(instance), state);
                         if (quest.Entity?.Key is null)
                         {
-                            unresolved.Add("An earlier line checks a quest that could not be read.");
+                            unresolved.Add(
+                                "An earlier line checks a quest that could not be read."
+                            );
                             continue;
                         }
                         if (!questGates.TryGetValue(quest, out var gates))
@@ -255,7 +257,9 @@ internal static class WorldSourceData
             }
             else
             {
-                unresolved.Add("Earlier lines of the conversation have checks whose path is not read.");
+                unresolved.Add(
+                    "Earlier lines of the conversation have checks whose path is not read."
+                );
             }
         }
         foreach (var node in nodes)

@@ -101,7 +101,9 @@ internal sealed class CraftingMechanism : ISourceMechanism
         (
             RecordValues.EnumDisplay(row.Values["CraftingType"])
             ?? RecordValues.EnumValue(row.Values["CraftingType"])
-        ) is "Cooking" or "CraftingTypes::NewEnumerator6";
+        )
+            is "Cooking"
+                or "CraftingTypes::NewEnumerator6";
 
     /// <summary>Hand-mapped items whose recipe row the recipe table lacks, which the crafting window cannot make.</summary>
     public static IReadOnlyList<ClassName> MissingRows(CatalogContext context)

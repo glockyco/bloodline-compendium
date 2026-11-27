@@ -179,7 +179,9 @@ internal static partial class KnownIssues
             }
             if (issue.Effect is null && issue.EffectDetails is not { Count: > 0 })
             {
-                throw new InvalidDataException($"Known issue {issue.Id} needs a player-facing effect.");
+                throw new InvalidDataException(
+                    $"Known issue {issue.Id} needs a player-facing effect."
+                );
             }
             if ((issue.Report == ReportStatus.Reported) != (issue.ReportUrl is not null))
             {
@@ -361,7 +363,9 @@ internal static partial class KnownIssues
                             return new IssueNote(issue.Id, effect)
                             {
                                 Workaround = note is null ? issue.Workaround : note.Workaround,
-                                TooltipValues = tooltipValues.GetValueOrDefault((item.Key, issue.Id)),
+                                TooltipValues = tooltipValues.GetValueOrDefault(
+                                    (item.Key, issue.Id)
+                                ),
                             };
                         })
                         .ToArray(),

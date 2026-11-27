@@ -80,12 +80,13 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
             if (string.IsNullOrWhiteSpace(speaker))
                 speaker = null;
             var placedUsers = placements[package].ToArray();
-            var users = new List<(
-                EntityReference Entity,
-                EntityReference? Place,
-                bool Generated,
-                bool UsesDialogue
-            )>();
+            var users =
+                new List<(
+                    EntityReference Entity,
+                    EntityReference? Place,
+                    bool Generated,
+                    bool UsesDialogue
+                )>();
             foreach (var placement in placedUsers)
             {
                 var generated = placement.Actor.Class.Contains(
@@ -217,13 +218,15 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
                     continue;
                 }
                 var notes = GrantNotes(dialogue).ToList();
-                var grantLines = data.Where(node => References(node, "Events", grant.Path)).ToArray();
+                var grantLines = data.Where(node => References(node, "Events", grant.Path))
+                    .ToArray();
                 var quotes = Quotes(context, grantLines, incoming, objects, debits)
                     .Distinct()
                     .ToArray();
-                var price = spec.Kind == EntityKind.Item
-                    ? GrantPrice(context, grantLines, incoming, objects, debits)
-                    : null;
+                var price =
+                    spec.Kind == EntityKind.Item
+                        ? GrantPrice(context, grantLines, incoming, objects, debits)
+                        : null;
                 var requirements = WorldSourceData.DialogueConditions(context, dialogue, grant);
                 var matching = rewards
                     .Where(reward =>
@@ -308,16 +311,20 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
             : obj.Properties;
 
     private static bool References(JsonNode? node, string field, string path) =>
-        RecordValues.Elements(RecordValues.At(node, field)).Any(reference =>
-            string.Equals(
-                RecordValues.AnyReference(reference),
-                path,
-                StringComparison.OrdinalIgnoreCase
-            )
-        );
+        RecordValues
+            .Elements(RecordValues.At(node, field))
+            .Any(reference =>
+                string.Equals(
+                    RecordValues.AnyReference(reference),
+                    path,
+                    StringComparison.OrdinalIgnoreCase
+                )
+            );
 
-    private static IEnumerable<JsonNode?> Parents(JsonNode? node, ILookup<long, JsonNode?> incoming) =>
-        RecordValues.Integer(RecordValues.At(node, "id")) is { } id ? incoming[id] : [];
+    private static IEnumerable<JsonNode?> Parents(
+        JsonNode? node,
+        ILookup<long, JsonNode?> incoming
+    ) => RecordValues.Integer(RecordValues.At(node, "id")) is { } id ? incoming[id] : [];
 
     private static IEnumerable<Quote> Quotes(
         CatalogContext context,
@@ -328,16 +335,18 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
     )
     {
         bool HasClass(JsonNode? node, string field, string type) =>
-            RecordValues.Elements(RecordValues.At(node, field)).Any(reference =>
-                RecordValues.AnyReference(reference) is { } path
-                && objects.TryGetValue(path, out var obj)
-                && WorldSourceData.IsClass(context, obj.Class, type)
-            );
+            RecordValues
+                .Elements(RecordValues.At(node, field))
+                .Any(reference =>
+                    RecordValues.AnyReference(reference) is { } path
+                    && objects.TryGetValue(path, out var obj)
+                    && WorldSourceData.IsClass(context, obj.Class, type)
+                );
 
         bool Charges(JsonNode? node) =>
-            RecordValues.Elements(RecordValues.At(node, "Events")).Any(evt =>
-                RecordValues.AnyReference(evt) is { } path && debits.ContainsKey(path)
-            );
+            RecordValues
+                .Elements(RecordValues.At(node, "Events"))
+                .Any(evt => RecordValues.AnyReference(evt) is { } path && debits.ContainsKey(path));
 
         foreach (var node in grantLines)
         {
@@ -345,12 +354,17 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
                 Charges(node)
                 || HasClass(node, "Conditions", "PlayerHasEnoughMoney")
                 || HasClass(node, "Conditions", "PlayerHasEnoughMoneyForSpecifiedItem");
-            foreach (var paymentLine in hasPayment ? [node] : Parents(node, incoming).Where(Charges))
+            foreach (
+                var paymentLine in hasPayment ? [node] : Parents(node, incoming).Where(Charges)
+            )
             {
                 // The offer is quoted dialogue. A gold check need not deduct anything.
-                foreach (var offer in Parents(paymentLine, incoming).Where(offer =>
-                    RecordValues.Boolean(RecordValues.At(offer, "isPlayer")) == false
-                ))
+                foreach (
+                    var offer in Parents(paymentLine, incoming)
+                        .Where(offer =>
+                            RecordValues.Boolean(RecordValues.At(offer, "isPlayer")) == false
+                        )
+                )
                 {
                     if (Line(offer) is { } quotedOffer)
                         yield return quotedOffer;
@@ -398,12 +412,15 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
             if (debits.Count == 0)
             {
                 // A zero-gold acceptance check does not debit gold, even when the previous line quotes a price.
-                return RecordValues.Elements(RecordValues.At(node, "Conditions")).Any(check =>
-                    RecordValues.AnyReference(check) is { } path
-                    && objects.TryGetValue(path, out var obj)
-                    && WorldSourceData.IsClass(context, obj.Class, "PlayerHasEnoughMoney")
-                    && WorldSourceData.Integer(EventProperties(context, obj)["Required Money"]) == 0
-                )
+                return RecordValues
+                    .Elements(RecordValues.At(node, "Conditions"))
+                    .Any(check =>
+                        RecordValues.AnyReference(check) is { } path
+                        && objects.TryGetValue(path, out var obj)
+                        && WorldSourceData.IsClass(context, obj.Class, "PlayerHasEnoughMoney")
+                        && WorldSourceData.Integer(EventProperties(context, obj)["Required Money"])
+                            == 0
+                    )
                     ? 0
                     : null;
             }
@@ -433,7 +450,10 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
     private static Quote? Line(JsonNode? node) =>
         RecordValues.Text(RecordValues.At(node, "Text")) is { } text
         && !string.IsNullOrWhiteSpace(text)
-            ? new Quote(text.Trim(), RecordValues.Boolean(RecordValues.At(node, "isPlayer")) == true)
+            ? new Quote(
+                text.Trim(),
+                RecordValues.Boolean(RecordValues.At(node, "isPlayer")) == true
+            )
             : null;
 
     private static IEnumerable<string> GrantNotes(AssetRecord dialogue)
