@@ -16,6 +16,9 @@
 -- This isolates an impact branch. It does not reproduce a normal collision.
 -- "watch" lists full Class_C:Function paths whose calls are recorded alongside hits.
 -- "withoutCollision" disables collision on newly spawned actors of the named class to isolate an impact.
+-- "home": true isolates a cast in a series from the casts before it. The first such cast records where the caster
+-- stands and looks. Each one destroys the actors that earlier casts left behind, such as burning ground, returns the
+-- caster to that place and view with full Health, and waits for the caster to return to their own body after a form.
 local p = requirePlayer()
 local world = UEHelpers.GetWorld()
 local controller = UEHelpers.GetPlayerController()
@@ -116,6 +119,19 @@ if not args.thirdPerson and not p['First Person?'] then p['Set camera to First P
 commands['close-tutorials']({})
 statics:SetGamePaused(world, false)
 if valid(state.enemy) then state.enemy:K2_DestroyActor() end
+if args.home then
+    for _, actor in ipairs(state.leftover or {}) do
+        if valid(actor) and actor:GetAddress() ~= p:GetAddress() then actor:K2_DestroyActor() end
+    end
+    if not state.home then
+        local at, view = p:K2_GetActorLocation(), controller:GetControlRotation()
+        state.home = { location = { X = at.X, Y = at.Y, Z = at.Z }, yaw = view.Yaw }
+    end
+    p:K2_SetActorLocation(state.home.location, false, {}, true)
+    controller:SetControlRotation({ Pitch = 0, Yaw = state.home.yaw, Roll = 0 })
+    p.Health = p['Max Health']
+end
+state.leftover = {}
 local rotation = controller:GetControlRotation()
 local yaw = args.yaw or rotation.Yaw
 controller:SetControlRotation({ Pitch = args.pitch or -8, Yaw = yaw, Roll = 0 })
@@ -263,12 +279,16 @@ handle = LoopInGameThreadAfterFrames(1, function()
                 end
             end
         end
-        if castAt and elapsed >= castAt + (args.seconds or 3) then
+        local ends = castAt and castAt + (args.seconds or 3)
+        -- A form puts the player in another body. The next cast needs their own, so a home cast waits for it.
+        local away = args.home and controller.Pawn:GetAddress() ~= p:GetAddress()
+        if ends and elapsed >= ends and (not away or elapsed >= ends + 30) then
             stopSampling()
+            for _, entry in ipairs(capture.objects) do state.leftover[#state.leftover + 1] = entry.object end
             finish({ inputs = inputs, target = target, initial = initial, final = snapshot(), rows = rows, hits = hits,
                 mana = mana, manaSpent = deduction, spawns = capture.spawns, castAt = castAt, receives = capture.receives,
                 recastAt = recastAt, events = capture.events,
-                dispatchedActorOverlap = dispatched })
+                dispatchedActorOverlap = dispatched, awayFromBody = away or nil })
         end
     end)
     if not ok then
