@@ -567,6 +567,9 @@ internal enum OddsEvent
 
     /// <summary>One pick of a source whose number of picks per action depends on the player's skill.</summary>
     Pick,
+
+    /// <summary>One Chiselstone at the Chiseling Station.</summary>
+    Chiselstone,
 }
 
 /// <summary>
@@ -651,6 +654,7 @@ internal enum SourceKind
     Contract,
     SeasonalGift,
     Archaeology,
+    Chiseling,
     Reward,
 
     /// <summary>A slot in a discipline's skill tree.</summary>

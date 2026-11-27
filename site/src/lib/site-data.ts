@@ -82,6 +82,7 @@ export type SourceKind =
   | "contract"
   | "seasonalGift"
   | "archaeology"
+  | "chiseling"
   | "reward"
   | "skillTree"
   | "skillBook"
@@ -91,7 +92,7 @@ export type SourceKind =
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "OddsEvent".
  */
-export type OddsEvent = "container" | "lootSpot" | "kill" | "delivery" | "use" | "catch" | "pick";
+export type OddsEvent = "container" | "lootSpot" | "kill" | "delivery" | "use" | "catch" | "pick" | "chiselstone";
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "PriceRule".

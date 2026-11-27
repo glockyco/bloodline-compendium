@@ -33,6 +33,7 @@ export const sourceHeadings: Record<SourceKind, string> = {
 	contract: 'From Contracts',
 	seasonalGift: 'Seasonal Gifts',
 	archaeology: 'Dug Up',
+	chiseling: 'Chiseled',
 	reward: 'Rewarded',
 	// Random loot names no place or chance, so it follows the ways that do.
 	randomLoot: 'Found as Random Loot'
@@ -82,6 +83,7 @@ export const sourceColumns: Record<SourceKind, string> = {
 	contract: 'Contract',
 	seasonalGift: 'Gift',
 	archaeology: 'Find',
+	chiseling: 'Station',
 	reward: 'Reward',
 	skillTree: 'Discipline',
 	skillBook: 'Location',

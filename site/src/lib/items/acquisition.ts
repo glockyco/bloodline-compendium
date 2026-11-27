@@ -32,6 +32,7 @@ const oddsLabels: Record<OddsEvent, string> = {
 	kill: 'per kill',
 	delivery: 'per delivery',
 	use: 'per use',
+	chiselstone: 'per Chiselstone',
 	catch: 'per catch',
 	pick: 'per item gathered'
 };
@@ -120,6 +121,7 @@ export const sourceVerbs: Record<SourceKind, string> = {
 	contract: 'Given by',
 	seasonalGift: 'Given by',
 	archaeology: 'Dug up from',
+	chiseling: 'Chiseled at',
 	reward: 'Given by',
 	skillTree: 'Unlocked in the tree of',
 	skillBook: 'Learned from a skill book in',

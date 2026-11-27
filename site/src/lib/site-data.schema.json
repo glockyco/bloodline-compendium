@@ -1560,7 +1560,8 @@
         "delivery",
         "use",
         "catch",
-        "pick"
+        "pick",
+        "chiselstone"
       ],
       "title": "OddsEvent"
     },
@@ -3138,6 +3139,7 @@
         "contract",
         "seasonalGift",
         "archaeology",
+        "chiseling",
         "reward",
         "skillTree",
         "skillBook",
