@@ -366,6 +366,12 @@ internal sealed record KnownIssue(
     /// discipline's class path. A discipline notes an issue only through this entry.
     /// </summary>
     public IReadOnlyDictionary<string, IssueNoteText>? Notes { get; init; }
+
+    /// <summary>
+    /// True when the defect concerns something no page describes, such as a weapon assembled from parts, so the
+    /// issue affects no page by design and not for lack of a lab run.
+    /// </summary>
+    public bool? WithoutPages { get; init; }
 }
 
 /// <summary>The registry of reproduced game defects, <c>issues/known-issues.json</c>.</summary>

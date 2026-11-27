@@ -1130,6 +1130,12 @@
         "title": {
           "type": "string"
         },
+        "withoutPages": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
         "workaround": {
           "type": [
             "string",

@@ -48,6 +48,7 @@
     {
       "id": "assembled-weapon-trade-damage",
       "title": "Trading Shows Less Damage for Some Assembled Weapons",
+      "withoutPages": true,
       "effect": "Trading can show less damage than your inventory for the same assembled weapon. A grade D spear made from a Pine Polearm Shaft and Small Copper Spearhead shows three different values.",
       "effectDetails": [
         { "label": "In Trading", "text": "The tooltip shows DAMAGE: 11." },

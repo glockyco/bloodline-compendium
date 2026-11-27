@@ -592,6 +592,7 @@ export interface KnownIssue {
   reportUrl: string | null;
   steps: IssueStep[];
   title: string;
+  withoutPages?: boolean | null;
   workaround: string | null;
 }
 /**
