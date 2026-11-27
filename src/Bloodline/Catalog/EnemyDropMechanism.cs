@@ -26,8 +26,8 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
             var name = LootRecords.Name(properties, "Enemy Name", path);
             var spawned = !placedClasses.Contains(path) && places.Count > 0;
             var sourcePlaces = places;
-            // A creature that no level holds, no spawner lists and nothing else names cannot be met.
-            var absent = sourcePlaces.Count == 0 && !context.NamedElsewhere(path);
+            // A creature that no level holds, no spawner lists and nothing in play leads to cannot be met.
+            var absent = sourcePlaces.Count == 0 && !context.CanAppear(path);
             foreach (var (field, picks) in Pools(context, path))
             foreach (
                 var source in LootRecords.Pool(

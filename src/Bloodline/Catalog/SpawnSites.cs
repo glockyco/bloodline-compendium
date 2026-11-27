@@ -222,7 +222,7 @@ internal sealed class SpawnSites
     /// spawns, as the fort on The Scorched Coast does. The dungeon populator holds such tables and never reads them
     /// (design-facts.md, item 18).
     /// </summary>
-    private bool DrawsEnemies(string owner)
+    internal bool DrawsEnemies(string owner)
     {
         if (draws.TryGetValue(owner, out var known))
             return known;

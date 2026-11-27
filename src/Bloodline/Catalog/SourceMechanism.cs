@@ -126,56 +126,13 @@ internal sealed class CatalogContext
             Classes.TryGetValue(path, out var type) && type.Ancestors.Any(ExcludedClasses.Contains)
         );
 
-    private HashSet<string>? named;
+    private Liveness? liveness;
 
     /// <summary>
-    /// Whether anything besides the class itself could bring it into the world: a class, a table row, a placed
-    /// actor or a conversation that holds a reference to it, or a function that spawns it. A class that no level
-    /// holds and nothing names cannot be found in play.
+    /// Whether anything in a level in play could bring the class into the world, as <see cref="Liveness"/> follows
+    /// it. A class that no level holds and nothing there leads to cannot be found in play.
     /// </summary>
-    public bool NamedElsewhere(string path)
-    {
-        if (named is null)
-        {
-            named = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            void Walk(System.Text.Json.Nodes.JsonNode? node, string owner)
-            {
-                if (node is System.Text.Json.Nodes.JsonObject obj)
-                {
-                    if (RecordValues.AnyReference(obj) is { } reference && reference != owner)
-                        named.Add(reference);
-                    foreach (var (_, value) in obj)
-                        Walk(value, owner);
-                }
-                else if (node is System.Text.Json.Nodes.JsonArray array)
-                {
-                    foreach (var value in array)
-                        Walk(value, owner);
-                }
-            }
-            foreach (var type in Records.Classes)
-                Walk(type.Properties, type.Path);
-            foreach (var row in Records.Tables.SelectMany(table => table.Rows))
-                Walk(row.Values, "");
-            foreach (var actor in Records.Levels.SelectMany(level => level.Actors))
-                Walk(actor.Properties, "");
-            foreach (var dialogue in Records.Dialogues)
-            {
-                Walk(dialogue.Properties, "");
-                foreach (var inner in dialogue.Objects)
-                    Walk(inner.Properties, "");
-            }
-            foreach (var function in Records.Code?.Functions ?? [])
-            {
-                if (!function.Calls.Contains("/Script/Engine:BeginDeferredActorSpawnFromClass"))
-                    continue;
-                foreach (var read in function.Reads)
-                    if (read.Path.Split('.')[0] != function.Package)
-                        named.Add(read.Path);
-            }
-        }
-        return named.Contains(path);
-    }
+    public bool CanAppear(string path) => (liveness ??= new Liveness(this)).IsLive(path);
 
     public EntityReference ItemLink(string path) =>
         Items.TryGetValue(path, out var item) && !IsExcludedClass(path)

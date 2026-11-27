@@ -546,13 +546,19 @@ public sealed class LootMechanismTests
     }
 
     [Theory]
-    [InlineData(false, true)]
-    [InlineData(true, false)]
-    public void EnemyThatNothingPlacesOrNamesIsOnlyInTheGameFiles(bool named, bool unconfirmed)
+    [InlineData(false, true, true)]
+    [InlineData(true, true, false)]
+    [InlineData(true, false, true)]
+    public void EnemyThatNothingInPlayLeadsToIsOnlyInTheGameFiles(
+        bool named,
+        bool keeperPlaced,
+        bool unconfirmed
+    )
     {
-        // A creature that another class holds a reference to may be brought in while the game runs, so only one
-        // that nothing names counts as absent from the world.
+        // A creature that an object in a level names may be brought in while the game runs. One that nothing
+        // names, or only a class that no level holds, counts as absent from the world.
         const string enemy = "/Game/Invented/Beast.Beast_C";
+        const string keeperClass = "/Game/Invented/Keeper.Keeper_C";
         var properties = Parse("""{"Enemy Name":{"$text":"Marsh beast"}}""");
         properties["Loot Table"] = Pool();
         var keeper = Parse(
@@ -561,10 +567,15 @@ public sealed class LootMechanismTests
         var source = Assert
             .Single(
                 new EnemyDropMechanism().FindSources(
-                    Context([
-                        new ClassRecord(enemy, [], properties),
-                        new ClassRecord("/Game/Invented/Keeper.Keeper_C", [], keeper),
-                    ])
+                    Context(
+                        [
+                            new ClassRecord(enemy, [], properties),
+                            new ClassRecord(keeperClass, [], keeper),
+                        ],
+                        keeperPlaced
+                            ? [new ActorRecord("Keeper", keeperClass, new JsonObject())]
+                            : []
+                    )
                 )
             )
             .Source;

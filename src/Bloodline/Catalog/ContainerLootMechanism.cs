@@ -67,9 +67,9 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                     name = LootRecords.DisplayName(presetName);
                 }
             }
-            // A container that no level holds and nothing else names cannot be found, as run bandit-chests found
+            // A container that no level holds and nothing in play leads to cannot be found, as run bandit-chests found
             // no Bandit Chest in the one dungeon whose script looks for them.
-            var absent = places.Count == 0 && !context.NamedElsewhere(path);
+            var absent = places.Count == 0 && !context.CanAppear(path);
             foreach (
                 var source in LootRecords.Pool(
                     context,
