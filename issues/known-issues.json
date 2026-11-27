@@ -471,7 +471,7 @@
       "notes": {
         "/Game/BloodlinesAlpha/Interactables/Weapons/2H_Weapons/TwoHanded_Tool_Weapons/MiningPickaxe.MiningPickaxe_C": {
           "effect": "Some Mining Picks in the Glennheim Hills lie in pairs. Taking one can make the other disappear about a minute after the area next loads.",
-          "workaround": "Take both picks of a pair before you leave the area."
+          "workaround": "Take both Mining Picks of a pair before you leave the area."
         },
         "/Game/BloodlinesAlpha/Interactables/BagOfGold100gp.BagOfGold100gp_C": {
           "effect": "Some Bags of Gold in the Glennheim Hills lie in pairs. Taking one can make the other disappear about a minute after the area next loads.",
