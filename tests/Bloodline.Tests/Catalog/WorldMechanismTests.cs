@@ -188,7 +188,7 @@ public sealed class WorldMechanismTests
     [InlineData("/Invented/Dialogue_Unused/Tale.Tale", true, false)]
     [InlineData("/Invented/Dialogue_Unused/Tale.Tale", false, true)]
     [InlineData("/Invented/Tale.Tale", true, false)]
-    public void DialogueUsesItsSpeakerAndPlacementOverTheFolderName(
+    public void DialogueNamesThePlacedPersonAndConfirmsByPlacementNotFolder(
         string path,
         bool placed,
         bool unconfirmed
@@ -227,8 +227,8 @@ public sealed class WorldMechanismTests
             )
             .Source;
         Assert.Equal(unconfirmed, source.Unconfirmed);
-        // Only a placement that swaps the conversation in speaks under its name.
-        Assert.Equal(placed ? "Spoken name" : "Tale", source.Name);
+        // A placed person keeps the name over their head, whatever name the conversation carries.
+        Assert.Equal(placed ? "Placed name" : "Tale", source.Name);
         Assert.Equal(source.Name, source.Entity.Name);
         if (placed)
             Assert.Equal("/Invented/Coast", Assert.Single(source.Places).Key);

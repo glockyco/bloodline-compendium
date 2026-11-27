@@ -76,9 +76,6 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
                 continue;
             }
             var package = dialogue.Path.Split('.')[0];
-            var speaker = RecordValues.Text(dialogue.Properties["Name"]);
-            if (string.IsNullOrWhiteSpace(speaker))
-                speaker = null;
             var placedUsers = placements[package].ToArray();
             var users =
                 new List<(
@@ -101,19 +98,12 @@ internal sealed class DialogueGrantMechanism : ISourceMechanism
                         package,
                         StringComparison.OrdinalIgnoreCase
                     );
-                // A placement that swaps in another conversation speaks under that conversation's name, as the arena's
-                // waitress does (run design-facts). An actor with its own conversation keeps its own name.
-                var swapped =
-                    usesDialogue
-                    && !defaultsByDialogue[package].Any(type => type.Path == placement.Actor.Class);
+                // A person is named as the game names them over their head, which is the actor's name. The dialogue
+                // window can show another, as it calls Mary Osterhout "Groundskeeper" and the arena's Heidi Blanchard
+                // "Mysha Bullock" (run shown-names), and that name does not tell a player whom to look for.
                 users.Add(
                     (
-                        WorldSourceData.PlacementEntity(
-                            context,
-                            placement,
-                            EntityKind.Person,
-                            swapped ? speaker : null
-                        ),
+                        WorldSourceData.PlacementEntity(context, placement, EntityKind.Person),
                         context.Places.Get(placement.Level),
                         generated,
                         usesDialogue
