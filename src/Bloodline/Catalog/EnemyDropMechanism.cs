@@ -29,23 +29,38 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
             if (context.Classes.TryGetValue(placement.Actor.Class, out var placed))
                 Spawns(place, placed.Properties, []);
         }
-        // A level's own script can spawn an enemy, as Glennheim Hills spawns The Copper King.
+        // A level's own script can spawn an enemy, as Glennheim Hills spawns The Copper King. What a stream's chat
+        // spawns is left out, because a player does not meet it. A level's script also opens the window that lists
+        // the enemies a player can call there, as in Harbingers Arena.
         var levels = context
             .Records.Levels.Select(level => level.Path)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
         foreach (var function in context.Records.Code?.Functions ?? [])
         {
+            if (!levels.Contains(function.Package))
+                continue;
+            var place = context.Places.Get(function.Package);
+            var read = function
+                .Reads.Where(read => read.Kind == Code.CodeTargetKind.Object)
+                .Select(read => read.Path)
+                .ToArray();
             if (
-                levels.Contains(function.Package)
-                && function.Calls.Contains("/Script/Engine:BeginDeferredActorSpawnFromClass")
+                function.Calls.Contains("/Script/Engine:BeginDeferredActorSpawnFromClass")
+                && !function.Name.Contains("TwitchIntegrator", StringComparison.Ordinal)
             )
-                Spawns(
-                    context.Places.Get(function.Package),
-                    [],
-                    function
-                        .Reads.Where(read => read.Kind == Code.CodeTargetKind.Object)
-                        .Select(read => read.Path)
-                );
+                Spawns(place, [], read);
+            foreach (var path in read)
+            {
+                if (context.Classes.TryGetValue(path, out var window))
+                    Spawns(
+                        place,
+                        [],
+                        RecordValues
+                            .Elements(window.Properties["Available Enemies"])
+                            .Select(RecordValues.AnyReference)
+                            .OfType<string>()
+                    );
+            }
         }
 
         void Spawns(
