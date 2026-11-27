@@ -417,7 +417,7 @@ internal static class WorldSourceData
             _ => null,
         };
 
-    private static RelationCondition QuestCondition(
+    internal static RelationCondition QuestCondition(
         CatalogContext context,
         JsonObject properties,
         string state

@@ -83,11 +83,17 @@ internal sealed class PickupObjectMechanism : ISourceMechanism
                         path,
                         WorldSourceData.Name(properties, path, context.ItemLink(item).Name)
                     ),
-                    WorldSourceData.Conditions(
-                        context,
-                        properties,
-                        places.Count == 1 ? places[0].Key : null
-                    ),
+                    [
+                        .. WorldSourceData.Conditions(
+                            context,
+                            properties,
+                            places.Count == 1 ? places[0].Key : null
+                        ),
+                        // BP_QuestItem_FetchQuest:ReceiveTick shows the object only while its quest is active.
+                        .. type.Path == FetchQuestItem
+                            ? [WorldSourceData.QuestCondition(context, properties, "active")]
+                            : Array.Empty<RelationCondition>(),
+                    ],
                     notes,
                     AlwaysPresent.Contains(path)
                         && RecordValues.Boolean(properties["Need Quest?"]) != true
@@ -121,11 +127,15 @@ internal sealed class PickupObjectMechanism : ISourceMechanism
         }
     }
 
+    private const string FetchQuestItem =
+        "/Game/BloodlinesAlpha/Interactables/BP_QuestItem_FetchQuest.BP_QuestItem_FetchQuest_C";
+
     private static bool IsPickupObject(ClassRecord type) =>
         type.Path == ItemIdentity.Interactable
         || type.Ancestors.Contains(ItemIdentity.Interactable)
         || type.Path == LootItem
         || type.Ancestors.Contains(LootItem)
+        || type.Path == FetchQuestItem
         || Collectibles.Any(rule => type.Path == rule.Class || type.Ancestors.Contains(rule.Class));
 
     private static EntitySource Grant(
