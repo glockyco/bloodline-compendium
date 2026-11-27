@@ -174,7 +174,7 @@ internal sealed class SpawnSites
                 Notes =
                 [
                     .. candidate.Source.Notes,
-                    .. names.Select(name => $"Takes the place of {name} during a conversation."),
+                    .. names.Select(name => $"Replaces {name} as you advance the conversation"),
                 ],
             },
         };

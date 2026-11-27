@@ -2,9 +2,16 @@ import { render } from 'svelte/server';
 import { expect, it, vi } from 'vitest';
 import SourceRow from './SourceRow.svelte';
 import fixture from '../../../fixtures/site-data/items/lanternedge.json';
+import kinds from '../../../fixtures/site-data/kinds.json';
 import type { ItemPage, Source } from '../site-data.js';
 
-vi.mock('$app/state', () => ({ page: { data: { kinds: [] } } }));
+vi.mock('$app/state', () => ({
+	page: {
+		get data() {
+			return { kinds };
+		}
+	}
+}));
 
 const container = (fixture as ItemPage).sources.find((source) => source.kind === 'containerLoot')!;
 const spawnCell = (spawn: Source['spawn']) => {
@@ -52,4 +59,35 @@ it.each([undefined, null])('renders a fixed chance when the upper bound is %s', 
 	});
 	expect(body).toContain('25%');
 	expect(body).not.toContain('25% to');
+});
+
+it('links an event-only source without saying its location is unknown', () => {
+	const { body } = render(SourceRow, {
+		props: {
+			source: {
+				...container,
+				places: [],
+				events: [
+					{
+						kind: 'calendar',
+						name: 'Ghost Ship',
+						page: {
+							kind: 'mechanic',
+							key: 'calendar-events',
+							slug: 'calendar-events',
+							name: 'Calendar Events',
+							fragment: 'ghost-ship',
+							icon: null
+						}
+					}
+				]
+			},
+			id: 'event-only-test'
+		}
+	});
+	expect(body).toContain('Calendar event:');
+	expect(body).toContain('href="/mechanics/calendar-events/#ghost-ship"');
+	expect(body).toContain('Ghost Ship');
+	expect(body).not.toContain('Location unknown');
+	expect(body).not.toContain('No fixed spawn');
 });

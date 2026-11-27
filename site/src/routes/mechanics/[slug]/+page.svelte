@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { alignSide } from '#lib/ui/align-side.js';
 	import type { MechanicTable } from '#lib/site-data.js';
 	import Chance from '#lib/ui/Chance.svelte';
@@ -83,7 +84,8 @@
 							collapse={false}
 						>
 							{#snippet row(cells, index)}
-								<tr id={table.anchors?.[index]}>
+								{@const anchor = table.anchors?.[index]}
+								<tr id={anchor} class:anchor-target={anchor && page.url.hash === `#${anchor}`}>
 									{#each cells as cell, column (column)}
 										{@const chances = table.chanceColumns?.[column]?.[index]}
 										<td
@@ -107,6 +109,11 @@
 															<Chance min={chance.value} {id} />
 														{/if}
 													{/each}
+												</div>
+											{:else if column === 0 && table.rowNotes?.[index]}
+												<div>
+													<LinkedText text={cell} />
+													<p class="event-note">{table.rowNotes[index]}</p>
 												</div>
 											{:else}
 												<LinkedText text={cell} />
@@ -132,7 +139,8 @@
 	.text-layout {
 		margin-top: var(--gap-section);
 	}
-	tr:target {
+	tr:target,
+	tr.anchor-target {
 		background: var(--surface-raised);
 	}
 	@container (width < 40rem) {
@@ -148,6 +156,10 @@
 		justify-content: space-between;
 		gap: var(--gap-inline);
 		white-space: nowrap;
+	}
+	.event-note {
+		margin-top: var(--gap-inline);
+		color: var(--text-soft);
 	}
 	.evidence {
 		display: grid;

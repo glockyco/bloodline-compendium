@@ -98,7 +98,8 @@
 				{eventLabels[line.kind][
 					line.events.length === 1 ? 0 : 1
 				]}{#each line.events as event, index (event.name)}{index ? ', ' : ' '}<EntityLink
-						entity={event.page}>{event.name}</EntityLink
+						entity={event.page}
+						class="source-event">{event.name}</EntityLink
 					>{/each}
 			</p>{/each}
 		{#if source.inputs.length || (!summarized && source.notes.length) || source.quotes?.length}
@@ -180,6 +181,10 @@
 </tr>
 
 <style>
+	:global(.source-event) {
+		display: inline-block;
+		max-width: 100%;
+	}
 	.currency-price {
 		white-space: normal;
 	}

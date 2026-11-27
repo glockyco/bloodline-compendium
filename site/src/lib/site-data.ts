@@ -895,6 +895,9 @@ export interface MechanicTable {
     [k: string]: MechanicChance[][];
   } | null;
   headings: string[];
+  rowNotes?: {
+    [k: string]: string;
+  } | null;
   rows: string[][];
 }
 /**

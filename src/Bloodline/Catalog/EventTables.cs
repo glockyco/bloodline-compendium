@@ -156,6 +156,7 @@ internal static class EventTables
             .Calendar.OrderByDescending(happening => happening.Chance)
             .ThenBy(happening => happening.Name, StringComparer.Ordinal)
             .ToArray();
+        var ghostShip = Array.FindIndex(ordered, happening => happening.Name == "Ghost Ship");
         return new MechanicTable(
             ["Event", "Calendar Text", "Areas", "Chance per Day"],
             [
@@ -174,6 +175,13 @@ internal static class EventTables
         )
         {
             Anchors = [.. ordered.Select(happening => ItemIdentity.Slug(happening.Name))],
+            RowNotes =
+                ghostShip >= 0
+                    ? new Dictionary<int, string>
+                    {
+                        [ghostShip] = "Destroy the ship to find its chest.",
+                    }
+                    : null,
             ChanceColumns = new Dictionary<int, IReadOnlyList<IReadOnlyList<MechanicChance>>>
             {
                 [3] =

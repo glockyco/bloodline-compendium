@@ -145,7 +145,7 @@
 	},
 	{
 		"name": "World Map Events",
-		"intro": "World map events are the ambushes, camps, animals and gathering spots that appear around you while you travel the world map. Move close to an event to see how you can take part.",
+		"intro": "World map events are the ambushes, camps, animals and gathering spots that appear around you while you travel the world map.",
 		"sections": [
 			{
 				"heading": "How Events Appear",
@@ -166,8 +166,7 @@
 			{
 				"heading": "What Each Event Brings",
 				"paragraphs": [
-					"Each percentage is the chance that a new event in that terrain is of this kind.",
-					"Roaming Bandits walk across the map and bring the same bandits as a Bandit Ambush."
+					"Each percentage is the chance that a new event in that terrain is of this kind."
 				],
 				"data": "worldMapEventsWithChances"
 			}
@@ -181,12 +180,12 @@
 	},
 	{
 		"name": "Calendar Events",
-		"intro": "Calendar events change one area for a day, with more enemies, falling meteors, a ghost ship or better harvests. The calendar shows which event comes to which area about two weeks ahead.",
+		"intro": "Calendar events change one area for a day, with more enemies, falling meteors, a ghost ship or better harvests. The game schedules events about two weeks ahead.",
 		"sections": [
 			{
 				"heading": "How Events Are Chosen",
 				"paragraphs": [
-					"Each day has one event in one area, except Soulfaring Night on Vohath 15 of the year 874. The game picks one of 18 areas at random and then draws one of the events that can happen there.",
+					"The game schedules at most one event per day. It skips Soulfaring Night on Vohath 15 of the year 874. For each draw, it chooses one of 18 areas at random, then draws an event that can happen there.",
 					"The event happens while you are in its area on its day."
 				]
 			},

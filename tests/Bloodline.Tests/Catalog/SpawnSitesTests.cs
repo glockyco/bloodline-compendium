@@ -119,7 +119,7 @@ public sealed class SpawnSitesTests
         );
         var arriving = sites.Arriving(candidate);
         Assert.Equal(
-            "Takes the place of Old Hermit during a conversation.",
+            "Replaces Old Hermit as you advance the conversation",
             Assert.Single(arriving.Source.Notes)
         );
     }

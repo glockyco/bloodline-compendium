@@ -757,6 +757,9 @@ internal sealed record MechanicTable(
     /// <summary>A fragment for each row that other pages link to, or null when no row is a link target.</summary>
     public IReadOnlyList<string>? Anchors { get; init; }
 
+    /// <summary>Short guidance shown beside the row's name, indexed by row.</summary>
+    public IReadOnlyDictionary<int, string>? RowNotes { get; init; }
+
     /// <summary>Chance cells by column, in row order. The matching text cells are empty.</summary>
     public IReadOnlyDictionary<
         int,

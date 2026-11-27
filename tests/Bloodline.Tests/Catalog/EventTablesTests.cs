@@ -106,6 +106,31 @@ public sealed class EventTablesTests
     }
 
     [Fact]
+    public void CalendarKeepsTheGhostShipRewardBesideItsAnchorAndOutsideCalendarText()
+    {
+        var context = EventRecords.Create(
+            worldMap: false,
+            calendar: true,
+            calendarRows:
+            [
+                EventRecords.CalendarRow(
+                    "Ghost Ship",
+                    "An Ethereal Airship will appear.",
+                    1,
+                    "Area 1"
+                ),
+            ]
+        );
+        var table = Assert
+            .Single(Assert.Single(EventTables.Fill([Page("calendarEvents")], context)).Sections)
+            .Table!;
+
+        Assert.Equal("ghost-ship", Assert.Single(table.Anchors!));
+        Assert.Equal("An Ethereal Airship will appear.", Assert.Single(table.Rows)[1]);
+        Assert.Equal("Destroy the ship to find its chest.", table.RowNotes![0]);
+    }
+
+    [Fact]
     public void UnknownEventTableNameFailsWithPageName()
     {
         var context = EventRecords.Create(worldMap: false);

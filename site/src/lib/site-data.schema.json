@@ -1438,6 +1438,15 @@
           },
           "type": "array"
         },
+        "rowNotes": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
         "rows": {
           "items": {
             "items": {
