@@ -74,6 +74,7 @@ public sealed class EventTablesTests
             [
                 new("Chances by Terrain", []) { Data = "worldMapEventChances" },
                 new("What Each Event Brings", []) { Data = "worldMapEvents" },
+                new("Terrain", []) { Data = "worldMapEventTerrains" },
             ],
         };
         var page = Assert.Single(EventTables.Fill([content], context));
@@ -84,6 +85,7 @@ public sealed class EventTablesTests
         Assert.Equal("Pine Forest", matrix.Headings[1]);
         Assert.Equal(["bandit-ambush", "bear"], effects.Anchors);
         Assert.Equal(["chances-bandit-ambush", "chances-bear"], matrix.Anchors);
+        Assert.Equal(new MechanicCellLink("terrain", "Find your terrain"), matrix.ArrivalLink);
         Assert.Equal(
             new MechanicCellLink("chances-bandit-ambush", "Terrain chances for Bandit Ambush"),
             effects.CellLinks![0][0]
@@ -130,6 +132,7 @@ public sealed class EventTablesTests
             [
                 new("Events", []) { Data = "calendarEvents" },
                 new("Calendar Areas", []) { Data = "calendarEventAreas" },
+                new("How Events Are Chosen", []) { Data = "calendarEventGuide" },
             ],
         };
         var page = Assert.Single(
@@ -144,6 +147,11 @@ public sealed class EventTablesTests
         Assert.Equal(["Rabbit Swarm", "Rabbits appear.", "Area 1", ""], table.Rows[1]);
         Assert.Equal(new MechanicCellLink("calendar-areas"), table.CellLinks![2][0]);
         Assert.Equal(page.Sections[1].Anchor, table.CellLinks[2][0].Anchor);
+        Assert.Equal(
+            new MechanicCellLink("how-events-are-chosen", "Check Calendar for the date and area"),
+            table.ArrivalLink
+        );
+        Assert.Equal(page.Sections[2].Anchor, table.ArrivalLink!.Anchor);
         Assert.Single(table.CellLinks[2]);
         Assert.Equal(1.0 / 36, Assert.Single(table.ChanceColumns![3][1]).Value, 10);
     }

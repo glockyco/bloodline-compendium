@@ -76,6 +76,8 @@
 					{#if section.table}
 						{@const table = section.table}
 						{@const numeric = numericColumns(table)}
+						{@const chanceMatrix =
+							table.chanceContext && numeric.every((value, column) => !column || value)}
 						{#if table.chanceContext}
 							<p>{table.chanceContext}</p>
 						{/if}
@@ -93,6 +95,7 @@
 										{@const chances = table.chanceColumns?.[column]?.[index]}
 										{@const cellLink = table.cellLinks?.[column]?.[index]}
 										{@const rowNote = column === 0 ? table.rowNotes?.[index] : undefined}
+										{@const showArrival = column === 0 && (chanceMatrix || table.arrivalLink)}
 										<td
 											class:numeric={numeric[column]}
 											class:event-description={table.anchors && column > 0 && !numeric[column]}
@@ -125,7 +128,7 @@
 												</div>
 											{:else if cellLink && !cellLink.label}
 												<a href={`#${cellLink.anchor}`}>{cell}</a>
-											{:else if rowNote || cellLink}
+											{:else if rowNote || cellLink || showArrival}
 												<div>
 													<LinkedText text={cell} />
 													{#if rowNote}<p class="event-note">{rowNote}</p>{/if}
@@ -133,6 +136,16 @@
 														<p class="event-note">
 															<a href={`#${cellLink.anchor}`}>{cellLink.label}</a>
 														</p>
+													{/if}
+													{#if showArrival}
+														<div class="arrival-context">
+															{#if chanceMatrix}<p>{table.chanceContext}</p>{/if}
+															{#if table.arrivalLink}
+																<a href={`#${table.arrivalLink.anchor}`}
+																	>{table.arrivalLink.label}</a
+																>
+															{/if}
+														</div>
 													{/if}
 												</div>
 											{:else}
@@ -178,12 +191,18 @@
 		white-space: nowrap;
 	}
 	.chance-context,
+	.arrival-context,
 	.matrix-terrain {
 		display: none;
 	}
 	:is(tr:target, tr.anchor-target) .chance-context {
 		display: block;
 		margin-block-end: var(--gap-line);
+		color: var(--text-soft);
+	}
+	:is(tr:target, tr.anchor-target) .arrival-context {
+		display: block;
+		margin-block-start: var(--gap-inline);
 		color: var(--text-soft);
 	}
 	@container (width >= 40rem) {

@@ -891,6 +891,7 @@ export interface MechanicSection {
  */
 export interface MechanicTable {
   anchors?: string[] | null;
+  arrivalLink?: MechanicCellLink | null;
   cellLinks?: {
     [k: string]: {
       [k: string]: MechanicCellLink;

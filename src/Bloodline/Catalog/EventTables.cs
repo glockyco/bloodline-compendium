@@ -32,6 +32,7 @@ internal static class EventTables
         section.Data switch
         {
             null => section,
+            "calendarEventGuide" => section with { Data = null },
             "calendarEventAreas" => section with
             {
                 Data = null,
@@ -47,7 +48,10 @@ internal static class EventTables
     private static MechanicTable Build(CatalogContext context, MechanicContent page, string data) =>
         data switch
         {
-            "worldMapEventChances" => Chances(context.Events),
+            "worldMapEventChances" => Chances(
+                context.Events,
+                SectionAnchor(page, "worldMapEventTerrains")
+            ),
             "worldMapEventTerrains" => Terrains(context.Events),
             "worldMapEvents" => WorldMap(
                 context,
@@ -56,16 +60,20 @@ internal static class EventTables
             "worldMapEventsWithChances" => WorldMap(context, includeChances: true),
             "calendarEvents" => Calendar(
                 context.Events,
-                page.Sections.FirstOrDefault(section =>
-                    section.Data == "calendarEventAreas"
-                )?.Heading
+                SectionAnchor(page, "calendarEventAreas"),
+                SectionAnchor(page, "calendarEventGuide")
             ),
             _ => throw new InvalidDataException(
                 $"The mechanic page {page.Name} names the table {data}, which the catalog does not build."
             ),
         };
 
-    private static MechanicTable Chances(GameEvents events)
+    private static string? SectionAnchor(MechanicContent page, string data) =>
+        page.Sections.FirstOrDefault(section => section.Data == data) is { } section
+            ? ItemIdentity.Slug(section.Heading)
+            : null;
+
+    private static MechanicTable Chances(GameEvents events, string? terrainAnchor)
     {
         var ordered = OrderedWorldMap(events);
         return new MechanicTable(
@@ -82,6 +90,7 @@ internal static class EventTables
                 .. ordered.Select(happening => ChanceAnchor(ItemIdentity.Slug(happening.Name))),
             ],
             ChanceContext = NextEventChance,
+            ArrivalLink = terrainAnchor is null ? null : new(terrainAnchor, "Find your terrain"),
             ChanceColumns = Enumerable
                 .Range(0, events.Terrains.Count)
                 .ToDictionary(
@@ -185,16 +194,18 @@ internal static class EventTables
         };
     }
 
-    private static MechanicTable Calendar(GameEvents events, string? areasHeading)
+    private static MechanicTable Calendar(
+        GameEvents events,
+        string? areasAnchor,
+        string? guideAnchor
+    )
     {
         var ordered = events
             .Calendar.OrderByDescending(happening => happening.Chance)
             .ThenBy(happening => happening.Name, StringComparer.Ordinal)
             .ToArray();
         var ghostShip = Array.FindIndex(ordered, happening => happening.Name == "Ghost Ship");
-        var areaLink = areasHeading is null
-            ? null
-            : new MechanicCellLink(ItemIdentity.Slug(areasHeading));
+        var areaLink = areasAnchor is null ? null : new MechanicCellLink(areasAnchor);
         Dictionary<int, MechanicCellLink>? areaLinks = null;
         if (areaLink is not null)
         {
@@ -220,6 +231,9 @@ internal static class EventTables
         )
         {
             Anchors = [.. ordered.Select(happening => ItemIdentity.Slug(happening.Name))],
+            ArrivalLink = guideAnchor is null
+                ? null
+                : new(guideAnchor, "Check Calendar for the date and area"),
             CellLinks = areaLinks is null
                 ? null
                 : new Dictionary<int, IReadOnlyDictionary<int, MechanicCellLink>>

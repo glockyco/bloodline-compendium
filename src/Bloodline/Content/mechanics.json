@@ -186,7 +186,8 @@
 					"The game schedules at most one event per day. It skips Soulfaring Night on Vohath 15 of the year 874. For each draw, it chooses one of 18 areas at random, then draws an event that can happen there.",
 					"Open Calendar on the world map and check a date for the event and its area. Your Character Sheet also has a Calendar button.",
 					"The event happens while you are in its area on its day."
-				]
+				],
+				"data": "calendarEventGuide"
 			},
 			{
 				"heading": "Events",

@@ -766,8 +766,11 @@ internal sealed record MechanicTable(
         IReadOnlyDictionary<int, MechanicCellLink>
     >? CellLinks { get; init; }
 
-    /// <summary>What the chances measure, shown before the table and beside labelled chances on a linked row.</summary>
+    /// <summary>What the chances measure, shown before the table and on a linked row.</summary>
     public string? ChanceContext { get; init; }
+
+    /// <summary>A related section linked from the row the reader arrived at.</summary>
+    public MechanicCellLink? ArrivalLink { get; init; }
 
     /// <summary>Chance cells by column, in row order. The matching text cells are empty.</summary>
     public IReadOnlyDictionary<
