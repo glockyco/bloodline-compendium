@@ -5,6 +5,7 @@ namespace Bloodline.Catalog;
 
 internal sealed class EnemyDropMechanism : ISourceMechanism
 {
+    private static readonly string[] SpawnMapFields = ["Spawns", "Enemies"];
     private static readonly string[] PopulationFields = ["spawnDataArr", "npcParametersArr"];
     private static readonly string[] SpawnClassFields =
     [
@@ -20,7 +21,14 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
             StringComparer.OrdinalIgnoreCase
         );
         foreach (var placement in context.Placements)
-            Spawns(context.Places.Get(placement.Level), placement.Properties, []);
+        {
+            var place = context.Places.Get(placement.Level);
+            Spawns(place, placement.Properties, []);
+            // A placement holds only what it changes, so what its class spawns by default counts too, as the
+            // fort on The Scorched Coast spawns its Finfolk.
+            if (context.Classes.TryGetValue(placement.Actor.Class, out var placed))
+                Spawns(place, placed.Properties, []);
+        }
         // A level's own script can spawn an enemy, as Glennheim Hills spawns The Copper King.
         var levels = context
             .Records.Levels.Select(level => level.Path)
@@ -59,7 +67,8 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
                         continue;
                     Add(RecordValues.AnyReference(RecordValues.At(entry, "classNPC")));
                 }
-                foreach (var (key, value) in RecordValues.MapEntries(properties["Spawns"]))
+                foreach (var field in SpawnMapFields)
+                foreach (var (key, value) in RecordValues.MapEntries(properties[field]))
                 {
                     if (RecordValues.Number(value) is > 0)
                         Add(RecordValues.AnyReference(key));
