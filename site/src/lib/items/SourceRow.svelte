@@ -95,11 +95,13 @@
 				{@render placeList()}
 			</p>{/if}
 		{#each eventLines as line (line.kind)}<p class="source-places">
-				{eventLabels[line.kind][
-					line.events.length === 1 ? 0 : 1
-				]}{#each line.events as event, index (event.name)}{index ? ', ' : ' '}<EntityLink
-						entity={event.page}
-						class="source-event">{event.name}</EntityLink
+				{eventLabels[line.kind][line.events.length === 1 ? 0 : 1] +
+					' '}{#each line.events as event, index (event.name)}{index > 0 ? ' ' : ''}<span
+						class="source-event"
+						><EntityLink entity={event.page}>{event.name}</EntityLink>{index ===
+						line.events.length - 1
+							? ''
+							: ','}</span
 					>{/each}
 			</p>{/each}
 		{#if source.inputs.length || (!summarized && source.notes.length) || source.quotes?.length}
@@ -181,7 +183,7 @@
 </tr>
 
 <style>
-	:global(.source-event) {
+	.source-event {
 		display: inline-block;
 		max-width: 100%;
 	}
