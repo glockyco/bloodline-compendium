@@ -124,7 +124,10 @@ public sealed class SpawnSitesTests
     }
 
     [Theory]
-    [InlineData(true, "Choose \"*Fight!*\" in Aida's conversation to make the demon appear")]
+    [InlineData(
+        true,
+        "Follow The Mirage to the cave north of Dariush. Choose \"*Fight!*\" in Aida's conversation to make the demon appear"
+    )]
     [InlineData(false, "Replaces Aida as you advance the conversation")]
     public void AidaNoteNamesActualPlayerReplyThatTriggersReplacement(bool player, string expected)
     {

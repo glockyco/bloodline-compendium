@@ -291,7 +291,7 @@ internal sealed class SpawnSites
         string name
     )
     {
-        // The lab reached this conversation through Force Talk, then advanced through the replacement's reply.
+        // The Mirage sends the player to Dariush, who points out the cave. The lab verified Aida's final reply.
         if (dialogue.Path == AidaDialogue)
         {
             foreach (var node in RecordValues.Elements(dialogue.Properties["Data"]))
@@ -310,7 +310,7 @@ internal sealed class SpawnSites
                             )
                         )
                 )
-                    return $"Choose \"{reply}\" in {name}'s conversation to make the demon appear";
+                    return $"Follow The Mirage to the cave north of Dariush. Choose \"{reply}\" in {name}'s conversation to make the demon appear";
             }
         }
         return $"Replaces {name} as you advance the conversation";
