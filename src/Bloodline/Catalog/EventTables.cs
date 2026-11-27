@@ -230,6 +230,7 @@ internal static class EventTables
         )
         {
             Anchors = [.. ordered.Select(happening => ItemIdentity.Slug(happening.Name))],
+            GameColumns = [1],
             ArrivalLink = guideAnchor is null
                 ? null
                 : new(guideAnchor, "Check Calendar for the date and area"),

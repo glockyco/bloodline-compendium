@@ -183,7 +183,7 @@
 			{
 				"heading": "How Events Are Chosen",
 				"paragraphs": [
-					"A day has at most one event. For each day the game picks one of 18 areas at random and then an event that can happen there. Soulfaring Night, on Vohath 15 of 874, gets none.",
+					"A day has at most one event. For each day the game chooses one of 18 areas at random and then an event that can happen there. Soulfaring Night, on Vohath 15 of 874, gets none.",
 					"Open Calendar on the world map and check a date for the event and its area. Your Character Sheet also has a Calendar button.",
 					"The event happens while you are in its area on its day."
 				],

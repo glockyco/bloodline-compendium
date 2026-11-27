@@ -776,6 +776,9 @@ internal sealed record MechanicTable(
     /// <summary>What the chances measure, shown before the table and on a linked row.</summary>
     public string? ChanceContext { get; init; }
 
+    /// <summary>The columns that quote the game's own text, such as the calendar's event descriptions.</summary>
+    public IReadOnlyList<int>? GameColumns { get; init; }
+
     /// <summary>A related section linked from the row the reader arrived at.</summary>
     public MechanicCellLink? ArrivalLink { get; init; }
 

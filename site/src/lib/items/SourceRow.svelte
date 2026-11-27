@@ -104,7 +104,12 @@
 							: ','}</span
 					>{/each}
 			</p>{/each}
-		{#each source.triggers ?? [] as trigger (trigger)}<p class="source-places">{trigger}</p>{/each}
+		{#each source.triggers ?? [] as trigger (trigger)}<p class="source-places">
+				<!-- A reply in quotes is the game's own text. -->
+				{#each trigger.split(/("[^"]+")/) as part, index (index)}{#if index % 2}<span data-game
+							>{part}</span
+						>{:else}{part}{/if}{/each}
+			</p>{/each}
 		{#if source.inputs.length || (!summarized && source.notes.length) || source.quotes?.length}
 			<details class="row-details">
 				<summary

@@ -901,6 +901,7 @@ export interface MechanicTable {
     [k: string]: MechanicChance[][];
   } | null;
   chanceContext?: string | null;
+  gameColumns?: number[] | null;
   headings: string[];
   rowNotes?: {
     [k: string]: string;

@@ -99,6 +99,7 @@
 										<td
 											class:numeric={numeric[column]}
 											class:event-description={table.anchors && column > 0 && !numeric[column]}
+											data-game={table.gameColumns?.includes(column) ? '' : undefined}
 										>
 											{#if chances}
 												<div>

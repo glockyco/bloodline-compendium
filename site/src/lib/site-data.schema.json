@@ -1472,6 +1472,15 @@
             "null"
           ]
         },
+        "gameColumns": {
+          "items": {
+            "type": "integer"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
         "headings": {
           "items": {
             "type": "string"
