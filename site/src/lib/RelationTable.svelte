@@ -102,6 +102,12 @@
 		border-radius: var(--radius-1);
 		background: var(--surface-panel);
 	}
+	/* The panel clips what leaves it, so a hint in the last rows opens upward. */
+	.relation-panel :global(tbody tr:nth-last-child(-n + 2) .hint) {
+		inset-block-start: auto;
+		inset-block-end: var(--position-below);
+		margin-block: 0 var(--gap-line);
+	}
 	.relation-panel :global(table) {
 		width: 100%;
 		border-collapse: collapse;

@@ -28,14 +28,15 @@
 	onMount(() => {
 		enhanced = true;
 	});
-	// Revealed entries render before the button, so focus moves to the first of them, where reading continues.
+	// Revealed entries render before the button, so focus moves to the first of them, where reading continues. A
+	// value with a hint is passed over, because focus would open its hint over the rows.
 	async function flip() {
 		expanded = !expanded;
 		if (!expanded) return;
 		await tick();
 		toggle?.previousElementSibling
 			?.querySelector<HTMLElement>(
-				'.more a[href], .more button, .more input, .more select, .more [tabindex]'
+				'.more a[href], .more button, .more input, .more select, .more [tabindex]:not(.hinted)'
 			)
 			?.focus();
 	}
