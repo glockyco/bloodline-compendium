@@ -1,5 +1,6 @@
 using System.Text.Json.Nodes;
 using Bloodline.Catalog;
+using Bloodline.Code;
 using Bloodline.Records;
 using Bloodline.SiteData;
 
@@ -34,7 +35,8 @@ public sealed class LootMechanismTests
     private static CatalogContext Context(
         IReadOnlyList<ClassRecord> classes,
         IReadOnlyList<ActorRecord>? actors = null,
-        IReadOnlyList<TableRecord>? tables = null
+        IReadOnlyList<TableRecord>? tables = null,
+        IReadOnlyList<CodeFunction>? functions = null
     )
     {
         var item = new ClassRecord(
@@ -62,7 +64,10 @@ public sealed class LootMechanismTests
             [],
             [],
             []
-        );
+        )
+        {
+            Code = functions is null ? null : CodeIndex.Create(functions),
+        };
         return new CatalogContext(records, new Dictionary<string, ItemPage>(), []);
     }
 
@@ -90,6 +95,86 @@ public sealed class LootMechanismTests
         Assert.Empty(source.Inputs);
         Assert.Empty(source.Notes);
         Assert.Equal(0.5, candidate.Container!.AppearanceChance);
+    }
+
+    [Fact]
+    public void EtherealChestRebuildsItsPoolAndRangesOddsAcrossCharacterLevels()
+    {
+        const string weapon = "/Game/Invented/Weapon.Weapon_C";
+        const string armour = "/Game/Invented/Armour.Armour_C";
+        const string food = "/Game/Invented/Food.Food_C";
+        const string rejected = "/Game/Invented/OtherWeapon.OtherWeapon_C";
+        var chest = ContainerLootMechanism.EtherealChest;
+        var properties = OnePick(
+            Parse(
+                """
+                {
+                  "Types of Loot Contained":[{"$enum":"E_ItemType::NewEnumerator1"},{"$enum":"E_ItemType::NewEnumerator2"}],
+                  "Required Loot Tags":["Ethereal","Undead","Treasure"]
+                }
+                """
+            )
+        );
+        properties["Selected Loot Table"] = Pool();
+        var context = Context(
+            [new ClassRecord(chest, [ContainerLootMechanism.Root], properties)],
+            [new ActorRecord("Chest", chest, new JsonObject())],
+            [
+                new TableRecord(
+                    ContainerLootMechanism.AllLootRates,
+                    null,
+                    [
+                        Row(weapon, 1, "Ethereal", 1),
+                        Row(armour, 2, "Undead", 5),
+                        Row(food, 3, "Treasure", 1),
+                        Row(rejected, 1, "Bandit", 1),
+                    ]
+                ),
+            ],
+            [
+                Reading("ReceiveBeginPlay", "bbc26085741a"),
+                Reading("Check Data Table For Correct Item", "4faf00914556"),
+            ]
+        );
+        var sources = new ContainerLootMechanism().FindSources(context).ToArray();
+
+        Assert.Equal(2, sources.Length);
+        var entry = Assert.Single(sources, candidate => candidate.Key == weapon).Source;
+        Assert.Equal(1.0 / 11, entry.Odds!.Chance!.Value, 7);
+        Assert.Equal(2.0 / 7, entry.Odds.HighestChance!.Value, 7);
+        Assert.Equal("The chance changes with your character level.", Assert.Single(entry.Notes));
+        Assert.Equal(Level, Assert.Single(entry.Places).Key);
+        Assert.Contains(sources, candidate => candidate.Key == armour);
+
+        static TableRow Row(string item, int type, string tag, int level) =>
+            new(
+                item,
+                new JsonObject
+                {
+                    ["ItemClass"] = new JsonObject { ["$ref"] = item },
+                    ["ItemType"] = new JsonObject
+                    {
+                        ["$enum"] = $"E_ItemType::NewEnumerator{type}",
+                    },
+                    ["Tags"] = new JsonArray(tag),
+                    ["Level"] = level,
+                    ["BaseSpawnRate"] = 1,
+                }
+            );
+
+        CodeFunction Reading(string name, string fingerprint) =>
+            new(
+                chest.Split('.')[0],
+                chest,
+                name,
+                false,
+                fingerprint,
+                CodeParseStatus.Complete,
+                [],
+                [],
+                [],
+                []
+            );
     }
 
     [Theory]

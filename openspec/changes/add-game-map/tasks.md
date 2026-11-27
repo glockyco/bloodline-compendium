@@ -19,6 +19,7 @@
 - [ ] 3.4 Recount the items without a way and the ways without a place or mechanic, and record what stays open in the registry
 - [ ] 3.5 Observe the options of the encounter window of a hostile world map event in the lab (fight, run, toll, gift, climb, speak) and add them to the World Map Events page after their comparison
 - [ ] 3.6 Read and publish what the objects of calendar and world map events give: the crashed and damaged airship, the meteors of a Meteor Storm, the Moonstone Meteorite, the Warp Strider's chest, Badbarrel's waves, hostages, the hordes, Sandstorm, Lost Spirits, Deathfog, the Merchant Caravan's stock and the Caravan Ambush's merchant
+- [ ] 3.7 Recover container-specific loot for the GenericLootableObject placements that rebuild their pool from the entire loot table. Check each allowed type and tag combination and verify the odds as character level changes
 
 ## 4. Creatures and what they drop
 

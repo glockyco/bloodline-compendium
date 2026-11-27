@@ -38,16 +38,30 @@ internal sealed record PickCount(IReadOnlyList<(int Picks, double Probability)> 
 internal static class LootOdds
 {
     /// <summary>
-    /// The odds of an item that each independent pick chooses with <paramref name="perPick"/>, over the picks an
-    /// event makes.
+    /// The odds of at least one copy across the event's picks, optionally across two bounds for the share per pick.
     /// </summary>
-    public static Odds Of(OddsEvent oddsEvent, double perPick, PickCount picks) =>
-        new(
-            oddsEvent,
-            picks.Counts.Sum(count => count.Probability * AtLeastOnce(perPick, count.Picks)),
-            picks.Counts.Sum(count => count.Probability * count.Picks) * perPick,
-            null
-        );
+    public static Odds Of(
+        OddsEvent oddsEvent,
+        double perPick,
+        PickCount picks,
+        double? highestPerPick = null
+    )
+    {
+        var chance = 0.0;
+        var highest = 0.0;
+        var expectedPicks = 0.0;
+        foreach (var (count, probability) in picks.Counts)
+        {
+            chance += probability * AtLeastOnce(perPick, count);
+            expectedPicks += probability * count;
+            if (highestPerPick is { } upper)
+                highest += probability * AtLeastOnce(upper, count);
+        }
+        return new Odds(oddsEvent, chance, expectedPicks * perPick, null)
+        {
+            HighestChance = highest > chance ? highest : null,
+        };
+    }
 
     // One pick keeps the pool share exact instead of rounding it through 1 - (1 - p).
     private static double AtLeastOnce(double perPick, int picks) =>

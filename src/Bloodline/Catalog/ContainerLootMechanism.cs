@@ -11,6 +11,11 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
         "/Game/BloodlinesAlpha/Interactables/LootableObject.LootableObject_C";
     internal const string LooseRoot =
         "/Game/Overworld/Villages/VillageBuildings/GenericDungeon_StructuresAndEvents/Lootables/Dungeon_Generic_Lootable_Item_Placer.Dungeon_Generic_Lootable_Item_Placer_C";
+    private const string EtherealPackage = "/Game/BloodlinesAlpha/Interactables/EtherealChest";
+    internal const string EtherealChest = EtherealPackage + ".EtherealChest_C";
+    internal const string AllLootRates = "/Game/BloodlinesAlpha/Interactables/AllLootSpawnRates";
+
+    private const string LevelDependentOdds = "The chance changes with your character level.";
 
     public IEnumerable<EntitySource> FindSources(CatalogContext context)
     {
@@ -44,6 +49,15 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                     ? new Amount(checked((int)min), checked((int)max))
                     : null
             );
+            // This class replaces its inherited pool even when no loot-table switch is set.
+            if (path == EtherealChest || context.Classes[path].Ancestors.Contains(EtherealChest))
+            {
+                foreach (
+                    var source in EtherealSources(context, path, name, properties, places, details)
+                )
+                    yield return source;
+                continue;
+            }
             var pool = SelectPool(properties, enumValues);
             if (RecordValues.Boolean(properties["Use Specific Loot Table?"]) == true)
             {
@@ -178,6 +192,141 @@ internal sealed class ContainerLootMechanism : ISourceMechanism
                 {
                     Container = details,
                 };
+        }
+    }
+
+    private static IEnumerable<EntitySource> EtherealSources(
+        CatalogContext context,
+        string path,
+        string name,
+        JsonObject properties,
+        IReadOnlyList<EntityReference> places,
+        ContainerDetails details
+    )
+    {
+        ReadFunction.Find(
+            context,
+            EtherealPackage + ":ReceiveBeginPlay",
+            "bbc26085741a",
+            "Ethereal Chest loot"
+        );
+        ReadFunction.Find(
+            context,
+            EtherealPackage + ":Check Data Table For Correct Item",
+            "4faf00914556",
+            "Ethereal Chest loot"
+        );
+        var table =
+            context.Records.Tables.SingleOrDefault(table =>
+                ItemIdentity.ClassName(table.Path) == ItemIdentity.ClassName(AllLootRates)
+            )
+            ?? throw new InvalidDataException(
+                "The Ethereal Chest's AllLootSpawnRates table is missing."
+            );
+        var itemTypes = RecordValues
+            .Elements(properties["Types of Loot Contained"])
+            .Select(RecordValues.EnumValue)
+            .ToHashSet(StringComparer.Ordinal);
+        var requiredTags = RecordValues
+            .Elements(properties["Required Loot Tags"])
+            .Select(RecordValues.String)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var pool = new Dictionary<string, (float Rate, int Level, bool Weapon)>(
+            StringComparer.OrdinalIgnoreCase
+        );
+        foreach (var row in table.Rows)
+        {
+            var type = RecordValues.EnumValue(row.Values["ItemType"]);
+            if (
+                RecordValues.AnyReference(row.Values["ItemClass"]) is not { } item
+                || (itemTypes.Count > 0 && !itemTypes.Contains(type))
+                || (
+                    requiredTags.Count > 0
+                    && !RecordValues
+                        .Elements(row.Values["Tags"])
+                        .Any(tag => requiredTags.Contains(RecordValues.String(tag)))
+                )
+            )
+                continue;
+            if (
+                RecordValues.Number(row.Values["BaseSpawnRate"]) is not { } rate
+                || RecordValues.Integer(row.Values["Level"]) is not { } level
+            )
+                throw new InvalidDataException(
+                    $"Ethereal Chest loot {row.Name} needs its rate and level."
+                );
+            // Map Add replaces an earlier eligible entry for the same item class.
+            pool[item] = ((float)rate, checked((int)level), type == "E_ItemType::NewEnumerator1");
+        }
+        var entries = pool.Where(entry => entry.Value.Rate > 0).ToArray();
+        if (entries.Length == 0)
+            yield break;
+
+        // The membership does not depend on the player level. Above the last item level no share changes again.
+        var weights = new float[entries.Length];
+        var ranges = new (double Min, double Max)[entries.Length];
+        var lastLevel = Math.Max(1, entries.Max(entry => entry.Value.Level) - 1);
+        for (var playerLevel = 1; playerLevel <= lastLevel; playerLevel++)
+        {
+            var total = 0f;
+            for (var index = 0; index < entries.Length; index++)
+            {
+                var (rate, level, weapon) = entries[index].Value;
+                var weight = rate / Math.Clamp(level - playerLevel, 1, 999) / (weapon ? 10 : 1);
+                weights[index] = weight;
+                total += weight;
+            }
+            for (var index = 0; index < entries.Length; index++)
+            {
+                var share = (double)(weights[index] / total);
+                var (min, max) = ranges[index];
+                ranges[index] =
+                    playerLevel == 1
+                        ? (share, share)
+                        : (Math.Min(min, share), Math.Max(max, share));
+            }
+        }
+        var entity = WorldSourceData.Reference(EntityKind.Container, path, name);
+        var conditions = WorldSourceData.Conditions(
+            context,
+            properties,
+            places.Count == 1 ? places[0].Key : null
+        );
+        var picks = details.Picks;
+        var absent = places.Count == 0 && !context.CanAppear(path);
+        for (var index = 0; index < entries.Length; index++)
+        {
+            var item = entries[index].Key;
+            var (min, max) = ranges[index];
+            var odds = picks is null
+                ? LootOdds.Unknown(
+                    OddsEvent.Container,
+                    "How many items this container holds is unknown."
+                )
+                : LootOdds.Of(OddsEvent.Container, min, picks, max > min ? max : null);
+            yield return new EntitySource(
+                item,
+                new Source(
+                    SourceKind.ContainerLoot,
+                    name,
+                    places,
+                    null,
+                    LootRecords.Quantity(context, item),
+                    [],
+                    absent ? ["No container of this kind is placed anywhere in the world."]
+                        : max > min ? [LevelDependentOdds]
+                        : []
+                )
+                {
+                    Entity = entity,
+                    Conditions = conditions,
+                    Odds = odds,
+                    Unconfirmed = absent,
+                }
+            )
+            {
+                Container = details,
+            };
         }
     }
 
