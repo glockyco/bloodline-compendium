@@ -17,7 +17,8 @@ internal sealed class PickupMechanism : ISourceMechanism
                         "World pickup",
                         [context.Places.Get(placement.Level)],
                         null,
-                        null,
+                        // Picking the item up gives the stack it is, as a loot item's pickup does.
+                        LootRecords.Quantity(context, placement.Actor.Class),
                         [],
                         []
                     )

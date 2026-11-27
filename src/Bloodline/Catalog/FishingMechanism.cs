@@ -77,10 +77,7 @@ internal sealed class FishingMechanism : ISourceMechanism
                         defaults.Properties["Standard Lava Loot"],
                         "Lava fishing",
                         [context.Places.Get(spot.Level)],
-                        [
-                            .. notes,
-                            "Lava catches are listed, but whether they are available at this spot is unknown.",
-                        ],
+                        notes,
                         WorldSourceData.Reference(EntityKind.Activity, spot.Actor.Class, "Fishing"),
                         [
                             .. WorldSourceData.Conditions(context, properties, spot.Level),
