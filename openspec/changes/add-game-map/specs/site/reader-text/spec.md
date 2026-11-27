@@ -37,3 +37,10 @@ A mechanic page SHALL state its rules for players and SHALL NOT publish the obse
 #### Scenario: Evidence of a mechanic page
 - **WHEN** a mechanic page is built
 - **THEN** it shows no section for developers and its site data holds no evidence, while cataloging still refuses a page whose text has no evidence
+
+### Requirement: Chiseled finds
+An item that the Chiseling Station gives SHALL show one row under Chiseled with the station's place, the Chiselstone it uses under Details, the chance per Chiselstone that the find is of the item's kind, and under the place how intact the find must stay for the item's quality, because the quality is the player's doing and the kind is chance.
+
+#### Scenario: Pristine Human Fossil
+- **WHEN** the item page of Pristine Human Fossil is built
+- **THEN** its Chiseled row reads Chiseling Station, The Mage's College: Main Hall, "Keep at least 75% of it intact.", 20% per Chiselstone, with 1 Chiselstone as a required item
