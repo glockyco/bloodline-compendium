@@ -18,19 +18,31 @@ internal static class EventTables
                 {
                     Sections =
                     [
-                        .. page.Sections.Select(section =>
-                            section.Data is { } data
-                                ? section with
-                                {
-                                    Data = null,
-                                    Table = Build(context, page.Name, data),
-                                }
-                                : section
-                        ),
+                        .. page.Sections.Select(section => Fill(section, page.Name, context)),
                     ],
                 }
             ),
         ];
+
+    private static MechanicSection Fill(
+        MechanicSection section,
+        string page,
+        CatalogContext context
+    ) =>
+        section.Data switch
+        {
+            null => section,
+            "calendarEventAreas" => section with
+            {
+                Data = null,
+                Paragraphs =
+                [
+                    .. section.Paragraphs,
+                    string.Join(", ", context.Events.CalendarAreas) + ".",
+                ],
+            },
+            var data => section with { Data = null, Table = Build(context, page, data) },
+        };
 
     private static MechanicTable Build(CatalogContext context, string page, string data) =>
         data switch
@@ -127,7 +139,8 @@ internal static class EventTables
                                         .Where(entry => entry.chance is > 0)
                                         .Select(entry => new MechanicChance(
                                             entry.chance!.Value,
-                                            context.Events.Terrains[entry.index].Name
+                                            context.Events.Terrains[entry.index].Name,
+                                            "terrain"
                                         )),
                                 ]
                         ),

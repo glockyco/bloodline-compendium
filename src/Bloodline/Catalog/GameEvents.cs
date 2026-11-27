@@ -216,12 +216,14 @@ internal sealed class GameEvents
     public IReadOnlyList<EventTerrain> Terrains { get; }
     public IReadOnlyList<WorldMapEvent> WorldMap { get; }
     public IReadOnlyList<CalendarEvent> Calendar { get; }
+    public IReadOnlyList<string> CalendarAreas { get; }
 
     public GameEvents(CatalogContext context)
     {
         Terrains = [];
         WorldMap = [];
         Calendar = [];
+        CalendarAreas = [];
         if (Pinned(context, EventActor + ":Select Location Data Table", "9194e1b24180"))
         {
             Pinned(context, EventActor + ":Choose Actor to Spawn", "013bc615e833");
@@ -242,7 +244,7 @@ internal sealed class GameEvents
             );
             foreach (var (_, function, fingerprint, _) in CalendarSpawns)
                 Pinned(context, Popup + "CalendarEvent_Spawner:" + function, fingerprint);
-            Calendar = ReadCalendar(context);
+            (CalendarAreas, Calendar) = ReadCalendar(context);
         }
     }
 
@@ -345,7 +347,9 @@ internal sealed class GameEvents
         return (terrains, events);
     }
 
-    private static IReadOnlyList<CalendarEvent> ReadCalendar(CatalogContext context)
+    private static (IReadOnlyList<string> Areas, IReadOnlyList<CalendarEvent> Events) ReadCalendar(
+        CatalogContext context
+    )
     {
         var manager = context.Classes[Popup + "CalendarEventManager.CalendarEventManager_C"];
         var areas = RecordValues
@@ -396,17 +400,19 @@ internal sealed class GameEvents
             entry => entry.Spawns,
             StringComparer.OrdinalIgnoreCase
         );
-        return
-        [
-            .. rows.Where(row => chances[row.Name] > 0)
-                .Select(row => new CalendarEvent(
-                    row.Name,
-                    row.Description,
-                    row.Areas.Contains("ALL") ? [] : row.Areas,
-                    chances[row.Name],
-                    spawns.GetValueOrDefault(row.Name) ?? []
-                )),
-        ];
+        return (
+            areas,
+            [
+                .. rows.Where(row => chances[row.Name] > 0)
+                    .Select(row => new CalendarEvent(
+                        row.Name,
+                        row.Description,
+                        row.Areas.Contains("ALL") ? [] : row.Areas,
+                        chances[row.Name],
+                        spawns.GetValueOrDefault(row.Name) ?? []
+                    )),
+            ]
+        );
     }
 
     /// <summary>The entry of an event on its mechanic page, which a way that the event brings links to.</summary>

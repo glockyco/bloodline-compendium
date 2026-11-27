@@ -44,7 +44,7 @@ public sealed class EventTablesTests
         Assert.Equal(["bandit-ambush"], table.Anchors);
         Assert.Equal(["Bandit Ambush", "Robber", "", "15 seconds"], Assert.Single(table.Rows));
         Assert.Equal(
-            new MechanicChance(1, "Pine Forest"),
+            new MechanicChance(1, "Pine Forest", "terrain"),
             Assert.Single(Assert.Single(table.ChanceColumns![2]))
         );
     }
@@ -63,6 +63,22 @@ public sealed class EventTablesTests
         Assert.Equal("Pine Forest", table.Headings[1]);
         Assert.Equal(new MechanicChance(1), Assert.Single(Assert.Single(table.ChanceColumns![1])));
         Assert.Equal(new MechanicChance(0), Assert.Single(Assert.Single(table.ChanceColumns[2])));
+    }
+
+    [Fact]
+    public void CalendarAreaSectionNamesTheManagersAreas()
+    {
+        var context = EventRecords.Create(worldMap: false, calendar: true);
+        var section = Assert.Single(
+            Assert.Single(EventTables.Fill([Page("calendarEventAreas")], context)).Sections
+        );
+
+        Assert.Null(section.Data);
+        Assert.Null(section.Table);
+        Assert.Equal(
+            string.Join(", ", Enumerable.Range(1, 18).Select(number => $"Area {number}")) + ".",
+            Assert.Single(section.Paragraphs)
+        );
     }
 
     [Fact]

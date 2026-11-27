@@ -193,9 +193,16 @@
 			{
 				"heading": "Events",
 				"paragraphs": [
-					"Chance per Day is the chance that a day's event is this one, in any of its areas, on a day when the game draws an event."
+					"Chance per Day gives the odds of drawing that event in any area, on days with a draw."
 				],
 				"data": "calendarEvents"
+			},
+			{
+				"heading": "Calendar Areas",
+				"paragraphs": [
+					"These are the areas that can have an event on the calendar."
+				],
+				"data": "calendarEventAreas"
 			}
 		],
 		"evidence": [

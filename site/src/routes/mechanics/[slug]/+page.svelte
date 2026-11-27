@@ -96,7 +96,11 @@
 														{@const id = `${section.anchor}-${index}-${column}-${entry}`}
 														{#if chance.label}
 															<div class="labelled-chance">
-																<span>{chance.label}</span>
+																{#if chance.labelAnchor}
+																	<a href={`#${chance.labelAnchor}`}>{chance.label}</a>
+																{:else}
+																	<span>{chance.label}</span>
+																{/if}
 																<Chance min={chance.value} {id} />
 															</div>
 														{:else}

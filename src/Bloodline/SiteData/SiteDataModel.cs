@@ -741,8 +741,8 @@ internal sealed record MechanicSection(string Heading, IReadOnlyList<string> Par
     public MechanicTable? Table { get; init; }
 
     /// <summary>
-    /// In the written content, the name of the table the catalog builds from the game's records for this section,
-    /// such as the chance of each world map event by terrain. The catalog replaces it with <see cref="Table"/>.
+    /// In the written content, the name of the event data to show here, such as the world map chances by terrain.
+    /// The catalog replaces it with the section's text or <see cref="Table"/>.
     /// </summary>
     public string? Data { get; init; }
 }
@@ -765,7 +765,11 @@ internal sealed record MechanicTable(
 }
 
 /// <summary>A fraction with an optional label, such as the terrain where the chance applies.</summary>
-internal sealed record MechanicChance(double Value, string? Label = null);
+internal sealed record MechanicChance(
+    double Value,
+    string? Label = null,
+    string? LabelAnchor = null
+);
 
 /// <summary>A mechanic page. Written as <c>mechanics/&lt;slug&gt;.json</c>.</summary>
 internal sealed record MechanicPage(

@@ -1265,6 +1265,13 @@
             "null"
           ]
         },
+        "labelAnchor": {
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "value": {
           "type": "number"
         }

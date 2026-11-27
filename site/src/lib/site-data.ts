@@ -903,6 +903,7 @@ export interface MechanicTable {
  */
 export interface MechanicChance {
   label?: string | null;
+  labelAnchor?: string | null;
   value: number;
   [k: string]: unknown;
 }
