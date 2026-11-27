@@ -26,6 +26,39 @@ internal sealed class FishingMechanism : ISourceMechanism
             )
             .ToArray();
         var placedPools = new HashSet<string>(StringComparer.Ordinal);
+        // A spawner with Spawn Special Loot Spot? spawns one spot that fishes from its Specific Loot Table, as
+        // FishingSpotSpawner's script sets Use Specific Loot table? and the table on that spot.
+        if (
+            ReadFunction.Find(
+                context,
+                "/Game/ISW/Blueprint/FishingSpotSpawner:ExecuteUbergraph_FishingSpotSpawner",
+                "41b8ca6ad8a3",
+                "FishingMechanism"
+            )
+            is not null
+        )
+            foreach (
+                var spawner in context.Placements.Where(placement =>
+                    placement.Actor.Class.Split('.')[0] == "/Game/ISW/Blueprint/FishingSpotSpawner"
+                    && RecordValues.Boolean(placement.Properties["Spawn Special Loot Spot?"])
+                        == true
+                )
+            )
+            foreach (
+                var source in Sources(
+                    spawner.Properties["Specific Loot Table"],
+                    "Fishing spot",
+                    [context.Places.Get(spawner.Level)],
+                    [],
+                    WorldSourceData.Reference(
+                        EntityKind.Activity,
+                        "/Game/BloodlinesAlpha/Interactables/FishingSpot.FishingSpot_C",
+                        "Fishing"
+                    ),
+                    WorldSourceData.Conditions(context, spawner.Properties, spawner.Level)
+                )
+            )
+                yield return source;
         foreach (var spot in spots)
         {
             var properties = spot.Properties;
