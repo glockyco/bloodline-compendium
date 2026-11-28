@@ -13,6 +13,7 @@ Readers find their way through the compendium by following names, and too many n
 - One look for entity names: a link is link blue and underlined whether or not it has an icon, and a name without a page is never link blue. A layout check fails on any other style.
 - Pages for the kinds readers meet without pages today: creatures, places, people and merchants, quests, effects (debuffs, weapon enchantments and armor attunements), containers, settlement buildings and recipes. Each kind is compared with screenshots before it ships and ships with its preview.
 - Comparison checks also check the links and previews in their screenshots.
+- A design for a new kind of page starts from a reference board and is compared as two to four options before it is built, and a check fails a comparison without them.
 
 ## Capabilities
 
@@ -30,4 +31,4 @@ Readers find their way through the compendium by following names, and too many n
 - Catalog: `LinkedText`, `CatalogBuilder` coverage and report, a recorded counts file under `coverage/`, new producers for each page kind.
 - Site: `EntityLink`, previews and `TooltipPresenter`, new routes and page components for each kind, the layout check.
 - Publication: `scripts/publication-gate.mjs` and `scripts/entity-graph-gate.mjs`.
-- Process: the comparison-check agent's instructions gain the link and preview check.
+- Process: the comparison-check agent's instructions gain the link and preview check, and the `page-design` skill, the `design-research` agent and `scripts/check-comparison.mjs` put research and options before the build.

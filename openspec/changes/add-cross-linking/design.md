@@ -44,6 +44,12 @@ Creatures first, because they are the most named kind after recipes and their pa
 
 `.omp/agents/comparison-check.md` gains the rule that every name in a comparison's screenshots that has a page or a wanted mark is linked, and that a new kind shows a hover screenshot of its preview.
 
+### A page design is researched and compared before it is built
+
+Each new kind of page goes through `.agent/skills/page-design/SKILL.md`: the `design-research` agent builds a reference board of how this site, the sibling compendiums, large wikis and the game show the thing, a brief lists what such pages show against what the catalog has, and two to four options that differ in structure are compared before site code for the design exists. `scripts/check-comparison.mjs` fails a comparison that lacks any of these, and the `comparison-check` agent takes only the comparison's path, so its author cannot narrow the check.
+
+Alternative: build one design, then ask whether it should ship. That turned each comparison into a sign-off, and the references a design needed came up only in the answers that rejected it.
+
 ### Place pages describe the place
 
 A place page lists what is in the place by kind of thing, as Ancient Kingdoms and Afallon list a zone's creatures, people, chests, events and services, instead of one table per way to get an item. Each thing is one card of a name, what it does there and its items as icons, so later kinds such as services and quests join as sections in the same form. A finder narrows the cards to what gives an item. Calendar events come from the calendar's area names, matched to places without a leading "The", apostrophes or case.

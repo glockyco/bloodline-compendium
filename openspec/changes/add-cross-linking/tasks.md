@@ -13,6 +13,7 @@
 - [x] 2.2 Compare and build previews for resources, professions and mechanics, with hover screenshots at 1440 and 390, and verify the gate passes
 - [x] 2.3 Compare and build one style for entity names, underlined in the link colour with or without an icon, add the style rule to `site/tests/layout.ts`, and verify the layout check passes on the real-data review pages
 - [x] 2.4 Add the link and preview check to `.omp/agents/comparison-check.md`
+- [x] 2.5 Add the `page-design` skill, the `design-research` agent and `scripts/check-comparison.mjs`, have the `comparison-check` agent run the script and take only a path, and verify with `site/tests/comparison-check.test.js` that one built design asked against the current page is reported
 
 ## 3. Creatures
 
