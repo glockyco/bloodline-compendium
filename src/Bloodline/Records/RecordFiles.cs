@@ -30,7 +30,18 @@ internal sealed record ClassRecord(
 {
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public IReadOnlyList<DelegateBinding>? Bindings { get; init; }
+
+    /// <summary>
+    /// The components the class and its parents set values on, keyed by component name, such as
+    /// <c>EnemyLevelManager</c>. Like a placed actor, each holds only the values the classes set, merged from the
+    /// parent's down, so a reader takes every other value from the component class's defaults.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public IReadOnlyDictionary<string, ComponentRecord>? Components { get; init; }
 }
+
+/// <summary>A component template of a Blueprint class, with its class and the values the Blueprints set.</summary>
+internal sealed record ComponentRecord(string Class, JsonObject Properties);
 
 /// <summary>A function bound to a widget's event, such as <c>OnClicked</c> of the button <c>Lute</c>.</summary>
 internal sealed record DelegateBinding(string Component, string Event, string Function);

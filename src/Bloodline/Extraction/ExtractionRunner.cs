@@ -237,6 +237,7 @@ internal sealed class ExtractionRunner
             var parent = generated.SuperStruct.ResolvedObject?.GetPathName();
             var ancestors = new List<string>();
             var inherited = new JsonObject();
+            IReadOnlyDictionary<string, ComponentRecord>? inheritedComponents = null;
             if (parent != null)
             {
                 ancestors.Add(parent);
@@ -244,6 +245,7 @@ internal sealed class ExtractionRunner
                 {
                     var parentRecord = Class(parent);
                     inherited = parentRecord.Properties;
+                    inheritedComponents = parentRecord.Components;
                     ancestors.AddRange(parentRecord.Ancestors);
                 }
             }
@@ -284,6 +286,7 @@ internal sealed class ExtractionRunner
             )
             {
                 Bindings = widget ? Bindings(generated) : null,
+                Components = Components(package, path, inheritedComponents),
             };
             merged.Add(path, record);
             return record;
@@ -297,6 +300,60 @@ internal sealed class ExtractionRunner
         {
             loading.Remove(path);
         }
+    }
+
+    /// <summary>
+    /// The component templates of a Blueprint class merged over its parent's: those its construction script adds and
+    /// those it overrides of a parent's, which the editor names <c>&lt;component&gt;_GEN_VARIABLE</c> below the
+    /// generated class. Each holds only the values the templates set, as a placed actor does.
+    /// </summary>
+    private IReadOnlyDictionary<string, ComponentRecord>? Components(
+        IPackage package,
+        string path,
+        IReadOnlyDictionary<string, ComponentRecord>? inherited
+    )
+    {
+        const string Suffix = "_GEN_VARIABLE";
+        var generatedName = path.Split('.')[^1];
+        var components = new SortedDictionary<string, ComponentRecord>(
+            inherited?.ToDictionary() ?? [],
+            StringComparer.Ordinal
+        );
+        var removed = deltas.For(package);
+        for (var i = 0; i < package.ExportsLazy.Length; i++)
+        {
+            var info = package.ResolvePackageIndex(new FPackageIndex(package, i + 1));
+            if (info == null || !info.Name.Text.EndsWith(Suffix, StringComparison.Ordinal))
+                continue;
+            var owner = info.Outer;
+            while (owner != null && owner.Name.Text != generatedName)
+                owner = owner.Outer;
+            var classPath = info.Class?.GetPathName();
+            if (owner == null || classPath == null)
+                continue;
+            var name = info.Name.Text[..^Suffix.Length];
+            if (
+                gaps.TryRead(
+                    path,
+                    info.GetPathName(),
+                    () =>
+                    {
+                        var template = package.ExportsLazy[i].Value;
+                        return template.Class?.Load() is UStruct declaration
+                            ? encoder.Properties(template.Properties, declaration, removed(i))
+                            : encoder.Properties(template.Properties, removed(i));
+                    },
+                    out var values
+                )
+            )
+                components[name] = new ComponentRecord(
+                    classPath,
+                    components.TryGetValue(name, out var parentTemplate)
+                        ? RecordMerge.OverlayProperties(parentTemplate.Properties, values!)
+                        : values!
+                );
+        }
+        return components.Count == 0 ? null : components;
     }
 
     /// <summary>
