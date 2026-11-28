@@ -271,7 +271,7 @@ internal sealed class ItemProducer
     }
 
     private static int? ReadValue(ItemPage item) =>
-        item.Facts.First(fact => fact.Stat == Stat.Value).Number is { } value
+        item.Facts.FirstOrDefault(fact => fact.Stat == Stat.Value)?.Number is { } value
         && value == Math.Floor(value)
         && value is >= int.MinValue and <= int.MaxValue
             ? (int)value

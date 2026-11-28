@@ -63,6 +63,7 @@ internal static class CatalogBuilder
             new ChiselingMechanism(),
             new SpecialKeyChestMechanism(),
             new EventObjectMechanism(),
+            new StableMechanism(),
             new CookingMechanism(),
             new DialogueGrantMechanism(),
             new FishingMechanism(),

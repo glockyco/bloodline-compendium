@@ -43,8 +43,13 @@
 				label: 'Sells for',
 				numeric: true,
 				position: 'end' as const,
+				// A mount is never carried, so no merchant buys it.
 				text: (item: ItemSummary) =>
-					item.value === null ? 'Unknown' : formatNumber(neutralSale(item.value)) + ' gold'
+					item.category === 'mount'
+						? ''
+						: item.value === null
+							? 'Unknown'
+							: formatNumber(neutralSale(item.value)) + ' gold'
 			}
 		];
 	}

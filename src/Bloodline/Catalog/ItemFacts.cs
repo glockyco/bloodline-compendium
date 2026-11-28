@@ -19,6 +19,18 @@ internal sealed class ItemFacts(
     private readonly ConsoleCommands console = new(tables);
     public IReadOnlyList<FactClaim> Claims => claims.Claims;
 
+    /// <summary>
+    /// The names of mounts, without spaces, as rows of MountDataTable name them. A stable's window finds a mount's
+    /// row by its item name without spaces, and buying unlocks the mount without putting an item in the inventory.
+    /// </summary>
+    private readonly HashSet<string> mounts = (tables ?? [])
+        .Where(table =>
+            table.Path == "/Game/BloodlinesAlpha/UI/Inventory/MountDataTable.MountDataTable"
+        )
+        .SelectMany(table => table.Rows)
+        .Select(row => row.Name)
+        .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
     private readonly HashSet<string> ignoredFoodEffects = new(StringComparer.Ordinal);
 
     /// <summary>Foods whose effect row lists an effect name that the food manager's switch does not apply.</summary>
@@ -220,7 +232,10 @@ internal sealed class ItemFacts(
         var componentPart = component is null ? null : ComponentValue(component, "Part");
         // CustomCurrencyShop's default shop functions select these inventory classes as currency.
         var currency = ItemIdentity.ClassName(item.Path) is "Iuba_Coin" or "Tithes";
-        var readerCategory = ItemCategories.For(category, component is not null, currency);
+        var mount = mounts.Contains(name.Replace(" ", "", StringComparison.Ordinal));
+        var readerCategory = mount
+            ? ItemCategories.Mount
+            : ItemCategories.For(category, component is not null, currency);
         var type =
             currency ? "Currency"
             : component is not null ? componentPart
@@ -244,7 +259,9 @@ internal sealed class ItemFacts(
                     : StatVocabulary.Text(stat, Display(value))
             );
         }
-        Add(Stat.Value, "ItemInfo.ItemValue");
+        // A mount is never carried, so it has no price a merchant pays.
+        if (!mount)
+            Add(Stat.Value, "ItemInfo.ItemValue");
         if (category is null)
         {
             facts.Add(StatVocabulary.Unknown(Stat.Category, StatVocabulary.NotInFiles));

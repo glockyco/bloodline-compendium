@@ -26,6 +26,9 @@ internal static class ItemCategories
 
     public static readonly Category Currency = new("Currency", "Currencies");
 
+    /// <summary>A mount a stable sells or the player tames, which the player rides and never carries.</summary>
+    public static readonly Category Mount = new("Mount", "Mounts");
+
     /// <summary>The category of an item, or null when the game files do not name its type.</summary>
     public static Category? For(string? gameType, bool weaponPart, bool currency) =>
         currency ? Currency
@@ -38,6 +41,7 @@ internal static class ItemCategories
         ByGameType
             .Values.Append(WeaponPart)
             .Append(Currency)
+            .Append(Mount)
             .FirstOrDefault(category => category.Name == name)
             ?.Plural
         ?? name;

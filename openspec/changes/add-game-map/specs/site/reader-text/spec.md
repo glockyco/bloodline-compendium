@@ -51,3 +51,10 @@ A chest that opens only with a key SHALL show under Found in Containers as Locke
 #### Scenario: Golden Plate
 - **WHEN** the item page of Golden Plate is built
 - **THEN** its row reads Locked Chest, "Requires Castleside Tavernkeeper's Key", Woodhurst, Always
+
+### Requirement: Mounts
+A mount SHALL show under the category Mount, without a sell price, and SHALL show the stables that sell it with their place and price in gold, because buying one unlocks the mount and puts no item in the inventory.
+
+#### Scenario: White Direwolf
+- **WHEN** the item page of White Direwolf is built
+- **THEN** it reads Mount, has no Sells for line, and Sold at Stables lists the stable in Woodhurst for 15,000 gold
