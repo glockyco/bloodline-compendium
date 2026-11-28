@@ -46,11 +46,43 @@ A new design goes through four stages in this order. Each stage ends in a file, 
 
 The `compare-options` skill gives the rules of a comparison. This skill adds what this project does before and around it. A change of wording alone needs only `compare-options`.
 
-## 1. Board
+## 1. Board and census
 
-Start the `design-research` agent with the topic, such as "creature pages", and the questions a player brings to the page. It writes `artifacts/design/references/<topic>/board.md`: how this site, the sibling compendiums, large wikis and the game itself show the thing, each with a screenshot, then the data and assets the catalog has and the patterns worth an option. A topic keeps one board. When it exists, the agent extends it.
+Start the `design-research` agent with the topic, such as "creature pages", and the questions a player brings to the page. It writes `artifacts/design/references/<topic>/board.md`: how this site, the sibling compendiums, large wikis and the game itself show the thing, each with a screenshot, then the assets the catalog has and the patterns worth an option. A topic keeps one board. When it exists, the agent extends it.
 
-Do other work while it runs, but draft nothing for this design. When it returns, read the board and open every screenshot yourself.
+While it runs, survey what the game holds for this kind of thing, so the design starts from all of it and not from the fields someone remembered. Draft nothing for the design yet.
+
+1. Take the census of the kind's classes:
+
+   ```sh
+   bun scripts/census.mjs artifacts/<build>/records --descendants-of <class path> > artifacts/design/references/<topic>/census.md
+   ```
+
+   The class is the ancestor of every thing of this kind, which the kind's producer under `src/Bloodline/Catalog/` names. The census lists every field that differs between the classes, every setting of the game's components on them, and every function they define. Read it whole.
+
+2. Write `artifacts/design/references/<topic>/data.md` beside it, with one row for each thing a player could learn:
+
+   ```markdown
+   # Data: <topic>
+
+   [Census](census.md)
+
+   | A player learns | Census names | Known from | On the page |
+   | --- | --- | --- | --- |
+   | <such as how hard its melee hits> | <fields and functions, separated by commas> | <Read: a function, Seen: a lab run, or Name only> | <Yes, Later: a task, or No: a reason> |
+   ```
+
+   Every function of the census and every field that a function reads goes into one row. Group names that tell a player the same thing. Looks, sounds and animation share a row with "No". A field that no function reads still gets a row when its values mean something to a player, such as a family tag.
+
+3. Fill "Known from" honestly. `Read: <function>` holds after you read the function with `nix develop -c python3 tools/script-view.py <package> [function]`, which the README describes. `Seen: <lab run>` holds after a lab run showed it. Everything else is `Name only`, and a row known by name only never goes on the page, because a name is intent and not behaviour.
+
+4. Fill "On the page". `Yes` means the page of this kind shows it. `Later: <task number>` is for what needs work the design does not depend on, such as renders, and names its task in the active change's `tasks.md`. `No: <reason>` gives a reason a player would accept. Unread code is never a reason for `Later` or `No`: read or check now whatever a player question asks about, such as attacks, abilities and defences on a creature page.
+
+5. Run `bun scripts/check-comparison.mjs --data <data.md>` and fill every gap it prints.
+
+A topic keeps one census and one data file. Take the census again after a game update. A kind whose records are not classes, such as dialogues, has no census: start `data.md` with a line "No census: <reason>" and fill its rows from ten of its records read whole.
+
+When the agent returns, read the board and open every screenshot yourself.
 
 ## 2. Brief
 
@@ -68,6 +100,10 @@ Case: Explore. <why nothing approved covers this, or the answer that rejected th
 ## Board
 
 [Board](../../references/<topic>/board.md)
+
+## Data
+
+[Data](../../references/<topic>/data.md)
 
 ## Inventory
 
@@ -89,11 +125,13 @@ Case: Explore. <why nothing approved covers this, or the answer that rejected th
 - <a decision in `openspec/` or an earlier comparison that applies, and what transfers>
 ```
 
-The inventory lists everything the board's pages show for this kind of page, not only what the catalog has today. A row with "No" in the last column needs a reason a player would accept. When the reason is missing data or a missing asset, add the work to the active change's `tasks.md`, so the page gets it later.
+The inventory lists everything the board's pages show for this kind of page, not only what the catalog has today. A row with "No" in the last column needs a reason a player would accept. When the reason is missing data or a missing asset, add the work to the active change's `tasks.md`, so the page gets it later. Compare it with `data.md`: what other pages show and the game holds is "Yes" in both.
 
 ## 3. Options
 
 Draft two to four options that differ in structure, such as a table by level, a calculator for the player's own level and a card of fixed figures. Each starts from a pattern of the board. Draft them yourself, as `compare-options` says.
+
+Every option lays out the whole page: each row that `data.md` or the inventory marks "Yes" has its place in every option, and the screenshots show it there, because a section designed alone leaves the rest without a place. Name what is marked "Later" in one line of the review file, with its tasks, so the choice is made knowing what is still to come.
 
 Build each option only as far as its screenshots need, as its own component beside the page, such as `CreatureStats.option-a.svelte`, and let the page pick one with `?option=a` while the comparison is open. The catalog data the options share may be produced first, because facts do not depend on the choice. Previews, links from other pages, tests and fixtures wait for the answer. Every option renders the same real data on the real page at 1440 and 390 pixels, on at least two pages that differ, such as a short and a long one.
 
@@ -111,6 +149,6 @@ To show finished work for approval, such as the built page after step 4, open it
 
 ## After a rejection
 
-An answer that rejects every option, or that calls the design plain, uninspired, narrow or its own thing, says the board or the inventory was too thin. Do not adjust the rejected design. Go back to stage 1 with the owner's words as questions for the board, then write new options. Quote those words in the evidence file under Earlier decisions and say how each new option answers them.
+An answer that rejects every option, or that calls the design plain, uninspired, narrow or its own thing, says the board or the inventory was too thin. An answer that asks where something is, or that misses information, says `data.md` was too thin or its rows were dismissed too easily. Do not adjust the rejected design. Go back to stage 1 with the owner's words as questions for the board and the data file, then write new options. Quote those words in the evidence file under Earlier decisions and say how each new option answers them.
 
 An answer that names one defect in an otherwise accepted option is different: fix it, look for the same defect elsewhere on the page, and keep the rest.

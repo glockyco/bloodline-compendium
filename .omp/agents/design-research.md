@@ -21,7 +21,7 @@ A board holds 8 to 12 entries. Open at most ten wiki candidates and keep the thr
 2. Siblings. Afallon, Ancient Kingdoms and Erenshor, whose addresses are in `site/src/lib/compendiums.ts`. The same person built them and approved their pages, so they show what already passed review. When a checkout lies beside this repository (`../afallon-compendium/apps/site`, `../ancient-kingdoms-mods/website`, `../erenshor-data-mining`), find the component that renders the thing with `grep` and read it, then screenshot the live page. Take at least one page from each sibling that shows this kind of thing.
 3. Wikis. At least three large wikis of different games that face the same problem, not their home pages. For a creature whose stats rise with its level, that means pages of creatures with scaling stats, such as Terraria's difficulty tabs, Old School RuneScape's monster infoboxes or Path of Exile's monster level tables. Search for the problem, open candidates and keep the strongest. Prefer wikis that people wrote and maintain.
 4. Game. How the game itself shows the thing: its tooltip, health bar, map marker, menu or model. Look for a screenshot or render in `artifacts/<build>/runtime/` first. Otherwise take one in the lab as `.agent/skills/runtime-checks/SKILL.md` describes. Run the game only through `tools/runtime/lab.mjs`. When the game shows nothing of the kind, say so with what you checked.
-5. Data and assets. What the extracted records under `artifacts/<build>/records/` hold for the thing beyond what the page shows: fields, icons, textures, models, sounds. Say what could be produced, such as a render through the item render pipeline, and what cannot.
+5. Data and assets. What a page could show that the fields of the thing's classes do not hold: icons, textures, models, sounds and positions under `artifacts/<build>/records/`. Say what could be produced, such as a render through the item render pipeline, and what cannot. Whoever started you surveys the fields themselves in `data.md` beside the board. When that file exists, read it and name a field only where a board entry shows something that needs it.
 
 ## Screenshots
 
@@ -83,7 +83,7 @@ Write exactly these sections, because `scripts/check-comparison.mjs` reads them:
 
 | Thing | Catalog has it | Where |
 | --- | --- | --- |
-| <field, icon, model> | <Yes, No, or what it takes> | <record path or field> |
+| <icon, model, sound, or a field an entry needs> | <Yes, No, or what it takes> | <record path or field> |
 
 ## Patterns
 

@@ -1,8 +1,10 @@
 // Checks that a design comparison and its reference board hold what a design decision needs before it is asked:
-// a board of references with screenshots, a brief, and options that differ and name what they borrow.
+// a board of references with screenshots, an account of what the game holds for the thing, a brief, and options
+// that differ and name what they borrow.
 // `.agent/skills/page-design/SKILL.md` gives the procedure and the file formats.
 // Usage: bun scripts/check-comparison.mjs <comparison.md>
 //        bun scripts/check-comparison.mjs --board <board.md>
+//        bun scripts/check-comparison.mjs --data <data.md>
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -151,6 +153,88 @@ export function checkBoard(path) {
   return problems;
 }
 
+const cells = (row) =>
+  row
+    .split(/(?<!\\)\|/)
+    .slice(1, -1)
+    .map((cell) => cell.trim().replaceAll("\\|", "|"));
+
+/**
+ * The names of a census that a design has to account for: each field that differs between the classes and that a
+ * function reads, on the classes and on the game's components, and each function the classes define.
+ */
+function censusNames(text) {
+  const names = new Set();
+  for (const [heading, part] of sections(text))
+    if (/^(Fields that differ|Component )/.test(heading)) {
+      for (const row of tableRows(part).map(cells))
+        if (row.at(-1) !== "none") names.add(row[0]);
+    } else if (/^Functions the classes define/.test(heading))
+      for (const line of part.split("\n")) {
+        const name = /^- (.+): \d+ \(/.exec(line)?.[1];
+        if (name) names.add(name);
+      }
+  return [...names];
+}
+
+/**
+ * What a data file lacks. It accounts for the census of a kind of thing: each row says what a player could learn,
+ * the census names behind it, how their meaning is known and whether it goes on the page. A row goes on the page
+ * only when a function was read or the game was observed, never on a name alone.
+ */
+export function checkData(path) {
+  if (!existsSync(path))
+    return [
+      `${path} is missing. Take the census of the kind and account for it, as stage 1 of .agent/skills/page-design/SKILL.md says.`,
+    ];
+  const text = readFileSync(path, "utf8");
+  const problems = [];
+  const link = /\]\(([^)\s]*census\.md)\)/.exec(text)?.[1];
+  const census = link && resolve(dirname(path), link);
+  if (!link && !/^No census: \S/m.test(text))
+    problems.push(
+      'The data file links no census.md. Run `bun scripts/census.mjs` for the kind\'s ancestor class and link its output, or give a line "No census: <why the kind has no class records>".',
+    );
+  if (census && !existsSync(census))
+    problems.push(
+      `${link} does not exist. Run \`bun scripts/census.mjs\` for the kind's ancestor class.`,
+    );
+  const rows = tableRows(text).map(cells);
+  if (rows.length < 3)
+    problems.push(
+      "The data file needs a table of at least 3 rows, each with what a player learns, the census names behind it, how that is known and whether it goes on the page.",
+    );
+  const named = new Set();
+  for (const [learns, names = "", known = "", shown = ""] of rows) {
+    const where = `Data, "${learns}"`;
+    for (const name of names.split(",")) named.add(name.trim());
+    if (!/^(Read: \S|Seen: \S|Name only$)/.test(known))
+      problems.push(
+        `${where}: the third cell is "Read: <function>", "Seen: <lab run>" or "Name only".`,
+      );
+    if (!/^(Yes$|Later: \S|No: \S)/.test(shown))
+      problems.push(
+        `${where}: the last cell is "Yes", "Later: <task>" or "No: <reason>".`,
+      );
+    else if (shown === "Yes" && known === "Name only")
+      problems.push(
+        `${where}: goes on the page but is known by name only. Read the functions that use it or check it in the lab first.`,
+      );
+  }
+  if (census && existsSync(census)) {
+    const listed = rows.map((row) => row[1] ?? "").join("\n");
+    const missing = censusNames(readFileSync(census, "utf8")).filter(
+      (name) =>
+        !named.has(name) && !(name.includes(",") && listed.includes(name)),
+    );
+    if (missing.length)
+      problems.push(
+        `The data file leaves out ${missing.length} census name${missing.length === 1 ? "" : "s"}: ${missing.join(", ")}. Put each in a row, with "No: <reason>" when a player has no use for it.`,
+      );
+  }
+  return problems;
+}
+
 /** The evidence files a review file links. */
 const evidenceLinks = (review) =>
   [...review.matchAll(/\]\(([^)\s]+-evidence\.md)\)/g)].map(
@@ -254,7 +338,7 @@ export function checkComparison(
   const explore = kind !== "Choose";
   const all = reader(sections(evidence), problems, "The evidence file");
   const section = (name, holds, check) =>
-    explore || !["Board", "Inventory", "In the game"].includes(name)
+    explore || !["Board", "Data", "Inventory", "In the game"].includes(name)
       ? all(name, holds, check)
       : undefined;
   section(
@@ -280,6 +364,14 @@ export function checkComparison(
       titles = [...sections(readFileSync(boardPath, "utf8"))].flatMap(
         ([, text]) => entries(text).map((entry) => entry.title.toLowerCase()),
       );
+  });
+  section("Data", "links the kind's data file", (part) => {
+    const dataLink = /\]\(([^)\s]+data\.md)\)/.exec(part)?.[1];
+    if (!dataLink)
+      return problems.push(
+        "Data links no data.md. Take the census of the kind and account for it, as stage 1 of .agent/skills/page-design/SKILL.md says.",
+      );
+    problems.push(...checkData(resolve(dirname(evidencePath), dataLink)));
   });
   section(
     "Inventory",
@@ -349,17 +441,20 @@ export function checkComparison(
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const board = process.argv[2] === "--board";
-  const path = process.argv[board ? 3 : 2];
+  const mode = ["--board", "--data"].find((flag) => flag === process.argv[2]);
+  const board = mode === "--board";
+  const path = process.argv[mode ? 3 : 2];
   if (!path) {
     console.error(
-      "Usage: bun scripts/check-comparison.mjs <comparison.md> | --board <board.md>",
+      "Usage: bun scripts/check-comparison.mjs <comparison.md> | --board <board.md> | --data <data.md>",
     );
     process.exit(2);
   }
   const problems = board
     ? checkBoard(resolve(path))
-    : checkComparison(resolve(path));
+    : mode
+      ? checkData(resolve(path))
+      : checkComparison(resolve(path));
   if (problems.length) {
     console.error(problems.map((problem) => "- " + problem).join("\n"));
     console.error(
@@ -367,6 +462,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     );
     process.exitCode = 1;
   } else if (board) console.log("The board is complete.");
+  else if (mode) console.log("The data file accounts for the census.");
   else if (evidenceLinks(readFileSync(resolve(path), "utf8")).length)
     console.log(
       "The comparison is complete. Start the comparison-check agent with its path.",

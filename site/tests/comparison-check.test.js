@@ -44,6 +44,38 @@ const board = [
 	'3. An infobox beside a portrait. Shown by: Old School RuneScape.'
 ].join('\n');
 
+const census = [
+	'# Census of Base: 3 classes',
+	'## Fields that differ between classes (3)',
+	'| Field | Kind | Classes apart from the usual value | Values | Usual value | Range or other values | Read by |',
+	'| --- | --- | --- | --- | --- | --- | --- |',
+	'| MaxHealth | number | 1 of 3 | 2 | 50 | 50 to 400 | 2: Base:Receive Damage, Hero:Swing |',
+	'| Armor | number | 1 of 3 | 2 | 0 | 0 to 250 | 1: Base:Receive Damage |',
+	'| Editor Note | string | 1 of 3 | 2 | "" | "wip" (Troll) | none |',
+	'## Component LevelManager (LevelManager, on 3 classes)',
+	'| Field | Kind | Classes apart from the usual value | Values | Usual value | Range or other values | Read by |',
+	'| --- | --- | --- | --- | --- | --- | --- |',
+	'| Base Level | number | 1 of 3 | 2 | 1 | 1 to 15 | 1: LevelManager:Initialize |',
+	'## Functions the classes define (2)',
+	'- Leap Attack: 1 (Troll)',
+	'- Hair: 2 (Troll, Wolf)'
+].join('\n');
+
+const data = (rows) =>
+	[
+		'# Data: creature pages',
+		'[Census](census.md)',
+		'| A player learns | Census names | Known from | On the page |',
+		'| --- | --- | --- | --- |',
+		...rows
+	].join('\n');
+
+const accounted = data([
+	'| How much damage it takes to kill | MaxHealth, Armor, Base Level | Read: Base:Receive Damage | Yes |',
+	'| Its special attacks | Leap Attack | Name only | Later: 3.6 |',
+	'| Nothing: looks | Hair | Name only | No: looks only |'
+]);
+
 const evidence = (options) =>
 	[
 		'# Evidence',
@@ -52,6 +84,8 @@ const evidence = (options) =>
 		'- How tough is this creature at my level?',
 		'## Board',
 		'[Board](references/board.md)',
+		'## Data',
+		'[Data](references/data.md)',
 		'## Inventory',
 		'| Pages of this kind show | Who shows it | Catalog has it | In this change |',
 		'| --- | --- | --- | --- |',
@@ -81,13 +115,15 @@ const review = (card, rows) =>
 	].join('\n');
 
 /** Writes a comparison with its evidence, board and screenshots into a temporary folder and checks it. */
-async function check(reviewText, evidenceText) {
+async function check(reviewText, evidenceText, dataText = accounted) {
 	const directory = await mkdtemp(join(tmpdir(), 'bloodline-comparison-'));
 	try {
 		await mkdir(join(directory, 'references'));
 		await writeFile(join(directory, 'review.md'), reviewText);
 		await writeFile(join(directory, 'review-evidence.md'), evidenceText);
 		await writeFile(join(directory, 'references/board.md'), board);
+		await writeFile(join(directory, 'references/census.md'), census);
+		await writeFile(join(directory, 'references/data.md'), dataText);
 		for (const image of ['a.png', 'b.png', 'references/shot.png'])
 			await writeFile(join(directory, image), '');
 		return checkComparison(join(directory, 'review.md'), directory);
@@ -240,4 +276,52 @@ it('checks a wording comparison without evidence by its question card alone', as
 	expect(await check(wording(one), '')).toEqual([
 		expect.stringContaining('Question 1 offers 1 new option')
 	]);
+});
+
+const levels = review(
+	[
+		'Recommended: A: a table by level',
+		'',
+		'- [ ] A: a table by level',
+		'- [ ] B: a calculator for your level',
+		'- [ ] None of these',
+		'',
+		'Why: A shows every level at once.'
+	],
+	['| A: Wolf | ![](a.png) | ![](a.png) |', '| B: Wolf | ![](b.png) | ![](b.png) |']
+);
+const borrowed = evidence([
+	'- A: borrows the level table of Path of Exile: creature page.',
+	'- B: borrows the level input of Afallon: creature page.'
+]);
+
+it('reports census names the data file leaves out, except fields no function reads', async () => {
+	const problems = await check(
+		levels,
+		borrowed,
+		data([
+			'| How much damage it takes to kill | MaxHealth | Read: Base:Receive Damage | Yes |',
+			'| Its special attacks | Leap Attack | Name only | Later: 3.6 |',
+			'| Nothing: looks | Hair | Name only | No: looks only |'
+		])
+	);
+	expect(problems).toEqual([
+		'The data file leaves out 2 census names: Armor, Base Level. Put each in a row, with "No: <reason>" when a player has no use for it.'
+	]);
+});
+
+it('reports a row that goes on the page while its meaning is known by name only', async () => {
+	const problems = await check(
+		levels,
+		borrowed,
+		data([
+			'| How much damage it takes to kill | MaxHealth, Armor, Base Level | Read: Base:Receive Damage | Yes |',
+			'| Its special attacks | Leap Attack | Name only | Yes |',
+			'| Nothing: looks | Hair | Name only | No: looks only |'
+		])
+	);
+	expect(problems).toHaveLength(1);
+	expect(problems[0]).toContain(
+		'"Its special attacks": goes on the page but is known by name only'
+	);
 });

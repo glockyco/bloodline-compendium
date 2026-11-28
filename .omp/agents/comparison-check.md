@@ -16,7 +16,9 @@ Then open the comparison, its evidence file, its board and every screenshot, and
 - The options differ in structure and not only in a word, a column count or a colour: for a design, such as a table against cards against a calculator, and for wording, such as one sentence against a labelled line. Each fits in one line.
 - An option of an Explore comparison names the board entries it borrows from, and its screenshots show what it claims to borrow. A wording comparison quotes how large wikis word the same thing, with links.
 - The board of an Explore comparison holds pages that face the same problem as the question. A board of home pages or unrelated pages does not count.
-- The inventory of an Explore comparison lists what the sibling compendiums and wikis show on pages of this kind. For each thing the options leave out, it gives a reason a player would accept. "No data" holds only when the board's Data and assets table says so.
+- The inventory of an Explore comparison lists what the sibling compendiums and wikis show on pages of this kind. For each thing the options leave out, it gives a reason a player would accept. "No data" holds only when the data file or the board's Data and assets table says so.
+- The data file of an Explore comparison accounts for the census of the kind. Open both. A row marked `No` or `Later` holds nothing that a player question asks about or that the board's pages show, and no row lumps unrelated names together to dismiss them. A `Read:` names a function that says what the row claims: check three rows with `nix develop -c python3 tools/script-view.py <package> <function>`.
+- Every row the data file or the inventory marks `Yes` is visible in every option's screenshots. An option that shows one section of the page, with the rest of what the game holds left for later, is a gap. The review file names what is marked `Later` in one line.
 - An Explore comparison says how the game itself shows the thing, and one option at least takes that up or the evidence says why none does.
 - It names earlier decisions in `openspec/` and earlier comparisons in `artifacts/design/process/trial/` that apply, and its recommendation does not contradict one without saying why. When an earlier comparison on the topic was rejected, it quotes the owner's words and says how each option answers them.
 - It asks only what has to be decided now.
@@ -36,5 +38,7 @@ These are corrections the site's owner made by hand. Find this kind of gap befor
 - "Why not take inspiration from other existing strong wikis regarding level scaling etc.? Even Ancient Kingdoms and Afallon have things like that built-in already." (a level range as plain text)
 - "Pretty much all the monsters there have icons as well, and similarly Erenshor's wiki pages have renders of the 3D models of enemies / npcs. Again: why aren't you doing proper research and building mood boards etc. to get inspiration?" (cards without any picture of the creature)
 - "Those are still looking very plain and uninspired." (text cards beside richer sibling pages)
+- "Why is armor hiding down here? Why don't you show it with the other stats? What's with damage stats? Abilities? What else? I feel like you're missing a lot of useful information about creatures. When designing a page, make sure to first get a THOROUGH impression of what data we could show for it!" (a stats section designed from five fields, while the creature classes hold attacks, abilities, blocking, weak spots and behaviour)
+- "Yet more fluff. What's that supposed to tell a reader?" (a sentence about how the game rounds experience, which changes nothing a player does)
 
 Report gaps only. Do not rewrite the comparison or choose an option.
