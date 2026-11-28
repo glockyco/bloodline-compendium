@@ -71,6 +71,8 @@ When a kind gets pages, references to it already in the graph become links and s
 
 Place names come first among the later kinds, because places, people, the map and the sources of items, skills and spellsongs all show them.
 
+A kind's packages count as described in the game map once its pages exist, and as named while other pages only mention them. Before a change for a kind starts, the named and open packages of its system show what its pages have to explain.
+
 ### Reading the game
 
 - Data that the game defines in its interface lives in widget trees, such as the skill slots and passives of the skill trees. Extraction records the Blueprint widgets of every widget tree. Look there when class defaults leave a value empty.
