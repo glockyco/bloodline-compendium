@@ -276,6 +276,9 @@ internal sealed record ItemPage(
     [JsonRequired]
     public IReadOnlyList<ItemUse> Uses { get; init; } = [];
 
+    /// <summary>The items creatures give when they die with the debuff this item applies.</summary>
+    public IReadOnlyList<Harvest> Harvests { get; init; } = [];
+
     /// <summary>Known issues that affect a value this page shows.</summary>
     [JsonRequired]
     public IReadOnlyList<IssueNote> Notes { get; init; } = [];
@@ -384,6 +387,15 @@ internal sealed record KnownIssueRegistry(IReadOnlyList<KnownIssue> Issues)
 
 /// <summary>A known issue with the pages that note it. Written as <c>issues.json</c>.</summary>
 internal sealed record PublishedIssue(KnownIssue Issue, IReadOnlyList<EntityReference> Affected);
+
+/// <summary>
+/// An item creatures give when they die with the debuff a skill or item applies, and how it applies the debuff.
+/// </summary>
+internal sealed record Harvest(EntityReference Item, string Text)
+{
+    [JsonRequired]
+    public string RelationId { get; init; } = "";
+}
 
 internal sealed record ItemUse(SourceKind Kind, string Name, EntityReference Item, int Quantity)
 {
@@ -1153,6 +1165,9 @@ internal sealed record SkillPage(
 
     [JsonRequired]
     public IReadOnlyList<EntityRelation> Relations { get; init; } = [];
+
+    /// <summary>The items creatures give when they die with the debuff this skill applies.</summary>
+    public IReadOnlyList<Harvest> Harvests { get; init; } = [];
 
     [JsonRequired]
     public IReadOnlyList<IssueNote> Notes { get; init; } = [];

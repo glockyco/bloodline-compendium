@@ -599,6 +599,26 @@
       "title": "Fact",
       "type": "object"
     },
+    "Harvest": {
+      "properties": {
+        "item": {
+          "$ref": "#/$defs/EntityReference"
+        },
+        "relationId": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "item",
+        "text",
+        "relationId"
+      ],
+      "title": "Harvest",
+      "type": "object"
+    },
     "IssueEffectDetail": {
       "additionalProperties": false,
       "properties": {
@@ -762,6 +782,12 @@
         "facts": {
           "items": {
             "$ref": "#/$defs/Fact"
+          },
+          "type": "array"
+        },
+        "harvests": {
+          "items": {
+            "$ref": "#/$defs/Harvest"
           },
           "type": "array"
         },
@@ -2751,6 +2777,12 @@
         "facts": {
           "items": {
             "$ref": "#/$defs/Fact"
+          },
+          "type": "array"
+        },
+        "harvests": {
+          "items": {
+            "$ref": "#/$defs/Harvest"
           },
           "type": "array"
         },

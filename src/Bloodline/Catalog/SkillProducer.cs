@@ -520,6 +520,7 @@ internal sealed partial class SkillProducer
                 page with
                 {
                     Relations = Document(EntityKind.Skill, page.Key)?.Relations ?? [],
+                    Harvests = graph.Harvests.GetValueOrDefault((EntityKind.Skill, page.Key)) ?? [],
                     Sources =
                         graph.Sources.GetValueOrDefault((EntityKind.Skill, page.Key))
                         ?? page.Sources,

@@ -6,6 +6,7 @@
 	import EntityLink from '#lib/ui/EntityLink.svelte';
 	import Conditions from '#lib/Conditions.svelte';
 	import BugsSection from '#lib/entity/BugsSection.svelte';
+	import HarvestSection from '#lib/entity/HarvestSection.svelte';
 	import Section from '#lib/ui/Section.svelte';
 	import ItemTooltip from '#lib/items/ItemTooltip.svelte';
 	import ItemDetails from '#lib/items/ItemDetails.svelte';
@@ -195,6 +196,7 @@
 							>{/snippet}</RelationTable
 					>{/if}
 			</Section>{/if}
+		<HarvestSection harvests={item.harvests ?? []} {idPrefix} />
 		{#if payments.length}<Section id={idPrefix + 'buys'} title="Buys" count={payments.length}>
 				<RelationTable
 					items={payments}

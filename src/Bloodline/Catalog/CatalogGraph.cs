@@ -19,6 +19,12 @@ internal sealed record GraphResult(EntityGraph Graph, IReadOnlyList<ItemPage> It
 
     public IReadOnlyDictionary<(EntityKind, string), IReadOnlyList<Source>> Sources { get; init; } =
         new Dictionary<(EntityKind, string), IReadOnlyList<Source>>();
+
+    /// <summary>What a skill or item makes creatures give on death, by the entity that applies the debuff.</summary>
+    public IReadOnlyDictionary<
+        (EntityKind, string),
+        IReadOnlyList<Harvest>
+    > Harvests { get; init; } = new Dictionary<(EntityKind, string), IReadOnlyList<Harvest>>();
 }
 
 internal static class CatalogGraph
@@ -89,6 +95,7 @@ internal static class CatalogGraph
             _ => new List<ItemUse>(),
             StringComparer.Ordinal
         );
+        var harvests = new Dictionary<(EntityKind Kind, string Key), List<Harvest>>();
         var pages = new List<ItemPage>(items.Count);
         foreach (var item in items)
         {
@@ -174,6 +181,23 @@ internal static class CatalogGraph
                     )
                 );
                 sources.TryAdd(id, source);
+                // The page of what applies the debuff shows the item it harvests, so that page carries the relation.
+                if (
+                    source
+                        is {
+                            Kind: SourceKind.DebuffKill,
+                            Unconfirmed: false,
+                            Entity.Key: { } giver
+                        }
+                    && entities.ContainsKey((source.Entity.Kind, giver))
+                )
+                {
+                    if (!harvests.TryGetValue((source.Entity.Kind, giver), out var list))
+                        harvests[(source.Entity.Kind, giver)] = list = [];
+                    list.Add(
+                        new Harvest(target, string.Join(" ", source.Triggers)) { RelationId = id }
+                    );
+                }
                 if (!source.Unconfirmed)
                 {
                     foreach (var input in source.Inputs)
@@ -300,6 +324,12 @@ internal static class CatalogGraph
                             .OrderBy(use => use.Item.Name, StringComparer.OrdinalIgnoreCase)
                             .ThenBy(use => use.Name, StringComparer.OrdinalIgnoreCase)
                             .ToArray(),
+                        Harvests =
+                            harvests
+                                .GetValueOrDefault((EntityKind.Item, item.Key))
+                                ?.OrderBy(harvest => harvest.Item.Name, StringComparer.Ordinal)
+                                .ToArray()
+                            ?? [],
                     }
                 )
                 .ToArray()
@@ -309,6 +339,14 @@ internal static class CatalogGraph
                 .Where(document => document.Entity.Kind != EntityKind.Item)
                 .ToDictionary(document => (document.Entity.Kind, document.Entity.Key!)),
             Sources = otherSources,
+            Harvests = harvests.ToDictionary(
+                pair => pair.Key,
+                pair =>
+                    (IReadOnlyList<Harvest>)
+                        pair
+                            .Value.OrderBy(harvest => harvest.Item.Name, StringComparer.Ordinal)
+                            .ToArray()
+            ),
         };
     }
 

@@ -4,6 +4,7 @@
 	import SourceSections from '../entity/SourceSections.svelte';
 	import UnconfirmedSources from '../entity/UnconfirmedSources.svelte';
 	import BugsSection from '../entity/BugsSection.svelte';
+	import HarvestSection from '../entity/HarvestSection.svelte';
 	import SkillTooltip from './SkillTooltip.svelte';
 	import { skillStatus } from './describe.js';
 	import { skillRowAnchor } from './anchors.js';
@@ -52,6 +53,7 @@
 					)}% more damage at full ranks.
 				</p>
 			</Section>{/if}
+		<HarvestSection harvests={skill.harvests ?? []} {idPrefix} />
 		<UnconfirmedSources sources={skill.sources} {idPrefix} />
 		<BugsSection notes={skill.notes} facts={skill.facts} name={skill.name} {idPrefix} />
 	</div>

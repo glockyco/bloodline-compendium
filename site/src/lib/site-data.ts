@@ -647,6 +647,7 @@ export interface ItemPage {
   consoleCommand?: string | null;
   description: string | null;
   facts: Fact[];
+  harvests?: Harvest[];
   icon: string | null;
   key: string;
   kind: EntityKind;
@@ -692,6 +693,16 @@ export interface Effect {
   name: string;
   power: number | null;
   seconds: number;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "Harvest".
+ */
+export interface Harvest {
+  item: EntityReference;
+  relationId: string;
+  text: string;
   [k: string]: unknown;
 }
 /**
@@ -1150,6 +1161,7 @@ export interface SkillPage {
   damageScaling?: DamageScaling | null;
   description: string | null;
   facts: Fact[];
+  harvests?: Harvest[];
   icon: string | null;
   key: string;
   kind: EntityKind;

@@ -72,3 +72,7 @@ An item that a creature gives when it dies with a debuff on it SHALL show under 
 #### Scenario: Lightborn Wand Core
 - **WHEN** the item page of Divine Favor is built
 - **THEN** Harvested from Kills lists Lightborn Wand Core, and its row says that a wand with it and a Bloodwrought Helix Wand Shaft or Golden Talon Wand Shaft applies Divine Bond with 15% of the hits of its normal attack, with both shafts linked
+
+#### Scenario: Applier page
+- **WHEN** the page of a skill or item that applies such a debuff is built
+- **THEN** a Harvested from Kills section after Used For links each item it harvests and says how it applies the debuff, in the words of that item's row
