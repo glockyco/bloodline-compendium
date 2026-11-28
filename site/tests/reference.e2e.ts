@@ -596,6 +596,8 @@ test('each public page has production identity, social metadata and generated br
 			'/professions/starsmithing/',
 			'/resources/',
 			'/resources/ember-orchard/',
+			'/creatures/',
+			'/creatures/bramble-sentinel/',
 			'/mechanics/',
 			'/mechanics/discipline-levels/',
 			'/mechanics/skill-points/',
