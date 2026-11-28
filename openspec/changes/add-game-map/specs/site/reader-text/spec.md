@@ -58,3 +58,10 @@ A mount SHALL show under the category Mount, without a sell price, and SHALL sho
 #### Scenario: White Direwolf
 - **WHEN** the item page of White Direwolf is built
 - **THEN** it reads Mount, has no Sells for line, and Sold at Stables lists the stable in Woodhurst for 15,000 gold
+
+### Requirement: Christmas presents
+An item a Christmas present gives SHALL show under Seasonal Gifts with the towns that hold the present and, under them, how many Christmas cookies it takes and where the cookies lie.
+
+#### Scenario: Reindeer Rampart
+- **WHEN** the item page of Reindeer Rampart is built
+- **THEN** its row reads Christmas Present, Thronhild, Whitebrook Haven, and "Open it with 12 Christmas cookies, which you collect in Whitebrook Haven."

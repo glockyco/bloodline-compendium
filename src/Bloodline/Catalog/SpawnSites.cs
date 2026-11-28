@@ -97,6 +97,8 @@ internal sealed class SpawnSites
         },
         // The ghost ship of the calendar leaves an Ethereal Chest when it is destroyed.
         new("/Game/PuzzleProps/UndeadAirship:Spawn Ethereal Chest", "143a9fdb1e2a"),
+        // Collecting Christmas cookies spawns Naughty-List Goblins near the cookie at set counts.
+        new("/Game/Christmas_Assets/Cookie_Pickup:Spawn Naughty-List Goblins", "75e1743c3b50"),
     ];
 
     private const string Replace =

@@ -64,6 +64,7 @@ internal static class CatalogBuilder
             new SpecialKeyChestMechanism(),
             new EventObjectMechanism(),
             new StableMechanism(),
+            new ChristmasPresentMechanism(),
             new CookingMechanism(),
             new DialogueGrantMechanism(),
             new FishingMechanism(),
