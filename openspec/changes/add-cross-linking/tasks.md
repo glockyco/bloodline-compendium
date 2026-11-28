@@ -11,7 +11,7 @@
 
 - [x] 2.1 Fail publication for a kind with pages or hosted entries that `previewKinds` lacks, and verify with `site/tests/publication.test.js`
 - [x] 2.2 Compare and build previews for resources, professions and mechanics, with hover screenshots at 1440 and 390, and verify the gate passes
-- [ ] 2.3 Compare and build one style for entity names in `EntityLink`, add the style rule to `site/tests/layout.ts`, and verify the layout check passes on the real-data review pages and fails on The Mad Monk in link colour
+- [x] 2.3 Compare and build one style for entity names, underlined in the link colour with or without an icon, add the style rule to `site/tests/layout.ts`, and verify the layout check passes on the real-data review pages
 - [x] 2.4 Add the link and preview check to `.omp/agents/comparison-check.md`
 
 ## 3. Creatures

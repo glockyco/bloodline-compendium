@@ -49,16 +49,13 @@ count it. A name is its text, so only an entity shown with other text carries it
 	>{/if}
 
 <style>
-	/* The icon and name are one target, and only the name wraps. */
+	/* The icon and name are one target, and only the name wraps. The underline marks the link as it does without
+	   an icon, so every entity link looks the same. */
 	.with-icon {
 		display: inline-flex;
 		align-items: center;
 		gap: var(--gap-inline);
 		vertical-align: middle;
-		text-decoration: none;
-	}
-	a.with-icon:hover {
-		text-decoration: underline;
 	}
 	.entity-icon {
 		flex: none;

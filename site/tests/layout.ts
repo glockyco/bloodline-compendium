@@ -10,7 +10,8 @@ import type { Page } from '@playwright/test';
  * - a numeric cell or heading in a column of a table is not right-aligned,
  * - a comma in site text has no space after it,
  * - sibling sections of one column sit at different distances from each other,
- * - a link with a preview reaches past its text, so its preview opens away from what the reader points at.
+ * - a link with a preview reaches past its text, so its preview opens away from what the reader points at,
+ * - an entity link is not underlined in the link colour, or a name without a page takes the link colour.
  */
 export async function layoutProblems(page: Page): Promise<string[]> {
 	// Search and other components render after load, and their text counts too.
@@ -141,6 +142,22 @@ export async function layoutProblems(page: Page): Promise<string[]> {
 			const right = Math.max(...[...text.getClientRects()].map((rect) => rect.right));
 			if (link.getBoundingClientRect().right - right > 4)
 				problems.push(`${describe(link)} reaches past its text`);
+		}
+		// Every entity name looks one way: a link is underlined in the link colour, with or without its icon, and a
+		// name without a page never takes the link colour, so a reader can tell which names lead somewhere.
+		const sample = document.body.appendChild(document.createElement('a'));
+		sample.href = '/';
+		const linkColour = getComputedStyle(sample).color;
+		sample.remove();
+		for (const link of document.querySelectorAll('main a[data-preview]')) {
+			if (!visible(link)) continue;
+			const style = getComputedStyle(link);
+			if (style.color !== linkColour || !style.textDecorationLine.includes('underline'))
+				problems.push(`${describe(link)} is not underlined in the link colour`);
+		}
+		for (const name of document.querySelectorAll('main span[data-kind]')) {
+			if (visible(name) && getComputedStyle(name).color === linkColour)
+				problems.push(`${describe(name)} has no page but takes the link colour`);
 		}
 		return problems;
 	});

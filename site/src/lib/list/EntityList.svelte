@@ -733,17 +733,14 @@
 	.sort:focus-visible .sort-mark.idle {
 		opacity: 0.8;
 	}
-	/* The link covers its icon and name only, so pointing at empty cell space neither follows nor previews it. */
+	/* The link covers its icon and name only, so pointing at empty cell space neither follows nor previews it. It is
+	   underlined as every entity link is. */
 	:global(.entity-name) {
 		display: inline-flex;
 		align-items: center;
 		gap: var(--gap-inline);
 		vertical-align: middle;
-		text-decoration: none;
 		overflow-wrap: break-word;
-	}
-	:global(.entity-name:hover) {
-		text-decoration: underline;
 	}
 	.empty {
 		padding: var(--inset-loose) var(--inset);
