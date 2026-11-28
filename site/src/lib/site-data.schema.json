@@ -145,6 +145,172 @@
       "title": "CraftingData",
       "type": "object"
     },
+    "CreatureDrop": {
+      "properties": {
+        "amount": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Amount"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "conditions": {
+          "items": {
+            "$ref": "#/$defs/RelationCondition"
+          },
+          "type": "array"
+        },
+        "events": {
+          "items": {
+            "$ref": "#/$defs/SourceEvent"
+          },
+          "type": "array"
+        },
+        "item": {
+          "$ref": "#/$defs/EntityReference"
+        },
+        "notes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "odds": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Odds"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "places": {
+          "items": {
+            "$ref": "#/$defs/EntityReference"
+          },
+          "type": "array"
+        },
+        "relationIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "unconfirmed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "item",
+        "relationIds",
+        "odds",
+        "amount",
+        "notes",
+        "conditions",
+        "places",
+        "events"
+      ],
+      "title": "CreatureDrop",
+      "type": "object"
+    },
+    "CreatureIndex": {
+      "properties": {
+        "creatures": {
+          "items": {
+            "$ref": "#/$defs/CreatureSummary"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "creatures"
+      ],
+      "title": "CreatureIndex",
+      "type": "object"
+    },
+    "CreaturePage": {
+      "properties": {
+        "drops": {
+          "items": {
+            "$ref": "#/$defs/CreatureDrop"
+          },
+          "type": "array"
+        },
+        "events": {
+          "items": {
+            "$ref": "#/$defs/SourceEvent"
+          },
+          "type": "array"
+        },
+        "key": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/EntityKind"
+        },
+        "name": {
+          "type": "string"
+        },
+        "places": {
+          "items": {
+            "$ref": "#/$defs/EntityReference"
+          },
+          "type": "array"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "unconfirmed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "key",
+        "slug",
+        "name",
+        "drops",
+        "places",
+        "events",
+        "kind"
+      ],
+      "title": "CreaturePage",
+      "type": "object"
+    },
+    "CreatureSummary": {
+      "properties": {
+        "drops": {
+          "type": "integer"
+        },
+        "key": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "places": {
+          "type": "integer"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "unconfirmed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "key",
+        "slug",
+        "name",
+        "drops",
+        "places"
+      ],
+      "title": "CreatureSummary",
+      "type": "object"
+    },
     "DamageScaling": {
       "properties": {
         "discipline": {
@@ -3341,6 +3507,12 @@
     "crafting": {
       "$ref": "#/$defs/CraftingData"
     },
+    "creature": {
+      "$ref": "#/$defs/CreaturePage"
+    },
+    "creatures": {
+      "$ref": "#/$defs/CreatureIndex"
+    },
     "discipline": {
       "$ref": "#/$defs/DisciplinePage"
     },
@@ -3421,6 +3593,8 @@
     "mechanic",
     "resources",
     "resource",
+    "creatures",
+    "creature",
     "planner"
   ],
   "title": "SiteDataFiles",

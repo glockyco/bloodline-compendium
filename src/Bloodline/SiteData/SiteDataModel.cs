@@ -989,6 +989,65 @@ internal sealed record ResourceLoot(
 /// </summary>
 internal sealed record ResourcePlace(EntityReference Place, double Expected, int Most, bool More);
 
+/// <summary>The creatures by name. Written as <c>creatures.json</c>.</summary>
+internal sealed record CreatureIndex(IReadOnlyList<CreatureSummary> Creatures);
+
+/// <summary>A creature as the creature list shows it: how many items it drops and in how many areas it lives.</summary>
+internal sealed record CreatureSummary(string Key, string Slug, string Name, int Drops, int Places)
+{
+    /// <summary>No creature of this kind is placed anywhere, so its drops are unconfirmed.</summary>
+    public bool Unconfirmed { get; init; }
+}
+
+/// <summary>
+/// A creature's page, one per name a player meets, whichever classes carry it: what it drops, by the relations its
+/// items' pages show, and the areas and events that bring it. Written as <c>creatures/&lt;slug&gt;.json</c>.
+/// </summary>
+internal sealed record CreaturePage(
+    string Key,
+    string Slug,
+    string Name,
+    IReadOnlyList<CreatureDrop> Drops,
+    IReadOnlyList<EntityReference> Places,
+    IReadOnlyList<SourceEvent> Events
+)
+{
+    [JsonRequired]
+    public EntityKind Kind { get; init; } = EntityKind.Creature;
+
+    /// <summary>No creature of this kind is placed anywhere, so its drops are unconfirmed.</summary>
+    public bool Unconfirmed { get; init; }
+}
+
+/// <summary>
+/// One item a creature drops, as the item's Dropped by row shows it. Rows that read the same across the name's
+/// classes are one row carrying each relation.
+/// </summary>
+internal sealed record CreatureDrop(
+    EntityReference Item,
+    IReadOnlyList<string> RelationIds,
+    Odds? Odds,
+    Amount? Amount,
+    IReadOnlyList<string> Notes
+)
+{
+    [JsonRequired]
+    public IReadOnlyList<RelationCondition> Conditions { get; init; } = [];
+
+    /// <summary>
+    /// The areas of the classes that drop it, which differ between classes of one name, such as the Wolf that no
+    /// area places. Empty means no area is known.
+    /// </summary>
+    [JsonRequired]
+    public IReadOnlyList<EntityReference> Places { get; init; } = [];
+
+    /// <summary>The events that bring the classes that drop it.</summary>
+    [JsonRequired]
+    public IReadOnlyList<SourceEvent> Events { get; init; } = [];
+
+    public bool Unconfirmed { get; init; }
+}
+
 /// <summary>The disciplines in the skill window's order. Written as <c>disciplines.json</c>.</summary>
 internal sealed record DisciplineIndex(IReadOnlyList<DisciplineSummary> Disciplines);
 
@@ -1222,6 +1281,8 @@ internal sealed record SiteDataFiles(
     MechanicPage Mechanic,
     ResourceIndex Resources,
     ResourcePage Resource,
+    CreatureIndex Creatures,
+    CreaturePage Creature,
     PlannerData Planner
 );
 

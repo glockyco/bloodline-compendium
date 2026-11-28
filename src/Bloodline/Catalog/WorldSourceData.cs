@@ -26,6 +26,13 @@ internal static class WorldSourceData
     public static EntityReference Resource(string name) =>
         new(EntityKind.Resource, "Resource:" + name, name, ItemIdentity.Slug(name), null);
 
+    /// <summary>
+    /// A creature is what a player meets by its name, such as Wolf, whichever of its classes stands in the world, so
+    /// its name is its identity and its page.
+    /// </summary>
+    public static EntityReference Creature(string name) =>
+        new(EntityKind.Creature, "Creature:" + name, name, ItemIdentity.Slug(name), null);
+
     // Containers and pickup objects share one class across objects the player meets under different names, such as a
     // Miner's Crate and a Cabinet, so the name the player sees is part of their identity.
     private static bool NamedByInstance(EntityKind kind, string key) =>

@@ -177,7 +177,12 @@ export async function linkCoverage(directory) {
       (function visit(child, top) {
         const attrs = attributes(child);
         if (!top && blockTags.has(child.tagName)) return block(child);
-        if (skippedTags.has(child.tagName) || attrs["aria-hidden"] === "true")
+        // Text only a screen reader reads, such as "Details for" a row's name, is no place for a link.
+        if (
+          skippedTags.has(child.tagName) ||
+          attrs["aria-hidden"] === "true" ||
+          (attrs.class ?? "").split(/\s+/).includes("sr-only")
+        )
           return;
         const entity = entityOf(child, routes);
         if (entity) {

@@ -24,6 +24,7 @@ internal sealed record CatalogResult(
 
     public ProfessionOutput Professions { get; init; } = new(new ProfessionIndex([]), []);
     public ResourceOutput Resources { get; init; } = new(new ResourceIndex([]), []);
+    public CreatureOutput Creatures { get; init; } = new(new CreatureIndex([]), []);
 
     public MechanicOutput Mechanics { get; init; } = new(new MechanicIndex([]), []);
 
@@ -155,6 +156,7 @@ internal static class CatalogBuilder
             GatheringMechanism.Spots(context),
             records.HarvestPresets
         );
+        var creatures = CreatureProducer.Produce(items.Items);
         // The Known Issues page lists every page of every kind that notes an issue.
         var issues = KnownIssues.Publish(
             records.Issues,
@@ -204,6 +206,7 @@ internal static class CatalogBuilder
             Issues = issues,
             Professions = professions,
             Resources = resources,
+            Creatures = creatures,
             Mechanics = MechanicProducer.Produce(records.Mechanics),
             Links = Links(
                 records,

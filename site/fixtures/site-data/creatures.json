@@ -1,0 +1,12 @@
+{
+	"creatures": [
+		{
+			"key": "Creature:Bramble sentinel",
+			"slug": "bramble-sentinel",
+			"name": "Bramble sentinel",
+			"drops": 1,
+			"places": 1,
+			"unconfirmed": false
+		}
+	]
+}

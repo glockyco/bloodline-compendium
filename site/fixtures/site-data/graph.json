@@ -137,9 +137,9 @@
 					"direction": "incoming",
 					"entity": {
 						"kind": "creature",
-						"key": "/Invented/creature/mosswoven-coat/0",
+						"key": "Creature:Bramble sentinel",
 						"name": "Bramble sentinel",
-						"slug": null,
+						"slug": "bramble-sentinel",
 						"icon": null
 					},
 					"label": "Obtained from",
@@ -547,9 +547,9 @@
 		{
 			"entity": {
 				"kind": "creature",
-				"key": "/Invented/creature/mosswoven-coat/0",
+				"key": "Creature:Bramble sentinel",
 				"name": "Bramble sentinel",
-				"slug": null,
+				"slug": "bramble-sentinel",
 				"icon": null
 			},
 			"relations": [
@@ -1659,9 +1659,9 @@
 			"kind": "enemyDrop",
 			"source": {
 				"kind": "creature",
-				"key": "/Invented/creature/mosswoven-coat/0",
+				"key": "Creature:Bramble sentinel",
 				"name": "Bramble sentinel",
-				"slug": null,
+				"slug": "bramble-sentinel",
 				"icon": null
 			},
 			"target": {
@@ -1696,9 +1696,9 @@
 				"notes": [],
 				"entity": {
 					"kind": "creature",
-					"key": "/Invented/creature/mosswoven-coat/0",
+					"key": "Creature:Bramble sentinel",
 					"name": "Bramble sentinel",
-					"slug": null,
+					"slug": "bramble-sentinel",
 					"icon": null
 				},
 				"conditions": [],

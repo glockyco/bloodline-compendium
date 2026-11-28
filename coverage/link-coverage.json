@@ -4,7 +4,6 @@
     "building": 21,
     "calendarEvent": 1,
     "container": 44,
-    "creature": 166,
     "merchant": 94,
     "person": 63,
     "pickup": 3,
@@ -19,14 +18,13 @@
     "discipline": 6,
     "item": 81,
     "item or recipe": 1,
-    "item or resource": 18,
+    "item or resource": 5,
     "mechanic": 2,
     "merchant": 11,
     "merchant or person": 6,
     "person": 16,
     "place": 55,
     "quest": 1,
-    "resource": 1,
     "skill": 10
   }
 }

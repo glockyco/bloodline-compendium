@@ -56,9 +56,9 @@
 			"notes": [],
 			"entity": {
 				"kind": "creature",
-				"key": "/Invented/creature/mosswoven-coat/0",
+				"key": "Creature:Bramble sentinel",
 				"name": "Bramble sentinel",
-				"slug": null,
+				"slug": "bramble-sentinel",
 				"icon": null
 			},
 			"conditions": [],
@@ -80,9 +80,9 @@
 			"direction": "incoming",
 			"entity": {
 				"kind": "creature",
-				"key": "/Invented/creature/mosswoven-coat/0",
+				"key": "Creature:Bramble sentinel",
 				"name": "Bramble sentinel",
-				"slug": null,
+				"slug": "bramble-sentinel",
 				"icon": null
 			},
 			"label": "Obtained from",

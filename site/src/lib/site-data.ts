@@ -45,6 +45,16 @@ export type ConditionKind =
   | "unknown";
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "SourceEventKind".
+ */
+export type SourceEventKind = "worldMap" | "calendar";
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "OddsEvent".
+ */
+export type OddsEvent = "container" | "lootSpot" | "kill" | "delivery" | "use" | "catch" | "pick" | "chiselstone";
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "RelationDirection".
  */
 export type RelationDirection = "outgoing" | "incoming";
@@ -53,11 +63,6 @@ export type RelationDirection = "outgoing" | "incoming";
  * via the `definition` "PointKind".
  */
 export type PointKind = "skillPoint" | "proficiencyPoint" | "levelUpPoint";
-/**
- * This interface was referenced by `SiteDataFiles`'s JSON-Schema
- * via the `definition` "SourceEventKind".
- */
-export type SourceEventKind = "worldMap" | "calendar";
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "SourceKind".
@@ -89,11 +94,6 @@ export type SourceKind =
   | "skillBook"
   | "noteSheet"
   | "event";
-/**
- * This interface was referenced by `SiteDataFiles`'s JSON-Schema
- * via the `definition` "OddsEvent".
- */
-export type OddsEvent = "container" | "lootSpot" | "kill" | "delivery" | "use" | "catch" | "pick" | "chiselstone";
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "PriceRule".
@@ -158,6 +158,8 @@ export type ResourceAfterUse = "removed" | "stays";
 export interface SiteDataFiles {
   build: SiteBuild;
   crafting: CraftingData;
+  creature: CreaturePage;
+  creatures: CreatureIndex;
   discipline: DisciplinePage;
   disciplines: DisciplineIndex;
   graph: EntityGraph;
@@ -283,6 +285,100 @@ export interface WeaponFamily {
 }
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "CreaturePage".
+ */
+export interface CreaturePage {
+  drops: CreatureDrop[];
+  events: SourceEvent[];
+  key: string;
+  kind: EntityKind;
+  name: string;
+  places: EntityReference[];
+  slug: string;
+  unconfirmed?: boolean;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "CreatureDrop".
+ */
+export interface CreatureDrop {
+  amount: Amount | null;
+  conditions: RelationCondition[];
+  events: SourceEvent[];
+  item: EntityReference;
+  notes: string[];
+  odds: Odds | null;
+  places: EntityReference[];
+  relationIds: string[];
+  unconfirmed?: boolean;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "Amount".
+ */
+export interface Amount {
+  max: number;
+  min: number;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "RelationCondition".
+ */
+export interface RelationCondition {
+  entity: EntityReference | null;
+  kind: ConditionKind;
+  label: string;
+  value: number | null;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "SourceEvent".
+ */
+export interface SourceEvent {
+  kind: SourceEventKind;
+  name: string;
+  page: EntityReference;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "Odds".
+ */
+export interface Odds {
+  chance: number | null;
+  event: OddsEvent;
+  expected: number | null;
+  highestChance?: number | null;
+  unknown: string | null;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "CreatureIndex".
+ */
+export interface CreatureIndex {
+  creatures: CreatureSummary[];
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "CreatureSummary".
+ */
+export interface CreatureSummary {
+  drops: number;
+  key: string;
+  name: string;
+  places: number;
+  slug: string;
+  unconfirmed?: boolean;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "DisciplinePage".
  */
 export interface DisciplinePage {
@@ -364,17 +460,6 @@ export interface EntityRelation {
 }
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
- * via the `definition` "RelationCondition".
- */
-export interface RelationCondition {
-  entity: EntityReference | null;
-  kind: ConditionKind;
-  label: string;
-  value: number | null;
-  [k: string]: unknown;
-}
-/**
- * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "SkillRow".
  */
 export interface SkillRow {
@@ -435,30 +520,11 @@ export interface Source {
 }
 /**
  * This interface was referenced by `SiteDataFiles`'s JSON-Schema
- * via the `definition` "Amount".
- */
-export interface Amount {
-  max: number;
-  min: number;
-  [k: string]: unknown;
-}
-/**
- * This interface was referenced by `SiteDataFiles`'s JSON-Schema
  * via the `definition` "PointCost".
  */
 export interface PointCost {
   amount: number;
   points: PointKind;
-  [k: string]: unknown;
-}
-/**
- * This interface was referenced by `SiteDataFiles`'s JSON-Schema
- * via the `definition` "SourceEvent".
- */
-export interface SourceEvent {
-  kind: SourceEventKind;
-  name: string;
-  page: EntityReference;
   [k: string]: unknown;
 }
 /**
@@ -469,18 +535,6 @@ export interface ItemAmount {
   item: EntityReference;
   quantity: number;
   relationId?: string | null;
-  [k: string]: unknown;
-}
-/**
- * This interface was referenced by `SiteDataFiles`'s JSON-Schema
- * via the `definition` "Odds".
- */
-export interface Odds {
-  chance: number | null;
-  event: OddsEvent;
-  expected: number | null;
-  highestChance?: number | null;
-  unknown: string | null;
   [k: string]: unknown;
 }
 /**

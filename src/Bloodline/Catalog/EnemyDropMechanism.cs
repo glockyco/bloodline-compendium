@@ -37,7 +37,7 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
                     name,
                     sourcePlaces,
                     RollNotes(field),
-                    WorldSourceData.Reference(EntityKind.Creature, path, name),
+                    WorldSourceData.Creature(name),
                     OddsEvent.Kill,
                     picks,
                     conditions: WorldSourceData.Conditions(
@@ -58,11 +58,7 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
                         Source = source.Source with
                         {
                             Unconfirmed = true,
-                            Notes =
-                            [
-                                .. source.Source.Notes,
-                                "No creature of this kind is placed anywhere in the world.",
-                            ],
+                            Notes = [.. source.Source.Notes, Absent],
                         },
                     }
                 : source;
@@ -82,7 +78,7 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
                     name,
                     places,
                     RollNotes(field),
-                    WorldSourceData.Reference(EntityKind.Creature, path, name),
+                    WorldSourceData.Creature(name),
                     OddsEvent.Kill,
                     picks,
                     conditions: WorldSourceData.Conditions(
@@ -100,6 +96,9 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
                     };
         }
     }
+
+    /// <summary>The note of a drop whose creature no level, spawner or event places.</summary>
+    public const string Absent = "No creature of this kind is placed anywhere in the world.";
 
     private const string SpawnerUnread =
         "A spawner places this enemy, and when it spawns is not read.";

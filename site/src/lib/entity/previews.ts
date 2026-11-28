@@ -59,17 +59,17 @@ export interface DisciplinePreview {
 }
 
 /**
- * What a resource, profession or mechanic link's preview shows: the facts its list card shows, or a mechanic's
+ * What a resource, profession, mechanic or creature link's preview shows: the facts its list shows, or a mechanic's
  * introduction, as lines under its name.
  */
-export interface SummaryPreview<Kind extends 'resource' | 'profession' | 'mechanic' = SummaryKind> {
+export interface SummaryPreview<Kind extends SummaryKind = SummaryKind> {
 	kind: Kind;
 	name: string;
 	icon: string | null;
 	lines: string[];
 }
 
-type SummaryKind = 'resource' | 'profession' | 'mechanic';
+type SummaryKind = 'resource' | 'profession' | 'mechanic' | 'creature';
 
 /**
  * The previews of a hosted kind's entries on one host page, keyed by their anchor, which a link's fragment picks.
@@ -92,7 +92,8 @@ export type Preview =
 	| DisciplinePreview
 	| SummaryPreview<'resource'>
 	| SummaryPreview<'profession'>
-	| SummaryPreview<'mechanic'>;
+	| SummaryPreview<'mechanic'>
+	| SummaryPreview<'creature'>;
 
 /** A preview resource: one entity's preview, or the previews of a hosted kind's entries on one page. */
 export type PreviewResource =
@@ -106,6 +107,7 @@ export const previewKinds: ReadonlySet<EntityKind> = new Set<Preview['kind']>([
 	'spellsong',
 	'discipline',
 	'resource',
+	'creature',
 	'profession',
 	'mechanic'
 ]);

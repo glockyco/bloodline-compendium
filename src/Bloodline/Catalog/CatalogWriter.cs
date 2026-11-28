@@ -62,6 +62,13 @@ internal static class CatalogWriter
                     Path.Combine(staging, "resources", resource.Slug + ".json"),
                     resource
                 );
+            CanonicalJson.Write(Path.Combine(staging, "creatures.json"), catalog.Creatures.Index);
+            Directory.CreateDirectory(Path.Combine(staging, "creatures"));
+            foreach (var creature in catalog.Creatures.Pages)
+                CanonicalJson.Write(
+                    Path.Combine(staging, "creatures", creature.Slug + ".json"),
+                    creature
+                );
             Directory.CreateDirectory(Path.Combine(staging, "disciplines"));
             Directory.CreateDirectory(Path.Combine(staging, "skills"));
             foreach (var discipline in catalog.Skills.Disciplines)

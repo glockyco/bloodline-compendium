@@ -3,6 +3,7 @@ import {
 	readDisciplines,
 	readItem,
 	readMechanics,
+	readCreatures,
 	readProfessions,
 	readResources,
 	readSharedMerchantNames,
@@ -178,6 +179,26 @@ export const previewSources: {
 				name: mechanic.name,
 				icon: null,
 				lines: [plainText(mechanic.intro)]
+			};
+		}
+	},
+	creature: {
+		async slugs() {
+			return (await readCreatures()).creatures.map((creature) => creature.slug);
+		},
+		async build(slug): Promise<SummaryPreview<'creature'>> {
+			const creature = (await readCreatures()).creatures.find((entry) => entry.slug === slug)!;
+			return {
+				kind: 'creature',
+				name: creature.name,
+				icon: null,
+				// A preview describes the creature, not its loot. Until its stats are checked in the game, that is where
+				// it lives.
+				lines: [
+					creature.unconfirmed
+						? 'Not placed anywhere'
+						: `Lives in ${plural(creature.places, 'area', 'areas')}`
+				]
 			};
 		}
 	}

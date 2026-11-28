@@ -1,0 +1,44 @@
+{
+	"key": "Creature:Bramble sentinel",
+	"slug": "bramble-sentinel",
+	"name": "Bramble sentinel",
+	"kind": "creature",
+	"unconfirmed": false,
+	"drops": [
+		{
+			"item": {
+				"kind": "item",
+				"key": "/Invented/Items/MosswovenCoat",
+				"name": "Mosswoven Coat",
+				"slug": "mosswoven-coat",
+				"icon": "mosswoven-coat"
+			},
+			"relationIds": ["fixture:mosswoven-coat:source:0"],
+			"odds": { "event": "kill", "chance": 0.2, "expected": 0.2, "unknown": null },
+			"amount": { "min": 1, "max": 1 },
+			"notes": [],
+			"conditions": [],
+			"places": [
+				{
+					"kind": "place",
+					"key": "/Invented/Places/GlassReach",
+					"name": "Glass Reach",
+					"slug": null,
+					"icon": null
+				}
+			],
+			"events": [],
+			"unconfirmed": false
+		}
+	],
+	"places": [
+		{
+			"kind": "place",
+			"key": "/Invented/Places/GlassReach",
+			"name": "Glass Reach",
+			"slug": null,
+			"icon": null
+		}
+	],
+	"events": []
+}

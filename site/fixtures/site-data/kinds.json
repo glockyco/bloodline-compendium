@@ -25,9 +25,9 @@
 	},
 	{
 		"kind": "creature",
-		"hasPages": false,
-		"route": null,
-		"searchFilter": "Creature",
+		"hasPages": true,
+		"route": "creatures",
+		"searchFilter": "Creatures",
 		"structuredDataType": "Thing",
 		"host": null
 	},

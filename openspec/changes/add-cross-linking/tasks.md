@@ -16,7 +16,8 @@
 
 ## 3. Creatures
 
-- [ ] 3.1 Compare and build creature pages with drops, places, spawn conditions and the debuffs they can carry, and their preview, and verify every creature reference on item pages links and the creature count in the recorded file drops to zero
+- [x] 3.1 Compare and build creature pages with drops, each with its areas, places, spawn conditions and their preview, and verify every creature reference on item pages links and the creature count in the recorded file drops to zero. The debuffs a creature can carry move to 5.2, because effects have no pages yet
+- [ ] 3.2 Read and check in the lab what a creature's health, armor, damage, resistances and experience on kill do, compare how creature pages and their previews show them, and make the preview describe the creature by them instead of where it lives
 
 ## 4. Places
 
