@@ -4,6 +4,8 @@ import {
 	readItem,
 	readMechanics,
 	readCreatures,
+	readPlace,
+	readPlaces,
 	readProfessions,
 	readResources,
 	readSharedMerchantNames,
@@ -15,7 +17,7 @@ import { plainText } from '../links.js';
 import { resourceLine } from '../resources/summary.js';
 import { entries as itemEntries } from '../../routes/items/[slug]/+page.server.js';
 import { firstRoute } from '../items/acquisition.js';
-import { sourceHeadings } from '../labels.js';
+import { placeSections, sourceHeadings } from '../labels.js';
 import { rankCosts } from '../rules/progression.js';
 import { disciplineContents, skillStatus } from '../skills/describe.js';
 import type {
@@ -198,6 +200,38 @@ export const previewSources: {
 					creature.unconfirmed
 						? 'Not placed anywhere'
 						: `Lives in ${plural(creature.places, 'area', 'areas')}`
+				]
+			};
+		}
+	},
+	place: {
+		async slugs() {
+			return (await readPlaces()).places.map((place) => place.slug);
+		},
+		async build(slug): Promise<SummaryPreview<'place'>> {
+			const place = await readPlace(slug);
+			// What a visitor finds there, counted as the page's sections and overview tiles count it.
+			const things = new Set(
+				place.groups.flatMap((group) =>
+					group.things.map(
+						(thing) => `${thing.entity.kind}:${thing.entity.key ?? thing.entity.name}`
+					)
+				)
+			);
+			return {
+				kind: 'place',
+				name: place.name,
+				icon: null,
+				lines: [
+					...placeSections.flatMap((section) => {
+						const count = [...things].filter((key) =>
+							section.kinds.some((kind) => key.startsWith(kind + ':'))
+						).length;
+						return count ? [plural(count, section.noun[0], section.noun[1])] : [];
+					}),
+					...(place.lessons.length
+						? [plural(place.lessons.length, 'skill to learn', 'skills to learn')]
+						: [])
 				]
 			};
 		}

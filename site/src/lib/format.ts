@@ -18,6 +18,11 @@ export function plural(count: number, one: string, many: string): string {
 	return `${formatNumber(count)} ${count === 1 ? one : many}`;
 }
 
+/** How many different items something can give, where one is simply "1 item". */
+export function differentItems(count: number): string {
+	return plural(count, 'item', 'different items');
+}
+
 /** A range of levels, such as "1 to 55", one level alone, or "None" when the range is unknown. */
 export function levelRange(min: number | null | undefined, max: number | null | undefined): string {
 	return min == null || max == null
@@ -63,6 +68,13 @@ export function formatOneIn(min: number, max: number): string | null {
  */
 export function formatChance(value: number): string {
 	return value > 0 && value < 0.01 ? `about ${oneIn(value)}` : formatPercent(value);
+}
+
+/** How often a day brings something, as about 1 day in N below 1 percent, and as a share of days above. */
+export function formatDays(value: number): string {
+	return value > 0 && value < 0.01
+		? `About 1 day in ${rarityFormat.format(1 / value)}`
+		: `On ${formatPercent(value)} of days`;
 }
 
 /**

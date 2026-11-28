@@ -18,6 +18,8 @@ import type {
 	ResourcePage,
 	CreatureIndex,
 	CreaturePage,
+	PlaceIndex,
+	PlacePage,
 	MechanicIndex,
 	MechanicPage,
 	PlannerData
@@ -56,6 +58,8 @@ export const readResources = () => json<ResourceIndex>('resources.json');
 export const readResource = (slug: string) => json<ResourcePage>('resources/' + slug + '.json');
 export const readCreatures = () => json<CreatureIndex>('creatures.json');
 export const readCreature = (slug: string) => json<CreaturePage>('creatures/' + slug + '.json');
+export const readPlaces = () => json<PlaceIndex>('places.json');
+export const readPlace = (slug: string) => json<PlacePage>('places/' + slug + '.json');
 export const readProfession = (slug: string) =>
 	json<ProfessionPage>('professions/' + slug + '.json');
 /**

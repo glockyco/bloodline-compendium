@@ -21,7 +21,12 @@
 
 ## 4. Places
 
-- [ ] 4.1 Compare and build place pages with the creatures, containers, pickups, merchants and people each place holds, and their preview, and lower the recorded place count to zero
+- [x] 4.1 Compare and build place pages with the creatures, containers, pickups, merchants and people each place holds, and their preview, and lower the recorded place count to zero
+- [ ] 4.2 Read which terrain tag opens which camp map, and list on each camp place the world map events that lead there with their chances
+- [ ] 4.3 List on place pages the creatures placed there that give no item, from the spawn sites, with task 3.2's stats
+- [ ] 4.4 Read services and crafting stations by place, such as stables, workbenches and cooking fires, and show them on place pages whether or not they give items
+- [ ] 4.5 Read the transitions between levels and list each place's connected places
+- [ ] 4.6 Extract actor positions and compare a map figure for place pages
 
 ## 5. Effects
 

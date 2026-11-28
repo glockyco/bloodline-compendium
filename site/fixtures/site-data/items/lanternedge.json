@@ -54,9 +54,9 @@
 			"places": [
 				{
 					"kind": "place",
-					"key": "/Invented/Places/GlassReach",
+					"key": "Place:Glass Reach",
 					"name": "Glass Reach",
-					"slug": null,
+					"slug": "glass-reach",
 					"icon": null
 				}
 			],
@@ -420,9 +420,9 @@
 			"places": [
 				{
 					"kind": "place",
-					"key": "/Invented/Places/GlassReach",
+					"key": "Place:Glass Reach",
 					"name": "Glass Reach",
-					"slug": null,
+					"slug": "glass-reach",
 					"icon": null
 				}
 			],
@@ -513,9 +513,9 @@
 			"places": [
 				{
 					"kind": "place",
-					"key": "/Invented/Places/GlassReach",
+					"key": "Place:Glass Reach",
 					"name": "Glass Reach",
-					"slug": null,
+					"slug": "glass-reach",
 					"icon": null
 				}
 			],
@@ -561,9 +561,9 @@
 			"places": [
 				{
 					"kind": "place",
-					"key": "/Invented/Places/GlassReach",
+					"key": "Place:Glass Reach",
 					"name": "Glass Reach",
-					"slug": null,
+					"slug": "glass-reach",
 					"icon": null
 				}
 			],
@@ -597,9 +597,9 @@
 			"places": [
 				{
 					"kind": "place",
-					"key": "/Invented/Places/GlassReach",
+					"key": "Place:Glass Reach",
 					"name": "Glass Reach",
-					"slug": null,
+					"slug": "glass-reach",
 					"icon": null
 				}
 			],

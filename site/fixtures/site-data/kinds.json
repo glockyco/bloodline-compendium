@@ -33,9 +33,9 @@
 	},
 	{
 		"kind": "place",
-		"hasPages": false,
-		"route": null,
-		"searchFilter": "Place",
+		"hasPages": true,
+		"route": "places",
+		"searchFilter": "Places",
 		"structuredDataType": "Thing",
 		"host": null
 	},

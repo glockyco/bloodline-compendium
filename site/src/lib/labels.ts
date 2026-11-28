@@ -1,4 +1,5 @@
-import type { RelationCondition, SourceEventKind, SourceKind } from './site-data.js';
+import type { EntityKind, RelationCondition, SourceEventKind, SourceKind } from './site-data.js';
+import { differentItems, plural } from './format.js';
 export function titleCase(value: string): string {
 	return value
 		.replace(/([a-z])([A-Z])/g, '$1 $2')
@@ -93,4 +94,43 @@ export const sourceColumns: Record<SourceKind, string> = {
 	skillBook: 'Location',
 	noteSheet: 'Location',
 	event: 'Event'
+};
+/**
+ * The sections of a place page, by the kind of thing they hold and in the order a visitor meets them, each with what
+ * its tile counts, once and several times. A place's people, creatures and other things fill them, and a thing's
+ * card says what it does there.
+ */
+export const placeSections: {
+	id: string;
+	title: string;
+	kinds: EntityKind[];
+	noun: [string, string];
+}[] = [
+	{ id: 'people', title: 'People', kinds: ['merchant', 'person'], noun: ['person', 'people'] },
+	{ id: 'buildings', title: 'Buildings', kinds: ['building'], noun: ['building', 'buildings'] },
+	{ id: 'creatures', title: 'Creatures', kinds: ['creature'], noun: ['creature', 'creatures'] },
+	{ id: 'resources', title: 'Resources', kinds: ['resource'], noun: ['resource', 'resources'] },
+	{ id: 'fishing', title: 'Fishing', kinds: ['activity'], noun: ['fishing spot', 'fishing spots'] },
+	{
+		id: 'containers',
+		title: 'Containers',
+		kinds: ['container'],
+		noun: ['container', 'containers']
+	},
+	{ id: 'ground', title: 'On the Ground', kinds: ['pickup', 'place'], noun: ['item', 'items'] }
+];
+
+/** What a thing does at a place, by the way it gives items, with how many items. */
+export const placeRoles: Partial<Record<SourceKind, (count: number) => string>> = {
+	shop: (count) => `Sells ${plural(count, 'item', 'items')}`,
+	currencyShop: (count) => `Sells ${plural(count, 'item', 'items')} for special currency`,
+	stable: (count) => `Sells ${plural(count, 'mount', 'mounts')}`,
+	dialogue: (count) => `Gives ${plural(count, 'item', 'items')} in dialogue`,
+	enemyDrop: (count) => `Can drop ${plural(count, 'item', 'items')}`,
+	gathering: (count) => `Can give ${differentItems(count)}`,
+	fishing: (count) => `Can give ${differentItems(count)}`,
+	containerLoot: (count) => `Can hold ${differentItems(count)}`,
+	pickup: (count) => `Holds ${plural(count, 'item', 'items')}`,
+	seasonalGift: (count) => `Gives ${plural(count, 'item', 'items')}`,
+	chiseling: (count) => `Chisels ${plural(count, 'item', 'items')}`
 };

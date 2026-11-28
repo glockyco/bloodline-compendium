@@ -559,7 +559,7 @@ public sealed class CatalogTests
             [new Exclusion(ExclusionKind.Level, "/Game/Test", "Test", "Invented test")]
         );
         var source = Assert.Single(result.Items[0].Sources);
-        Assert.Equal("/Game/Live", Assert.Single(source.Places).Key);
+        Assert.Equal("Place:Live", Assert.Single(source.Places).Key);
     }
 
     [Fact]
@@ -589,7 +589,7 @@ public sealed class CatalogTests
             )
         );
         Assert.Equal(
-            ["/Game/A", "/Game/B"],
+            ["Place:A", "Place:B"],
             result.Items[0].Sources.Select(source => source.Entity.Key).Order()
         );
         Assert.All(
@@ -725,7 +725,7 @@ public sealed class CatalogTests
     }
 
     [Fact]
-    public void ReportsEntitiesOfAKindWithoutPagesThatShareAName()
+    public void LevelsThatShareAPlaceNameAreOnePlace()
     {
         var item = Item();
         ActorRecord Entrance(string level) =>
@@ -752,14 +752,13 @@ public sealed class CatalogTests
                 new LevelRecord("/Game/Valley_North", [], []),
             ]
         );
-        var entries = Build(records)
-            .Report.Gaps.Single(gap => gap.Kind == GapKind.SharedName)
-            .Entries;
+        var result = Build(records);
+        // A reader knows the area by its name, so both levels are one place with one page.
         Assert.Equal(
-            ["/Game/Valley_Map", "/Game/Valley_North"],
-            entries.Select(entry => entry.Detail)
+            "Place:Green Valley",
+            Assert.Single(Assert.Single(result.Items[0].Sources).Places).Key
         );
-        Assert.All(entries, entry => Assert.Equal("Place: Green Valley", entry.Label));
+        Assert.DoesNotContain(result.Report.Gaps, gap => gap.Kind == GapKind.SharedName);
     }
 
     [Fact]

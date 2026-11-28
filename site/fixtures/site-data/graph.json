@@ -572,9 +572,9 @@
 		{
 			"entity": {
 				"kind": "place",
-				"key": "/Invented/Places/GlassReach",
+				"key": "Place:Glass Reach",
 				"name": "Glass Reach",
-				"slug": null,
+				"slug": "glass-reach",
 				"icon": null
 			},
 			"relations": []
@@ -1146,9 +1146,9 @@
 					"direction": "incoming",
 					"entity": {
 						"kind": "place",
-						"key": "/Invented/Levels/Ashford",
+						"key": "Place:Ashford",
 						"name": "Ashford",
-						"slug": null,
+						"slug": "ashford",
 						"icon": null,
 						"fragment": null
 					},
@@ -1160,9 +1160,9 @@
 		{
 			"entity": {
 				"kind": "place",
-				"key": "/Invented/Levels/Ashford",
+				"key": "Place:Ashford",
 				"name": "Ashford",
-				"slug": null,
+				"slug": "ashford",
 				"icon": null,
 				"fragment": null
 			},
@@ -1364,9 +1364,9 @@
 					"direction": "incoming",
 					"entity": {
 						"kind": "place",
-						"key": "/Invented/Levels/Ashford",
+						"key": "Place:Ashford",
 						"name": "Ashford",
-						"slug": null,
+						"slug": "ashford",
 						"icon": null,
 						"fragment": null
 					},
@@ -1485,9 +1485,9 @@
 				"places": [
 					{
 						"kind": "place",
-						"key": "/Invented/Places/GlassReach",
+						"key": "Place:Glass Reach",
 						"name": "Glass Reach",
-						"slug": null,
+						"slug": "glass-reach",
 						"icon": null
 					}
 				],
@@ -1542,9 +1542,9 @@
 				"places": [
 					{
 						"kind": "place",
-						"key": "/Invented/Places/GlassReach",
+						"key": "Place:Glass Reach",
 						"name": "Glass Reach",
-						"slug": null,
+						"slug": "glass-reach",
 						"icon": null
 					}
 				],
@@ -1594,9 +1594,9 @@
 				"places": [
 					{
 						"kind": "place",
-						"key": "/Invented/Places/GlassReach",
+						"key": "Place:Glass Reach",
 						"name": "Glass Reach",
-						"slug": null,
+						"slug": "glass-reach",
 						"icon": null
 					}
 				],
@@ -1681,9 +1681,9 @@
 				"places": [
 					{
 						"kind": "place",
-						"key": "/Invented/Places/GlassReach",
+						"key": "Place:Glass Reach",
 						"name": "Glass Reach",
-						"slug": null,
+						"slug": "glass-reach",
 						"icon": null
 					}
 				],
@@ -1745,9 +1745,9 @@
 				"places": [
 					{
 						"kind": "place",
-						"key": "/Invented/Places/GlassReach",
+						"key": "Place:Glass Reach",
 						"name": "Glass Reach",
-						"slug": null,
+						"slug": "glass-reach",
 						"icon": null
 					}
 				],
@@ -2391,9 +2391,9 @@
 				"places": [
 					{
 						"kind": "place",
-						"key": "/Invented/Places/GlassReach",
+						"key": "Place:Glass Reach",
 						"name": "Glass Reach",
-						"slug": null,
+						"slug": "glass-reach",
 						"icon": null
 					}
 				],
@@ -2526,9 +2526,9 @@
 				"places": [
 					{
 						"kind": "place",
-						"key": "/Invented/Places/GlassReach",
+						"key": "Place:Glass Reach",
 						"name": "Glass Reach",
-						"slug": null,
+						"slug": "glass-reach",
 						"icon": null
 					}
 				],
@@ -2588,9 +2588,9 @@
 				"places": [
 					{
 						"kind": "place",
-						"key": "/Invented/Places/GlassReach",
+						"key": "Place:Glass Reach",
 						"name": "Glass Reach",
-						"slug": null,
+						"slug": "glass-reach",
 						"icon": null
 					}
 				],
@@ -2793,9 +2793,9 @@
 			"kind": "SkillBook",
 			"source": {
 				"kind": "place",
-				"key": "/Invented/Levels/Ashford",
+				"key": "Place:Ashford",
 				"name": "Ashford",
-				"slug": null,
+				"slug": "ashford",
 				"icon": null,
 				"fragment": null
 			},
@@ -2816,9 +2816,9 @@
 				"places": [
 					{
 						"kind": "place",
-						"key": "/Invented/Levels/Ashford",
+						"key": "Place:Ashford",
 						"name": "Ashford",
-						"slug": null,
+						"slug": "ashford",
 						"icon": null,
 						"fragment": null
 					}
@@ -2829,9 +2829,9 @@
 				"notes": [],
 				"entity": {
 					"kind": "place",
-					"key": "/Invented/Levels/Ashford",
+					"key": "Place:Ashford",
 					"name": "Ashford",
-					"slug": null,
+					"slug": "ashford",
 					"icon": null,
 					"fragment": null
 				},
@@ -2870,9 +2870,9 @@
 				"places": [
 					{
 						"kind": "place",
-						"key": "/Invented/Levels/Ashford",
+						"key": "Place:Ashford",
 						"name": "Ashford",
-						"slug": null,
+						"slug": "ashford",
 						"icon": null,
 						"fragment": null
 					}
@@ -2901,9 +2901,9 @@
 			"kind": "NoteSheet",
 			"source": {
 				"kind": "place",
-				"key": "/Invented/Levels/Ashford",
+				"key": "Place:Ashford",
 				"name": "Ashford",
-				"slug": null,
+				"slug": "ashford",
 				"icon": null,
 				"fragment": null
 			},
@@ -2932,9 +2932,9 @@
 				"places": [
 					{
 						"kind": "place",
-						"key": "/Invented/Levels/Ashford",
+						"key": "Place:Ashford",
 						"name": "Ashford",
-						"slug": null,
+						"slug": "ashford",
 						"icon": null,
 						"fragment": null
 					}
@@ -2945,9 +2945,9 @@
 				"notes": [],
 				"entity": {
 					"kind": "place",
-					"key": "/Invented/Levels/Ashford",
+					"key": "Place:Ashford",
 					"name": "Ashford",
-					"slug": null,
+					"slug": "ashford",
 					"icon": null,
 					"fragment": null
 				},

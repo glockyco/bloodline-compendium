@@ -25,13 +25,15 @@ internal sealed record WorldMapEvent(
 
 /// <summary>
 /// An event the calendar puts on a day in one area. <see cref="Areas"/> is empty when it can happen in every area,
-/// and <see cref="Chance"/> is the chance that a day's event is this one.
+/// <see cref="Chance"/> is the chance that a day's event is this one, and <see cref="Rate"/> its weight in the draw
+/// among the events of the day's area.
 /// </summary>
 internal sealed record CalendarEvent(
     string Name,
     string Description,
     IReadOnlyList<string> Areas,
     double Chance,
+    double Rate,
     IReadOnlyList<string> Spawns
 );
 
@@ -217,6 +219,21 @@ internal sealed class GameEvents
     public IReadOnlyList<WorldMapEvent> WorldMap { get; }
     public IReadOnlyList<CalendarEvent> Calendar { get; }
     public IReadOnlyList<string> CalendarAreas { get; }
+
+    /// <summary>
+    /// The calendar events that can happen in an area, each with the chance that a day brings it there: the day picks
+    /// the area among all of them, then the event by rate among those the area allows.
+    /// </summary>
+    public IEnumerable<(CalendarEvent Event, double Chance)> CalendarIn(string area)
+    {
+        var pool = Calendar
+            .Where(happening =>
+                happening.Areas.Count == 0 || happening.Areas.Contains(area, StringComparer.Ordinal)
+            )
+            .ToArray();
+        var total = pool.Sum(happening => happening.Rate);
+        return pool.Select(happening => (happening, happening.Rate / total / CalendarAreas.Count));
+    }
 
     public GameEvents(CatalogContext context)
     {
@@ -409,6 +426,7 @@ internal sealed class GameEvents
                         row.Description,
                         row.Areas.Contains("ALL") ? [] : row.Areas,
                         chances[row.Name],
+                        row.Rate,
                         spawns.GetValueOrDefault(row.Name) ?? []
                     )),
             ]

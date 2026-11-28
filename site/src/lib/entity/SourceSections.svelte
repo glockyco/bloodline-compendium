@@ -1,5 +1,6 @@
 <script lang="ts">
 	import SourceRow from '#lib/items/SourceRow.svelte';
+	import EntityLink from '#lib/ui/EntityLink.svelte';
 	import RelationTable from '#lib/RelationTable.svelte';
 	import Section from '#lib/ui/Section.svelte';
 	import {
@@ -175,7 +176,10 @@
 						></tr
 					>{:else if !lost && group.byPlace && (index === 0 || placeOf(group.sources[index - 1]) !== placeOf(source))}<tr
 						class="group-heading"
-						><th colspan={group.headings.length} scope="colgroup" data-game>{placeOf(source)}</th
+						><th colspan={group.headings.length} scope="colgroup"
+							>{#if source.places[0]}<EntityLink entity={source.places[0]} />{:else}<span data-game
+									>{placeOf(source)}</span
+								>{/if}</th
 						></tr
 					>{/if}<SourceRow
 					{source}

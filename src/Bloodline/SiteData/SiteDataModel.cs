@@ -1048,6 +1048,61 @@ internal sealed record CreatureDrop(
     public bool Unconfirmed { get; init; }
 }
 
+/// <summary>The places by name. Written as <c>places.json</c>.</summary>
+internal sealed record PlaceIndex(IReadOnlyList<PlaceSummary> Places);
+
+/// <summary>A place as the place list shows it: how many things there give items.</summary>
+internal sealed record PlaceSummary(string Key, string Slug, string Name, int Things);
+
+/// <summary>
+/// A place's page: what gives items there, by the kind of way, each thing with the items it gives, from the item
+/// pages' sources that name the place, and the events that happen there. Written as <c>places/&lt;slug&gt;.json</c>.
+/// </summary>
+internal sealed record PlacePage(
+    string Key,
+    string Slug,
+    string Name,
+    IReadOnlyList<PlaceGroup> Groups
+)
+{
+    [JsonRequired]
+    public EntityKind Kind { get; init; } = EntityKind.Place;
+
+    /// <summary>The skills and spellsongs a book or note sheet in the place teaches, by the relations those show.</summary>
+    [JsonRequired]
+    public IReadOnlyList<PlaceLesson> Lessons { get; init; } = [];
+
+    /// <summary>The calendar events that can happen in the place, the likeliest first.</summary>
+    [JsonRequired]
+    public IReadOnlyList<PlaceEvent> Events { get; init; } = [];
+}
+
+/// <summary>
+/// An event that can happen at a place, with its entry on its mechanic page, the game's text for it, and the chance
+/// that a day brings it there.
+/// </summary>
+internal sealed record PlaceEvent(SourceEvent Event, string Description, double Chance);
+
+/// <summary>An item a thing gives at a place, with its category, so the page can find items by kind.</summary>
+internal sealed record PlaceItem(EntityReference Item, CategoryLink Category);
+
+/// <summary>A skill or spellsong a book or note sheet in a place teaches.</summary>
+internal sealed record PlaceLesson(EntityReference Entity, SourceKind Kind, string RelationId);
+
+/// <summary>The things of one kind of way at a place, such as its creatures or its containers.</summary>
+internal sealed record PlaceGroup(SourceKind Kind, IReadOnlyList<PlaceThing> Things);
+
+/// <summary>One thing at a place and every item it gives there, the most likely first.</summary>
+internal sealed record PlaceThing(EntityReference Entity, IReadOnlyList<PlaceItem> Items)
+{
+    /// <summary>
+    /// The relations of a thing that is the place itself, such as an item picked up there, which the item's page
+    /// shows as coming from the place.
+    /// </summary>
+    [JsonRequired]
+    public IReadOnlyList<string> RelationIds { get; init; } = [];
+}
+
 /// <summary>The disciplines in the skill window's order. Written as <c>disciplines.json</c>.</summary>
 internal sealed record DisciplineIndex(IReadOnlyList<DisciplineSummary> Disciplines);
 
@@ -1283,6 +1338,8 @@ internal sealed record SiteDataFiles(
     ResourcePage Resource,
     CreatureIndex Creatures,
     CreaturePage Creature,
+    PlaceIndex Places,
+    PlacePage Place,
     PlannerData Planner
 );
 

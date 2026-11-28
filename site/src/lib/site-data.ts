@@ -172,6 +172,8 @@ export interface SiteDataFiles {
   };
   mechanic: MechanicPage;
   mechanics: MechanicIndex;
+  place: PlacePage;
+  places: PlaceIndex;
   planner: PlannerData;
   profession: ProfessionPage;
   professions: ProfessionIndex;
@@ -1011,6 +1013,87 @@ export interface MechanicSummary {
   key: string;
   name: string;
   slug: string;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "PlacePage".
+ */
+export interface PlacePage {
+  events: PlaceEvent[];
+  groups: PlaceGroup[];
+  key: string;
+  kind: EntityKind;
+  lessons: PlaceLesson[];
+  name: string;
+  slug: string;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "PlaceEvent".
+ */
+export interface PlaceEvent {
+  chance: number;
+  description: string;
+  event: SourceEvent;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "PlaceGroup".
+ */
+export interface PlaceGroup {
+  kind: SourceKind;
+  things: PlaceThing[];
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "PlaceThing".
+ */
+export interface PlaceThing {
+  entity: EntityReference;
+  items: PlaceItem[];
+  relationIds: string[];
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "PlaceItem".
+ */
+export interface PlaceItem {
+  category: CategoryLink;
+  item: EntityReference;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "PlaceLesson".
+ */
+export interface PlaceLesson {
+  entity: EntityReference;
+  kind: SourceKind;
+  relationId: string;
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "PlaceIndex".
+ */
+export interface PlaceIndex {
+  places: PlaceSummary[];
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `SiteDataFiles`'s JSON-Schema
+ * via the `definition` "PlaceSummary".
+ */
+export interface PlaceSummary {
+  key: string;
+  name: string;
+  slug: string;
+  things: number;
   [k: string]: unknown;
 }
 /**

@@ -69,7 +69,7 @@ export interface SummaryPreview<Kind extends SummaryKind = SummaryKind> {
 	lines: string[];
 }
 
-type SummaryKind = 'resource' | 'profession' | 'mechanic' | 'creature';
+type SummaryKind = 'resource' | 'profession' | 'mechanic' | 'creature' | 'place';
 
 /**
  * The previews of a hosted kind's entries on one host page, keyed by their anchor, which a link's fragment picks.
@@ -93,7 +93,8 @@ export type Preview =
 	| SummaryPreview<'resource'>
 	| SummaryPreview<'profession'>
 	| SummaryPreview<'mechanic'>
-	| SummaryPreview<'creature'>;
+	| SummaryPreview<'creature'>
+	| SummaryPreview<'place'>;
 
 /** A preview resource: one entity's preview, or the previews of a hosted kind's entries on one page. */
 export type PreviewResource =
@@ -108,6 +109,7 @@ export const previewKinds: ReadonlySet<EntityKind> = new Set<Preview['kind']>([
 	'discipline',
 	'resource',
 	'creature',
+	'place',
 	'profession',
 	'mechanic'
 ]);

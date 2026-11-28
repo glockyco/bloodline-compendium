@@ -1,0 +1,6 @@
+{
+	"places": [
+		{ "key": "Place:Ashford", "slug": "ashford", "name": "Ashford", "things": 0 },
+		{ "key": "Place:Glass Reach", "slug": "glass-reach", "name": "Glass Reach", "things": 1 }
+	]
+}

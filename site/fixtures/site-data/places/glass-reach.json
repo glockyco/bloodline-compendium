@@ -1,0 +1,37 @@
+{
+	"key": "Place:Glass Reach",
+	"slug": "glass-reach",
+	"name": "Glass Reach",
+	"kind": "place",
+	"events": [],
+	"groups": [
+		{
+			"kind": "enemyDrop",
+			"things": [
+				{
+					"entity": {
+						"kind": "creature",
+						"key": "Creature:Bramble sentinel",
+						"name": "Bramble sentinel",
+						"slug": "bramble-sentinel",
+						"icon": null
+					},
+					"items": [
+						{
+							"item": {
+								"kind": "item",
+								"key": "/Invented/Items/MosswovenCoat",
+								"name": "Mosswoven Coat",
+								"slug": "mosswoven-coat",
+								"icon": "mosswoven-coat"
+							},
+							"category": { "slug": "armor", "name": "Armor" }
+						}
+					],
+					"relationIds": []
+				}
+			]
+		}
+	],
+	"lessons": []
+}

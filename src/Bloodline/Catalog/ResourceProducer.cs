@@ -154,9 +154,10 @@ internal static class ResourceProducer
     /// </summary>
     private static ResourcePlace[] Places(IEnumerable<GatherSpot> spots) =>
         spots
-            .GroupBy(spot => spot.Place.Key ?? spot.Place.Name, StringComparer.Ordinal)
+            .GroupBy(spot => spot.Place.Name, StringComparer.Ordinal)
             .Select(group => new ResourcePlace(
-                group.First().Place,
+                // A place is its name, as the graph names it, so the area links to its page.
+                WorldSourceData.Place(group.Key),
                 Math.Round(group.Sum(spot => (spot.Count ?? 0) * spot.Chance * spot.Share), 1),
                 group.Sum(spot => spot.Most ?? 0),
                 group.Any(spot => spot.Count is null)

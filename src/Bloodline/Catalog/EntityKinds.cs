@@ -10,7 +10,7 @@ internal static class EntityKinds
         new(EntityKind.Merchant, false, null, "Merchants", "Person"),
         new(EntityKind.Person, false, null, "People", "Person"),
         new(EntityKind.Creature, true, "creatures", "Creatures", "Thing"),
-        new(EntityKind.Place, false, null, "Places", "Place"),
+        new(EntityKind.Place, true, "places", "Places", "Place"),
         new(EntityKind.Container, false, null, "Containers", "Thing"),
         new(EntityKind.Recipe, false, null, "Recipes", "Recipe"),
         new(EntityKind.Building, false, null, "Buildings", "Place"),

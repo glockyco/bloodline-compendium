@@ -1891,6 +1891,191 @@
       "title": "PassiveRow",
       "type": "object"
     },
+    "PlaceEvent": {
+      "properties": {
+        "chance": {
+          "type": "number"
+        },
+        "description": {
+          "type": "string"
+        },
+        "event": {
+          "$ref": "#/$defs/SourceEvent"
+        }
+      },
+      "required": [
+        "event",
+        "description",
+        "chance"
+      ],
+      "title": "PlaceEvent",
+      "type": "object"
+    },
+    "PlaceGroup": {
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/SourceKind"
+        },
+        "things": {
+          "items": {
+            "$ref": "#/$defs/PlaceThing"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "things"
+      ],
+      "title": "PlaceGroup",
+      "type": "object"
+    },
+    "PlaceIndex": {
+      "properties": {
+        "places": {
+          "items": {
+            "$ref": "#/$defs/PlaceSummary"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "places"
+      ],
+      "title": "PlaceIndex",
+      "type": "object"
+    },
+    "PlaceItem": {
+      "properties": {
+        "category": {
+          "$ref": "#/$defs/CategoryLink"
+        },
+        "item": {
+          "$ref": "#/$defs/EntityReference"
+        }
+      },
+      "required": [
+        "item",
+        "category"
+      ],
+      "title": "PlaceItem",
+      "type": "object"
+    },
+    "PlaceLesson": {
+      "properties": {
+        "entity": {
+          "$ref": "#/$defs/EntityReference"
+        },
+        "kind": {
+          "$ref": "#/$defs/SourceKind"
+        },
+        "relationId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "entity",
+        "kind",
+        "relationId"
+      ],
+      "title": "PlaceLesson",
+      "type": "object"
+    },
+    "PlacePage": {
+      "properties": {
+        "events": {
+          "items": {
+            "$ref": "#/$defs/PlaceEvent"
+          },
+          "type": "array"
+        },
+        "groups": {
+          "items": {
+            "$ref": "#/$defs/PlaceGroup"
+          },
+          "type": "array"
+        },
+        "key": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/EntityKind"
+        },
+        "lessons": {
+          "items": {
+            "$ref": "#/$defs/PlaceLesson"
+          },
+          "type": "array"
+        },
+        "name": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "slug",
+        "name",
+        "groups",
+        "kind",
+        "lessons",
+        "events"
+      ],
+      "title": "PlacePage",
+      "type": "object"
+    },
+    "PlaceSummary": {
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "things": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "key",
+        "slug",
+        "name",
+        "things"
+      ],
+      "title": "PlaceSummary",
+      "type": "object"
+    },
+    "PlaceThing": {
+      "properties": {
+        "entity": {
+          "$ref": "#/$defs/EntityReference"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/PlaceItem"
+          },
+          "type": "array"
+        },
+        "relationIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "entity",
+        "items",
+        "relationIds"
+      ],
+      "title": "PlaceThing",
+      "type": "object"
+    },
     "PlannerData": {
       "properties": {
         "build": {
@@ -3552,6 +3737,12 @@
     "mechanics": {
       "$ref": "#/$defs/MechanicIndex"
     },
+    "place": {
+      "$ref": "#/$defs/PlacePage"
+    },
+    "places": {
+      "$ref": "#/$defs/PlaceIndex"
+    },
     "planner": {
       "$ref": "#/$defs/PlannerData"
     },
@@ -3595,6 +3786,8 @@
     "resource",
     "creatures",
     "creature",
+    "places",
+    "place",
     "planner"
   ],
   "title": "SiteDataFiles",

@@ -1,0 +1,42 @@
+{
+	"key": "Place:Ashford",
+	"slug": "ashford",
+	"name": "Ashford",
+	"kind": "place",
+	"events": [],
+	"groups": [],
+	"lessons": [
+		{
+			"entity": {
+				"kind": "skill",
+				"key": "/Invented/Skills/LanternedgeFlare",
+				"name": "Lanternedge Flare",
+				"slug": "lanternedge-flare",
+				"icon": "lanternedge",
+				"fragment": null
+			},
+			"kind": "skillBook",
+			"relationId": "da59fe544328a498edffa6090b1511907007c05bf82ca5a6d3cc1ef46fc59b50"
+		},
+		{
+			"entity": {
+				"kind": "spellsong",
+				"key": "/Invented/Songs:1243",
+				"name": "Ember Ballad",
+				"slug": null,
+				"icon": null,
+				"fragment": "spellsong-ember-ballad",
+				"host": {
+					"kind": "discipline",
+					"key": "/Invented/Trees/Songcraft",
+					"name": "Songcraft",
+					"slug": "songcraft",
+					"icon": null,
+					"fragment": null
+				}
+			},
+			"kind": "noteSheet",
+			"relationId": "45cfa1609b961202ed26bb1e13151c8cc088494045dbfcf191a02c1c6fe7668a"
+		}
+	]
+}

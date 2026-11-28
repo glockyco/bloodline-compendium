@@ -44,6 +44,12 @@ Creatures first, because they are the most named kind after recipes and their pa
 
 `.omp/agents/comparison-check.md` gains the rule that every name in a comparison's screenshots that has a page or a wanted mark is linked, and that a new kind shows a hover screenshot of its preview.
 
+### Place pages describe the place
+
+A place page lists what is in the place by kind of thing, as Ancient Kingdoms and Afallon list a zone's creatures, people, chests, events and services, instead of one table per way to get an item. Each thing is one card of a name, what it does there and its items as icons, so later kinds such as services and quests join as sections in the same form. A finder narrows the cards to what gives an item. Calendar events come from the calendar's area names, matched to places without a leading "The", apostrophes or case.
+
+Alternative: the item-source tables of the first place pages. They answered where to get an item but not what is in a place.
+
 ## Risks / Trade-offs
 
 - [A common word matches an entity name, such as Stone in a sentence] → a one-word name at the start of a sentence and a name joined to another capitalized word are skipped. The first real-data run reported no such case, so no list of skipped names exists. If one appears, a reviewed list beside the record is the next step.

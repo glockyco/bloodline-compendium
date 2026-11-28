@@ -56,8 +56,11 @@ internal static class CatalogGraph
                 && itemReferences.TryGetValue(original, out var canonical)
             )
                 reference = canonical;
-            // Several classes share one creature name, such as two Wolves, and a reader meets the name. Mechanisms keep
-            // the class, which events and conditions look up, and pages get the name.
+            // Several levels share one place name, such as a town and its streamed parts, and several classes share one
+            // creature name, such as two Wolves, and a reader meets the name. Mechanisms keep the class or level, which
+            // events and conditions look up, and pages get the name.
+            if (reference.Kind == EntityKind.Place)
+                reference = WorldSourceData.Place(reference.Name);
             if (reference.Kind == EntityKind.Creature)
                 reference = WorldSourceData.Creature(reference.Name);
             if (reference.Key is not { } key)

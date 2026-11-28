@@ -25,9 +25,9 @@
 					"places": [
 						{
 							"kind": "place",
-							"key": "/Invented/Levels/Ashford",
+							"key": "Place:Ashford",
 							"name": "Ashford",
-							"slug": null,
+							"slug": "ashford",
 							"icon": null,
 							"fragment": null
 						}
@@ -38,9 +38,9 @@
 					"notes": [],
 					"entity": {
 						"kind": "place",
-						"key": "/Invented/Levels/Ashford",
+						"key": "Place:Ashford",
 						"name": "Ashford",
-						"slug": null,
+						"slug": "ashford",
 						"icon": null,
 						"fragment": null
 					},

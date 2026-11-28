@@ -25,6 +25,7 @@ internal sealed record CatalogResult(
     public ProfessionOutput Professions { get; init; } = new(new ProfessionIndex([]), []);
     public ResourceOutput Resources { get; init; } = new(new ResourceIndex([]), []);
     public CreatureOutput Creatures { get; init; } = new(new CreatureIndex([]), []);
+    public PlaceOutput Places { get; init; } = new(new PlaceIndex([]), []);
 
     public MechanicOutput Mechanics { get; init; } = new(new MechanicIndex([]), []);
 
@@ -134,8 +135,9 @@ internal static class CatalogBuilder
         }
         var graphResult = CatalogGraph.Build(
             prepared.Grouped.Entities,
-            // Mechanic pages are written by hand, so the graph learns them from their content.
-            context.Places.All.Concat(records.Mechanics.Select(MechanicProducer.Reference)),
+            // Mechanic pages are written by hand, so the graph learns them from their content. Places enter the graph
+            // through what names them, so test and menu levels that nothing names get no page.
+            records.Mechanics.Select(MechanicProducer.Reference),
             prepared.Grouped.References,
             skillsPrepared.GraphEntities
         );
@@ -157,6 +159,18 @@ internal static class CatalogBuilder
             records.HarvestPresets
         );
         var creatures = CreatureProducer.Produce(items.Items);
+        var placePages = PlaceProducer.Produce(
+            items.Items,
+            graphResult
+                .Graph.Entities.Select(document => document.Entity)
+                .Where(entity => entity.Kind == EntityKind.Place && entity.Key is not null)
+                // A resource's areas are places too, though its page names them outside the graph.
+                .Concat(
+                    resources.Pages.SelectMany(page => page.Places.Select(place => place.Place))
+                ),
+            graphResult.Graph.Relations,
+            context.Events
+        );
         // The Known Issues page lists every page of every kind that notes an issue.
         var issues = KnownIssues.Publish(
             records.Issues,
@@ -207,6 +221,7 @@ internal static class CatalogBuilder
             Professions = professions,
             Resources = resources,
             Creatures = creatures,
+            Places = placePages,
             Mechanics = MechanicProducer.Produce(records.Mechanics),
             Links = Links(
                 records,

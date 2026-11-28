@@ -1,4 +1,4 @@
-import { formatNumber, plural } from '../format.js';
+import { differentItems, formatNumber } from '../format.js';
 import type { ResourceSummary } from '../site-data.js';
 
 /**
@@ -6,7 +6,7 @@ import type { ResourceSummary } from '../site-data.js';
  * harvest gives some of them, so the line says it can give them.
  */
 export function resourceLine(resource: ResourceSummary): string {
-	const gives = plural(resource.loot, 'different item', 'different items');
+	const gives = differentItems(resource.loot);
 	return resource.level
 		? `Needs ${resource.profession} level ${formatNumber(resource.level)}, can give ${gives}`
 		: `Can give ${gives}`;

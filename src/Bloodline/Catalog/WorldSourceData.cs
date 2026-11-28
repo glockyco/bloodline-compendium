@@ -33,6 +33,13 @@ internal static class WorldSourceData
     public static EntityReference Creature(string name) =>
         new(EntityKind.Creature, "Creature:" + name, name, ItemIdentity.Slug(name), null);
 
+    /// <summary>
+    /// A place is the area a player knows by its name, whichever of its levels holds a thing, so its name is its
+    /// identity and its page.
+    /// </summary>
+    public static EntityReference Place(string name) =>
+        new(EntityKind.Place, "Place:" + name, name, ItemIdentity.Slug(name), null);
+
     // Containers and pickup objects share one class across objects the player meets under different names, such as a
     // Miner's Crate and a Cabinet, so the name the player sees is part of their identity.
     private static bool NamedByInstance(EntityKind kind, string key) =>
