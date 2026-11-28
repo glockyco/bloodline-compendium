@@ -30,8 +30,14 @@ internal sealed record GameMapRegistry(IReadOnlyList<MapRule> Rules)
 
 internal enum MapState
 {
-    /// <summary>Site data or a fact citation names the package.</summary>
-    Published,
+    /// <summary>A page of its own explains the package: an entity page of its kind or a mechanic page.</summary>
+    Described,
+
+    /// <summary>
+    /// Site data or a fact citation names the package, or the catalog reads one of its functions, but no page of
+    /// its own explains it, as an item row names the stable that sells it.
+    /// </summary>
+    Named,
 
     /// <summary>The registry gives a reason nobody needs to read the package.</summary>
     SetAside,
@@ -66,7 +72,8 @@ internal sealed record MapSystem(
     int Packages,
     int Functions,
     int CitedFunctions,
-    int Published,
+    int Described,
+    int Named,
     int SetAside,
     int Open,
     int OpenFunctions,
@@ -104,6 +111,44 @@ internal static partial class GameMap
     }
 
     /// <summary>
+    /// The packages that a page of their own explains: the entity of every item, skill and discipline page with its
+    /// versions, and what mechanic pages declare.
+    /// </summary>
+    public static IReadOnlySet<string> DescribedPackages(
+        string siteDirectory,
+        IEnumerable<string> mechanicPackages
+    )
+    {
+        var described = new HashSet<string>(mechanicPackages, StringComparer.OrdinalIgnoreCase);
+        foreach (var kind in new[] { "items", "skills", "disciplines" })
+        {
+            var directory = System.IO.Path.Combine(siteDirectory, kind);
+            if (!Directory.Exists(directory))
+                continue;
+            foreach (var file in Directory.EnumerateFiles(directory, "*.json"))
+            {
+                using var page = JsonDocument.Parse(File.ReadAllText(file));
+                if (
+                    page.RootElement.TryGetProperty("key", out var key)
+                    && key.GetString() is { } path
+                )
+                    described.Add(Package(path));
+                if (
+                    page.RootElement.TryGetProperty("versions", out var versions)
+                    && versions.ValueKind == JsonValueKind.Array
+                )
+                    foreach (var version in versions.EnumerateArray())
+                        if (
+                            version.TryGetProperty("key", out var other)
+                            && other.GetString() is { } versionPath
+                        )
+                            described.Add(Package(versionPath));
+            }
+        }
+        return described;
+    }
+
+    /// <summary>
     /// The map, and the packages that no rule of the registry covers, which nobody has decided anything about.
     /// </summary>
     public static (GameMapReport Map, IReadOnlyList<string> Unclassified) Build(
@@ -111,7 +156,8 @@ internal static partial class GameMap
         GameMapRegistry registry,
         IReadOnlySet<string> named,
         IEnumerable<FactClaim> claims,
-        IEnumerable<string>? readings = null
+        IEnumerable<string>? readings = null,
+        IReadOnlySet<string>? described = null
     )
     {
         var kinds = new Dictionary<string, SortedSet<string>>(StringComparer.OrdinalIgnoreCase);
@@ -190,6 +236,11 @@ internal static partial class GameMap
                 rule.Ancestor is null
                 || (lineage.TryGetValue(package, out var line) && line.Contains(rule.Ancestor))
             );
+        // A page that claims to explain a package the build does not hold has outlived a game update.
+        if (described?.FirstOrDefault(package => !kinds.ContainsKey(package)) is { } missing)
+            throw new InvalidDataException(
+                $"A page explains {missing}, which the build does not hold. Correct the page's packages."
+            );
 
         var packages = new List<MapPackage>();
         var unclassified = new List<string>();
@@ -202,9 +253,11 @@ internal static partial class GameMap
                 continue;
             }
             counts.TryGetValue(package, out var code);
-            // What the site names is published, whatever the registry says about its folder.
+            // A package with a page of its own is described, one the site only names is named, whatever the registry
+            // says about its folder.
             var state =
-                named.Contains(package) || cited.ContainsKey(package) ? MapState.Published
+                described?.Contains(package) == true ? MapState.Described
+                : named.Contains(package) || cited.ContainsKey(package) ? MapState.Named
                 : rule.SetAside is not null ? MapState.SetAside
                 : MapState.Open;
             packages.Add(
@@ -231,7 +284,8 @@ internal static partial class GameMap
                     group.Count(),
                     group.Sum(package => package.Functions),
                     group.Sum(package => package.CitedFunctions),
-                    group.Count(package => package.State == MapState.Published),
+                    group.Count(package => package.State == MapState.Described),
+                    group.Count(package => package.State == MapState.Named),
                     group.Count(package => package.State == MapState.SetAside),
                     open.Length,
                     open.Sum(package => package.Functions),

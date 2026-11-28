@@ -8,15 +8,26 @@ Cataloging SHALL write a map that lists every package of the build's records, wh
 - **THEN** the map holds as many packages as the build's records name, and each has a system and a state
 
 ### Requirement: States that cannot go stale
-A package SHALL have the state published when site data or a fact citation names it, and cataloging SHALL derive that state itself. The registry SHALL set every other package aside with a reason or leave it open. The registry SHALL NOT mark a package published.
+A package SHALL have the state named when site data or a fact citation names it, or the catalog reads one of its functions by fingerprint, and no page of its own explains it. Cataloging SHALL derive the states itself. The registry SHALL set every other package aside with a reason or leave it open, and SHALL NOT mark a package described or named.
 
-#### Scenario: Newly published system
+#### Scenario: Newly named system
 - **WHEN** a change makes the site name a package that the registry leaves open
-- **THEN** the next map lists the package as published without a registry edit
+- **THEN** the next map lists the package as named without a registry edit
 
 #### Scenario: Set aside with a reason
 - **WHEN** the registry sets a folder of animation code aside
 - **THEN** the map lists each of its packages as set aside with that reason
+
+### Requirement: Described by a page of its own
+A package SHALL have the state described when an entity page of its kind explains it, or a mechanic page lists it among the packages it explains.
+
+#### Scenario: Named until a page explains it
+- **WHEN** item pages show a stable as the place that sells a mount and no page explains stables
+- **THEN** the map lists the stable's packages as named, not described
+
+#### Scenario: Page that outlived an update
+- **WHEN** a mechanic page lists a package the build does not hold
+- **THEN** cataloging fails and names the package
 
 ### Requirement: No unclassified package
 Cataloging SHALL fail and name the packages when a package belongs to no system of the registry.
@@ -37,7 +48,7 @@ Every window and every class with an actor in a level SHALL belong to a system, 
 - **THEN** the map lists that class among the system's set-aside classes that stand in a level
 
 ### Requirement: Open systems in the map
-The map SHALL list every system with the number of its packages and functions that are published, set aside and open, ordered by open functions, largest first.
+The map SHALL list every system with the number of its packages and functions that are described, named, set aside and open, ordered by open functions, largest first.
 
 #### Scenario: Untouched system
 - **WHEN** no page or fact names any package of the mounts system

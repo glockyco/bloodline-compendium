@@ -740,7 +740,14 @@ internal sealed record MechanicContent(
     string Intro,
     IReadOnlyList<MechanicSection> Sections,
     IReadOnlyList<string> Evidence
-);
+)
+{
+    /// <summary>
+    /// The game packages this page explains as a whole, such as the calendar's manager and spawner, which the game
+    /// map counts as described. For maintainers only, so the published page leaves it out.
+    /// </summary>
+    public IReadOnlyList<string> Packages { get; init; } = [];
+}
 
 /// <summary>A titled part of a mechanic page. The catalog sets <see cref="Anchor"/>, its fragment, from the heading.</summary>
 [JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]

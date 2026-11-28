@@ -25,9 +25,9 @@ A package holds one class, table, conversation, level or enum with its functions
 
 The registry is an ordered list of rules, and a package belongs to the system of the first rule that holds. A rule can name a class the package derives from, a path prefix, a kind of record, or packages that lie directly under `/Game`. Ancestry comes first because it is what the game itself goes by: an item is an item in whatever folder it lies, and hundreds of animation classes lie loose at the top level. Two thirds of the build's packages classify by ancestry alone. Prefix rules cover the rest, with coarse system names taken from the folders until a system is read and can be named and split better. A new class in a known family or folder joins its system as open, and only a new folder fails cataloging.
 
-### Published is derived from output
+### Described and named are derived from output
 
-A package is published when a path in the site data or in `claims.json` names it. That needs no instrumentation of the mechanisms and cannot claim more than the site shows. It says that the site names the package, not that every rule in it was read, so the map also gives each system's cited functions beside its function count. A package the site names is published even where a rule sets its folder aside.
+A package is named when a path in the site data or in `claims.json` names it, or when the catalog reads one of its functions by fingerprint. That needs no instrumentation of the mechanisms and cannot claim more than the site shows. A package is described only when a page of its own explains it: the entity of an item, skill or discipline page, or a package a mechanic page lists as one it explains. The split keeps a system unfinished while item rows only mention it, as stables were while mounts listed them and no page explained stables, so the plan can tell which systems still need their own pages. A mechanic page lists only packages it explains as a whole, so a large shared class such as the player's discipline component stays named after one rule of it gets a page. A package the site names is named even where a rule sets its folder aside.
 
 ### The systems stand in the map, not in the maintainer report
 

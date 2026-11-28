@@ -14,7 +14,8 @@ public sealed class GameMapTests
         new(package, package, name, window, "", CodeParseStatus.Complete, [], [], [], []);
 
     private static (GameMapReport Map, IReadOnlyList<string> Unclassified) Build(
-        IEnumerable<string>? readings = null
+        IEnumerable<string>? readings = null,
+        IReadOnlySet<string>? described = null
     )
     {
         var records = new CatalogRecords(
@@ -91,7 +92,8 @@ public sealed class GameMapTests
                 "/Game/Effects/Glow",
             },
             claims,
-            readings
+            readings,
+            described
         );
     }
 
@@ -107,9 +109,9 @@ public sealed class GameMapTests
         // Two actors in one level count as one level.
         Assert.Equal(1, stable.Levels);
         Assert.Equal("Stables", stable.System);
-        // A cited function publishes its package, and so does a name in the site data.
-        Assert.Equal(MapState.Published, stable.State);
-        Assert.Equal(MapState.Published, map["/Game/Invented/Sword"].State);
+        // A cited function names its package, and so does a name in the site data.
+        Assert.Equal(MapState.Named, stable.State);
+        Assert.Equal(MapState.Named, map["/Game/Invented/Sword"].State);
         Assert.Equal(0, map["/Game/Invented/Sword"].CitedFunctions);
         // Nothing names the window or the table, and no rule sets them aside.
         Assert.True(map["/Game/Invented/StableWindow"].Window);
@@ -117,19 +119,37 @@ public sealed class GameMapTests
         Assert.Equal(MapState.Open, map["/Game/Invented/Prices"].State);
         Assert.Equal("Mounts", map["/Game/Elsewhere/Camel"].System);
         Assert.Equal("Areas", map["/Game/Invented/Town"].System);
-        // What the site names is published even in a folder the registry sets aside.
-        Assert.Equal(MapState.Published, map["/Game/Effects/Glow"].State);
+        // What the site names is named even in a folder the registry sets aside.
+        Assert.Equal(MapState.Named, map["/Game/Effects/Glow"].State);
         Assert.Equal(MapState.SetAside, map["/Game/Effects/Torch"].State);
         Assert.Equal("Only looks.", map["/Game/Effects/Torch"].Reason);
     }
 
     [Fact]
-    public void AFunctionTheCatalogHoldsAsReadPublishesItsPackage()
+    public void AFunctionTheCatalogHoldsAsReadNamesItsPackage()
     {
         var window = Build(["/Game/Invented/StableWindow:Construct"])
             .Map.Packages.Single(package => package.Path == "/Game/Invented/StableWindow");
-        Assert.Equal(MapState.Published, window.State);
+        Assert.Equal(MapState.Named, window.State);
         Assert.Equal(1, window.CitedFunctions);
+    }
+
+    [Fact]
+    public void OnlyAPageOfItsOwnDescribesAPackage()
+    {
+        var map = Build(described: new HashSet<string>(["/Game/Invented/Sword"]))
+            .Map.Packages.ToDictionary(package => package.Path);
+        Assert.Equal(MapState.Described, map["/Game/Invented/Sword"].State);
+        // The stable is cited by a fact but explained by no page, so it stays named.
+        Assert.Equal(MapState.Named, map["/Game/Invented/Stable"].State);
+    }
+
+    [Fact]
+    public void APageThatExplainsAPackageTheBuildLacksFailsTheMap()
+    {
+        Assert.Throws<InvalidDataException>(() =>
+            Build(described: new HashSet<string>(["/Game/Invented/Gone"]))
+        );
     }
 
     [Fact]
@@ -146,7 +166,8 @@ public sealed class GameMapTests
         var systems = Build().Map.Systems.ToDictionary(system => system.Name);
         var stables = systems["Stables"];
         Assert.Equal(4, stables.Packages);
-        Assert.Equal(2, stables.Published);
+        Assert.Equal(0, stables.Described);
+        Assert.Equal(2, stables.Named);
         Assert.Equal(2, stables.Open);
         Assert.Equal(1, stables.OpenFunctions);
         Assert.Equal(["/Game/Invented/StableWindow"], stables.OpenWindows);

@@ -83,7 +83,8 @@ internal static class CatalogCommand
                     release
                 );
                 CatalogWriter.Write(layout, provenance, catalog);
-                // The map marks a package published when the site data just written names it.
+                // The map marks a package named when the site data just written names it, and described when a
+                // page of its own explains it.
                 var (map, unclassified) = GameMap.Build(
                     records,
                     GameMapRegistry.Load(Path.Combine(AppContext.BaseDirectory, "game-map.json")),
@@ -95,11 +96,15 @@ internal static class CatalogCommand
                         )
                     ),
                     catalog.Claims,
-                    catalog.Readings
+                    catalog.Readings,
+                    GameMap.DescribedPackages(
+                        layout.SiteDirectory,
+                        records.Mechanics.SelectMany(page => page.Packages)
+                    )
                 );
                 Bloodline.Output.CanonicalJson.Write(layout.MapFile, map);
                 Console.WriteLine(
-                    $"Game map: {map.Packages.Count} packages in {map.Systems.Count} systems, {map.Packages.Count(package => package.State == MapState.Published)} published, {map.Packages.Count(package => package.State == MapState.SetAside)} set aside, {map.Packages.Count(package => package.State == MapState.Open)} open."
+                    $"Game map: {map.Packages.Count} packages in {map.Systems.Count} systems, {map.Packages.Count(package => package.State == MapState.Described)} described, {map.Packages.Count(package => package.State == MapState.Named)} named, {map.Packages.Count(package => package.State == MapState.SetAside)} set aside, {map.Packages.Count(package => package.State == MapState.Open)} open."
                 );
                 // A package that no rule covers is one nobody decided anything about, such as a folder a game
                 // update added.

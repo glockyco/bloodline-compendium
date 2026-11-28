@@ -174,6 +174,12 @@
 			"Code: Overworld_EventActor's Select Location Data Table picks the list by the nearest terrain tag, Select Event draws by weight, and Choose Actor to Spawn sets how long the event stays.",
 			"Code: SmallEventSpawner's Recieve Event spawns the creatures of the event the player entered.",
 			"Runs events1 and events2, build 24464547: the moving pawn saw at most 7 live events in Pine Forest over 90 seconds per run. A stationary pawn had no new event in 90 seconds. Calling Enter Event on a Goblin Boar Riders actor opened a pine forest camp with 4 mounted goblins. Setting the save tag directly gave 1 Bear or 6 Wild Wolves in that camp."
+		],
+		"packages": [
+			"/Game/Eudros/OverworldEventLocations/Overworld_EventActor",
+			"/Game/Eudros/OverworldEventLocations/Overworld_LocationThemeTagActor",
+			"/Game/Overworld/OpenWorldAreas/Small_Event_Areas/Small_Event_Area_PropsAndBuildings/SmallEventSpawner",
+			"/Game/Overworld/OpenWorldAreas/Small_Event_Areas/Small_Event_Area_PropsAndBuildings/All_NPC_Army_Types"
 		]
 	},
 	{
@@ -209,6 +215,11 @@
 			"Code: CalendarEvent_Spawner's Recieve Event calls the function of the day's event, such as Spawn Ghost Ship.",
 			"Runs events1 and events2, build 24464547: each fresh calendar had 13 generated entries on Vohath 2 through 14, all in eligible areas. Setting the date to Vohath 7 before opening Parford Lake gave 25 Rabbits for its scheduled Rabbit Swarm, versus 0 on Vohath 1. Runs events2 and holidays2 generated an event on Vohath 25 but not Vohath 15.",
 			"Run review-interface, build 24464547: the world map's Calendar button opened the calendar with event and area names on their dates. The Character Sheet's Calendar button also opened the calendar, but the sheet covered it in that capture."
+		],
+		"packages": [
+			"/Game/fantasy_gui_4/widgets/templates/popup/CalendarEventManager",
+			"/Game/fantasy_gui_4/widgets/templates/popup/CalendarEventInfo",
+			"/Game/Overworld/OpenWorldAreas/PresetCalendarEvents"
 		]
 	}
 ]
