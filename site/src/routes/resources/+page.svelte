@@ -6,7 +6,7 @@
 	import Tabs from '#lib/ui/Tabs.svelte';
 	import IconSlot from '#lib/ui/IconSlot.svelte';
 	import { entityPath } from '#lib/entities.js';
-	import { formatNumber, plural } from '#lib/format.js';
+	import { resourceLine } from '#lib/resources/summary.js';
 	let { data } = $props();
 	// Categories in the order a player levels them, the gathering professions first.
 	const order = ['Woodcutting', 'Mining', 'Foraging', 'Farming', 'Gathering'];
@@ -65,12 +65,7 @@
 				<svelte:element this={tabbed ? 'h2' : 'h3'} class="card-head"
 					><IconSlot icon={resource.icon ?? null} />{resource.name}</svelte:element
 				>
-				<p class="card-line">
-					{resource.level
-						? `Needs ${resource.profession} level ${formatNumber(resource.level)}, gives`
-						: 'Gives'}
-					{plural(resource.loot, 'item', 'items')}
-				</p>
+				<p class="card-line">{resourceLine(resource)}</p>
 			</Card>{/each}
 	</CardGrid>
 {/snippet}

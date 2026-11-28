@@ -18,6 +18,15 @@ export function plural(count: number, one: string, many: string): string {
 	return `${formatNumber(count)} ${count === 1 ? one : many}`;
 }
 
+/** A range of levels, such as "1 to 55", one level alone, or "None" when the range is unknown. */
+export function levelRange(min: number | null | undefined, max: number | null | undefined): string {
+	return min == null || max == null
+		? 'None'
+		: min === max
+			? formatNumber(min)
+			: `${formatNumber(min)} to ${formatNumber(max)}`;
+}
+
 const percentFormat = new Intl.NumberFormat('en', { maximumFractionDigits: 1 });
 const rarityFormat = new Intl.NumberFormat('en', { maximumSignificantDigits: 2 });
 

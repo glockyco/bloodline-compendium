@@ -9,8 +9,8 @@
 
 ## 2. Previews and link style
 
-- [ ] 2.1 Make the kind registry say which kinds have previews, make `previewKinds` read it, fail the entity graph gate for a kind with pages and no preview, and verify it fails today for resources, professions and mechanics
-- [ ] 2.2 Compare and build previews for resources, professions and mechanics, with hover screenshots at 1440 and 390, and verify the gate passes
+- [x] 2.1 Fail publication for a kind with pages or hosted entries that `previewKinds` lacks, and verify with `site/tests/publication.test.js`
+- [x] 2.2 Compare and build previews for resources, professions and mechanics, with hover screenshots at 1440 and 390, and verify the gate passes
 - [ ] 2.3 Compare and build one style for entity names in `EntityLink`, add the style rule to `site/tests/layout.ts`, and verify the layout check passes on the real-data review pages and fails on The Mad Monk in link colour
 - [ ] 2.4 Add the link and preview check to `.omp/agents/comparison-check.md`
 
@@ -44,6 +44,7 @@
 
 - [ ] 9.1 Compare recipes as pages of their own against anchored entries on the pages of what they make, build the chosen one with its preview, and lower the recorded recipe count to zero
 - [ ] 9.2 Compare how pickup spots link, as entries on place pages or as map positions, build it, and lower the recorded pickup count to zero
+- [ ] 9.3 Compare and build pages for the gathering skills Mining, Woodcutting, Foraging and Fishing, which conditions such as "Requires Mining level 10" name as plain text without an entity, with their levels and resources, and their preview, and link those conditions
 
 ## 10. Integration
 

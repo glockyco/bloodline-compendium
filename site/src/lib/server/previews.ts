@@ -2,10 +2,16 @@ import {
 	readDiscipline,
 	readDisciplines,
 	readItem,
+	readMechanics,
+	readProfessions,
+	readResources,
 	readSharedMerchantNames,
 	readSkill,
 	readSkills
 } from './data.js';
+import { levelRange, plural } from '../format.js';
+import { plainText } from '../links.js';
+import { resourceLine } from '../resources/summary.js';
 import { entries as itemEntries } from '../../routes/items/[slug]/+page.server.js';
 import { firstRoute } from '../items/acquisition.js';
 import { sourceHeadings } from '../labels.js';
@@ -19,7 +25,8 @@ import type {
 	Preview,
 	PreviewResource,
 	SkillPreview,
-	SpellsongPreview
+	SpellsongPreview,
+	SummaryPreview
 } from '../entity/previews.js';
 import type { ItemPage, SkillPage, SourceKind } from '../site-data.js';
 
@@ -118,6 +125,59 @@ export const previewSources: {
 				name: summary.name,
 				category: summary.category.name,
 				contents: disciplineContents(summary)
+			};
+		}
+	},
+	// Resources, professions and mechanics preview what their list cards show.
+	resource: {
+		async slugs() {
+			return (await readResources()).resources.map((resource) => resource.slug);
+		},
+		async build(slug): Promise<SummaryPreview<'resource'>> {
+			const resource = (await readResources()).resources.find((entry) => entry.slug === slug)!;
+			return {
+				kind: 'resource',
+				name: resource.name,
+				icon: resource.icon ?? null,
+				lines: [resourceLine(resource)]
+			};
+		}
+	},
+	profession: {
+		async slugs() {
+			return (await readProfessions()).professions.map((profession) => profession.slug);
+		},
+		async build(slug): Promise<SummaryPreview<'profession'>> {
+			const profession = (await readProfessions()).professions.find(
+				(entry) => entry.slug === slug
+			)!;
+			return {
+				kind: 'profession',
+				name: profession.name,
+				icon: profession.icon ?? null,
+				lines: [
+					...(profession.stations.length
+						? [`Made at ${profession.stations.map((station) => station.name).join(', ')}`]
+						: []),
+					...(profession.minLevel != null
+						? [`Levels ${levelRange(profession.minLevel, profession.maxLevel)}`]
+						: []),
+					`Makes ${plural(profession.count, 'item', 'items')}`
+				]
+			};
+		}
+	},
+	mechanic: {
+		async slugs() {
+			return (await readMechanics()).mechanics.map((mechanic) => mechanic.slug);
+		},
+		async build(slug): Promise<SummaryPreview<'mechanic'>> {
+			const mechanic = (await readMechanics()).mechanics.find((entry) => entry.slug === slug)!;
+			return {
+				kind: 'mechanic',
+				name: mechanic.name,
+				icon: null,
+				lines: [plainText(mechanic.intro)]
 			};
 		}
 	}

@@ -35,6 +35,12 @@ it('reports a known name that a row shows without a link', async () => {
 	});
 });
 
+it('reports game text that is only a linkable name, such as a header’s discipline', async () => {
+	await site('<p class="identity"><span data-game>Golden Talon Wand Shaft</span></p>', (result) => {
+		expect(result.unlinked.get('/items/core/')).toEqual(['Golden Talon Wand Shaft']);
+	});
+});
+
 it('accepts a name its own row links, the page’s own name, part of a longer name and game text', async () => {
 	await site(
 		'<p>Needs a <a data-game href="/items/shaft/">Golden Talon Wand Shaft</a>. A Golden Talon Wand Shaft works.</p>' +

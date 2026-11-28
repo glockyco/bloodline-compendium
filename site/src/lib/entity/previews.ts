@@ -1,4 +1,4 @@
-import type { EntityKind, Fact, ItemPage } from '../site-data.js';
+import type { EntityKind, EntityKindDefinition, Fact, ItemPage } from '../site-data.js';
 
 /** What an item link's preview shows: the item's tooltip. */
 export interface ItemPreview {
@@ -59,6 +59,19 @@ export interface DisciplinePreview {
 }
 
 /**
+ * What a resource, profession or mechanic link's preview shows: the facts its list card shows, or a mechanic's
+ * introduction, as lines under its name.
+ */
+export interface SummaryPreview<Kind extends 'resource' | 'profession' | 'mechanic' = SummaryKind> {
+	kind: Kind;
+	name: string;
+	icon: string | null;
+	lines: string[];
+}
+
+type SummaryKind = 'resource' | 'profession' | 'mechanic';
+
+/**
  * The previews of a hosted kind's entries on one host page, keyed by their anchor, which a link's fragment picks.
  */
 export interface HostedPreviews<P extends PassivePreview | SpellsongPreview> {
@@ -68,10 +81,18 @@ export interface HostedPreviews<P extends PassivePreview | SpellsongPreview> {
 
 /**
  * Every kind's preview. A kind gets previews by adding its type here, its kind to `previewKinds`, its tooltip to
- * `TooltipPresenter.svelte` and its data to `previewSources` in `server/previews.ts`.
+ * `TooltipPresenter.svelte` and its data to `previewSources` in `server/previews.ts`. Publication fails for a kind
+ * with pages that `previewKinds` lacks.
  */
 export type Preview =
-	ItemPreview | SkillPreview | PassivePreview | SpellsongPreview | DisciplinePreview;
+	| ItemPreview
+	| SkillPreview
+	| PassivePreview
+	| SpellsongPreview
+	| DisciplinePreview
+	| SummaryPreview<'resource'>
+	| SummaryPreview<'profession'>
+	| SummaryPreview<'mechanic'>;
 
 /** A preview resource: one entity's preview, or the previews of a hosted kind's entries on one page. */
 export type PreviewResource =
@@ -83,12 +104,38 @@ export const previewKinds: ReadonlySet<EntityKind> = new Set<Preview['kind']>([
 	'skill',
 	'passive',
 	'spellsong',
-	'discipline'
+	'discipline',
+	'resource',
+	'profession',
+	'mechanic'
 ]);
 
 /** The address of a kind's preview data, which `routes/tooltips/[kind]/[slug].json` prerenders. */
 export function previewPath(kind: EntityKind, slug: string, fragment: string | null): string {
 	return `/tooltips/${kind}/${encodeURIComponent(slug)}.json${fragment ? '#' + encodeURIComponent(fragment) : ''}`;
+}
+
+/**
+ * The preview address of a link marked `data-preview`. A hosted entry's link, such as a passive's, holds its address,
+ * because its page's address names the host. Any other link leaves the attribute empty, because its page's address
+ * names the kind by its route and the entity by its slug, which keeps long tables small.
+ */
+export function linkPreviewPath(
+	link: HTMLAnchorElement,
+	kinds: EntityKindDefinition[]
+): string | null {
+	if (link.dataset.preview) return link.dataset.preview;
+	const url = new URL(link.href, window.location.href);
+	const [route, slug] = url.pathname.split('/').filter(Boolean);
+	const kind = kinds.find(
+		(entry) => entry.hasPages && entry.route?.replace(/^\/+|\/+$/g, '') === route
+	);
+	if (!kind || !slug) return null;
+	return previewPath(
+		kind.kind,
+		decodeURIComponent(slug),
+		url.hash ? decodeURIComponent(url.hash.slice(1)) : null
+	);
 }
 
 const loaded = new Map<string, Promise<PreviewResource | null>>();

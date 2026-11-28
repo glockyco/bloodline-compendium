@@ -121,6 +121,15 @@ export async function publicationGate(directory) {
       .map((kind) => "/" + kind.route.replace(/^\/+|\/+$/g, "") + "/"),
   ])
     if (!pages.has(path)) throw new Error("Publication is missing " + path);
+  // Every link to a kind with pages, or to an entry a page hosts, shows a preview on hover.
+  const { previewKinds } = await import("../site/src/lib/entity/previews.ts");
+  for (const kind of kinds)
+    if ((kind.hasPages || kind.host) && !previewKinds.has(kind.kind))
+      throw new Error(
+        "Kind " +
+          kind.kind +
+          " has pages but no preview. Add it as site/src/lib/entity/previews.ts describes.",
+      );
   const entityPages = [];
   for (const kind of kinds.filter((kind) => kind.hasPages)) {
     const prefix = "/" + kind.route.replace(/^\/+|\/+$/g, "") + "/";

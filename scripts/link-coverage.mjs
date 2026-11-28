@@ -111,9 +111,14 @@ export async function linkCoverage(directory) {
     if (main && !noindex) pages.push({ file, main });
   }
 
-  // Every entity name any page shows, with its kind, is a name text must link.
+  // Every entity name any page shows, with its kind, is a name text must link, and a name some page links has
+  // somewhere to lead.
   const kindsByName = new Map();
   const plain = new Map();
+  const linkable = new Set();
+  // The names of entries that links reach at an anchor of a page, such as a passive on its discipline's page, by
+  // that page's address. There the name is the entry itself.
+  const hosted = new Map();
   for (const { main } of pages)
     (function visit(node) {
       const entity = entityOf(node, routes);
@@ -122,7 +127,15 @@ export async function linkCoverage(directory) {
       if (kind && name) {
         if (!kindsByName.has(name)) kindsByName.set(name, new Set());
         kindsByName.get(name).add(kind);
-        if (node.tagName !== "a") {
+        if (node.tagName === "a") {
+          linkable.add(name);
+          const href = attributes(node).href;
+          if (href?.includes("#")) {
+            const host = href.split("#")[0];
+            if (!hosted.has(host)) hosted.set(host, new Set());
+            hosted.get(host).add(name);
+          }
+        } else {
           if (!plain.has(kind)) plain.set(kind, new Set());
           plain.get(kind).add(name);
         }
@@ -155,10 +168,12 @@ export async function linkCoverage(directory) {
       for (const child of node.childNodes ?? []) find(child);
     })(main);
     const found = new Set();
+    const here = hosted.get(path) ?? new Set();
     // Each block's text and the names it links.
     function block(node) {
       const texts = [];
       const linked = new Set();
+      const gameNames = [];
       (function visit(child, top) {
         const attrs = attributes(child);
         if (!top && blockTags.has(child.tagName)) return block(child);
@@ -170,7 +185,17 @@ export async function linkCoverage(directory) {
           texts.push(" ");
           return;
         }
+        // Text inside any other link, such as a card, already leads somewhere.
+        if (child.tagName === "a") {
+          texts.push(" ");
+          return;
+        }
+        // Game text keeps its wording, but an element that is only a linkable name of two or more words is a name
+        // shown without its link. A one-word name there is often a value, such as the item type Pommel, which is
+        // also a skill's name.
         if ("data-game" in attrs) {
+          const whole = textOf(child).replace(/\s+/g, " ").trim();
+          if (linkable.has(whole) && whole.includes(" ")) gameNames.push(whole);
           texts.push(" ");
           return;
         }
@@ -178,6 +203,9 @@ export async function linkCoverage(directory) {
         for (const grandchild of child.childNodes ?? [])
           visit(grandchild, false);
       })(node, true);
+      for (const name of gameNames)
+        if (name !== self && !here.has(name) && !linked.has(name))
+          found.add(name);
       const text = texts.join("").replace(/\s+/g, " ");
       for (const match of text.matchAll(pattern)) {
         const name = match[0];

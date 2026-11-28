@@ -1,5 +1,6 @@
 <script lang="ts">
 	import EntityPage from '#lib/entity/EntityPage.svelte';
+	import EntityLink from '#lib/ui/EntityLink.svelte';
 	import EntityVersions from '#lib/entity/EntityVersions.svelte';
 	import SkillVersion from '#lib/skills/SkillVersion.svelte';
 	import CharacterCue from '#lib/planner/CharacterCue.svelte';
@@ -63,7 +64,7 @@
 						data.kinds,
 						`?category=${encodeURIComponent(data.category.slug)}`
 					)!}>{titleCase(data.category.name)}</a
-				>{#if tree}<span aria-hidden="true">·</span><span data-game>{tree.name}</span>{/if}
+				>{#if tree?.entity}<span aria-hidden="true">·</span><EntityLink entity={tree.entity} />{/if}
 			</p>
 			<CharacterCue skill={{ key: data.skill.key, trees }} />
 		{/snippet}

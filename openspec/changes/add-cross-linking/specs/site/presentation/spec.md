@@ -8,8 +8,12 @@ Entity links SHALL show previews through one presenter that picks each kind's to
 - **THEN** publication fails and names the kind
 
 #### Scenario: Resource linked from an item
-- **WHEN** a reader hovers or focuses a resource link on an item page
-- **THEN** the resource's preview appears beside the link
+- **WHEN** a reader hovers or focuses the Iron Deposit link on Iron Ore
+- **THEN** a card framed as item previews are shows "Needs Mining level 10, can give 2 different items", the line the resource list card shows
+
+#### Scenario: Profession and mechanic previews
+- **WHEN** a reader hovers a profession or mechanic link
+- **THEN** the card shows a profession's station, levels and "Makes" with its item count, or a mechanic's introduction, inside the frame
 
 ## ADDED Requirements
 

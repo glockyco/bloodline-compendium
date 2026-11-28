@@ -1,15 +1,17 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { beforeNavigate } from '$app/navigation';
+	import { page } from '$app/state';
 	import TooltipPresenter from './TooltipPresenter.svelte';
-	import { loadPreview, type Preview } from './previews.js';
+	import { linkPreviewPath, loadPreview, type Preview } from './previews.js';
 	import { linkLine, placeBeside } from '../floating.js';
 
 	/**
 	 * Shows the tooltip of every link marked data-preview on hover after a short intent, on keyboard focus and on a
 	 * first tap, and a second tap follows the link. One listener serves the page, so a list of a thousand links does
 	 * no work until a reader points at one. Without JavaScript the links lead straight to the entity's page. The
-	 * attribute holds the address of the preview's data, and `TooltipPresenter` shows it in its kind's tooltip.
+	 * attribute holds the address of the preview's data or leaves it to the link's address, as `linkPreviewPath`
+	 * reads it, and `TooltipPresenter` shows it in its kind's tooltip.
 	 */
 	let preview = $state<Preview | null>(null);
 	let failed = $state(false);
@@ -33,7 +35,8 @@
 		anchor = link;
 		dockTop = link.getBoundingClientRect().top > window.innerHeight / 2;
 		link.setAttribute('aria-describedby', id);
-		const loaded = await loadPreview(link.dataset.preview!);
+		const path = linkPreviewPath(link, page.data.kinds ?? []);
+		const loaded = path ? await loadPreview(path) : null;
 		// A navigation can remove the link while its details load.
 		if (anchor !== link || !link.isConnected) return;
 		failed = !loaded;
@@ -73,7 +76,8 @@
 			if (link === anchor) return;
 			clearTimeout(intent);
 			// The details load while the pointer rests, so the preview shows when the intent delay ends.
-			void loadPreview(link.dataset.preview!);
+			const path = linkPreviewPath(link, page.data.kinds ?? []);
+			if (path) void loadPreview(path);
 			intent = setTimeout(() => void show(link), 160);
 		};
 		const move = (event: PointerEvent) => {
@@ -192,7 +196,8 @@
 	.entity-preview :global([data-ui='tooltip'] > :not(.card)) {
 		padding-inline: var(--inset);
 	}
-	.entity-preview :global(:is([data-ui='tooltip'], .route):last-child) {
+	/* The site's facts under the game card end on an inset. A card alone ends at its own edge. */
+	.entity-preview :global(:is([data-ui='tooltip']:has(> :not(.card)), .route):last-child) {
 		padding-bottom: var(--inset);
 	}
 	/* Phones dock the tooltip at the bottom, where it covers no link the reader is reading. */

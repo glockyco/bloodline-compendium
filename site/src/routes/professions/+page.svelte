@@ -4,15 +4,9 @@
 	import CardGrid, { balancedColumns } from '#lib/ui/CardGrid.svelte';
 	import IconSlot from '#lib/ui/IconSlot.svelte';
 	import { entityPath } from '#lib/entities.js';
-	import { formatNumber } from '#lib/format.js';
+	import { formatNumber, levelRange as levels } from '#lib/format.js';
 	let { data } = $props();
 	const professions = $derived(data.index.professions);
-	const levels = (min: number | null | undefined, max: number | null | undefined) =>
-		min == null || max == null
-			? 'None'
-			: min === max
-				? formatNumber(min)
-				: `${formatNumber(min)} to ${formatNumber(max)}`;
 </script>
 
 <SeoHead

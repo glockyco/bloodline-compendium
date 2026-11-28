@@ -36,9 +36,11 @@ count it. A name is its text, so only an entity shown with other text carries it
 		class={[className, shownIcon && 'with-icon']}
 		data-game
 		data-name={children ? entity.name : undefined}
-		data-preview={previewKinds.has(entity.kind) && (entity.slug ?? entity.host?.slug)
-			? previewPath(entity.kind, (entity.slug ?? entity.host?.slug)!, entity.fragment ?? null)
-			: undefined}>{@render content()}</a
+		data-preview={!previewKinds.has(entity.kind) || !(entity.slug ?? entity.host?.slug)
+			? undefined
+			: entity.host
+				? previewPath(entity.kind, entity.host.slug!, entity.fragment ?? null)
+				: ''}>{@render content()}</a
 	>{:else}<span
 		class={[className, shownIcon && 'with-icon']}
 		data-game

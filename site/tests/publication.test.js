@@ -422,3 +422,14 @@ it.each([
 		);
 	});
 });
+
+it('rejects a kind with pages but no preview', async () => {
+	await publication(async (directory) => {
+		const kinds = JSON.parse(await readFile(join(directory, 'kinds.json'), 'utf8'));
+		kinds.push({ kind: 'creature', hasPages: false, host: 'item' });
+		await writeFile(join(directory, 'kinds.json'), JSON.stringify(kinds));
+		await expect(publicationGate(directory)).rejects.toThrow(
+			'Kind creature has pages but no preview'
+		);
+	});
+});
