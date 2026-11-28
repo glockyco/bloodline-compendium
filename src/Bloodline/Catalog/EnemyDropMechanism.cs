@@ -113,7 +113,8 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
     // event spawns a Loot_Dropped with it, which then picks once, and these are the classes whose Drop Loot does
     // so with the authored pool, with the chance it gates the drop by. Bandit_Cutter, LobGob, Goblin_Archer,
     // Undead_Lancer and Herald_Emberbound also drop a rare pool, but replace it with their own weapon on
-    // construction, and Fenraen's pool is what it digs up.
+    // construction, and Fenraen's pool is what it digs up. Items that can be dropped is read only by
+    // Goblin_Soldier:Die, which adds one of them on a 1 in 10 roll, and no level or spawner places a Goblin Soldier.
     private static readonly Dictionary<string, double> RareDrops = new(
         StringComparer.OrdinalIgnoreCase
     )

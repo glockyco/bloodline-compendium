@@ -81,6 +81,7 @@ export type SourceKind =
   | "stable"
   | "contract"
   | "seasonalGift"
+  | "debuffKill"
   | "archaeology"
   | "chiseling"
   | "reward"

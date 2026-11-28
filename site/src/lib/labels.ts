@@ -25,6 +25,7 @@ export const sourceHeadings: Record<SourceKind, string> = {
 	farming: 'Grown',
 	containerLoot: 'Found in Containers',
 	enemyDrop: 'Dropped by',
+	debuffKill: 'Harvested from Kills',
 	pickup: 'Picked Up',
 	dialogue: 'Given in Dialogue',
 	bountyNote: 'Obtained from Bounty Notes',
@@ -43,7 +44,9 @@ export const sourceIntros: Partial<Record<SourceKind, string>> = {
 	settlementDelivery:
 		'Completed buildings in your settlement add resources every game week. Collect them under Resources Ready in the settlement overview.',
 	skillTree:
-		'A skill costs 1 [skill point](mechanic:skill-points) once its discipline reaches the required level. Clicking it again refunds the point.'
+		'A skill costs 1 [skill point](mechanic:skill-points) once its discipline reaches the required level. Clicking it again refunds the point.',
+	debuffKill:
+		'Each of these applies a debuff. A creature that dies while the debuff lasts gives you 1 of this item.'
 };
 /** What is known of a way that stands somewhere but that no area places, for one row and for several alike. */
 export const placeUnknownReasons: Partial<Record<SourceKind, string>> = {
@@ -72,6 +75,7 @@ export const sourceColumns: Record<SourceKind, string> = {
 	containerLoot: 'Container',
 	randomLoot: 'Loot',
 	enemyDrop: 'Creature',
+	debuffKill: 'Applied by',
 	pickup: 'Location',
 	dialogue: 'Person',
 	fishing: 'Fishing',

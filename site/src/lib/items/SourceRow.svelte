@@ -4,6 +4,7 @@
 	import { alwaysThere, formatAmount, oddsLabel, payPrice, placedKinds } from './acquisition.js';
 	import { eventLabels, placeUnknownReasons } from '../labels.js';
 	import EntityLink from '../ui/EntityLink.svelte';
+	import LinkedText from '../ui/LinkedText.svelte';
 	import Conditions from '../Conditions.svelte';
 	import Chance from '../ui/Chance.svelte';
 	import Hint from '../ui/Hint.svelte';
@@ -105,10 +106,7 @@
 					>{/each}
 			</p>{/each}
 		{#each source.triggers ?? [] as trigger (trigger)}<p class="source-places">
-				<!-- A reply in quotes is the game's own text. -->
-				{#each trigger.split(/("[^"]+")/) as part, index (index)}{#if index % 2}<span data-game
-							>{part}</span
-						>{:else}{part}{/if}{/each}
+				<LinkedText text={trigger} />
 			</p>{/each}
 		{#if source.inputs.length || (!summarized && source.notes.length) || source.quotes?.length}
 			<details class="row-details">

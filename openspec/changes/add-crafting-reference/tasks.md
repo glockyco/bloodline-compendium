@@ -13,7 +13,7 @@
 - [x] 2.1 Read the hand-mapped recipes of `Crafting:Get Correct Item`, and verify Copper Claymore's 25 damage version gains its recipe and Round Mace goes to the report
 - [ ] 2.2 Fill and write `CraftingData` with weapon families, part kinds, fitting parts, contributions and the lab-confirmed quality grades and multipliers, and verify a greatsword's parts and its damage at one grade
 - [ ] 2.3 Add armorsmithing qualities, levels, armor by class and quality, rune slots and material costs, and verify one quality's armor against the run
-- [ ] 2.4 Add rune attunement and enchanting rules confirmed by the lab, and verify the break chance at attunement level 1
+- [ ] 2.4 Add rune attunement and enchanting rules confirmed by the lab, and verify the break chance at attunement level 1. Link the Arcane Enchantment and Arcane Pulse rows under Harvested from Kills on Divine Favor to where they are published
 - [ ] 2.5 Read how a recipe becomes available to the player and publish it as the recipe's learning, and verify Apple Pie
 - [ ] 2.6 Publish ingredient treatments as the lab applied them, and verify Gildleaf's chopped effect
 

@@ -118,6 +118,7 @@ export const sourceVerbs: Record<SourceKind, string> = {
 	containerLoot: 'Found in',
 	randomLoot: 'Found in',
 	enemyDrop: 'Dropped by',
+	debuffKill: 'Harvested from creatures debuffed by',
 	pickup: 'Picked up in',
 	dialogue: 'Given in dialogue by',
 	fishing: 'Fished in',

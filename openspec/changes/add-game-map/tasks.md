@@ -26,8 +26,9 @@
 
 ## 4. Creatures and what they drop
 
-- [ ] 4.1 Read the creature fields no page describes, such as Arcane Kill Item, Necromancy Kill Item, Divine Favor, Soul Essence and Items that can be dropped, and observe each in the lab
-- [ ] 4.2 Compare and build how those drops show on item pages
+- [x] 4.1 Read the creature fields no page describes, such as Arcane Kill Item, Necromancy Kill Item, Divine Favor, Soul Essence and Items that can be dropped, and observe each in the lab
+- [x] 4.2 Compare and build how those drops show on item pages
+- [ ] 4.3 Compare and build a page for the debuffs a creature can carry, such as Divine Bond and Soulsap, and link the debuff names in the Harvested from Kills rows to it
 
 ## 5. Mounts and taming
 

@@ -653,6 +653,9 @@ internal enum SourceKind
     Stable,
     Contract,
     SeasonalGift,
+
+    /// <summary>A way to apply a debuff that makes a creature give the item when it dies with it.</summary>
+    DebuffKill,
     Archaeology,
     Chiseling,
     Reward,

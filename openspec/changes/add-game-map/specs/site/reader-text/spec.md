@@ -65,3 +65,10 @@ An item a Christmas present gives SHALL show under Seasonal Gifts with the towns
 #### Scenario: Reindeer Rampart
 - **WHEN** the item page of Reindeer Rampart is built
 - **THEN** its row reads Christmas Present, Thronhild, Whitebrook Haven, and "Open it with 12 Christmas cookies, which you collect in Whitebrook Haven."
+
+### Requirement: Items from kills with a debuff
+An item that a creature gives when it dies with a debuff on it SHALL show under Harvested from Kills with one row for each way to apply that debuff. Each row SHALL link the skill or item that applies it where it has a page, and SHALL say how it applies the debuff, with the parts it needs linked.
+
+#### Scenario: Lightborn Wand Core
+- **WHEN** the item page of Divine Favor is built
+- **THEN** Harvested from Kills lists Lightborn Wand Core, and its row says that a wand with it and a Bloodwrought Helix Wand Shaft or Golden Talon Wand Shaft applies Divine Bond with 15% of the hits of its normal attack, with both shafts linked

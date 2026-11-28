@@ -65,6 +65,7 @@ internal static class CatalogBuilder
             new EventObjectMechanism(),
             new StableMechanism(),
             new ChristmasPresentMechanism(),
+            new DebuffKillMechanism(),
             new CookingMechanism(),
             new DialogueGrantMechanism(),
             new FishingMechanism(),
@@ -212,7 +213,14 @@ internal static class CatalogBuilder
                         EntityVersions.Reference(skill, EntityKind.Skill)
                     ),
                 ],
-                overviews
+                overviews,
+                [
+                    .. items.Items.SelectMany(item =>
+                        item.Sources.SelectMany(source =>
+                            source.Triggers.Select(trigger => ("A source of " + item.Name, trigger))
+                        )
+                    ),
+                ]
             ),
             Skills = skills,
         };
@@ -256,14 +264,15 @@ internal static class CatalogBuilder
     }
 
     /// <summary>
-    /// The link targets text written for the site uses. Issue and mechanic text is checked here, and every target it
-    /// uses is listed. The site's own text, such as section intros, links overview pages, so every discipline,
-    /// profession and mechanic is listed too, and the site fails on a target the list lacks.
+    /// The link targets text written for the site uses. Issue, mechanic and source trigger text is checked here, and
+    /// every target it uses is listed. The site's own text, such as section intros, links overview pages, so every
+    /// discipline, profession and mechanic is listed too, and the site fails on a target the list lacks.
     /// </summary>
     private static IReadOnlyDictionary<string, EntityReference> Links(
         CatalogRecords records,
         IReadOnlyList<EntityReference> entities,
-        IReadOnlyList<EntityReference> overviews
+        IReadOnlyList<EntityReference> overviews,
+        IReadOnlyList<(string Owner, string Text)> triggers
     )
     {
         var targets = LinkedText.Targets([.. entities, .. overviews]);
@@ -271,6 +280,8 @@ internal static class CatalogBuilder
         foreach (var (target, reference) in KnownIssues.Links(records.Issues, targets))
             used[target] = reference;
         MechanicProducer.Links(records.Mechanics, targets, used);
+        foreach (var (owner, text) in triggers)
+            LinkedText.Resolve(owner, text, targets, used);
         foreach (var overview in overviews)
             used[LinkedText.Target(overview)] = overview;
         return used;
