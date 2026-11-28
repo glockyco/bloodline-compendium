@@ -3,6 +3,7 @@ import { readFile, rm, cp, mkdir } from "node:fs/promises";
 import { resolve, join } from "node:path";
 import { assetGate } from "./asset-gate.mjs";
 import { payloadGate } from "./payload-gate.mjs";
+import { linkCoverageGate } from "./link-coverage.mjs";
 import { assertProductionBuild } from "./provenance.mjs";
 import { publicationGate } from "./publication-gate.mjs";
 import { writeSiteAssets } from "./site-assets.mjs";
@@ -113,6 +114,9 @@ console.log(
 console.log((await payloadGate(join(site, "build"))).report);
 console.log((await publicationGate(join(site, "build"))).report);
 console.log((await voiceGate(join(site, "build"))).report);
+// The recorded counts describe the game data, so invented fixture data is not held to them.
+if (!fixtures)
+  console.log((await linkCoverageGate(join(site, "build"))).report);
 if (production) {
   assertProductionBuild(build, root);
   await mkdir(join(site, ".stage"), { recursive: true });

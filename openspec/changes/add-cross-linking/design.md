@@ -14,13 +14,13 @@ Non-goals: linking names inside the game's own words, such as item descriptions 
 
 ### The unlinked-name check reads the built pages
 
-The check runs in the publication gate over the built HTML, not over catalog strings. It sees text from every producer, including Svelte templates, section intros and labels, which a catalog-side check cannot reach. The names come from the catalog's link targets and from the references in site data, so names of kinds without pages count too. It skips text inside a link, inside game text (`[data-game]` that is not an entity name) and the page's own entity. A name matches as a whole phrase, longest names first, so Iron Ingot does not also match Iron.
+The check runs over the built HTML of a real-data build, not over catalog strings. It sees text from every producer, including Svelte templates, section intros and labels, which a catalog-side check cannot reach. The names are those of every entity any page shows: `EntityLink` marks a name without a page with its kind, and a link's kind comes from its address. It skips text inside a link, inside game text (`[data-game]`) and the page's own name. A name matches as a whole phrase, longest names first, so Iron Ingot does not also match Iron. Only the kind of a name without a page is an attribute, because the attribute on every link pushed the largest item page over its payload budget.
 
 Alternative: extend `LinkedText.Unlinked` to every catalog text. It misses site-written text, which is where the section intros and labels live.
 
 ### Counts live in a recorded file
 
-`coverage/link-coverage.json` holds the plain-text count per kind and the unlinked names per page. The catalog writes the current counts to `report.json`, and the gate compares them with the recorded file: a rise fails, a fall fails with the instruction to lower the recorded value. A failing build names what is new, so a change never inherits a vague number.
+`coverage/link-coverage.json` holds the plain-text count per kind and the unlinked mention count per kind. Names stay out of the repository, because they come from the game's files: each build writes them to `artifacts/link-coverage.json`, and a rise names what is new against the previous build's list there. A rise fails, and a fall fails with the instruction to lower the recorded value. Fixture builds skip the comparison, because their invented data does not match the record.
 
 Alternative: a report without a gate. That is how the gaps grew.
 
@@ -46,12 +46,12 @@ Creatures first, because they are the most named kind after recipes and their pa
 
 ## Risks / Trade-offs
 
-- [A common word matches an entity name, such as Bone or Coal in a sentence] → the reviewed list of skipped one-word names, which the build reports when an entry no longer matches any text.
+- [A common word matches an entity name, such as Stone in a sentence] → a one-word name at the start of a sentence and a name joined to another capitalized word are skipped. The first real-data run reported no such case, so no list of skipped names exists. If one appears, a reviewed list beside the record is the next step.
 - [The first gate run reports thousands of names] → the recorded file starts at today's counts, so the first run passes and each later change only answers for what it adds.
 - [Pages for eight new kinds take many changes] → each kind is a group of tasks with its own comparison, and the ratchet keeps the gains of each.
 
 ## Where findings live
 
 - Decisions on each page kind: the reader-text spec of this change, as requirements, and the comparison files under `artifacts/design/process/trial/`.
-- Names the check skips: the reviewed list beside the recorded counts in `coverage/`.
+- Names the check reports: `artifacts/link-coverage.json` after each real-data build.
 - Open work: `tasks.md` of this change.

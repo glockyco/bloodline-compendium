@@ -83,6 +83,8 @@ bun run --cwd site review
 
 Every build stops when a page breaks the voice rules in `scripts/voice-rules.json`, links to a page that does not exist, or exceeds its payload budget in `scripts/payload-gate.mjs`.
 
+A build of real data also stops when it shows more entity names without a link than [coverage/link-coverage.json](coverage/link-coverage.json) records: names of kinds without pages, counted per kind, and names that site text mentions without linking them. The error names what is new against the previous build's list in `artifacts/link-coverage.json`. Link the name, or give its kind pages. When a count falls, the build stops until the record is lowered with `bun scripts/link-coverage.mjs site/build --record`, so the record only ever falls.
+
 Before committing a change to the site's interface, check the real-data pages that stress layout most at four widths against the running development server:
 
 ```sh

@@ -29,14 +29,21 @@
 			loading="lazy"
 		/>{/if}{#if children}{@render children()}{:else}<span>{entity.name}</span>{/if}{/snippet}
 
+<!-- A name without a page carries its kind, which a link's address already shows, so the link coverage check can
+count it. A name is its text, so only an entity shown with other text carries its name. -->
 {#if path}<a
 		href={path}
 		class={[className, shownIcon && 'with-icon']}
 		data-game
+		data-name={children ? entity.name : undefined}
 		data-preview={previewKinds.has(entity.kind) && (entity.slug ?? entity.host?.slug)
 			? previewPath(entity.kind, (entity.slug ?? entity.host?.slug)!, entity.fragment ?? null)
 			: undefined}>{@render content()}</a
-	>{:else}<span class={[className, shownIcon && 'with-icon']} data-game>{@render content()}</span
+	>{:else}<span
+		class={[className, shownIcon && 'with-icon']}
+		data-game
+		data-kind={entity.kind}
+		data-name={children ? entity.name : undefined}>{@render content()}</span
 	>{/if}
 
 <style>

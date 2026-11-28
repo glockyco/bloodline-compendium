@@ -2,10 +2,10 @@
 
 ## 1. Link coverage check
 
-- [ ] 1.1 Count plain-text names per kind from the references in site data and write them to `report.json`, and verify the creature count matches the 179 distinct creatures item and skill pages name today
-- [ ] 1.2 Add the unlinked-name check to the publication gate over built pages, with longest-first whole-phrase matching and the skips the design names, and verify it reports Golden Talon Wand Shaft when a fixture row names it as plain text
-- [ ] 1.3 Add `wanted:` link targets: the site renders them as text, the catalog lists them with their pages in `report.json` and fails on a wanted name an entity now holds, and verify with Divine Bond on the Harvested from Kills rows
-- [ ] 1.4 Record today's counts and unlinked names in `coverage/link-coverage.json` with the reviewed list of skipped one-word names, make the gate fail on a rise and on an unlowered fall, describe the file in the README where coverage files are described, and verify a fixture that adds a plain place name fails the build
+- [x] 1.1 Count plain-text names per kind on the built pages of a real-data build, and verify the creature count matches the creatures item and skill pages show without a link (166)
+- [x] 1.2 Check built pages for unlinked names with longest-first whole-phrase matching and the skips the design names, and verify with `site/tests/link-coverage.test.js` that a row naming Golden Talon Wand Shaft as plain text is reported
+- [ ] 1.3 Add `wanted:` link targets: the site renders them as text, the build lists them with their pages in `artifacts/link-coverage.json` and the catalog fails on a wanted name an entity now holds, and verify with Divine Bond on the Harvested from Kills rows
+- [x] 1.4 Record today's counts in `coverage/link-coverage.json`, make real-data builds fail on a rise, naming the new names, and on an unlowered fall, describe the record in the README, and verify both failures against the recorded counts
 
 ## 2. Previews and link style
 
