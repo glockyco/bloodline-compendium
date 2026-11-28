@@ -876,19 +876,30 @@ public sealed class CatalogTests
     public void DeduplicatesCoverageEntriesWithoutMergingDistinctAcquisitionData()
     {
         var item = Item();
-        ClassRecord Enemy(string suffix, int weight) =>
+        // Two classes of one creature name are one creature, and their drops stay apart where their chances differ.
+        ClassRecord Enemy(string suffix, string pool) =>
             new(
                 "/Game/Enemy" + suffix + ".Enemy" + suffix + "_C",
                 [],
                 Parse(
                     $$$"""
-                    {"Enemy Name":{"$text":"Invented enemy"},"Loot Table":{"$map":[[{"$ref":"{{{item.Path}}}"},{{{weight}}}]]}}
+                    {"Enemy Name":{"$text":"Invented enemy"},"Loot Table":{"$map":[{{{pool}}}]}}
                     """
                 )
             );
         var gap = new GapRecord("/Game/Unread", null, "Invented error");
         var result = CatalogBuilder.Build(
-            Records([item, Enemy("A", 1), Enemy("B", 2)], gaps: [gap, gap]),
+            Records(
+                [
+                    item,
+                    Enemy("A", $$"""[{"$ref":"{{item.Path}}"},1]"""),
+                    Enemy(
+                        "B",
+                        $$"""[{"$ref":"{{item.Path}}"},2],[{"$ref":"/Game/Other.Other_C"},2]"""
+                    ),
+                ],
+                gaps: [gap, gap]
+            ),
             exclusions: [],
             mechanisms: [new EnemyDropMechanism()]
         );

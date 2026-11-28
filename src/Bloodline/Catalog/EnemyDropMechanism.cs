@@ -37,7 +37,7 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
                     name,
                     sourcePlaces,
                     RollNotes(field),
-                    WorldSourceData.Creature(name),
+                    WorldSourceData.Reference(EntityKind.Creature, path, name),
                     OddsEvent.Kill,
                     picks,
                     conditions: WorldSourceData.Conditions(
@@ -78,7 +78,7 @@ internal sealed class EnemyDropMechanism : ISourceMechanism
                     name,
                     places,
                     RollNotes(field),
-                    WorldSourceData.Creature(name),
+                    WorldSourceData.Reference(EntityKind.Creature, path, name),
                     OddsEvent.Kill,
                     picks,
                     conditions: WorldSourceData.Conditions(
