@@ -151,6 +151,12 @@ export function checkBoard(path) {
   return problems;
 }
 
+/** The evidence files a review file links. */
+const evidenceLinks = (review) =>
+  [...review.matchAll(/\]\(([^)\s]+-evidence\.md)\)/g)].map(
+    (match) => match[1],
+  );
+
 /** The options of a question card: those that are new, as letter and text, and whether it offers the rest. */
 function card(body) {
   const options = [...body.matchAll(/^- \[ \] (.+)$/gm)].map((match) =>
@@ -167,10 +173,15 @@ function card(body) {
 }
 
 /**
- * What a design comparison lacks: the review file with its question cards and screenshots, the evidence file it
- * links, and the board the evidence links.
+ * What a design comparison lacks: the review file with its question cards and screenshots, and the evidence file
+ * it links. The evidence names its case. Explore needs the board, the inventory and the game's own presentation.
+ * Choose needs each option to name a file of the repository that already has the form it uses. `root` is the
+ * repository those paths are read from.
  */
-export function checkComparison(path) {
+export function checkComparison(
+  path,
+  root = resolve(dirname(fileURLToPath(import.meta.url)), ".."),
+) {
   if (!existsSync(path)) return [`${path} does not exist.`];
   const review = readFileSync(path, "utf8");
   const directory = dirname(path);
@@ -221,12 +232,13 @@ export function checkComparison(path) {
   for (const image of missingImages(review, directory))
     problems.push(`The review file shows ${image}, which does not exist.`);
 
-  const linked = [...review.matchAll(/\]\(([^)\s]+-evidence\.md)\)/g)].map(
-    (match) => match[1],
-  );
-  if (linked.length !== 1) {
+  // A comparison of wording alone links no evidence file. Its card and screenshots are checked, and the
+  // comparison-check agent says whether its options change more than wording.
+  const linked = evidenceLinks(review);
+  if (linked.length === 0) return problems;
+  if (linked.length > 1) {
     problems.push(
-      `The review file links ${linked.length} evidence files and needs exactly one, named <comparison>-evidence.md.`,
+      `The review file links ${linked.length} evidence files and may link one, named <comparison>-evidence.md.`,
     );
     return problems;
   }
@@ -234,7 +246,17 @@ export function checkComparison(path) {
   if (!existsSync(evidencePath))
     return [...problems, `${linked[0]} does not exist.`];
   const evidence = readFileSync(evidencePath, "utf8");
-  const section = reader(sections(evidence), problems, "The evidence file");
+  const kind = /^Case: (Choose|Explore)\. \S/m.exec(evidence)?.[1];
+  if (!kind)
+    problems.push(
+      'The evidence file has no "Case: Choose. <fact>" or "Case: Explore. <fact>" line. `.agent/skills/page-design/SKILL.md` says which holds.',
+    );
+  const explore = kind !== "Choose";
+  const all = reader(sections(evidence), problems, "The evidence file");
+  const section = (name, holds, check) =>
+    explore || !["Board", "Inventory", "In the game"].includes(name)
+      ? all(name, holds, check)
+      : undefined;
   section(
     "Player questions",
     "names what a player wants to know or do on the page",
@@ -279,24 +301,38 @@ export function checkComparison(path) {
         'In the game needs a screenshot, a lab run, or a line that starts "The game does not show this" with the reason.',
       );
   });
-  section("Options", "says what each option borrows from the board", (part) => {
-    for (const letter of letters) {
-      const line = bullets(part).find((bullet) =>
-        bullet.startsWith(`- ${letter}:`),
-      );
-      if (!line)
-        problems.push(
-          `Options has no "- ${letter}:" line saying what option ${letter} borrows.`,
+  section(
+    "Options",
+    explore
+      ? "says what each option borrows from the board"
+      : "names the file that already has the form each option uses",
+    (part) => {
+      for (const letter of letters) {
+        const line = bullets(part).find((bullet) =>
+          bullet.startsWith(`- ${letter}:`),
         );
-      else if (
-        titles.length &&
-        !titles.some((title) => line.toLowerCase().includes(title))
-      )
-        problems.push(
-          `Options, ${letter}: names no board entry it borrows from. Use an entry's title as the board writes it.`,
-        );
-    }
-  });
+        if (!line)
+          problems.push(
+            `Options has no "- ${letter}:" line saying what option ${letter} borrows.`,
+          );
+        else if (!explore) {
+          const paths = [...line.matchAll(/`([^`\s]+\/[^`\s]+)`/g)].map(
+            (match) => match[1],
+          );
+          if (!paths.some((file) => existsSync(resolve(root, file))))
+            problems.push(
+              `Options, ${letter}: names no existing file that already has the form it uses. A form the site does not have yet makes the case Explore.`,
+            );
+        } else if (
+          titles.length &&
+          !titles.some((title) => line.toLowerCase().includes(title))
+        )
+          problems.push(
+            `Options, ${letter}: names no board entry it borrows from. Use an entry's title as the board writes it.`,
+          );
+      }
+    },
+  );
   section(
     "Earlier decisions",
     "names the decisions in openspec/ and earlier comparisons that apply",
@@ -330,10 +366,13 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       `\n${problems.length} gap${problems.length === 1 ? "" : "s"}. Fill each one. Do not open the comparison yet.`,
     );
     process.exitCode = 1;
-  } else
+  } else if (board) console.log("The board is complete.");
+  else if (evidenceLinks(readFileSync(resolve(path), "utf8")).length)
     console.log(
-      board
-        ? "The board is complete."
-        : "The comparison is complete. Start the comparison-check agent with its path.",
+      "The comparison is complete. Start the comparison-check agent with its path.",
+    );
+  else
+    console.log(
+      "Checked as a comparison of wording alone, because it links no evidence file. When an option changes layout, structure or what the page shows, write the evidence file first. Otherwise start the comparison-check agent with its path.",
     );
 }

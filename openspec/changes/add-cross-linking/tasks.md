@@ -18,7 +18,8 @@
 ## 3. Creatures
 
 - [x] 3.1 Compare and build creature pages with drops, each with its areas, places, spawn conditions and their preview, and verify every creature reference on item pages links and the creature count in the recorded file drops to zero. The debuffs a creature can carry move to 5.2, because effects have no pages yet
-- [ ] 3.2 Read and check in the lab what a creature's health, armor, damage, resistances and experience on kill do, compare how creature pages and their previews show them, and make the preview describe the creature by them instead of where it lives
+- [ ] 3.2 Read and check in the lab what a creature's health, armor, damage, resistances and experience on kill do, compare how creature pages and their previews show them, and make the preview describe the creature by them instead of where it lives. Damage moves to 3.3, because a creature's attacks use different values
+- [ ] 3.3 Read which of a creature's attacks use Damage, DamageMelee or fixed values, check its hits on the character in the lab, and compare how creature pages show them
 
 ## 4. Places
 
@@ -28,6 +29,7 @@
 - [ ] 4.4 Read services and crafting stations by place, such as stables, workbenches and cooking fires, and show them on place pages whether or not they give items
 - [ ] 4.5 Read the transitions between levels and list each place's connected places
 - [ ] 4.6 Extract actor positions and compare a map figure for place pages
+- [ ] 4.7 Rebalance the overview tiles of place pages at widths where fewer columns fit than `balancedColumns` chose, where five tiles now wrap to two, two and one, and verify with a rendered five-tile case in `site/tests/presentation.e2e.ts`
 
 ## 5. Effects
 

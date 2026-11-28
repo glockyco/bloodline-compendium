@@ -47,6 +47,7 @@ const board = [
 const evidence = (options) =>
 	[
 		'# Evidence',
+		'Case: Explore. The site shows no creature stats yet.',
 		'## Player questions',
 		'- How tough is this creature at my level?',
 		'## Board',
@@ -89,7 +90,7 @@ async function check(reviewText, evidenceText) {
 		await writeFile(join(directory, 'references/board.md'), board);
 		for (const image of ['a.png', 'b.png', 'references/shot.png'])
 			await writeFile(join(directory, image), '');
-		return checkComparison(join(directory, 'review.md'));
+		return checkComparison(join(directory, 'review.md'), directory);
 	} finally {
 		await rm(directory, { recursive: true, force: true });
 	}
@@ -157,5 +158,86 @@ it('reports an option that borrows from nothing on the board and one without scr
 	expect(problems).toEqual([
 		'Option B has no table row with its desktop and phone screenshots.',
 		"Options, B: names no board entry it borrows from. Use an entry's title as the board writes it."
+	]);
+});
+
+const twoForms = review(
+	[
+		'Recommended: A: one line per item',
+		'',
+		'- [ ] A: one line per item',
+		'- [ ] B: two lines per item',
+		'- [ ] None of these',
+		'',
+		'Why: A keeps the list short.'
+	],
+	['| A: Ashford | ![](a.png) | ![](a.png) |', '| B: Ashford | ![](b.png) | ![](b.png) |']
+);
+
+const chosen = (options) =>
+	[
+		'# Evidence',
+		'Case: Choose. Both card forms are in use on place pages.',
+		'## Player questions',
+		'- What lies on the ground here?',
+		'## Options',
+		...options,
+		'## Earlier decisions',
+		'- Place pages show each thing as a card.'
+	].join('\n');
+
+it('passes a choice between two forms the site already has without a board', async () => {
+	const problems = await check(
+		twoForms,
+		chosen([
+			'- A: the one-line card of `references/board.md`.',
+			'- B: the two-line card of `references/board.md`.'
+		])
+	);
+	expect(problems).toEqual([]);
+});
+
+it('reports a choice whose option uses a form no file of the site has', async () => {
+	const problems = await check(
+		twoForms,
+		chosen([
+			'- A: the one-line card of `references/board.md`.',
+			'- B: a new gallery, as `site/src/lib/Gallery.svelte` would be.'
+		])
+	);
+	expect(problems).toEqual([
+		'Options, B: names no existing file that already has the form it uses. A form the site does not have yet makes the case Explore.'
+	]);
+});
+
+const wording = (card) =>
+	[
+		'# The empty place line',
+		'| | 1440 | 390 |',
+		'| --- | --- | --- |',
+		'| A: Ashford | ![](a.png) | ![](a.png) |',
+		'| B: Ashford | ![](b.png) | ![](b.png) |',
+		':::question',
+		'How should a place without item sources say so?',
+		'',
+		...card,
+		':::'
+	].join('\n');
+
+it('checks a wording comparison without evidence by its question card alone', async () => {
+	const two = [
+		'Recommended: A: say nothing',
+		'',
+		'- [ ] A: say nothing',
+		'- [ ] B: "No one here gives items."',
+		'- [ ] Current: "Nothing here gives items."',
+		'- [ ] None of these',
+		'',
+		'Why: The sections already say what is there.'
+	];
+	expect(await check(wording(two), '')).toEqual([]);
+	const one = two.filter((line) => !line.startsWith('- [ ] B'));
+	expect(await check(wording(one), '')).toEqual([
+		expect.stringContaining('Question 1 offers 1 new option')
 	]);
 });

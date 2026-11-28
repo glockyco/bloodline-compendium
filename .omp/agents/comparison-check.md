@@ -11,12 +11,13 @@ When the options differ in layout, structure or what a page shows, the compariso
 
 Then open the comparison, its evidence file, its board and every screenshot, and report each gap with the line it concerns:
 
+- The case the evidence names is true. Choose holds only when every option uses a form the site already has and no answer has rejected a design for this thing. A new kind of page, section, card, picture, chart or control, or an earlier rejection, makes it Explore, which needs the board, the inventory and the game's own presentation.
 - The design was not built before it was asked. A card that offers one new design against the current page, or options named "as shown" or "as built", is a sign-off of finished work and not a comparison.
 - The options differ in structure and not only in a word, a column count or a colour: for a design, such as a table against cards against a calculator, and for wording, such as one sentence against a labelled line. Each fits in one line.
-- A design option names the board entries it borrows from, and its screenshots show what it claims to borrow. A wording comparison quotes how large wikis word the same thing, with links.
-- The board holds pages that face the same problem as the question. A board of home pages or unrelated pages does not count.
-- The inventory lists what the sibling compendiums and wikis show on pages of this kind. For each thing the options leave out, it gives a reason a player would accept. "No data" holds only when the board's Data and assets table says so.
-- It says how the game itself shows the thing, and one option at least takes that up or the evidence says why none does.
+- An option of an Explore comparison names the board entries it borrows from, and its screenshots show what it claims to borrow. A wording comparison quotes how large wikis word the same thing, with links.
+- The board of an Explore comparison holds pages that face the same problem as the question. A board of home pages or unrelated pages does not count.
+- The inventory of an Explore comparison lists what the sibling compendiums and wikis show on pages of this kind. For each thing the options leave out, it gives a reason a player would accept. "No data" holds only when the board's Data and assets table says so.
+- An Explore comparison says how the game itself shows the thing, and one option at least takes that up or the evidence says why none does.
 - It names earlier decisions in `openspec/` and earlier comparisons in `artifacts/design/process/trial/` that apply, and its recommendation does not contradict one without saying why. When an earlier comparison on the topic was rejected, it quotes the owner's words and says how each option answers them.
 - It asks only what has to be decided now.
 - Every option has screenshots of the real page with real data at a desktop and a phone width.
