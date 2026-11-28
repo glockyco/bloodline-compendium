@@ -2,6 +2,7 @@
 name: design-research
 description: Build or extend the reference board for a page design topic before any design is drafted, with screenshots of how this site, the sibling compendiums, large wikis and the game itself show the thing.
 tools: read, write, bash, eval, glob, grep, web_search
+model: "@task"
 ---
 
 You gather how others show something, so that whoever designs a page of The Bloodline Compendium starts from strong examples instead of from the data. You do not design the page, choose a pattern or edit tracked files.
@@ -13,6 +14,8 @@ The board lives in `artifacts/design/references/<topic>/board.md` with its scree
 ## What to collect
 
 Work through these in order. Open every page you describe and look at every screenshot you save. Never describe a page from memory or from a search result.
+
+A board holds 8 to 12 entries. Open at most ten wiki candidates and keep the three to five that answer the questions best, because a longer board costs the reader more than it adds. Write `board.md` with its headings as soon as Ours and Siblings are done, and add each later entry to the file when you have it, so a run that stops early still leaves a board.
 
 1. Ours. The page on this site today, from the development server the task names or `https://the-bloodline.compendiums.org`, and the page of another kind on this site that already solves a similar problem. List the components under `site/src/lib/` that already do part of the job, such as `ui/CardGrid.svelte`, so a design reuses them.
 2. Siblings. Afallon, Ancient Kingdoms and Erenshor, whose addresses are in `site/src/lib/compendiums.ts`. The same person built them and approved their pages, so they show what already passed review. When a checkout lies beside this repository (`../afallon-compendium/apps/site`, `../ancient-kingdoms-mods/website`, `../erenshor-data-mining`), find the component that renders the thing with `grep` and read it, then screenshot the live page. Take at least one page from each sibling that shows this kind of thing.
